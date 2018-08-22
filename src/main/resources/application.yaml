@@ -1,0 +1,11 @@
+server:
+  port: 4650
+
+management:
+  endpoints:
+    web:
+      base-path: /
+
+spring:
+  application:
+    name: Bulk Scan Orchestrator
