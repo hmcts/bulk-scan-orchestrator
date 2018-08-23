@@ -80,8 +80,7 @@ pmd {
 }
 
 jacocoTestReport {
-  // TODO: add 'integration' when integration tests are added
-  executionData(test)
+  executionData(test, integration)
   reports {
     xml.enabled = true
     csv.enabled = false
