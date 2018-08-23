@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscanorchestrator.controllers;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

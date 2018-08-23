@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscanorchestrator;
+package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
