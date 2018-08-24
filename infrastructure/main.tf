@@ -7,7 +7,38 @@ resource "azurerm_resource_group" "rg" {
 }
 
 locals {
-  ase_name = "${data.terraform_remote_state.core_apps_compute.ase_name[0]}"
+  ase_name               = "${data.terraform_remote_state.core_apps_compute.ase_name[0]}"
+  is_preview             = "${(var.env == "preview" || var.env == "spreview")}"
+  previewVaultName       = "${var.product}-bsp"
+  nonPreviewVaultName    = "${var.product}-bsp-${var.env}"
+  vaultName              = "${local.is_preview ? local.previewVaultName : local.nonPreviewVaultName}"
+  vaultResourceGroupName = "rpe-bulk-scan-processor-${var.env}"
+}
+
+module "bulk-scan-key-vault" {
+  source                  = "git@github.com:hmcts/moj-module-key-vault?ref=master"
+  name                    = "${local.vaultName}"
+  product                 = "${var.product}"
+  env                     = "${var.env}"
+  tenant_id               = "${var.tenant_id}"
+  object_id               = "${var.jenkins_AAD_objectId}"
+  resource_group_name     = "${local.vaultResourceGroupName}"
+  # dcd_cc_dev group object ID
+  product_group_object_id = "38f9dea6-e861-4a50-9e73-21e64f563537"
+}
+
+module "queue-namespace" {
+  source              = "git@github.com:hmcts/terraform-module-servicebus-namespace.git"
+  name                = "${var.product}-${var.component}-servicebus-${var.env}"
+  location            = "${var.location_app}"
+  resource_group_name = "${azurerm_resource_group.rg.name}"
+}
+
+module "queue" {
+  source              = "git@github.com:hmcts/terraform-module-servicebus-queue.git"
+  name                = "envelopes"
+  namespace_name      = "${module.queue-namespace.name}"
+  resource_group_name = "${azurerm_resource_group.rg.name}"
 }
 
 module "bulk-scan-orchestrator" {
@@ -24,5 +55,12 @@ module "bulk-scan-orchestrator" {
   app_settings = {
     LOGBACK_REQUIRE_ALERT_LEVEL = false
     LOGBACK_REQUIRE_ERROR_CODE  = false
+    QUEUE_CONNECTION_STRING     = "${module.queue.primary_listen_connection_string}"
   }
+}
+
+resource "azurerm_key_vault_secret" "queue_send_connection_string" {
+  name      = "envelope-queue-send-conn-string"
+  value     = "${module.queue.primary_send_connection_string}"
+  vault_uri = "${module.bulk-scan-key-vault.key_vault_uri}"
 }
