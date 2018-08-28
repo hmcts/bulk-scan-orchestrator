@@ -12,19 +12,7 @@ locals {
   previewVaultName       = "${var.product}-bsp"
   nonPreviewVaultName    = "${var.product}-bsp-${var.env}"
   vaultName              = "${local.is_preview ? local.previewVaultName : local.nonPreviewVaultName}"
-  vaultResourceGroupName = "rpe-bulk-scan-processor-${var.env}"
-}
-
-module "bulk-scan-key-vault" {
-  source                  = "git@github.com:hmcts/moj-module-key-vault?ref=master"
-  name                    = "${local.vaultName}"
-  product                 = "${var.product}"
-  env                     = "${var.env}"
-  tenant_id               = "${var.tenant_id}"
-  object_id               = "${var.jenkins_AAD_objectId}"
-  resource_group_name     = "${local.vaultResourceGroupName}"
-  # dcd_cc_dev group object ID
-  product_group_object_id = "38f9dea6-e861-4a50-9e73-21e64f563537"
+  keyVaultUri            = "https://rpe-bsp-${var.env}.vault.azure.net/"
 }
 
 module "queue-namespace" {
@@ -62,5 +50,6 @@ module "bulk-scan-orchestrator" {
 resource "azurerm_key_vault_secret" "queue_send_connection_string" {
   name      = "envelope-queue-send-conn-string"
   value     = "${module.queue.primary_send_connection_string}"
-  vault_uri = "${module.bulk-scan-key-vault.key_vault_uri}"
+  vault_uri = "${local.keyVaultUri}"
+  count     = "${is_preview ? "0": "1"}"
 }
