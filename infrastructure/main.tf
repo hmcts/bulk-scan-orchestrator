@@ -51,5 +51,5 @@ resource "azurerm_key_vault_secret" "queue_send_connection_string" {
   name      = "envelope-queue-send-conn-string"
   value     = "${module.queue.primary_send_connection_string}"
   vault_uri = "${local.keyVaultUri}"
-  count     = "${is_preview ? "0": "1"}"
+  count     = "${local.is_preview ? "0": "1"}"
 }
