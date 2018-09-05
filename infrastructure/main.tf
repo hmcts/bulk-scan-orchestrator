@@ -32,6 +32,6 @@ module "bulk-scan-orchestrator" {
   app_settings = {
     LOGBACK_REQUIRE_ALERT_LEVEL = false
     LOGBACK_REQUIRE_ERROR_CODE  = false
-    QUEUE_CONNECTION_STRING     = "${data.terraform_remote_state.queue.primary_listen_connection_string}"
+    QUEUE_CONNECTION_STRING     = "${data.terraform_remote_state.queue.primary_listen_connection_string[0]}"
   }
 }
