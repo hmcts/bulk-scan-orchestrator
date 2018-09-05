@@ -4,9 +4,9 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.exceptions.ReadEnvelopeException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.Envelope;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.BulkScanProcessorClient;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.bulkscanprocessorclient.client.BulkScanProcessorClient;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.bulkscanprocessorclient.exceptions.ReadEnvelopeException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.bulkscanprocessorclient.model.Envelope;
 
 import java.util.UUID;
 

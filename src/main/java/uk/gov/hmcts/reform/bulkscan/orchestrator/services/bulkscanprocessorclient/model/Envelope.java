@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.model;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.bulkscanprocessorclient.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
