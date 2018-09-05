@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 
 public class GetEnvelopeTest {
 
-    private final static int PORT = 8089;
+    private static final int PORT = 8089;
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(PORT);
