@@ -7,12 +7,12 @@ resource "azurerm_resource_group" "rg" {
 }
 
 locals {
-  ase_name               = "${data.terraform_remote_state.core_apps_compute.ase_name[0]}"
-  is_preview             = "${(var.env == "preview" || var.env == "spreview")}"
-  previewVaultName       = "${var.product}-bsp"
-  nonPreviewVaultName    = "${var.product}-bsp-${var.env}"
-  vaultName              = "${local.is_preview ? local.previewVaultName : local.nonPreviewVaultName}"
-  keyVaultUri            = "https://rpe-bsp-${var.env}.vault.azure.net/"
+  ase_name            = "${data.terraform_remote_state.core_apps_compute.ase_name[0]}"
+  is_preview          = "${(var.env == "preview" || var.env == "spreview")}"
+  previewVaultName    = "${var.product}-bsp"
+  nonPreviewVaultName = "${var.product}-bsp-${var.env}"
+  vaultName           = "${local.is_preview ? local.previewVaultName : local.nonPreviewVaultName}"
+  keyVaultUri         = "https://rpe-bsp-${var.env}.vault.azure.net/"
 }
 
 module "queue-namespace" {
@@ -30,15 +30,15 @@ module "queue" {
 }
 
 module "bulk-scan-orchestrator" {
-  source              = "git@github.com:hmcts/cnp-module-webapp?ref=master"
-  product             = "${var.product}-${var.component}"
-  location            = "${var.location_app}"
-  env                 = "${var.env}"
-  ilbIp               = "${var.ilbIp}"
-  resource_group_name = "${azurerm_resource_group.rg.name}"
-  subscription        = "${var.subscription}"
-  capacity            = "${var.capacity}"
-  common_tags         = "${var.common_tags}"
+  source                          = "git@github.com:hmcts/cnp-module-webapp?ref=master"
+  product                         = "${var.product}-${var.component}"
+  location                        = "${var.location_app}"
+  env                             = "${var.env}"
+  ilbIp                           = "${var.ilbIp}"
+  resource_group_name             = "${azurerm_resource_group.rg.name}"
+  subscription                    = "${var.subscription}"
+  capacity                        = "${var.capacity}"
+  common_tags                     = "${var.common_tags}"
   appinsights_instrumentation_key = "${var.appinsights_instrumentation_key}"
 
   app_settings = {
