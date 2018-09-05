@@ -30,7 +30,7 @@ module "queue" {
 }
 
 module "bulk-scan-orchestrator" {
-  source              = "git@github.com:hmcts/moj-module-webapp?ref=master"
+  source              = "git@github.com:hmcts/cnp-module-webapp?ref=master"
   product             = "${var.product}-${var.component}"
   location            = "${var.location_app}"
   env                 = "${var.env}"
@@ -39,6 +39,7 @@ module "bulk-scan-orchestrator" {
   subscription        = "${var.subscription}"
   capacity            = "${var.capacity}"
   common_tags         = "${var.common_tags}"
+  appinsights_instrumentation_key = "${var.appinsights_instrumentation_key}"
 
   app_settings = {
     LOGBACK_REQUIRE_ALERT_LEVEL = false
