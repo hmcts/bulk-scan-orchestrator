@@ -24,7 +24,7 @@ data "terraform_remote_state" "core_apps_compute" {
   }
 }
 
-data "terraform_remote_state" "queue" {
+data "terraform_remote_state" "shared_infra" {
   backend = "azurerm"
 
   config {
