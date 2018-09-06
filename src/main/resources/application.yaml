@@ -11,3 +11,9 @@ spring:
     name: Bulk Scan Orchestrator
 
 bulk-scan-processor-url: ${BULK_SCAN_PROCESSOR_URL:}
+
+idam:
+  s2s-auth:
+    url:    ${S2S_URL:http://localhost:8081}
+    secret: ${S2S_SECRET:AAAAAAAAAAAAAAAA}
+    name:   ${S2S_NAME:bulk_scan_orchestrator}
