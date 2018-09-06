@@ -9,3 +9,5 @@ management:
 spring:
   application:
     name: Bulk Scan Orchestrator
+
+bulk-scan-processor-url: ${BULK_SCAN_PROCESSOR_URL:}

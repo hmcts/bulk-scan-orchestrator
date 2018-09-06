@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.bulkscanprocessorclien
 
 import java.util.function.Supplier;
 
-@Service
 public class BulkScanProcessorClient {
 
     private final RestTemplate restTemplate = new RestTemplate();
