@@ -30,7 +30,7 @@ data "terraform_remote_state" "shared_infra" {
   config {
     resource_group_name  = "mgmt-state-store-${var.subscription}"
     storage_account_name = "mgmtstatestore${var.subscription}"
-    container_name       = "mgmtstatestorecontainer${var.env}"
-    key                  = "bulk-scan/${var.env}/terraform.tfstate"
+    container_name       = "mgmtstatestorecontainer${local.local_env}"
+    key                  = "bulk-scan/${local.local_env}/terraform.tfstate"
   }
 }

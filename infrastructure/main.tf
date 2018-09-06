@@ -13,6 +13,7 @@ locals {
   nonPreviewVaultName = "${var.product}-bsp-${var.env}"
   vaultName           = "${local.is_preview ? local.previewVaultName : local.nonPreviewVaultName}"
   keyVaultUri         = "https://rpe-bsp-${var.env}.vault.azure.net/"
+  local_env           = "${local.is_preview ? "aat" : var.env}"
 }
 
 module "bulk-scan-orchestrator" {

@@ -1,6 +1,4 @@
-variable "product" {
-  type = "string"
-}
+variable "product" {}
 
 variable "component" {
   type = "string"
