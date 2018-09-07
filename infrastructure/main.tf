@@ -33,6 +33,9 @@ module "bulk-scan-orchestrator" {
   app_settings = {
     LOGBACK_REQUIRE_ALERT_LEVEL = false
     LOGBACK_REQUIRE_ERROR_CODE  = false
+
+    S2S_URL                     = "http://rpe-service-auth-provider-${local.local_env}.service.core-compute-${local.local_env}.internal"
+
     QUEUE_CONNECTION_STRING     = "${data.terraform_remote_state.shared_infra.queue_primary_listen_connection_string}"
   }
 }
