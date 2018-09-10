@@ -36,7 +36,7 @@ public class BulkScanProcessorClient {
                 Envelope.class
             ).getBody();
         } catch (RestClientException exc) {
-            throw new ReadEnvelopeException(exc);
+            throw new ReadEnvelopeException(id, exc);
         }
     }
 }

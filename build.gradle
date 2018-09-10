@@ -144,6 +144,8 @@ dependencies {
   compile group: 'uk.gov.hmcts.reform', name: 'java-logging', version: versions.reformLogging
   compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '1.0.1'
 
+  compile group: 'com.microsoft.azure', name: 'azure-servicebus', version: '1.2.7'
+
   testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot
   testCompile group: 'com.github.tomakehurst', name: 'wiremock', version: '2.18.0'
 
