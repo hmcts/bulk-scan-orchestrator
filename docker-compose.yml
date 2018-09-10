@@ -1,0 +1,290 @@
+---
+version: '2.1'
+
+services:
+    authentication-web:
+      image: docker.artifactory.reform.hmcts.net/auth/authentication-web:latest
+      environment:
+        - IDAM_API_URL=http://idam-api:8080
+        - IDAM_API_OAUTH2_CLIENT_CLIENT_SECRETS_BULK_SCAN_ORCHESTRATOR=123456
+        - IDAM_API_OAUTH2_CLIENT_CLIENT_SECRETS_CCD_GATEWAY=123456
+        - IDAM_CONTINUE_URL_VALIDATOR_ENFORCE_TLS=false
+      mem_limit: 256m
+      memswap_limit: 0
+      depends_on:
+        idam-api:
+          condition: service_started
+      healthcheck:
+        disable: true
+      ports:
+        - 8000:8000
+
+    idam-api:
+      image: docker.artifactory.reform.hmcts.net/auth/idam-api
+      command: --wait-for-database 60
+      environment:
+        - JAVA_OPTS=-Xms8m -Xmx256m -Djava.security.egd=file:/dev/./urandom -XX:MaxMetaspaceSize=128m
+        - SPRING_DATASOURCE_URL=jdbc:postgresql://shared-database-v10:5432/idam
+        - IDAM_TESTING_SUPPORT_ENABLED=true
+        - SPRING_MAIL_HOST=smtp-server
+        - NOTIFY_API_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        - NOTIFY=false
+        - NOTIFY_CMC_WELCOME_USER_TEMPLATE=fake
+        - NOTIFY_DIVORCE_WELCOME_USER_TEMPLATE=fake
+        - NOTIFY_SSCS_WELCOME_USER_TEMPLATE=fake
+        - NOTIFY_RESET_PASSWORD_TEMPLATE=fake
+        - NOTIFY_PROBATE_ACTIVATE_USER_TEMPLATE=fake
+        - NOTIFY_DIVORCE_ACTIVATE_USER_TEMPLATE=fake
+        - NOTIFY_SSCS_ACTIVATE_USER_TEMPLATE=fake
+        - NOTIFY_CCD_ACTIVATE_USER_TEMPLATE=fake
+        - NOTIFY_BAR_ACTIVATE_USER_TEMPLATE=fake
+        - NOTIFY_FREG_ACTIVATE_USER_TEMPLATE=fake
+        - IDAM_API_OAUTH2_CLIENT_CLIENT_SECRETS_CMC_CITIZEN=123456
+        - IDAM_API_OAUTH2_CLIENT_CLIENT_SECRETS_CMC_LEGAL=123456
+        - IDAM_API_OAUTH2_CLIENT_CLIENT_SECRETS_CCD_GATEWAY=123456
+        - http_proxy
+        - https_proxy
+        - no_proxy
+        - REFORM_ENVIRONMENT=test
+        - IDAM_BSO_SYSTEMUPDATE_USER=bulkscanorchestrator+systemupdate@gmail.com
+        - IDAM_BSO_SYSTEMUPDATE_PASSWORD=Password12
+      mem_limit: 512m
+      memswap_limit: 0
+      depends_on:
+        shared-database-v10:
+          condition: service_healthy
+      ports:
+        - 8080:8080
+
+    smtp-server:
+      image: mailhog/mailhog
+      mem_limit: 32m
+      memswap_limit: 0
+      ports:
+        - 1025:1025
+
+    service-auth-provider-api:
+      image: hmcts/service-auth-provider-app
+      environment:
+        - SERVER_PORT=8080
+        - JAVA_OPTS=-Xms8m -Xmx256m -Djava.security.egd=file:/dev/./urandom -XX:MaxMetaspaceSize=128m
+        - JWT_KEY=wThK0f0/lh3FlxFcL4xUWDMI5C1J9KyQBgXV4wseh1e5J1uYJIjvTvArHxQDrYoHJ23xFxjHkOnvNbR5dXRoxA==
+        - MICROSERVICE_KEYS_BULK_SCAN_ORCHESTRATOR=AAAAAAAAAAAAAAAA
+        - MICROSERVICE_KEYS_EM_GW=AAAAAAAAAAAAAAAA
+        - MICROSERVICE_KEYS_CCD_DATA=AAAAAAAAAAAAAAAA
+        - MICROSERVICE_KEYS_CCD_DEFINITION=AAAAAAAAAAAAAAAA
+        - MICROSERVICE_KEYS_CCD_GW=AAAAAAAAAAAAAAAA
+        - TESTING_SUPPORT_ENABLED=true
+      mem_limit: 512m
+      memswap_limit: 0
+      healthcheck:
+        disable: true
+      ports:
+        - 4552:8080
+
+    shared-database-v10:
+      image: postgres:10.5-alpine
+      command: postgres -c 'max_connections=250'
+      volumes:
+        - ./docker/database/init-db-v10.sh:/docker-entrypoint-initdb.d/init-db.sh
+        - shared-database-data-v10:/var/lib/postgresql/data
+      healthcheck:
+        test: psql -c 'select 1' -d postgres -U postgres
+        retries: 40
+      mem_limit: 320m
+      memswap_limit: 0
+      ports:
+        - 5432:5432
+
+    ccd-user-profile-api:
+        image: hmcts/ccd-user-profile-api:latest
+        environment:
+          - JAVA_OPTS=-Xms8m -Xmx256m -Djava.security.egd=file:/dev/./urandom -XX:MaxMetaspaceSize=128m
+          - USER_PROFILE_DB_HOST=shared-database-v10
+          - USER_PROFILE_DB_PORT=5432
+          - USER_PROFILE_DB_USERNAME=ccd_user_profile
+          - USER_PROFILE_DB_PASSWORD=ccd_user_profile
+          - USER_PROFILE_S2S_AUTHORISED_SERVICES=ccd_data,ccd_definition
+          - IDAM_S2S_URL=http://service-auth-provider-api:8080
+          - REFORM_SERVICE_NAME=ccd-user-profile-api
+          - REFORM_TEAM=ccd
+          - REFORM_ENVIRONMENT=local
+          - APPINSIGHTS_INSTRUMENTATIONKEY=fake-key
+          - USER_PROFILE_DB_USE_SSL=false
+        mem_limit: 512m
+        memswap_limit: 0
+        depends_on:
+          shared-database-v10:
+            condition: service_healthy
+        healthcheck:
+          disable: true
+        ports:
+          - 4453:4453
+
+    ccd-definition-store-api:
+      image: hmcts/ccd-definition-store-api:latest
+      environment:
+        - JAVA_OPTS=-Xms8m -Xmx256m -Djava.security.egd=file:/dev/./urandom -XX:MaxMetaspaceSize=128m
+        - DEFINITION_STORE_DB_HOST=shared-database-v10
+        - DEFINITION_STORE_DB_PORT=5432
+        - DEFINITION_STORE_DB_USERNAME=ccd_definition_store
+        - DEFINITION_STORE_DB_PASSWORD=ccd_definition_store
+        - SPRING_DATASOURCE_URL=jdbc:postgresql://shared-database-v10:5432/ccd_definition_store
+        - DEFINITION_STORE_IDAM_KEY=AAAAAAAAAAAAAAAA
+        - DEFINITION_STORE_S2S_AUTHORISED_SERVICES=ccd_data,bulk_scan_orchestrator,ccd_gw
+        - USER_PROFILE_HOST=http://ccd-user-profile-api:4453
+        - IDAM_USER_URL=http://idam-api:8080
+        - IDAM_S2S_URL=http://service-auth-provider-api:8080
+        - REFORM_SERVICE_NAME=ccd-definition-store-api
+        - REFORM_TEAM=ccd
+        - REFORM_ENVIRONMENT=local
+        - APPINSIGHTS_INSTRUMENTATIONKEY=fake-key
+      mem_limit: 512m
+      memswap_limit: 0
+      depends_on:
+        shared-database-v10:
+          condition: service_healthy
+      healthcheck:
+        disable: true
+      ports:
+        - 4451:4451
+
+    ccd-data-store-api:
+      image: hmcts/ccd-data-store-api:latest
+      environment:
+        - JAVA_OPTS=-Xms8m -Xmx256m -Djava.security.egd=file:/dev/./urandom -XX:MaxMetaspaceSize=128m
+        - DATA_STORE_DB_HOST=shared-database-v10
+        - DATA_STORE_DB_PORT=5432
+        - DATA_STORE_DB_USERNAME=ccd_data_store
+        - DATA_STORE_DB_PASSWORD=ccd_data_store
+        - DATA_STORE_IDAM_KEY=AAAAAAAAAAAAAAAA
+        - SPRING_DATASOURCE_URL=jdbc:postgresql://shared-database-v10:5432/ccd_data_store?stringtype=unspecified
+        - DATA_STORE_TOKEN_SECRET=sdsadahjsadhgaskjhdhasghgkjasd
+        - DATA_STORE_S2S_AUTHORISED_SERVICES=cmc_claim_store,ccd_gw
+        - DEFINITION_STORE_HOST=http://ccd-definition-store-api:4451
+        - USER_PROFILE_HOST=http://ccd-user-profile-api:4453
+        - IDAM_USER_URL=http://idam-api:8080
+        - IDAM_S2S_URL=http://service-auth-provider-api:8080
+        - REFORM_SERVICE_NAME=ccd-data-store-api
+        - REFORM_TEAM=ccd
+        - REFORM_ENVIRONMENT=local
+        - APPINSIGHTS_INSTRUMENTATIONKEY=fake-key
+        - CCD_DM_DOMAIN=http://dm-store:4460
+      mem_limit: 512m
+      memswap_limit: 0
+      depends_on:
+        shared-database-v10:
+          condition: service_healthy
+      healthcheck:
+        disable: true
+      ports:
+       - 4452:4452
+
+    ccd-importer:
+      build:
+        context: docker/ccd-definition-import
+      image: hmcts/bulk-scan-ccd-importer
+      environment:
+        WAIT_HOSTS: ccd-user-profile-api:4453, ccd-definition-store-api:4451, service-auth-provider-api:8080, ccd-api-gateway:3453, idam-api:8080
+        VERBOSE: ${VERBOSE:-false}
+        WAIT_HOSTS_TIMEOUT: 300
+
+    ccd-case-management-web:
+      image: hmcts/ccd-case-management-web:latest
+      environment:
+        - IDAM_LOGIN_URL=https://localhost:8000/login
+        - CCD_GATEWAY_BASE_URL=http://localhost:3453
+        - CCD_ACTIVITY_BASE_URL=http://localhost:3455
+        - DM_URL=http://localhost:3453/documents
+        - DM_URL_REMOTE=http://dm-store:4460/documents
+      mem_limit: 256m
+      memswap_limit: 0
+      depends_on:
+        ccd-api-gateway:
+          condition: service_started
+        authentication-web:
+          condition: service_started
+      healthcheck:
+        disable: true
+      ports:
+        - 3451:3451
+      volumes:
+        - ./docker/ccd-definition-import/data/CCD_Definition_BULK_SCAN.template.xlsx:/definition-template.xlsx
+        - ./docker/ccd-definition-import/scripts:/scripts
+
+    ccd-api-gateway:
+      image: hmcts/ccd-api-gateway:latest
+      environment:
+        - IDAM_BASE_URL=http://idam-api:8080
+        - IDAM_USER_URL=http://idam-api:8080
+        - IDAM_LOGOUT_URL=https://localhost:8000/login/logout
+        - IDAM_OAUTH2_TOKEN_ENDPOINT=http://idam-api:8080/oauth2/token
+        - IDAM_S2S_URL=http://service-auth-provider-api:8080
+        - IDAM_SERVICE_KEY=AAAAAAAAAAAAAAAA
+        - IDAM_SERVICE_NAME=ccd_gw
+        - IDAM_OAUTH2_CLIENT_SECRET=123456
+        - PROXY_AGGREGATED=http://ccd-data-store-api:4452
+        - PROXY_DATA=http://ccd-data-store-api:4452
+        - PROXY_DEFINITION_IMPORT=http://ccd-definition-store-api:4451
+        - PROXY_DOCUMENT_MANAGEMENT=http://dm-store:4460
+      mem_limit: 256m
+      memswap_limit: 0
+      depends_on:
+        ccd-user-profile-api:
+          condition: service_started
+        ccd-definition-store-api:
+          condition: service_started
+        ccd-data-store-api:
+          condition: service_started
+        service-auth-provider-api:
+          condition: service_started
+        idam-api:
+          condition: service_started
+      healthcheck:
+        disable: true
+      ports:
+        - 3453:3453
+
+    dm-store:
+      image: hmcts/dm-store:latest
+      command: --wait-for-database 30
+      environment:
+        - JAVA_OPTS=-Xms8m -Xmx256m -Djava.security.egd=file:/dev/./urandom -XX:MaxMetaspaceSize=128m
+        - SERVER_PORT=4460
+        - SPRING_DATASOURCE_URL=jdbc:postgresql://shared-database-v10:5432/evidence
+        - SPRING_DATASOURCE_USERNAME=evidence
+        - SPRING_DATASOURCE_PASSWORD=evidence
+        - IDAM_USER_BASE_URI=http://idam-api:8080
+        - IDAM_S2S_BASE_URI=http://service-auth-provider-api:8080
+        - S2S_NAMES_WHITELIST=ccd_gw,cmc,bulk_scan_orchestrator,ccd_data
+        - http_proxy=
+        - https_proxy=
+        - no_proxy=
+        - ROOT_APPENDER=CONSOLE
+        - REFORM_SERVICE_TYPE=java
+        - REFORM_SERVICE_NAME=dm-store
+        - REFORM_TEAM=evidence
+        - REFORM_ENVIRONMENT=docker
+        - ENABLE_DELETE=true
+        - ENABLE_IDAM_HEALTH_CHECK=false
+        - ENABLE_METADATA_SEARCH=true
+        - ENABLE_DOCUMENT_AND_METADATA_UPLOAD=false
+        - ENABLE_FOLDER_API=true
+        - ENABLE_TTL=true
+        - ENABLE_THUMBNAIL=true
+        - DM_MULTIPART_WHITELIST=image/jpeg,application/pdf,image/tiff,image/png,image/bmp,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.wordprocessingml.template,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.spreadsheetml.template,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.openxmlformats-officedocument.presentationml.template,application/vnd.openxmlformats-officedocument.presentationml.slideshow
+        - DM_MULTIPART_WHITELIST_EXT=.jpg,.jpeg,.bmp,.tif,.tiff,.png,.pdf,.txt,.doc,.dot,.docx,.dotx,.xls,.xlt,.xla,.xlsx,.xltx,.xlsb,.ppt,.pot,.pps,.ppa,.pptx,.potx,.ppsx
+        - MAX_FILE_SIZE=500MB
+        - MAX_ACTIVE_DB_CONNECTIONS=10
+        - ENDPOINTS_HEALTH_SENSITIVE=false
+        - ENDPOINTS_INFO_SENSITIVE=false
+        - CASE_WORKER_ROLES=caseworker-sscs
+      environment:
+        - http_proxy=
+        - https_proxy=
+        - no_proxy=
+      ports:
+        - 4460:4460
+
+volumes:
+  shared-database-data-v10:
