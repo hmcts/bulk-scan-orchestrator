@@ -14,5 +14,6 @@ withPipeline(type, product, component) {
     sh './gradlew integration'
   }
 
+  enableDockerBuild()
   enableSlackNotifications(channel)
 }
