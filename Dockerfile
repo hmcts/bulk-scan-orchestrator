@@ -1,4 +1,4 @@
-FROM hmcts/cnp-java-base:openjdk-jre-8-alpine-1.3
+FROM hmcts/cnp-java-base:openjdk-jre-8-alpine-1.4
 
 ENV APP bulk-scan-orchestrator.jar
 ENV APPLICATION_TOTAL_MEMORY 1024M
