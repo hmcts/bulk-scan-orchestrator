@@ -12,8 +12,11 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.bulkscanprocessorclien
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.bulkscanprocessorclient.exceptions.ReadEnvelopeException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.ReceiverProvider;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -76,7 +79,19 @@ public class EnvelopeProcessorTest {
 
     @Test
     public void should_complete_message_after_it_is_successfully_processed() throws Exception {
+        // given
+        UUID lockToken = UUID.randomUUID();
+        given(someMessage.getLockToken()).willReturn(lockToken);
 
+        given(receiver.receive())
+            .willReturn(someMessage)
+            .willReturn(null);
+
+        // when
+        processor.run();
+
+        // then
+        verify(receiver).complete(eq(lockToken));
     }
 
     @Test
