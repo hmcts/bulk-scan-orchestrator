@@ -18,6 +18,7 @@ public class ReceiverProvider {
         try {
             return ClientFactory.createMessageReceiverFromConnectionString(connString, ReceiveMode.PEEKLOCK);
         } catch (InterruptedException | ServiceBusException e) {
+            Thread.currentThread().interrupt();
             throw new ConnectionException("Unable to connect to queue", e);
         }
     }
