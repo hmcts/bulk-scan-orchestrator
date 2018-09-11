@@ -96,6 +96,7 @@ sonarqube {
     property "sonar.projectName", "Reform :: Bulk Scan Orchestrator"
     property "sonar.jacoco.reportPath", "${project.buildDir}/jacoco/test.exec"
     property "sonar.jacoco.itReportPath", "${project.buildDir}/jacoco/integration.exec"
+    property "sonar.coverage.exclusions", "**/ReceiverProvider.java"
   }
 }
 
