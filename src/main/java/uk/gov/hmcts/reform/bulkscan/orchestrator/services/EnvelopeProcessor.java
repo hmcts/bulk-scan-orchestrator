@@ -5,12 +5,15 @@ import com.microsoft.azure.servicebus.IMessageReceiver;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.bulkscanprocessorclient.client.BulkScanProcessorClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.bulkscanprocessorclient.exceptions.ReadEnvelopeException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.bulkscanprocessorclient.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.ReceiverProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.ConnectionException;
 
+@Service
 public class EnvelopeProcessor {
     private static final Logger logger = LoggerFactory.getLogger(EnvelopeProcessor.class);
 
@@ -25,7 +28,9 @@ public class EnvelopeProcessor {
         this.bulkScanProcessorClient = bulkScanProcessorClient;
     }
 
+    @Scheduled(fixedDelayString = "${queue.read-interval}")
     public void run() {
+        logger.info("Checking queue for new messages");
         try {
             IMessageReceiver msgReceiver = receiverProvider.get();
             IMessage msg = msgReceiver.receive();
