@@ -13,7 +13,7 @@ spring:
 bulk-scan-processor-url: ${BULK_SCAN_PROCESSOR_URL:}
 
 queue:
-  conn-string: ${QUEUE_CONNECTION_STRING:}
+  connection-string: ${QUEUE_CONNECTION_STRING:}
   read-interval: ${QUEUE_READ_INTERVAL:30000} # in ms
 
 idam:

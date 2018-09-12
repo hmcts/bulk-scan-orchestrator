@@ -13,7 +13,7 @@ public class ReceiverProvider {
 
     private final String connString;
 
-    public ReceiverProvider(@Value("${queue.conn-string}") String connString) {
+    public ReceiverProvider(@Value("${queue.connection-string}") String connString) {
         this.connString = connString;
     }
 
