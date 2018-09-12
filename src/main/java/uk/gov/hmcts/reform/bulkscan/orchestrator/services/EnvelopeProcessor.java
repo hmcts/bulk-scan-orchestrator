@@ -13,8 +13,12 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.bulkscanprocessorclien
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.ReceiverProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.ConnectionException;
 
+import java.util.Objects;
+
 @Service
 public class EnvelopeProcessor {
+    public static final String TEST_MSG_LABEL = "test";
+
     private static final Logger logger = LoggerFactory.getLogger(EnvelopeProcessor.class);
 
     private final ReceiverProvider receiverProvider;
@@ -48,8 +52,12 @@ public class EnvelopeProcessor {
         throws InterruptedException, ServiceBusException {
 
         try {
-            Envelope envelope = bulkScanProcessorClient.getEnvelopeById(msg.getMessageId()); // NOPMD
-            // TODO: use envelop data to interact with CCD
+            if (Objects.equals(msg.getLabel(), TEST_MSG_LABEL)) {
+                logger.info("Received test message");
+            } else {
+                Envelope envelope = bulkScanProcessorClient.getEnvelopeById(msg.getMessageId()); // NOPMD
+                // TODO: use envelop data to interact with CCD
+            }
             messageReceiver.complete(msg.getLockToken());
         } catch (ReadEnvelopeException exc) {
             logger.error("Unable to read envelope with ID: " + exc.envelopeId, exc);
