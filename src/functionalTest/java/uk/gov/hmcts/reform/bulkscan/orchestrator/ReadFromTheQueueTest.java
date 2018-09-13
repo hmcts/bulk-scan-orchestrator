@@ -52,5 +52,7 @@ public class ReadFromTheQueueTest {
 
         // then
         assertThat(readClient.receive()).isNull();
+
+        // TODO: once implemented, check whether case in CCD has been created, envelope status updated etc...
     }
 }
