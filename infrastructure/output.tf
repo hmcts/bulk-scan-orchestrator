@@ -2,7 +2,7 @@ output "microserviceName" {
   value = "${var.component}"
 }
 
-// region for functional testst
+// region: settings for functional tests
 
 output "QUEUE_READ_CONN_STRING" {
   value = "${data.terraform_remote_state.shared_infra.queue_primary_listen_connection_string}"

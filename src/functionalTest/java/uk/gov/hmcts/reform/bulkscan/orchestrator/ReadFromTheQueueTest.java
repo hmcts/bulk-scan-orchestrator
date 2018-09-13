@@ -35,7 +35,7 @@ public class ReadFromTheQueueTest {
 
         this.writeClient = new QueueClient(
             new ConnectionStringBuilder(conf.getString("queue.conn-strings.write")),
-                ReceiveMode.PEEKLOCK
+            ReceiveMode.PEEKLOCK
         );
     }
 
