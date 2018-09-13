@@ -110,4 +110,23 @@ public class EnvelopeProcessorTest {
         // then
         verify(receiver, never()).complete(any());
     }
+
+    @Test
+    public void should_not_read_envelopes_for_test_queue_messages() throws Exception {
+        // given
+        UUID lockToken = UUID.randomUUID();
+        given(someMessage.getLockToken()).willReturn(lockToken);
+        given(someMessage.getLabel()).willReturn(EnvelopeProcessor.TEST_MSG_LABEL);
+
+        given(receiver.receive())
+            .willReturn(someMessage)
+            .willReturn(null);
+
+        // when
+        processor.run();
+
+        // then
+        verify(receiver).complete(eq(lockToken));
+        verify(bulkScanProcessorClient, never()).getEnvelopeById(any());
+    }
 }
