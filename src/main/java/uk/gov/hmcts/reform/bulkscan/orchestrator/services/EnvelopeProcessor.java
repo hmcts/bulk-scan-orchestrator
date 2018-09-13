@@ -42,7 +42,9 @@ public class EnvelopeProcessor {
                 handle(msgReceiver, msg);
                 msg = msgReceiver.receive();
             }
-        } catch (InterruptedException | ServiceBusException | ConnectionException exc) {
+        } catch (ServiceBusException | ConnectionException exc) {
+            logger.error("Unable to read messages from queue", exc);
+        } catch (InterruptedException exc) {
             Thread.currentThread().interrupt();
             logger.error("Unable to read messages from queue", exc);
         }
