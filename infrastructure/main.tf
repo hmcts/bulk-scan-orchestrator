@@ -14,6 +14,8 @@ locals {
   vaultName           = "${local.is_preview ? local.previewVaultName : local.nonPreviewVaultName}"
   keyVaultUri         = "https://rpe-bsp-${var.env}.vault.azure.net/"
   local_env           = "${local.is_preview ? "aat" : var.env}"
+
+  sku_size = "${var.env == "prod" || var.env == "sprod" || var.env == "aat" ? "I2" : "I1"}"
 }
 
 module "bulk-scan-orchestrator" {
@@ -29,6 +31,7 @@ module "bulk-scan-orchestrator" {
   appinsights_instrumentation_key = "${var.appinsights_instrumentation_key}"
   asp_name                        = "${var.product}-${var.env}"
   asp_rg                          = "${var.product}-${var.env}"
+  instance_size                   = "${local.sku_size}"
 
   app_settings = {
     LOGBACK_REQUIRE_ALERT_LEVEL = false
