@@ -3,13 +3,13 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageHandler;
 import com.microsoft.azure.servicebus.IMessageReceiver;
-import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.ReceiverProvider;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.ConnectionException;
+
+import java.util.concurrent.ExecutionException;
 
 @Service
 public class MessageProcessor {
@@ -34,17 +34,15 @@ public class MessageProcessor {
                 process(msg);
                 msgReceiver.complete(msg.getLockToken());
             }
-        } catch (ServiceBusException | ConnectionException exc) {
-            logger.error("Unable to read messages from queue", exc);
-        } catch (InterruptedException exc) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            logger.error("Unable to read messages from queue", exc);
-        } catch (Exception e) {
-            logger.error("Error processing message ID: {}", (msg != null) ? msg.getMessageId() : "none", e);
+            logger.error("interrupted", e);
+        } catch (Throwable throwable) {
+            logger.error("Message processing exception msgId:{}", (msg != null) ? msg.getMessageId() : "none", throwable);
         }
     }
 
-    private void process(IMessage msg) throws InterruptedException, java.util.concurrent.ExecutionException {
+    private void process(IMessage msg) throws ExecutionException, InterruptedException {
         if (isTestMessage(msg)) {
             logger.info("Received test message, messageId: {}", msg.getMessageId());
         } else {

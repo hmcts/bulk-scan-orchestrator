@@ -30,13 +30,15 @@ class EnvelopeProcessorTest {
 
     @BeforeEach
     void before() {
-        given(someMessage.getMessageId()).willReturn(MSG_ID);
         envelopeProcessor = new EnvelopeProcessor(bulkScanProcessorClient);
     }
 
     @Test
     @DisplayName("should use queue message id to read envelope")
     void readEnvelope() throws ExecutionException, InterruptedException {
+        //given
+        given(someMessage.getMessageId()).willReturn(MSG_ID);
+
         // when
         envelopeProcessor.onMessageAsync(someMessage).get();
 
@@ -44,6 +46,13 @@ class EnvelopeProcessorTest {
         ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
         verify(bulkScanProcessorClient).getEnvelopeById(argumentCaptor.capture());
         assertThat(argumentCaptor.getValue()).isEqualTo(MSG_ID);
+    }
+
+    @Test
+    @DisplayName("empty test for coverage of the exception method.")
+    void notifyException() {
+        // when
+        envelopeProcessor.notifyException(null, null);
     }
 
 
