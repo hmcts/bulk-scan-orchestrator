@@ -85,7 +85,7 @@ jacocoTestReport {
   reports {
     xml.enabled = true
     csv.enabled = false
-    xml.destination = file("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
+    xml.destination  file("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
   }
 }
 
@@ -128,8 +128,8 @@ repositories {
 // it is important to specify logback classic and core packages explicitly as libraries like spring boot
 // enforces it's own (older) version which is not recommended.
 def versions = [
-  reformLogging: '3.0.1',
-  springBoot: springBoot.class.package.implementationVersion,
+  reformLogging   : '3.0.1',
+  springBoot      : springBoot.class.package.implementationVersion,
   springfoxSwagger: '2.9.2'
 ]
 
@@ -147,7 +147,14 @@ dependencies {
 
   compile group: 'com.microsoft.azure', name: 'azure-servicebus', version: '1.2.7'
 
-  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot
+  testCompile(group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot) {
+    exclude group: 'junit'
+    exclude group: 'org.mockito'
+  }
+  testCompile 'org.mockito:mockito-junit-jupiter:2.22.0'
+  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.1.0'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.1.0'
+  testRuntimeOnly 'org.junit.vintage:junit-vintage-engine:5.1.0'
   testCompile group: 'com.github.tomakehurst', name: 'wiremock', version: '2.18.0'
 
   integrationTestCompile sourceSets.main.runtimeClasspath
