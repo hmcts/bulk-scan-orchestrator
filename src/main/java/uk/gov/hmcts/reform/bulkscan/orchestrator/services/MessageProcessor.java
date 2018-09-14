@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.
 
 @Service
 public class MessageProcessor {
-    static final String TEST_MSG_LABEL = "test";
+    public static final String TEST_MSG_LABEL = "test";
 
     private static final Logger logger = LoggerFactory.getLogger(MessageProcessor.class);
 
