@@ -1,17 +1,17 @@
 #!groovy
-
 @Library("Infrastructure")
+import uk.gov.hmcts.contino.GradleBuilder
 
 def type = "java"
 def product = "bulk-scan"
 def component = "orchestrator"
 
 def channel = '#rpe-build-notices'
-
+GradleBuilder builder = new GradleBuilder(this, product)
 
 withPipeline(type, product, component) {
   after('test') {
-    sh './gradlew integration'
+    builder.gradle('integration')
   }
 
   enableDockerBuild()
