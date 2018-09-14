@@ -27,6 +27,6 @@ public class EnvelopeProcessor implements IMessageHandler {
 
     @Override
     public void notifyException(Throwable exception, ExceptionPhase phase) {
-        //No exceptions expected untill we use the azure API
+        //No exceptions expected until we use the azure API
     }
 }
