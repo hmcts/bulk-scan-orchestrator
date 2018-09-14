@@ -18,7 +18,15 @@ public class EnvelopeProcessor implements IMessageHandler {
 
     @Override
     public CompletableFuture<Void> onMessageAsync(IMessage message) {
-        return CompletableFuture.runAsync(() -> process(message));
+        /*
+         * NOTE: this is done here instead of offloading to the forkJoin pool "CompletableFuture.runAsync()"
+         * because we probably should think about a threading model before doing this.
+         * Maybe consider using Netflix's RxJava too (much simpler than CompletableFuture).
+         */
+        CompletableFuture<Void> completableFuture = new CompletableFuture<>();
+        process(message);
+        completableFuture.complete(null);
+        return completableFuture;
     }
 
     private void process(IMessage message) {
