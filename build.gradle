@@ -123,6 +123,9 @@ dependencyCheck {
 
 repositories {
   jcenter()
+  maven {
+    url 'https://dl.bintray.com/hmcts/hmcts-maven'
+  }
 }
 
 // it is important to specify logback classic and core packages explicitly as libraries like spring boot
@@ -143,6 +146,7 @@ dependencies {
   compile group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
 
   compile group: 'uk.gov.hmcts.reform', name: 'java-logging', version: versions.reformLogging
+  compile group: 'uk.gov.hmcts.reform', name: 'java-logging-appinsights', version: versions.reformLogging
   compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '1.0.1'
 
   compile group: 'com.microsoft.azure', name: 'azure-servicebus', version: '1.2.7'
