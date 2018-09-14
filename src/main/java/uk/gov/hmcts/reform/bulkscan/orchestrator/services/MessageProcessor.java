@@ -38,8 +38,12 @@ public class MessageProcessor {
             Thread.currentThread().interrupt();
             logger.error("interrupted", e);
         } catch (Throwable throwable) {
-            logger.error("Message processing exception msgId:{}", (msg != null) ? msg.getMessageId() : "none", throwable);
+            logger.error("Message processing exception msgId:{}", getMessageId(msg), throwable);
         }
+    }
+
+    private String getMessageId(IMessage msg) {
+        return (msg != null) ? msg.getMessageId() : "none";
     }
 
     private void process(IMessage msg) throws ExecutionException, InterruptedException {

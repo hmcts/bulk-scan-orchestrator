@@ -91,7 +91,8 @@ class MessageProcessorTest {
     }
 
     @SuppressWarnings("unchecked")
-    private static CompletableFuture<Void> interruptedExceptionCompletable() throws ExecutionException, InterruptedException {
+    private static CompletableFuture<Void> interruptedExceptionCompletable()
+        throws ExecutionException, InterruptedException {
         CompletableFuture<Void> mock = (CompletableFuture<Void>) mock(CompletableFuture.class);
         when(mock.get()).thenThrow(new InterruptedException());
         return mock;

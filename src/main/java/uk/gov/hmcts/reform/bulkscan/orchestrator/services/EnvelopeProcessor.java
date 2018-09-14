@@ -18,10 +18,7 @@ public class EnvelopeProcessor implements IMessageHandler {
 
     @Override
     public CompletableFuture<Void> onMessageAsync(IMessage message) {
-        CompletableFuture<Void> future = new CompletableFuture<>();
-        process(message);
-        future.complete(null);
-        return future;
+        return CompletableFuture.runAsync(() -> process(message));
     }
 
     private void process(IMessage message) {
