@@ -24,8 +24,12 @@ public class EnvelopeEventProcessor implements IMessageHandler {
          * Maybe consider using Netflix's RxJava too (much simpler than CompletableFuture).
          */
         CompletableFuture<Void> completableFuture = new CompletableFuture<>();
-        process(message);
-        completableFuture.complete(null);
+        try {
+            process(message);
+            completableFuture.complete(null);
+        } catch (Throwable t) {
+            completableFuture.completeExceptionally(t);
+        }
         return completableFuture;
     }
 

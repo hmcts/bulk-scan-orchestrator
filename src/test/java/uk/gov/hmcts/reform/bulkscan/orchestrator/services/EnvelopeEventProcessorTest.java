@@ -9,9 +9,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.bulkscanprocessorclient.client.BulkScanProcessorClient;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -21,7 +23,7 @@ public class EnvelopeEventProcessorTest {
     @Mock
     BulkScanProcessorClient bulkScanProcessorClient;
 
-    private EnvelopeEventProcessor envelopeEventProcessor;
+    private EnvelopeEventProcessor processor;
 
     @Mock
     private IMessage someMessage;
@@ -29,16 +31,15 @@ public class EnvelopeEventProcessorTest {
 
     @Before
     public void before() {
-        envelopeEventProcessor = new EnvelopeEventProcessor(bulkScanProcessorClient);
+        processor = new EnvelopeEventProcessor(bulkScanProcessorClient);
+        given(someMessage.getMessageId()).willReturn(MSG_ID);
     }
 
     @Test
     public void should_use_queue_message_id_to_read_envelope() throws ExecutionException, InterruptedException {
-        //given
-        given(someMessage.getMessageId()).willReturn(MSG_ID);
 
         // when
-        envelopeEventProcessor.onMessageAsync(someMessage).get();
+        processor.onMessageAsync(someMessage).get();
 
         // then
         ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
@@ -47,8 +48,27 @@ public class EnvelopeEventProcessorTest {
     }
 
     @Test
+    public void should_capture_exception_in_completable() {
+        //given
+        given(bulkScanProcessorClient.getEnvelopeById(MSG_ID)).willThrow(new RuntimeException("completable"));
+
+        // when
+        CompletableFuture<Void> future = processor.onMessageAsync(someMessage);
+
+        //then
+        assertThat(future.isCompletedExceptionally()).isTrue();
+        assertThat(future.isDone()).isTrue();
+
+        Throwable thrown = catchThrowable(future::get);
+        assertThat(thrown).isInstanceOf(ExecutionException.class);
+        assertThat(thrown.getCause()).isInstanceOf(RuntimeException.class);
+        assertThat(thrown.getCause()).hasMessage("completable");
+
+    }
+
+    @Test
     public void should_not_do_anything_in_notify() {
         // when
-        envelopeEventProcessor.notifyException(null, null);
+        processor.notifyException(null, null);
     }
 }
