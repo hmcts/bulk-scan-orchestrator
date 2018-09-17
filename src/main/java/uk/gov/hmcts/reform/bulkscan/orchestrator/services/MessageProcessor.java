@@ -16,15 +16,15 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.
 import java.util.Objects;
 
 @Service
-public class EnvelopeProcessor {
+public class MessageProcessor {
     public static final String TEST_MSG_LABEL = "test";
 
-    private static final Logger logger = LoggerFactory.getLogger(EnvelopeProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(MessageProcessor.class);
 
     private final ReceiverProvider receiverProvider;
     private final BulkScanProcessorClient bulkScanProcessorClient;
 
-    public EnvelopeProcessor(
+    public MessageProcessor(
         ReceiverProvider receiverProvider,
         BulkScanProcessorClient bulkScanProcessorClient
     ) {

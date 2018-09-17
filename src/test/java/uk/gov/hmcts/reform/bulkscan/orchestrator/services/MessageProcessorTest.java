@@ -23,7 +23,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EnvelopeProcessorTest {
+public class MessageProcessorTest {
 
     @Mock private BulkScanProcessorClient bulkScanProcessorClient;
     @Mock private ReceiverProvider receiverProvider;
@@ -31,11 +31,11 @@ public class EnvelopeProcessorTest {
     @Mock private IMessage someMessage;
     @Mock private IMessageReceiver receiver;
 
-    private EnvelopeProcessor processor;
+    private MessageProcessor processor;
 
     @Before
     public void setUp() throws Exception {
-        this.processor = new EnvelopeProcessor(receiverProvider, bulkScanProcessorClient);
+        this.processor = new MessageProcessor(receiverProvider, bulkScanProcessorClient);
         given(receiverProvider.get()).willReturn(receiver);
     }
 
@@ -116,7 +116,7 @@ public class EnvelopeProcessorTest {
         // given
         UUID lockToken = UUID.randomUUID();
         given(someMessage.getLockToken()).willReturn(lockToken);
-        given(someMessage.getLabel()).willReturn(EnvelopeProcessor.TEST_MSG_LABEL);
+        given(someMessage.getLabel()).willReturn(MessageProcessor.TEST_MSG_LABEL);
 
         given(receiver.receive())
             .willReturn(someMessage)
