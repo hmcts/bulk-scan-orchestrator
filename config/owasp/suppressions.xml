@@ -9,4 +9,131 @@
     <cve>CVE-2011-1068</cve>
   </suppress>
 
+  <!-- this is for the TEST jar wiremock-standalone -->
+  <suppress>
+    <notes><![CDATA[
+   file name: wiremock-standalone-2.18.0.jar (shaded: org.eclipse.jetty:jetty-security:9.2.24.v20180105)
+   ]]></notes>
+    <gav regex="true">^org\.eclipse\.jetty:jetty-security:.*$</gav>
+    <cpe>cpe:/a:eclipse:jetty</cpe>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: wiremock-standalone-2.18.0.jar (shaded: org.eclipse.jetty:jetty-security:9.2.24.v20180105)
+   ]]></notes>
+    <gav regex="true">^org\.eclipse\.jetty:jetty-security:.*$</gav>
+    <cpe>cpe:/a:jetty:jetty</cpe>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: wiremock-standalone-2.18.0.jar (shaded: org.eclipse.jetty:jetty-server:9.2.24.v20180105)
+   ]]></notes>
+    <gav regex="true">^org\.eclipse\.jetty:jetty-server:.*$</gav>
+    <cpe>cpe:/a:eclipse:jetty</cpe>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: wiremock-standalone-2.18.0.jar (shaded: org.eclipse.jetty:jetty-server:9.2.24.v20180105)
+   ]]></notes>
+    <gav regex="true">^org\.eclipse\.jetty:jetty-server:.*$</gav>
+    <cpe>cpe:/a:jetty:jetty</cpe>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: wiremock-standalone-2.18.0.jar (shaded: org.eclipse.jetty:jetty-servlets:9.2.24.v20180105)
+   ]]></notes>
+    <gav regex="true">^org\.eclipse\.jetty:jetty-servlets:.*$</gav>
+    <cpe>cpe:/a:eclipse:jetty</cpe>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: wiremock-standalone-2.18.0.jar (shaded: org.eclipse.jetty:jetty-servlets:9.2.24.v20180105)
+   ]]></notes>
+    <gav regex="true">^org\.eclipse\.jetty:jetty-servlets:.*$</gav>
+    <cpe>cpe:/a:jetty:jetty</cpe>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: wiremock-standalone-2.18.0.jar (shaded: com.fasterxml.jackson.core:jackson-databind:2.8.11)
+   ]]></notes>
+    <gav regex="true">^com\.fasterxml\.jackson\.core:jackson-databind:.*$</gav>
+    <cpe>cpe:/a:fasterxml:jackson-databind</cpe>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: wiremock-standalone-2.18.0.jar (shaded: com.fasterxml.jackson.core:jackson-databind:2.8.11)
+   ]]></notes>
+    <gav regex="true">^com\.fasterxml\.jackson\.core:jackson-databind:.*$</gav>
+    <cpe>cpe:/a:fasterxml:jackson</cpe>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: wiremock-standalone-2.18.0.jar (shaded: org.eclipse.jetty:jetty-http:9.2.24.v20180105)
+   ]]></notes>
+    <gav regex="true">^org\.eclipse\.jetty:jetty-http:.*$</gav>
+    <cpe>cpe:/a:eclipse:jetty</cpe>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: wiremock-standalone-2.18.0.jar (shaded: org.eclipse.jetty:jetty-http:9.2.24.v20180105)
+   ]]></notes>
+    <gav regex="true">^org\.eclipse\.jetty:jetty-http:.*$</gav>
+    <cpe>cpe:/a:jetty:jetty</cpe>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: wiremock-standalone-2.18.0.jar (shaded: org.eclipse.jetty:jetty-continuation:9.2.24.v20180105)
+   ]]></notes>
+    <gav regex="true">^org\.eclipse\.jetty:jetty-continuation:.*$</gav>
+    <cpe>cpe:/a:eclipse:jetty</cpe>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: wiremock-standalone-2.18.0.jar (shaded: org.eclipse.jetty:jetty-continuation:9.2.24.v20180105)
+   ]]></notes>
+    <gav regex="true">^org\.eclipse\.jetty:jetty-continuation:.*$</gav>
+    <cpe>cpe:/a:jetty:jetty</cpe>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: wiremock-standalone-2.18.0.jar (shaded: org.eclipse.jetty:jetty-xml:9.2.24.v20180105)
+   ]]></notes>
+    <gav regex="true">^org\.eclipse\.jetty:jetty-xml:.*$</gav>
+    <cpe>cpe:/a:eclipse:jetty</cpe>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: wiremock-standalone-2.18.0.jar (shaded: org.eclipse.jetty:jetty-xml:9.2.24.v20180105)
+   ]]></notes>
+    <gav regex="true">^org\.eclipse\.jetty:jetty-xml:.*$</gav>
+    <cpe>cpe:/a:jetty:jetty</cpe>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: wiremock-standalone-2.18.0.jar (shaded: org.eclipse.jetty:jetty-util:9.2.24.v20180105)
+   ]]></notes>
+    <gav regex="true">^org\.eclipse\.jetty:jetty-util:.*$</gav>
+    <cpe>cpe:/a:eclipse:jetty</cpe>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: wiremock-standalone-2.18.0.jar (shaded: org.eclipse.jetty:jetty-util:9.2.24.v20180105)
+   ]]></notes>
+    <gav regex="true">^org\.eclipse\.jetty:jetty-util:.*$</gav>
+    <cpe>cpe:/a:jetty:jetty</cpe>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: wiremock-standalone-2.18.0.jar (shaded: org.eclipse.jetty:jetty-webapp:9.2.24.v20180105)
+   ]]></notes>
+    <gav regex="true">^org\.eclipse\.jetty:jetty-webapp:.*$</gav>
+    <cpe>cpe:/a:eclipse:jetty</cpe>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: wiremock-standalone-2.18.0.jar (shaded: org.eclipse.jetty:jetty-servlet:9.2.24.v20180105)
+   ]]></notes>
+    <gav regex="true">^org\.eclipse\.jetty:jetty-servlet:.*$</gav>
+    <cpe>cpe:/a:eclipse:jetty</cpe>
+  </suppress>
 </suppressions>
