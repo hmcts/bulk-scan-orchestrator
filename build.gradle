@@ -81,11 +81,13 @@ pmd {
 }
 
 jacocoTestReport {
+  dependsOn test,integration
   executionData(test, integration)
   reports {
     xml.enabled = true
     csv.enabled = false
-    xml.destination = file("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
+    html.destination file("${buildDir}/reports/jacoco/html")
+    xml.destination  file("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
   }
 }
 
