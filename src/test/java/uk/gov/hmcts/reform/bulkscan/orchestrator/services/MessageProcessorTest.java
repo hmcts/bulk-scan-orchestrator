@@ -26,14 +26,10 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.MessageProcesso
 
 @RunWith(MockitoJUnitRunner.class)
 public class MessageProcessorTest {
-    @Mock
-    private ReceiverProvider receiverProvider;
-    @Mock
-    private IMessage someMessage;
-    @Mock
-    private IMessageReceiver receiver;
-    @Mock
-    private EnvelopeEventProcessor envelopeEventProcessor;
+    @Mock private ReceiverProvider receiverProvider;
+    @Mock private IMessage someMessage;
+    @Mock private IMessageReceiver receiver;
+    @Mock private EnvelopeEventProcessor envelopeEventProcessor;
 
     private MessageProcessor messageProcessor;
 
