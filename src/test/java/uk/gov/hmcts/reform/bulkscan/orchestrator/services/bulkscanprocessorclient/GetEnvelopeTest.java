@@ -1,6 +1,9 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.bulkscanprocessorclient;
 
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -10,11 +13,11 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.bulkscanprocessorclien
 
 import java.util.UUID;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.anyUrl;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.status;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
@@ -25,23 +28,21 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 
 public class GetEnvelopeTest {
 
-    private static final int PORT = 8089;
-
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule(PORT);
+    public WireMockRule wireMockRule = new WireMockRule(WireMockConfiguration.wireMockConfig().dynamicPort());
 
     private BulkScanProcessorClient client;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         this.client = new BulkScanProcessorClient(
-            "http://localhost:" + PORT,
+            "http://localhost:" + wireMockRule.port(),
             () -> "some_token"
         );
     }
 
     @Test
-    public void should_retrieve_envelope_from_the_service() {
+    public void should_retrieve_envelope_from_the_service() throws JSONException {
         // given
         String id = UUID.randomUUID().toString();
         String zipFileName = "hello.zip";
@@ -49,15 +50,10 @@ public class GetEnvelopeTest {
         stubFor(
             get(urlEqualTo("/envelopes/" + id))
                 .willReturn(
-                    aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody("{"
-                            + "\"id\": \"" + id + "\","
-                            + "\"zip_file_name\": \"" + zipFileName + "\""
-                            + "}"
-                        )
-                )
+                    okJson(new JSONObject()
+                        .put("id", id)
+                        .put("zip_file_name", zipFileName)
+                        .toString()))
         );
 
         // when
