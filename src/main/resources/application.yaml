@@ -10,8 +10,6 @@ spring:
   application:
     name: Bulk Scan Orchestrator
 
-bulk-scan-processor-url: ${BULK_SCAN_PROCESSOR_URL:}
-
 queue:
   connection-string: ${QUEUE_CONNECTION_STRING:}
   read-interval: ${QUEUE_READ_INTERVAL:30000} # in ms
