@@ -126,9 +126,6 @@ dependencyCheck {
 repositories {
   mavenLocal()
   jcenter()
-  maven {
-    url 'https://dl.bintray.com/hmcts/hmcts-maven'
-  }
 }
 
 // it is important to specify logback classic and core packages explicitly as libraries like spring boot
