@@ -8,6 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.bulkscanprocessorclient.client.BulkScanProcessorClient;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.UserService;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -23,6 +24,9 @@ public class EnvelopeEventProcessorTest {
     @Mock
     BulkScanProcessorClient bulkScanProcessorClient;
 
+    @Mock
+    UserService userService;
+
     private EnvelopeEventProcessor processor;
 
     @Mock
@@ -31,7 +35,7 @@ public class EnvelopeEventProcessorTest {
 
     @Before
     public void before() {
-        processor = new EnvelopeEventProcessor(bulkScanProcessorClient);
+        processor = new EnvelopeEventProcessor(bulkScanProcessorClient, userService);
         given(someMessage.getMessageId()).willReturn(MSG_ID);
     }
 

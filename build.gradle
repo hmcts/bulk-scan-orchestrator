@@ -124,6 +124,7 @@ dependencyCheck {
 }
 
 repositories {
+  mavenLocal()
   jcenter()
   maven {
     url 'https://dl.bintray.com/hmcts/hmcts-maven'
@@ -150,6 +151,7 @@ dependencies {
   compile group: 'uk.gov.hmcts.reform', name: 'java-logging', version: versions.reformLogging
   compile group: 'uk.gov.hmcts.reform', name: 'java-logging-appinsights', version: versions.reformLogging
   compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '1.0.1'
+  compile group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '0.0.1'
 
   compile group: 'com.microsoft.azure', name: 'azure-servicebus', version: '1.2.7'
 
