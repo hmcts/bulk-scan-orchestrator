@@ -7,7 +7,7 @@ import java.util.Map;
 
 @Component
 @ConfigurationProperties(prefix = "idam")
-public class UserMapping {
+public class JurisdictionToUserMapping {
     private Map<String, Credential> users;
 
     public Map<String, Credential> getUsers() {

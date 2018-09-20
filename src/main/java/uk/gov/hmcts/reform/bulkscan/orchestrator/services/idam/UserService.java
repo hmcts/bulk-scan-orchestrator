@@ -8,10 +8,10 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 public class UserService {
 
     private final IdamClient idamClient;
-    private final UserMapping users;
+    private final JurisdictionToUserMapping users;
 
     @Autowired
-    public UserService(IdamClient idamClient, UserMapping users) {
+    public UserService(IdamClient idamClient, JurisdictionToUserMapping users) {
         this.idamClient = idamClient;
         this.users = users;
     }
