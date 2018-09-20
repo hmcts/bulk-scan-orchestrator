@@ -19,7 +19,7 @@ public class RootController {
      * "Always On" is turned on.
      * This is the endpoint to deal with that and therefore silence the unnecessary 404s as a response code.</p>
      */
-    @GetMapping
+    @GetMapping("/")
     public ResponseEntity<Void> welcome() {
         return noContent().build();
     }
