@@ -8,12 +8,16 @@ import com.microsoft.azure.servicebus.ReceiveMode;
 import com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.MessageProcessor;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
 import java.util.UUID;
 
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ReadFromTheQueueTest {
@@ -44,7 +48,7 @@ public class ReadFromTheQueueTest {
         // given
         Message message = new Message();
         message.setMessageId(UUID.randomUUID().toString());
-        message.setLabel(MessageProcessor.TEST_MSG_LABEL);
+        message.setBody(SampleData.envelopeJson().getBytes());
 
         // when
         writeClient.send(message);
