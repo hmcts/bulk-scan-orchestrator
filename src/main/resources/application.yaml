@@ -3,8 +3,13 @@ server:
 
 management:
   endpoints:
+    exposure:
+      include: '*'
     web:
       base-path: /
+  endpoint:
+    health:
+      show-details: always
 
 spring:
   application:
