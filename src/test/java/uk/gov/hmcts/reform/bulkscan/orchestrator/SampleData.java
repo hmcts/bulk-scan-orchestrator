@@ -17,4 +17,8 @@ public class SampleData {
             .put("doc_urls", new JSONArray(asList("a", "b")))
             .toString();
     }
+
+    private SampleData() {
+        // util class
+    }
 }
