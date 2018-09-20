@@ -36,9 +36,9 @@ locals {
     LOGBACK_REQUIRE_ALERT_LEVEL = false
     LOGBACK_REQUIRE_ERROR_CODE  = false
 
-    S2S_URL                     = "http://rpe-service-auth-provider-${local.local_env}.service.core-compute-${local.local_env}.internal"
+    S2S_URL = "http://rpe-service-auth-provider-${local.local_env}.service.core-compute-${local.local_env}.internal"
 
-    QUEUE_CONNECTION_STRING     = "${data.terraform_remote_state.shared_infra.queue_primary_listen_connection_string}"
+    QUEUE_CONNECTION_STRING = "${data.terraform_remote_state.shared_infra.queue_primary_listen_connection_string}"
   }
 }
 
@@ -61,7 +61,7 @@ module "bulk-scan-orchestrator" {
 }
 
 data "azurerm_key_vault" "key_vault" {
-  name = "${local.vaultName}"
+  name                = "${local.vaultName}"
   resource_group_name = "${local.vaultName}"
 }
 
