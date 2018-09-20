@@ -4,6 +4,8 @@ import com.microsoft.azure.servicebus.ExceptionPhase;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageHandler;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -19,7 +21,8 @@ public class EnvelopeEventProcessor implements IMessageHandler {
          */
         CompletableFuture<Void> completableFuture = new CompletableFuture<>();
         try {
-            // TODO: handle message
+            Envelope envelope = EnvelopeParser.parse(message.getBody());
+            // TODO: use data from envelope to call CCD
             completableFuture.complete(null);
         } catch (Throwable t) {
             completableFuture.completeExceptionally(t);
