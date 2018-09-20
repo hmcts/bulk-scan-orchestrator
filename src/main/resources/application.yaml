@@ -3,9 +3,9 @@ server:
 
 management:
   endpoints:
-    exposure:
-      include: '*'
     web:
+      exposure:
+        include: '*'
       base-path: /
   endpoint:
     health:
