@@ -6,11 +6,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-<<<<<<< HEAD
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.bulkscanprocessorclient.client.BulkScanProcessorClient;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.UserService;
-=======
->>>>>>> master
 
 import java.util.concurrent.CompletableFuture;
 
