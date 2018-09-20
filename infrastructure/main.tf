@@ -9,13 +9,37 @@ resource "azurerm_resource_group" "rg" {
 locals {
   ase_name            = "${data.terraform_remote_state.core_apps_compute.ase_name[0]}"
   is_preview          = "${(var.env == "preview" || var.env == "spreview")}"
-  previewVaultName    = "${var.product}-bsp"
-  nonPreviewVaultName = "${var.product}-bsp-${var.env}"
+  previewVaultName    = "${var.raw_product}-aat"
+  nonPreviewVaultName = "${var.raw_product}-${var.env}"
   vaultName           = "${local.is_preview ? local.previewVaultName : local.nonPreviewVaultName}"
-  keyVaultUri         = "https://rpe-bsp-${var.env}.vault.azure.net/"
   local_env           = "${local.is_preview ? "aat" : var.env}"
 
   sku_size = "${var.env == "prod" || var.env == "sprod" || var.env == "aat" ? "I2" : "I1"}"
+
+  users = {
+    SSCS = "idam-users-sscs"
+  }
+
+  users_secret_names = "${values(local.users)}"
+
+  users_usernames_settings = "${zipmap(
+                                    formatlist("IDAM_USERS_%s_USERNAME", keys(local.users)),
+                                    data.azurerm_key_vault_secret.idam_users_usernames.*.value
+                                )}"
+
+  users_passwords_settings = "${zipmap(
+                                    formatlist("IDAM_USERS_%s_PASSWORD", keys(local.users)),
+                                    data.azurerm_key_vault_secret.idam_users_passwords.*.value
+                                )}"
+
+  core_app_settings = {
+    LOGBACK_REQUIRE_ALERT_LEVEL = false
+    LOGBACK_REQUIRE_ERROR_CODE  = false
+
+    S2S_URL                     = "http://rpe-service-auth-provider-${local.local_env}.service.core-compute-${local.local_env}.internal"
+
+    QUEUE_CONNECTION_STRING     = "${data.terraform_remote_state.shared_infra.queue_primary_listen_connection_string}"
+  }
 }
 
 module "bulk-scan-orchestrator" {
@@ -33,12 +57,22 @@ module "bulk-scan-orchestrator" {
   asp_rg                          = "${var.product}-${var.env}"
   instance_size                   = "${local.sku_size}"
 
-  app_settings = {
-    LOGBACK_REQUIRE_ALERT_LEVEL = false
-    LOGBACK_REQUIRE_ERROR_CODE  = false
+  app_settings = "${merge(local.core_app_settings, local.users_usernames_settings, local.users_passwords_settings)}"
+}
 
-    S2S_URL                     = "http://rpe-service-auth-provider-${local.local_env}.service.core-compute-${local.local_env}.internal"
+data "azurerm_key_vault" "key_vault" {
+  name = "${local.vaultName}"
+  resource_group_name = "${local.vaultName}"
+}
 
-    QUEUE_CONNECTION_STRING     = "${data.terraform_remote_state.shared_infra.queue_primary_listen_connection_string}"
-  }
+data "azurerm_key_vault_secret" "idam_users_usernames" {
+  name      = "${local.users_secret_names[count.index]}-username"
+  vault_uri = "${data.azurerm_key_vault.key_vault.vault_uri}"
+  count     = "${length(local.users_secret_names)}"
+}
+
+data "azurerm_key_vault_secret" "idam_users_passwords" {
+  name      = "${local.users_secret_names[count.index]}-password"
+  vault_uri = "${data.azurerm_key_vault.key_vault.vault_uri}"
+  count     = "${length(local.users_secret_names)}"
 }

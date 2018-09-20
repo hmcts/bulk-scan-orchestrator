@@ -1,5 +1,9 @@
 variable "product" {}
 
+variable "raw_product" {
+  default = "bulk-scan"
+}
+
 variable "component" {
   type = "string"
 }
