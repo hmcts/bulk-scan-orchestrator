@@ -4,20 +4,11 @@ import com.microsoft.azure.servicebus.ExceptionPhase;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageHandler;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.bulkscanprocessorclient.client.BulkScanProcessorClient;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.UserService;
 
 import java.util.concurrent.CompletableFuture;
 
 @Component
 public class EnvelopeEventProcessor implements IMessageHandler {
-    private BulkScanProcessorClient bulkScanProcessorClient;
-    private final UserService userService;
-
-    public EnvelopeEventProcessor(BulkScanProcessorClient bulkScanProcessorClient, UserService userService) {
-        this.bulkScanProcessorClient = bulkScanProcessorClient;
-        this.userService = userService;
-    }
 
     @Override
     public CompletableFuture<Void> onMessageAsync(IMessage message) {
@@ -28,16 +19,12 @@ public class EnvelopeEventProcessor implements IMessageHandler {
          */
         CompletableFuture<Void> completableFuture = new CompletableFuture<>();
         try {
-            process(message);
+            // TODO: handle message
             completableFuture.complete(null);
         } catch (Throwable t) {
             completableFuture.completeExceptionally(t);
         }
         return completableFuture;
-    }
-
-    private void process(IMessage message) {
-        bulkScanProcessorClient.getEnvelopeById(message.getMessageId());
     }
 
     @Override
