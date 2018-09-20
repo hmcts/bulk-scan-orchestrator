@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.Test;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.InvalidMessageException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
@@ -12,13 +11,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
 public class EnvelopeParserTest {
-
-    private EnvelopeParser envelopeParser;
-
-    @Before
-    public void setUp() throws Exception {
-        envelopeParser = new EnvelopeParser();
-    }
 
     @Test
     public void should_parse_valid_json() throws Exception {
@@ -39,7 +31,7 @@ public class EnvelopeParserTest {
                 .toString();
 
         // when
-        Envelope result = envelopeParser.parse(json.getBytes());
+        Envelope result = EnvelopeParser.parse(json.getBytes());
 
         // then
         assertThat(result).isEqualToComparingFieldByField(envelope);
@@ -53,7 +45,7 @@ public class EnvelopeParserTest {
                 .toString();
 
         // when
-        Throwable exc = catchThrowable(() -> envelopeParser.parse(json.getBytes()));
+        Throwable exc = catchThrowable(() -> EnvelopeParser.parse(json.getBytes()));
 
         // then
         assertThat(exc).isInstanceOf(InvalidMessageException.class);
@@ -65,7 +57,7 @@ public class EnvelopeParserTest {
         String json = "gibberish";
 
         // when
-        Throwable exc = catchThrowable(() -> envelopeParser.parse(json.getBytes()));
+        Throwable exc = catchThrowable(() -> EnvelopeParser.parse(json.getBytes()));
 
         // then
         assertThat(exc).isInstanceOf(InvalidMessageException.class);
@@ -81,7 +73,7 @@ public class EnvelopeParserTest {
                 .toString();
 
         // when
-        Throwable exc = catchThrowable(() -> envelopeParser.parse(jsonEnvelopeWithoutId.getBytes()));
+        Throwable exc = catchThrowable(() -> EnvelopeParser.parse(jsonEnvelopeWithoutId.getBytes()));
 
         // then
         assertThat(exc).isInstanceOf(InvalidMessageException.class);

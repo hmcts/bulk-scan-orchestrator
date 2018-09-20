@@ -8,13 +8,17 @@ import java.io.IOException;
 
 public class EnvelopeParser {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public Envelope parse(byte[] bytes) {
+    public static Envelope parse(byte[] bytes) {
         try {
             return objectMapper.readValue(bytes, Envelope.class);
         } catch (IOException exc) {
             throw new InvalidMessageException(exc);
         }
+    }
+
+    private EnvelopeParser() {
+        // utility class
     }
 }
