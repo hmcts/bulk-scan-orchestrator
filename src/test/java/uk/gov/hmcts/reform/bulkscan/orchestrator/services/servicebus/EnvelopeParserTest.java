@@ -4,6 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.InvalidMessageException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
 import static java.util.Arrays.asList;
@@ -19,6 +20,7 @@ public class EnvelopeParserTest {
             "975b339d-4531-4e32-8ebe-a7bc4650f33a",
             "case_ref_number",
             "jurisdiction",
+            Classification.SUPPLEMENTARY_EVIDENCE,
             asList("a", "b", "c")
         );
 
@@ -27,6 +29,7 @@ public class EnvelopeParserTest {
                 .put("id", envelope.id)
                 .put("case_ref", envelope.caseRef)
                 .put("jurisdiction", envelope.jurisdiction)
+                .put("classification", envelope.classification.toString().toLowerCase())
                 .put("doc_urls", new JSONArray(envelope.docUrls))
                 .toString();
 
