@@ -17,6 +17,8 @@ locals {
   sku_size = "${var.env == "prod" || var.env == "sprod" || var.env == "aat" ? "I2" : "I1"}"
 
   users = {
+    // configures a user for a jurisdiction
+    // add secrets to all bulk-scan vaults in the form idam-users-<jurisdiction>-username idam-users-<jurisdiction>-password
     SSCS = "idam-users-sscs"
   }
 
