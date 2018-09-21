@@ -39,6 +39,10 @@ locals {
     S2S_URL = "http://rpe-service-auth-provider-${local.local_env}.service.core-compute-${local.local_env}.internal"
 
     QUEUE_CONNECTION_STRING = "${data.terraform_remote_state.shared_infra.queue_primary_listen_connection_string}"
+
+    IDAM_API_URL       = "${var.idam_api_url}"
+    IDAM_CLIENT_SECRET = "${data.azurerm_key_vault_secret.idam_client_secret.value}"
+    IDAM_REDIRECT_URI  = "${var.idam_redirect_uri}"
   }
 }
 
@@ -75,4 +79,9 @@ data "azurerm_key_vault_secret" "idam_users_passwords" {
   name      = "${local.users_secret_names[count.index]}-password"
   vault_uri = "${data.azurerm_key_vault.key_vault.vault_uri}"
   count     = "${length(local.users_secret_names)}"
+}
+
+data "azurerm_key_vault_secret" "idam_client_secret" {
+  name      = "idam-client-secret"
+  vault_uri = "${data.azurerm_key_vault.key_vault.vault_uri}"
 }

@@ -40,3 +40,11 @@ variable "appinsights_instrumentation_key" {
   description = "Instrumentation key of the App Insights instance this webapp should use. Module will create own App Insights resource if this is not provided"
   default     = ""
 }
+
+variable "idam_api_url" {
+  default = "http://betaDevBccidamAppLB.reform.hmcts.net"
+}
+
+variable "idam_redirect_uri" {
+  default = "https://rpe-bulk-scan-processor-sandbox.service.core-compute-sandbox.internal/oauth2/callback"
+}

@@ -21,6 +21,13 @@ queue:
 
 idam:
   s2s-auth:
-    url:    ${S2S_URL:http://localhost:8081}
+    url:    ${S2S_URL:http://localhost:4552}
     secret: ${S2S_SECRET:AAAAAAAAAAAAAAAA}
     name:   ${S2S_NAME:bulk_scan_orchestrator}
+  api:
+    url: http://localhost:8080
+  client:
+    id: 'bsp'
+    secret: '123456'
+    redirect_uri: 'http://localhost/receiver'
+  users:
