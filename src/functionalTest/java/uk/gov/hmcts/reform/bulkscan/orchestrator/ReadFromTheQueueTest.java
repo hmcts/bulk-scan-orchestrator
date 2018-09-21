@@ -10,7 +10,6 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.junit.Before;
 import org.junit.Test;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.MessageProcessor;
 
 import java.util.UUID;
 
@@ -44,7 +43,7 @@ public class ReadFromTheQueueTest {
         // given
         Message message = new Message();
         message.setMessageId(UUID.randomUUID().toString());
-        message.setLabel(MessageProcessor.TEST_MSG_LABEL);
+        message.setBody(SampleData.envelopeJson().getBytes());
 
         // when
         writeClient.send(message);

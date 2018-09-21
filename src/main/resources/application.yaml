@@ -3,20 +3,17 @@ server:
 
 management:
   endpoints:
-    exposure:
-      include: '*'
     web:
+      exposure:
+        include: '*'
       base-path: /
   endpoint:
     health:
       show-details: always
 
-
 spring:
   application:
     name: Bulk Scan Orchestrator
-
-bulk-scan-processor-url: ${BULK_SCAN_PROCESSOR_URL:}
 
 queue:
   connection-string: ${QUEUE_CONNECTION_STRING:}
