@@ -65,8 +65,9 @@ public class EnvelopeEventProcessorTest {
     }
 
     @Test
-    public void should_return_exceptionally_completed_future_if_unknown_jurisdiction() {
+    public void should_return_exceptionally_completed_future_if_unknown_jurisdiction() throws Exception {
         // given
+        given(someMessage.getBody()).willReturn(SampleData.envelopeJson().getBytes());
         given(userService.getBearerTokenForJurisdiction(any()))
             .willThrow(new NoUserConfiguredException("foo"));
 
