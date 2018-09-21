@@ -22,7 +22,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.MessageProcessor.TEST_MSG_LABEL;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MessageProcessorTest {
@@ -100,25 +99,6 @@ public class MessageProcessorTest {
 
         // then
         verify(receiver).complete(eq(lockToken));
-    }
-
-    @Test
-    public void should_not_read_envelopes_for_test_queue_messages() throws Exception {
-        // given
-        UUID lockToken = UUID.randomUUID();
-        given(someMessage.getLockToken()).willReturn(lockToken);
-        given(someMessage.getLabel()).willReturn(TEST_MSG_LABEL);
-
-        given(receiver.receive())
-            .willReturn(someMessage)
-            .willReturn(null);
-
-        // when
-        messageProcessor.run();
-
-        // then
-        verify(receiver).complete(eq(lockToken));
-        verify(envelopeEventProcessor, never()).onMessageAsync(any());
     }
 
     @SuppressWarnings("unchecked")
