@@ -9,11 +9,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.ReceiverProvider;
 
-import java.util.concurrent.ExecutionException;
-
 @Service
 public class MessageProcessor {
-    public static final String TEST_MSG_LABEL = "test";
 
     private static final Logger logger = LoggerFactory.getLogger(MessageProcessor.class);
 
@@ -31,7 +28,9 @@ public class MessageProcessor {
         try {
             IMessageReceiver msgReceiver = receiverProvider.get();
             while ((msg = msgReceiver.receive()) != null) {
-                process(msg);
+
+                envelopeProcessor.onMessageAsync(msg).get();
+
                 msgReceiver.complete(msg.getLockToken());
             }
         } catch (InterruptedException e) {
@@ -45,17 +44,4 @@ public class MessageProcessor {
     private String getMessageId(IMessage msg) {
         return (msg != null) ? msg.getMessageId() : "none";
     }
-
-    private void process(IMessage msg) throws ExecutionException, InterruptedException {
-        if (isTestMessage(msg)) {
-            logger.info("Received test message, messageId: {}", msg.getMessageId());
-        } else {
-            envelopeProcessor.onMessageAsync(msg).get();
-        }
-    }
-
-    private boolean isTestMessage(IMessage msg) {
-        return TEST_MSG_LABEL.equals(msg.getLabel());
-    }
-
 }

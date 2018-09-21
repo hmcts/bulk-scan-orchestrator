@@ -2,9 +2,14 @@ server:
   port: 8582
 
 management:
-  web:
-    base-path: /
-
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+      base-path: /
+  endpoint:
+    health:
+      show-details: always
 
 spring:
   application:
