@@ -20,6 +20,7 @@ public class EnvelopeParserTest {
             "975b339d-4531-4e32-8ebe-a7bc4650f33a",
             "case_ref_number",
             "jurisdiction",
+            "zip-file-test.zip",
             Classification.SUPPLEMENTARY_EVIDENCE,
             asList("a", "b", "c")
         );
@@ -29,6 +30,7 @@ public class EnvelopeParserTest {
                 .put("id", envelope.id)
                 .put("case_ref", envelope.caseRef)
                 .put("jurisdiction", envelope.jurisdiction)
+                .put("zip_file_name", envelope.zipFileName)
                 .put("classification", envelope.classification.toString().toLowerCase())
                 .put("doc_urls", new JSONArray(envelope.docUrls))
                 .toString();
@@ -55,7 +57,7 @@ public class EnvelopeParserTest {
     }
 
     @Test
-    public void should_throw_an_exception_if_invalid_json_is_passed() throws Exception {
+    public void should_throw_an_exception_if_invalid_json_is_passed() {
 
         String json = "gibberish";
 
