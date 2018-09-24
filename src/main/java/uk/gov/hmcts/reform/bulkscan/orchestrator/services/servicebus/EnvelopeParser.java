@@ -19,7 +19,7 @@ public class EnvelopeParser {
     public static Envelope parse(byte[] bytes) {
         try {
             return objectMapper.readValue(bytes, Envelope.class);
-        } catch (IOException exc) {
+        } catch (IOException | NullPointerException exc) {
             throw new InvalidMessageException(exc);
         }
     }
