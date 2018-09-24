@@ -93,4 +93,16 @@ public class EnvelopeParserTest {
         // then
         assertThat(exc).isInstanceOf(InvalidMessageException.class);
     }
+
+    @Test
+    public void should_throw_an_exception_if_byte_array_is_empty() {
+        // given
+        byte[] body = new byte[] {};
+
+        // when
+        Throwable exc = catchThrowable(() -> EnvelopeParser.parse(body));
+
+        // then
+        assertThat(exc).isInstanceOf(InvalidMessageException.class);
+    }
 }
