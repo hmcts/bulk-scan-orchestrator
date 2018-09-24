@@ -28,9 +28,7 @@ public class MessageProcessor {
         try {
             IMessageReceiver msgReceiver = receiverProvider.get();
             while ((msg = msgReceiver.receive()) != null) {
-
                 envelopeProcessor.onMessageAsync(msg).get();
-
                 msgReceiver.complete(msg.getLockToken());
             }
         } catch (InterruptedException e) {

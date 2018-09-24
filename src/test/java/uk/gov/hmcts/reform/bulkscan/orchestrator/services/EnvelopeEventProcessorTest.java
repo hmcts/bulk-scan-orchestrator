@@ -16,13 +16,14 @@ import static org.mockito.BDDMockito.given;
 @RunWith(MockitoJUnitRunner.class)
 public class EnvelopeEventProcessorTest {
 
+    private EnvelopeEventProcessor processor;
+
     @Mock
     private IMessage someMessage;
-    private EnvelopeEventProcessor processor;
 
     @Before
     public void before() {
-        processor = new EnvelopeEventProcessor();
+//        processor = new EnvelopeEventProcessor(userService);
     }
 
     @Test
@@ -56,4 +57,19 @@ public class EnvelopeEventProcessorTest {
         // when
         processor.notifyException(null, null);
     }
+
+    @Test
+    public void should_return_exceptionally_completed_future_if_unknown_jurisdiction() throws Exception {
+        // given
+        given(someMessage.getBody()).willReturn(SampleData.envelopeJson().getBytes());
+//        given(userService.getBearerTokenForJurisdiction(any()))
+//            .willThrow(new NoUserConfiguredException("foo"));
+
+        // when
+        CompletableFuture<Void> result = processor.onMessageAsync(someMessage);
+
+        // then
+        assertThat(result.isCompletedExceptionally()).isTrue();
+    }
+
 }
