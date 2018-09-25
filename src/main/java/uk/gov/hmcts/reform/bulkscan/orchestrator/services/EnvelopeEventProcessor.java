@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.concurrent.CompletableFuture;
 
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.CompletableHelper.completeRunnable;
+
 @Service
 public class EnvelopeEventProcessor implements CompletableFutureWrapper, IMessageHandler {
     private static final Logger log = LoggerFactory.getLogger(EnvelopeEventProcessor.class);
@@ -27,7 +29,7 @@ public class EnvelopeEventProcessor implements CompletableFutureWrapper, IMessag
 
     @Override
     public CompletableFuture<Void> onMessageAsync(IMessage message) {
-        return null;
+        return completeRunnable(() -> process(message));
     }
 
     @Override
@@ -35,10 +37,11 @@ public class EnvelopeEventProcessor implements CompletableFutureWrapper, IMessag
         Envelope envelope = EnvelopeParser.parse(message.getBody());
         CcdAuthInfo authInfo = authenticator.authenticateForJurisdiction(envelope.jurisdiction);
         CaseDetails workerCase = caseRetriever.retrieve(authInfo, envelope.jurisdiction, envelope.caseRef);
+        log.info("Found worker case: {}:{}:{}", workerCase.getJurisdiction(), workerCase.getCaseTypeId(), workerCase.getId());
     }
 
     @Override
     public void notifyException(Throwable exception, ExceptionPhase phase) {
-
+        //Left empty for now.
     }
 }
