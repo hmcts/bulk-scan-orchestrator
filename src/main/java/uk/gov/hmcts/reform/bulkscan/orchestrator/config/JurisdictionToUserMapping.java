@@ -14,7 +14,7 @@ import java.util.Map;
 @ConfigurationProperties(prefix = "idam")
 public class JurisdictionToUserMapping {
 
-    private Map<Jurisdiction, Credential> users;
+    private Map<String, Credential> users;
 
     public void setUsers(Map<String, Map<String,String>> users) {
         this.users = users
@@ -24,13 +24,13 @@ public class JurisdictionToUserMapping {
             .collect(HashMap::new,(map, pair)->map.put(pair.first(), pair.second()), HashMap::putAll);
     }
 
-    private Pair<Jurisdiction, Credential> toEntry(Map.Entry<String, Map<String, String>> entry) {
-        Jurisdiction key = Jurisdiction.valueOf(entry.getKey().toUpperCase());
+    private Pair<String, Credential> toEntry(Map.Entry<String, Map<String, String>> entry) {
+        String key = entry.getKey().toUpperCase();
         Credential cred = new Credential(entry.getValue().get("username"),entry.getValue().get("password") );
         return new Pair<>(key, cred);
     }
 
-    public Credential getUser(Jurisdiction jurisdiction) {
+    public Credential getUser(String jurisdiction) {
         return users.get(jurisdiction);
     }
 }

@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Jurisdiction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.JurisdictionToUserMapping;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.Credential;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser;
@@ -56,14 +55,18 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
     private void process(IMessage message) {
         String sscsToken = s2sTokenGenerator.generate();
-        Jurisdiction jurisdiction = Jurisdiction.SSCS;
-        Credential user = users.getUser(jurisdiction);
+
         Envelope envelope = EnvelopeParser.parse(message.getBody());
+
+        Credential user = users.getUser(envelope.jurisdiction.toLowerCase());
         String userToken = idamClient.authenticateUser(user.getUsername(), user.getPassword());
+        String userId = idamClient.getUserDetails(userToken).getId();
+
         try {
             CaseDetails workerCase = coreCaseDataApi.readForCaseWorker(userToken,
-                sscsToken, user.getUsername(),
-                jurisdiction.name(),
+                sscsToken,
+                userId,
+                envelope.jurisdiction,
                 "Bulk_Scanned",
                 envelope.caseRef);
             log.info("Retrieved case {}:{}:{}", workerCase.getJurisdiction(), workerCase.getCaseTypeId(), workerCase.getId());
