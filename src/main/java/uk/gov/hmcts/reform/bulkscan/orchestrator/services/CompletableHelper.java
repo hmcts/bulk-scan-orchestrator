@@ -2,8 +2,8 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
 
 import java.util.concurrent.CompletableFuture;
 
-public class CompletableHelper {
-    public static CompletableFuture<Void> completeRunnable(Runnable runnable) {
+public interface CompletableHelper {
+    static CompletableFuture<Void> completeRunnable(Runnable runnable) {
         /*
          * NOTE: this is done here instead of offloading to the forkJoin pool "CompletableFuture.runAsync()"
          * because we probably should think about a threading model before doing this.

@@ -35,12 +35,15 @@ public class EnvelopeEventProcessor implements IMessageHandler {
     private void process(IMessage message) {
         Envelope envelope = EnvelopeParser.parse(message.getBody());
         CcdAuthInfo authInfo = authenticator.authenticateForJurisdiction(envelope.jurisdiction);
-        CaseDetails workerCase = caseRetriever.retrieve(authInfo, envelope.jurisdiction, envelope.caseRef);
-        log.info("Found worker case: {}:{}:{}", workerCase.getJurisdiction(), workerCase.getCaseTypeId(), workerCase.getId());
+        CaseDetails aaCase = caseRetriever.retrieve(authInfo, envelope.jurisdiction, envelope.caseRef);
+        log.info("Found worker case: {}:{}:{}",
+            aaCase.getJurisdiction(),
+            aaCase.getCaseTypeId(),
+            aaCase.getId());
     }
 
     @Override
     public void notifyException(Throwable exception, ExceptionPhase phase) {
-        //Left empty for now.
+        // Left empty on purpose
     }
 }

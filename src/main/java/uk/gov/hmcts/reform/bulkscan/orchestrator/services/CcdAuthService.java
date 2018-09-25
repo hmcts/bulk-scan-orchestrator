@@ -13,7 +13,9 @@ class CcdAuthService {
     private final IdamClient idamClient;
     private final JurisdictionToUserMapping users;
 
-    public CcdAuthService(AuthTokenGenerator s2sTokenGenerator, IdamClient idamClient, JurisdictionToUserMapping users) {
+    public CcdAuthService(AuthTokenGenerator s2sTokenGenerator,
+                          IdamClient idamClient,
+                          JurisdictionToUserMapping users) {
         this.s2sTokenGenerator = s2sTokenGenerator;
         this.idamClient = idamClient;
         this.users = users;

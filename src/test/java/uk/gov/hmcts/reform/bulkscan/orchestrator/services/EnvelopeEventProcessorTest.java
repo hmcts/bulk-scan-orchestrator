@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -20,10 +21,14 @@ public class EnvelopeEventProcessorTest {
 
     @Mock
     private IMessage someMessage;
+    @Mock
+    private CcdCaseRetriever caseRetriever;
+    @Mock
+    private CcdAuthService authenticator;
 
     @Before
     public void before() {
-//        processor = new EnvelopeEventProcessor(userService);
+        processor = new EnvelopeEventProcessor(caseRetriever, authenticator);
     }
 
     @Test
@@ -62,8 +67,7 @@ public class EnvelopeEventProcessorTest {
     public void should_return_exceptionally_completed_future_if_unknown_jurisdiction() throws Exception {
         // given
         given(someMessage.getBody()).willReturn(SampleData.envelopeJson().getBytes());
-//        given(userService.getBearerTokenForJurisdiction(any()))
-//            .willThrow(new NoUserConfiguredException("foo"));
+        given(authenticator.authenticateForJurisdiction(any())).willThrow(new RuntimeException());
 
         // when
         CompletableFuture<Void> result = processor.onMessageAsync(someMessage);
