@@ -3,80 +3,42 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
 import com.microsoft.azure.servicebus.ExceptionPhase;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageHandler;
-import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.config.JurisdictionToUserMapping;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.Credential;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.idam.client.IdamClient;
 
 import java.util.concurrent.CompletableFuture;
 
 @Service
-public class EnvelopeEventProcessor implements IMessageHandler {
-    private final CoreCaseDataApi coreCaseDataApi;
-    private final AuthTokenGenerator s2sTokenGenerator;
-    private final IdamClient idamClient;
-    private JurisdictionToUserMapping users;
+public class EnvelopeEventProcessor implements CompletableFutureWrapper, IMessageHandler {
     private static final Logger log = LoggerFactory.getLogger(EnvelopeEventProcessor.class);
 
-    public EnvelopeEventProcessor(CoreCaseDataApi coreCaseDataApi,
-                                  AuthTokenGenerator s2sTokenGenerator,
-                                  IdamClient idamClient,
-                                  JurisdictionToUserMapping users) {
-        this.users = users;
-        this.coreCaseDataApi = coreCaseDataApi;
-        this.s2sTokenGenerator = s2sTokenGenerator;
-        this.idamClient = idamClient;
+    private final CcdAuthService authenticator;
+    private final CcdCaseRetriever caseRetriever;
+
+    public EnvelopeEventProcessor(CcdCaseRetriever caseRetriever,
+                                  CcdAuthService authenticator) {
+        this.caseRetriever = caseRetriever;
+        this.authenticator = authenticator;
     }
 
     @Override
     public CompletableFuture<Void> onMessageAsync(IMessage message) {
-        /*
-         * NOTE: this is done here instead of offloading to the forkJoin pool "CompletableFuture.runAsync()"
-         * because we probably should think about a threading model before doing this.
-         * Maybe consider using Netflix's RxJava too (much simpler than CompletableFuture).
-         */
-        CompletableFuture<Void> completableFuture = new CompletableFuture<>();
-        try {
-            process(message);
-            completableFuture.complete(null);
-        } catch (Throwable t) {
-            completableFuture.completeExceptionally(t);
-        }
-        return completableFuture;
+        return null;
     }
 
-    private void process(IMessage message) {
-        String sscsToken = s2sTokenGenerator.generate();
-
+    @Override
+    public void process(IMessage message) {
         Envelope envelope = EnvelopeParser.parse(message.getBody());
-
-        Credential user = users.getUser(envelope.jurisdiction.toLowerCase());
-        String userToken = idamClient.authenticateUser(user.getUsername(), user.getPassword());
-        String userId = idamClient.getUserDetails(userToken).getId();
-
-        try {
-            CaseDetails workerCase = coreCaseDataApi.readForCaseWorker(userToken,
-                sscsToken,
-                userId,
-                envelope.jurisdiction,
-                "Bulk_Scanned",
-                envelope.caseRef);
-            log.info("Retrieved case {}:{}:{}", workerCase.getJurisdiction(), workerCase.getCaseTypeId(), workerCase.getId());
-        } catch (FeignException e) {
-            log.error("Failed to read Case status: {}", e.status(), e);
-        }
+        CcdAuthInfo authInfo = authenticator.authenticateForJurisdiction(envelope.jurisdiction);
+        CaseDetails workerCase = caseRetriever.retrieve(authInfo, envelope.jurisdiction, envelope.caseRef);
     }
 
     @Override
     public void notifyException(Throwable exception, ExceptionPhase phase) {
-        //No exceptions expected until we use the azure API
+
     }
 }
