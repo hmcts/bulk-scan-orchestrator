@@ -13,6 +13,7 @@ public class SampleData {
             .put("id", "eb9c3598-35fc-424e-b05a-902ee9f11d56")
             .put("case_ref", "ABC123")
             .put("jurisdiction", "SSCS")
+            .put("zip_file_name", "zip-file-test.zip")
             .put("classification", Classification.NEW_APPLICATION)
             .put("doc_urls", new JSONArray(asList("a", "b")))
             .toString();
