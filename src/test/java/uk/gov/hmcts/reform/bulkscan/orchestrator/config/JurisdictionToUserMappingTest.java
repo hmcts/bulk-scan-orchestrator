@@ -40,7 +40,7 @@ public class JurisdictionToUserMappingTest {
 
         assertThat(throwable)
             .isInstanceOf(NoUserConfiguredException.class)
-            .hasMessage("No user configured for jurisdiction: NONE");
+            .hasMessage("No user configured for jurisdiction: none");
     }
 
     private Credential failFound() {
