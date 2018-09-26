@@ -3,45 +3,47 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
 import com.microsoft.azure.servicebus.ExceptionPhase;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageHandler;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.UserService;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.concurrent.CompletableFuture;
 
-@Component
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.CompletableHelper.completeRunnable;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser.parse;
+
+@Service
 public class EnvelopeEventProcessor implements IMessageHandler {
+    private static final Logger log = LoggerFactory.getLogger(EnvelopeEventProcessor.class);
 
-    private UserService userService;
+    private final CcdAuthService authenticator;
+    private final CcdCaseRetriever caseRetriever;
 
-    @Autowired
-    public EnvelopeEventProcessor(UserService userService) {
-        this.userService = userService;
+    public EnvelopeEventProcessor(CcdCaseRetriever caseRetriever,
+                                  CcdAuthService authenticator) {
+        this.caseRetriever = caseRetriever;
+        this.authenticator = authenticator;
     }
 
     @Override
     public CompletableFuture<Void> onMessageAsync(IMessage message) {
-        /*
-         * NOTE: this is done here instead of offloading to the forkJoin pool "CompletableFuture.runAsync()"
-         * because we probably should think about a threading model before doing this.
-         * Maybe consider using Netflix's RxJava too (much simpler than CompletableFuture).
-         */
-        CompletableFuture<Void> completableFuture = new CompletableFuture<>();
-        try {
-            Envelope envelope = EnvelopeParser.parse(message.getBody());
-            userService.getBearerTokenForJurisdiction(envelope.jurisdiction);
-            // TODO: use data from envelope to call CCD
-            completableFuture.complete(null);
-        } catch (Throwable t) {
-            completableFuture.completeExceptionally(t);
-        }
-        return completableFuture;
+        return completeRunnable(() -> process(message));
+    }
+
+    private void process(IMessage message) {
+        Envelope envelope = parse(message.getBody());
+        CcdAuthInfo authInfo = authenticator.authenticateForJurisdiction(envelope.jurisdiction);
+        CaseDetails theCase = caseRetriever.retrieve(authInfo, envelope.caseRef);
+        log.info("Found worker case: {}:{}:{}",
+            theCase.getJurisdiction(),
+            theCase.getCaseTypeId(),
+            theCase.getId());
     }
 
     @Override
     public void notifyException(Throwable exception, ExceptionPhase phase) {
-        //No exceptions expected until we use the azure API
+        // Left empty on purpose
     }
 }
