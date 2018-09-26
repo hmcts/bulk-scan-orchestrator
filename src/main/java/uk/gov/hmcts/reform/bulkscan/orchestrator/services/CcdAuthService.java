@@ -27,6 +27,6 @@ class CcdAuthService {
         String userToken = idamClient.authenticateUser(user.getUsername(), user.getPassword());
         UserDetails userDetails = idamClient.getUserDetails(userToken);
 
-        return new CcdAuthInfo(sscsToken, user, userToken, userDetails);
+        return new CcdAuthInfo(sscsToken, user, userToken, userDetails, jurisdiction);
     }
 }

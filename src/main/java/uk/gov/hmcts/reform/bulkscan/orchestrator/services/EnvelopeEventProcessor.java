@@ -35,7 +35,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
     private void process(IMessage message) {
         Envelope envelope = parse(message.getBody());
         CcdAuthInfo authInfo = authenticator.authenticateForJurisdiction(envelope.jurisdiction);
-        CaseDetails theCase = caseRetriever.retrieve(authInfo, envelope.jurisdiction, envelope.caseRef);
+        CaseDetails theCase = caseRetriever.retrieve(authInfo, envelope.caseRef);
         log.info("Found worker case: {}:{}:{}",
             theCase.getJurisdiction(),
             theCase.getCaseTypeId(),

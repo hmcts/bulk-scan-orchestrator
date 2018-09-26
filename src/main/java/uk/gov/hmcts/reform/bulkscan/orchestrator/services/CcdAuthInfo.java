@@ -8,11 +8,13 @@ public class CcdAuthInfo {
     final String sscsToken;
     private final Credential user;
     final String userToken;
+    final String jursdiction;
 
-    public CcdAuthInfo(String sscsToken, Credential user, String userToken, UserDetails userDetails) {
+    public CcdAuthInfo(String sscsToken, Credential user, String userToken, UserDetails userDetails, String jurisdiction) {
         this.sscsToken = sscsToken;
         this.user = user;
         this.userToken = userToken;
         this.userDetails = userDetails;
+        this.jursdiction = jurisdiction;
     }
 }

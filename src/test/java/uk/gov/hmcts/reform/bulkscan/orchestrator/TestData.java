@@ -24,7 +24,7 @@ public interface TestData {
 
     UserDetails USER_DETAILS = new UserDetails(USER_ID, null, null, null, emptyList());
     Credential USER_CREDS = new Credential(USER_NAME, PASSWORD);
-    CcdAuthInfo CCD_AUTH_INFO = new CcdAuthInfo(SSCS_TOKEN, USER_CREDS, USER_TOKEN, USER_DETAILS);
+    CcdAuthInfo CCD_AUTH_INFO = new CcdAuthInfo(SSCS_TOKEN, USER_CREDS, USER_TOKEN, USER_DETAILS, JURSIDICTION);
 
     CaseDetails THE_CASE = CaseDetails.builder()
         .id(CASE_ID)

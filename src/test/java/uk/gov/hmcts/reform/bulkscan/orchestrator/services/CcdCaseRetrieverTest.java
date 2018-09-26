@@ -32,7 +32,7 @@ public class CcdCaseRetrieverTest {
         retriever = new CcdCaseRetriever(dataApi);
         when(dataApi.readForCaseWorker(USER_TOKEN, SSCS_TOKEN, USER_ID, JURSIDICTION, CASE_TYPE_ID, CASE_REF))
             .thenReturn(THE_CASE);
-        CaseDetails theCase = retriever.retrieve(CCD_AUTH_INFO, JURSIDICTION, CASE_REF);
+        CaseDetails theCase = retriever.retrieve(CCD_AUTH_INFO, CASE_REF);
         assertThat(theCase.getId()).isEqualTo(CASE_ID);
     }
 

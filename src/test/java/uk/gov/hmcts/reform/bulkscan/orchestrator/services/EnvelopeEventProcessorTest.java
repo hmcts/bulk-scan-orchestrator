@@ -38,7 +38,7 @@ public class EnvelopeEventProcessorTest {
     @Before
     public void before() throws Exception {
         processor = new EnvelopeEventProcessor(caseRetriever, authenticator);
-        when(caseRetriever.retrieve(eq(authInfo), eq(JURSIDICTION), eq(CASE_REF))).thenReturn(theCase);
+        when(caseRetriever.retrieve(eq(authInfo), eq(CASE_REF))).thenReturn(theCase);
         given(someMessage.getBody()).willReturn(TestData.envelopeJson().getBytes());
         given(authenticator.authenticateForJurisdiction(eq(JURSIDICTION))).willReturn(authInfo);
 

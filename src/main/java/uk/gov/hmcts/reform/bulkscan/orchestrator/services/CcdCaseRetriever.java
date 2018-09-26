@@ -13,11 +13,11 @@ public class CcdCaseRetriever {
         this.coreCaseDataApi = coreCaseDataApi;
     }
 
-    CaseDetails retrieve(CcdAuthInfo authInfo, String jurisdiction, String caseRef) {
+    CaseDetails retrieve(CcdAuthInfo authInfo, String caseRef) {
         return coreCaseDataApi.readForCaseWorker(authInfo.userToken,
             authInfo.sscsToken,
             authInfo.userDetails.getId(),
-            jurisdiction,
+            authInfo.jursdiction,
             CASE_TYPE_ID,
             caseRef);
     }
