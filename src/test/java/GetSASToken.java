@@ -11,8 +11,7 @@ public class GetSASToken {
 
         String sas = getSASToken("sb://bulk-scan-servicebus-sandbox.servicebus.windows.net/",
             "SendSharedAccessKey",
-            "t1t3w9EVognlP9Lp3IcpjjFP69opitogcwAa1NVrkBs=");
-        //Endpoint=sb://bulk-scan-servicebus-sandbox.servicebus.windows.net/;SharedAccessKeyName=SendSharedAccessKey;SharedAccessKey=t1t3w9EVognlP9Lp3IcpjjFP69opitogcwAa1NVrkBs=;EntityPath=envelopes
+            "");
         System.out.println(sas);
     }
 
