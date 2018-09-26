@@ -2,9 +2,9 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 
 import static java.util.Arrays.asList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.NEW_APPLICATION;
 
 public class SampleData {
 
@@ -13,7 +13,7 @@ public class SampleData {
             .put("id", "eb9c3598-35fc-424e-b05a-902ee9f11d56")
             .put("case_ref", "ABC123")
             .put("jurisdiction", "SSCS")
-            .put("classification", Classification.NEW_APPLICATION)
+            .put("classification", NEW_APPLICATION)
             .put("doc_urls", new JSONArray(asList("a", "b")))
             .toString();
     }

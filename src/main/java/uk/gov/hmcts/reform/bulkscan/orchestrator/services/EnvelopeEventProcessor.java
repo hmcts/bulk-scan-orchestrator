@@ -6,13 +6,13 @@ import com.microsoft.azure.servicebus.IMessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.concurrent.CompletableFuture;
 
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.CompletableHelper.completeRunnable;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser.parse;
 
 @Service
 public class EnvelopeEventProcessor implements IMessageHandler {
@@ -33,13 +33,13 @@ public class EnvelopeEventProcessor implements IMessageHandler {
     }
 
     private void process(IMessage message) {
-        Envelope envelope = EnvelopeParser.parse(message.getBody());
+        Envelope envelope = parse(message.getBody());
         CcdAuthInfo authInfo = authenticator.authenticateForJurisdiction(envelope.jurisdiction);
-        CaseDetails aaCase = caseRetriever.retrieve(authInfo, envelope.jurisdiction, envelope.caseRef);
+        CaseDetails theCase = caseRetriever.retrieve(authInfo, envelope.jurisdiction, envelope.caseRef);
         log.info("Found worker case: {}:{}:{}",
-            aaCase.getJurisdiction(),
-            aaCase.getCaseTypeId(),
-            aaCase.getId());
+            theCase.getJurisdiction(),
+            theCase.getCaseTypeId(),
+            theCase.getId());
     }
 
     @Override
