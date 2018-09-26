@@ -15,9 +15,9 @@ public class CcdCaseRetriever {
 
     CaseDetails retrieve(CcdAuthInfo authInfo, String caseRef) {
         return coreCaseDataApi.readForCaseWorker(authInfo.userToken,
-            authInfo.sscsToken,
+            authInfo.serviceToken,
             authInfo.userDetails.getId(),
-            authInfo.jursdiction,
+            authInfo.jurisdiction,
             CASE_TYPE_ID,
             caseRef);
     }

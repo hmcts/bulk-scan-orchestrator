@@ -1,24 +1,20 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
 
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.Credential;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 public class CcdAuthInfo {
     final UserDetails userDetails;
-    final String sscsToken;
-    private final Credential user;
+    final String serviceToken;
     final String userToken;
-    final String jursdiction;
+    final String jurisdiction;
 
-    public CcdAuthInfo(String sscsToken,
-                       Credential user,
+    public CcdAuthInfo(String serviceToken,
                        String userToken,
                        UserDetails userDetails,
                        String jurisdiction) {
-        this.sscsToken = sscsToken;
-        this.user = user;
+        this.serviceToken = serviceToken;
         this.userToken = userToken;
         this.userDetails = userDetails;
-        this.jursdiction = jurisdiction;
+        this.jurisdiction = jurisdiction;
     }
 }

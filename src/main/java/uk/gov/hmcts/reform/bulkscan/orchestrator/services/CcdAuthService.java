@@ -22,11 +22,11 @@ class CcdAuthService {
     }
 
     CcdAuthInfo authenticateForJurisdiction(String jurisdiction) {
-        String sscsToken = s2sTokenGenerator.generate();
+        String serviceToken = s2sTokenGenerator.generate();
         Credential user = users.getUser(jurisdiction);
         String userToken = idamClient.authenticateUser(user.getUsername(), user.getPassword());
         UserDetails userDetails = idamClient.getUserDetails(userToken);
 
-        return new CcdAuthInfo(sscsToken, user, userToken, userDetails, jurisdiction);
+        return new CcdAuthInfo(serviceToken, userToken, userDetails, jurisdiction);
     }
 }
