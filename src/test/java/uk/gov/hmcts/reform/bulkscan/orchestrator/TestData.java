@@ -38,6 +38,7 @@ public interface TestData {
             .put("case_ref", CASE_REF)
             .put("jurisdiction", JURSIDICTION)
             .put("classification", NEW_APPLICATION)
+            .put("zip_file_name", "zip-file-test.zip")
             .put("doc_urls", new JSONArray(asList("a", "b")))
             .toString();
     }
