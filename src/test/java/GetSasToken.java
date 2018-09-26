@@ -5,7 +5,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class GetSASToken {
+public class GetSasToken {
 
     public static void main(String[] args) throws Exception {
 
