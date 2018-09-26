@@ -13,7 +13,7 @@ locals {
   nonPreviewVaultName = "${var.raw_product}-${var.env}"
   vaultName           = "${local.is_preview ? local.previewVaultName : local.nonPreviewVaultName}"
   local_env           = "${local.is_preview ? "aat" : var.env}"
-  local_ase = "${(var.env == "preview" || var.env == "spreview") ? (var.env == "preview" ) ? "core-compute-aat" : "core-compute-saat" : local.aseName}"
+  local_ase = "${(var.env == "preview" || var.env == "spreview") ? (var.env == "preview" ) ? "core-compute-aat" : "core-compute-saat" : local.ase_name}"
 
   sku_size = "${var.env == "prod" || var.env == "sprod" || var.env == "aat" ? "I2" : "I1"}"
 
