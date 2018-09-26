@@ -68,7 +68,7 @@ public class EnvelopeEventProcessorTest {
     }
 
     @Test
-    public void should_return_exceptionally_completed_future_if_unknown_jurisdiction() throws Exception {
+    public void should_return_exceptionally_completed_future_if_exception_is_thrown() throws Exception {
         // given
         given(someMessage.getBody()).willReturn(envelopeJson().getBytes());
         given(caseRetriever.retrieve(any(), any())).willThrow(new RuntimeException());
