@@ -19,18 +19,17 @@ public class JurisdictionToUserMapping {
         this.users = users
             .entrySet()
             .stream()
-            .map(this::toEntry)
+            .map(this::createPair)
             .collect(HashMap::new, (map, pair) -> map.put(pair.first(), pair.second()), HashMap::putAll);
     }
 
-    private Pair<String, Credential> toEntry(Map.Entry<String, Map<String, String>> entry) {
+    private Pair<String, Credential> createPair(Map.Entry<String, Map<String, String>> entry) {
         String key = entry.getKey().toLowerCase();
         Credential cred = new Credential(entry.getValue().get("username"), entry.getValue().get("password"));
         return new Pair<>(key, cred);
     }
 
     public Credential getUser(String jurisdiction) {
-
         Credential credential = users.get(jurisdiction.toLowerCase());
         if (credential != null) {
             return credential;
