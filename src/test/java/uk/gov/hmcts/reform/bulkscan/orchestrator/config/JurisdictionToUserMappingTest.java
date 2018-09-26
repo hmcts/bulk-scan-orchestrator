@@ -37,8 +37,10 @@ public class JurisdictionToUserMappingTest {
     @Test
     public void should_throw_exception_if_not_found() {
         Throwable throwable = catchThrowable(() -> mapping.getUser("NONE"));
-        assertThat(throwable).isInstanceOf(NoUserConfiguredException.class);
-        assertThat(throwable).hasMessage("No user configured for jurisdiction: NONE");
+
+        assertThat(throwable)
+            .isInstanceOf(NoUserConfiguredException.class)
+            .hasMessage("No user configured for jurisdiction: NONE");
     }
 
     private Credential failFound() {
