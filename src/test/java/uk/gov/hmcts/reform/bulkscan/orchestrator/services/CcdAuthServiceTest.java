@@ -36,7 +36,7 @@ public class CcdAuthServiceTest {
     @Before
     public void before() {
         service = new CcdAuthService(tokenGenerator, idamClient, users);
-        when(users.getUser(JURSIDICTION.toLowerCase())).thenReturn(USER_CREDS);
+        when(users.getUser(eq(JURSIDICTION))).thenReturn(USER_CREDS);
         when(tokenGenerator.generate()).thenReturn(SSCS_TOKEN);
         when(idamClient.authenticateUser(eq(USER_NAME), eq(PASSWORD))).thenReturn(USER_TOKEN);
         when(idamClient.getUserDetails(USER_TOKEN)).thenReturn(USER_DETAILS);

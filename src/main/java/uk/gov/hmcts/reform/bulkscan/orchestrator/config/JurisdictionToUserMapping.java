@@ -31,6 +31,12 @@ public class JurisdictionToUserMapping {
     }
 
     public Credential getUser(String jurisdiction) {
-        return users.get(jurisdiction);
+
+        Credential credential = users.get(jurisdiction.toLowerCase());
+        if (credential != null) {
+            return credential;
+        } else {
+            throw new UserNotConfiguredException(jurisdiction);
+        }
     }
 }

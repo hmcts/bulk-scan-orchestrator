@@ -14,6 +14,7 @@ import org.junit.Test;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.TestData.envelopeJson;
 
 public class ReadFromTheQueueTest {
 
@@ -43,7 +44,7 @@ public class ReadFromTheQueueTest {
         // given
         Message message = new Message();
         message.setMessageId(UUID.randomUUID().toString());
-        message.setBody(SampleData.envelopeJson().getBytes());
+        message.setBody(envelopeJson().getBytes());
 
         // when
         writeClient.send(message);

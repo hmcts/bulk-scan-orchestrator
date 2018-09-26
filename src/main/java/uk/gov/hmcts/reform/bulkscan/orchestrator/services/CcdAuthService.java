@@ -23,7 +23,7 @@ class CcdAuthService {
 
     CcdAuthInfo authenticateForJurisdiction(String jurisdiction) {
         String sscsToken = s2sTokenGenerator.generate();
-        Credential user = users.getUser(jurisdiction.toLowerCase());
+        Credential user = users.getUser(jurisdiction);
         String userToken = idamClient.authenticateUser(user.getUsername(), user.getPassword());
         UserDetails userDetails = idamClient.getUserDetails(userToken);
 
