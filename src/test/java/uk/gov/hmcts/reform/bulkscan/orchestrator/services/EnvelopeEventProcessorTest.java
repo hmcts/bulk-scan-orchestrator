@@ -26,7 +26,7 @@ public class EnvelopeEventProcessorTest {
     @Mock
     private CcdCaseRetriever caseRetriever;
     @Mock
-    private CcdAuthInfo authInfo;
+    private AuthDetails authInfo;
 
     private EnvelopeEventProcessor processor;
 

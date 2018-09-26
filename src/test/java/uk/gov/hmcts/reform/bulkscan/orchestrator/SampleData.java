@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.CcdAuthInfo;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.AuthDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.Credential;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -25,8 +25,7 @@ public class SampleData {
     public static final UserDetails USER_DETAILS = new UserDetails(USER_ID,
         null, null, null, emptyList());
     public static final Credential USER_CREDS = new Credential(USER_NAME, PASSWORD);
-    public static final CcdAuthInfo CCD_AUTH_INFO = new CcdAuthInfo(SERVICE_TOKEN,
-        USER_TOKEN, USER_DETAILS, JURSIDICTION);
+    public static final AuthDetails AUTH_DETAILS = new AuthDetails(SERVICE_TOKEN, USER_TOKEN, USER_DETAILS);
 
     public static final CaseDetails THE_CASE = CaseDetails.builder()
         .id(CASE_ID)

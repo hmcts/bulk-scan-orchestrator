@@ -17,11 +17,11 @@ public class CcdCaseRetriever {
     }
 
     CaseDetails retrieve(String jurisdiction, String caseRef) {
-        CcdAuthInfo info = authenticator.authenticateForJurisdiction(jurisdiction);
+        AuthDetails info = authenticator.authenticateForJurisdiction(jurisdiction);
         return retrieveCase(jurisdiction, caseRef, info);
     }
 
-    private CaseDetails retrieveCase(String jurisdiction, String caseRef, CcdAuthInfo info) {
+    private CaseDetails retrieveCase(String jurisdiction, String caseRef, AuthDetails info) {
         return coreCaseDataApi.readForCaseWorker(info.userToken,
             info.serviceToken,
             info.userDetails.getId(),

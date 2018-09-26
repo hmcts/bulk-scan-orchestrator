@@ -44,7 +44,7 @@ public class CcdAuthServiceTest {
 
     @Test
     public void should_sucessfully_return_authInfo() {
-        CcdAuthInfo authInfo = service.authenticateForJurisdiction(JURSIDICTION);
+        AuthDetails authInfo = service.authenticateForJurisdiction(JURSIDICTION);
         assertThat(authInfo).isNotNull();
         assertThat(authInfo.serviceToken).isEqualTo(SERVICE_TOKEN);
         assertThat(authInfo.userToken).isEqualTo(USER_TOKEN);
