@@ -5,7 +5,8 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 @Service
-class CcdCaseRetriever {
+public class CcdCaseRetriever {
+    public static final String CASE_TYPE_ID = "Bulk_Scanned";
     private final CoreCaseDataApi coreCaseDataApi;
 
     CcdCaseRetriever(CoreCaseDataApi coreCaseDataApi) {
@@ -17,7 +18,7 @@ class CcdCaseRetriever {
             authInfo.sscsToken,
             authInfo.userDetails.getId(),
             jurisdiction,
-            "Bulk_Scanned",
+            CASE_TYPE_ID,
             caseRef);
     }
 

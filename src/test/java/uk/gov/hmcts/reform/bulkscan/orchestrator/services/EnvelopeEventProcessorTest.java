@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.TestData;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.concurrent.CompletableFuture;
@@ -16,12 +16,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.TestData.CASE_REF;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.TestData.JURSIDICTION;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EnvelopeEventProcessorTest {
 
-    private static final String JURISDICTION = "SSCS";
-    private static final String SOME_CASE_REF = "someCaseRef";
     private EnvelopeEventProcessor processor;
 
     @Mock
@@ -38,9 +38,9 @@ public class EnvelopeEventProcessorTest {
     @Before
     public void before() throws Exception {
         processor = new EnvelopeEventProcessor(caseRetriever, authenticator);
-        when(caseRetriever.retrieve(authInfo, JURISDICTION, SOME_CASE_REF)).thenReturn(theCase);
-        given(someMessage.getBody()).willReturn(SampleData.envelopeJson().getBytes());
-        given(authenticator.authenticateForJurisdiction(eq(JURISDICTION))).willReturn(authInfo);
+        when(caseRetriever.retrieve(eq(authInfo), eq(JURSIDICTION), eq(CASE_REF))).thenReturn(theCase);
+        given(someMessage.getBody()).willReturn(TestData.envelopeJson().getBytes());
+        given(authenticator.authenticateForJurisdiction(eq(JURSIDICTION))).willReturn(authInfo);
 
     }
 
@@ -77,7 +77,7 @@ public class EnvelopeEventProcessorTest {
     @Test
     public void should_return_exceptionally_completed_future_if_unknown_jurisdiction() throws Exception {
         // given
-        given(someMessage.getBody()).willReturn(SampleData.envelopeJson().getBytes());
+        given(someMessage.getBody()).willReturn(TestData.envelopeJson().getBytes());
         given(authenticator.authenticateForJurisdiction(any())).willThrow(new RuntimeException());
 
         // when
