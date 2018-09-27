@@ -7,13 +7,23 @@
 - Run up the docker environment from bulk-scan-shared-infrastructure
 - You will have to setup these environment variables on either your
 run configuration or bash shell
-```$bash
+```
 IDAM_USERS_SSCS_USERNAME = bulkscanorchestrator+systemupdate@gmail.com
 IDAM_USERS_SSCS_PASSWORD = Password12
-CORE_CASE_DATA_API_URL = http://localhost:4452
 ```
-- add a case into using the docker ui
-- copy the case number from the UI (excluding the #) and place it into the example1.json#case_ref to reference the created case.
+- either using the environment vars or application default you will need to set
+  ```
+  queue:
+    connection-string: XXXXX
+    read-interval: YYYY
+  ```
+  - where: 
+    - XXXX is the connection string from azure to the queue you intend to use.
+    - YYYY is optional but recommended to reduce this to 500 ms for speed of development.
+  
+  
+- add a case into ccd using the [case management ui](http://localhost:3451)
+- copy the case number from the UI (excluding the # and -'s) and place it into the example1.json#case_ref to reference the created case.
 - get the secret and run the getSasSecret script to create the queue jwt token.
 - put this in the send_message.sh script
 - run the send_message script in and make sure the 201 success is returned.
