@@ -7,9 +7,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 @Service
 public class CcdCaseRetriever {
     public static final String CASE_TYPE_ID = "Bulk_Scanned";
+
     private CcdAuthenticatorFactory authenticator;
     private final CoreCaseDataApi coreCaseDataApi;
-
 
     CcdCaseRetriever(CcdAuthenticatorFactory authService, CoreCaseDataApi coreCaseDataApi) {
         this.authenticator = authService;
