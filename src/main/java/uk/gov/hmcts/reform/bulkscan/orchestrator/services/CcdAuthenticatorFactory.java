@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.Credential;
@@ -10,7 +9,6 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 @Service
-@Component
 @EnableConfigurationProperties(JurisdictionToUserMapping.class)
 class CcdAuthenticatorFactory {
     private final AuthTokenGenerator s2sTokenGenerator;
