@@ -5,8 +5,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.Map;
+
+import static java.util.stream.Collectors.toMap;
 
 @Component
 @EnableConfigurationProperties
@@ -20,7 +21,7 @@ public class JurisdictionToUserMapping {
             .entrySet()
             .stream()
             .map(this::createPair)
-            .collect(HashMap::new, (map, pair) -> map.put(pair.first(), pair.second()), HashMap::putAll);
+            .collect(toMap(Pair::first,Pair::second));
     }
 
     private Pair<String, Credential> createPair(Map.Entry<String, Map<String, String>> entry) {

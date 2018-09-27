@@ -22,12 +22,14 @@ public class CcdCaseRetriever {
     }
 
     private CaseDetails retrieveCase(String jurisdiction, String caseRef, AuthDetails info) {
-        return coreCaseDataApi.readForCaseWorker(info.userToken,
+        return coreCaseDataApi.readForCaseWorker(
+            info.userAuthDetails.token,
             info.serviceToken,
-            info.userDetails.getId(),
+            info.userAuthDetails.details.getId(),
             jurisdiction,
             CASE_TYPE_ID,
-            caseRef);
+            caseRef
+        );
     }
 
 }

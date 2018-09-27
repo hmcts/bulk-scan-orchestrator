@@ -25,7 +25,7 @@ public class SampleData {
     public static final UserDetails USER_DETAILS = new UserDetails(USER_ID,
         null, null, null, emptyList());
     public static final Credential USER_CREDS = new Credential(USER_NAME, PASSWORD);
-    public static final AuthDetails AUTH_DETAILS = new AuthDetails(SERVICE_TOKEN, USER_TOKEN, USER_DETAILS);
+    public static final AuthDetails AUTH_DETAILS =  AuthDetails.from(SERVICE_TOKEN,USER_DETAILS,USER_TOKEN);
 
     public static final CaseDetails THE_CASE = CaseDetails.builder()
         .id(CASE_ID)
