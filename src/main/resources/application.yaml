@@ -17,7 +17,7 @@ spring:
 
 queue:
   connection-string: ${QUEUE_CONNECTION_STRING:}
-  read-interval: ${QUEUE_READ_INTERVAL:500} # in ms
+  read-interval: ${QUEUE_READ_INTERVAL:30000} # in ms
 
 idam:
   s2s-auth:
