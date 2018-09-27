@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,15 +40,5 @@ public class JurisdictionToUserMappingTest {
         assertThat(throwable)
             .isInstanceOf(NoUserConfiguredException.class)
             .hasMessage("No user configured for jurisdiction: none");
-    }
-
-    private Credential failFound() {
-        Assert.fail("Found creds when there should be none");
-        return null;
-    }
-
-    private Credential failNotFound() {
-        Assert.fail("Did not find the SSCS map item");
-        return null;
     }
 }
