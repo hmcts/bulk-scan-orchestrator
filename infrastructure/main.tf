@@ -45,9 +45,9 @@ locals {
 
     QUEUE_CONNECTION_STRING = "${data.terraform_remote_state.shared_infra.queue_primary_listen_connection_string}"
 
-    IDAM_API_URL       = "${var.idam_api_url}"
+    IDAM_API_URL = "${var.idam_api_url}"
     IDAM_CLIENT_SECRET = "${data.azurerm_key_vault_secret.idam_client_secret.value}"
-    IDAM_REDIRECT_URI  = "${var.idam_redirect_uri}"
+    IDAM_REDIRECT_URI = "${var.idam_redirect_uri}"
     CORE_CASE_DATA_API_URL = "${local.ccdApiUrl}"
   }
 }
