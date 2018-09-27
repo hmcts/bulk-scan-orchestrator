@@ -1,8 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
-@ConfigurationProperties
 public class Credential {
     private final String username;
     private final String password;
