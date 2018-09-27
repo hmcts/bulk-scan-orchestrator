@@ -8,24 +8,24 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 public class CcdCaseRetriever {
     public static final String CASE_TYPE_ID = "Bulk_Scanned";
 
-    private CcdAuthenticatorFactory authenticator;
+    private final CcdAuthenticatorFactory factory;
     private final CoreCaseDataApi coreCaseDataApi;
 
-    CcdCaseRetriever(CcdAuthenticatorFactory authService, CoreCaseDataApi coreCaseDataApi) {
-        this.authenticator = authService;
+    CcdCaseRetriever(CcdAuthenticatorFactory factory, CoreCaseDataApi coreCaseDataApi) {
+        this.factory = factory;
         this.coreCaseDataApi = coreCaseDataApi;
     }
 
     CaseDetails retrieve(String jurisdiction, String caseRef) {
-        Authenticator info = authenticator.createForJurisdiction(jurisdiction);
+        Authenticator info = factory.createForJurisdiction(jurisdiction);
         return retrieveCase(jurisdiction, caseRef, info);
     }
 
-    private CaseDetails retrieveCase(String jurisdiction, String caseRef, Authenticator info) {
+    private CaseDetails retrieveCase(String jurisdiction, String caseRef, Authenticator authenticator) {
         return coreCaseDataApi.readForCaseWorker(
-            info.getUserToken(),
-            info.getServiceToken(),
-            info.userDetails.getId(),
+            authenticator.getUserToken(),
+            authenticator.getServiceToken(),
+            authenticator.userDetails.getId(),
             jurisdiction,
             CASE_TYPE_ID,
             caseRef
