@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam;
 
 public class Credential {
-
     private final String username;
     private final String password;
 

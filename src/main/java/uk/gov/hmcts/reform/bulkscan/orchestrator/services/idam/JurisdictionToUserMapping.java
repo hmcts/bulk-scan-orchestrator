@@ -1,20 +1,36 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam;
 
+import com.netflix.util.Pair;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-@Component
+import static java.util.stream.Collectors.toMap;
+
 @ConfigurationProperties(prefix = "idam")
 public class JurisdictionToUserMapping {
+
     private Map<String, Credential> users;
 
-    public Map<String, Credential> getUsers() {
-        return users;
+    public void setUsers(Map<String, Map<String, String>> users) {
+        this.users = users
+            .entrySet()
+            .stream()
+            .map(this::createPair)
+            .collect(toMap(Pair::first, Pair::second));
     }
 
-    public void setUsers(Map<String, Credential> users) {
-        this.users = users;
+    private Pair<String, Credential> createPair(Map.Entry<String, Map<String, String>> entry) {
+        String key = entry.getKey().toLowerCase();
+        Credential cred = new Credential(entry.getValue().get("username"), entry.getValue().get("password"));
+        return new Pair<>(key, cred);
+    }
+
+    public Credential getUser(String jurisdiction) {
+        return users.computeIfAbsent(jurisdiction.toLowerCase(), this::throwNotFound);
+    }
+
+    private Credential throwNotFound(String jurisdiction) {
+        throw new NoUserConfiguredException(jurisdiction);
     }
 }

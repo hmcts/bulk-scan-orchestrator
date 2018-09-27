@@ -13,8 +13,11 @@ locals {
   nonPreviewVaultName = "${var.raw_product}-${var.env}"
   vaultName           = "${local.is_preview ? local.previewVaultName : local.nonPreviewVaultName}"
   local_env           = "${local.is_preview ? "aat" : var.env}"
+  local_ase           = "${(var.env == "preview" || var.env == "spreview") ? (var.env == "preview" ) ? "core-compute-aat" : "core-compute-saat" : local.ase_name}"
 
   sku_size = "${var.env == "prod" || var.env == "sprod" || var.env == "aat" ? "I2" : "I1"}"
+
+  ccdApiUrl = "http://ccd-data-store-api-${local.local_env}.service.${local.local_ase}.internal"
 
   users = {
     // configures a user for a jurisdiction
@@ -42,9 +45,10 @@ locals {
 
     QUEUE_CONNECTION_STRING = "${data.terraform_remote_state.shared_infra.queue_primary_listen_connection_string}"
 
-    IDAM_API_URL       = "${var.idam_api_url}"
-    IDAM_CLIENT_SECRET = "${data.azurerm_key_vault_secret.idam_client_secret.value}"
-    IDAM_REDIRECT_URI  = "${var.idam_redirect_uri}"
+    IDAM_API_URL           = "${var.idam_api_url}"
+    IDAM_CLIENT_SECRET     = "${data.azurerm_key_vault_secret.idam_client_secret.value}"
+    IDAM_REDIRECT_URI      = "${var.idam_redirect_uri}"
+    CORE_CASE_DATA_API_URL = "${local.ccdApiUrl}"
   }
 }
 
