@@ -2,15 +2,11 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam;
 
 import com.netflix.util.Pair;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
 import static java.util.stream.Collectors.toMap;
 
-@Component
-@EnableConfigurationProperties
 @ConfigurationProperties(prefix = "idam")
 public class JurisdictionToUserMapping {
 
@@ -21,7 +17,7 @@ public class JurisdictionToUserMapping {
             .entrySet()
             .stream()
             .map(this::createPair)
-            .collect(toMap(Pair::first,Pair::second));
+            .collect(toMap(Pair::first, Pair::second));
     }
 
     private Pair<String, Credential> createPair(Map.Entry<String, Map<String, String>> entry) {
@@ -31,7 +27,7 @@ public class JurisdictionToUserMapping {
     }
 
     public Credential getUser(String jurisdiction) {
-        return users.computeIfAbsent(jurisdiction.toLowerCase(),this::throwNotFound);
+        return users.computeIfAbsent(jurisdiction.toLowerCase(), this::throwNotFound);
     }
 
     private Credential throwNotFound(String jurisdiction) {

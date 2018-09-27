@@ -24,7 +24,7 @@ public class CcdCaseRetrieverTest {
     @Mock
     private CoreCaseDataApi dataApi;
     @Mock
-    private CcdAuthService authenticator;
+    private CcdAuthenticatorFactory authenticator;
 
     private CcdCaseRetriever retriever;
 
@@ -34,7 +34,7 @@ public class CcdCaseRetrieverTest {
 
         given(dataApi.readForCaseWorker(USER_TOKEN, SERVICE_TOKEN, USER_ID, JURSIDICTION, CASE_TYPE_ID, CASE_REF))
             .willReturn(THE_CASE);
-        given(authenticator.authenticateForJurisdiction(JURSIDICTION)).willReturn(AUTH_DETAILS);
+        given(authenticator.createForJurisdiction(JURSIDICTION)).willReturn(AUTH_DETAILS);
 
         CaseDetails theCase = retriever.retrieve(JURSIDICTION, CASE_REF);
         assertThat(theCase.getId()).isEqualTo(CASE_ID);

@@ -23,7 +23,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_TOKEN;
 
 
 @RunWith(MockitoJUnitRunner.class)
-public class CcdAuthServiceTest {
+public class CcdAuthenticatorFactoryTest {
     @Mock
     private AuthTokenGenerator tokenGenerator;
     @Mock
@@ -31,11 +31,11 @@ public class CcdAuthServiceTest {
     @Mock
     private JurisdictionToUserMapping users;
 
-    private CcdAuthService service;
+    private CcdAuthenticatorFactory service;
 
     @Before
     public void before() {
-        service = new CcdAuthService(tokenGenerator, idamClient, users);
+        service = new CcdAuthenticatorFactory(tokenGenerator, idamClient, users);
     }
 
     @Test
@@ -45,11 +45,11 @@ public class CcdAuthServiceTest {
         given(idamClient.authenticateUser(eq(USER_NAME), eq(PASSWORD))).willReturn(USER_TOKEN);
         given(idamClient.getUserDetails(USER_TOKEN)).willReturn(USER_DETAILS);
 
-        AuthDetails authDetails = service.authenticateForJurisdiction(JURSIDICTION);
+        Authenticator authenticator = service.createForJurisdiction(JURSIDICTION);
 
-        assertThat(authDetails.serviceToken).isEqualTo(SERVICE_TOKEN);
-        assertThat(authDetails.userAuthDetails.token).isEqualTo(USER_TOKEN);
-        assertThat(authDetails.userAuthDetails.details.getId()).isEqualTo(USER_ID);
+        assertThat(authenticator.getServiceToken()).isEqualTo(SERVICE_TOKEN);
+        assertThat(authenticator.getUserToken()).isEqualTo(USER_TOKEN);
+        assertThat(authenticator.userDetails.getId()).isEqualTo(USER_ID);
     }
 
 }
