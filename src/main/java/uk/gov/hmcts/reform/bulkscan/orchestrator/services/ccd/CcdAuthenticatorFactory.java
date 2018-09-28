@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
@@ -23,13 +23,13 @@ class CcdAuthenticatorFactory {
         this.users = users;
     }
 
-    Authenticator createForJurisdiction(String jurisdiction) {
+    CcdAuthenticator createForJurisdiction(String jurisdiction) {
         Credential user = users.getUser(jurisdiction);
         String userToken = idamClient.authenticateUser(user.getUsername(), user.getPassword());
         UserDetails userDetails = idamClient.getUserDetails(userToken);
 
         //TODO: RPE-738 the userToken needs a to be cached and timed-out.
         // this can be decorated here like the s2sTokenGenerator
-        return Authenticator.from(s2sTokenGenerator::generate, userDetails, () -> userToken);
+        return CcdAuthenticator.from(s2sTokenGenerator::generate, userDetails, () -> userToken);
     }
 }

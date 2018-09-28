@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -24,9 +26,9 @@ public class EnvelopeEventProcessorTest {
     @Mock
     private IMessage someMessage;
     @Mock
-    private CcdCaseRetriever caseRetriever;
+    private CaseRetriever caseRetriever;
     @Mock
-    private Authenticator authInfo;
+    private CcdAuthenticator authInfo;
 
     private EnvelopeEventProcessor processor;
 

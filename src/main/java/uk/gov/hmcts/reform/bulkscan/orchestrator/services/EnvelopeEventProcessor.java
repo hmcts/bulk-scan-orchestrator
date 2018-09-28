@@ -6,6 +6,7 @@ import com.microsoft.azure.servicebus.IMessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -17,9 +18,9 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.Enve
 public class EnvelopeEventProcessor implements IMessageHandler {
     private static final Logger log = LoggerFactory.getLogger(EnvelopeEventProcessor.class);
 
-    private final CcdCaseRetriever caseRetriever;
+    private final CaseRetriever caseRetriever;
 
-    public EnvelopeEventProcessor(CcdCaseRetriever caseRetriever) {
+    public EnvelopeEventProcessor(CaseRetriever caseRetriever) {
         this.caseRetriever = caseRetriever;
     }
 
