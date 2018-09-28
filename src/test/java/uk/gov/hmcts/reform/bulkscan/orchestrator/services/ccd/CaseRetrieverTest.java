@@ -17,20 +17,20 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.SERVICE_TOKEN
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.THE_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_ID;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_TOKEN;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdCaseRetriever.CASE_TYPE_ID;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever.CASE_TYPE_ID;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CcdCaseRetrieverTest {
+public class CaseRetrieverTest {
     @Mock
     private CoreCaseDataApi dataApi;
     @Mock
     private CcdAuthenticatorFactory authenticator;
 
-    private CcdCaseRetriever retriever;
+    private CaseRetriever retriever;
 
     @Test
     public void should_retrieve_case_successfully() {
-        retriever = new CcdCaseRetriever(authenticator, dataApi);
+        retriever = new CaseRetriever(authenticator, dataApi);
 
         given(dataApi.readForCaseWorker(USER_TOKEN, SERVICE_TOKEN, USER_ID, JURSIDICTION, CASE_TYPE_ID, CASE_REF))
             .willReturn(THE_CASE);

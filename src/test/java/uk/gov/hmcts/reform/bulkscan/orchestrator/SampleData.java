@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Authenticator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.Credential;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdCaseRetriever.CASE_TYPE_ID;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever.CASE_TYPE_ID;
 
 public class SampleData {
     public static final String SERVICE_TOKEN = "SERVICE_TOKEN";
@@ -25,7 +25,7 @@ public class SampleData {
     public static final UserDetails USER_DETAILS = new UserDetails(USER_ID,
         null, null, null, emptyList());
     public static final Credential USER_CREDS = new Credential(USER_NAME, PASSWORD);
-    public static final Authenticator AUTH_DETAILS = Authenticator.from(
+    public static final CcdAuthenticator AUTH_DETAILS = CcdAuthenticator.from(
         () -> SERVICE_TOKEN,
         USER_DETAILS,
         () -> USER_TOKEN);

@@ -45,7 +45,7 @@ public class CcdAuthenticatorFactoryTest {
         given(idamClient.authenticateUser(eq(USER_NAME), eq(PASSWORD))).willReturn(USER_TOKEN);
         given(idamClient.getUserDetails(USER_TOKEN)).willReturn(USER_DETAILS);
 
-        Authenticator authenticator = service.createForJurisdiction(JURSIDICTION);
+        CcdAuthenticator authenticator = service.createForJurisdiction(JURSIDICTION);
 
         assertThat(authenticator.getServiceToken()).isEqualTo(SERVICE_TOKEN);
         assertThat(authenticator.getUserToken()).isEqualTo(USER_TOKEN);
