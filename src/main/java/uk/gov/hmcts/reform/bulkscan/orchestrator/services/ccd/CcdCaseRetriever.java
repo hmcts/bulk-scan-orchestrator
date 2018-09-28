@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -16,7 +16,7 @@ public class CcdCaseRetriever {
         this.coreCaseDataApi = coreCaseDataApi;
     }
 
-    CaseDetails retrieve(String jurisdiction, String caseRef) {
+    public CaseDetails retrieve(String jurisdiction, String caseRef) {
         Authenticator info = factory.createForJurisdiction(jurisdiction);
         return retrieveCase(jurisdiction, caseRef, info);
     }

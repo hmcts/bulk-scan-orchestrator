@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.Authenticator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Authenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.Credential;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.CcdCaseRetriever.CASE_TYPE_ID;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdCaseRetriever.CASE_TYPE_ID;
 
 public class SampleData {
     public static final String SERVICE_TOKEN = "SERVICE_TOKEN";

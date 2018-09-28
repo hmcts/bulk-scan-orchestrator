@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Authenticator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdCaseRetriever;
 
 import java.util.concurrent.CompletableFuture;
 

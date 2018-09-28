@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,7 +17,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.SERVICE_TOKEN
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.THE_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_ID;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_TOKEN;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.CcdCaseRetriever.CASE_TYPE_ID;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdCaseRetriever.CASE_TYPE_ID;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CcdCaseRetrieverTest {
