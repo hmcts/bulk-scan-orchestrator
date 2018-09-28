@@ -188,7 +188,6 @@ dependencies {
   testCompile group: 'org.junit.vintage', name: 'junit-vintage-engine', version: versions.junit
 
   annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
-
   integrationTestCompile sourceSets.main.runtimeClasspath
   integrationTestCompile sourceSets.test.runtimeClasspath
 
