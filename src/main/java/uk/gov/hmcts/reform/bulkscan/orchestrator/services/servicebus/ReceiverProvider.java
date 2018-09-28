@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.ConnectionException;
 
 @Component
-public class ReceiverProvider {
+public class ReceiverProvider implements IMessageReceiverProvider {
 
     private final String connString;
 
