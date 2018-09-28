@@ -43,6 +43,36 @@ public class EnvelopeParserTest {
     }
 
     @Test
+    public void should_ignore_unrecognised_fields_in_json() throws Exception {
+        // given
+        Envelope envelope = new Envelope(
+            "975b339d-4531-4e32-8ebe-a7bc4650f33a",
+            "case_ref_number",
+            "jurisdiction",
+            "zip-file-test.zip",
+            Classification.SUPPLEMENTARY_EVIDENCE,
+            asList("a", "b", "c")
+        );
+
+        String json =
+            new JSONObject()
+                .put("id", envelope.id)
+                .put("case_ref", envelope.caseRef)
+                .put("jurisdiction", envelope.jurisdiction)
+                .put("zip_file_name", envelope.zipFileName)
+                .put("classification", envelope.classification.toString().toLowerCase())
+                .put("doc_urls", new JSONArray(envelope.docUrls))
+                .put("some_extra_ignored_field", "some_ignored_value")
+                .toString();
+
+        // when
+        Envelope result = EnvelopeParser.parse(json.getBytes());
+
+        // then
+        assertThat(result).isEqualToComparingFieldByField(envelope);
+    }
+
+    @Test
     public void should_throw_an_exception_if_json_is_not_a_valid_envelope() throws Exception {
         String json =
             new JSONObject()
