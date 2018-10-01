@@ -14,7 +14,7 @@ import java.util.concurrent.CountDownLatch
 val latch = CountDownLatch(1)
 
 @Import(Application::class)
-open class TestConfig {
+class TestConfig {
     @Bean
     @Primary
     fun testProvider(): MessageReceiverFactory {
