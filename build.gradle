@@ -161,7 +161,6 @@ def versions = [
 
 dependencies {
   compile group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib-jdk8'
-  compile group: 'org.jetbrains.kotlin', name: 'kotlin-reflect'
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: versions.springBoot
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: versions.springBoot
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: versions.springBoot
