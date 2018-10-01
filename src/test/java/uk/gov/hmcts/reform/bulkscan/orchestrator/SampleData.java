@@ -47,12 +47,12 @@ public class SampleData {
             .put("classification", Classification.NEW_APPLICATION)
             .put("documents", new JSONArray()
                 .put(new JSONObject()
-                        .put("file_name", "hello.pdf")
-                        .put("control_number", "control_number")
-                        .put("type", "doc_type")
-                        .put("scanned_at", toIso8601(Instant.EPOCH))
-                        .put("url", "https://example.gov.uk/123")
-                    )
+                    .put("file_name", "hello.pdf")
+                    .put("control_number", "control_number")
+                    .put("type", "doc_type")
+                    .put("scanned_at", toIso8601(Instant.EPOCH))
+                    .put("url", "https://example.gov.uk/123")
+                )
             )
             .toString();
     }
