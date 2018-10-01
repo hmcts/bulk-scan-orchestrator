@@ -30,18 +30,18 @@ public class EnvelopeParserTest {
             Classification.SUPPLEMENTARY_EVIDENCE,
             asList(
                 new Document(
-                    "file_name",
-                    "control_number",
-                    "type",
+                    "doc1_file_name",
+                    "doc1_control_number",
+                    "doc1_type",
                     Instant.now(),
-                    "url"
+                    "doc1_url"
                 ),
                 new Document(
-                    "file_name",
-                    "control_number",
-                    "type",
+                    "doc2_file_name",
+                    "doc2_control_number",
+                    "doc2_type",
                     Instant.now(),
-                    "url"
+                    "doc2_url"
                 )
             )
         );
