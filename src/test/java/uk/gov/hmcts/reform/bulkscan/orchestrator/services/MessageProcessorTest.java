@@ -25,8 +25,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MessageProcessorTest {
-    @Mock
-    private ReceiverFactory receiverProvider;
+    @Mock private ReceiverFactory receiverProvider;
     @Mock private IMessage someMessage;
     @Mock private IMessageReceiver receiver;
     @Mock private EnvelopeEventProcessor envelopeEventProcessor;

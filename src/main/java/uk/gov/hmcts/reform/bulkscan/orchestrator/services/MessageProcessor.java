@@ -14,11 +14,11 @@ public class MessageProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(MessageProcessor.class);
 
-    private final MessageReceiverFactory receiverProvider;
+    private final MessageReceiverFactory messageReceiverFactory;
     private final IMessageHandler envelopeProcessor;
 
     public MessageProcessor(MessageReceiverFactory provider, IMessageHandler envelopeProcessor) {
-        this.receiverProvider = provider;
+        this.messageReceiverFactory = provider;
         this.envelopeProcessor = envelopeProcessor;
     }
 
@@ -26,7 +26,7 @@ public class MessageProcessor {
     public void run() {
         IMessage msg = null;
         try {
-            IMessageReceiver msgReceiver = receiverProvider.create();
+            IMessageReceiver msgReceiver = messageReceiverFactory.create();
             while ((msg = msgReceiver.receive()) != null) {
 
                 envelopeProcessor.onMessageAsync(msg).get();
