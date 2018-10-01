@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.hmcts.reform.bulkscan.orchestrator.Application
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IMessageReceiverProvider
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.MessageReceiverFactory
 import java.util.concurrent.CountDownLatch
 
 val latch = CountDownLatch(1)
@@ -17,8 +17,8 @@ val latch = CountDownLatch(1)
 open class TestConfig {
     @Bean
     @Primary
-    fun testProvider(): IMessageReceiverProvider {
-        return IMessageReceiverProvider {
+    fun testProvider(): MessageReceiverFactory {
+        return MessageReceiverFactory {
             try {
                 throw RuntimeException("The right Provider")
             } finally {

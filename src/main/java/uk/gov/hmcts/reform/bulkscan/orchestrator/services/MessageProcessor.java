@@ -7,17 +7,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IMessageReceiverProvider;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.MessageReceiverFactory;
 
 @Service
 public class MessageProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(MessageProcessor.class);
 
-    private final IMessageReceiverProvider receiverProvider;
+    private final MessageReceiverFactory receiverProvider;
     private final IMessageHandler envelopeProcessor;
 
-    public MessageProcessor(IMessageReceiverProvider provider, IMessageHandler envelopeProcessor) {
+    public MessageProcessor(MessageReceiverFactory provider, IMessageHandler envelopeProcessor) {
         this.receiverProvider = provider;
         this.envelopeProcessor = envelopeProcessor;
     }
@@ -26,7 +26,7 @@ public class MessageProcessor {
     public void run() {
         IMessage msg = null;
         try {
-            IMessageReceiver msgReceiver = receiverProvider.get();
+            IMessageReceiver msgReceiver = receiverProvider.create();
             while ((msg = msgReceiver.receive()) != null) {
 
                 envelopeProcessor.onMessageAsync(msg).get();

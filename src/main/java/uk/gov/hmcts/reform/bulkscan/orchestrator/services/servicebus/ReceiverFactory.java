@@ -9,15 +9,15 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.ConnectionException;
 
 @Component
-public class ReceiverProvider implements IMessageReceiverProvider {
+public class ReceiverFactory implements MessageReceiverFactory {
 
     private final String connString;
 
-    public ReceiverProvider(@Value("${queue.connection-string}") String connString) {
+    public ReceiverFactory(@Value("${queue.connection-string}") String connString) {
         this.connString = connString;
     }
 
-    public IMessageReceiver get() {
+    public IMessageReceiver create() {
         try {
             return ClientFactory.createMessageReceiverFromConnectionString(connString, ReceiveMode.PEEKLOCK);
         } catch (InterruptedException | ServiceBusException e) {
