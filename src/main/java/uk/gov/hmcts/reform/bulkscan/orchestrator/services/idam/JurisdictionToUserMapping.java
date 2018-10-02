@@ -1,10 +1,11 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam;
 
-import com.netflix.util.Pair;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.AbstractMap;
 import java.util.Map;
 
+import static java.util.Map.Entry;
 import static java.util.stream.Collectors.toMap;
 
 @ConfigurationProperties(prefix = "idam")
@@ -16,14 +17,15 @@ public class JurisdictionToUserMapping {
         this.users = users
             .entrySet()
             .stream()
-            .map(this::createPair)
-            .collect(toMap(Pair::first, Pair::second));
+            .map(this::createEntry)
+            .collect(toMap(Entry::getKey, Entry::getValue));
     }
 
-    private Pair<String, Credential> createPair(Map.Entry<String, Map<String, String>> entry) {
+    private Entry<String, Credential> createEntry(Entry<String, Map<String, String>> entry) {
         String key = entry.getKey().toLowerCase();
         Credential cred = new Credential(entry.getValue().get("username"), entry.getValue().get("password"));
-        return new Pair<>(key, cred);
+
+        return new AbstractMap.SimpleEntry<>(key, cred);
     }
 
     public Credential getUser(String jurisdiction) {
