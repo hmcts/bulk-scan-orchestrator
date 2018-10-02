@@ -17,11 +17,11 @@ public class JurisdictionToUserMapping {
         this.users = users
             .entrySet()
             .stream()
-            .map(this::createPair)
+            .map(this::createEntry)
             .collect(toMap(Entry::getKey, Entry::getValue));
     }
 
-    private Entry<String, Credential> createPair(Entry<String, Map<String, String>> entry) {
+    private Entry<String, Credential> createEntry(Entry<String, Map<String, String>> entry) {
         String key = entry.getKey().toLowerCase();
         Credential cred = new Credential(entry.getValue().get("username"), entry.getValue().get("password"));
 
