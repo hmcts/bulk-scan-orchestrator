@@ -17,8 +17,8 @@ public class MessageProcessor {
     private final MessageReceiverFactory messageReceiverFactory;
     private final IMessageHandler envelopeProcessor;
 
-    public MessageProcessor(MessageReceiverFactory provider, IMessageHandler envelopeProcessor) {
-        this.messageReceiverFactory = provider;
+    MessageProcessor(MessageReceiverFactory factory, IMessageHandler envelopeProcessor) {
+        this.messageReceiverFactory = factory;
         this.envelopeProcessor = envelopeProcessor;
     }
 
