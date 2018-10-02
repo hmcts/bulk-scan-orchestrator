@@ -23,6 +23,7 @@ locals {
     // configures a user for a jurisdiction
     // add secrets to all bulk-scan vaults in the form idam-users-<jurisdiction>-username idam-users-<jurisdiction>-password
     SSCS = "idam-users-sscs"
+    BULKSCAN = "idam-users-bulkscan"
   }
 
   users_secret_names = "${values(local.users)}"
