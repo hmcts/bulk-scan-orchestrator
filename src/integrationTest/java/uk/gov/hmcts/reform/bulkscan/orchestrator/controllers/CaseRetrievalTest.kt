@@ -9,7 +9,6 @@ import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -20,8 +19,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever
 import java.io.File
 import java.util.concurrent.TimeUnit
-
-val mockReciever: IMessageReceiver = Mockito.mock(com.microsoft.azure.servicebus.IMessageReceiver::class.java)
 
 @ExtendWith(SpringExtension::class)
 @SpringBootTest(classes = [TestConfig::class], webEnvironment = RANDOM_PORT)
@@ -49,9 +46,12 @@ class CaseRetrievalTest {
     @Autowired
     private lateinit var server: WireMockServer
 
+    @Autowired
+    private lateinit var mockReceiver: IMessageReceiver
+
     @BeforeEach
     fun before() {
-        `when`(mockReciever.receive()).thenReturn(mockMessage, null)
+        `when`(mockReceiver.receive()).thenReturn(mockMessage, null)
 //        server.startRecording(urlToRecord);
     }
 
