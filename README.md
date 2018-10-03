@@ -8,8 +8,8 @@
 - You will have to setup these environment variables on either your
 run configuration or bash shell
 ```
-IDAM_USERS_SSCS_USERNAME = bulkscanorchestrator+systemupdate@gmail.com
-IDAM_USERS_SSCS_PASSWORD = Password12
+IDAM_USERS_BULKSCAN_USERNAME = bulkscan+ccd@gmail.com
+IDAM_USERS_BULKSCAN_PASSWORD = Password12
 ```
 - either using the environment vars or application default you will need to set
   ```
