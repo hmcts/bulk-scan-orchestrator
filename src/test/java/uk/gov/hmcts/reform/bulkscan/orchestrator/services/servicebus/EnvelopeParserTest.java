@@ -141,7 +141,8 @@ public class EnvelopeParserTest {
     @Test
     public void can_parse_example_json() {
         // given
-        byte[] bytes = exampleJson.getBytes();
+        byte[] bytes = exampleJson;
+
         // when
         Envelope anEnvelope = EnvelopeParser.parse(bytes);
 
@@ -153,7 +154,7 @@ public class EnvelopeParserTest {
     @Test
     public void can_parse_sampleData_json() {
         // given
-        String json = SampleData.envelopeJson();
+        byte[] json = SampleData.envelopeJson();
 
         // when
         Envelope anEnvelope = EnvelopeParser.parse(json);

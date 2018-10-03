@@ -43,9 +43,9 @@ public class SampleData {
         .caseTypeId(CASE_TYPE_ID)
         .build();
 
-    public static String exampleJson = fromFile("envelopes/example.json");
+    public static byte[] exampleJson = fromFile("envelopes/example.json").getBytes();
 
-    public static String envelopeJson() {
+    public static byte[] envelopeJson() {
         try {
             return new JSONObject()
                 .put("id", "eb9c3598-35fc-424e-b05a-902ee9f11d56")
@@ -62,7 +62,7 @@ public class SampleData {
                         .put("url", "https://example.gov.uk/123")
                     )
                 )
-                .toString();
+                .toString().getBytes();
         } catch (Exception e) {
             throw new RuntimeException("Could not make envelopeJson", e);
         }

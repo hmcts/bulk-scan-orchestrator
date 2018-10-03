@@ -36,7 +36,7 @@ public class EnvelopeEventProcessorTest {
     public void before() throws Exception {
         processor = new EnvelopeEventProcessor(caseRetriever);
         when(caseRetriever.retrieve(eq(JURSIDICTION), eq(CASE_REF))).thenReturn(THE_CASE);
-        given(someMessage.getBody()).willReturn(envelopeJson().getBytes());
+        given(someMessage.getBody()).willReturn(envelopeJson());
     }
 
     @Test
@@ -72,7 +72,7 @@ public class EnvelopeEventProcessorTest {
     @Test
     public void should_return_exceptionally_completed_future_if_exception_is_thrown() throws Exception {
         // given
-        given(someMessage.getBody()).willReturn(envelopeJson().getBytes());
+        given(someMessage.getBody()).willReturn(envelopeJson());
         given(caseRetriever.retrieve(any(), any())).willThrow(new RuntimeException());
 
         // when

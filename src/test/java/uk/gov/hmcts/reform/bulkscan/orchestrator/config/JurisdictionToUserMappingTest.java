@@ -41,4 +41,12 @@ public class JurisdictionToUserMappingTest {
             .isInstanceOf(NoUserConfiguredException.class)
             .hasMessage("No user configured for jurisdiction: none");
     }
+
+    @Test
+    public void should_throw_exception_if_none_configured() {
+        Throwable throwable = catchThrowable(() -> new JurisdictionToUserMapping().getUser("NONE"));
+        assertThat(throwable)
+            .isInstanceOf(NoUserConfiguredException.class)
+            .hasMessage("No user configured for jurisdiction: none");
+    }
 }

@@ -43,7 +43,7 @@ public class ReadFromTheQueueTest {
         // given
         Message message = new Message();
         message.setMessageId(UUID.randomUUID().toString());
-        message.setBody(SampleData.envelopeJson().getBytes());
+        message.setBody(SampleData.envelopeJson());
 
         // when
         writeClient.send(message);
