@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.ReceiverProvider;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.ReceiverFactory;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MessageProcessorTest {
-    @Mock private ReceiverProvider receiverProvider;
+    @Mock private ReceiverFactory receiverProvider;
     @Mock private IMessage someMessage;
     @Mock private IMessageReceiver receiver;
     @Mock private EnvelopeEventProcessor envelopeEventProcessor;
@@ -38,14 +38,14 @@ public class MessageProcessorTest {
         value.complete(null);
         when(this.envelopeEventProcessor.onMessageAsync(someMessage)).thenReturn(value);
         this.messageProcessor = new MessageProcessor(receiverProvider, envelopeEventProcessor);
-        given(receiverProvider.get()).willReturn(receiver);
+        given(receiverProvider.create()).willReturn(receiver);
     }
 
     @Test
     public void should_handle_exceptions_off_receiver_get()
         throws ServiceBusException, InterruptedException {
         // given
-        given(receiverProvider.get()).willThrow(new RuntimeException());
+        given(receiverProvider.create()).willThrow(new RuntimeException());
 
         // when
         messageProcessor.run();
