@@ -27,9 +27,9 @@ import java.util.concurrent.TimeUnit
     webEnvironment = RANDOM_PORT
 )
 @TestPropertySource(properties = [
-    "core_case_data.api.url=http://localhost:\${wiremock.port}",
-    "idam.s2s-auth.url=http://localhost:\${wiremock.port}",
-    "idam.api.url=http://localhost:\${wiremock.port}",
+    "core_case_data.api.url=${TestUrls.wiremockUrls.CORE_CASE_DATA_URL}",
+    "idam.s2s-auth.url=${TestUrls.wiremockUrls.IDAM_S2S_URL}",
+    "idam.api.url=${TestUrls.wiremockUrls.IDAM_API_URL}",
     "idam.users.sscs.username=bulkscanorchestrator+systemupdate@gmail.com",
     "idam.users.sscs.password=Password12",
     "queue.read-interval=100"
