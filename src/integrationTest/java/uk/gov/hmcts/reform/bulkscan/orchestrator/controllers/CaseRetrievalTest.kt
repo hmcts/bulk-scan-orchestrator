@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.microsoft.azure.servicebus.IMessageReceiver
 import com.microsoft.azure.servicebus.Message
 import org.awaitility.Awaitility.await
@@ -24,10 +23,7 @@ import java.util.concurrent.TimeUnit
 
 @ExtendWith(SpringExtension::class)
 @SpringBootTest(
-    classes = [
-        IntegrationTestConfig::class,
-        WireMockConfiguration::class
-    ],
+    classes = [IntegrationTestConfig::class],
     webEnvironment = RANDOM_PORT
 )
 @TestPropertySource(properties = [
