@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam;
 
+import com.microsoft.applicationinsights.core.dependencies.googlecommon.collect.ImmutableMap;
 import com.netflix.util.Pair;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -10,7 +11,7 @@ import static java.util.stream.Collectors.toMap;
 @ConfigurationProperties(prefix = "idam")
 public class JurisdictionToUserMapping {
 
-    private Map<String, Credential> users;
+    private Map<String, Credential> users = ImmutableMap.of();
 
     public void setUsers(Map<String, Map<String, String>> users) {
         this.users = users
