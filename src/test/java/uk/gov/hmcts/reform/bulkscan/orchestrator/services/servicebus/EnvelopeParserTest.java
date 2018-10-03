@@ -4,6 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.InvalidMessageException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
@@ -15,13 +16,14 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.DatetimeHelper.toIso8601;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.exampleJson;
 
 public class EnvelopeParserTest {
 
     private Envelope envelope;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         this.envelope = new Envelope(
             "975b339d-4531-4e32-8ebe-a7bc4650f33a",
             "case_ref_number",
@@ -134,6 +136,31 @@ public class EnvelopeParserTest {
 
         // then
         assertThat(exc).isInstanceOf(InvalidMessageException.class);
+    }
+
+    @Test
+    public void can_parse_example_json() {
+        // given
+        byte[] bytes = exampleJson.getBytes();
+        // when
+        Envelope anEnvelope = EnvelopeParser.parse(bytes);
+
+        // then
+        assertThat(anEnvelope.jurisdiction).isEqualTo("SSCS");
+
+    }
+
+    @Test
+    public void can_parse_sampleData_json() {
+        // given
+        String json = SampleData.envelopeJson();
+
+        // when
+        Envelope anEnvelope = EnvelopeParser.parse(json);
+
+        // then
+        assertThat(anEnvelope.jurisdiction).isEqualTo("SSCS");
+
     }
 
     private JSONObject toJson(Document doc) throws Exception {
