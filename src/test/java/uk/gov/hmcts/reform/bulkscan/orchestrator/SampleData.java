@@ -8,8 +8,10 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Class
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
-import static java.util.Arrays.asList;
+import java.time.Instant;
+
 import static java.util.Collections.emptyList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.DatetimeHelper.toIso8601;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever.CASE_TYPE_ID;
 
 public class SampleData {
@@ -43,7 +45,15 @@ public class SampleData {
             .put("jurisdiction", JURSIDICTION)
             .put("zip_file_name", "zip-file-test.zip")
             .put("classification", Classification.NEW_APPLICATION)
-            .put("doc_urls", new JSONArray(asList("a", "b")))
+            .put("documents", new JSONArray()
+                .put(new JSONObject()
+                    .put("file_name", "hello.pdf")
+                    .put("control_number", "control_number")
+                    .put("type", "doc_type")
+                    .put("scanned_at", toIso8601(Instant.EPOCH))
+                    .put("url", "https://example.gov.uk/123")
+                )
+            )
             .toString();
     }
 

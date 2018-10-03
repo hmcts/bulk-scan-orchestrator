@@ -2,29 +2,54 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.InvalidMessageException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
+
+import java.time.Instant;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.DatetimeHelper.toIso8601;
 
 public class EnvelopeParserTest {
 
-    @Test
-    public void should_parse_valid_json() throws Exception {
-        // given
-        Envelope envelope = new Envelope(
+    private Envelope envelope;
+
+    @Before
+    public void setUp() throws Exception {
+        this.envelope = new Envelope(
             "975b339d-4531-4e32-8ebe-a7bc4650f33a",
             "case_ref_number",
             "jurisdiction",
             "zip-file-test.zip",
             Classification.SUPPLEMENTARY_EVIDENCE,
-            asList("a", "b", "c")
+            asList(
+                new Document(
+                    "doc1_file_name",
+                    "doc1_control_number",
+                    "doc1_type",
+                    Instant.now(),
+                    "doc1_url"
+                ),
+                new Document(
+                    "doc2_file_name",
+                    "doc2_control_number",
+                    "doc2_type",
+                    Instant.now(),
+                    "doc2_url"
+                )
+            )
         );
+    }
 
+    @Test
+    public void should_parse_valid_json() throws Exception {
+        // given
         String json =
             new JSONObject()
                 .put("id", envelope.id)
@@ -32,28 +57,22 @@ public class EnvelopeParserTest {
                 .put("jurisdiction", envelope.jurisdiction)
                 .put("zip_file_name", envelope.zipFileName)
                 .put("classification", envelope.classification.toString().toLowerCase())
-                .put("doc_urls", new JSONArray(envelope.docUrls))
+                .put("documents", new JSONArray()
+                    .put(toJson(envelope.documents.get(0)))
+                    .put(toJson(envelope.documents.get(1)))
+                )
                 .toString();
 
         // when
         Envelope result = EnvelopeParser.parse(json.getBytes());
 
         // then
-        assertThat(result).isEqualToComparingFieldByField(envelope);
+        assertThat(result).isEqualToComparingFieldByFieldRecursively(envelope);
     }
 
     @Test
     public void should_ignore_unrecognised_fields_in_json() throws Exception {
         // given
-        Envelope envelope = new Envelope(
-            "975b339d-4531-4e32-8ebe-a7bc4650f33a",
-            "case_ref_number",
-            "jurisdiction",
-            "zip-file-test.zip",
-            Classification.SUPPLEMENTARY_EVIDENCE,
-            asList("a", "b", "c")
-        );
-
         String json =
             new JSONObject()
                 .put("id", envelope.id)
@@ -61,7 +80,10 @@ public class EnvelopeParserTest {
                 .put("jurisdiction", envelope.jurisdiction)
                 .put("zip_file_name", envelope.zipFileName)
                 .put("classification", envelope.classification.toString().toLowerCase())
-                .put("doc_urls", new JSONArray(envelope.docUrls))
+                .put("documents", new JSONArray()
+                    .put(toJson(envelope.documents.get(0)))
+                    .put(toJson(envelope.documents.get(1)))
+                )
                 .put("some_extra_ignored_field", "some_ignored_value")
                 .toString();
 
@@ -69,7 +91,7 @@ public class EnvelopeParserTest {
         Envelope result = EnvelopeParser.parse(json.getBytes());
 
         // then
-        assertThat(result).isEqualToComparingFieldByField(envelope);
+        assertThat(result).isEqualToComparingFieldByFieldRecursively(envelope);
     }
 
     @Test
@@ -112,5 +134,14 @@ public class EnvelopeParserTest {
 
         // then
         assertThat(exc).isInstanceOf(InvalidMessageException.class);
+    }
+
+    private JSONObject toJson(Document doc) throws Exception {
+        return new JSONObject()
+            .put("file_name", doc.fileName)
+            .put("control_number", doc.controlNumber)
+            .put("type", doc.type)
+            .put("scanned_at", toIso8601(doc.scannedAt))
+            .put("url", doc.url);
     }
 }
