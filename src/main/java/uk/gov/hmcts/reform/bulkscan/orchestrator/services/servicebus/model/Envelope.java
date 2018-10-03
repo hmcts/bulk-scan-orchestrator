@@ -13,7 +13,7 @@ public class Envelope {
     public final String jurisdiction;
     public final String zipFileName;
     public final Classification classification;
-    public final List<String> docUrls;
+    public final List<Document> documents;
 
     public Envelope(
         @JsonProperty(value = "id", required = true) String id,
@@ -21,13 +21,13 @@ public class Envelope {
         @JsonProperty(value = "jurisdiction", required = true) String jurisdiction,
         @JsonProperty(value = "zip_file_name", required = true) String zipFileName,
         @JsonProperty(value = "classification", required = true) Classification classification,
-        @JsonProperty(value = "doc_urls", required = true) List<String> docUrls
+        @JsonProperty(value = "documents", required = true) List<Document> documents
     ) {
         this.id = id;
         this.caseRef = caseRef;
         this.jurisdiction = jurisdiction;
         this.zipFileName = zipFileName;
         this.classification = classification;
-        this.docUrls = docUrls;
+        this.documents = documents;
     }
 }
