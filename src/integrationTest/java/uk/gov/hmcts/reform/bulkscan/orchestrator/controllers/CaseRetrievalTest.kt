@@ -66,7 +66,6 @@ class CaseRetrievalTest {
     @BeforeEach
     fun before() {
         `when`(mockReceiver.receive()).thenReturn(mockMessage, null)
-//        server.startRecording(urlToRecord);
     }
 
     @Test
