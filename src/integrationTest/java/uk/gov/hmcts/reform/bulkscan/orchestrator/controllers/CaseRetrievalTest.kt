@@ -16,8 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDO
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.exampleJson
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever
-import java.io.File
 import java.util.concurrent.TimeUnit
 
 @ExtendWith(SpringExtension::class)
@@ -41,7 +41,7 @@ class CaseRetrievalTest {
             "/caseworkers/${USER_ID}/jurisdictions/${JURIDICTION}/case-types/${CASE_TYPE}/cases/${CASE_REF}"
     }
 
-    private val mockMessage = Message(File("src/test/resources/example1.json").readText())
+    private val mockMessage = Message(exampleJson)
 
     @Autowired
     private lateinit var server: WireMockServer
