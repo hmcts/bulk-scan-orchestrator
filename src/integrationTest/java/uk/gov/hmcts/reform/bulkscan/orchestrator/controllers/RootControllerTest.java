@@ -14,7 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @WebMvcTest()
 //This removed the subscription from the Service bus to avoid test conflicts.
-@Import(TestConfig.class)
+@Import(IntegrationTestConfig.class)
 public class RootControllerTest {
 
     @Autowired
