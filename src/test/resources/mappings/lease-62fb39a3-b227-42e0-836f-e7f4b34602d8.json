@@ -1,0 +1,28 @@
+{
+  "id": "62fb39a3-b227-42e0-836f-e7f4b34602d8",
+  "name": "lease",
+  "request": {
+    "url": "/lease",
+    "method": "POST",
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": {
+          "expression": "$.microservice",
+          "contains": "bulk_scan_orchestrator"
+        }
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "body": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJidWxrX3NjYW5fb3JjaGVzdHJhdG9yIiwiZXhwIjoxNTM4NDQwNzgxfQ.6PZmovH9ggXiTckyGGyy2-JI143QKtE4O8hO3MwYh-7vp3L7EjJUJm5vEdIFFGG69zXBFqv3hs3lL2MJVWF4DA",
+    "headers": {
+      "X-Application-Context": "Service Auth Provider:8080",
+      "Content-Type": "text/plain;charset=UTF-8",
+      "Date": "Mon, 01 Oct 2018 20:39:41 GMT"
+    }
+  },
+  "uuid": "62fb39a3-b227-42e0-836f-e7f4b34602d8",
+  "persistent": true,
+  "insertionIndex": 5
+}

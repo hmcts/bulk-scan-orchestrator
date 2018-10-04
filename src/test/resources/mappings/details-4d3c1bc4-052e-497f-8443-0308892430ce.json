@@ -1,0 +1,21 @@
+{
+  "id": "4d3c1bc4-052e-497f-8443-0308892430ce",
+  "name": "details",
+  "request": {
+    "url": "/details",
+    "method": "GET"
+  },
+  "response": {
+    "status": 200,
+    "body": "{\"forename\":\"Bulk Scan\",\"surname\":\"System Update\",\"roles\":[\"caseworker-sscs\",\"caseworker-sscs-loa0\"],\"id\":32,\"defaultService\":\"BSP\",\"email\":\"bulkscanorchestrator+systemupdate@gmail.com\"}",
+    "headers": {
+      "X-Application-Context": "application",
+      "Content-Type": "application/json;charset=UTF-8",
+      "Vary": "Accept-Encoding",
+      "Date": "Mon, 01 Oct 2018 20:58:51 GMT"
+    }
+  },
+  "uuid": "4d3c1bc4-052e-497f-8443-0308892430ce",
+  "persistent": true,
+  "insertionIndex": 4
+}

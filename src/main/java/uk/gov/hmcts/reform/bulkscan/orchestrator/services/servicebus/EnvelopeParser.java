@@ -26,6 +26,10 @@ public class EnvelopeParser {
         }
     }
 
+    public static Envelope parse(String json) {
+        return parse(json.getBytes());
+    }
+
     private EnvelopeParser() {
         // utility class
     }
