@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
-import org.springframework.test.context.TestPropertySource
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.util.SocketUtils
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever
@@ -22,19 +22,9 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 @ExtendWith(SpringExtension::class)
-@SpringBootTest(
-    classes = [IntegrationTestConfig::class],
-    webEnvironment = RANDOM_PORT
-)
-@TestPropertySource(properties = [
-    "core_case_data.api.url=${TestUrls.wiremockUrls.CORE_CASE_DATA_URL}",
-    "idam.s2s-auth.url=${TestUrls.wiremockUrls.IDAM_S2S_URL}",
-    "idam.api.url=${TestUrls.wiremockUrls.IDAM_API_URL}",
-    "idam.users.sscs.username=bulkscanorchestrator+systemupdate@gmail.com",
-    "idam.users.sscs.password=Password12",
-    "queue.read-interval=100"
-])
+@SpringBootTest(webEnvironment = RANDOM_PORT)
 @AutoConfigureWireMock
+@ActiveProfiles("integrationtest")
 class CaseRetrievalTest {
     companion object {
         init {

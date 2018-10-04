@@ -1,0 +1,18 @@
+wiremock:
+  url: &wiremock "http://localhost:${wiremock.port}"
+
+core_case_data:
+  api:
+    url: *wiremock
+idam:
+  s2s-auth:
+    url: *wiremock
+  api:
+    url: *wiremock
+  users:
+    sscs:
+      username: bulkscanorchestrator+systemupdate@gmail.com
+      password: Password12
+
+queue:
+  read-interval: 100
