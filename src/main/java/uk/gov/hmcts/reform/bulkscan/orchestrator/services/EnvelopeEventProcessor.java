@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -43,11 +42,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
     private void process(IMessage message) {
         Envelope envelope = parse(message.getBody());
-        CaseDetails theCase = caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
-        log.info("Found worker case: {}:{}:{}",
-            theCase.getJurisdiction(),
-            theCase.getCaseTypeId(),
-            theCase.getId());
+        caseRetriever.updateCase(envelope);
     }
 
     @Override
