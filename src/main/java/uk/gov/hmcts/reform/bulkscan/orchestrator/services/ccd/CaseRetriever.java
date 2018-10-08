@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -7,6 +9,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 @Service
 public class CaseRetriever {
     public static final String CASE_TYPE_ID = "Bulk_Scanned";
+
+    private static final Logger log = LoggerFactory.getLogger(CaseRetriever.class);
 
     private final CcdAuthenticatorFactory factory;
     private final CoreCaseDataApi coreCaseDataApi;
@@ -18,7 +22,18 @@ public class CaseRetriever {
 
     public CaseDetails retrieve(String jurisdiction, String caseRef) {
         CcdAuthenticator info = factory.createForJurisdiction(jurisdiction);
-        return retrieveCase(jurisdiction, caseRef, info);
+        CaseDetails caseDetails = retrieveCase(jurisdiction, caseRef, info);
+
+        if (caseDetails != null) {
+            log.info(
+                "Found worker case: {}:{}:{}",
+                caseDetails.getJurisdiction(),
+                caseDetails.getCaseTypeId(),
+                caseDetails.getId()
+            );
+        }
+
+        return caseDetails;
     }
 
     private CaseDetails retrieveCase(String jurisdiction, String caseRef, CcdAuthenticator authenticator) {
