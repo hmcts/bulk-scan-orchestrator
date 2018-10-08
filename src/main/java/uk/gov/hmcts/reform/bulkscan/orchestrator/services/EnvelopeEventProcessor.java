@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
 
+import com.google.common.base.Strings;
 import com.microsoft.azure.servicebus.ExceptionPhase;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageHandler;
@@ -40,7 +41,12 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
     private void process(IMessage message) {
         Envelope envelope = parse(message.getBody());
-        CaseDetails theCase = caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
+        CaseDetails theCase = Strings.isNullOrEmpty(envelope.caseRef)
+            ? null
+            : caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
+
+        // - create record from envelope and case
+        // - supply it to ccd event publisher
     }
 
     @Override
