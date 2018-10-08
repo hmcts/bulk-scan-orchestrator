@@ -6,7 +6,11 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.microsoft.azure.servicebus.IMessageReceiver
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.context.annotation.*
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Primary
+import org.springframework.context.annotation.Profile
 import uk.gov.hmcts.reform.bulkscan.orchestrator.Application
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.MessageReceiverFactory
 
