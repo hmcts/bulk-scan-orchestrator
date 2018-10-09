@@ -1,12 +1,11 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers
 
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
-import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import com.microsoft.azure.servicebus.IMessageReceiver
 import com.microsoft.azure.servicebus.Message
 import org.awaitility.Awaitility.await
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -28,15 +27,15 @@ import java.util.concurrent.TimeUnit
     webEnvironment = RANDOM_PORT
 )
 @TestPropertySource(properties = [
-    "core_case_data.api.url=http://localhost:\${wiremock.port}",
-    "idam.s2s-auth.url=${TestUrls.dockerUrls.IDAM_S2S_URL}",
-    "idam.api.url=${TestUrls.dockerUrls.IDAM_API_URL}",
+    "core_case_data.api.url=${TestUrls.wiremockUrls.CORE_CASE_DATA_URL}",
+    "idam.s2s-auth.url=${TestUrls.wiremockUrls.IDAM_S2S_URL}",
+    "idam.api.url=${TestUrls.wiremockUrls.IDAM_API_URL}",
     "idam.users.bulkscan.username=bulkscan+ccd@gmail.com",
     "idam.users.bulkscan.password=Password12",
     "queue.read-interval=100"
 ])
 @AutoConfigureWireMock
-class CaseUpdateTest {
+class SupplementaryEvidenceCreatorTest {
     companion object {
         init {
             //This needs to be done since AutoConfigureWireMock seems to have a bug where its using a random port.
@@ -46,8 +45,8 @@ class CaseUpdateTest {
         val USER_ID = "640"
         val JURIDICTION = "BULKSCAN"
         val CASE_TYPE = CaseRetriever.CASE_TYPE_ID
-        val CASE_REF = "1538729959889349"
-        val EVENT_ID = "attachRecord"
+        val CASE_REF = "1539007368674134"
+        val EVENT_ID = "attachScannedDocs"
 
         private fun startEventCcdUrl() =
             "/caseworkers/${USER_ID}/jurisdictions/${JURIDICTION}/case-types/${CASE_TYPE}/cases/${CASE_REF}/event-triggers/${EVENT_ID}/token"
@@ -56,7 +55,7 @@ class CaseUpdateTest {
             "/caseworkers/${USER_ID}/jurisdictions/${JURIDICTION}/case-types/${CASE_TYPE}/cases/${CASE_REF}/events"
     }
 
-    private val mockMessage = Message(File("src/test/resources/envelopes/example.json").readText())
+    private val mockMessage = Message(File("src/test/resources/example1.json").readText())
 
     @Autowired
     private lateinit var server: WireMockServer
@@ -67,21 +66,15 @@ class CaseUpdateTest {
     @BeforeEach
     fun before() {
         `when`(mockReceiver.receive()).thenReturn(mockMessage, null)
-        server.startRecording(TestUrls.dockerUrls.CORE_CASE_DATA_URL)
-    }
-
-    @AfterEach
-    fun after() {
-        server.stopRecording()
     }
 
     @Test
-    fun `Should call start event for caseworker in ccd`() {
+    fun `should call ccd to attach supplementary evidence for caseworker`() {
         await()
-            .atMost(5, TimeUnit.SECONDS)
+            .atMost(30, TimeUnit.SECONDS)
             .ignoreExceptions()
             .until {
-                server.verify(getRequestedFor(urlEqualTo(startEventCcdUrl())))
+                server.verify(postRequestedFor(urlPathEqualTo(submitCaseEventUrl())))
                 true
             }
     }

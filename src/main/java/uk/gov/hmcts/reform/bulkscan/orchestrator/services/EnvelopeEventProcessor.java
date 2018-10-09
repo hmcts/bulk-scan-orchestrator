@@ -3,10 +3,9 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
 import com.microsoft.azure.servicebus.ExceptionPhase;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.SupplementaryEvidenceCreator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
 import java.util.concurrent.CompletableFuture;
@@ -15,12 +14,11 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.Enve
 
 @Service
 public class EnvelopeEventProcessor implements IMessageHandler {
-    private static final Logger log = LoggerFactory.getLogger(EnvelopeEventProcessor.class);
 
-    private final CaseRetriever caseRetriever;
+    private final SupplementaryEvidenceCreator supplementaryEvidenceCreator;
 
-    public EnvelopeEventProcessor(CaseRetriever caseRetriever) {
-        this.caseRetriever = caseRetriever;
+    public EnvelopeEventProcessor(SupplementaryEvidenceCreator supplementaryEvidenceCreator) {
+        this.supplementaryEvidenceCreator = supplementaryEvidenceCreator;
     }
 
     @Override
@@ -42,7 +40,10 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
     private void process(IMessage message) {
         Envelope envelope = parse(message.getBody());
-        caseRetriever.updateCase(envelope);
+
+        if (envelope.classification == Classification.SUPPLEMENTARY_EVIDENCE) {
+            supplementaryEvidenceCreator.createSupplementaryEvidence(envelope);
+        }
     }
 
     @Override

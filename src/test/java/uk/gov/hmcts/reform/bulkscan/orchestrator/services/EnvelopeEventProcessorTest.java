@@ -16,10 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.CASE_REF;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.JURSIDICTION;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.THE_CASE;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelopeJson;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EnvelopeEventProcessorTest {
