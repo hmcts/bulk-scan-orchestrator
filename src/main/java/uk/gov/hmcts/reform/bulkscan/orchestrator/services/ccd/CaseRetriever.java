@@ -5,6 +5,7 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.actuate.health.Status;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.exceptions.CcdClientException;
@@ -62,21 +63,36 @@ public class CaseRetriever {
         return caseDetails;
     }
 
+    @HystrixCommand(fallbackMethod = "ccdHealthCheckFallback")
     @SuppressWarnings("unused")
     private CaseDetails retrieveFallback(
         String jurisdiction,
         String caseRef,
         CcdAuthenticator authenticator,
         Throwable exception
-    ) {
-        String message = exception.getMessage();
+    ) throws Throwable {
+        if (coreCaseDataApi.health().getStatus().getCode().equals(Status.UP.getCode())) {
+            return retrieve(jurisdiction, caseRef, authenticator);
+        }
 
-        if (exception instanceof FeignException && ((FeignException) exception).status() == NOT_FOUND.value()) {
+        throw exception;
+    }
+
+    @SuppressWarnings("unused")
+    private CaseDetails ccdHealthCheckFallback(
+        String jurisdiction,
+        String caseRef,
+        CcdAuthenticator authenticator,
+        Throwable exception
+    ) {
+        Throwable cause = exception.getCause();
+
+        if (cause instanceof FeignException && ((FeignException) cause).status() == NOT_FOUND.value()) {
             log.info("Case not found. Ref:{}, jurisdiction:{}", caseRef, jurisdiction);
 
             return null;
         } else {
-            throw new CcdClientException(message, exception);
+            throw new CcdClientException(exception.getMessage(), exception);
         }
     }
 }
