@@ -36,7 +36,7 @@ public class CaseRetrieverTest {
             .willReturn(THE_CASE);
         given(authenticator.createForJurisdiction(JURSIDICTION)).willReturn(AUTH_DETAILS);
 
-        CaseDetails theCase = retriever.retrieve(JURSIDICTION, CASE_REF, AUTH_DETAILS);
+        CaseDetails theCase = retriever.retrieve(JURSIDICTION, CASE_REF);
         assertThat(theCase.getId()).isEqualTo(CASE_ID);
     }
 
