@@ -6,10 +6,12 @@ import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.exceptions.CcdClientException;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
 public class CaseRetriever {
@@ -69,47 +71,12 @@ public class CaseRetriever {
     ) {
         String message = exception.getMessage();
 
-        if (exception instanceof FeignException) {
-            HttpStatus status = HttpStatus.valueOf(((FeignException) exception).status());
+        if (exception instanceof FeignException && ((FeignException) exception).status() == NOT_FOUND.value()) {
+            log.info("Case not found. Ref:{}, jurisdiction:{}", caseRef, jurisdiction);
 
-            logResponse(jurisdiction, caseRef, status, message);
+            return null;
         } else {
-            log.error(
-                "Could not retrieve case with ref:{} for {} jurisdiction. Error: {}",
-                caseRef,
-                jurisdiction,
-                message,
-                exception
-            );
-        }
-
-        return null;
-    }
-
-    private void logResponse(String jurisdiction, String caseRef, HttpStatus status, String originalMessage) {
-        if (HttpStatus.NOT_FOUND.equals(status)) {
-            log.info(
-                "Not found case ref:{} for {} jurisdiction {}. Error: {}",
-                caseRef,
-                jurisdiction,
-                originalMessage
-            );
-        } else if (status.is4xxClientError()) {
-            log.warn(
-                "Client error response {} when searching case ref:{} for {} jurisdiction. Error: {}",
-                status.value(),
-                caseRef,
-                jurisdiction,
-                originalMessage
-            );
-        } else if (status.is5xxServerError()) {
-            log.error(
-                "Server error response {} when searching case ref:{} for {} jurisdiction. Error: {}",
-                status.value(),
-                caseRef,
-                jurisdiction,
-                originalMessage
-            );
+            throw new CcdClientException(message, exception);
         }
     }
 }
