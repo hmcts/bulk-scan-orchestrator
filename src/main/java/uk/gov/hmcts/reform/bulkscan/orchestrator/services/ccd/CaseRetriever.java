@@ -4,7 +4,6 @@ import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.exceptions.CcdClientException;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -48,10 +47,8 @@ public class CaseRetriever {
 
                 return null;
             } else {
-                throw new CcdClientException(exception.getMessage(), exception);
+                throw exception;
             }
-        } catch (Throwable exception) {
-            throw new CcdClientException(exception.getMessage(), exception);
         }
     }
 
