@@ -5,7 +5,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import java.util.function.Supplier;
 
 public class CcdAuthenticator {
-    final UserDetails userDetails;
+    private final UserDetails userDetails;
     private final Supplier<String> serviceTokenSupplier;
     private final Supplier<String> userTokenSupplier;
 
@@ -34,4 +34,7 @@ public class CcdAuthenticator {
         return this.serviceTokenSupplier.get();
     }
 
+    public UserDetails getUserDetails() {
+        return this.userDetails;
+    }
 }
