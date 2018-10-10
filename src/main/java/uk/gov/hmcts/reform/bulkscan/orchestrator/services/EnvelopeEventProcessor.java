@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
 import com.microsoft.azure.servicebus.ExceptionPhase;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.SupplementaryEvidenceCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
@@ -14,6 +16,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.Enve
 
 @Service
 public class EnvelopeEventProcessor implements IMessageHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(EnvelopeEventProcessor.class);
 
     private final SupplementaryEvidenceCreator supplementaryEvidenceCreator;
 
@@ -43,6 +47,13 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
         if (envelope.classification == Classification.SUPPLEMENTARY_EVIDENCE) {
             supplementaryEvidenceCreator.createSupplementaryEvidence(envelope);
+        } else {
+            log.info(
+                "Skipped processing of envelope ID {} for case {} - classification {} not handled yet",
+                envelope.id,
+                envelope.caseRef,
+                envelope.classification
+            );
         }
     }
 

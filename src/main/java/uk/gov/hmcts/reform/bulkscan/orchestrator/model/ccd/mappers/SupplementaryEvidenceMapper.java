@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CCDDocument;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.SupplementaryEvidence;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CCDCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
@@ -14,12 +14,16 @@ import static java.util.stream.Collectors.toList;
 
 public class SupplementaryEvidenceMapper {
 
+    private SupplementaryEvidenceMapper() {
+        // utility class
+    }
+
     public static SupplementaryEvidence fromEnvelope(Envelope envelope) {
-        List<CCDCollectionElement<ScannedDocument>> scannedDocuments =
+        List<CcdCollectionElement<ScannedDocument>> scannedDocuments =
             envelope
                 .documents
                 .stream()
-                .map(document -> new CCDCollectionElement<>(fromEnvelopeDocument(document)))
+                .map(document -> new CcdCollectionElement<>(fromEnvelopeDocument(document)))
                 .collect(toList());
 
         return new SupplementaryEvidence(scannedDocuments);
@@ -31,7 +35,7 @@ public class SupplementaryEvidenceMapper {
             document.controlNumber,
             document.type,
             document.scannedAt.atZone(ZoneId.systemDefault()).toLocalDate(),
-            new CCDDocument(document.url)
+            new CcdDocument(document.url)
         );
     }
 }

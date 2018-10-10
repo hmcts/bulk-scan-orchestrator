@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.Supplementary
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
@@ -32,66 +31,71 @@ public class SupplementaryEvidenceCreator {
     }
 
     public void createSupplementaryEvidence(Envelope envelope) {
-        log.info("Case id: " + envelope.caseRef);
+        log.info("Creating supplementary evidence for case {}", envelope.caseRef);
 
         CcdAuthenticator info = authenticatorFactory.createForJurisdiction(envelope.jurisdiction);
 
-        StartEventResponse startEventResponse = startEvent(info, envelope);
+        StartEventResponse startEventResponse =
+            startEvent(info, envelope.jurisdiction, envelope.caseRef);
+
+        log.info("Started {} event for case {}", startEventResponse.getEventId(), envelope.caseRef);
 
         CaseDataContent caseDataContent = prepareCaseDataContent(
             startEventResponse.getToken(),
             SupplementaryEvidenceMapper.fromEnvelope(envelope)
         );
 
-        log.info("Event id: " + startEventResponse.getEventId());
-        log.info("Event token: " + startEventResponse.getToken());
-        log.info("Case data: " + startEventResponse.getCaseDetails().getData().toString());
-        log.info("Case id: " + startEventResponse.getCaseDetails().getId());
-        log.info("Case type id: " + startEventResponse.getCaseDetails().getCaseTypeId());
-        log.info("Case state: " + startEventResponse.getCaseDetails().getState());
-        log.info("Document count: " + envelope.documents.size());
+        submitEvent(info, envelope.jurisdiction, envelope.caseRef, caseDataContent);
 
-        submitEvent(info, envelope, caseDataContent);
+        log.info("Submitted {} event for case {}", startEventResponse.getEventId(), envelope.caseRef);
     }
 
-    private CaseDataContent prepareCaseDataContent(String eventToken, SupplementaryEvidence supplementaryEvidence) {
-       return CaseDataContent.builder()
-           .eventToken(eventToken)
-           .event(Event.builder()
-               .id(EVENT_TYPE_ID)
-               .summary("Attach scanned documents")
-               .description("Attach scanned documents")
-               .build())
-           .data(supplementaryEvidence)
-           .build();
+    private CaseDataContent prepareCaseDataContent(
+        String eventToken,
+        SupplementaryEvidence supplementaryEvidence
+    ) {
+        return CaseDataContent.builder()
+            .eventToken(eventToken)
+            .event(Event.builder()
+                .id(EVENT_TYPE_ID)
+                .summary("Attach scanned documents")
+                .description("Attach scanned documents")
+                .build())
+            .data(supplementaryEvidence)
+            .build();
     }
 
-    private StartEventResponse startEvent(CcdAuthenticator authenticator, Envelope envelope) {
+    private StartEventResponse startEvent(
+        CcdAuthenticator authenticator,
+        String jurisdiction,
+        String caseRef
+    ) {
         return coreCaseDataApi.startEventForCaseWorker(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
-            authenticator.userDetails.getId(),
-            envelope.jurisdiction,
+            authenticator.getUserDetails().getId(),
+            jurisdiction,
             CASE_TYPE_ID,
-            envelope.caseRef,
+            caseRef,
             EVENT_TYPE_ID
         );
     }
 
-    private void submitEvent(CcdAuthenticator authenticator, Envelope envelope, CaseDataContent caseDataContent) {
-        log.info("Case data content: " + caseDataContent.getData().toString());
-
-        CaseDetails caseDetails = coreCaseDataApi.submitEventForCaseWorker(
+    private void submitEvent(
+        CcdAuthenticator authenticator,
+        String jurisdiction,
+        String caseRef,
+        CaseDataContent caseDataContent
+    ) {
+        coreCaseDataApi.submitEventForCaseWorker(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
-            authenticator.userDetails.getId(),
-            envelope.jurisdiction,
+            authenticator.getUserDetails().getId(),
+            jurisdiction,
             CASE_TYPE_ID,
-            envelope.caseRef,
+            caseRef,
             true,
             caseDataContent
         );
-
-        log.info("New case details: " + caseDetails.getData().toString());
     }
 }
