@@ -5,9 +5,11 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.model.caserecord.E
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.model.caserecord.SupplementaryEvidenceRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 public class CaseRecordFactoryTest {
 
@@ -22,13 +24,28 @@ public class CaseRecordFactoryTest {
         Envelope envelope = getDummyEnvelope(Classification.SUPPLEMENTARY_EVIDENCE);
 
         // when
-        CaseDataCreator creator = CaseRecordFactory.getCaseDataCreator(envelope, null);
+        CaseDataCreator creator = CaseRecordFactory.getCaseDataCreator(envelope, mock(CaseDetails.class));
 
         // then
         assertThat(creator)
             .isInstanceOf(SupplementaryEvidenceRecord.class)
             .extracting("caseRecordIdentifier")
             .containsOnly(CaseRecord.Record.SUPPLEMENTARY_EVIDENCE);
+    }
+
+    @Test
+    public void should_get_exception_record_when_case_is_empty() {
+        // given
+        Envelope envelope = getDummyEnvelope(Classification.SUPPLEMENTARY_EVIDENCE);
+
+        // when
+        CaseDataCreator creator = CaseRecordFactory.getCaseDataCreator(envelope, null);
+
+        // then
+        assertThat(creator)
+            .isInstanceOf(ExceptionRecord.class)
+            .extracting("caseRecordIdentifier")
+            .containsOnly(CaseRecord.Record.EXCEPTION_RECORD);
     }
 
     // can be separated once cleared up about classifications and case creation in general
