@@ -71,17 +71,11 @@ public class AttachSupplementaryEvidenceTest {
     private Boolean caseUpdated(byte[] envelopeJson) {
 
         Envelope envelope = EnvelopeParser.parse(envelopeJson);
-        CaseDetails caseDetails = caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
 
-        List<Document> updatedScannedDocuments = TestHelper.getScannedDocuments(caseDetails);
+        CaseDetails updatedCaseDetails = caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
+
+        List<Document> updatedScannedDocuments = TestHelper.getScannedDocuments(updatedCaseDetails);
         List<Document> scannedDocuments = envelope.documents;
-
-        //TODO: compare documents
-        return updatedScannedDocuments.equals(scannedDocuments);
-    }
-
-    private Boolean compareDocument(Document document, Document updatedDocument) {
-        //TODO:
-        return document.equals(updatedDocument);
+        return scannedDocuments.stream().allMatch(document -> updatedScannedDocuments.contains(document));
     }
 }
