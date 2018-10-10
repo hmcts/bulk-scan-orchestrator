@@ -5,6 +5,8 @@ import org.json.JSONObject;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.Credential;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
@@ -12,9 +14,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.lang.ClassLoader.getSystemResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.DatetimeHelper.toIso8601;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever.CASE_TYPE_ID;
@@ -80,6 +88,31 @@ public class SampleData {
         } catch (Exception e) {
             throw new RuntimeException("Could not load file" + file, e);
         }
+    }
+
+    public static Envelope envelope(int numberOfDocuments) {
+        return new Envelope(
+            "eb9c3598-35fc-424e-b05a-902ee9f11d56",
+            CASE_REF,
+            JURSIDICTION,
+            "zip-file-test.zip",
+            Classification.NEW_APPLICATION,
+            documents(numberOfDocuments)
+        );
+    }
+
+    private static List<Document> documents(int numberOfDocuments) {
+        return Stream.iterate(1, i -> i + 1)
+            .map(index ->
+                new Document(
+                    String.format("file_%s.pdf", index),
+                    String.format("control_number_%s", index),
+                    String.format("type_%s", index),
+                    LocalDate.parse("2018-10-01").plus(index, DAYS).atStartOfDay().toInstant(ZoneOffset.UTC),
+                    String.format("https://example.gov.uk/%s", index)
+                )
+            ).limit(numberOfDocuments)
+            .collect(Collectors.toList());
     }
 
     private SampleData() {
