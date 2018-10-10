@@ -1,0 +1,23 @@
+{
+  "id": "0192",
+  "case_ref": "1539007368674134",
+  "jurisdiction": "BULKSCAN",
+  "classification": "SUPPLEMENTARY_EVIDENCE",
+  "zip_file_name": "zip-file-test.zip",
+  "documents": [
+    {
+      "file_name": "testfilename",
+      "control_number": "1234",
+      "type": "other",
+      "scanned_at": "2018-01-01T12:34:56.123Z",
+      "url": "test-url"
+    },
+    {
+      "file_name": "testfilename2",
+      "control_number": "12345",
+      "type": "other",
+      "scanned_at": "2018-01-10T12:34:56.123Z",
+      "url": "test-url2"
+    }
+  ]
+}
