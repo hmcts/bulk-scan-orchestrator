@@ -11,13 +11,13 @@ import static java.util.stream.Collectors.toList;
 
 public class TestHelper {
 
-    public static void verifyCaseDetails(CaseDetails caseDetails) {
+    public static List<Document> getScannedDocuments(CaseDetails caseDetails) {
         List<Map<String, Map<String, String>>> data = (List<Map<String, Map<String, String>>>) caseDetails.getData().get("scannedDocuments");
 
-        List<Document> documentList = data.stream().map(TestHelper::createDocument).collect(toList());
+        return data.stream().map(TestHelper::createDocumentFromMap).collect(toList());
     }
 
-    private static Document createDocument(Map<String, Map<String, String>> object) {
+    private static Document createDocumentFromMap(Map<String, Map<String, String>> object) {
         Map<String, String> doc = object.get("value");
         Document document = new Document(String.valueOf(doc.get("file_name")),
             String.valueOf(doc.get("control_number")),

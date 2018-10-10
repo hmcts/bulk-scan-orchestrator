@@ -11,11 +11,10 @@ import com.typesafe.config.ConfigFactory;
 import org.awaitility.Duration;
 import org.junit.Before;
 import org.junit.Test;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CCDCollectionElement;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.SupplementaryEvidence;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.TestHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -59,8 +58,6 @@ public class AttachSupplementaryEvidenceTest {
         byte[] envelopeJson = SampleData.envelopeJson();
         message.setBody(envelopeJson);
 
-        Envelope envelope = EnvelopeParser.parse(envelopeJson);
-
         // when
         writeClient.send(message);
 
@@ -68,19 +65,23 @@ public class AttachSupplementaryEvidenceTest {
         await("Supplementary evidence is attached to the case in ccd")
             .atMost(45, TimeUnit.SECONDS)
             .pollInterval(Duration.TWO_SECONDS)
-            .until(
-                () -> getScannedDocumentsInCase(envelope).size() == (envelope.documents.size())
-            );
+            .until(() -> caseUpdated(envelopeJson));
     }
 
-    private List<CCDCollectionElement<ScannedDocument>> getScannedDocumentsInCase(Envelope envelope) {
+    private Boolean caseUpdated(byte[] envelopeJson) {
+
+        Envelope envelope = EnvelopeParser.parse(envelopeJson);
         CaseDetails caseDetails = caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
-        SupplementaryEvidence supplementaryEvidence = (SupplementaryEvidence) caseDetails.getData().get("documents");
-        return supplementaryEvidence.scannedDocuments;
+
+        List<Document> updatedScannedDocuments = TestHelper.getScannedDocuments(caseDetails);
+        List<Document> scannedDocuments = envelope.documents;
+
+        //TODO: compare documents
+        return updatedScannedDocuments.equals(scannedDocuments);
     }
 
-    private Boolean isCaseUpdated(CaseDetails caseDetails, CaseDetails updatedCaseDetails) {
-        //TODO: verify scanned documents data
-        return Boolean.TRUE;
+    private Boolean compareDocument(Document document, Document updatedDocument) {
+        //TODO:
+        return document.equals(updatedDocument);
     }
 }
