@@ -19,12 +19,12 @@ public final class CaseRecordFactory {
         Record.SUPPLEMENTARY_EVIDENCE, SupplementaryEvidenceRecord::new
     ));
 
-    public static CaseDataCreator getCaseDataCreator(Envelope envelope, CaseDetails caseDetails) {
+    public static CaseDataCreator getCaseDataCreator(Envelope envelope, CaseDetails existingCase) {
         Record record;
 
         switch (envelope.classification) {
             case SUPPLEMENTARY_EVIDENCE:
-                record = Record.SUPPLEMENTARY_EVIDENCE;
+                record = existingCase == null ? Record.EXCEPTION_RECORD : Record.SUPPLEMENTARY_EVIDENCE;
 
                 break;
             case EXCEPTION:
@@ -35,7 +35,7 @@ public final class CaseRecordFactory {
                 break;
         }
 
-        return AVAILABLE_MODELS.get(record).apply(envelope, caseDetails);
+        return AVAILABLE_MODELS.get(record).apply(envelope, existingCase);
     }
 
     private CaseRecordFactory() {
