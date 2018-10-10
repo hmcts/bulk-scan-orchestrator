@@ -15,6 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.JURSIDICTION;
@@ -35,12 +36,26 @@ public class EnvelopeEventProcessorTest {
     @Before
     public void before() throws Exception {
         processor = new EnvelopeEventProcessor(caseRetriever);
-        when(caseRetriever.retrieve(eq(JURSIDICTION), eq(CASE_REF))).thenReturn(THE_CASE);
+        when(caseRetriever.retrieve(eq(JURSIDICTION), eq(CASE_REF)))
+            .thenReturn(THE_CASE);
         given(someMessage.getBody()).willReturn(envelopeJson());
     }
 
     @Test
     public void should_return_completed_future_if_everything_went_fine() {
+
+        // when
+        CompletableFuture<Void> result = processor.onMessageAsync(someMessage);
+
+        // then
+        assertThat(result.isDone()).isTrue();
+        assertThat(result.isCompletedExceptionally()).isFalse();
+    }
+
+    @Test
+    public void should_return_completed_future_when_case_is_null() {
+        reset(someMessage);
+        given(someMessage.getBody()).willReturn(envelopeJson(""));
 
         // when
         CompletableFuture<Void> result = processor.onMessageAsync(someMessage);

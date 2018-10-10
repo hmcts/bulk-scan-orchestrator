@@ -45,11 +45,11 @@ public class SampleData {
 
     public static byte[] exampleJson = fromFile("envelopes/example.json").getBytes();
 
-    public static byte[] envelopeJson() {
+    public static byte[] envelopeJson(String caseRef) {
         try {
             return new JSONObject()
                 .put("id", "eb9c3598-35fc-424e-b05a-902ee9f11d56")
-                .put("case_ref", CASE_REF)
+                .put("case_ref", caseRef)
                 .put("jurisdiction", JURSIDICTION)
                 .put("zip_file_name", "zip-file-test.zip")
                 .put("classification", Classification.NEW_APPLICATION)
@@ -66,6 +66,10 @@ public class SampleData {
         } catch (Exception e) {
             throw new RuntimeException("Could not make envelopeJson", e);
         }
+    }
+
+    public static byte[] envelopeJson() {
+        return envelopeJson(CASE_REF);
     }
 
     public static String fromFile(String file) {
