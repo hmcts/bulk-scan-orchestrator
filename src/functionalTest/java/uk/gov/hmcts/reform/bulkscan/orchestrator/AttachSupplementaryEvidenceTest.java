@@ -8,14 +8,21 @@ import com.microsoft.azure.servicebus.ReceiveMode;
 import com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import feign.Feign;
 import org.awaitility.Duration;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Value;
+import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
+import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.IdamClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.TestHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.JurisdictionToUserMapping;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
@@ -30,7 +37,38 @@ public class AttachSupplementaryEvidenceTest {
     private QueueClient writeClient;
     private int readInterval;
 
+    private String s2sUrl;
+    private String s2sName;
+    private String s2sSecret;
+
     private CaseRetriever caseRetriever;
+
+    @Value("${idam-url}")
+    protected String idamUrl;
+
+    @Value("${idam-user-email}")
+    protected String idamUserEmail;
+
+    @Value("${idam-password}")
+    protected String idamPassword;
+
+    @Value("${idam-client-id}")
+    protected String idamClientId;
+
+    @Value("${idam-client-secret}")
+    protected String idamClientSecret;
+
+    @Value("${idam-redirect-uri}")
+    protected String idamRedirectUri;
+
+    @Value("${idam.s2s-auth.url}")
+    protected String s2sAuthUrl;
+
+    @Value("${core-case-data.url}")
+    protected String ccdUrl;
+
+    @Value("${use-idam-testing-support}")
+    protected boolean useIdamTestingSupport;
 
     @Before
     public void setUp() throws Exception {
@@ -46,6 +84,41 @@ public class AttachSupplementaryEvidenceTest {
         this.writeClient = new QueueClient(
             new ConnectionStringBuilder(conf.getString("queue.conn-strings.write")),
             ReceiveMode.PEEKLOCK
+        );
+
+        IdamClient idamClient = createIdamClient();
+
+        ServiceAuthorisationApi serviceAuthorisationApi = Feign
+            .builder()
+            .target(ServiceAuthorisationApi.class, s2sAuthUrl);
+
+        ServiceAuthTokenGenerator tokenGenerator = new ServiceAuthTokenGenerator(s2sSecret, s2sName, serviceAuthorisationApi);
+
+//        CcdAuthenticatorFactory factory =new CcdAuthenticatorFactory(tokenGenerator, idamClient, new JurisdictionToUserMapping());
+
+        this.s2sUrl = conf.getString("test-s2s-url");
+        this.s2sName = conf.getString("test-s2s-name");
+        this.s2sSecret = conf.getString("test-s2s-secret");
+
+        String s2sToken = TestHelper.s2sSignIn(s2sName, s2sSecret, s2sUrl);
+
+        JurisdictionToUserMapping jurisdictionToUserMapping = new JurisdictionToUserMapping();
+
+
+        CoreCaseDataApi coreCaseDataApi;
+
+//        this.caseRetriever = new CaseRetriever(factory, coreCaseDataApi);
+
+    }
+
+    private IdamClient createIdamClient() {
+        return new IdamClient(
+            idamUrl,
+            idamUserEmail,
+            idamPassword,
+            idamClientId,
+            idamClientSecret,
+            idamRedirectUri
         );
     }
 
