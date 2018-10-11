@@ -8,4 +8,5 @@ public class CcdCollectionElement<T> {
     public CcdCollectionElement(T value) {
         this.value = value;
     }
+
 }

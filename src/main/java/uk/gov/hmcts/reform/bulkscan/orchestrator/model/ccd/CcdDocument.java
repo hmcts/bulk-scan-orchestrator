@@ -10,4 +10,5 @@ public class CcdDocument {
     public CcdDocument(String documentUrl) {
         this.documentUrl = documentUrl;
     }
+
 }
