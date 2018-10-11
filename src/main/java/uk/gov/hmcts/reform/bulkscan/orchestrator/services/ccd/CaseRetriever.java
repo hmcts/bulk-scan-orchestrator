@@ -20,7 +20,7 @@ public class CaseRetriever {
 
     private final CoreCaseDataApi coreCaseDataApi;
 
-    CaseRetriever(CcdAuthenticatorFactory factory, CoreCaseDataApi coreCaseDataApi) {
+    public CaseRetriever(CcdAuthenticatorFactory factory, CoreCaseDataApi coreCaseDataApi) {
         this.factory = factory;
         this.coreCaseDataApi = coreCaseDataApi;
     }
