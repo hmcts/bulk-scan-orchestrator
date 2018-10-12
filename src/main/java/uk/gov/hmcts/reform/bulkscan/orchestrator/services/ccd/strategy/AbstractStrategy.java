@@ -143,7 +143,15 @@ abstract class AbstractStrategy implements Strategy {
 
     // end region - execution steps
 
+    /**
+     * Strategy is coupled with event type id. Used in building case data.
+     * @return Event type ID
+     */
     abstract String getEventTypeId();
 
+    /**
+     * Short sentence representing event type ID. Used in building case data.
+     * @return Event summary
+     */
     abstract String getEventSummary();
 }
