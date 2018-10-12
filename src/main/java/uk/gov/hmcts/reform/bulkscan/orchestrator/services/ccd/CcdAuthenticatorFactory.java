@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 @Service
 @EnableConfigurationProperties(JurisdictionToUserMapping.class)
-class CcdAuthenticatorFactory {
+public class CcdAuthenticatorFactory {
     private final AuthTokenGenerator s2sTokenGenerator;
     private final IdamClient idamClient;
     private final JurisdictionToUserMapping users;
