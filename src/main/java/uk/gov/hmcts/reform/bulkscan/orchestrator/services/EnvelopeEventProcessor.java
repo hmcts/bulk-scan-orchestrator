@@ -20,8 +20,11 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
     private final CaseRetriever caseRetriever;
 
-    public EnvelopeEventProcessor(CaseRetriever caseRetriever) {
+    private final StrategyContainer strategyContainer;
+
+    public EnvelopeEventProcessor(CaseRetriever caseRetriever, StrategyContainer strategyContainer) {
         this.caseRetriever = caseRetriever;
+        this.strategyContainer = strategyContainer;
     }
 
     @Override
@@ -47,7 +50,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
             ? null
             : caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
 
-        Strategy strategy = StrategyContainer.getStrategy(envelope, theCase);
+        Strategy strategy = strategyContainer.getStrategy(envelope, theCase);
         strategy.execute(envelope);
     }
 

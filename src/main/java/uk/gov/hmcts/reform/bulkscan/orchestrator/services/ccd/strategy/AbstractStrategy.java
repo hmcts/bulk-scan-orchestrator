@@ -2,31 +2,77 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.strategy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
-import java.util.function.Function;
-
+/**
+ * Implementation of strategy.
+ * Any strategy is invoking steps as follows:
+ * <ul>
+ *     <li>jurisdiction authentication</li>
+ *     <li>start the event</li>
+ *     <li>create data content accordingly</li>
+ *     <li>submit the event</li>
+ * </ul>
+ * Any strategy will have to be implemented as an example:
+ * <pre>{@code
+ * @Component("strategy-name")
+ * class StrategyName extends AbstractStrategy {
+ *
+ *     StrategyName() {
+ *         // any extra autowiring needed
+ *     }
+ *
+ *     @Override
+ *     public boolean isStrategyEligible(Classification classification, boolean caseExists) {
+ *         return false; // by default it returns false so override in case strategy needs any rules to apply
+ *     }
+ *
+ *     @Override
+ *     Object mapEnvelopeToCaseDataObject(Envelope envelope) {
+ *         return null; // implement this
+ *     }
+ *
+ *     @Override
+ *     String getEventTypeId() {
+ *         return ""
+ *     }
+ *
+ *     @Override
+ *     String getEventSummary() {
+ *         return ""
+ *     }
+ * }}</pre>
+ * <p/>
+ * No need to make any public access as everything will be injected in {@link StrategyContainer}:
+ * <pre>{@code
+ * @Resource(name = "strategy-name")
+ * private Strategy someNamedStrategy;}</pre>
+ * <p/>
+ * Then include each strategy in {@link StrategyContainer#setUpStrategies()}
+ */
 abstract class AbstractStrategy implements Strategy {
 
     private static final String CASE_TYPE_ID = "Bulk_Scanned";
 
     private static final Logger log = LoggerFactory.getLogger(AbstractStrategy.class);
 
-    private Function<String, CcdAuthenticator> authenticatorProvider;
-
+    @Autowired
     private CoreCaseDataApi ccdApi;
 
-    protected void setAuthenticatorProvider(Function<String, CcdAuthenticator> authenticatorProvider) {
-        this.authenticatorProvider = authenticatorProvider;
-    }
+    @Autowired
+    private CcdAuthenticatorFactory authenticatorFactory;
 
-    protected void setCcdApi(CoreCaseDataApi ccdApi) {
-        this.ccdApi = ccdApi;
+    @Override
+    public boolean isStrategyEligible(Classification classification, boolean caseExists) {
+        return false;
     }
 
     @Override
@@ -52,7 +98,7 @@ abstract class AbstractStrategy implements Strategy {
     }
 
     private CcdAuthenticator authenticateJurisdiction(String jurisdiction) {
-        return authenticatorProvider.apply(jurisdiction);
+        return authenticatorFactory.createForJurisdiction(jurisdiction);
     }
 
     private StartEventResponse startEvent(

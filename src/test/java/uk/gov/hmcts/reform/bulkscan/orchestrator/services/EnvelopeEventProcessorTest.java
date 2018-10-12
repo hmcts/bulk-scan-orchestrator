@@ -8,6 +8,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.strategy.Strategy;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.strategy.StrategyContainer;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -29,15 +34,20 @@ public class EnvelopeEventProcessorTest {
     @Mock
     private CaseRetriever caseRetriever;
     @Mock
+    private StrategyContainer strategyContainer;
+    @Mock
     private CcdAuthenticator authInfo;
 
     private EnvelopeEventProcessor processor;
 
     @Before
-    public void before() throws Exception {
-        processor = new EnvelopeEventProcessor(caseRetriever);
-        when(caseRetriever.retrieve(eq(JURSIDICTION), eq(CASE_REF)))
-            .thenReturn(THE_CASE);
+    public void before() {
+        processor = new EnvelopeEventProcessor(caseRetriever, strategyContainer);
+        when(caseRetriever.retrieve(eq(JURSIDICTION), eq(CASE_REF))).thenReturn(THE_CASE);
+        when(strategyContainer.getStrategy(any(Envelope.class), any(CaseDetails.class)))
+            .thenReturn(getDummyStrategy());
+        when(strategyContainer.getStrategy(any(Envelope.class), eq(null)))
+            .thenReturn(getDummyStrategy());
         given(someMessage.getBody()).willReturn(envelopeJson());
     }
 
@@ -49,7 +59,7 @@ public class EnvelopeEventProcessorTest {
 
         // then
         assertThat(result.isDone()).isTrue();
-        assertThat(result.isCompletedExceptionally()).isTrue(); // TODO once strategy is implemented
+        assertThat(result.isCompletedExceptionally()).isFalse();
     }
 
     @Test
@@ -62,7 +72,7 @@ public class EnvelopeEventProcessorTest {
 
         // then
         assertThat(result.isDone()).isTrue();
-        assertThat(result.isCompletedExceptionally()).isTrue(); // TODO once strategy is implemented
+        assertThat(result.isCompletedExceptionally()).isFalse();
     }
 
     @Test
@@ -97,4 +107,17 @@ public class EnvelopeEventProcessorTest {
         assertThat(result.isCompletedExceptionally()).isTrue();
     }
 
+    private Strategy getDummyStrategy() {
+        return new Strategy() {
+            @Override
+            public void execute(Envelope envelope) {
+                //
+            }
+
+            @Override
+            public boolean isStrategyEligible(Classification classification, boolean caseExists) {
+                return true;
+            }
+        };
+    }
 }
