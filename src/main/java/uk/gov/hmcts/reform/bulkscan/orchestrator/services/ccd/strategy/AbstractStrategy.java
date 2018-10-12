@@ -60,7 +60,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
  */
 abstract class AbstractStrategy implements Strategy {
 
-    private static final String CASE_TYPE_ID = "Bulk_Scanned";
+    static final String CASE_TYPE_ID = "Bulk_Scanned";
 
     private static final Logger log = LoggerFactory.getLogger(AbstractStrategy.class);
 
