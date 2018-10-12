@@ -38,7 +38,7 @@ public class StrategyContainer {
         return strategy;
     }
 
-    private StrategyContainer() {
+    StrategyContainer() {
         // utility class constructor
     }
 }
