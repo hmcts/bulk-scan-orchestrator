@@ -4,6 +4,8 @@ import com.google.common.base.Strings;
 import com.microsoft.azure.servicebus.ExceptionPhase;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.strategy.Strategy;
@@ -17,6 +19,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.Enve
 
 @Service
 public class EnvelopeEventProcessor implements IMessageHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(EnvelopeEventProcessor.class);
 
     private final CaseRetriever caseRetriever;
 
@@ -51,7 +55,17 @@ public class EnvelopeEventProcessor implements IMessageHandler {
             : caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
 
         Strategy strategy = strategyContainer.getStrategy(envelope, theCase);
-        strategy.execute(envelope);
+
+        if (strategy != null) {
+            strategy.execute(envelope);
+        } else {
+            log.info(
+                "Skipped processing of envelope ID {} for case {} - classification {} not handled yet",
+                envelope.id,
+                envelope.caseRef,
+                envelope.classification
+            );
+        }
     }
 
     @Override

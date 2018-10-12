@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
@@ -51,16 +54,36 @@ public class SampleData {
         .caseTypeId(CASE_TYPE_ID)
         .build();
 
+    public static final ObjectMapper objectMapper;
+
+    static {
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS);
+    }
+
     public static byte[] exampleJson = fromFile("envelopes/example.json").getBytes();
 
+    public static byte[] envelopeJson() {
+        return envelopeJson(Classification.SUPPLEMENTARY_EVIDENCE, CASE_REF);
+    }
+
     public static byte[] envelopeJson(String caseRef) {
+        return envelopeJson(Classification.SUPPLEMENTARY_EVIDENCE, caseRef);
+    }
+
+    public static byte[] envelopeJson(Classification classification) {
+        return envelopeJson(classification, CASE_REF);
+    }
+
+    public static byte[] envelopeJson(Classification classification, String caseRef) {
         try {
             return new JSONObject()
                 .put("id", "eb9c3598-35fc-424e-b05a-902ee9f11d56")
                 .put("case_ref", caseRef)
                 .put("jurisdiction", JURSIDICTION)
                 .put("zip_file_name", "zip-file-test.zip")
-                .put("classification", Classification.NEW_APPLICATION)
+                .put("classification", classification)
                 .put("documents", new JSONArray()
                     .put(new JSONObject()
                         .put("file_name", "hello.pdf")
@@ -74,10 +97,7 @@ public class SampleData {
         } catch (Exception e) {
             throw new RuntimeException("Could not make envelopeJson", e);
         }
-    }
 
-    public static byte[] envelopeJson() {
-        return envelopeJson(CASE_REF);
     }
 
     public static String fromFile(String file) {

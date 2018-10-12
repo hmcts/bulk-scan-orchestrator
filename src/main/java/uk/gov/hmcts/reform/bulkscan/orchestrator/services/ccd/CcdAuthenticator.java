@@ -26,10 +26,6 @@ public class CcdAuthenticator {
         return new CcdAuthenticator(serviceTokenSupplier, userDetails, userTokenSupplier);
     }
 
-    public UserDetails getUserDetails() {
-        return userDetails;
-    }
-
     public String getUserToken() {
         return this.userTokenSupplier.get();
     }
@@ -38,4 +34,7 @@ public class CcdAuthenticator {
         return this.serviceTokenSupplier.get();
     }
 
+    public UserDetails getUserDetails() {
+        return this.userDetails;
+    }
 }
