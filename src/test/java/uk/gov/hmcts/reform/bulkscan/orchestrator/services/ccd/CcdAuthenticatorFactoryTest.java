@@ -49,7 +49,7 @@ public class CcdAuthenticatorFactoryTest {
 
         assertThat(authenticator.getServiceToken()).isEqualTo(SERVICE_TOKEN);
         assertThat(authenticator.getUserToken()).isEqualTo(USER_TOKEN);
-        assertThat(authenticator.userDetails.getId()).isEqualTo(USER_ID);
+        assertThat(authenticator.getUserDetails().getId()).isEqualTo(USER_ID);
     }
 
 }

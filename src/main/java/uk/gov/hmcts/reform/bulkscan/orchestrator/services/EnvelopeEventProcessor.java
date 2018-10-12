@@ -6,6 +6,8 @@ import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageHandler;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.strategy.Strategy;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.strategy.StrategyContainer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -45,8 +47,8 @@ public class EnvelopeEventProcessor implements IMessageHandler {
             ? null
             : caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
 
-        // - create record from envelope and case
-        // - supply it to ccd event publisher
+        Strategy strategy = StrategyContainer.getStrategy(envelope, theCase);
+        strategy.execute(envelope);
     }
 
     @Override
