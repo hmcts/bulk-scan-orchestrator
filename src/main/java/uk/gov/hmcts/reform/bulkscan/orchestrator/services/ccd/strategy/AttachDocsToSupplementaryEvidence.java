@@ -1,10 +1,12 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.strategy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.SupplementaryEvidence;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.SupplementaryEvidenceMapper;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -12,9 +14,9 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 @Service
-public class SupplementaryEvidenceCreator {
+public class AttachDocsToSupplementaryEvidence {
 
-    private static final Logger log = LoggerFactory.getLogger(SupplementaryEvidenceCreator.class);
+    private static final Logger log = LoggerFactory.getLogger(AttachDocsToSupplementaryEvidence.class);
 
     private static final String CASE_TYPE_ID = "Bulk_Scanned";
     private static final String EVENT_TYPE_ID = "attachScannedDocs";
@@ -22,7 +24,7 @@ public class SupplementaryEvidenceCreator {
     private final CcdAuthenticatorFactory authenticatorFactory;
     private final CoreCaseDataApi coreCaseDataApi;
 
-    SupplementaryEvidenceCreator(
+    AttachDocsToSupplementaryEvidence(
         CcdAuthenticatorFactory authenticatorFactory,
         CoreCaseDataApi coreCaseDataApi
     ) {

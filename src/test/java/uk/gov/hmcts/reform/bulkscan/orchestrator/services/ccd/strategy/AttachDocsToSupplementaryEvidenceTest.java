@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.strategy;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -9,6 +9,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.SupplementaryEvidence;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.SupplementaryEvidenceMapper;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -26,7 +27,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_DETAILS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_TOKEN;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SupplementaryEvidenceCreatorTest {
+public class AttachDocsToSupplementaryEvidenceTest {
 
     private static final String CASE_TYPE_ID = "Bulk_Scanned";
     private static final String EVENT_TYPE_ID = "attachScannedDocs";
@@ -37,13 +38,13 @@ public class SupplementaryEvidenceCreatorTest {
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
 
-    private SupplementaryEvidenceCreator creator;
+    private AttachDocsToSupplementaryEvidence creator;
 
     @Before
     public void setUp() {
         given(authenticatorFactory.createForJurisdiction(any())).willReturn(AUTH_DETAILS);
 
-        creator = new SupplementaryEvidenceCreator(authenticatorFactory, coreCaseDataApi);
+        creator = new AttachDocsToSupplementaryEvidence(authenticatorFactory, coreCaseDataApi);
     }
 
     @Test
