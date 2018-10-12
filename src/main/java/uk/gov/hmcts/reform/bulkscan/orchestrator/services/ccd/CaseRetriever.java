@@ -32,7 +32,7 @@ public class CaseRetriever {
             CaseDetails caseDetails = coreCaseDataApi.readForCaseWorker(
                 authenticator.getUserToken(),
                 authenticator.getServiceToken(),
-                authenticator.userDetails.getId(),
+                authenticator.getUserDetails().getId(),
                 jurisdiction,
                 CASE_TYPE_ID,
                 caseRef
