@@ -36,20 +36,9 @@ public class StrategyContainer {
     public Strategy getStrategy(Envelope envelope, CaseDetails caseDetails) {
         return availableStrategies
             .stream()
-            .filter(strategy -> evaluateStrategy(strategy, envelope.classification, caseDetails))
+            .filter(strategy -> strategy.isStrategyEligible(envelope.classification, caseDetails != null))
             .findFirst()
             .orElseThrow(() -> new RuntimeException("Strategy not found"));// replace with default aka exception record
-    }
-
-    private boolean evaluateStrategy(
-        Expression expression,
-        Classification classification,
-        CaseDetails caseDetails
-    ) {
-        return expression.isStrategyEligible(
-            classification,
-            Optional.ofNullable(caseDetails).isPresent()
-        );
     }
 
     private StrategyContainer() {
