@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -31,11 +30,6 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
  *     }
  *
  *     @Override
- *     public boolean isStrategyEligible(Classification classification, boolean caseExists) {
- *         return false; // by default it returns false so override in case strategy needs any rules to apply
- *     }
- *
- *     @Override
  *     Object mapEnvelopeToCaseDataObject(Envelope envelope) {
  *         return null; // implement this
  *     }
@@ -56,7 +50,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
  * @Resource(name = "strategy-name")
  * private Strategy someNamedStrategy;}</pre>
  * <p/>
- * Then include each strategy in {@link StrategyContainer#setUpStrategies()}
+ * Then include each strategy in {@link StrategyContainer}
  */
 abstract class AbstractStrategy implements Strategy {
 
@@ -69,11 +63,6 @@ abstract class AbstractStrategy implements Strategy {
 
     @Autowired
     private CcdAuthenticatorFactory authenticatorFactory;
-
-    @Override
-    public boolean isStrategyEligible(Classification classification, boolean caseExists) {
-        return false;
-    }
 
     @Override
     public void execute(Envelope envelope) {

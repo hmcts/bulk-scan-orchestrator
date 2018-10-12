@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.strategy.Strategy;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.strategy.StrategyContainer;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -108,16 +107,8 @@ public class EnvelopeEventProcessorTest {
     }
 
     private Strategy getDummyStrategy() {
-        return new Strategy() {
-            @Override
-            public void execute(Envelope envelope) {
-                //
-            }
-
-            @Override
-            public boolean isStrategyEligible(Classification classification, boolean caseExists) {
-                return true;
-            }
+        return (Envelope envelope) -> {
+            //
         };
     }
 }
