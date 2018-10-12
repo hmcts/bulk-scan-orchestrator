@@ -11,6 +11,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
 public class CaseRetriever {
+
     public static final String CASE_TYPE_ID = "Bulk_Scanned";
 
     private static final Logger log = LoggerFactory.getLogger(CaseRetriever.class);
@@ -19,7 +20,7 @@ public class CaseRetriever {
 
     private final CoreCaseDataApi coreCaseDataApi;
 
-    CaseRetriever(CcdAuthenticatorFactory factory, CoreCaseDataApi coreCaseDataApi) {
+    public CaseRetriever(CcdAuthenticatorFactory factory, CoreCaseDataApi coreCaseDataApi) {
         this.factory = factory;
         this.coreCaseDataApi = coreCaseDataApi;
     }
@@ -32,7 +33,7 @@ public class CaseRetriever {
             CaseDetails caseDetails = coreCaseDataApi.readForCaseWorker(
                 authenticator.getUserToken(),
                 authenticator.getServiceToken(),
-                authenticator.userDetails.getId(),
+                authenticator.getUserDetails().getId(),
                 jurisdiction,
                 CASE_TYPE_ID,
                 caseRef

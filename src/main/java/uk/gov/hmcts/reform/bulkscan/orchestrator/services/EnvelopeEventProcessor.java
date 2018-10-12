@@ -1,13 +1,14 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
 
-import com.google.common.base.Strings;
 import com.microsoft.azure.servicebus.ExceptionPhase;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.SupplementaryEvidenceCreator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -16,10 +17,12 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.Enve
 @Service
 public class EnvelopeEventProcessor implements IMessageHandler {
 
-    private final CaseRetriever caseRetriever;
+    private static final Logger log = LoggerFactory.getLogger(EnvelopeEventProcessor.class);
 
-    public EnvelopeEventProcessor(CaseRetriever caseRetriever) {
-        this.caseRetriever = caseRetriever;
+    private final SupplementaryEvidenceCreator supplementaryEvidenceCreator;
+
+    public EnvelopeEventProcessor(SupplementaryEvidenceCreator supplementaryEvidenceCreator) {
+        this.supplementaryEvidenceCreator = supplementaryEvidenceCreator;
     }
 
     @Override
@@ -41,12 +44,17 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
     private void process(IMessage message) {
         Envelope envelope = parse(message.getBody());
-        CaseDetails theCase = Strings.isNullOrEmpty(envelope.caseRef)
-            ? null
-            : caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
 
-        // - create record from envelope and case
-        // - supply it to ccd event publisher
+        if (envelope.classification == Classification.SUPPLEMENTARY_EVIDENCE) {
+            supplementaryEvidenceCreator.createSupplementaryEvidence(envelope);
+        } else {
+            log.info(
+                "Skipped processing of envelope ID {} for case {} - classification {} not handled yet",
+                envelope.id,
+                envelope.caseRef,
+                envelope.classification
+            );
+        }
     }
 
     @Override
