@@ -123,6 +123,7 @@ public class EnvelopeEventProcessorTest {
         // when
         processor.onMessageAsync(someMessage);
 
+        // then
         verifyNoMoreInteractions(supplementaryEvidenceCreator);
     }
 
@@ -134,6 +135,7 @@ public class EnvelopeEventProcessorTest {
         // when
         processor.onMessageAsync(someMessage);
 
+        // then
         verifyNoMoreInteractions(supplementaryEvidenceCreator);
     }
 }
