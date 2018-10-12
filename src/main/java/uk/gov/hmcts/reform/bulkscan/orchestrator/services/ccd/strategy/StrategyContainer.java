@@ -4,6 +4,8 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import javax.annotation.Resource;
+
 /**
  * Container class to hold availableStrategies strategies enabled by this project.
  * In order to enable one must do:
@@ -16,11 +18,17 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 @Component
 public class StrategyContainer {
 
+    @Resource(name = "attach-docs-to-supplementary-evidence")
+    private Strategy attachDocsStrategy;
+
     public Strategy getStrategy(Envelope envelope, CaseDetails caseDetails) {
         Strategy strategy = null;
 
         switch (envelope.classification) {
             case SUPPLEMENTARY_EVIDENCE:
+                strategy = attachDocsStrategy;
+
+                break;
             case EXCEPTION:
             case NEW_APPLICATION:
             default:

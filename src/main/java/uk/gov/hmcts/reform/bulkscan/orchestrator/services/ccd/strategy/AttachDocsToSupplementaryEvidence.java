@@ -1,103 +1,28 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.strategy;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.SupplementaryEvidence;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.SupplementaryEvidenceMapper;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
-import uk.gov.hmcts.reform.ccd.client.model.Event;
-import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
-@Service
-public class AttachDocsToSupplementaryEvidence {
+@Component("attach-docs-to-supplementary-evidence")
+class AttachDocsToSupplementaryEvidence extends AbstractStrategy {
 
-    private static final Logger log = LoggerFactory.getLogger(AttachDocsToSupplementaryEvidence.class);
-
-    private static final String CASE_TYPE_ID = "Bulk_Scanned";
-    private static final String EVENT_TYPE_ID = "attachScannedDocs";
-
-    private final CcdAuthenticatorFactory authenticatorFactory;
-    private final CoreCaseDataApi coreCaseDataApi;
-
-    AttachDocsToSupplementaryEvidence(
-        CcdAuthenticatorFactory authenticatorFactory,
-        CoreCaseDataApi coreCaseDataApi
-    ) {
-        this.authenticatorFactory = authenticatorFactory;
-        this.coreCaseDataApi = coreCaseDataApi;
+    @Override
+    Object mapEnvelopeToCaseDataObject(Envelope envelope) {
+        return SupplementaryEvidenceMapper.fromEnvelope(envelope);
     }
 
-    public void createSupplementaryEvidence(Envelope envelope) {
-        log.info("Creating supplementary evidence for case {}", envelope.caseRef);
-
-        CcdAuthenticator authenticator =
-            authenticatorFactory.createForJurisdiction(envelope.jurisdiction);
-
-        StartEventResponse startEventResponse =
-            startEvent(authenticator, envelope.jurisdiction, envelope.caseRef);
-
-        log.debug("Started {} event for case {}", startEventResponse.getEventId(), envelope.caseRef);
-
-        CaseDataContent caseDataContent = prepareCaseDataContent(
-            startEventResponse.getToken(),
-            SupplementaryEvidenceMapper.fromEnvelope(envelope)
-        );
-
-        submitEvent(authenticator, envelope.jurisdiction, envelope.caseRef, caseDataContent);
-
-        log.debug("Submitted {} event for case {}", startEventResponse.getEventId(), envelope.caseRef);
+    @Override
+    String getEventTypeId() {
+        return "attachScannedDocs";
     }
 
-    private CaseDataContent prepareCaseDataContent(
-        String eventToken,
-        SupplementaryEvidence supplementaryEvidence
-    ) {
-        return CaseDataContent.builder()
-            .eventToken(eventToken)
-            .event(Event.builder()
-                .id(EVENT_TYPE_ID)
-                .summary("Attach scanned documents")
-                .build())
-            .data(supplementaryEvidence)
-            .build();
+    @Override
+    String getEventSummary() {
+        return "Attach scanned documents";
     }
 
-    private StartEventResponse startEvent(
-        CcdAuthenticator authenticator,
-        String jurisdiction,
-        String caseRef
-    ) {
-        return coreCaseDataApi.startEventForCaseWorker(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
-            jurisdiction,
-            CASE_TYPE_ID,
-            caseRef,
-            EVENT_TYPE_ID
-        );
-    }
-
-    private void submitEvent(
-        CcdAuthenticator authenticator,
-        String jurisdiction,
-        String caseRef,
-        CaseDataContent caseDataContent
-    ) {
-        coreCaseDataApi.submitEventForCaseWorker(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
-            jurisdiction,
-            CASE_TYPE_ID,
-            caseRef,
-            true,
-            caseDataContent
-        );
+    AttachDocsToSupplementaryEvidence() {
+        // empty strategy constructor
     }
 }

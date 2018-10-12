@@ -4,7 +4,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.SupplementaryEvidence;
@@ -38,13 +40,14 @@ public class AttachDocsToSupplementaryEvidenceTest {
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
 
-    private AttachDocsToSupplementaryEvidence creator;
+    @InjectMocks
+    private Strategy strategy = new AttachDocsToSupplementaryEvidence();
 
     @Before
     public void setUp() {
-        given(authenticatorFactory.createForJurisdiction(any())).willReturn(AUTH_DETAILS);
+        MockitoAnnotations.initMocks(this);
 
-        creator = new AttachDocsToSupplementaryEvidence(authenticatorFactory, coreCaseDataApi);
+        given(authenticatorFactory.createForJurisdiction(any())).willReturn(AUTH_DETAILS);
     }
 
     @Test
@@ -58,7 +61,7 @@ public class AttachDocsToSupplementaryEvidenceTest {
         given(coreCaseDataApi.startEventForCaseWorker(any(), any(), any(), any(), any(), any(), any()))
             .willReturn(startEventResponse);
 
-        creator.createSupplementaryEvidence(envelope);
+        strategy.execute(envelope);
 
         verifyEventStarted(envelope);
         verifyEventSubmitted(envelope, eventToken);
