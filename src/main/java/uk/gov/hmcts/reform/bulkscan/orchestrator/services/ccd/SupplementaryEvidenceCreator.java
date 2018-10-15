@@ -33,21 +33,22 @@ public class SupplementaryEvidenceCreator {
     public void createSupplementaryEvidence(Envelope envelope) {
         log.info("Creating supplementary evidence for case {}", envelope.caseRef);
 
-        CcdAuthenticator info = authenticatorFactory.createForJurisdiction(envelope.jurisdiction);
+        CcdAuthenticator authenticator =
+            authenticatorFactory.createForJurisdiction(envelope.jurisdiction);
 
         StartEventResponse startEventResponse =
-            startEvent(info, envelope.jurisdiction, envelope.caseRef);
+            startEvent(authenticator, envelope.jurisdiction, envelope.caseRef);
 
-        log.info("Started {} event for case {}", startEventResponse.getEventId(), envelope.caseRef);
+        log.debug("Started {} event for case {}", startEventResponse.getEventId(), envelope.caseRef);
 
         CaseDataContent caseDataContent = prepareCaseDataContent(
             startEventResponse.getToken(),
             SupplementaryEvidenceMapper.fromEnvelope(envelope)
         );
 
-        submitEvent(info, envelope.jurisdiction, envelope.caseRef, caseDataContent);
+        submitEvent(authenticator, envelope.jurisdiction, envelope.caseRef, caseDataContent);
 
-        log.info("Submitted {} event for case {}", startEventResponse.getEventId(), envelope.caseRef);
+        log.debug("Submitted {} event for case {}", startEventResponse.getEventId(), envelope.caseRef);
     }
 
     private CaseDataContent prepareCaseDataContent(
@@ -59,7 +60,6 @@ public class SupplementaryEvidenceCreator {
             .event(Event.builder()
                 .id(EVENT_TYPE_ID)
                 .summary("Attach scanned documents")
-                .description("Attach scanned documents")
                 .build())
             .data(supplementaryEvidence)
             .build();

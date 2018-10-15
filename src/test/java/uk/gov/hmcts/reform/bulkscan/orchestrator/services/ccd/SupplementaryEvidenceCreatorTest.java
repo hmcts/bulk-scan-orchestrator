@@ -15,13 +15,10 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.AUTH_DETAILS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.SERVICE_TOKEN;
@@ -66,24 +63,6 @@ public class SupplementaryEvidenceCreatorTest {
         verifyEventSubmitted(envelope, eventToken);
     }
 
-    @Test
-    public void createSupplementaryEvidence_does_not_submit_event_when_starting_fails() {
-        Exception expectedException = new RuntimeException("test exception");
-
-        willThrow(expectedException)
-            .given(coreCaseDataApi)
-            .startEventForCaseWorker(any(), any(), any(), any(), any(), any(), any());
-
-        Throwable actualException = catchThrowable(
-            () -> creator.createSupplementaryEvidence(SampleData.envelope(1))
-        );
-
-        assertThat(actualException).isSameAs(expectedException);
-
-        verify(coreCaseDataApi, never())
-            .submitEventForCaseWorker(any(), any(), any(), any(), any(), any(), eq(true), any());
-    }
-
     private void assertCaseDataContentHasRightData(
         CaseDataContent caseDataContent,
         String eventToken,
@@ -92,7 +71,6 @@ public class SupplementaryEvidenceCreatorTest {
         assertThat(caseDataContent.getEventToken()).isEqualTo(eventToken);
         assertThat(caseDataContent.getEvent().getId()).isEqualTo(EVENT_TYPE_ID);
         assertThat(caseDataContent.getEvent().getSummary()).isEqualTo("Attach scanned documents");
-        assertThat(caseDataContent.getEvent().getDescription()).isEqualTo("Attach scanned documents");
 
         SupplementaryEvidence supplementaryEvidence = SupplementaryEvidenceMapper.fromEnvelope(envelope);
 
