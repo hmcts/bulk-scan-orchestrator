@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.strategy;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
 import org.junit.Before;
 import org.junit.Test;

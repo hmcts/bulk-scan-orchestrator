@@ -8,8 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.strategy.Strategy;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.strategy.StrategyContainer;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.Strategy;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.StrategyContainer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
