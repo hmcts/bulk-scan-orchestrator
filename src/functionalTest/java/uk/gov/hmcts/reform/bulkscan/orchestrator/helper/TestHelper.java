@@ -9,6 +9,7 @@ import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
 
+@SuppressWarnings("unchecked")
 public class TestHelper {
 
     public static List<ScannedDocument> getScannedDocuments(CaseDetails caseDetails) {
