@@ -25,11 +25,9 @@ public class ReceiverFactory implements MessageReceiverFactory {
         try {
             return ClientFactory.createMessageReceiverFromConnectionString(connString, ReceiveMode.PEEKLOCK);
         } catch (InterruptedException e) {
-            logger.error("Interrupted error.", e);
             Thread.currentThread().interrupt();
             throw new ConnectionException("Unable to connect to queue", e);
         } catch (ServiceBusException e) {
-            logger.error("ServiceBus error.", e);
             throw new ConnectionException("Unable to connect to queue", e);
         }
     }
