@@ -45,7 +45,7 @@ class CaseRetrievalTest {
             System.setProperty("wiremock.port", SocketUtils.findAvailableTcpPort().toString())
         }
 
-        val USER_ID = "32"
+        val USER_ID = "640"
         val JURIDICTION = "BULKSCAN"
         val CASE_TYPE = CaseRetriever.CASE_TYPE_ID
         val CASE_REF = "1537879748168579"
