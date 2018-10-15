@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
-public interface Strategy {
+public interface EventPublisher {
 
-    void execute(Envelope envelope);
+    void publish(Envelope envelope);
 }

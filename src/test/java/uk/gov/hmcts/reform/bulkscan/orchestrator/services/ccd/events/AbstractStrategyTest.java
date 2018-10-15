@@ -33,7 +33,7 @@ public class AbstractStrategyTest {
     private static final Envelope ENVELOPE = SampleData.envelope(1);
 
     @InjectMocks
-    private Strategy strategy = new AbstractStrategy() {
+    private EventPublisher eventPublisher = new AbstractStrategy() {
 
         @Override
         Object mapEnvelopeToCaseDataObject(Envelope envelope) {
@@ -75,7 +75,7 @@ public class AbstractStrategyTest {
             .willReturn(StartEventResponse.builder().token("event token").build());
 
         // when
-        strategy.execute(ENVELOPE);
+        eventPublisher.publish(ENVELOPE);
 
         //then
         verify(ccdApi).startEventForCaseWorker(

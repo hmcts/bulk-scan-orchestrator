@@ -41,7 +41,7 @@ public class AttachDocsToSupplementaryEvidenceTest {
     private CoreCaseDataApi coreCaseDataApi;
 
     @InjectMocks
-    private Strategy strategy = new AttachDocsToSupplementaryEvidence();
+    private EventPublisher eventPublisher = new AttachDocsToSupplementaryEvidence();
 
     @Before
     public void setUp() {
@@ -61,7 +61,7 @@ public class AttachDocsToSupplementaryEvidenceTest {
         given(coreCaseDataApi.startEventForCaseWorker(any(), any(), any(), any(), any(), any(), any()))
             .willReturn(startEventResponse);
 
-        strategy.execute(envelope);
+        eventPublisher.publish(envelope);
 
         verifyEventStarted(envelope);
         verifyEventSubmitted(envelope, eventToken);

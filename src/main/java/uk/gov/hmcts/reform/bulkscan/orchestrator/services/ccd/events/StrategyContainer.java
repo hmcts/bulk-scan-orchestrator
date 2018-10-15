@@ -11,7 +11,7 @@ import javax.annotation.Resource;
  * In order to enable one must do:
  * <ul>
  *     <li>implement {@link AbstractStrategy}</li>
- *     <li>include {@code @Resource(name = "strategy-name") private Strategy someStrategy;}</li>
+ *     <li>include {@code @Resource(name = "publisher-name") private EventPublisher somePublisher;}</li>
  *     <li>use resource in {@link this#getStrategy(Envelope, CaseDetails)}</li>
  * </ul>
  */
@@ -19,14 +19,14 @@ import javax.annotation.Resource;
 public class StrategyContainer {
 
     @Resource(name = "attach-docs-to-supplementary-evidence")
-    private Strategy attachDocsStrategy;
+    private EventPublisher attachDocsPublisher;
 
-    public Strategy getStrategy(Envelope envelope, CaseDetails caseDetails) {
-        Strategy strategy = null;
+    public EventPublisher getStrategy(Envelope envelope, CaseDetails caseDetails) {
+        EventPublisher eventPublisher = null;
 
         switch (envelope.classification) {
             case SUPPLEMENTARY_EVIDENCE:
-                strategy = attachDocsStrategy;
+                eventPublisher = attachDocsPublisher;
 
                 break;
             case EXCEPTION:
@@ -35,7 +35,7 @@ public class StrategyContainer {
                 break;
         }
 
-        return strategy;
+        return eventPublisher;
     }
 
     StrategyContainer() {

@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.Strategy;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.StrategyContainer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -54,10 +54,10 @@ public class EnvelopeEventProcessor implements IMessageHandler {
             ? null
             : caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
 
-        Strategy strategy = strategyContainer.getStrategy(envelope, theCase);
+        EventPublisher eventPublisher = strategyContainer.getStrategy(envelope, theCase);
 
-        if (strategy != null) {
-            strategy.execute(envelope);
+        if (eventPublisher != null) {
+            eventPublisher.publish(envelope);
         } else {
             log.info(
                 "Skipped processing of envelope ID {} for case {} - classification {} not handled yet",

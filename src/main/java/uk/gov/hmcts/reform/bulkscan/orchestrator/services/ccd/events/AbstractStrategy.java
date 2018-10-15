@@ -47,12 +47,12 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
  * <p/>
  * No need to make any public access as everything will be injected in {@link StrategyContainer}:
  * <pre>{@code
- * @Resource(name = "strategy-name")
- * private Strategy someNamedStrategy;}</pre>
+ * @Resource(name = "publisher-name")
+ * private EventPublisher someNamedPublisher;}</pre>
  * <p/>
  * Then include each strategy in {@link StrategyContainer}
  */
-abstract class AbstractStrategy implements Strategy {
+abstract class AbstractStrategy implements EventPublisher {
 
     static final String CASE_TYPE_ID = "Bulk_Scanned";
 
@@ -65,7 +65,7 @@ abstract class AbstractStrategy implements Strategy {
     private CcdAuthenticatorFactory authenticatorFactory;
 
     @Override
-    public void execute(Envelope envelope) {
+    public void publish(Envelope envelope) {
         String caseRef = envelope.caseRef;
         String jurisdiction = envelope.jurisdiction;
 
@@ -144,7 +144,7 @@ abstract class AbstractStrategy implements Strategy {
     // end region - execution steps
 
     /**
-     * Strategy is coupled with event type id. Used in building case data.
+     * EventPublisher is coupled with event type id. Used in building case data.
      * @return Event type ID
      */
     abstract String getEventTypeId();

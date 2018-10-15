@@ -33,7 +33,7 @@ public class StrategyContainerTest {
     @Test
     public void should_get_AttachDocsToSupplementaryEvidence_strategy() throws IOException {
         // when
-        Strategy strategy = strategyContainer.getStrategy(
+        EventPublisher eventPublisher = strategyContainer.getStrategy(
             objectMapper.readValue(
                 envelopeJson(Classification.SUPPLEMENTARY_EVIDENCE),
                 Envelope.class
@@ -42,6 +42,6 @@ public class StrategyContainerTest {
         );
 
         // then
-        assertThat(strategy).isInstanceOf(attachDocsToSupplementaryEvidence.getClass());
+        assertThat(eventPublisher).isInstanceOf(attachDocsToSupplementaryEvidence.getClass());
     }
 }
