@@ -1,0 +1,15 @@
+{
+  "id": "0192",
+  "jurisdiction": "BULKSCAN",
+  "classification": "NEW_APPLICATION",
+  "zip_file_name": "zip-file-test-updated.zip",
+  "documents": [
+    {
+      "file_name": "cert_updated.pdf",
+      "control_number": "control_number_updated",
+      "type": "other",
+      "scanned_at": "1970-01-01T00:00:00.000Z",
+      "url": "https://example.gov.uk/123456"
+    }
+  ]
+}

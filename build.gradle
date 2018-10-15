@@ -89,6 +89,7 @@ checkstyle {
   toolVersion = '8.10.1'
   // need to set configDir to rootDir otherwise submodule will use submodule/config/checkstyle
   configDir = new File(rootDir, 'config/checkstyle')
+  sourceSets = []
 }
 
 pmd {
@@ -189,6 +190,7 @@ dependencies {
   testCompile group: 'org.junit.vintage', name: 'junit-vintage-engine', version: versions.junit
   testCompile group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '2.0.1.RELEASE'
   testCompile group: 'org.awaitility', name: 'awaitility', version: '3.0.0'
+  testCompile group: 'io.rest-assured', name: 'rest-assured', version: '3.1.1'
 
   annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
   integrationTestCompile sourceSets.main.runtimeClasspath
