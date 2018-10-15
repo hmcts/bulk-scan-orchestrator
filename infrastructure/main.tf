@@ -38,11 +38,14 @@ locals {
                                     data.azurerm_key_vault_secret.idam_users_passwords.*.value
                                 )}"
 
+  s2s_url           = "http://rpe-service-auth-provider-${local.local_env}.service.core-compute-${local.local_env}.internal"
+  s2s_vault_url     = "https://s2s-${local.local_env}.vault.azure.net/"
+
   core_app_settings = {
     LOGBACK_REQUIRE_ALERT_LEVEL = false
     LOGBACK_REQUIRE_ERROR_CODE  = false
 
-    S2S_URL = "http://rpe-service-auth-provider-${local.local_env}.service.core-compute-${local.local_env}.internal"
+    S2S_URL     = "${local.s2s_url}"
 
     QUEUE_CONNECTION_STRING = "${data.terraform_remote_state.shared_infra.queue_primary_listen_connection_string}"
 
@@ -90,5 +93,17 @@ data "azurerm_key_vault_secret" "idam_users_passwords" {
 
 data "azurerm_key_vault_secret" "idam_client_secret" {
   name      = "idam-client-secret"
+  vault_uri = "${data.azurerm_key_vault.key_vault.vault_uri}"
+}
+
+data "azurerm_key_vault_secret" "s2s_secret" {
+  name = "microservicekey-bulk-scan-orchestrator"
+  vault_uri = "${local.s2s_vault_url}"
+}
+
+# the s2s secret is copied to app's own vault, so that Jeknins can convert it to an env variable
+resource "azurerm_key_vault_secret" "s2s_secret_for_tests" {
+  name  = "s2s-secret-for-tests"
+  value = "${data.azurerm_key_vault_secret.s2s_secret.value}"
   vault_uri = "${data.azurerm_key_vault.key_vault.vault_uri}"
 }
