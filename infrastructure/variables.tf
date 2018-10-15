@@ -48,3 +48,7 @@ variable "idam_api_url" {
 variable "idam_redirect_uri" {
   default = "https://rpe-bulk-scan-processor-sandbox.service.core-compute-sandbox.internal/oauth2/callback"
 }
+
+variable "s2s_name" {
+  default = "bulk_scan_orchestrator"
+}
