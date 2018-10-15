@@ -46,6 +46,8 @@ locals {
     LOGBACK_REQUIRE_ERROR_CODE  = false
 
     S2S_URL     = "${local.s2s_url}"
+    S2S_NAME    = "${var.s2s_name}"
+    S2S_SECRET  = "${data.azurerm_key_vault_secret.s2s_secret.value}"
 
     QUEUE_CONNECTION_STRING = "${data.terraform_remote_state.shared_infra.queue_primary_listen_connection_string}"
 
