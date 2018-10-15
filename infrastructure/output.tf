@@ -2,6 +2,14 @@ output "microserviceName" {
   value = "${var.component}"
 }
 
+output "vaultName" {
+  value = "${local.vaultName}"
+}
+
+output "vaultUri" {
+  value = "${data.azurerm_key_vault.key_vault.vault_uri}"
+}
+
 // region: settings for functional tests
 
 output "QUEUE_READ_CONN_STRING" {
