@@ -4,11 +4,14 @@
   "request" : {
     "url" : "/caseworkers/640/jurisdictions/BULKSCAN/case-types/Bulk_Scanned/cases/1539007368674134/events?ignore-warning=true",
     "method" : "POST",
-    "bodyPatterns" : [ {
-      "equalToJson" : "{\"event\":{\"id\":\"attachScannedDocs\",\"summary\":\"Attach scanned documents\",\"description\":\"Attach scanned documents\"},\"data\":{\"scannedDocuments\":[{\"value\":{\"fileName\":\"testfilename\",\"controlNumber\":\"1234\",\"type\":\"other\",\"scannedDate\":\"2018-01-01\"}}]},\"security_classification\":null,\"event_token\":\"eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIxMzN1b2x0aGtkZjc5dGp2bnUyNm9ma3VoMCIsInN1YiI6IjY0MCIsImlhdCI6MTUzOTAwODgyNiwiY2FzZS1pZCI6IjEiLCJldmVudC1pZCI6ImF0dGFjaFNjYW5uZWREb2NzIiwiY2FzZS10eXBlLWlkIjoiQnVsa19TY2FubmVkIiwianVyaXNkaWN0aW9uLWlkIjoiQlVMS1NDQU4iLCJjYXNlLXN0YXRlIjoiU2Nhbm5lZFJlY29yZEZvdW5kIiwiY2FzZS12ZXJzaW9uIjoiMTY1YTA2ZDc2Yjk4MmUyNzEyOTFiMmRjYTMwMTAwNmNmNWM3Y2ExMyJ9.KqW1Xu-y6SmAUb6w7wsjv4aVPHdQyBjim67RcHW0uUs\",\"ignore_warning\":false}",
-      "ignoreArrayOrder" : true,
-      "ignoreExtraElements" : true
-    } ]
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": {
+          "expression": "$.data.scannedDocuments[0].value.fileName",
+          "contains": "testfilename"
+        }
+      }
+    ]
   },
   "response" : {
     "status" : 201,
