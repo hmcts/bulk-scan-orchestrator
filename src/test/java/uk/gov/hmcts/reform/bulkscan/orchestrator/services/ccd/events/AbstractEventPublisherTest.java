@@ -24,7 +24,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AbstractStrategyTest {
+public class AbstractEventPublisherTest {
 
     private static final String EVENT_TYPE_ID = "test";
 
@@ -33,7 +33,7 @@ public class AbstractStrategyTest {
     private static final Envelope ENVELOPE = SampleData.envelope(1);
 
     @InjectMocks
-    private EventPublisher eventPublisher = new AbstractStrategy() {
+    private EventPublisher eventPublisher = new AbstractEventPublisher() {
 
         @Override
         Object mapEnvelopeToCaseDataObject(Envelope envelope) {
@@ -83,7 +83,7 @@ public class AbstractStrategyTest {
             authenticator.getServiceToken(),
             authenticator.getUserDetails().getId(),
             ENVELOPE.jurisdiction,
-            AbstractStrategy.CASE_TYPE_ID,
+            AbstractEventPublisher.CASE_TYPE_ID,
             ENVELOPE.caseRef,
             EVENT_TYPE_ID
         );
@@ -94,7 +94,7 @@ public class AbstractStrategyTest {
             authenticator.getServiceToken(),
             authenticator.getUserDetails().getId(),
             ENVELOPE.jurisdiction,
-            AbstractStrategy.CASE_TYPE_ID,
+            AbstractEventPublisher.CASE_TYPE_ID,
             ENVELOPE.caseRef,
             true,
             CaseDataContent

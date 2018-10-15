@@ -10,7 +10,7 @@ import javax.annotation.Resource;
  * Container class to hold availableStrategies strategies enabled by this project.
  * In order to enable one must do:
  * <ul>
- *     <li>implement {@link AbstractStrategy}</li>
+ *     <li>implement {@link AbstractEventPublisher}</li>
  *     <li>include {@code @Resource(name = "publisher-name") private EventPublisher somePublisher;}</li>
  *     <li>use resource in {@link this#getPublisher(Envelope, CaseDetails)}</li>
  * </ul>

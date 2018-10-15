@@ -20,12 +20,12 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
  *     <li>create data content accordingly</li>
  *     <li>submit the event</li>
  * </ul>
- * Any strategy will have to be implemented as an example:
+ * Any publisher will have to be implemented as an example:
  * <pre>{@code
- * @Component("strategy-name")
- * class StrategyName extends AbstractStrategy {
+ * @Component("publisher-name")
+ * class PublisherName extends AbstractEventPublisher {
  *
- *     StrategyName() {
+ *     PublisherName() {
  *         // any extra autowiring needed
  *     }
  *
@@ -52,11 +52,11 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
  * <p/>
  * Then include each publisher in {@link EventPublisherContainer}
  */
-abstract class AbstractStrategy implements EventPublisher {
+abstract class AbstractEventPublisher implements EventPublisher {
 
     static final String CASE_TYPE_ID = "Bulk_Scanned";
 
-    private static final Logger log = LoggerFactory.getLogger(AbstractStrategy.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractEventPublisher.class);
 
     @Autowired
     private CoreCaseDataApi ccdApi;

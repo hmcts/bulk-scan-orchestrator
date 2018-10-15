@@ -5,7 +5,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.Supplementary
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
 @Component("attach-docs-to-supplementary-evidence")
-class AttachDocsToSupplementaryEvidence extends AbstractStrategy {
+class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
 
     @Override
     Object mapEnvelopeToCaseDataObject(Envelope envelope) {
