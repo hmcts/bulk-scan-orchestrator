@@ -12,8 +12,13 @@ import static java.util.stream.Collectors.toList;
 @SuppressWarnings("unchecked")
 public class TestHelper {
 
+    private TestHelper() {
+        // utility class
+    }
+
     public static List<ScannedDocument> getScannedDocuments(CaseDetails caseDetails) {
-        List<Map<String, Map<String, String>>> data = (List<Map<String, Map<String, String>>>) caseDetails.getData().get("scannedDocuments");
+        List<Map<String, Map<String, String>>> data =
+            (List<Map<String, Map<String, String>>>) caseDetails.getData().get("scannedDocuments");
 
         return data.stream().map(TestHelper::createDocumentFromMap).collect(toList());
     }

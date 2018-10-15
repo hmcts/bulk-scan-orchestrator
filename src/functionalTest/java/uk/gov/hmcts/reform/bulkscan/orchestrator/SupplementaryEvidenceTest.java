@@ -26,12 +26,12 @@ public class SupplementaryEvidenceTest extends BaseTest {
         // given
         String caseData = SampleData.fromFile("envelopes/new-envelope.json");
         Envelope envelope = EnvelopeParser.parse(caseData);
-        CaseDetails aCase = ccdCaseCreator.createCasee(envelope);
-        Assert.assertNotNull(aCase.getId());
+        CaseDetails caseDetails = ccdCaseCreator.createCasee(envelope);
+        Assert.assertNotNull(caseDetails.getId());
 
         // when
         JSONObject updateData = new JSONObject(SampleData.fromFile("envelopes/update-envelope.json"));
-        updateData.put("case_ref", aCase.getId());
+        updateData.put("case_ref", caseDetails.getId());
         byte[] updatedEnvelopeData = updateData.toString().getBytes();
 
         Message message = new Message();
@@ -52,7 +52,11 @@ public class SupplementaryEvidenceTest extends BaseTest {
     public void verifySupplementaryEvidenceDetailsUpdated(byte[] envelopeData) {
         Envelope updatedEnvelope = EnvelopeParser.parse(envelopeData);
 
-        CaseDetails updatedCaseDetails = caseRetriever.retrieve(updatedEnvelope.jurisdiction, String.valueOf(updatedEnvelope.caseRef));
+        CaseDetails updatedCaseDetails = caseRetriever.retrieve(
+            updatedEnvelope.jurisdiction,
+            String.valueOf(updatedEnvelope.caseRef)
+        );
+
         List<ScannedDocument> updatedScannedDocuments = TestHelper.getScannedDocuments(updatedCaseDetails);
 
         ScannedDocument updatedDocument = updatedScannedDocuments.get(0);
