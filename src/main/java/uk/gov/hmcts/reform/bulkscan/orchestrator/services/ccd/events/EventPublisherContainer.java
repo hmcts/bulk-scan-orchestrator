@@ -12,16 +12,16 @@ import javax.annotation.Resource;
  * <ul>
  *     <li>implement {@link AbstractStrategy}</li>
  *     <li>include {@code @Resource(name = "publisher-name") private EventPublisher somePublisher;}</li>
- *     <li>use resource in {@link this#getStrategy(Envelope, CaseDetails)}</li>
+ *     <li>use resource in {@link this#getPublisher(Envelope, CaseDetails)}</li>
  * </ul>
  */
 @Component
-public class StrategyContainer {
+public class EventPublisherContainer {
 
     @Resource(name = "attach-docs-to-supplementary-evidence")
     private EventPublisher attachDocsPublisher;
 
-    public EventPublisher getStrategy(Envelope envelope, CaseDetails caseDetails) {
+    public EventPublisher getPublisher(Envelope envelope, CaseDetails caseDetails) {
         EventPublisher eventPublisher = null;
 
         switch (envelope.classification) {
@@ -38,7 +38,7 @@ public class StrategyContainer {
         return eventPublisher;
     }
 
-    StrategyContainer() {
+    EventPublisherContainer() {
         // utility class constructor
     }
 }

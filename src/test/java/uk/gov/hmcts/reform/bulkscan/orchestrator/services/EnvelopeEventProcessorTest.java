@@ -9,7 +9,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.StrategyContainer;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisherContainer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -33,7 +33,7 @@ public class EnvelopeEventProcessorTest {
     @Mock
     private CaseRetriever caseRetriever;
     @Mock
-    private StrategyContainer strategyContainer;
+    private EventPublisherContainer eventPublisherContainer;
     @Mock
     private CcdAuthenticator authInfo;
 
@@ -41,11 +41,11 @@ public class EnvelopeEventProcessorTest {
 
     @Before
     public void before() {
-        processor = new EnvelopeEventProcessor(caseRetriever, strategyContainer);
+        processor = new EnvelopeEventProcessor(caseRetriever, eventPublisherContainer);
         when(caseRetriever.retrieve(eq(JURSIDICTION), eq(CASE_REF))).thenReturn(THE_CASE);
-        when(strategyContainer.getStrategy(any(Envelope.class), any(CaseDetails.class)))
+        when(eventPublisherContainer.getPublisher(any(Envelope.class), any(CaseDetails.class)))
             .thenReturn(getDummyPublisher());
-        when(strategyContainer.getStrategy(any(Envelope.class), eq(null)))
+        when(eventPublisherContainer.getPublisher(any(Envelope.class), eq(null)))
             .thenReturn(getDummyPublisher());
         given(someMessage.getBody()).willReturn(envelopeJson());
     }

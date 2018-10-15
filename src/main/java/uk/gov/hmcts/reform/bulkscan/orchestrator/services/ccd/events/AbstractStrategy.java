@@ -45,12 +45,12 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
  *     }
  * }}</pre>
  * <p/>
- * No need to make any public access as everything will be injected in {@link StrategyContainer}:
+ * No need to make any public access as everything will be injected in {@link EventPublisherContainer}:
  * <pre>{@code
  * @Resource(name = "publisher-name")
  * private EventPublisher someNamedPublisher;}</pre>
  * <p/>
- * Then include each strategy in {@link StrategyContainer}
+ * Then include each publisher in {@link EventPublisherContainer}
  */
 abstract class AbstractStrategy implements EventPublisher {
 

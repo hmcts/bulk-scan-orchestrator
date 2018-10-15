@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.StrategyContainer;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisherContainer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -24,11 +24,11 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
     private final CaseRetriever caseRetriever;
 
-    private final StrategyContainer strategyContainer;
+    private final EventPublisherContainer eventPublisherContainer;
 
-    public EnvelopeEventProcessor(CaseRetriever caseRetriever, StrategyContainer strategyContainer) {
+    public EnvelopeEventProcessor(CaseRetriever caseRetriever, EventPublisherContainer eventPublisherContainer) {
         this.caseRetriever = caseRetriever;
-        this.strategyContainer = strategyContainer;
+        this.eventPublisherContainer = eventPublisherContainer;
     }
 
     @Override
@@ -54,7 +54,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
             ? null
             : caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
 
-        EventPublisher eventPublisher = strategyContainer.getStrategy(envelope, theCase);
+        EventPublisher eventPublisher = eventPublisherContainer.getPublisher(envelope, theCase);
 
         if (eventPublisher != null) {
             eventPublisher.publish(envelope);

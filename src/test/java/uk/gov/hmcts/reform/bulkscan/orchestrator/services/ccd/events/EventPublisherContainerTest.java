@@ -17,13 +17,13 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelopeJson;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.objectMapper;
 
 @RunWith(MockitoJUnitRunner.class)
-public class StrategyContainerTest {
+public class EventPublisherContainerTest {
 
     @Mock
     private AttachDocsToSupplementaryEvidence attachDocsToSupplementaryEvidence;
 
     @InjectMocks
-    private StrategyContainer strategyContainer = new StrategyContainer();
+    private EventPublisherContainer eventPublisherContainer = new EventPublisherContainer();
 
     @Before
     public void setUp() {
@@ -33,7 +33,7 @@ public class StrategyContainerTest {
     @Test
     public void should_get_AttachDocsToSupplementaryEvidence_strategy() throws IOException {
         // when
-        EventPublisher eventPublisher = strategyContainer.getStrategy(
+        EventPublisher eventPublisher = eventPublisherContainer.getPublisher(
             objectMapper.readValue(
                 envelopeJson(Classification.SUPPLEMENTARY_EVIDENCE),
                 Envelope.class
