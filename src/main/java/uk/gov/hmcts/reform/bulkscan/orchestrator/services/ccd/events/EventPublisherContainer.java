@@ -18,10 +18,14 @@ public class EventPublisherContainer {
 
     private final EventPublisher attachDocsPublisher;
 
+    private final EventPublisher exceptionRecordCreator;
+
     EventPublisherContainer(
-        AttachDocsToSupplementaryEvidence attachDocsPublisher
+        AttachDocsToSupplementaryEvidence attachDocsPublisher,
+        CreateExceptionRecord exceptionRecordCreator
     ) {
         this.attachDocsPublisher = attachDocsPublisher;
+        this.exceptionRecordCreator = exceptionRecordCreator;
     }
 
     public EventPublisher getPublisher(Envelope envelope, CaseDetails caseDetails) {
@@ -29,10 +33,13 @@ public class EventPublisherContainer {
 
         switch (envelope.classification) {
             case SUPPLEMENTARY_EVIDENCE:
-                eventPublisher = attachDocsPublisher;
+                eventPublisher = caseDetails == null ? exceptionRecordCreator : attachDocsPublisher;
 
                 break;
             case EXCEPTION:
+                eventPublisher = exceptionRecordCreator;
+
+                break;
             case NEW_APPLICATION:
             default:
                 break;

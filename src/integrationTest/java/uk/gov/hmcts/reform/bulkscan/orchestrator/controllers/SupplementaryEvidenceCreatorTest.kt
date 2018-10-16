@@ -1,6 +1,9 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers
 
 import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.givenThat
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import com.microsoft.azure.servicebus.IMessageReceiver
@@ -47,11 +50,12 @@ class SupplementaryEvidenceCreatorTest {
         val CASE_TYPE = CaseRetriever.CASE_TYPE_ID
         val CASE_REF = "1539007368674134"
 
-        private fun submitCaseEventUrl() =
-            "/caseworkers/${USER_ID}/jurisdictions/${JURIDICTION}/case-types/${CASE_TYPE}/cases/${CASE_REF}/events"
+        private val caseUrl = "/caseworkers/$USER_ID/jurisdictions/$JURIDICTION/case-types/$CASE_TYPE/cases/$CASE_REF"
+        private val caseEventUrl = "$caseUrl/events"
     }
 
     private val mockMessage = Message(File("src/test/resources/example1.json").readText())
+    private val mockResponse = File("src/integrationTest/resources/ccd/response/sample-case.json").readText()
 
     @Autowired
     private lateinit var server: WireMockServer
@@ -62,6 +66,7 @@ class SupplementaryEvidenceCreatorTest {
     @BeforeEach
     fun before() {
         `when`(mockReceiver.receive()).thenReturn(mockMessage, null)
+        givenThat(get(caseUrl).willReturn(aResponse().withBody(mockResponse)))
     }
 
     @Test
@@ -70,7 +75,7 @@ class SupplementaryEvidenceCreatorTest {
             .atMost(30, TimeUnit.SECONDS)
             .ignoreExceptions()
             .until {
-                server.verify(postRequestedFor(urlPathEqualTo(submitCaseEventUrl())))
+                server.verify(postRequestedFor(urlPathEqualTo(caseEventUrl)))
                 true
             }
     }
