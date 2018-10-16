@@ -12,7 +12,7 @@ queue:
 
 core_case_data:
   api:
-    url: ${CCD_API_URL:'http://localhost:4452'}
+    url: ${CCD_API_URL:http://localhost:4452}
 
 idam:
   s2s-auth:
@@ -20,12 +20,12 @@ idam:
     secret: ${S2S_SECRET:AAAAAAAAAAAAAAAA}
     name:   ${S2S_NAME:bulk_scan_orchestrator}
   api:
-    url: ${IDAM_API_URL:'http://localhost:8080'}
+    url: ${IDAM_API_URL:http://localhost:8080}
   client:
     id: 'bsp'
     secret: ${IDAM_CLIENT_SECRET:123456}
-    redirect_uri: ${IDAM_REDIRECT_URI:'http://localhost/receiver'}
+    redirect_uri: ${IDAM_REDIRECT_URI:http://localhost/receiver}
   users:
     bulkscan:
-      username: ${IDAM_USER_NAME:'bulkscan+ccd@gmail.com'}
+      username: ${IDAM_USER_NAME:bulkscan+ccd@gmail.com}
       password: ${IDAM_USER_PASSWORD:Password12}
