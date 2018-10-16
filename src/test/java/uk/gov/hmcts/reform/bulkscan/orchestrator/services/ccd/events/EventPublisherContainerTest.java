@@ -3,9 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
@@ -22,16 +20,17 @@ public class EventPublisherContainerTest {
     @Mock
     private AttachDocsToSupplementaryEvidence attachDocsToSupplementaryEvidence;
 
-    @InjectMocks
-    private EventPublisherContainer eventPublisherContainer = new EventPublisherContainer();
+    private EventPublisherContainer eventPublisherContainer;
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        eventPublisherContainer = new EventPublisherContainer(
+            attachDocsToSupplementaryEvidence
+        );
     }
 
     @Test
-    public void should_get_AttachDocsToSupplementaryEvidence_strategy() throws IOException {
+    public void should_get_AttachDocsToSupplementaryEvidence_event_publisher() throws IOException {
         // when
         EventPublisher eventPublisher = eventPublisherContainer.getPublisher(
             objectMapper.readValue(

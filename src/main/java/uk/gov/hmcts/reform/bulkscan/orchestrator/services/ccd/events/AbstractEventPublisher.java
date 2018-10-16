@@ -22,7 +22,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
  * </ul>
  * Any publisher will have to be implemented as an example:
  * <pre>{@code
- * @Component("publisher-name")
+ * @Component
  * class PublisherName extends AbstractEventPublisher {
  *
  *     PublisherName() {
@@ -47,8 +47,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
  * <p/>
  * No need to make any public access as everything will be injected in {@link EventPublisherContainer}:
  * <pre>{@code
- * @Resource(name = "publisher-name")
- * private EventPublisher someNamedPublisher;}</pre>
+ * private final EventPublisher somePublisher;}</pre>
  * <p/>
  * Then include each publisher in {@link EventPublisherContainer}
  */

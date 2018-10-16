@@ -4,22 +4,25 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
-import javax.annotation.Resource;
-
 /**
  * Container class to hold availableStrategies strategies enabled by this project.
  * In order to enable one must do:
  * <ul>
  *     <li>implement {@link AbstractEventPublisher}</li>
- *     <li>include {@code @Resource(name = "publisher-name") private EventPublisher somePublisher;}</li>
+ *     <li>include {@code private EventPublisher somePublisher;}</li>
  *     <li>use resource in {@link this#getPublisher(Envelope, CaseDetails)}</li>
  * </ul>
  */
 @Component
 public class EventPublisherContainer {
 
-    @Resource(name = "attach-docs-to-supplementary-evidence")
-    private EventPublisher attachDocsPublisher;
+    private final EventPublisher attachDocsPublisher;
+
+    EventPublisherContainer(
+        AttachDocsToSupplementaryEvidence attachDocsPublisher
+    ) {
+        this.attachDocsPublisher = attachDocsPublisher;
+    }
 
     public EventPublisher getPublisher(Envelope envelope, CaseDetails caseDetails) {
         EventPublisher eventPublisher = null;
@@ -36,9 +39,5 @@ public class EventPublisherContainer {
         }
 
         return eventPublisher;
-    }
-
-    EventPublisherContainer() {
-        // utility class constructor
     }
 }
