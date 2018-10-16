@@ -24,13 +24,13 @@ public abstract class BaseTest {
     IMessageReceiver readClient;
     QueueClient writeClient;
 
-    @Value("queue.read-interval")
+    @Value("${queue.read-interval}")
     public int readInterval;
 
-    @Value("queue.connection-string")
+    @Value("${queue.connection-string}")
     public String queueReadConnectionString;
 
-    @Value("queue.write-connection-string")
+    @Value("${queue.write-connection-string}")
     public String queueWriteConnectionString;
 
     @Autowired
