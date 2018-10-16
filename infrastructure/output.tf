@@ -37,7 +37,7 @@ output "s2s_name" {
 }
 
 output "idam_user_name" {
-  value = "BULKSCAN"
+  value = "${local.users_usernames_settings["IDAM_USERS_BULKSCAN_USERNAME"]}"
 }
 
 // endregion

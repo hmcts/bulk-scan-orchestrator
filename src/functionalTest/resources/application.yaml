@@ -1,0 +1,57 @@
+//queue {
+//  read-interval = 30000 // todo: make configurable
+//  conn-strings {
+//    read  = ${QUEUE_READ_CONN_STRING}
+//    write = ${QUEUE_WRITE_CONN_STRING}
+//  }
+//}
+//core-case-data {
+//  api {
+//    url = ${CCD_API_URL}
+//  }
+//}
+//
+//idam {
+//  api {
+//    url = ${IDAM_API_URL}
+//  }
+//  s2s-auth {
+//    url = ${S2S_URL}
+//    secret = ${S2S_SECRET}
+//    name = ${?S2S_NAME}
+//  }
+//  users {
+//    bulkscan {
+//      username = ${IDAM_USER_NAME}
+//      password = ${IDAM_USER_PASSWORD}
+//    }
+//  }
+//}
+
+scheduling:
+  enabled: false
+
+queue:
+  connection-string: ${QUEUE_READ_CONN_STRING}
+  write-connection-string: ${QUEUE_WRITE_CONN_STRING}
+  read-interval: ${QUEUE_READ_INTERVAL:30000} # in ms
+
+core_case_data:
+  api:
+    url: ${CCD_API_URL:'http://localhost:4452'}
+
+idam:
+  s2s-auth:
+    url:    ${S2S_URL:http://localhost:4552}
+    secret: ${S2S_SECRET:AAAAAAAAAAAAAAAA}
+    name:   ${S2S_NAME:bulk_scan_orchestrator}
+  api:
+    url: ${IDAM_API_URL:'http://localhost:8080'}
+  client:
+    id: 'does-not-matter'
+    secret: 'does-not-matter'
+    redirect_uri: 'http://localhost/receiver'
+  users:
+    bulkscan:
+      username: ${IDAM_USER_NAME:'bulkscan+ccd@gmail.com'}
+      password: ${IDAM_USER_PASSWORD:Password12}
