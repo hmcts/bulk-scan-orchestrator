@@ -9,6 +9,19 @@ def component = "orchestrator"
 def channel = '#rpe-build-notices'
 GradleBuilder builder = new GradleBuilder(this, product)
 
+List<LinkedHashMap<String, Object>> secrets = [
+  secret('s2s-secret-for-tests', 'S2S_SECRET'),
+]
+
+static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
+  [ $class: 'AzureKeyVaultSecret',
+    secretType: 'Secret',
+    name: secretName,
+    version: '',
+    envVariable: envVar
+  ]
+}
+
 withPipeline(type, product, component) {
   after('test') {
     builder.gradle('integration')
@@ -16,4 +29,5 @@ withPipeline(type, product, component) {
 
   enableDockerBuild()
   enableSlackNotifications(channel)
+  loadVaultSecrets(secrets)
 }
