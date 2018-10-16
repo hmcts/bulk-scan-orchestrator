@@ -1,33 +1,3 @@
-//queue {
-//  read-interval = 30000 // todo: make configurable
-//  conn-strings {
-//    read  = ${QUEUE_READ_CONN_STRING}
-//    write = ${QUEUE_WRITE_CONN_STRING}
-//  }
-//}
-//core-case-data {
-//  api {
-//    url = ${CCD_API_URL}
-//  }
-//}
-//
-//idam {
-//  api {
-//    url = ${IDAM_API_URL}
-//  }
-//  s2s-auth {
-//    url = ${S2S_URL}
-//    secret = ${S2S_SECRET}
-//    name = ${?S2S_NAME}
-//  }
-//  users {
-//    bulkscan {
-//      username = ${IDAM_USER_NAME}
-//      password = ${IDAM_USER_PASSWORD}
-//    }
-//  }
-//}
-
 scheduling:
   enabled: false
 
