@@ -40,5 +40,9 @@ output "idam_user_name" {
   value = "${local.users_usernames_settings["IDAM_USERS_BULKSCAN_USERNAME"]}"
 }
 
+output "idam_redirect_uri" {
+  value = "${var.idam_redirect_uri}"
+}
+
 // endregion
 

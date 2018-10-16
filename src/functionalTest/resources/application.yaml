@@ -22,9 +22,9 @@ idam:
   api:
     url: ${IDAM_API_URL:'http://localhost:8080'}
   client:
-    id: 'does-not-matter'
-    secret: 'does-not-matter'
-    redirect_uri: 'http://localhost/receiver'
+    id: 'bsp'
+    secret: ${IDAM_CLIENT_SECRET:123456}
+    redirect_uri: ${IDAM_REDIRECT_URI:'http://localhost/receiver'}
   users:
     bulkscan:
       username: ${IDAM_USER_NAME:'bulkscan+ccd@gmail.com'}
