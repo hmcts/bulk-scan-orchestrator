@@ -1,6 +1,10 @@
 scheduling:
   enabled: false
 
+spring:
+  application:
+    name: Bulk Scan Orchestrator Functional Tests
+
 queue:
   connection-string: ${QUEUE_READ_CONN_STRING}
   write-connection-string: ${QUEUE_WRITE_CONN_STRING}
