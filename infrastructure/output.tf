@@ -20,7 +20,7 @@ output "QUEUE_WRITE_CONN_STRING" {
   value = "${data.terraform_remote_state.shared_infra.queue_primary_send_connection_string}"
 }
 
-output "ccd_api_url" {
+output "core_case_data_api_url" {
   value = "${local.ccdApiUrl}"
 }
 
