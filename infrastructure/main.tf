@@ -109,9 +109,3 @@ resource "azurerm_key_vault_secret" "s2s_secret_for_tests" {
   value = "${data.azurerm_key_vault_secret.s2s_secret.value}"
   vault_uri = "${data.azurerm_key_vault.key_vault.vault_uri}"
 }
-
-resource "azurerm_key_vault_secret" "idam_password_for_tests" {
-  name  = "idam-password-for-tests"
-  value = "${local.users_passwords_settings["IDAM_USERS_BULKSCAN_PASSWORD"]}"
-  vault_uri = "${data.azurerm_key_vault.key_vault.vault_uri}"
-}
