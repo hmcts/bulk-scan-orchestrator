@@ -147,7 +147,7 @@ public class EnvelopeParserTest {
         Envelope anEnvelope = EnvelopeParser.parse(bytes);
 
         // then
-        assertThat(anEnvelope.jurisdiction).isEqualTo("SSCS");
+        assertThat(anEnvelope.jurisdiction).isEqualTo("BULKSCAN");
 
     }
 
@@ -160,7 +160,7 @@ public class EnvelopeParserTest {
         Envelope anEnvelope = EnvelopeParser.parse(json);
 
         // then
-        assertThat(anEnvelope.jurisdiction).isEqualTo("SSCS");
+        assertThat(anEnvelope.jurisdiction).isEqualTo("BULKSCAN");
 
     }
 

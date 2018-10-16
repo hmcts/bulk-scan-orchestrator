@@ -1,0 +1,21 @@
+{
+  "id" : "2caf7585-b23d-4ecc-80bf-50b0dbf83a62",
+  "name" : "details",
+  "request" : {
+    "url" : "/details",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "body" : "{\"forename\":\"Bulkscan\",\"surname\":\"Caseworker\",\"roles\":[\"caseworker-bulkscan\",\"caseworker\",\"caseworker-bulkscan-loa1\",\"caseworker-loa1\"],\"id\":640,\"defaultService\":\"CCD\",\"email\":\"bulkscan+ccd@gmail.com\"}",
+    "headers" : {
+      "X-Application-Context" : "application",
+      "Content-Type" : "application/json;charset=UTF-8",
+      "Vary" : "Accept-Encoding",
+      "Date" : "Mon, 08 Oct 2018 14:07:36 GMT"
+    }
+  },
+  "uuid" : "2caf7585-b23d-4ecc-80bf-50b0dbf83a62",
+  "persistent" : true,
+  "insertionIndex" : 6
+}
