@@ -36,5 +36,9 @@ output "s2s_name" {
   value = "${var.s2s_name}"
 }
 
+output "idam_user_name" {
+  value = "BULKSCAN"
+}
+
 // endregion
 
