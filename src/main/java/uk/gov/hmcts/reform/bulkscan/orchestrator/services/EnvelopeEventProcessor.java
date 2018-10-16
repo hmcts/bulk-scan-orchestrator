@@ -1,14 +1,17 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
 
+import com.google.common.base.Strings;
 import com.microsoft.azure.servicebus.ExceptionPhase;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.SupplementaryEvidenceCreator;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisherContainer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -19,10 +22,13 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
     private static final Logger log = LoggerFactory.getLogger(EnvelopeEventProcessor.class);
 
-    private final SupplementaryEvidenceCreator supplementaryEvidenceCreator;
+    private final CaseRetriever caseRetriever;
 
-    public EnvelopeEventProcessor(SupplementaryEvidenceCreator supplementaryEvidenceCreator) {
-        this.supplementaryEvidenceCreator = supplementaryEvidenceCreator;
+    private final EventPublisherContainer eventPublisherContainer;
+
+    public EnvelopeEventProcessor(CaseRetriever caseRetriever, EventPublisherContainer eventPublisherContainer) {
+        this.caseRetriever = caseRetriever;
+        this.eventPublisherContainer = eventPublisherContainer;
     }
 
     @Override
@@ -44,9 +50,14 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
     private void process(IMessage message) {
         Envelope envelope = parse(message.getBody());
+        CaseDetails theCase = Strings.isNullOrEmpty(envelope.caseRef)
+            ? null
+            : caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
 
-        if (envelope.classification == Classification.SUPPLEMENTARY_EVIDENCE) {
-            supplementaryEvidenceCreator.createSupplementaryEvidence(envelope);
+        EventPublisher eventPublisher = eventPublisherContainer.getPublisher(envelope, theCase);
+
+        if (eventPublisher != null) {
+            eventPublisher.publish(envelope);
         } else {
             log.info(
                 "Skipped processing of envelope ID {} for case {} - classification {} not handled yet",

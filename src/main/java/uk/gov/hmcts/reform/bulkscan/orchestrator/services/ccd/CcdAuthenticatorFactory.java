@@ -23,7 +23,7 @@ public class CcdAuthenticatorFactory {
         this.users = users;
     }
 
-    CcdAuthenticator createForJurisdiction(String jurisdiction) {
+    public CcdAuthenticator createForJurisdiction(String jurisdiction) {
         Credential user = users.getUser(jurisdiction);
         String userToken = idamClient.authenticateUser(user.getUsername(), user.getPassword());
         UserDetails userDetails = idamClient.getUserDetails(userToken);
