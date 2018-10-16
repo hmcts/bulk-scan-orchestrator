@@ -37,7 +37,7 @@ public class SampleData {
     public static final String PASSWORD = "PASSWORD";
     public static final String USER_ID = "USER_ID";
     public static final String CASE_REF = "ABC123";
-    public static final String JURSIDICTION = "SSCS";
+    public static final String JURSIDICTION = "BULKSCAN";
     public static final long CASE_ID = 23L;
 
     public static final UserDetails USER_DETAILS = new UserDetails(USER_ID,
