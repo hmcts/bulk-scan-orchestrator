@@ -32,5 +32,5 @@ idam:
     url: http://localhost:8080
   client:
     id: 'bsp'
-    secret: ${IDAM_CLIENT_SECRET:'123456'}
-    redirect_uri: ${IDAM_REDIRECT_URI:'http://localhost/receiver'}
+    secret: ${IDAM_CLIENT_SECRET:123456}
+    redirect_uri: ${IDAM_REDIRECT_URI:http://localhost/receiver}
