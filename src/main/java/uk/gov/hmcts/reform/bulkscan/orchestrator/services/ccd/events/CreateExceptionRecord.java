@@ -7,6 +7,10 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envel
 @Component
 class CreateExceptionRecord extends AbstractEventPublisher {
 
+    CreateExceptionRecord() {
+        // empty constructor for ccd event publisher
+    }
+
     /**
      * Exception record does not present any existing case hence the creation of it.
      * @param envelope Original envelope
@@ -30,9 +34,5 @@ class CreateExceptionRecord extends AbstractEventPublisher {
     @Override
     String getEventSummary() {
         return "Create an exception record";
-    }
-
-    CreateExceptionRecord() {
-        // empty strategy constructor
     }
 }

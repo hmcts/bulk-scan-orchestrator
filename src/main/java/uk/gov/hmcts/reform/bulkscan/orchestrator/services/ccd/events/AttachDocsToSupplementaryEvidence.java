@@ -7,6 +7,10 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envel
 @Component
 class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
 
+    AttachDocsToSupplementaryEvidence() {
+        // empty constructor for ccd event publisher
+    }
+
     @Override
     Object mapEnvelopeToCaseDataObject(Envelope envelope) {
         return SupplementaryEvidenceMapper.fromEnvelope(envelope);
@@ -20,9 +24,5 @@ class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
     @Override
     String getEventSummary() {
         return "Attach scanned documents";
-    }
-
-    AttachDocsToSupplementaryEvidence() {
-        // empty strategy constructor
     }
 }
