@@ -66,17 +66,16 @@ abstract class AbstractEventPublisher implements EventPublisher {
     @Override
     public void publish(Envelope envelope) {
         String caseRef = envelope.caseRef;
-        String jurisdiction = envelope.jurisdiction;
 
         logCaseCreationEntry(caseRef);
 
-        CcdAuthenticator authenticator = authenticateJurisdiction(jurisdiction);
-        StartEventResponse eventResponse = startEvent(authenticator, jurisdiction, caseRef);
+        CcdAuthenticator authenticator = authenticateJurisdiction(envelope.jurisdiction);
+        StartEventResponse eventResponse = startEvent(authenticator, envelope);
         CaseDataContent caseDataContent = buildCaseDataContent(
             eventResponse.getToken(),
             mapEnvelopeToCaseDataObject(envelope)
         );
-        submitEvent(authenticator, jurisdiction, caseRef, caseDataContent);
+        submitEvent(authenticator, envelope, caseDataContent);
     }
 
     // region - execution steps
@@ -89,20 +88,37 @@ abstract class AbstractEventPublisher implements EventPublisher {
         return authenticatorFactory.createForJurisdiction(jurisdiction);
     }
 
+    String getCaseRef(Envelope envelope) {
+        return envelope.caseRef;
+    }
+
     private StartEventResponse startEvent(
         CcdAuthenticator authenticator,
-        String jurisdiction,
-        String caseRef
+        Envelope envelope
     ) {
-        return ccdApi.startEventForCaseWorker(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
-            jurisdiction,
-            CASE_TYPE_ID,
-            caseRef,
-            getEventTypeId()
-        );
+        String caseRef = getCaseRef(envelope);
+        String jurisdiction = envelope.jurisdiction;
+
+        if (caseRef == null) {
+            return ccdApi.startForCaseworker(
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                authenticator.getUserDetails().getId(),
+                jurisdiction,
+                CASE_TYPE_ID,
+                getEventTypeId()
+            );
+        } else {
+            return ccdApi.startEventForCaseWorker(
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                authenticator.getUserDetails().getId(),
+                jurisdiction,
+                CASE_TYPE_ID,
+                caseRef,
+                getEventTypeId()
+            );
+        }
     }
 
     // todo perhaps some generic interface for these data objects?
@@ -124,20 +140,34 @@ abstract class AbstractEventPublisher implements EventPublisher {
 
     private void submitEvent(
         CcdAuthenticator authenticator,
-        String jurisdiction,
-        String caseRef,
+        Envelope envelope,
         CaseDataContent caseDataContent
     ) {
-        ccdApi.submitEventForCaseWorker(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
-            jurisdiction,
-            CASE_TYPE_ID,
-            caseRef,
-            true,
-            caseDataContent
-        );
+        String caseRef = getCaseRef(envelope);
+        String jurisdiction = envelope.jurisdiction;
+
+        if (caseRef == null) {
+            ccdApi.submitForCaseworker(
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                authenticator.getUserDetails().getId(),
+                jurisdiction,
+                CASE_TYPE_ID,
+                true,
+                caseDataContent
+            );
+        } else {
+            ccdApi.submitEventForCaseWorker(
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                authenticator.getUserDetails().getId(),
+                jurisdiction,
+                CASE_TYPE_ID,
+                caseRef,
+                true,
+                caseDataContent
+            );
+        }
     }
 
     // end region - execution steps
