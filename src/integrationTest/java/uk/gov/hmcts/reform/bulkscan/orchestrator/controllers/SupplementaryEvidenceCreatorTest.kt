@@ -54,7 +54,9 @@ class SupplementaryEvidenceCreatorTest {
         private val caseEventUrl = "$caseUrl/events"
     }
 
-    private val mockMessage = Message(File("src/test/resources/example1.json").readText())
+    private val mockMessage = Message(File(
+        "src/integrationTest/resources/servicebus/message/supplementary-evidence-example.json"
+    ).readText())
     private val mockResponse = File("src/integrationTest/resources/ccd/response/sample-case.json").readText()
 
     @Autowired
