@@ -24,15 +24,20 @@ public class MessageProcessor {
 
     @Scheduled(fixedDelayString = "${queue.read-interval}")
     public void run() {
+        logger.info("Started processing queue messages.");
+
         IMessage msg = null;
+        int processedMessagesCount = 0;
+
         try {
             IMessageReceiver msgReceiver = messageReceiverFactory.create();
             while ((msg = msgReceiver.receive()) != null) {
-
                 envelopeProcessor.onMessageAsync(msg).get();
-
                 msgReceiver.complete(msg.getLockToken());
+                processedMessagesCount++;
             }
+
+            logger.info("Message processing complete. Processed {} messages", processedMessagesCount);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             logger.error("interrupted", e);
