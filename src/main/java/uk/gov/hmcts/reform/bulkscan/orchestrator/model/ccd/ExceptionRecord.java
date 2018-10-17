@@ -10,19 +10,15 @@ public class ExceptionRecord {
     @JsonProperty("journeyClassification")
     public final String classification;
 
-    @JsonProperty("poBox")
     public final String poBox;
 
     @JsonProperty("poBoxJurisdiction")
     public final String jurisdiction;
 
-    @JsonProperty("deliveryDate")
     public final LocalDateTime deliveryDate;
 
-    @JsonProperty("openingDate")
     public final LocalDateTime openingDate;
 
-    @JsonProperty("scannedDocuments")
     public final List<CcdCollectionElement<ScannedDocument>> scannedDocuments;
 
     public ExceptionRecord(
