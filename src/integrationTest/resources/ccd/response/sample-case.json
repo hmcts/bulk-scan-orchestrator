@@ -5,7 +5,7 @@
   "created_date": "2018-01-01T12:34:56.123Z",
   "last_modified": "2018-01-01T12:34:56.123Z",
   "state": "",
-  "locked_by_user_id": 1,
+  "locked_by_user_id": null,
   "security_alert": 0,
   "case_data": {},
   "security_classification": "PUBLIC",
