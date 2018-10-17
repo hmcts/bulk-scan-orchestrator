@@ -22,7 +22,7 @@ public class ExceptionRecord {
     @JsonProperty("openingDate")
     public final LocalDateTime openingDate;
 
-    @JsonProperty("scannedRecords")
+    @JsonProperty("scannedDocuments")
     public final List<CcdCollectionElement<ScannedDocument>> scannedDocuments;
 
     public ExceptionRecord(
