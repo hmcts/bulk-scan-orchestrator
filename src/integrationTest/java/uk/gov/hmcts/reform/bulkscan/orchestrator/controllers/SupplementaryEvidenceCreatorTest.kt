@@ -4,7 +4,6 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
-import com.github.tomakehurst.wiremock.client.WireMock.givenThat
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import com.microsoft.azure.servicebus.IMessageReceiver
@@ -18,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
-import org.springframework.context.annotation.Profile
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
@@ -48,10 +46,9 @@ class SupplementaryEvidenceCreatorTest {
 
     @BeforeEach
     fun before() {
-        WireMock(server.port()).register(
-            get(caseUrl).willReturn(aResponse().withBody(mockResponse))
-        )
         `when`(mockReceiver.receive()).thenReturn(mockMessage, null)
+        //We need to do this because of an issue with the way AutoConfigureWireMock works with profiles.
+        WireMock(server.port()).register(get(caseUrl).willReturn(aResponse().withBody(mockResponse)))
     }
 
     @Test
