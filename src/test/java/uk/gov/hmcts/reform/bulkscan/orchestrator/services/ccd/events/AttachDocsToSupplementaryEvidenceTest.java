@@ -78,7 +78,7 @@ public class AttachDocsToSupplementaryEvidenceTest {
         assertThat(caseDataContent.getEvent().getId()).isEqualTo(EVENT_TYPE_ID);
         assertThat(caseDataContent.getEvent().getSummary()).isEqualTo("Attach scanned documents");
 
-        SupplementaryEvidence supplementaryEvidence = mapper.fromEnvelope(envelope);
+        SupplementaryEvidence supplementaryEvidence = mapper.mapEnvelope(envelope);
 
         assertThat(caseDataContent.getData()).isEqualToComparingFieldByFieldRecursively(supplementaryEvidence);
     }

@@ -12,7 +12,7 @@ public class ExceptionRecordMapper extends ModelMapper<ExceptionRecord> {
     }
 
     @Override
-    public ExceptionRecord fromEnvelope(Envelope envelope) {
+    public ExceptionRecord mapEnvelope(Envelope envelope) {
         return new ExceptionRecord(
             envelope.classification.name(),
             envelope.poBox,

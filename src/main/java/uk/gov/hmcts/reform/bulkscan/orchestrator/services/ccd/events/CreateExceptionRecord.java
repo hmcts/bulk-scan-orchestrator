@@ -27,7 +27,7 @@ class CreateExceptionRecord extends AbstractEventPublisher {
 
     @Override
     CaseData mapEnvelopeToCaseDataObject(Envelope envelope) {
-        return mapper.fromEnvelope(envelope);
+        return mapper.mapEnvelope(envelope);
     }
 
     @Override

@@ -15,18 +15,17 @@ import java.util.stream.Collectors;
 
 public abstract class ModelMapper<T extends CaseData> {
 
-    public abstract T fromEnvelope(Envelope envelope);
+    public abstract T mapEnvelope(Envelope envelope);
 
     List<CcdCollectionElement<ScannedDocument>> mapDocuments(List<Document> documents) {
         return documents
             .stream()
-            .map(this::fromEnvelopeDocument)
+            .map(this::mapDocument)
             .map(CcdCollectionElement::new)
             .collect(Collectors.toList());
     }
 
-    // private methods from Java9 only
-    private ScannedDocument fromEnvelopeDocument(Document document) {
+    private ScannedDocument mapDocument(Document document) {
         return new ScannedDocument(
             document.fileName,
             document.controlNumber,

@@ -12,7 +12,7 @@ public class SupplementaryEvidenceMapper extends ModelMapper<SupplementaryEviden
     }
 
     @Override
-    public SupplementaryEvidence fromEnvelope(Envelope envelope) {
+    public SupplementaryEvidence mapEnvelope(Envelope envelope) {
         return new SupplementaryEvidence(mapDocuments(envelope.documents));
     }
 }
