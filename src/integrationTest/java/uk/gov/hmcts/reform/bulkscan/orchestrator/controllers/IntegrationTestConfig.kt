@@ -10,11 +10,13 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
+import org.springframework.context.annotation.Profile
 import uk.gov.hmcts.reform.bulkscan.orchestrator.Application
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.MessageReceiverFactory
 
 @Import(Application::class)
 @Configuration
+@Profile("integration")
 class IntegrationTestConfig {
     @Bean
     fun options(@Value("\${wiremock.port}") port: Int): Options =

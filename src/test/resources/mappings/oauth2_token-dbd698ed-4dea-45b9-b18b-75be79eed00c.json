@@ -1,0 +1,21 @@
+{
+  "id" : "dbd698ed-4dea-45b9-b18b-75be79eed00c",
+  "name" : "oauth2_token",
+  "request" : {
+    "url" : "/oauth2/token?code=FuKdnrw4NHppHvgq&grant_type=authorization_code&redirect_uri=http%3A%2F%2Flocalhost%2Freceiver&client_id=bsp&client_secret=123456",
+    "method" : "POST"
+  },
+  "response" : {
+    "status" : 200,
+    "body" : "{\"access_token\":\"eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJwMTY1bzNlY2c1dmExMjJ1anFiZWwxNmMzaCIsInN1YiI6IjY0MCIsImlhdCI6MTUzOTAwNzY1NiwiZXhwIjoxNTM5MDM2NDU2LCJkYXRhIjoiY2FzZXdvcmtlci1idWxrc2NhbixjYXNld29ya2VyLGNhc2V3b3JrZXItYnVsa3NjYW4tbG9hMSxjYXNld29ya2VyLWxvYTEiLCJ0eXBlIjoiQUNDRVNTIiwiaWQiOiI2NDAiLCJmb3JlbmFtZSI6IkJ1bGtzY2FuIiwic3VybmFtZSI6IkNhc2V3b3JrZXIiLCJkZWZhdWx0LXNlcnZpY2UiOiJDQ0QiLCJsb2EiOjEsImRlZmF1bHQtdXJsIjoiaHR0cHM6Ly9sb2NhbGhvc3Q6OTAwMC9wb2MvY2NkIiwiZ3JvdXAiOiJjYXNld29ya2VyLWJ1bGtzY2FuIn0.q6hDG0Z1Qbinwtl8TgeDrAVV0LlCTRtbQqBYoMjd03k\",\"token_type\":\"Bearer\",\"expires_in\":28800}",
+    "headers" : {
+      "X-Application-Context" : "application",
+      "Content-Type" : "application/json;charset=UTF-8",
+      "Vary" : "Accept-Encoding",
+      "Date" : "Mon, 08 Oct 2018 14:07:36 GMT"
+    }
+  },
+  "uuid" : "dbd698ed-4dea-45b9-b18b-75be79eed00c",
+  "persistent" : true,
+  "insertionIndex" : 5
+}

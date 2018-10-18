@@ -4,37 +4,49 @@ import com.microsoft.azure.servicebus.IMessage;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.SupplementaryEvidenceCreator;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisherContainer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.CASE_REF;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.JURSIDICTION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.THE_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelopeJson;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.objectMapper;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EnvelopeEventProcessorTest {
     @Mock
     private IMessage someMessage;
     @Mock
-    private SupplementaryEvidenceCreator supplementaryEvidenceCreator;
+    private CaseRetriever caseRetriever;
+    @Mock
+    private EventPublisherContainer eventPublisherContainer;
+    @Mock
+    private CcdAuthenticator authInfo;
 
     private EnvelopeEventProcessor processor;
 
     @Before
-    public void before() throws Exception {
-        processor = new EnvelopeEventProcessor(supplementaryEvidenceCreator);
+    public void before() {
+        processor = new EnvelopeEventProcessor(caseRetriever, eventPublisherContainer);
+        when(caseRetriever.retrieve(eq(JURSIDICTION), eq(CASE_REF))).thenReturn(THE_CASE);
+        when(eventPublisherContainer.getPublisher(any(Envelope.class), any(CaseDetails.class)))
+            .thenReturn(getDummyPublisher());
+        when(eventPublisherContainer.getPublisher(any(Envelope.class), eq(null)))
+            .thenReturn(getDummyPublisher());
         given(someMessage.getBody()).willReturn(envelopeJson());
     }
 
@@ -84,10 +96,8 @@ public class EnvelopeEventProcessorTest {
     @Test
     public void should_return_exceptionally_completed_future_if_exception_is_thrown() throws Exception {
         // given
-        given(someMessage.getBody())
-            .willReturn(envelopeJson(Classification.SUPPLEMENTARY_EVIDENCE));
-
-        willThrow(new RuntimeException()).given(supplementaryEvidenceCreator).createSupplementaryEvidence(any());
+        given(someMessage.getBody()).willReturn(envelopeJson());
+        given(caseRetriever.retrieve(any(), any())).willThrow(new RuntimeException());
 
         // when
         CompletableFuture<Void> result = processor.onMessageAsync(someMessage);
@@ -96,46 +106,9 @@ public class EnvelopeEventProcessorTest {
         assertThat(result.isCompletedExceptionally()).isTrue();
     }
 
-    @Test
-    public void should_handle_messages_with_supplementary_evidence_classification() throws Exception {
-        // given
-        given(someMessage.getBody())
-            .willReturn(envelopeJson(Classification.SUPPLEMENTARY_EVIDENCE));
-
-        // when
-        processor.onMessageAsync(someMessage);
-
-        // then
-        ArgumentCaptor<Envelope> envelopeCaptor = ArgumentCaptor.forClass(Envelope.class);
-        verify(supplementaryEvidenceCreator).createSupplementaryEvidence(envelopeCaptor.capture());
-
-        Envelope expectedEnvelope = objectMapper.readValue(someMessage.getBody(), Envelope.class);
-
-        assertThat(envelopeCaptor.getValue())
-            .isEqualToComparingFieldByFieldRecursively(expectedEnvelope);
-    }
-
-    @Test
-    public void should_not_process_messages_with_new_application_classification() throws Exception {
-        // given
-        given(someMessage.getBody()).willReturn(envelopeJson(Classification.NEW_APPLICATION));
-
-        // when
-        processor.onMessageAsync(someMessage);
-
-        // then
-        verifyNoMoreInteractions(supplementaryEvidenceCreator);
-    }
-
-    @Test
-    public void should_not_process_messages_with_exception_classification() throws Exception {
-        // given
-        given(someMessage.getBody()).willReturn(envelopeJson(Classification.EXCEPTION));
-
-        // when
-        processor.onMessageAsync(someMessage);
-
-        // then
-        verifyNoMoreInteractions(supplementaryEvidenceCreator);
+    private EventPublisher getDummyPublisher() {
+        return (Envelope envelope) -> {
+            //
+        };
     }
 }
