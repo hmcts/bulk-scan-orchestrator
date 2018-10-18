@@ -1,12 +1,12 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 
 public class SupplementaryEvidence implements CaseData {
 
-    @JsonProperty("scannedDocuments")
+    // this field should always null in JSON sent to CCD
+    public final String evidenceHandled = null;
+
     public final List<CcdCollectionElement<ScannedDocument>> scannedDocuments;
 
     public SupplementaryEvidence(List<CcdCollectionElement<ScannedDocument>> scannedDocuments) {
