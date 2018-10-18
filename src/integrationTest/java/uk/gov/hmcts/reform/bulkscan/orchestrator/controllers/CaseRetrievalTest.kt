@@ -31,7 +31,7 @@ class CaseRetrievalTest {
         val USER_ID = "640"
         val JURIDICTION = "BULKSCAN"
         val CASE_TYPE = CaseRetriever.CASE_TYPE_ID
-        val CASE_REF = "1537879748168579"
+        val CASE_REF = "1539007368674134"
 
         private fun retrieveCase() =
             "/caseworkers/${USER_ID}/jurisdictions/${JURIDICTION}/case-types/${CASE_TYPE}/cases/${CASE_REF}"
