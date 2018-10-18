@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers
 
 import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
-import com.github.tomakehurst.wiremock.client.WireMock.givenThat
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import com.microsoft.azure.servicebus.IMessageReceiver
@@ -17,9 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
-import org.springframework.context.annotation.Profile
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.util.SocketUtils
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever
@@ -60,7 +58,8 @@ class SupplementaryEvidenceCreatorTest {
     @BeforeEach
     fun before() {
         `when`(mockReceiver.receive()).thenReturn(mockMessage, null)
-        givenThat(get(caseUrl).willReturn(aResponse().withBody(mockResponse)))
+        //We need to do this because of an issue with the way AutoConfigureWireMock works with profiles.
+        WireMock(server.port()).register(get(caseUrl).willReturn(aResponse().withBody(mockResponse)))
     }
 
     @Test
