@@ -40,8 +40,10 @@ public class AttachDocsToSupplementaryEvidenceTest {
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
 
+    private static final SupplementaryEvidenceMapper mapper = new SupplementaryEvidenceMapper();
+
     @InjectMocks
-    private EventPublisher eventPublisher = new AttachDocsToSupplementaryEvidence();
+    private EventPublisher eventPublisher = new AttachDocsToSupplementaryEvidence(mapper);
 
     @Before
     public void setUp() {
@@ -76,7 +78,7 @@ public class AttachDocsToSupplementaryEvidenceTest {
         assertThat(caseDataContent.getEvent().getId()).isEqualTo(EVENT_TYPE_ID);
         assertThat(caseDataContent.getEvent().getSummary()).isEqualTo("Attach scanned documents");
 
-        SupplementaryEvidence supplementaryEvidence = SupplementaryEvidenceMapper.fromEnvelope(envelope);
+        SupplementaryEvidence supplementaryEvidence = mapper.fromEnvelope(envelope);
 
         assertThat(caseDataContent.getData()).isEqualToComparingFieldByFieldRecursively(supplementaryEvidence);
     }
