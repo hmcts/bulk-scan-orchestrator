@@ -1,60 +1,69 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
-import com.microsoft.azure.servicebus.Message;
 import org.awaitility.Duration;
-import org.json.JSONObject;
-import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.TestHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.Assert.assertEquals;
 
-public class SupplementaryEvidenceTest extends BaseTest {
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class SupplementaryEvidenceTest {
+
+    @Autowired
+    private CaseRetriever caseRetriever;
+
+    @Autowired
+    private CcdCaseCreator ccdCaseCreator;
+
+    @Autowired
+    private EnvelopeMessager envelopeMessager;
 
     @Test
     public void should_attach_supplementary_evidence_to_the_case() throws Exception {
         // given
         String caseData = SampleData.fromFile("envelopes/new-envelope.json");
-        Envelope envelope = EnvelopeParser.parse(caseData);
-        CaseDetails caseDetails = ccdCaseCreator.createCasee(envelope);
-        Assert.assertNotNull(caseDetails.getId());
+        Envelope newEnvelope = EnvelopeParser.parse(caseData);
+
+        CaseDetails caseDetails = ccdCaseCreator.createCasee(newEnvelope);
+        assertThat(caseDetails.getId()).isNotNull();
 
         // when
-        JSONObject updateData = new JSONObject(SampleData.fromFile("envelopes/update-envelope.json"));
-        updateData.put("case_ref", caseDetails.getId());
-        byte[] updatedEnvelopeData = updateData.toString().getBytes();
-
-        Message message = new Message();
-        message.setMessageId(UUID.randomUUID().toString());
-        message.setBody(updatedEnvelopeData);
-        writeClient.send(message);
+        envelopeMessager.sendMessageFromFile("envelopes/update-envelope.json", caseDetails.getId());
 
         // then
         await("Supplementary evidence is attached to the case in ccd")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.TWO_SECONDS)
-            .until(() -> caseUpdatedWithSupplementaryEvidence(updatedEnvelopeData));
+            .until(() -> hasCaseBeenUpdatedWithSupplementaryEvidence(caseDetails));
 
-        verifySupplementaryEvidenceDetailsUpdated(updatedEnvelopeData);
-
+        verifySupplementaryEvidenceDetailsUpdated(caseDetails, "envelopes/update-envelope.json");
     }
 
-    public void verifySupplementaryEvidenceDetailsUpdated(byte[] envelopeData) {
-        Envelope updatedEnvelope = EnvelopeParser.parse(envelopeData);
+    public void verifySupplementaryEvidenceDetailsUpdated(CaseDetails caseDetails, String jsonFileName) {
+
+        String caseData = SampleData.fromFile(jsonFileName);
+        Envelope updatedEnvelope = EnvelopeParser.parse(caseData);
 
         CaseDetails updatedCaseDetails = caseRetriever.retrieve(
-            updatedEnvelope.jurisdiction,
-            String.valueOf(updatedEnvelope.caseRef)
+            caseDetails.getJurisdiction(),
+            String.valueOf(caseDetails.getId())
         );
 
         List<ScannedDocument> updatedScannedDocuments = TestHelper.getScannedDocuments(updatedCaseDetails);
@@ -63,19 +72,17 @@ public class SupplementaryEvidenceTest extends BaseTest {
 
         Document queueDocument = updatedEnvelope.documents.get(0);
 
-        assertEquals(updatedDocument.fileName, queueDocument.fileName);
-        assertEquals(updatedDocument.controlNumber, queueDocument.controlNumber);
-        assertEquals(updatedDocument.type, queueDocument.type);
+        assertThat(updatedDocument.fileName).isEqualTo(queueDocument.fileName);
+        assertThat(updatedDocument.controlNumber).isEqualTo(queueDocument.controlNumber);
+        assertThat(updatedDocument.type).isEqualTo(queueDocument.type);
     }
 
-    private Boolean caseUpdatedWithSupplementaryEvidence(byte[] envelopeJson) {
+    private Boolean hasCaseBeenUpdatedWithSupplementaryEvidence(CaseDetails caseDetails) {
 
-        Envelope envelope = EnvelopeParser.parse(envelopeJson);
-
-        CaseDetails updatedCaseDetails = caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
+        CaseDetails updatedCaseDetails = caseRetriever.retrieve(
+            caseDetails.getJurisdiction(), String.valueOf(caseDetails.getId()));
 
         List<ScannedDocument> updatedScannedDocuments = TestHelper.getScannedDocuments(updatedCaseDetails);
-        return  updatedScannedDocuments.size() > 0;
+        return updatedScannedDocuments.size() > 0;
     }
 }
-
