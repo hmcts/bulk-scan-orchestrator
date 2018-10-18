@@ -4,7 +4,9 @@ import java.util.List;
 
 public class SupplementaryEvidence implements CaseData {
 
-    // this field should always null in JSON sent to CCD
+    /*
+     * This field should always be sent as {@code null} in CCD data object
+     */
     public final String evidenceHandled = null;
 
     public final List<CcdCollectionElement<ScannedDocument>> scannedDocuments;
