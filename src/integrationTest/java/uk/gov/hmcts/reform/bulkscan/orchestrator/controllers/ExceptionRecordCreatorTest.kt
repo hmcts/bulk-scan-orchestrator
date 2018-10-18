@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers
 
 import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
@@ -21,10 +22,12 @@ import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import org.springframework.util.SocketUtils
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.caseEventTriggerStartUrl
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.caseSubmitUrl
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.caseUrl
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -32,23 +35,8 @@ import java.util.concurrent.TimeUnit
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("integration")
 @AutoConfigureWireMock
+@ContextConfiguration(initializers = [IntegrationTestConfig::class])
 class ExceptionRecordCreatorTest {
-    companion object {
-        init {
-            //This needs to be done since AutoConfigureWireMock seems to have a bug where its using a random port.
-            System.setProperty("wiremock.port", SocketUtils.findAvailableTcpPort().toString())
-        }
-
-        val USER_ID = "640"
-        val JURIDICTION = "BULKSCAN"
-        val CASE_TYPE = CaseRetriever.CASE_TYPE_ID
-        val CASE_REF = "1539007368674134"
-
-        private val caseTypeUrl = "/caseworkers/$USER_ID/jurisdictions/$JURIDICTION/case-types/$CASE_TYPE"
-        private val caseUrl = "$caseTypeUrl/cases/$CASE_REF"
-        private val caseEventTriggerStartUrl = "$caseTypeUrl/event-triggers/createException/token"
-        private val caseSubmitUrl = "$caseTypeUrl/cases"
-    }
 
     private val mockSupplementaryMessage = Message(File(
         "src/integrationTest/resources/servicebus/message/supplementary-evidence-example.json"
@@ -65,6 +53,7 @@ class ExceptionRecordCreatorTest {
 
     @BeforeEach
     fun before() {
+        WireMock.configureFor(server.port())
         givenThat(get(caseUrl).willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())))
         givenThat(get(caseEventTriggerStartUrl).willReturn(aResponse().withBody(
             "{\"case_details\":null,\"event_id\":\"eid\",\"token\":\"etoken\"}"

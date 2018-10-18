@@ -11,32 +11,22 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import org.springframework.util.SocketUtils
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.CASE_REF
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.JURIDICTION
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.retrieveCase
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi
 
+
 @ExtendWith(SpringExtension::class)
-@SpringBootTest(webEnvironment = RANDOM_PORT)
+@SpringBootTest(webEnvironment = RANDOM_PORT )
 @AutoConfigureWireMock
 @ActiveProfiles("integration")
+@ContextConfiguration(initializers = [IntegrationTestConfig::class])
 class CaseRetrievalTest {
-    companion object {
-        init {
-            //This needs to be done since AutoConfigureWireMock seems to have a bug where its using a random port.
-            System.setProperty("wiremock.port", SocketUtils.findAvailableTcpPort().toString())
-        }
-
-        val USER_ID = "640"
-        val JURIDICTION = "BULKSCAN"
-        val CASE_TYPE = CaseRetriever.CASE_TYPE_ID
-        val CASE_REF = "1537879748168579"
-
-        private fun retrieveCase() =
-            "/caseworkers/${USER_ID}/jurisdictions/${JURIDICTION}/case-types/${CASE_TYPE}/cases/${CASE_REF}"
-    }
-
     @Autowired
     private lateinit var server: WireMockServer
 
