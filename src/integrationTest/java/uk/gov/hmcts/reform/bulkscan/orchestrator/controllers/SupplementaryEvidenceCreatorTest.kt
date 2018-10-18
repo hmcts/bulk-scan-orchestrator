@@ -46,9 +46,11 @@ class SupplementaryEvidenceCreatorTest {
 
     @BeforeEach
     fun before() {
-        `when`(mockReceiver.receive()).thenReturn(mockMessage, null)
         //We need to do this because of an issue with the way AutoConfigureWireMock works with profiles.
-        WireMock(server.port()).register(get(caseUrl).willReturn(aResponse().withBody(mockResponse)))
+        WireMock(server.port()).register(
+            get(caseUrl).willReturn(aResponse().withBody(mockResponse))
+        )
+        `when`(mockReceiver.receive()).thenReturn(mockMessage, null)
     }
 
     @Test
