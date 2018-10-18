@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.MessageRece
 
 @Import(Application::class)
 @Configuration
-@Profile("integrationtest")
+@Profile("integration")
 class IntegrationTestConfig {
     @Bean
     fun options(@Value("\${wiremock.port}") port: Int): Options =

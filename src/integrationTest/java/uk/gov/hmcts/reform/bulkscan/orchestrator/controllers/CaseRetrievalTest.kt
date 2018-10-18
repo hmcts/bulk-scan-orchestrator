@@ -3,14 +3,9 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import com.microsoft.azure.servicebus.IMessageReceiver
-import com.microsoft.azure.servicebus.Message
-import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
@@ -21,13 +16,11 @@ import org.springframework.util.SocketUtils
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi
-import java.io.File
-import java.util.concurrent.TimeUnit
 
 @ExtendWith(SpringExtension::class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @AutoConfigureWireMock
-@ActiveProfiles("integrationtest")
+@ActiveProfiles("integration")
 class CaseRetrievalTest {
     companion object {
         init {

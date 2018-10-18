@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest()
-@ActiveProfiles("integrationtest")
+@ActiveProfiles("integration")
 public class RootControllerTest {
 
     @Autowired
