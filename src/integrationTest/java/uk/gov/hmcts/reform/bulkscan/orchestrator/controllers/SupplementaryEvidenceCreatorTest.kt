@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
+import org.springframework.context.annotation.Profile
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.util.SocketUtils
@@ -25,18 +27,8 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 @ExtendWith(SpringExtension::class)
-@SpringBootTest(
-    classes = [IntegrationTestConfig::class],
-    webEnvironment = RANDOM_PORT
-)
-@TestPropertySource(properties = [
-    "core_case_data.api.url=${TestUrls.wiremockUrls.CORE_CASE_DATA_URL}",
-    "idam.s2s-auth.url=${TestUrls.wiremockUrls.IDAM_S2S_URL}",
-    "idam.api.url=${TestUrls.wiremockUrls.IDAM_API_URL}",
-    "idam.users.bulkscan.username=bulkscan+ccd@gmail.com",
-    "idam.users.bulkscan.password=Password12",
-    "queue.read-interval=100"
-])
+@SpringBootTest(webEnvironment = RANDOM_PORT)
+@ActiveProfiles("integration")
 @AutoConfigureWireMock
 class SupplementaryEvidenceCreatorTest {
     companion object {

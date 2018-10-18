@@ -3,41 +3,24 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import com.microsoft.azure.servicebus.IMessageReceiver
-import com.microsoft.azure.servicebus.Message
-import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
-import org.springframework.test.context.TestPropertySource
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.util.SocketUtils
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi
-import java.io.File
-import java.util.concurrent.TimeUnit
 
 @ExtendWith(SpringExtension::class)
-@SpringBootTest(
-    classes = [IntegrationTestConfig::class],
-    webEnvironment = RANDOM_PORT
-)
-@TestPropertySource(properties = [
-    "core_case_data.api.url=${TestUrls.wiremockUrls.CORE_CASE_DATA_URL}",
-    "idam.s2s-auth.url=${TestUrls.wiremockUrls.IDAM_S2S_URL}",
-    "idam.api.url=${TestUrls.wiremockUrls.IDAM_API_URL}",
-    "idam.users.bulkscan.username=bulkscan+ccd@gmail.com",
-    "idam.users.bulkscan.password=Password12",
-    "queue.read-interval=100"
-])
+@SpringBootTest(webEnvironment = RANDOM_PORT)
 @AutoConfigureWireMock
+@ActiveProfiles("integration")
 class CaseRetrievalTest {
     companion object {
         init {
