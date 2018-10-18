@@ -38,6 +38,7 @@ public class SampleData {
     public static final String USER_ID = "USER_ID";
     public static final String CASE_REF = "ABC123";
     public static final String JURSIDICTION = "BULKSCAN";
+    public static final String PO_BOX = "BULKSCAN_PO_BOX";
     public static final long CASE_ID = 23L;
 
     public static final UserDetails USER_DETAILS = new UserDetails(USER_ID,
@@ -81,8 +82,11 @@ public class SampleData {
             return new JSONObject()
                 .put("id", "eb9c3598-35fc-424e-b05a-902ee9f11d56")
                 .put("case_ref", caseRef)
+                .put("po_box", PO_BOX)
                 .put("jurisdiction", JURSIDICTION)
                 .put("zip_file_name", "zip-file-test.zip")
+                .put("delivery_date", toIso8601(Instant.now()))
+                .put("opening_date", toIso8601(Instant.now()))
                 .put("classification", classification)
                 .put("documents", new JSONArray()
                     .put(new JSONObject()
@@ -114,8 +118,11 @@ public class SampleData {
         return new Envelope(
             "eb9c3598-35fc-424e-b05a-902ee9f11d56",
             CASE_REF,
+            PO_BOX,
             JURSIDICTION,
             "zip-file-test.zip",
+            Instant.now(),
+            Instant.now(),
             Classification.NEW_APPLICATION,
             documents(numberOfDocuments)
         );

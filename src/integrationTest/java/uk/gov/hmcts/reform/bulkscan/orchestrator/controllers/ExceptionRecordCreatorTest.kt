@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.givenThat
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
+import org.springframework.http.HttpStatus
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.util.SocketUtils
@@ -38,7 +40,7 @@ import java.util.concurrent.TimeUnit
     "queue.read-interval=100"
 ])
 @AutoConfigureWireMock
-class SupplementaryEvidenceCreatorTest {
+class ExceptionRecordCreatorTest {
     companion object {
         init {
             //This needs to be done since AutoConfigureWireMock seems to have a bug where its using a random port.
@@ -50,14 +52,18 @@ class SupplementaryEvidenceCreatorTest {
         val CASE_TYPE = CaseRetriever.CASE_TYPE_ID
         val CASE_REF = "1539007368674134"
 
-        private val caseUrl = "/caseworkers/$USER_ID/jurisdictions/$JURIDICTION/case-types/$CASE_TYPE/cases/$CASE_REF"
-        private val caseEventUrl = "$caseUrl/events"
+        private val caseTypeUrl = "/caseworkers/$USER_ID/jurisdictions/$JURIDICTION/case-types/$CASE_TYPE"
+        private val caseUrl = "$caseTypeUrl/cases/$CASE_REF"
+        private val caseEventTriggerStartUrl = "$caseTypeUrl/event-triggers/createException/token"
+        private val caseSubmitUrl = "$caseTypeUrl/cases"
     }
 
-    private val mockMessage = Message(File(
+    private val mockSupplementaryMessage = Message(File(
         "src/integrationTest/resources/servicebus/message/supplementary-evidence-example.json"
     ).readText())
-    private val mockResponse = File("src/integrationTest/resources/ccd/response/sample-case.json").readText()
+    private val mockExceptionMessage = Message(File(
+        "src/integrationTest/resources/servicebus/message/exception-example.json"
+    ).readText())
 
     @Autowired
     private lateinit var server: WireMockServer
@@ -67,17 +73,35 @@ class SupplementaryEvidenceCreatorTest {
 
     @BeforeEach
     fun before() {
-        `when`(mockReceiver.receive()).thenReturn(mockMessage, null)
-        givenThat(get(caseUrl).willReturn(aResponse().withBody(mockResponse)))
+        givenThat(get(caseUrl).willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())))
+        givenThat(get(caseEventTriggerStartUrl).willReturn(aResponse().withBody(
+            "{\"case_details\":null,\"event_id\":\"eid\",\"token\":\"etoken\"}"
+        )))
     }
 
     @Test
-    fun `should call ccd to attach supplementary evidence for caseworker`() {
+    fun `should create exception record for supplementary evidence when case record is not found`() {
+        `when`(mockReceiver.receive()).thenReturn(mockSupplementaryMessage, null)
+
         await()
             .atMost(30, TimeUnit.SECONDS)
             .ignoreExceptions()
             .until {
-                server.verify(postRequestedFor(urlPathEqualTo(caseEventUrl)))
+                server.verify(getRequestedFor(urlPathEqualTo(caseUrl)))
+                server.verify(postRequestedFor(urlPathEqualTo(caseSubmitUrl)))
+                true
+            }
+    }
+
+    @Test
+    fun `should create exception record for new exception case type`() {
+        `when`(mockReceiver.receive()).thenReturn(mockExceptionMessage, null)
+
+        await()
+            .atMost(30, TimeUnit.SECONDS)
+            .ignoreExceptions()
+            .until {
+                server.verify(postRequestedFor(urlPathEqualTo(caseSubmitUrl)))
                 true
             }
     }
