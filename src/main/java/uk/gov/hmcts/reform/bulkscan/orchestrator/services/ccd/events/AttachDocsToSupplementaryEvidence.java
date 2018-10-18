@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.SupplementaryEvidenceMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
@@ -12,7 +13,7 @@ class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
     }
 
     @Override
-    Object mapEnvelopeToCaseDataObject(Envelope envelope) {
+    CaseData mapEnvelopeToCaseDataObject(Envelope envelope) {
         return SupplementaryEvidenceMapper.fromEnvelope(envelope);
     }
 
