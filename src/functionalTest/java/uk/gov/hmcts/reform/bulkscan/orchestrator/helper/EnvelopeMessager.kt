@@ -24,7 +24,7 @@ class EnvelopeMessager( @Autowired client: QueueClient) : IQueueClient by client
     fun sendMessageFromFile(jsonFileName: String, caseRef: Long?) {
 
         val updateCaseData = JSONObject(SampleData.fromFile(jsonFileName))
-        updateCaseData.put("case_ref", caseRef)
+        updateCaseData.put("case_ref", "$caseRef")
 
         val message = Message()
         message.messageId = UUID.randomUUID().toString()
