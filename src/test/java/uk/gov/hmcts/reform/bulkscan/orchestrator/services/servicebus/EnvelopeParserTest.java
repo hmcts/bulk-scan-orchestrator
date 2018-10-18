@@ -27,8 +27,11 @@ public class EnvelopeParserTest {
         this.envelope = new Envelope(
             "975b339d-4531-4e32-8ebe-a7bc4650f33a",
             "case_ref_number",
+            "po_box",
             "jurisdiction",
             "zip-file-test.zip",
+            Instant.now(),
+            Instant.now(),
             Classification.SUPPLEMENTARY_EVIDENCE,
             asList(
                 new Document(
@@ -56,8 +59,11 @@ public class EnvelopeParserTest {
             new JSONObject()
                 .put("id", envelope.id)
                 .put("case_ref", envelope.caseRef)
+                .put("po_box", envelope.poBox)
                 .put("jurisdiction", envelope.jurisdiction)
                 .put("zip_file_name", envelope.zipFileName)
+                .put("delivery_date", envelope.deliveryDate)
+                .put("opening_date", envelope.openingDate)
                 .put("classification", envelope.classification.toString().toLowerCase())
                 .put("documents", new JSONArray()
                     .put(toJson(envelope.documents.get(0)))
@@ -79,8 +85,11 @@ public class EnvelopeParserTest {
             new JSONObject()
                 .put("id", envelope.id)
                 .put("case_ref", envelope.caseRef)
+                .put("po_box", envelope.poBox)
                 .put("jurisdiction", envelope.jurisdiction)
                 .put("zip_file_name", envelope.zipFileName)
+                .put("delivery_date", envelope.deliveryDate)
+                .put("opening_date", envelope.openingDate)
                 .put("classification", envelope.classification.toString().toLowerCase())
                 .put("documents", new JSONArray()
                     .put(toJson(envelope.documents.get(0)))
@@ -147,7 +156,7 @@ public class EnvelopeParserTest {
         Envelope anEnvelope = EnvelopeParser.parse(bytes);
 
         // then
-        assertThat(anEnvelope.jurisdiction).isEqualTo("SSCS");
+        assertThat(anEnvelope.jurisdiction).isEqualTo("BULKSCAN");
 
     }
 
@@ -160,7 +169,7 @@ public class EnvelopeParserTest {
         Envelope anEnvelope = EnvelopeParser.parse(json);
 
         // then
-        assertThat(anEnvelope.jurisdiction).isEqualTo("SSCS");
+        assertThat(anEnvelope.jurisdiction).isEqualTo("BULKSCAN");
 
     }
 

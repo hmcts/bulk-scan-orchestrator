@@ -1,35 +1,66 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
+import feign.FeignException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+
 @Service
 public class CaseRetriever {
+
     public static final String CASE_TYPE_ID = "Bulk_Scanned";
 
+    private static final Logger log = LoggerFactory.getLogger(CaseRetriever.class);
+
     private final CcdAuthenticatorFactory factory;
+
     private final CoreCaseDataApi coreCaseDataApi;
 
-    CaseRetriever(CcdAuthenticatorFactory factory, CoreCaseDataApi coreCaseDataApi) {
+    public CaseRetriever(CcdAuthenticatorFactory factory, CoreCaseDataApi coreCaseDataApi) {
         this.factory = factory;
         this.coreCaseDataApi = coreCaseDataApi;
     }
 
     public CaseDetails retrieve(String jurisdiction, String caseRef) {
-        CcdAuthenticator info = factory.createForJurisdiction(jurisdiction);
-        return retrieveCase(jurisdiction, caseRef, info);
+        // not including in try catch to fast fail the method
+        CcdAuthenticator authenticator = factory.createForJurisdiction(jurisdiction);
+
+        try {
+            CaseDetails caseDetails = coreCaseDataApi.readForCaseWorker(
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                authenticator.getUserDetails().getId(),
+                jurisdiction,
+                CASE_TYPE_ID,
+                caseRef
+            );
+
+            logCaseDetails(caseDetails);
+
+            return caseDetails;
+        } catch (FeignException exception) {
+            if (exception.status() == NOT_FOUND.value()) {
+                log.info("Case not found. Ref:{}, jurisdiction:{}", caseRef, jurisdiction);
+
+                return null;
+            } else {
+                throw exception;
+            }
+        }
     }
 
-    private CaseDetails retrieveCase(String jurisdiction, String caseRef, CcdAuthenticator authenticator) {
-        return coreCaseDataApi.readForCaseWorker(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            authenticator.userDetails.getId(),
-            jurisdiction,
-            CASE_TYPE_ID,
-            caseRef
-        );
+    private void logCaseDetails(CaseDetails caseDetails) {
+        if (caseDetails != null) {
+            log.info(
+                "Found worker case: {}:{}:{}",
+                caseDetails.getJurisdiction(),
+                caseDetails.getCaseTypeId(),
+                caseDetails.getId()
+            );
+        }
     }
-
 }

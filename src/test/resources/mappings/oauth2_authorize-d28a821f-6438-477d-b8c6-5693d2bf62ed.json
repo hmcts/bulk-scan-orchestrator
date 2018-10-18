@@ -1,0 +1,21 @@
+{
+  "id" : "d28a821f-6438-477d-b8c6-5693d2bf62ed",
+  "name" : "oauth2_authorize",
+  "request" : {
+    "url" : "/oauth2/authorize?response_type=code&client_id=bsp&redirect_uri=http%3A%2F%2Flocalhost%2Freceiver",
+    "method" : "POST"
+  },
+  "response" : {
+    "status" : 200,
+    "body" : "{\"code\":\"FuKdnrw4NHppHvgq\"}",
+    "headers" : {
+      "X-Application-Context" : "application",
+      "Content-Type" : "application/json;charset=UTF-8",
+      "Vary" : "Accept-Encoding",
+      "Date" : "Mon, 08 Oct 2018 14:07:36 GMT"
+    }
+  },
+  "uuid" : "d28a821f-6438-477d-b8c6-5693d2bf62ed",
+  "persistent" : true,
+  "insertionIndex" : 4
+}

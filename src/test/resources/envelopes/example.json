@@ -1,9 +1,12 @@
 {
   "id": "0192",
-  "case_ref": "1537879748168579",
-  "jurisdiction": "SSCS",
+  "case_ref": "1538729959889349",
+  "po_box": "BULKSCAN PO BOX",
+  "jurisdiction": "BULKSCAN",
   "classification": "NEW_APPLICATION",
   "zip_file_name": "zip-file-test.zip",
+  "delivery_date": "1970-01-01T00:00:00.000Z",
+  "opening_date": "1970-01-01T00:00:00.000Z",
   "documents": [
     {
       "file_name": "hello.pdf",

@@ -1,0 +1,35 @@
+{
+  "id" : "5e24bd28-34a3-4a7c-a78e-359b9dcc7254",
+  "name" : "caseworkers_640_jurisdictions_bulkscan_case-types_bulk_scanned_cases_1539007368674134_events",
+  "request" : {
+    "url" : "/caseworkers/640/jurisdictions/BULKSCAN/case-types/Bulk_Scanned/cases/1539007368674134/events?ignore-warning=true",
+    "method" : "POST",
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": {
+          "expression": "$.data.scannedDocuments[0].value.fileName",
+          "contains": "testfilename"
+        }
+      }
+    ]
+  },
+  "response" : {
+    "status" : 201,
+    "body" : "{\"id\":1539007368674134,\"jurisdiction\":\"BULKSCAN\",\"state\":\"ScannedRecordFound\",\"case_type_id\":\"Bulk_Scanned\",\"created_date\":\"2018-10-08T14:02:48.609\",\"last_modified\":\"2018-10-08T14:27:06.613\",\"security_classification\":\"PUBLIC\",\"case_data\":{\"meta_POBox\":null,\"meta_OpenningDate\":null,\"meta_DeliveryDate\":null,\"meta_Classification\":null,\"meta_ZipFileCreatedDate\":null,\"meta_Urgency\":null,\"recordFlag\":null,\"meta_ZipFileName\":null,\"burnID\":null,\"receivedDate\":null,\"meta_Jurisdiction\":null,\"scannedDocuments\":[{\"value\":{\"fileName\":\"testfilename\",\"controlNumber\":\"1234\",\"type\":\"other\",\"scannedDate\":\"2018-01-01\"},\"id\":\"9ca6613e-efa9-446b-83bd-4d7856f3fd74\"}]},\"data_classification\":{\"meta_POBox\":\"PUBLIC\",\"meta_OpenningDate\":\"PUBLIC\",\"meta_DeliveryDate\":\"PUBLIC\",\"meta_Classification\":\"PUBLIC\",\"meta_ZipFileCreatedDate\":\"PUBLIC\",\"meta_Urgency\":\"PUBLIC\",\"recordFlag\":\"PUBLIC\",\"meta_ZipFileName\":\"PUBLIC\",\"burnID\":\"PUBLIC\",\"receivedDate\":\"PUBLIC\",\"meta_Jurisdiction\":\"PUBLIC\",\"scannedDocuments\":{\"classification\":\"PUBLIC\",\"value\":[{\"value\":{\"fileName\":\"PUBLIC\",\"controlNumber\":\"PUBLIC\",\"type\":\"PUBLIC\",\"scannedDate\":\"PUBLIC\"},\"id\":\"9ca6613e-efa9-446b-83bd-4d7856f3fd74\"}]}},\"after_submit_callback_response\":null,\"callback_response_status_code\":null,\"callback_response_status\":null,\"delete_draft_response_status_code\":null,\"delete_draft_response_status\":null,\"security_classifications\":{\"meta_POBox\":\"PUBLIC\",\"meta_OpenningDate\":\"PUBLIC\",\"meta_DeliveryDate\":\"PUBLIC\",\"meta_Classification\":\"PUBLIC\",\"meta_ZipFileCreatedDate\":\"PUBLIC\",\"meta_Urgency\":\"PUBLIC\",\"recordFlag\":\"PUBLIC\",\"meta_ZipFileName\":\"PUBLIC\",\"burnID\":\"PUBLIC\",\"receivedDate\":\"PUBLIC\",\"meta_Jurisdiction\":\"PUBLIC\",\"scannedDocuments\":{\"classification\":\"PUBLIC\",\"value\":[{\"value\":{\"fileName\":\"PUBLIC\",\"controlNumber\":\"PUBLIC\",\"type\":\"PUBLIC\",\"scannedDate\":\"PUBLIC\"},\"id\":\"9ca6613e-efa9-446b-83bd-4d7856f3fd74\"}]}}}",
+    "headers" : {
+      "X-Application-Context" : "Case_Data_Store_for_Insights:4452",
+      "X-Content-Type-Options" : "nosniff",
+      "X-XSS-Protection" : "1; mode=block",
+      "Cache-Control" : "no-cache, no-store, max-age=0, must-revalidate",
+      "Pragma" : "no-cache",
+      "Expires" : "0",
+      "X-Frame-Options" : "DENY",
+      "Content-Type" : "application/json;charset=UTF-8",
+      "Vary" : "Accept-Encoding",
+      "Date" : "Mon, 08 Oct 2018 14:27:06 GMT"
+    }
+  },
+  "uuid" : "5e24bd28-34a3-4a7c-a78e-359b9dcc7254",
+  "persistent" : true,
+  "insertionIndex" : 14
+}

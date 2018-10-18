@@ -8,6 +8,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisherContainer;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -15,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.JURSIDICTION;
@@ -28,19 +33,38 @@ public class EnvelopeEventProcessorTest {
     @Mock
     private CaseRetriever caseRetriever;
     @Mock
+    private EventPublisherContainer eventPublisherContainer;
+    @Mock
     private CcdAuthenticator authInfo;
 
     private EnvelopeEventProcessor processor;
 
     @Before
-    public void before() throws Exception {
-        processor = new EnvelopeEventProcessor(caseRetriever);
+    public void before() {
+        processor = new EnvelopeEventProcessor(caseRetriever, eventPublisherContainer);
         when(caseRetriever.retrieve(eq(JURSIDICTION), eq(CASE_REF))).thenReturn(THE_CASE);
+        when(eventPublisherContainer.getPublisher(any(Envelope.class), any(CaseDetails.class)))
+            .thenReturn(getDummyPublisher());
+        when(eventPublisherContainer.getPublisher(any(Envelope.class), eq(null)))
+            .thenReturn(getDummyPublisher());
         given(someMessage.getBody()).willReturn(envelopeJson());
     }
 
     @Test
     public void should_return_completed_future_if_everything_went_fine() {
+
+        // when
+        CompletableFuture<Void> result = processor.onMessageAsync(someMessage);
+
+        // then
+        assertThat(result.isDone()).isTrue();
+        assertThat(result.isCompletedExceptionally()).isFalse();
+    }
+
+    @Test
+    public void should_return_completed_future_when_case_is_null() {
+        reset(someMessage);
+        given(someMessage.getBody()).willReturn(envelopeJson(""));
 
         // when
         CompletableFuture<Void> result = processor.onMessageAsync(someMessage);
@@ -82,4 +106,9 @@ public class EnvelopeEventProcessorTest {
         assertThat(result.isCompletedExceptionally()).isTrue();
     }
 
+    private EventPublisher getDummyPublisher() {
+        return (Envelope envelope) -> {
+            //
+        };
+    }
 }

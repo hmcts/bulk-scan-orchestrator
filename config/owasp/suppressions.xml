@@ -9,6 +9,14 @@
     <cve>CVE-2011-1068</cve>
   </suppress>
 
+  <suppress>
+    <notes><![CDATA[
+      Introduced via kotlin stdlib. Kotlin only used in integration tests
+    ]]></notes>
+    <gav regex="true">^org\.jetbrains:annotations:13\.0$</gav>
+    <cve>CVE-2017-8316</cve>
+  </suppress>
+
   <!-- this is for the TEST jar wiremock-standalone -->
   <suppress>
     <notes><![CDATA[

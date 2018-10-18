@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 @Service
 @EnableConfigurationProperties(JurisdictionToUserMapping.class)
-class CcdAuthenticatorFactory {
+public class CcdAuthenticatorFactory {
     private final AuthTokenGenerator s2sTokenGenerator;
     private final IdamClient idamClient;
     private final JurisdictionToUserMapping users;
@@ -23,7 +23,7 @@ class CcdAuthenticatorFactory {
         this.users = users;
     }
 
-    CcdAuthenticator createForJurisdiction(String jurisdiction) {
+    public CcdAuthenticator createForJurisdiction(String jurisdiction) {
         Credential user = users.getUser(jurisdiction);
         String userToken = idamClient.authenticateUser(user.getUsername(), user.getPassword());
         UserDetails userDetails = idamClient.getUserDetails(userToken);

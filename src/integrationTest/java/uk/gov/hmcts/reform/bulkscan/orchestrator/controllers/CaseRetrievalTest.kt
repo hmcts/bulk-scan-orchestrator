@@ -9,6 +9,7 @@ import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -18,6 +19,8 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.util.SocketUtils
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -32,8 +35,8 @@ class CaseRetrievalTest {
             System.setProperty("wiremock.port", SocketUtils.findAvailableTcpPort().toString())
         }
 
-        val USER_ID = "32"
-        val JURIDICTION = "SSCS"
+        val USER_ID = "640"
+        val JURIDICTION = "BULKSCAN"
         val CASE_TYPE = CaseRetriever.CASE_TYPE_ID
         val CASE_REF = "1537879748168579"
 
@@ -41,27 +44,26 @@ class CaseRetrievalTest {
             "/caseworkers/${USER_ID}/jurisdictions/${JURIDICTION}/case-types/${CASE_TYPE}/cases/${CASE_REF}"
     }
 
-    private val mockMessage = Message(File("src/test/resources/envelopes/example.json").readText())
-
     @Autowired
     private lateinit var server: WireMockServer
 
     @Autowired
-    private lateinit var mockReceiver: IMessageReceiver
+    private lateinit var factory: CcdAuthenticatorFactory
+
+    @Autowired
+    private lateinit var coreCaseDataApi: CoreCaseDataApi
+
+    private lateinit var caseRetriever: CaseRetriever
 
     @BeforeEach
     fun before() {
-        `when`(mockReceiver.receive()).thenReturn(mockMessage, null)
+        caseRetriever = CaseRetriever(factory, coreCaseDataApi)
     }
 
     @Test
     fun `Should call to retrieve the case from ccd`() {
-        await()
-            .atMost(5, TimeUnit.SECONDS)
-            .ignoreExceptions()
-            .until {
-                server.verify(getRequestedFor(urlEqualTo(retrieveCase())))
-                true
-            }
+        caseRetriever.retrieve(JURIDICTION, CASE_REF)
+
+        server.verify(getRequestedFor(urlEqualTo(retrieveCase())))
     }
 }

@@ -10,7 +10,7 @@ idam:
   api:
     url: *wiremock
   users:
-    sscs:
+    bulkscan:
       username: bulkscanorchestrator+systemupdate@gmail.com
       password: Password12
 
