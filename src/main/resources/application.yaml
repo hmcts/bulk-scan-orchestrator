@@ -34,3 +34,12 @@ idam:
     id: 'bsp'
     secret: ${IDAM_CLIENT_SECRET:123456}
     redirect_uri: ${IDAM_REDIRECT_URI:http://localhost/receiver}
+
+logging:
+  level:
+    uk.gov.hmcts.reform.bulkscan: WARN
+    org.springframework: WARN
+    com.microsoft.azure.servicebus: DEBUG
+    org.apache.qpid: DEBUG
+    org.apache.catalina: WARN
+    springfox.documentation: WARN

@@ -23,7 +23,8 @@ public class ReceiverFactory implements MessageReceiverFactory {
 
     public IMessageReceiver create() {
         try {
-            return ClientFactory.createMessageReceiverFromConnectionString(connString, ReceiveMode.PEEKLOCK);
+            logger.info("Connecting to the queue - Connection string %s", connString);
+            return ClientFactory.createMessageReceiverFromConnectionString(connString, ReceiveMode.RECEIVEANDDELETE);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new ConnectionException("Unable to connect to queue", e);
