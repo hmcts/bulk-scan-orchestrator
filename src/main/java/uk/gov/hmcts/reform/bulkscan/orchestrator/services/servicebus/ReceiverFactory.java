@@ -18,6 +18,7 @@ public class ReceiverFactory implements MessageReceiverFactory {
     private final String connString;
 
     public ReceiverFactory(@Value("${queue.connection-string}") String connString) {
+        logger.info("ReceiverFactory - Connection string {}", connString);
         this.connString = connString;
     }
 
