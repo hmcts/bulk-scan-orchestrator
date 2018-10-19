@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.MessageReceiverFactory;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.ReceiverFactory;
 
 @Service
 @ConditionalOnProperty(value = "scheduling.enabled", matchIfMissing = true)
@@ -19,7 +20,7 @@ public class MessageProcessor {
     private final MessageReceiverFactory messageReceiverFactory;
     private final IMessageHandler envelopeProcessor;
 
-    MessageProcessor(MessageReceiverFactory factory, IMessageHandler envelopeProcessor) {
+    MessageProcessor(ReceiverFactory factory, IMessageHandler envelopeProcessor) {
         this.messageReceiverFactory = factory;
         this.envelopeProcessor = envelopeProcessor;
     }
