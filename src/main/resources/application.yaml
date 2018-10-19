@@ -37,7 +37,7 @@ idam:
 
 logging:
   level:
-    uk.gov.hmcts.reform.bulkscan: WARN
+    uk.gov.hmcts.reform.bulkscan: DEBUG
     org.springframework: WARN
     com.microsoft.azure.servicebus: DEBUG
     org.apache.qpid: DEBUG
