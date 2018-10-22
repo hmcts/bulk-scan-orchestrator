@@ -13,8 +13,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.util.SocketUtils
 import org.springframework.util.SocketUtils.findAvailableTcpPort
 import uk.gov.hmcts.reform.bulkscan.orchestrator.Application
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.MessageReceiverFactory

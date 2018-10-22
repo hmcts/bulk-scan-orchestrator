@@ -1,11 +1,12 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers
 
+import io.restassured.RestAssured
 import io.restassured.RestAssured.given
-import io.restassured.http.ContentType
+import io.restassured.builder.RequestSpecBuilder
+import io.restassured.http.ContentType.JSON
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.boot.web.server.LocalServerPort
@@ -21,19 +22,20 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest
 @ActiveProfiles("integration")
 @AutoConfigureWireMock
 @ContextConfiguration(initializers = [IntegrationTestConfig::class])
-class CcAttachSupplementaryEvidenceTest {
+class CcdAttachSupplementaryEvidenceTest {
 
     @LocalServerPort
     private var applicationPort: Int = 0
 
     @BeforeEach
-    fun before() = waitFor(applicationPort)
-
+    fun before() {
+        waitFor(applicationPort)
+        RestAssured.requestSpecification = RequestSpecBuilder().setPort(applicationPort).setContentType(JSON).build()
+    }
 
     @Test
     fun `should be able to call the ccd event enpoint`() {
-        given().baseUri("http://localhost:${applicationPort}")
-            .contentType(ContentType.JSON)
+        given()
             .body(CallbackRequest.builder().build())
             .post("/callback/{type}", "someType")
             .then()
