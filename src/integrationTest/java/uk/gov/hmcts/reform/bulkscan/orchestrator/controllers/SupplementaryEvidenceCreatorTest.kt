@@ -14,12 +14,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.caseEventUrl
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.caseUrl
@@ -27,10 +21,7 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 @ExtendWith(SpringExtension::class)
-@SpringBootTest(webEnvironment = RANDOM_PORT)
-@ActiveProfiles("integration")
-@AutoConfigureWireMock
-@ContextConfiguration(initializers = [IntegrationTestConfig::class])
+@IntegrationTest
 class SupplementaryEvidenceCreatorTest {
 
     private val mockMessage = Message(File(
