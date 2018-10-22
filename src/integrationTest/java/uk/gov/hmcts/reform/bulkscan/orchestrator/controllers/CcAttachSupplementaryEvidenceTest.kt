@@ -15,13 +15,11 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.PortWaiter.waitFor
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.IntegrationTest
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest
 
 @ExtendWith(SpringExtension::class)
-@SpringBootTest(webEnvironment = RANDOM_PORT)
-@ActiveProfiles("integration")
-@AutoConfigureWireMock
-@ContextConfiguration(initializers = [IntegrationTestConfig::class])
+@IntegrationTest
 class CcdAttachSupplementaryEvidenceTest {
 
     @LocalServerPort
@@ -34,7 +32,7 @@ class CcdAttachSupplementaryEvidenceTest {
     }
 
     @Test
-    fun `should be able to call the ccd event enpoint`() {
+    fun `should be able to call the ccd event endpoint`() {
         given()
             .body(CallbackRequest.builder().build())
             .post("/callback/{type}", "someType")
