@@ -4,13 +4,14 @@ import io.restassured.RestAssured
 import io.restassured.RestAssured.given
 import io.restassured.builder.RequestSpecBuilder
 import io.restassured.http.ContentType.JSON
+import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.PortWaiter.waitFor
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.IntegrationTest
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.PortWaiter.waitFor
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest
 
 @ExtendWith(SpringExtension::class)
@@ -33,5 +34,6 @@ class CcdAttachSupplementaryEvidenceTest {
             .post("/callback/{type}", "someType")
             .then()
             .statusCode(200)
+            .body("errors.size()", equalTo(0))
     }
 }
