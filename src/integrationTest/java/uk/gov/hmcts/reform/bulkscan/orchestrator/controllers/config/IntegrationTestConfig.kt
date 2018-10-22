@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers
+package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config
 
 import com.github.tomakehurst.wiremock.common.Slf4jNotifier
 import com.github.tomakehurst.wiremock.core.Options

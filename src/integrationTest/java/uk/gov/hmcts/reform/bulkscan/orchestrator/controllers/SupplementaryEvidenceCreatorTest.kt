@@ -15,8 +15,9 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.caseEventUrl
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.caseUrl
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.caseEventUrl
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.caseUrl
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.IntegrationTest
 import java.io.File
 import java.util.concurrent.TimeUnit
 

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers
+package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config
 
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever
 
@@ -12,13 +12,13 @@ object Environment {
     val CASE_TYPE = CaseRetriever.CASE_TYPE_ID
     val CASE_REF = "1539007368674134"
 
-    val caseUrl = "/caseworkers/${USER_ID}/jurisdictions/${JURIDICTION}/case-types/${CASE_TYPE}/cases/${CASE_REF}"
-    val caseEventUrl = "${caseUrl}/events"
-    val caseTypeUrl = "/caseworkers/${USER_ID}/jurisdictions/${JURIDICTION}/case-types/${CASE_TYPE}"
+    val caseUrl = "/caseworkers/$USER_ID/jurisdictions/$JURIDICTION/case-types/$CASE_TYPE/cases/$CASE_REF"
+    val caseEventUrl = "$caseUrl/events"
+    val caseTypeUrl = "/caseworkers/$USER_ID/jurisdictions/$JURIDICTION/case-types/$CASE_TYPE"
     val caseSubmitUrl = "$caseTypeUrl/cases"
     val caseEventTriggerStartUrl = "$caseTypeUrl/event-triggers/createException/token"
 
     /** url for retrieve Case */
     fun retrieveCase() =
-        "/caseworkers/${USER_ID}/jurisdictions/${JURIDICTION}/case-types/${CASE_TYPE}/cases/${CASE_REF}"
+        "/caseworkers/$USER_ID/jurisdictions/$JURIDICTION/case-types/$CASE_TYPE/cases/$CASE_REF"
 }
