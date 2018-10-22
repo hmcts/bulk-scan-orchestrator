@@ -10,6 +10,7 @@ import com.microsoft.azure.servicebus.IMessageReceiver
 import com.microsoft.azure.servicebus.Message
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mockito.`when`
@@ -64,6 +65,7 @@ class SupplementaryEvidenceCreatorTest {
     }
 
     @Test
+    @Disabled("TODO injecting RecieverFactory bean to test Azure Service bus queue on AAT")
     fun `should call ccd to attach supplementary evidence for caseworker`() {
         await()
             .atMost(30, TimeUnit.SECONDS)
