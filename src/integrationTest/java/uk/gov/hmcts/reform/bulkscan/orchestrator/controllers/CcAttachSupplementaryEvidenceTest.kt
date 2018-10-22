@@ -4,6 +4,7 @@ import io.restassured.RestAssured
 import io.restassured.RestAssured.given
 import io.restassured.builder.RequestSpecBuilder
 import io.restassured.http.ContentType.JSON
+import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -30,10 +31,20 @@ class CcdAttachSupplementaryEvidenceTest {
     @Test
     fun `should be able to call the ccd event endpoint`() {
         given()
-            .body(CallbackRequest.builder().build())
-            .post("/callback/{type}", "someType")
+            .body(CallbackRequest.builder().eventId("another-id").build())
+            .post("/callback/{type}", "about-to-submit")
             .then()
             .statusCode(200)
             .body("errors.size()", equalTo(0))
+    }
+
+    @Test
+    fun `invalid event should return an error`() {
+        given()
+            .body(CallbackRequest.builder().eventId("another-id").build())
+            .post("/callback/{type}", "someType")
+            .then()
+            .statusCode(200)
+            .body("errors", contains("Internal Error: invalid event: someType"))
     }
 }
