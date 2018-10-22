@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers
 
-import org.springframework.util.SocketUtils
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever
 
-object Environment{
+/**
+ * This Singleton contains all the environmental items needed in the integration test profile.
+ */
+object Environment {
 
     val USER_ID = "640"
     val JURIDICTION = "BULKSCAN"
@@ -16,6 +18,7 @@ object Environment{
     val caseSubmitUrl = "$caseTypeUrl/cases"
     val caseEventTriggerStartUrl = "$caseTypeUrl/event-triggers/createException/token"
 
+    /** url for retrieve Case */
     fun retrieveCase() =
         "/caseworkers/${USER_ID}/jurisdictions/${JURIDICTION}/case-types/${CASE_TYPE}/cases/${CASE_REF}"
 }

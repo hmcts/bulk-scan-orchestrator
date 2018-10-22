@@ -7,11 +7,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.CASE_REF
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.JURIDICTION
@@ -22,10 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi
 
 
 @ExtendWith(SpringExtension::class)
-@SpringBootTest(webEnvironment = RANDOM_PORT )
-@AutoConfigureWireMock
-@ActiveProfiles("integration")
-@ContextConfiguration(initializers = [IntegrationTestConfig::class])
+@IntegrationTest
 class CaseRetrievalTest {
     @Autowired
     private lateinit var server: WireMockServer
