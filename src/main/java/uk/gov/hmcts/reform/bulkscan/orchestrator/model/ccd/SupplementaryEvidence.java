@@ -4,9 +4,8 @@ import java.util.List;
 
 public class SupplementaryEvidence implements CaseData {
 
-    /*
-     * This field should always be sent as {@code null} in CCD data object
-     */
+    // This field should always be set to null, as adding supplementary evidence
+    // resets 'evidenceHandled' field in the case
     public final String evidenceHandled = null;
 
     public final List<CcdCollectionElement<ScannedDocument>> scannedDocuments;
