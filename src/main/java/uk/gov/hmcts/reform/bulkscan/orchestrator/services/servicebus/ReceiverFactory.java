@@ -25,6 +25,7 @@ public class ReceiverFactory implements MessageReceiverFactory {
     public IMessageReceiver create() {
         try {
             logger.info("Connecting to the queue - Connection string {}", connString);
+            //TODO: change it back to PEEKLOCK
             return ClientFactory.createMessageReceiverFromConnectionString(connString, ReceiveMode.RECEIVEANDDELETE);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
