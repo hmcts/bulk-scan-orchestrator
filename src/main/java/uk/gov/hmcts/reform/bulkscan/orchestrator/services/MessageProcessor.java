@@ -36,7 +36,7 @@ public class MessageProcessor {
                 msgReceiver.complete(msg.getLockToken());
                 processedMessagesCount++;
             }
-
+            msgReceiver.close();
             logger.info("Message processing complete. Processed {} messages", processedMessagesCount);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
