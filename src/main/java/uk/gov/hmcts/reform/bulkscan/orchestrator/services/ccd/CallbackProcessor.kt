@@ -1,7 +1,9 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd
 
+import feign.FeignException
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest
 import uk.gov.hmcts.reform.ccd.client.model.CallbackTypes.ABOUT_TO_SUBMIT
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails
@@ -9,7 +11,10 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails
 private val logger = KotlinLogging.logger {}
 
 @Service
-class CallbackProcessor {
+class CallbackProcessor(
+    private val authenticatorFactory: CcdAuthenticatorFactory,
+    private val ccdApi: CoreCaseDataApi
+) {
 
     /**
      * returns
@@ -48,6 +53,33 @@ class CallbackProcessor {
     }
 
     private fun handleAttachRecord(caseDetails: CaseDetails): List<String> {
-        return listOf()
+        return if (caseDetails.data != null) {
+            startAttachEvent(caseDetails)
+        } else {
+            logger.error { "No case details supplied eventId: ${caseDetails.id}" }
+            listOf("Internal Error: no case data")
+        }
+    }
+
+    private fun startAttachEvent(caseDetails: CaseDetails): List<String> {
+        try {
+            val authenticator = authenticatorFactory.createForJurisdiction(caseDetails.jurisdiction)
+            ccdApi.startEventForCaseWorker(
+                authenticator.userToken,
+                authenticator.serviceToken,
+                authenticator.userDetails.id,
+                caseDetails.jurisdiction,
+                caseDetails.caseTypeId,
+                caseDetails.data["attachToCaseReference"] as String?,
+                "TBD"
+            )
+            return listOf()
+        } catch (e: FeignException) {
+            logger.error(e) {}
+            return listOf("Internal Error: response ${e.status()} submitting event")
+        } catch (e: Exception) {
+            logger.error(e) {}
+            return listOf("Internal Error: ${e::class.simpleName}:${e.message}")
+        }
     }
 }
