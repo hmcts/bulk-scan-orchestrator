@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseTypeId;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
@@ -67,8 +68,8 @@ abstract class AbstractEventPublisher implements EventPublisher {
     @Autowired
     private CcdAuthenticatorFactory authenticatorFactory;
 
-    AbstractEventPublisher(String caseTypeId) {
-        this.caseTypeId = caseTypeId;
+    AbstractEventPublisher(CaseTypeId caseTypeId) {
+        this.caseTypeId = caseTypeId.getId();
     }
 
     @Override

@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseTypeId;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisherContainer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
@@ -52,7 +53,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
         Envelope envelope = parse(message.getBody());
         CaseDetails theCase = Strings.isNullOrEmpty(envelope.caseRef)
             ? null
-            : caseRetriever.retrieve(envelope.jurisdiction, EventPublisher.CASE_TYPE_BULK_SCANNED, envelope.caseRef);
+            : caseRetriever.retrieve(envelope.jurisdiction, CaseTypeId.CASE_TYPE_BULK_SCANNED, envelope.caseRef);
 
         EventPublisher eventPublisher = eventPublisherContainer.getPublisher(envelope, theCase);
 

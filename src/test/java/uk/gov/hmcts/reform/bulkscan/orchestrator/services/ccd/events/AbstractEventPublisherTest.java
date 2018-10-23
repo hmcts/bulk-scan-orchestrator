@@ -23,7 +23,7 @@ import java.util.Collections;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher.CASE_TYPE_BULK_SCANNED;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseTypeId.CASE_TYPE_BULK_SCANNED;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractEventPublisherTest {
@@ -85,7 +85,7 @@ public class AbstractEventPublisherTest {
             authenticator.getServiceToken(),
             authenticator.getUserDetails().getId(),
             ENVELOPE.jurisdiction,
-            CASE_TYPE_BULK_SCANNED,
+            CASE_TYPE_BULK_SCANNED.getId(),
             ENVELOPE.caseRef,
             EVENT_TYPE_ID
         );
@@ -96,7 +96,7 @@ public class AbstractEventPublisherTest {
             authenticator.getServiceToken(),
             authenticator.getUserDetails().getId(),
             ENVELOPE.jurisdiction,
-            CASE_TYPE_BULK_SCANNED,
+            CASE_TYPE_BULK_SCANNED.getId(),
             ENVELOPE.caseRef,
             true,
             CaseDataContent

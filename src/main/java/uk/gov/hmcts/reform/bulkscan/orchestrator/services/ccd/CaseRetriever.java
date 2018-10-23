@@ -23,7 +23,7 @@ public class CaseRetriever {
         this.coreCaseDataApi = coreCaseDataApi;
     }
 
-    public CaseDetails retrieve(String jurisdiction, String caseTypeId, String caseRef) {
+    public CaseDetails retrieve(String jurisdiction, CaseTypeId caseTypeId, String caseRef) {
         // not including in try catch to fast fail the method
         CcdAuthenticator authenticator = factory.createForJurisdiction(jurisdiction);
 
@@ -33,7 +33,7 @@ public class CaseRetriever {
                 authenticator.getServiceToken(),
                 authenticator.getUserDetails().getId(),
                 jurisdiction,
-                caseTypeId,
+                caseTypeId.getId(),
                 caseRef
             );
 

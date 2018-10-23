@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.ModelMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.SupplementaryEvidenceMapper;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseTypeId;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
 @Component
@@ -12,7 +13,7 @@ class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
     private final ModelMapper<? extends CaseData> mapper;
 
     AttachDocsToSupplementaryEvidence(SupplementaryEvidenceMapper mapper) {
-        super(EventPublisher.CASE_TYPE_BULK_SCANNED);
+        super(CaseTypeId.CASE_TYPE_BULK_SCANNED);
         this.mapper = mapper;
     }
 

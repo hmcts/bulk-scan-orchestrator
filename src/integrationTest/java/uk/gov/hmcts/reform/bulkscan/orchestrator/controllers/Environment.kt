@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers
 
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseTypeId
 
 /**
  * This Singleton contains all the environmental items needed in the integration test profile.
@@ -9,8 +9,8 @@ object Environment {
 
     val USER_ID = "640"
     val JURIDICTION = "BULKSCAN"
-    val CASE_TYPE_BULK_SCAN = EventPublisher.CASE_TYPE_BULK_SCANNED
-    val CASE_TYPE_EXCEPTION_RECORD = EventPublisher.CASE_TYPE_EXCEPTION_RECORD
+    val CASE_TYPE_BULK_SCAN = CaseTypeId.CASE_TYPE_BULK_SCANNED
+    val CASE_TYPE_EXCEPTION_RECORD = CaseTypeId.CASE_TYPE_EXCEPTION_RECORD
     val CASE_REF = "1539007368674134"
 
     val caseUrl = "/caseworkers/${USER_ID}/jurisdictions/${JURIDICTION}/case-types/${CASE_TYPE_BULK_SCAN}/cases/${CASE_REF}"
