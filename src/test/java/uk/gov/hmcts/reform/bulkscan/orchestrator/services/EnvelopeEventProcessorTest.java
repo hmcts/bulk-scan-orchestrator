@@ -25,7 +25,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.JURSIDICTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.THE_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelopeJson;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher.BULK_SCANNED;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher.CASE_TYPE_BULK_SCANNED;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EnvelopeEventProcessorTest {
@@ -43,7 +43,7 @@ public class EnvelopeEventProcessorTest {
     @Before
     public void before() {
         processor = new EnvelopeEventProcessor(caseRetriever, eventPublisherContainer);
-        when(caseRetriever.retrieve(eq(JURSIDICTION), eq(BULK_SCANNED), eq(CASE_REF))).thenReturn(THE_CASE);
+        when(caseRetriever.retrieve(eq(JURSIDICTION), eq(CASE_TYPE_BULK_SCANNED), eq(CASE_REF))).thenReturn(THE_CASE);
         when(eventPublisherContainer.getPublisher(any(Envelope.class), any(CaseDetails.class)))
             .thenReturn(getDummyPublisher());
         when(eventPublisherContainer.getPublisher(any(Envelope.class), eq(null)))

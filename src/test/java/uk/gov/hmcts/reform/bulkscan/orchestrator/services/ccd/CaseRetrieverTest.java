@@ -23,7 +23,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.SERVICE_TOKEN
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.THE_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_ID;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_TOKEN;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher.BULK_SCANNED;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher.CASE_TYPE_BULK_SCANNED;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CaseRetrieverTest {
@@ -38,11 +38,11 @@ public class CaseRetrieverTest {
     public void should_retrieve_case_successfully() {
         retriever = new CaseRetriever(authenticator, dataApi);
 
-        given(dataApi.readForCaseWorker(USER_TOKEN, SERVICE_TOKEN, USER_ID, JURSIDICTION, BULK_SCANNED, CASE_REF))
+        given(dataApi.readForCaseWorker(USER_TOKEN, SERVICE_TOKEN, USER_ID, JURSIDICTION, CASE_TYPE_BULK_SCANNED, CASE_REF))
             .willReturn(THE_CASE);
         given(authenticator.createForJurisdiction(JURSIDICTION)).willReturn(AUTH_DETAILS);
 
-        CaseDetails theCase = retriever.retrieve(JURSIDICTION, BULK_SCANNED, CASE_REF);
+        CaseDetails theCase = retriever.retrieve(JURSIDICTION, CASE_TYPE_BULK_SCANNED, CASE_REF);
         assertThat(theCase.getId()).isEqualTo(CASE_ID);
     }
 
@@ -59,11 +59,11 @@ public class CaseRetrieverTest {
                 .build()
         );
 
-        given(dataApi.readForCaseWorker(USER_TOKEN, SERVICE_TOKEN, USER_ID, JURSIDICTION, BULK_SCANNED, CASE_REF))
+        given(dataApi.readForCaseWorker(USER_TOKEN, SERVICE_TOKEN, USER_ID, JURSIDICTION, CASE_TYPE_BULK_SCANNED, CASE_REF))
             .willThrow(exception);
         given(authenticator.createForJurisdiction(JURSIDICTION)).willReturn(AUTH_DETAILS);
 
-        CaseDetails theCase = retriever.retrieve(JURSIDICTION, BULK_SCANNED, CASE_REF);
+        CaseDetails theCase = retriever.retrieve(JURSIDICTION, CASE_TYPE_BULK_SCANNED, CASE_REF);
 
         assertThat(theCase).isNull();
     }
@@ -81,10 +81,10 @@ public class CaseRetrieverTest {
                 .build()
         );
 
-        given(dataApi.readForCaseWorker(USER_TOKEN, SERVICE_TOKEN, USER_ID, JURSIDICTION, BULK_SCANNED, CASE_REF))
+        given(dataApi.readForCaseWorker(USER_TOKEN, SERVICE_TOKEN, USER_ID, JURSIDICTION, CASE_TYPE_BULK_SCANNED, CASE_REF))
             .willThrow(exception);
         given(authenticator.createForJurisdiction(JURSIDICTION)).willReturn(AUTH_DETAILS);
 
-        assertThatCode(() -> retriever.retrieve(JURSIDICTION, BULK_SCANNED, CASE_REF)).isEqualTo(exception);
+        assertThatCode(() -> retriever.retrieve(JURSIDICTION, CASE_TYPE_BULK_SCANNED, CASE_REF)).isEqualTo(exception);
     }
 }

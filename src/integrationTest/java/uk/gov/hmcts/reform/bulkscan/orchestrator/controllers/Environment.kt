@@ -9,8 +9,8 @@ object Environment {
 
     val USER_ID = "640"
     val JURIDICTION = "BULKSCAN"
-    val CASE_TYPE_BULK_SCAN = EventPublisher.BULK_SCANNED
-    val CASE_TYPE_EXCEPTION_RECORD = EventPublisher.EXCEPTION_RECORD
+    val CASE_TYPE_BULK_SCAN = EventPublisher.CASE_TYPE_BULK_SCANNED
+    val CASE_TYPE_EXCEPTION_RECORD = EventPublisher.CASE_TYPE_EXCEPTION_RECORD
     val CASE_REF = "1539007368674134"
 
     val caseUrl = "/caseworkers/${USER_ID}/jurisdictions/${JURIDICTION}/case-types/${CASE_TYPE_BULK_SCAN}/cases/${CASE_REF}"

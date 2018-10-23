@@ -28,7 +28,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.DatetimeHelper.toIso8601;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher.BULK_SCANNED;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher.CASE_TYPE_BULK_SCANNED;
 
 public class SampleData {
     public static final String SERVICE_TOKEN = "SERVICE_TOKEN";
@@ -52,7 +52,7 @@ public class SampleData {
     public static final CaseDetails THE_CASE = CaseDetails.builder()
         .id(CASE_ID)
         .jurisdiction(JURSIDICTION)
-        .caseTypeId(BULK_SCANNED)
+        .caseTypeId(CASE_TYPE_BULK_SCANNED)
         .build();
 
     public static final ObjectMapper objectMapper;
