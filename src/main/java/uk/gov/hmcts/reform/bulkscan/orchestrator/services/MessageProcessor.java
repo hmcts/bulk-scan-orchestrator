@@ -7,11 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.MessageReceiverFactory;
 
-@Service
-@ConditionalOnProperty(value = "scheduling.enabled", matchIfMissing = true)
+//@Service
 public class MessageProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(MessageProcessor.class);
