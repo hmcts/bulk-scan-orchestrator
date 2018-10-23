@@ -15,9 +15,11 @@ spring:
   application:
     name: Bulk Scan Orchestrator
 
-queue:
-  connection-string: ${QUEUE_CONNECTION_STRING:}
-  read-interval: ${QUEUE_READ_INTERVAL:30000} # in ms
+azure:
+  servicebus:
+    connection-string: ${QUEUE_CONNECTION_STRING:"NO_VALUE_SUPPLIED"}
+    queue-name: envelopes
+    queue-receive-mode: peeklock
 
 core_case_data:
   api:
