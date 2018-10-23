@@ -1,8 +1,12 @@
 {
   "id": "0192",
+  "case_ref": "1539860706648396",
+  "po_box": "BULKSCAN PO BOX",
   "jurisdiction": "BULKSCAN",
-  "classification": "NEW_APPLICATION",
+  "classification": "SUPPLEMENTARY_EVIDENCE",
   "zip_file_name": "zip-file-test-updated.zip",
+  "delivery_date": "1970-01-01T00:00:00.000Z",
+  "opening_date": "1970-01-01T00:00:00.000Z",
   "documents": [
     {
       "file_name": "cert_updated.pdf",
