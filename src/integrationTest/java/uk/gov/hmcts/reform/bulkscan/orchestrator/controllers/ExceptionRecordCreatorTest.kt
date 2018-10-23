@@ -35,10 +35,11 @@ class ExceptionRecordCreatorTest {
     ).readText())
 
     private val caseEventTriggerStartUrl = Environment.caseEventTriggerStartUrl
-        .replace(CASE_TYPE_BULK_SCAN, CASE_TYPE_EXCEPTION_RECORD)
+        .replace(CASE_TYPE_BULK_SCAN.getId(), CASE_TYPE_EXCEPTION_RECORD.getId())
     private val caseSubmitUrl = Environment.caseSubmitUrl
-        .replace(CASE_TYPE_BULK_SCAN, CASE_TYPE_EXCEPTION_RECORD)
-    private val caseUrl = Environment.caseUrl.replace(CASE_TYPE_BULK_SCAN, CASE_TYPE_EXCEPTION_RECORD)
+        .replace(CASE_TYPE_BULK_SCAN.getId(), CASE_TYPE_EXCEPTION_RECORD.getId())
+    private val caseUrl = Environment.caseUrl
+        .replace(CASE_TYPE_BULK_SCAN.getId(), CASE_TYPE_EXCEPTION_RECORD.getId())
 
     @Autowired
     private lateinit var server: WireMockServer

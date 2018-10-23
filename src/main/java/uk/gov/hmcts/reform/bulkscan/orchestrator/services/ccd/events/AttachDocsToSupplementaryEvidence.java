@@ -13,7 +13,7 @@ class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
     private final ModelMapper<? extends CaseData> mapper;
 
     AttachDocsToSupplementaryEvidence(SupplementaryEvidenceMapper mapper) {
-        super(CaseTypeId.CASE_TYPE_BULK_SCANNED);
+        super(CaseTypeId.BULK_SCANNED);
         this.mapper = mapper;
     }
 

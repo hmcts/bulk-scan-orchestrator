@@ -13,7 +13,7 @@ class CreateExceptionRecord extends AbstractEventPublisher {
     private final ModelMapper<? extends CaseData> mapper;
 
     CreateExceptionRecord(ExceptionRecordMapper mapper) {
-        super(CaseTypeId.CASE_TYPE_EXCEPTION_RECORD);
+        super(CaseTypeId.EXCEPTION_RECORD);
         this.mapper = mapper;
     }
 

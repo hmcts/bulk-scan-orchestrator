@@ -9,17 +9,17 @@ object Environment {
 
     val USER_ID = "640"
     val JURIDICTION = "BULKSCAN"
-    val CASE_TYPE_BULK_SCAN = CaseTypeId.CASE_TYPE_BULK_SCANNED
-    val CASE_TYPE_EXCEPTION_RECORD = CaseTypeId.CASE_TYPE_EXCEPTION_RECORD
+    val CASE_TYPE_BULK_SCAN = CaseTypeId.BULK_SCANNED
+    val CASE_TYPE_EXCEPTION_RECORD = CaseTypeId.EXCEPTION_RECORD
     val CASE_REF = "1539007368674134"
 
-    val caseUrl = "/caseworkers/${USER_ID}/jurisdictions/${JURIDICTION}/case-types/${CASE_TYPE_BULK_SCAN}/cases/${CASE_REF}"
+    val caseUrl = "/caseworkers/${USER_ID}/jurisdictions/${JURIDICTION}/case-types/${CASE_TYPE_BULK_SCAN.getId()}/cases/${CASE_REF}"
     val caseEventUrl = "${caseUrl}/events"
-    val caseTypeUrl = "/caseworkers/${USER_ID}/jurisdictions/${JURIDICTION}/case-types/${CASE_TYPE_BULK_SCAN}"
+    val caseTypeUrl = "/caseworkers/${USER_ID}/jurisdictions/${JURIDICTION}/case-types/${CASE_TYPE_BULK_SCAN.getId()}"
     val caseSubmitUrl = "$caseTypeUrl/cases"
     val caseEventTriggerStartUrl = "$caseTypeUrl/event-triggers/createException/token"
 
     /** url for retrieve Case */
     fun retrieveCase() =
-        "/caseworkers/${USER_ID}/jurisdictions/${JURIDICTION}/case-types/${CASE_TYPE_BULK_SCAN}/cases/${CASE_REF}"
+        "/caseworkers/${USER_ID}/jurisdictions/${JURIDICTION}/case-types/${CASE_TYPE_BULK_SCAN.getId()}/cases/${CASE_REF}"
 }
