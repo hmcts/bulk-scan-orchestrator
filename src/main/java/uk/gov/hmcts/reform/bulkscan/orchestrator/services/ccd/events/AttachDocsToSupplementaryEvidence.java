@@ -1,19 +1,23 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.ModelMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.SupplementaryEvidenceMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
 @Component
 class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
 
-    AttachDocsToSupplementaryEvidence() {
-        // empty constructor for ccd event publisher
+    private final ModelMapper<? extends CaseData> mapper;
+
+    AttachDocsToSupplementaryEvidence(SupplementaryEvidenceMapper mapper) {
+        this.mapper = mapper;
     }
 
     @Override
-    Object mapEnvelopeToCaseDataObject(Envelope envelope) {
-        return SupplementaryEvidenceMapper.fromEnvelope(envelope);
+    CaseData mapEnvelopeToCaseDataObject(Envelope envelope) {
+        return mapper.mapEnvelope(envelope);
     }
 
     @Override

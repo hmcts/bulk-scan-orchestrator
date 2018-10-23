@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
-public class SupplementaryEvidence {
+public class SupplementaryEvidence implements CaseData {
 
     @JsonProperty("scannedDocuments")
     public final List<CcdCollectionElement<ScannedDocument>> scannedDocuments;

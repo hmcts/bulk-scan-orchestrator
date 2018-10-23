@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
@@ -122,11 +123,11 @@ abstract class AbstractEventPublisher implements EventPublisher {
     }
 
     // todo perhaps some generic interface for these data objects?
-    abstract Object mapEnvelopeToCaseDataObject(Envelope envelope);
+    abstract CaseData mapEnvelopeToCaseDataObject(Envelope envelope);
 
     private CaseDataContent buildCaseDataContent(
         String eventToken,
-        Object caseDataObject
+        CaseData caseDataObject
     ) {
         return CaseDataContent.builder()
             .eventToken(eventToken)

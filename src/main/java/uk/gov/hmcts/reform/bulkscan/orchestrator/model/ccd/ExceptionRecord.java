@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class ExceptionRecord {
+public class ExceptionRecord implements CaseData {
 
     @JsonProperty("journeyClassification")
     public final String classification;
