@@ -4,5 +4,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envel
 
 public interface EventPublisher {
 
+    String BULK_SCANNED = "Bulk_Scanned";
+    String EXCEPTION_RECORD = "ExceptionRecord";
+
     void publish(Envelope envelope);
 }

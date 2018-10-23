@@ -12,6 +12,7 @@ class CreateExceptionRecord extends AbstractEventPublisher {
     private final ModelMapper<? extends CaseData> mapper;
 
     CreateExceptionRecord(ExceptionRecordMapper mapper) {
+        super(EventPublisher.EXCEPTION_RECORD);
         this.mapper = mapper;
     }
 
