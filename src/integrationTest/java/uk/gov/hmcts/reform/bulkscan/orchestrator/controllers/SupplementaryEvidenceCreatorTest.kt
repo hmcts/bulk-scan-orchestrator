@@ -14,35 +14,15 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import org.springframework.util.SocketUtils
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.caseEventUrl
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.caseUrl
 import java.io.File
 import java.util.concurrent.TimeUnit
 
 @ExtendWith(SpringExtension::class)
-@SpringBootTest(webEnvironment = RANDOM_PORT)
-@ActiveProfiles("integration")
-@AutoConfigureWireMock
+@IntegrationTest
 class SupplementaryEvidenceCreatorTest {
-    companion object {
-        init {
-            //This needs to be done since AutoConfigureWireMock seems to have a bug where its using a random port.
-            System.setProperty("wiremock.port", SocketUtils.findAvailableTcpPort().toString())
-        }
-
-        val USER_ID = "640"
-        val JURIDICTION = "BULKSCAN"
-        val CASE_TYPE = CaseRetriever.CASE_TYPE_ID
-        val CASE_REF = "1539007368674134"
-
-        private val caseUrl = "/caseworkers/$USER_ID/jurisdictions/$JURIDICTION/case-types/$CASE_TYPE/cases/$CASE_REF"
-        private val caseEventUrl = "$caseUrl/events"
-    }
 
     private val mockMessage = Message(File(
         "src/integrationTest/resources/servicebus/message/supplementary-evidence-example.json"
@@ -57,9 +37,11 @@ class SupplementaryEvidenceCreatorTest {
 
     @BeforeEach
     fun before() {
-        `when`(mockReceiver.receive()).thenReturn(mockMessage, null)
         //We need to do this because of an issue with the way AutoConfigureWireMock works with profiles.
-        WireMock(server.port()).register(get(caseUrl).willReturn(aResponse().withBody(mockResponse)))
+        WireMock(server.port()).register(
+            get(caseUrl).willReturn(aResponse().withBody(mockResponse))
+        )
+        `when`(mockReceiver.receive()).thenReturn(mockMessage, null)
     }
 
     @Test
