@@ -129,7 +129,6 @@ abstract class AbstractEventPublisher implements EventPublisher {
         }
     }
 
-    // todo perhaps some generic interface for these data objects?
     abstract CaseData mapEnvelopeToCaseDataObject(Envelope envelope);
 
     private CaseDataContent buildCaseDataContent(
