@@ -52,7 +52,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
         Envelope envelope = parse(message.getBody());
         CaseDetails theCase = Strings.isNullOrEmpty(envelope.caseRef)
             ? null
-            : caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
+            : caseRetriever.retrieve(envelope.jurisdiction, EventPublisher.BULK_SCANNED, envelope.caseRef);
 
         EventPublisher eventPublisher = eventPublisherContainer.getPublisher(envelope, theCase);
 

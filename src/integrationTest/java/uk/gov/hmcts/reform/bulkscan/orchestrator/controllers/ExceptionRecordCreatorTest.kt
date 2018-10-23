@@ -18,9 +18,8 @@ import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.caseEventTriggerStartUrl
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.caseSubmitUrl
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.caseUrl
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.CASE_TYPE_BULK_SCAN
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.CASE_TYPE_EXCEPTION_RECORD
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -34,6 +33,12 @@ class ExceptionRecordCreatorTest {
     private val mockExceptionMessage = Message(File(
         "src/integrationTest/resources/servicebus/message/exception-example.json"
     ).readText())
+
+    private val caseEventTriggerStartUrl = Environment.caseEventTriggerStartUrl
+        .replace(CASE_TYPE_BULK_SCAN, CASE_TYPE_EXCEPTION_RECORD)
+    private val caseSubmitUrl = Environment.caseSubmitUrl
+        .replace(CASE_TYPE_BULK_SCAN, CASE_TYPE_EXCEPTION_RECORD)
+    private val caseUrl = Environment.caseUrl.replace(CASE_TYPE_BULK_SCAN, CASE_TYPE_EXCEPTION_RECORD)
 
     @Autowired
     private lateinit var server: WireMockServer
