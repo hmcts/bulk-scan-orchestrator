@@ -16,10 +16,12 @@ public class MessageProcessor {
 
     private final MessageReceiverFactory messageReceiverFactory;
     private final IMessageHandler envelopeProcessor;
+    private final IMessageReceiver msgReceiver;
 
     MessageProcessor(MessageReceiverFactory factory, IMessageHandler envelopeProcessor) {
         this.messageReceiverFactory = factory;
         this.envelopeProcessor = envelopeProcessor;
+        this.msgReceiver = messageReceiverFactory.create();
     }
 
     @Scheduled(fixedDelayString = "${queue.read-interval}")
@@ -30,13 +32,11 @@ public class MessageProcessor {
         int processedMessagesCount = 0;
 
         try {
-            IMessageReceiver msgReceiver = messageReceiverFactory.create();
             while ((msg = msgReceiver.receive()) != null) {
                 envelopeProcessor.onMessageAsync(msg).get();
                 msgReceiver.complete(msg.getLockToken());
                 processedMessagesCount++;
             }
-
             logger.info("Message processing complete. Processed {} messages", processedMessagesCount);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
