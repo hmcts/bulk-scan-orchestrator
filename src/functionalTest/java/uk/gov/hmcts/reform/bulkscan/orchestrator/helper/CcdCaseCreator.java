@@ -25,6 +25,9 @@ public class CcdCaseCreator {
     private final CcdAuthenticatorFactory ccdAuthenticatorFactory;
     private final CoreCaseDataApi coreCaseDataApi;
 
+    private final SupplementaryEvidenceMapper supplementaryEvidenceMapper =
+        new SupplementaryEvidenceMapper();
+
     public CcdCaseCreator(
         CcdAuthenticatorFactory ccdAuthenticatorFactory,
         CoreCaseDataApi coreCaseDataApi
@@ -56,7 +59,7 @@ public class CcdCaseCreator {
                 .summary("create new case")
                 .description("create new case for tests")
                 .build())
-            .data(SupplementaryEvidenceMapper.fromEnvelope(envelope))
+            .data(supplementaryEvidenceMapper.mapEnvelope(envelope))
             .build();
     }
 
