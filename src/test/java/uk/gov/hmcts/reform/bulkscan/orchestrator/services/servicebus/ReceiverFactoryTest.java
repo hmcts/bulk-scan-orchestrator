@@ -14,7 +14,8 @@ public class ReceiverFactoryTest {
     @Test
     public void create_should_return_client_from_client_factory() {
 
-        String connString = "Endpoint=sb://test123.example.com/;SharedAccessKeyName=test;SharedAccessKey=testKey;EntityPath=envelopes";
+        String connString =
+            "Endpoint=sb://test123.example.com/;SharedAccessKeyName=test;SharedAccessKey=testKey;EntityPath=envelopes";
 
         Throwable thrown = catchThrowable(() -> new ReceiverFactory(connString).create());
 
