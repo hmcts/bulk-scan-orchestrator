@@ -36,7 +36,7 @@ public class CcdCaseCreator {
         this.coreCaseDataApi = coreCaseDataApi;
     }
 
-    public CaseDetails createCasee(Envelope envelope) {
+    public CaseDetails createCase(Envelope envelope) {
         log.info("Creating new case");
         CcdAuthenticator authenticator = ccdAuthenticatorFactory.createForJurisdiction(JURISDICTION);
 

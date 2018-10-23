@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.TestHelper;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser;
@@ -41,7 +41,7 @@ public class SupplementaryEvidenceTest {
         String caseData = SampleData.fromFile("envelopes/new-envelope.json");
         Envelope newEnvelope = EnvelopeParser.parse(caseData);
 
-        CaseDetails caseDetails = ccdCaseCreator.createCasee(newEnvelope);
+        CaseDetails caseDetails = ccdCaseCreator.createCase(newEnvelope);
         assertThat(caseDetails.getId()).isNotNull();
 
         // when
@@ -66,7 +66,7 @@ public class SupplementaryEvidenceTest {
             String.valueOf(caseDetails.getId())
         );
 
-        List<ScannedDocument> updatedScannedDocuments = TestHelper.getScannedDocuments(updatedCaseDetails);
+        List<ScannedDocument> updatedScannedDocuments = ScannedDocumentsHelper.getScannedDocuments(updatedCaseDetails);
 
         ScannedDocument updatedDocument = updatedScannedDocuments.get(0);
 
@@ -82,7 +82,7 @@ public class SupplementaryEvidenceTest {
         CaseDetails updatedCaseDetails = caseRetriever.retrieve(
             caseDetails.getJurisdiction(), String.valueOf(caseDetails.getId()));
 
-        List<ScannedDocument> updatedScannedDocuments = TestHelper.getScannedDocuments(updatedCaseDetails);
+        List<ScannedDocument> updatedScannedDocuments = ScannedDocumentsHelper.getScannedDocuments(updatedCaseDetails);
         return updatedScannedDocuments.size() > 0;
     }
 }

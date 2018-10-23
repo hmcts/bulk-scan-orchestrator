@@ -10,9 +10,9 @@ import java.util.Map;
 import static java.util.stream.Collectors.toList;
 
 @SuppressWarnings("unchecked")
-public class TestHelper {
+public class ScannedDocumentsHelper {
 
-    private TestHelper() {
+    private ScannedDocumentsHelper() {
         // utility class
     }
 
@@ -20,7 +20,7 @@ public class TestHelper {
         List<Map<String, Map<String, String>>> data =
             (List<Map<String, Map<String, String>>>) caseDetails.getData().get("scannedDocuments");
 
-        return data.stream().map(TestHelper::createDocumentFromMap).collect(toList());
+        return data.stream().map(ScannedDocumentsHelper::createDocumentFromMap).collect(toList());
     }
 
     private static ScannedDocument createDocumentFromMap(Map<String, Map<String, String>> object) {
