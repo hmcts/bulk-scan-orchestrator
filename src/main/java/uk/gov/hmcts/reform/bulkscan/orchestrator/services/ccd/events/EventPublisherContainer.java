@@ -1,6 +1,9 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
+import com.google.common.base.Strings;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseTypeId;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -10,30 +13,35 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
  * <ul>
  *     <li>implement {@link AbstractEventPublisher}</li>
  *     <li>include {@code private EventPublisher somePublisher;}</li>
- *     <li>use resource in {@link this#getPublisher(Envelope, CaseDetails)}</li>
+ *     <li>use resource in {@link this#getPublisher(Envelope)}</li>
  * </ul>
  */
 @Component
 public class EventPublisherContainer {
+
+    private final CaseRetriever caseRetriever;
 
     private final EventPublisher attachDocsPublisher;
 
     private final EventPublisher exceptionRecordCreator;
 
     EventPublisherContainer(
+        CaseRetriever caseRetriever,
         AttachDocsToSupplementaryEvidence attachDocsPublisher,
         CreateExceptionRecord exceptionRecordCreator
     ) {
+        this.caseRetriever = caseRetriever;
         this.attachDocsPublisher = attachDocsPublisher;
         this.exceptionRecordCreator = exceptionRecordCreator;
     }
 
-    public EventPublisher getPublisher(Envelope envelope, CaseDetails caseDetails) {
+    public EventPublisher getPublisher(Envelope envelope) {
         EventPublisher eventPublisher = null;
 
         switch (envelope.classification) {
             case SUPPLEMENTARY_EVIDENCE:
-                eventPublisher = caseDetails == null ? exceptionRecordCreator : attachDocsPublisher;
+                boolean caseExists = doesCaseExist(envelope.jurisdiction, CaseTypeId.BULK_SCANNED, envelope.caseRef);
+                eventPublisher = caseExists ? attachDocsPublisher : exceptionRecordCreator;
 
                 break;
             case EXCEPTION:
@@ -46,5 +54,13 @@ public class EventPublisherContainer {
         }
 
         return eventPublisher;
+    }
+
+    private boolean doesCaseExist(String jurisdiction, CaseTypeId caseTypeId, String caseRef) {
+        CaseDetails caseDetails = Strings.isNullOrEmpty(caseRef)
+            ? null
+            : caseRetriever.retrieve(jurisdiction, caseTypeId, caseRef);
+
+        return caseDetails != null;
     }
 }
