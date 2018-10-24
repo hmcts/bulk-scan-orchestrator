@@ -15,9 +15,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -25,8 +22,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.lang.ClassLoader.getSystemResource;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.DatetimeHelper.toIso8601;
@@ -103,16 +98,6 @@ public class SampleData {
             throw new RuntimeException("Could not make envelopeJson", e);
         }
 
-    }
-
-    public static String fromFile(String file) {
-        try {
-            Path fullPath = Paths.get(getSystemResource(file).toURI());
-            byte[] bytes = Files.readAllBytes(fullPath);
-            return new String(bytes, UTF_8);
-        } catch (Exception e) {
-            throw new RuntimeException("Could not load file" + file, e);
-        }
     }
 
     public static byte[] fileContentAsBytes(String file) {
