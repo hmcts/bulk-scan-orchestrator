@@ -47,7 +47,8 @@ class SupplementaryEvidenceCreatorTest {
     @Test
     fun `should call ccd to attach supplementary evidence for caseworker`() {
         await()
-            .atMost(30, TimeUnit.SECONDS)
+            .atMost(60, TimeUnit.SECONDS)
+            .pollInterval(2, TimeUnit.SECONDS)
             .ignoreExceptions()
             .until {
                 server.verify(postRequestedFor(urlPathEqualTo(caseEventUrl)))
