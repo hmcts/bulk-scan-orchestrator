@@ -15,4 +15,4 @@ idam:
       password: Password12
 
 queue:
-  read-interval: 100
+  read-interval: 2000
