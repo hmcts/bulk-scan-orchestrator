@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
@@ -36,7 +37,7 @@ public class AbstractEventPublisherTest {
     private EventPublisher eventPublisher = new AbstractEventPublisher() {
 
         @Override
-        Object mapEnvelopeToCaseDataObject(Envelope envelope) {
+        CaseData mapEnvelopeToCaseDataObject(Envelope envelope) {
             return null;
         }
 

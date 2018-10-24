@@ -18,10 +18,9 @@ import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.caseEventTriggerStartUrl
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.caseSubmitUrl
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.caseUrl
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.IntegrationTest
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.caseEventTriggerStartUrl
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.caseSubmitUrl
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.caseUrl
 import java.io.File
 import java.util.concurrent.TimeUnit
 

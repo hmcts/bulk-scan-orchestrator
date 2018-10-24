@@ -8,10 +8,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_REF
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.JURIDICTION
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.retrieveCase
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.IntegrationTest
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.CASE_REF
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.JURIDICTION
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.retrieveCase
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi
