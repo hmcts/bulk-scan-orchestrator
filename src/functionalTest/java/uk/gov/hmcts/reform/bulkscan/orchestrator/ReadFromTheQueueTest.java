@@ -12,8 +12,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -30,7 +31,7 @@ public class ReadFromTheQueueTest {
     private int readInterval;
 
     @Test
-    public void should_read_message_from_the_queue() throws Exception {
+    public void should_consume_message_from_the_queue() throws Exception {
         // given
         Message message = new Message();
         message.setMessageId(UUID.randomUUID().toString());
@@ -38,11 +39,12 @@ public class ReadFromTheQueueTest {
 
         // when
         testWriteClient.send(message);
-        Thread.sleep(readInterval + 5_000L); // wait for msg to be processed by the service.
 
         // then
-        assertThat(testReadClient.receive()).isNull();
-
-        // TODO: once implemented, check whether case in CCD has been created, envelope status updated etc...
+        // wait for msg to be processed (and removed from the queue) by the service
+        await()
+            .atMost(readInterval + 5_000L, TimeUnit.MILLISECONDS)
+            .pollDelay(1, TimeUnit.SECONDS)
+            .until(() -> readClient.peek() == null);
     }
 }
