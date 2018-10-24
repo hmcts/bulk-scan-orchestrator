@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.CASE_TYPE_BULK_SCAN
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.CASE_TYPE_EXCEPTION_RECORD
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.caseUrl
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -35,11 +36,9 @@ class ExceptionRecordCreatorTest {
     ).readText())
 
     private val caseEventTriggerStartUrl = Environment.caseEventTriggerStartUrl
-        .replace(CASE_TYPE_BULK_SCAN.getId(), CASE_TYPE_EXCEPTION_RECORD.getId())
+        .replace(CASE_TYPE_BULK_SCAN.id, CASE_TYPE_EXCEPTION_RECORD.id)
     private val caseSubmitUrl = Environment.caseSubmitUrl
-        .replace(CASE_TYPE_BULK_SCAN.getId(), CASE_TYPE_EXCEPTION_RECORD.getId())
-    private val caseUrl = Environment.caseUrl
-        .replace(CASE_TYPE_BULK_SCAN.getId(), CASE_TYPE_EXCEPTION_RECORD.getId())
+        .replace(CASE_TYPE_BULK_SCAN.id, CASE_TYPE_EXCEPTION_RECORD.id)
 
     @Autowired
     private lateinit var server: WireMockServer

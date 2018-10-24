@@ -13,13 +13,9 @@ object Environment {
     val CASE_TYPE_EXCEPTION_RECORD = CaseTypeId.EXCEPTION_RECORD
     val CASE_REF = "1539007368674134"
 
-    val caseUrl = "/caseworkers/${USER_ID}/jurisdictions/${JURIDICTION}/case-types/${CASE_TYPE_BULK_SCAN.getId()}/cases/${CASE_REF}"
-    val caseEventUrl = "${caseUrl}/events"
-    val caseTypeUrl = "/caseworkers/${USER_ID}/jurisdictions/${JURIDICTION}/case-types/${CASE_TYPE_BULK_SCAN.getId()}"
+    private val caseTypeUrl = "/caseworkers/$USER_ID/jurisdictions/$JURIDICTION/case-types/${CASE_TYPE_BULK_SCAN.id}"
+    val caseUrl = "$caseTypeUrl/cases/$CASE_REF"
+    val caseEventUrl = "$caseUrl/events"
     val caseSubmitUrl = "$caseTypeUrl/cases"
     val caseEventTriggerStartUrl = "$caseTypeUrl/event-triggers/createException/token"
-
-    /** url for retrieve Case */
-    fun retrieveCase() =
-        "/caseworkers/${USER_ID}/jurisdictions/${JURIDICTION}/case-types/${CASE_TYPE_BULK_SCAN.getId()}/cases/${CASE_REF}"
 }
