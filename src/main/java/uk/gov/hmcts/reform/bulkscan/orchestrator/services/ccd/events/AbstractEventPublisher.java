@@ -58,7 +58,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
  */
 abstract class AbstractEventPublisher implements EventPublisher {
 
-    private final String caseTypeId;
+    private final CaseTypeId caseTypeId;
 
     private static final Logger log = LoggerFactory.getLogger(AbstractEventPublisher.class);
 
@@ -69,7 +69,7 @@ abstract class AbstractEventPublisher implements EventPublisher {
     private CcdAuthenticatorFactory authenticatorFactory;
 
     AbstractEventPublisher(CaseTypeId caseTypeId) {
-        this.caseTypeId = caseTypeId.getId();
+        this.caseTypeId = caseTypeId;
     }
 
     @Override
@@ -114,7 +114,7 @@ abstract class AbstractEventPublisher implements EventPublisher {
                 authenticator.getServiceToken(),
                 authenticator.getUserDetails().getId(),
                 jurisdiction,
-                caseTypeId,
+                caseTypeId.getId(),
                 getEventTypeId()
             );
         } else {
@@ -123,7 +123,7 @@ abstract class AbstractEventPublisher implements EventPublisher {
                 authenticator.getServiceToken(),
                 authenticator.getUserDetails().getId(),
                 jurisdiction,
-                caseTypeId,
+                caseTypeId.getId(),
                 caseRef,
                 getEventTypeId()
             );
@@ -160,7 +160,7 @@ abstract class AbstractEventPublisher implements EventPublisher {
                 authenticator.getServiceToken(),
                 authenticator.getUserDetails().getId(),
                 jurisdiction,
-                caseTypeId,
+                caseTypeId.getId(),
                 true,
                 caseDataContent
             );
@@ -170,7 +170,7 @@ abstract class AbstractEventPublisher implements EventPublisher {
                 authenticator.getServiceToken(),
                 authenticator.getUserDetails().getId(),
                 jurisdiction,
-                caseTypeId,
+                caseTypeId.getId(),
                 caseRef,
                 true,
                 caseDataContent
@@ -179,6 +179,12 @@ abstract class AbstractEventPublisher implements EventPublisher {
     }
 
     // end region - execution steps
+
+
+    @Override
+    public CaseTypeId getCaseTypeIdForEvent() {
+        return caseTypeId;
+    }
 
     /**
      * EventPublisher is coupled with event type id. Used in building case data.

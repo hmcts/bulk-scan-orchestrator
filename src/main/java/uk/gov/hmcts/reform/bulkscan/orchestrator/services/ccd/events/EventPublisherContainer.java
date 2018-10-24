@@ -40,7 +40,11 @@ public class EventPublisherContainer {
 
         switch (envelope.classification) {
             case SUPPLEMENTARY_EVIDENCE:
-                boolean caseExists = doesCaseExist(envelope.jurisdiction, CaseTypeId.BULK_SCANNED, envelope.caseRef);
+                boolean caseExists = doesCaseExist(
+                    envelope.jurisdiction,
+                    attachDocsPublisher.getCaseTypeIdForEvent(),
+                    envelope.caseRef
+                );
                 eventPublisher = caseExists ? attachDocsPublisher : exceptionRecordCreator;
 
                 break;
