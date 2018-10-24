@@ -33,4 +33,4 @@ idam:
   client:
     id: 'bsp'
     secret: 123456
-    redirect-uri: http://localhost/receiver
+    redirect_uri: http://localhost/receiver
