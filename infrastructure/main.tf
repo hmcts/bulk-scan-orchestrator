@@ -50,11 +50,12 @@ locals {
     S2S_SECRET  = "${data.azurerm_key_vault_secret.s2s_secret.value}"
 
     QUEUE_CONNECTION_STRING = "${data.terraform_remote_state.shared_infra.queue_primary_listen_connection_string}"
+    QUEUE_READ_INTERVAL = "${var.queue_read_interval}"
 
-    IDAM_API_URL           = "${var.idam_api_url}"
-    IDAM_CLIENT_SECRET     = "${data.azurerm_key_vault_secret.idam_client_secret.value}"
-    IDAM_REDIRECT_URI      = "${var.idam_redirect_uri}"
-    CORE_CASE_DATA_API_URL = "${local.ccdApiUrl}"
+    IDAM_API_URL              = "${var.idam_api_url}"
+    IDAM_CLIENT_SECRET        = "${data.azurerm_key_vault_secret.idam_client_secret.value}"
+    IDAM_CLIENT_REDIRECT_URI  = "${var.idam_client_redirect_uri}"
+    CORE_CASE_DATA_API_URL    = "${local.ccdApiUrl}"
   }
 }
 
