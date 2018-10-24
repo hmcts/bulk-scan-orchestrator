@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -102,6 +103,10 @@ public class SampleData {
 
     public static byte[] exampleJsonAsBytes() {
         return fileContentAsBytes(EXAMPLE_JSON_FILE);
+    }
+
+    public static String fileContentAsString(String file) {
+        return new String(fileContentAsBytes(file), StandardCharsets.UTF_8);
     }
 
     public static byte[] fileContentAsBytes(String file) {

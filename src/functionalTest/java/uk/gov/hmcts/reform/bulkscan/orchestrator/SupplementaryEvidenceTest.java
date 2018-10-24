@@ -39,7 +39,7 @@ public class SupplementaryEvidenceTest {
     @Test
     public void should_attach_supplementary_evidence_to_the_case() throws Exception {
         // given
-        String caseData = SampleData.fromFile("envelopes/new-envelope.json");
+        String caseData = SampleData.fileContentAsString("envelopes/new-envelope.json");
         Envelope newEnvelope = EnvelopeParser.parse(caseData);
 
         CaseDetails caseDetails = ccdCaseCreator.createCase(newEnvelope);
@@ -59,7 +59,7 @@ public class SupplementaryEvidenceTest {
 
     public void verifySupplementaryEvidenceDetailsUpdated(CaseDetails caseDetails, String jsonFileName) {
 
-        String caseData = SampleData.fromFile(jsonFileName);
+        String caseData = SampleData.fileContentAsString(jsonFileName);
         Envelope updatedEnvelope = EnvelopeParser.parse(caseData);
 
         CaseDetails updatedCaseDetails = caseRetriever.retrieve(
