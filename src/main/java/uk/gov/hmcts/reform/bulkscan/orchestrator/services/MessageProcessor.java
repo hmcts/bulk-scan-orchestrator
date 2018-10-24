@@ -30,22 +30,47 @@ public class MessageProcessor {
     public void run() {
         logger.info("Started processing queue messages.");
 
-        IMessage msg = null;
         int processedMessagesCount = 0;
+        int failedMessageCount = 0;
 
         try {
+            IMessage msg = null;
             while ((msg = msgReceiver.receive()) != null) {
-                envelopeProcessor.onMessageAsync(msg).get();
-                msgReceiver.complete(msg.getLockToken());
+                if (tryProcessMessage(msg)) {
+                    msgReceiver.complete(msg.getLockToken());
+                } else {
+                    failedMessageCount++;
+                }
+
                 processedMessagesCount++;
             }
-            logger.info("Message processing complete. Processed {} messages", processedMessagesCount);
+
+            logProcessingCompletion(processedMessagesCount, failedMessageCount);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             logger.error("interrupted", e);
         } catch (Throwable throwable) {
-            logger.error("Message processing exception msgId:{}", getMessageId(msg), throwable);
+            logger.error("Message processing job failed", throwable);
         }
+    }
+
+    private boolean tryProcessMessage(IMessage message) {
+        try {
+            envelopeProcessor.onMessageAsync(message).get();
+            return true;
+        } catch (Exception ex) {
+            logger.error("Failed to process message with Id: {}", getMessageId(message), ex);
+            return false;
+        }
+    }
+
+    private void logProcessingCompletion(int processedMessagesCount, int failedMessageCount) {
+        logger.info(
+            "Message processing complete. Successful: {}, Failed: {}, Total: {})",
+            processedMessagesCount - failedMessageCount,
+            failedMessageCount,
+            processedMessagesCount
+        );
     }
 
     private String getMessageId(IMessage msg) {

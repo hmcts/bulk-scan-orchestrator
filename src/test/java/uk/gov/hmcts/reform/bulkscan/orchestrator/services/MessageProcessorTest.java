@@ -18,6 +18,7 @@ import java.util.concurrent.ExecutionException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -77,6 +78,28 @@ public class MessageProcessorTest {
         // then
         verify(envelopeEventProcessor, times(2)).onMessageAsync(someMessage);
         verify(receiver, times(3)).receive();
+    }
+
+    @Test
+    public void should_continue_processing_after_message_specific_failure() throws Exception {
+        // given
+        // there are 2 messages on the queue
+        given(receiver.receive())
+            .willReturn(someMessage)
+            .willReturn(someMessage)
+            .willReturn(null);
+
+        // and every attempt to process a message fails
+        willThrow(new RuntimeException("test")).given(envelopeEventProcessor).onMessageAsync(any());
+
+        // when
+        messageProcessor.run();
+
+        // then
+        // all messages are read with an attempt to process them
+        verify(envelopeEventProcessor, times(2)).onMessageAsync(someMessage);
+        verify(receiver, times(3)).receive();
+        verify(receiver, never()).complete(any());
     }
 
 
