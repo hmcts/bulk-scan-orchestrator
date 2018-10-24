@@ -12,8 +12,6 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @Service
 public class CaseRetriever {
 
-    public static final String CASE_TYPE_ID = "Bulk_Scanned";
-
     private static final Logger log = LoggerFactory.getLogger(CaseRetriever.class);
 
     private final CcdAuthenticatorFactory factory;
@@ -25,7 +23,7 @@ public class CaseRetriever {
         this.coreCaseDataApi = coreCaseDataApi;
     }
 
-    public CaseDetails retrieve(String jurisdiction, String caseRef) {
+    public CaseDetails retrieve(String jurisdiction, CaseTypeId caseTypeId, String caseRef) {
         // not including in try catch to fast fail the method
         CcdAuthenticator authenticator = factory.createForJurisdiction(jurisdiction);
 
@@ -35,7 +33,7 @@ public class CaseRetriever {
                 authenticator.getServiceToken(),
                 authenticator.getUserDetails().getId(),
                 jurisdiction,
-                CASE_TYPE_ID,
+                caseTypeId.getId(),
                 caseRef
             );
 

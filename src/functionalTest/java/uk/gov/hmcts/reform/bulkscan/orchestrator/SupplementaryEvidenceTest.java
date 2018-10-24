@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseTypeId;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
@@ -63,6 +64,7 @@ public class SupplementaryEvidenceTest {
 
         CaseDetails updatedCaseDetails = caseRetriever.retrieve(
             caseDetails.getJurisdiction(),
+            CaseTypeId.BULK_SCANNED,
             String.valueOf(caseDetails.getId())
         );
 
@@ -80,7 +82,10 @@ public class SupplementaryEvidenceTest {
     private Boolean hasCaseBeenUpdatedWithSupplementaryEvidence(CaseDetails caseDetails) {
 
         CaseDetails updatedCaseDetails = caseRetriever.retrieve(
-            caseDetails.getJurisdiction(), String.valueOf(caseDetails.getId()));
+            caseDetails.getJurisdiction(),
+            CaseTypeId.BULK_SCANNED,
+            String.valueOf(caseDetails.getId())
+        );
 
         List<ScannedDocument> updatedScannedDocuments = ScannedDocumentsHelper.getScannedDocuments(updatedCaseDetails);
         return updatedScannedDocuments.size() > 0;
