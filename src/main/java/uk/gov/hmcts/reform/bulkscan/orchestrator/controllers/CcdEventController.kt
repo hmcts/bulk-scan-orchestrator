@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse
 @RestController
 class CcdEventController {
     @PostMapping(
-        value = ["/callback/{type}"],
+        path = ["/callback/{type}"],
         consumes = [APPLICATION_JSON_VALUE],
         produces = [APPLICATION_JSON_VALUE]
     )

@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest
 
 @ExtendWith(SpringExtension::class)
 @IntegrationTest
-class CcdAttachSupplementaryEvidenceTest {
+class AttachExceptionRecordToExistingCaseTest {
 
     @LocalServerPort
     private var applicationPort: Int = 0
