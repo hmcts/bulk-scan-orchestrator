@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.common.io.Resources;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
@@ -13,6 +14,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envel
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -40,6 +42,7 @@ public class SampleData {
     public static final String JURSIDICTION = "BULKSCAN";
     public static final String PO_BOX = "BULKSCAN_PO_BOX";
     public static final long CASE_ID = 23L;
+    public static final String EXAMPLE_JSON_FILE = "envelopes/example.json";
 
     public static final UserDetails USER_DETAILS = new UserDetails(USER_ID,
         null, null, null, emptyList());
@@ -62,8 +65,6 @@ public class SampleData {
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS);
     }
-
-    public static byte[] exampleJson = fromFile("envelopes/example.json").getBytes();
 
     public static byte[] envelopeJson() {
         return envelopeJson(Classification.SUPPLEMENTARY_EVIDENCE, CASE_REF);
@@ -110,6 +111,14 @@ public class SampleData {
             byte[] bytes = Files.readAllBytes(fullPath);
             return new String(bytes, UTF_8);
         } catch (Exception e) {
+            throw new RuntimeException("Could not load file" + file, e);
+        }
+    }
+
+    public static byte[] fileContentAsBytes(String file) {
+        try {
+            return Resources.toByteArray(Resources.getResource(file));
+        } catch (IOException e) {
             throw new RuntimeException("Could not load file" + file, e);
         }
     }

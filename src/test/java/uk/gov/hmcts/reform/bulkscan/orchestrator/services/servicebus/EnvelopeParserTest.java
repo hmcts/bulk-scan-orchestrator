@@ -16,7 +16,6 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.DatetimeHelper.toIso8601;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.exampleJson;
 
 public class EnvelopeParserTest {
 
@@ -150,7 +149,7 @@ public class EnvelopeParserTest {
     @Test
     public void can_parse_example_json() {
         // given
-        byte[] bytes = exampleJson;
+        byte[] bytes = SampleData.fileContentAsBytes(SampleData.EXAMPLE_JSON_FILE);
 
         // when
         Envelope anEnvelope = EnvelopeParser.parse(bytes);
