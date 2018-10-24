@@ -100,6 +100,10 @@ public class SampleData {
 
     }
 
+    public static byte[] exampleJsonAsBytes() {
+        return fileContentAsBytes(EXAMPLE_JSON_FILE);
+    }
+
     public static byte[] fileContentAsBytes(String file) {
         try {
             return Resources.toByteArray(Resources.getResource(file));
