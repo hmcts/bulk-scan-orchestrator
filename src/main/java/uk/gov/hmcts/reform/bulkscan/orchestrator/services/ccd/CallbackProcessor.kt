@@ -26,20 +26,14 @@ class CallbackProcessor(
 
         return when (type) {
             ABOUT_TO_SUBMIT -> aboutToSubmit(callback)
-            else -> {
-                logger.error { "Invalid callback, type: $type, eventId: ${callback.eventId}" }
-                listOf("Internal Error: invalid event: $type")
-            }
+            else -> internalError("invalid event: $type")
         }
     }
 
     private fun aboutToSubmit(callback: CallbackRequest): List<String> {
         return when (callback.eventId) {
             "attachToExistingCase" -> attachToExistingCase(callback)
-            else -> {
-                logger.error { "Invalid event ID:${callback.eventId}" }
-                listOf("Internal Error: Invalid event ID:${callback.eventId}")
-            }
+            else -> internalError("Invalid event ID:${callback.eventId}")
         }
     }
 
@@ -47,8 +41,7 @@ class CallbackProcessor(
         return if (callback.caseDetails != null) {
             handleAttachRecord(callback.caseDetails)
         } else {
-            logger.error { "No case details supplied eventId: ${callback.eventId}" }
-            listOf("Internal Error: No case details supplied")
+            internalError("No case details supplied eventId: ${callback.eventId}")
         }
     }
 
@@ -56,8 +49,7 @@ class CallbackProcessor(
         return if (caseDetails.data != null) {
             startAttachEvent(caseDetails)
         } else {
-            logger.error { "No case details supplied eventId: ${caseDetails.id}" }
-            listOf("Internal Error: no case data")
+            internalError("No case details supplied eventId: ${caseDetails.id}")
         }
     }
 
@@ -74,12 +66,27 @@ class CallbackProcessor(
                 "TBD"
             )
             return listOf()
-        } catch (e: FeignException) {
-            logger.error(e) {}
-            return listOf("Internal Error: response ${e.status()} submitting event")
         } catch (e: Exception) {
-            logger.error(e) {}
-            return listOf("Internal Error: ${e::class.simpleName}:${e.message}")
+            return internalError(e)
         }
     }
+
+
+    private fun internalError(error: String): List<String> {
+        logger.error { error }
+        return listOf("Internal Error: $error")
+    }
+
+    private fun internalError(error: Exception): List<String> {
+        logger.error { error }
+        return listOf("Internal Error: ${errorFromException(error)}")
+    }
+
+    private fun errorFromException(error: Exception): String {
+        return when (error) {
+            is FeignException -> "response ${error.status()} submitting event"
+            else -> "${error::class.simpleName}:${error.message}"
+        }
+    }
+
 }

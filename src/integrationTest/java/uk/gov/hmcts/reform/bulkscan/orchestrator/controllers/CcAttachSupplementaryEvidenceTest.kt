@@ -93,7 +93,7 @@ class CcdAttachSupplementaryEvidenceTest {
             .postToCallback()
             .then()
             .statusCode(200)
-            .body("errors", contains("Internal Error: no case data"))
+            .body("errors", contains("Internal Error: No case details supplied eventId: null"))
     }
 
     @Test
@@ -103,7 +103,7 @@ class CcdAttachSupplementaryEvidenceTest {
             .postToCallback()
             .then()
             .statusCode(200)
-            .body("errors", contains("Internal Error: No case details supplied"))
+            .body("errors", contains("Internal Error: No case details supplied eventId: attachToExistingCase"))
     }
 
     @Test
