@@ -45,6 +45,6 @@ public class ReadFromTheQueueTest {
         await()
             .atMost(readInterval + 5_000L, TimeUnit.MILLISECONDS)
             .pollDelay(1, TimeUnit.SECONDS)
-            .until(() -> readClient.peek() == null);
+            .until(() -> testReadClient.peek() == null);
     }
 }
