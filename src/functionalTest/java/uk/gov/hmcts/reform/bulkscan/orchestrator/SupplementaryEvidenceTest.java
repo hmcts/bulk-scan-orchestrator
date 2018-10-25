@@ -49,7 +49,7 @@ public class SupplementaryEvidenceTest {
     @Test
     public void should_attach_supplementary_evidence_to_the_case() throws Exception {
         // when
-        envelopeMessager.sendMessageFromFile("envelopes/update-envelope.json", caseDetails.getId());
+        envelopeMessager.sendMessageFromFile("envelopes/update-envelope.json", String.valueOf(caseDetails.getId()));
 
         // then
         await("Supplementary evidence is attached to the case in ccd")
