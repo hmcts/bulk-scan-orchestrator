@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.ExceptionRecordMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.ModelMapper;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseTypeId;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
 @Component
@@ -13,7 +12,6 @@ class CreateExceptionRecord extends AbstractEventPublisher {
     private final ModelMapper<? extends CaseData> mapper;
 
     CreateExceptionRecord(ExceptionRecordMapper mapper) {
-        super(CaseTypeId.EXCEPTION_RECORD);
         this.mapper = mapper;
     }
 
