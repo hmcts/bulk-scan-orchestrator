@@ -63,7 +63,7 @@ public class AttachDocsToSupplementaryEvidenceTest {
         given(coreCaseDataApi.startEventForCaseWorker(any(), any(), any(), any(), any(), any(), any()))
             .willReturn(startEventResponse);
 
-        eventPublisher.publish(envelope);
+        eventPublisher.publish(envelope, SampleData.BULK_SCANNED_CASE_TYPE);
 
         verifyEventStarted(envelope);
         verifyEventSubmitted(envelope, eventToken);

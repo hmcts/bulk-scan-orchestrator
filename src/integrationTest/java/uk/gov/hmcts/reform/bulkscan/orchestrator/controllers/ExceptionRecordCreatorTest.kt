@@ -2,12 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock.aResponse
-import com.github.tomakehurst.wiremock.client.WireMock.get
-import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
-import com.github.tomakehurst.wiremock.client.WireMock.givenThat
-import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
-import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.microsoft.azure.servicebus.IMessageReceiver
 import com.microsoft.azure.servicebus.Message
 import org.awaitility.Awaitility.await
@@ -18,9 +13,11 @@ import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.CASE_TYPE_BULK_SCAN
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.CASE_TYPE_EXCEPTION_RECORD
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.Environment.caseUrl
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_TYPE_BULK_SCAN
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_TYPE_EXCEPTION_RECORD
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.caseUrl
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.IntegrationTest
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -36,9 +33,9 @@ class ExceptionRecordCreatorTest {
     ).readText())
 
     private val caseEventTriggerStartUrl = Environment.caseEventTriggerStartUrl
-        .replace(CASE_TYPE_BULK_SCAN.id, CASE_TYPE_EXCEPTION_RECORD.id)
+        .replace(CASE_TYPE_BULK_SCAN, CASE_TYPE_EXCEPTION_RECORD)
     private val caseSubmitUrl = Environment.caseSubmitUrl
-        .replace(CASE_TYPE_BULK_SCAN.id, CASE_TYPE_EXCEPTION_RECORD.id)
+        .replace(CASE_TYPE_BULK_SCAN, CASE_TYPE_EXCEPTION_RECORD)
 
     @Autowired
     private lateinit var server: WireMockServer

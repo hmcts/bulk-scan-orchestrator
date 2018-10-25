@@ -4,5 +4,5 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envel
 
 public interface EventPublisher {
 
-    void publish(Envelope envelope);
+    void publish(Envelope envelope, String caseTypeId);
 }

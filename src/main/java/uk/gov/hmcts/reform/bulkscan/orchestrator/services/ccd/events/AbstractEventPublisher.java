@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseData;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseTypeId;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
@@ -58,8 +57,6 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
  */
 abstract class AbstractEventPublisher implements EventPublisher {
 
-    private final String caseTypeId;
-
     private static final Logger log = LoggerFactory.getLogger(AbstractEventPublisher.class);
 
     @Autowired
@@ -68,23 +65,22 @@ abstract class AbstractEventPublisher implements EventPublisher {
     @Autowired
     private CcdAuthenticatorFactory authenticatorFactory;
 
-    AbstractEventPublisher(CaseTypeId caseTypeId) {
-        this.caseTypeId = caseTypeId.getId();
+    AbstractEventPublisher() {
     }
 
     @Override
-    public void publish(Envelope envelope) {
+    public void publish(Envelope envelope, String caseTypeId) {
         String caseRef = envelope.caseRef;
 
         logCaseCreationEntry(caseRef);
 
         CcdAuthenticator authenticator = authenticateJurisdiction(envelope.jurisdiction);
-        StartEventResponse eventResponse = startEvent(authenticator, envelope);
+        StartEventResponse eventResponse = startEvent(authenticator, envelope, caseTypeId);
         CaseDataContent caseDataContent = buildCaseDataContent(
             eventResponse.getToken(),
             mapEnvelopeToCaseDataObject(envelope)
         );
-        submitEvent(authenticator, envelope, caseDataContent);
+        submitEvent(authenticator, envelope, caseDataContent, caseTypeId);
     }
 
     // region - execution steps
@@ -103,7 +99,8 @@ abstract class AbstractEventPublisher implements EventPublisher {
 
     private StartEventResponse startEvent(
         CcdAuthenticator authenticator,
-        Envelope envelope
+        Envelope envelope,
+        String caseTypeId
     ) {
         String caseRef = getCaseRef(envelope);
         String jurisdiction = envelope.jurisdiction;
@@ -149,7 +146,8 @@ abstract class AbstractEventPublisher implements EventPublisher {
     private void submitEvent(
         CcdAuthenticator authenticator,
         Envelope envelope,
-        CaseDataContent caseDataContent
+        CaseDataContent caseDataContent,
+        String caseTypeId
     ) {
         String caseRef = getCaseRef(envelope);
         String jurisdiction = envelope.jurisdiction;
