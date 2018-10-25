@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Profile
 import org.springframework.util.SocketUtils.findAvailableTcpPort
 import uk.gov.hmcts.reform.bulkscan.orchestrator.Application
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.MessageSender
 import java.lang.System.setProperty
 
 @Import(Application::class)
