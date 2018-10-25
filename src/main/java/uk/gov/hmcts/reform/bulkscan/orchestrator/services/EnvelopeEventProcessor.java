@@ -78,6 +78,6 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
     @Override
     public void notifyException(Throwable exception, ExceptionPhase phase) {
-        //No exceptions expected until we use the azure API
+        log.error("Error while handling message at stage: " + phase, exception);
     }
 }
