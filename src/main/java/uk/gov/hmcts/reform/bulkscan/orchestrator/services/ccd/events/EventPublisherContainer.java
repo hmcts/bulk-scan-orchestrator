@@ -16,8 +16,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 @Component
 public class EventPublisherContainer {
 
-    private final EventPublisher attachDocsPublisher;
-    private final EventPublisher exceptionRecordCreator;
+    private final AttachDocsToSupplementaryEvidence attachDocsPublisher;
+    private final CreateExceptionRecord exceptionRecordCreator;
 
     EventPublisherContainer(
         AttachDocsToSupplementaryEvidence attachDocsPublisher,
