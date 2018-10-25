@@ -25,12 +25,11 @@ public class ScannedDocumentsHelper {
 
     private static ScannedDocument createDocumentFromMap(Map<String, Map<String, String>> object) {
         Map<String, String> doc = object.get("value");
-        ScannedDocument document = new ScannedDocument(String.valueOf(doc.get("fileName")),
-            String.valueOf(doc.get("controlNumber")),
-            String.valueOf(doc.get("type")),
+        return new ScannedDocument(doc.get("fileName"),
+            doc.get("controlNumber"),
+            doc.get("type"),
             LocalDate.parse(doc.get("scannedDate")),
             null
         );
-        return document;
     }
 }

@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import org.awaitility.Duration;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,15 +36,18 @@ public class SupplementaryEvidenceTest {
     @Autowired
     private EnvelopeMessager envelopeMessager;
 
-    @Test
-    public void should_attach_supplementary_evidence_to_the_case() throws Exception {
-        // given
+    private CaseDetails caseDetails;
+
+    @Before
+    public void setup() {
         String caseData = SampleData.fileContentAsString("envelopes/new-envelope.json");
         Envelope newEnvelope = EnvelopeParser.parse(caseData);
 
-        CaseDetails caseDetails = ccdCaseCreator.createCase(newEnvelope);
-        assertThat(caseDetails.getId()).isNotNull();
+        caseDetails = ccdCaseCreator.createCase(newEnvelope);
+    }
 
+    @Test
+    public void should_attach_supplementary_evidence_to_the_case() throws Exception {
         // when
         envelopeMessager.sendMessageFromFile("envelopes/update-envelope.json", caseDetails.getId());
 
@@ -56,7 +60,7 @@ public class SupplementaryEvidenceTest {
         verifySupplementaryEvidenceDetailsUpdated(caseDetails, "envelopes/update-envelope.json");
     }
 
-    public void verifySupplementaryEvidenceDetailsUpdated(CaseDetails caseDetails, String jsonFileName) {
+    private void verifySupplementaryEvidenceDetailsUpdated(CaseDetails caseDetails, String jsonFileName) {
 
         String caseData = SampleData.fileContentAsString(jsonFileName);
         Envelope updatedEnvelope = EnvelopeParser.parse(caseData);
@@ -78,7 +82,7 @@ public class SupplementaryEvidenceTest {
         assertThat(updatedDocument.type).isEqualTo(queueDocument.type);
     }
 
-    private Boolean hasCaseBeenUpdatedWithSupplementaryEvidence(CaseDetails caseDetails) {
+    private boolean hasCaseBeenUpdatedWithSupplementaryEvidence(CaseDetails caseDetails) {
 
         CaseDetails updatedCaseDetails = caseRetriever.retrieve(
             caseDetails.getJurisdiction(),
