@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.collect.ImmutableList;
 import org.springframework.stereotype.Service;
