@@ -10,12 +10,17 @@ import static java.lang.String.format;
 
 @Service
 public class CallbackProcessorImpl implements CallbackProcessor {
+
     @Override
     public List<String> process(String type, String eventId, CaseDetails caseDetails) {
-        if ("attachToCaseReference".equals(type)) {
+        if(isAttachEvent(type)) {
             return ImmutableList.of();
-        } else {
-            return ImmutableList.of(format("Internal Error: invalid type supplied: %s", type));
+        }else{
+            return ImmutableList.of(format("Internal Error: invalid type supplied: %s",type));
         }
+    }
+
+    private boolean isAttachEvent(String type) {
+        return "attach_case".equals(type);
     }
 }
