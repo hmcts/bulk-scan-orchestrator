@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi
 
-
 @ExtendWith(SpringExtension::class)
 @IntegrationTest
 class CaseRetrievalTest {

@@ -12,13 +12,13 @@ import org.springframework.context.annotation.Import
 import org.springframework.stereotype.Service
 import uk.gov.hmcts.reform.bulkscan.orchestrator.FunctionalQueueConfig
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData
-import java.util.*
+import java.util.UUID
 
 private val logger = LoggerFactory.getLogger(EnvelopeMessager::class.java)
 
 @Service
 @Import(FunctionalQueueConfig::class)
-class EnvelopeMessager( @Autowired client: QueueClient) : IQueueClient by client{
+class EnvelopeMessager(@Autowired client: QueueClient) : IQueueClient by client {
 
     @Throws(JSONException::class, ServiceBusException::class, InterruptedException::class)
     fun sendMessageFromFile(jsonFileName: String, caseRef: Long?) {
@@ -33,5 +33,4 @@ class EnvelopeMessager( @Autowired client: QueueClient) : IQueueClient by client
         logger.info("Sending message to queue for the Case ID {} for updating the case", caseRef)
         send(message)
     }
-
 }

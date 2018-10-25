@@ -38,7 +38,7 @@ class SupplementaryEvidenceCreatorTest {
 
     @BeforeEach
     fun before() {
-        //We need to do this because of an issue with the way AutoConfigureWireMock works with profiles.
+        // We need to do this because of an issue with the way AutoConfigureWireMock works with profiles.
         WireMock(server.port()).register(
             get(caseUrl).willReturn(aResponse().withBody(mockResponse))
         )
