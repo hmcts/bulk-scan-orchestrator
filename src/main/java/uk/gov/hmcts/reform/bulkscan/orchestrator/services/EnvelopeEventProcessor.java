@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseTypeId;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisherContainer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
@@ -22,6 +21,10 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.Enve
 public class EnvelopeEventProcessor implements IMessageHandler {
 
     private static final Logger log = LoggerFactory.getLogger(EnvelopeEventProcessor.class);
+    public static final String EXCEPTION_RECORD_CASE_TYPE = "ExceptionRecord";
+
+    // Next sprint we use the new API so that jurisdictions other than bulk scanned work
+    public static final String TEMP_CASE_TYPE = "Bulk_Scanned";
 
     private final CaseRetriever caseRetriever;
 
@@ -53,12 +56,12 @@ public class EnvelopeEventProcessor implements IMessageHandler {
         Envelope envelope = parse(message.getBody());
         CaseDetails theCase = Strings.isNullOrEmpty(envelope.caseRef)
             ? null
-            : caseRetriever.retrieve(envelope.jurisdiction, CaseTypeId.BULK_SCANNED, envelope.caseRef);
-
+            : caseRetriever.retrieve(envelope.jurisdiction, TEMP_CASE_TYPE, envelope.caseRef);
+        String caseTypeId = getCaseTypeId(theCase);
         EventPublisher eventPublisher = eventPublisherContainer.getPublisher(envelope, theCase);
 
         if (eventPublisher != null) {
-            eventPublisher.publish(envelope);
+            eventPublisher.publish(envelope, caseTypeId);
         } else {
             log.info(
                 "Skipped processing of envelope ID {} for case {} - classification {} not handled yet",
@@ -67,6 +70,10 @@ public class EnvelopeEventProcessor implements IMessageHandler {
                 envelope.classification
             );
         }
+    }
+
+    private String getCaseTypeId(CaseDetails theCase) {
+        return theCase == null ? EXCEPTION_RECORD_CASE_TYPE : theCase.getCaseTypeId();
     }
 
     @Override
