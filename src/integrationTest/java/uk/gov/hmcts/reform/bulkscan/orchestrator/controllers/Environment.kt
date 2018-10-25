@@ -13,7 +13,7 @@ object Environment {
     val CASE_TYPE_EXCEPTION_RECORD = CaseTypeId.EXCEPTION_RECORD
     val CASE_REF = "1539007368674134"
 
-    private val caseTypeUrl = "/caseworkers/$USER_ID/jurisdictions/$JURIDICTION/case-types/${CASE_TYPE_BULK_SCAN.id}"
+    private val caseTypeUrl = "/caseworkers/$USER_ID/jurisdictions/$JURIDICTION/case-types/$CASE_TYPE_BULK_SCAN"
     val caseUrl = "$caseTypeUrl/cases/$CASE_REF"
     val caseEventUrl = "$caseUrl/events"
     val caseSubmitUrl = "$caseTypeUrl/cases"

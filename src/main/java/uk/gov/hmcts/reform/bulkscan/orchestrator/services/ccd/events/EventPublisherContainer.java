@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 import com.google.common.base.Strings;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseTypeId;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -60,7 +59,7 @@ public class EventPublisherContainer {
         return eventPublisher;
     }
 
-    private boolean doesCaseExist(String jurisdiction, CaseTypeId caseTypeId, String caseRef) {
+    private boolean doesCaseExist(String jurisdiction, String caseTypeId, String caseRef) {
         CaseDetails caseDetails = Strings.isNullOrEmpty(caseRef)
             ? null
             : caseRetriever.retrieve(jurisdiction, caseTypeId, caseRef);

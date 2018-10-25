@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseTypeId;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisherContainer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
@@ -82,7 +81,7 @@ public class EnvelopeEventProcessorTest {
     private EventPublisher getDummyPublisher() {
         return new EventPublisher() {
             @Override
-            public CaseTypeId getCaseTypeIdForEvent() {
+            public String getCaseTypeIdForEvent() {
                 return null;
             }
 

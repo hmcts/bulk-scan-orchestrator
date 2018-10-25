@@ -34,7 +34,7 @@ public class CaseRetrieverTest {
 
     private CaseRetriever retriever;
 
-    private static final String caseTypeId = BULK_SCANNED.getId();
+    private static final String caseTypeId = BULK_SCANNED;
 
     @Test
     public void should_retrieve_case_successfully() {

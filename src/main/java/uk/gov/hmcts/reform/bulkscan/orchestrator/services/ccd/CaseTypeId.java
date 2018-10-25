@@ -1,20 +1,15 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 /**
- * Temporary enumerator for case types until CCD client is updated.
+ * Temporary collection of case types until CCD client is updated.
  */
-public enum CaseTypeId {
+public final class CaseTypeId {
 
-    BULK_SCANNED("Bulk_Scanned"),
-    EXCEPTION_RECORD("ExceptionRecord");
+    public static final String BULK_SCANNED = "Bulk_Scanned";
 
-    private final String id;
+    public static final String EXCEPTION_RECORD = "ExceptionRecord";
 
-    CaseTypeId(String id) {
-        this.id = id;
-    }
-
-    public String getId() {
-        return id;
+    private CaseTypeId() {
+        // utility class constructor
     }
 }

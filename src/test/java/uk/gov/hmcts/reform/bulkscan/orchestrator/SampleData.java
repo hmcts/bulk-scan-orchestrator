@@ -52,7 +52,7 @@ public class SampleData {
     public static final CaseDetails THE_CASE = CaseDetails.builder()
         .id(CASE_ID)
         .jurisdiction(JURSIDICTION)
-        .caseTypeId(BULK_SCANNED.getId())
+        .caseTypeId(BULK_SCANNED)
         .build();
 
     public static final ObjectMapper objectMapper;

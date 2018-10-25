@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseData;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseTypeId;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
@@ -53,12 +52,10 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
  * private final EventPublisher somePublisher;}</pre>
  * <p/>
  * Then include each publisher in {@link EventPublisherContainer}
- * <p/>
- * {@code CASE_TYPE_ID}s are publicly available in {@code EventPublisher} interface
  */
 abstract class AbstractEventPublisher implements EventPublisher {
 
-    private final CaseTypeId caseTypeId;
+    private final String caseTypeId;
 
     private static final Logger log = LoggerFactory.getLogger(AbstractEventPublisher.class);
 
@@ -68,7 +65,7 @@ abstract class AbstractEventPublisher implements EventPublisher {
     @Autowired
     private CcdAuthenticatorFactory authenticatorFactory;
 
-    AbstractEventPublisher(CaseTypeId caseTypeId) {
+    AbstractEventPublisher(String caseTypeId) {
         this.caseTypeId = caseTypeId;
     }
 
@@ -114,7 +111,7 @@ abstract class AbstractEventPublisher implements EventPublisher {
                 authenticator.getServiceToken(),
                 authenticator.getUserDetails().getId(),
                 jurisdiction,
-                caseTypeId.getId(),
+                caseTypeId,
                 getEventTypeId()
             );
         } else {
@@ -123,7 +120,7 @@ abstract class AbstractEventPublisher implements EventPublisher {
                 authenticator.getServiceToken(),
                 authenticator.getUserDetails().getId(),
                 jurisdiction,
-                caseTypeId.getId(),
+                caseTypeId,
                 caseRef,
                 getEventTypeId()
             );
@@ -160,7 +157,7 @@ abstract class AbstractEventPublisher implements EventPublisher {
                 authenticator.getServiceToken(),
                 authenticator.getUserDetails().getId(),
                 jurisdiction,
-                caseTypeId.getId(),
+                caseTypeId,
                 true,
                 caseDataContent
             );
@@ -170,7 +167,7 @@ abstract class AbstractEventPublisher implements EventPublisher {
                 authenticator.getServiceToken(),
                 authenticator.getUserDetails().getId(),
                 jurisdiction,
-                caseTypeId.getId(),
+                caseTypeId,
                 caseRef,
                 true,
                 caseDataContent
@@ -182,7 +179,7 @@ abstract class AbstractEventPublisher implements EventPublisher {
 
 
     @Override
-    public CaseTypeId getCaseTypeIdForEvent() {
+    public String getCaseTypeIdForEvent() {
         return caseTypeId;
     }
 

@@ -85,7 +85,7 @@ public class AbstractEventPublisherTest {
             authenticator.getServiceToken(),
             authenticator.getUserDetails().getId(),
             ENVELOPE.jurisdiction,
-            BULK_SCANNED.getId(),
+            BULK_SCANNED,
             ENVELOPE.caseRef,
             EVENT_TYPE_ID
         );
@@ -96,7 +96,7 @@ public class AbstractEventPublisherTest {
             authenticator.getServiceToken(),
             authenticator.getUserDetails().getId(),
             ENVELOPE.jurisdiction,
-            BULK_SCANNED.getId(),
+            BULK_SCANNED,
             ENVELOPE.caseRef,
             true,
             CaseDataContent
