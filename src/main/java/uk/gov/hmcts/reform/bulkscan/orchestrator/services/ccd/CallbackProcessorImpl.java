@@ -22,7 +22,7 @@ public class CallbackProcessorImpl implements CallbackProcessor {
         return Validation
             .combine(
                 isAttachEvent(type),
-                isAboutToStart(eventId)
+                isAboutToSubmit(eventId)
             )
             .ap((theType, anEventId) -> attach(caseDetails))
             .getOrElseGet(Value::toJavaList);
@@ -32,15 +32,15 @@ public class CallbackProcessorImpl implements CallbackProcessor {
         return emptyList();
     }
 
-    private Validation<String, String> isAboutToStart(String eventId) {
+    private Validation<String, String> isAboutToSubmit(String eventId) {
         return ABOUT_TO_SUBMIT.equals(eventId)
             ? valid(eventId)
             : internalError("event-id: %s invalid", eventId);
     }
 
     @NotNull
-    private Validation<String, String> internalError(String error, String eventId) {
-        return invalid(format("Internal Error: " + error, eventId));
+    private Validation<String, String> internalError(String error, String arg1) {
+        return invalid(format("Internal Error: " + error, arg1));
     }
 
     private Validation<String, String> isAttachEvent(String type) {
