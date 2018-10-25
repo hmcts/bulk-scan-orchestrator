@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.common.io.Resources;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
@@ -13,9 +14,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envel
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -23,12 +23,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.lang.ClassLoader.getSystemResource;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.DatetimeHelper.toIso8601;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever.CASE_TYPE_ID;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseTypeId.BULK_SCANNED;
 
 public class SampleData {
     public static final String SERVICE_TOKEN = "SERVICE_TOKEN";
@@ -40,6 +38,7 @@ public class SampleData {
     public static final String JURSIDICTION = "BULKSCAN";
     public static final String PO_BOX = "BULKSCAN_PO_BOX";
     public static final long CASE_ID = 23L;
+    public static final String EXAMPLE_JSON_FILE = "envelopes/example.json";
 
     public static final UserDetails USER_DETAILS = new UserDetails(USER_ID,
         null, null, null, emptyList());
@@ -52,7 +51,7 @@ public class SampleData {
     public static final CaseDetails THE_CASE = CaseDetails.builder()
         .id(CASE_ID)
         .jurisdiction(JURSIDICTION)
-        .caseTypeId(CASE_TYPE_ID)
+        .caseTypeId(BULK_SCANNED.getId())
         .build();
 
     public static final ObjectMapper objectMapper;
@@ -62,8 +61,6 @@ public class SampleData {
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS);
     }
-
-    public static byte[] exampleJson = fromFile("envelopes/example.json").getBytes();
 
     public static byte[] envelopeJson() {
         return envelopeJson(Classification.SUPPLEMENTARY_EVIDENCE, CASE_REF);
@@ -104,12 +101,18 @@ public class SampleData {
 
     }
 
-    public static String fromFile(String file) {
+    public static byte[] exampleJsonAsBytes() {
+        return fileContentAsBytes(EXAMPLE_JSON_FILE);
+    }
+
+    public static String fileContentAsString(String file) {
+        return new String(fileContentAsBytes(file), StandardCharsets.UTF_8);
+    }
+
+    public static byte[] fileContentAsBytes(String file) {
         try {
-            Path fullPath = Paths.get(getSystemResource(file).toURI());
-            byte[] bytes = Files.readAllBytes(fullPath);
-            return new String(bytes, UTF_8);
-        } catch (Exception e) {
+            return Resources.toByteArray(Resources.getResource(file));
+        } catch (IOException e) {
             throw new RuntimeException("Could not load file" + file, e);
         }
     }

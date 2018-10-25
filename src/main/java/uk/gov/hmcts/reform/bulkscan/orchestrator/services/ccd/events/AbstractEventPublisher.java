@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseTypeId;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
  * class PublisherName extends AbstractEventPublisher {
  *
  *     PublisherName() {
+ *         super(CASE_TYPE_ID);
  *         // any extra autowiring needed
  *     }
  *
@@ -51,10 +53,12 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
  * private final EventPublisher somePublisher;}</pre>
  * <p/>
  * Then include each publisher in {@link EventPublisherContainer}
+ * <p/>
+ * {@code CASE_TYPE_ID}s are publicly available in {@code EventPublisher} interface
  */
 abstract class AbstractEventPublisher implements EventPublisher {
 
-    static final String CASE_TYPE_ID = "Bulk_Scanned";
+    private final String caseTypeId;
 
     private static final Logger log = LoggerFactory.getLogger(AbstractEventPublisher.class);
 
@@ -63,6 +67,10 @@ abstract class AbstractEventPublisher implements EventPublisher {
 
     @Autowired
     private CcdAuthenticatorFactory authenticatorFactory;
+
+    AbstractEventPublisher(CaseTypeId caseTypeId) {
+        this.caseTypeId = caseTypeId.getId();
+    }
 
     @Override
     public void publish(Envelope envelope) {
@@ -106,7 +114,7 @@ abstract class AbstractEventPublisher implements EventPublisher {
                 authenticator.getServiceToken(),
                 authenticator.getUserDetails().getId(),
                 jurisdiction,
-                CASE_TYPE_ID,
+                caseTypeId,
                 getEventTypeId()
             );
         } else {
@@ -115,14 +123,13 @@ abstract class AbstractEventPublisher implements EventPublisher {
                 authenticator.getServiceToken(),
                 authenticator.getUserDetails().getId(),
                 jurisdiction,
-                CASE_TYPE_ID,
+                caseTypeId,
                 caseRef,
                 getEventTypeId()
             );
         }
     }
 
-    // todo perhaps some generic interface for these data objects?
     abstract CaseData mapEnvelopeToCaseDataObject(Envelope envelope);
 
     private CaseDataContent buildCaseDataContent(
@@ -153,7 +160,7 @@ abstract class AbstractEventPublisher implements EventPublisher {
                 authenticator.getServiceToken(),
                 authenticator.getUserDetails().getId(),
                 jurisdiction,
-                CASE_TYPE_ID,
+                caseTypeId,
                 true,
                 caseDataContent
             );
@@ -163,7 +170,7 @@ abstract class AbstractEventPublisher implements EventPublisher {
                 authenticator.getServiceToken(),
                 authenticator.getUserDetails().getId(),
                 jurisdiction,
-                CASE_TYPE_ID,
+                caseTypeId,
                 caseRef,
                 true,
                 caseDataContent

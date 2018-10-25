@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseTypeId;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
@@ -38,7 +39,7 @@ public class SupplementaryEvidenceTest {
     @Test
     public void should_attach_supplementary_evidence_to_the_case() throws Exception {
         // given
-        String caseData = SampleData.fromFile("envelopes/new-envelope.json");
+        String caseData = SampleData.fileContentAsString("envelopes/new-envelope.json");
         Envelope newEnvelope = EnvelopeParser.parse(caseData);
 
         CaseDetails caseDetails = ccdCaseCreator.createCase(newEnvelope);
@@ -58,11 +59,12 @@ public class SupplementaryEvidenceTest {
 
     public void verifySupplementaryEvidenceDetailsUpdated(CaseDetails caseDetails, String jsonFileName) {
 
-        String caseData = SampleData.fromFile(jsonFileName);
+        String caseData = SampleData.fileContentAsString(jsonFileName);
         Envelope updatedEnvelope = EnvelopeParser.parse(caseData);
 
         CaseDetails updatedCaseDetails = caseRetriever.retrieve(
             caseDetails.getJurisdiction(),
+            CaseTypeId.BULK_SCANNED,
             String.valueOf(caseDetails.getId())
         );
 
@@ -80,7 +82,10 @@ public class SupplementaryEvidenceTest {
     private Boolean hasCaseBeenUpdatedWithSupplementaryEvidence(CaseDetails caseDetails) {
 
         CaseDetails updatedCaseDetails = caseRetriever.retrieve(
-            caseDetails.getJurisdiction(), String.valueOf(caseDetails.getId()));
+            caseDetails.getJurisdiction(),
+            CaseTypeId.BULK_SCANNED,
+            String.valueOf(caseDetails.getId())
+        );
 
         List<ScannedDocument> updatedScannedDocuments = ScannedDocumentsHelper.getScannedDocuments(updatedCaseDetails);
         return updatedScannedDocuments.size() > 0;
