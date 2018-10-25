@@ -14,15 +14,15 @@ public class CallbackProcessorImpl implements CallbackProcessor {
 
     @Override
     public List<String> process(String type, String eventId, CaseDetails caseDetails) {
-        if(isAttachEvent(type)) {
+        if (isAttachEvent(type)) {
             if (CallbackTypes.ABOUT_TO_SUBMIT.equals(eventId)) {
                 return ImmutableList.of();
-            }else{
-                return ImmutableList.of(format("Internal Error: : event-id: %s invalid",eventId));
+            } else {
+                return ImmutableList.of(format("Internal Error: : event-id: %s invalid", eventId));
             }
 
-        }else{
-            return ImmutableList.of(format("Internal Error: invalid type supplied: %s",type));
+        } else {
+            return ImmutableList.of(format("Internal Error: invalid type supplied: %s", type));
         }
     }
 
