@@ -23,7 +23,7 @@ class EnvelopeMessager( @Autowired client: QueueClient) : IQueueClient by client
     @Throws(JSONException::class, ServiceBusException::class, InterruptedException::class)
     fun sendMessageFromFile(jsonFileName: String, caseRef: Long?) {
 
-        val updateCaseData = JSONObject(SampleData.fromFile(jsonFileName))
+        val updateCaseData = JSONObject(SampleData.fileContentAsString(jsonFileName))
         updateCaseData.put("case_ref", "$caseRef")
 
         val message = Message()
