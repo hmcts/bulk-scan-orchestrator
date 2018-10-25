@@ -48,7 +48,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors",contains("Internal Error: : event-id: invalid invalid"))
+            .body("errors",contains("Internal Error: event-id: invalid invalid"))
     }
     @Test
     fun `should fail if no eventId set`() {
@@ -57,7 +57,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors",contains("Internal Error: : event-id: null invalid"))
+            .body("errors",contains("Internal Error: event-id: null invalid"))
     }
     @Test
     fun `should create error if type in incorrect`() {
