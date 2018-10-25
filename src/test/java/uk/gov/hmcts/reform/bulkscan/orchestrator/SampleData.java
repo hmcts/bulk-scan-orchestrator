@@ -26,7 +26,6 @@ import java.util.stream.Stream;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.DatetimeHelper.toIso8601;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseTypeId.BULK_SCANNED;
 
 public class SampleData {
     public static final String SERVICE_TOKEN = "SERVICE_TOKEN";
@@ -39,6 +38,7 @@ public class SampleData {
     public static final String PO_BOX = "BULKSCAN_PO_BOX";
     public static final long CASE_ID = 23L;
     public static final String EXAMPLE_JSON_FILE = "envelopes/example.json";
+    public static final String BULK_SCANNED_CASE_TYPE = "Bulk_Scanned";
 
     public static final UserDetails USER_DETAILS = new UserDetails(USER_ID,
         null, null, null, emptyList());
@@ -51,7 +51,7 @@ public class SampleData {
     public static final CaseDetails THE_CASE = CaseDetails.builder()
         .id(CASE_ID)
         .jurisdiction(JURSIDICTION)
-        .caseTypeId(BULK_SCANNED.getId())
+        .caseTypeId(BULK_SCANNED_CASE_TYPE)
         .build();
 
     public static final ObjectMapper objectMapper;

@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 public class EventPublisherContainer {
 
     private final EventPublisher attachDocsPublisher;
-
     private final EventPublisher exceptionRecordCreator;
 
     EventPublisherContainer(
