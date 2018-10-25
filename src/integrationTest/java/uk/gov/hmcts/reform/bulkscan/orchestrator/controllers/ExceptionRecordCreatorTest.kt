@@ -2,12 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock.aResponse
-import com.github.tomakehurst.wiremock.client.WireMock.get
-import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
-import com.github.tomakehurst.wiremock.client.WireMock.givenThat
-import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
-import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.microsoft.azure.servicebus.IMessageReceiver
 import com.microsoft.azure.servicebus.Message
 import org.awaitility.Awaitility.await
@@ -36,9 +31,9 @@ class ExceptionRecordCreatorTest {
     ).readText())
 
     private val caseEventTriggerStartUrl = Environment.caseEventTriggerStartUrl
-        .replace(CASE_TYPE_BULK_SCAN.id, CASE_TYPE_EXCEPTION_RECORD.id)
+        .replace(CASE_TYPE_BULK_SCAN, CASE_TYPE_EXCEPTION_RECORD)
     private val caseSubmitUrl = Environment.caseSubmitUrl
-        .replace(CASE_TYPE_BULK_SCAN.id, CASE_TYPE_EXCEPTION_RECORD.id)
+        .replace(CASE_TYPE_BULK_SCAN, CASE_TYPE_EXCEPTION_RECORD)
 
     @Autowired
     private lateinit var server: WireMockServer

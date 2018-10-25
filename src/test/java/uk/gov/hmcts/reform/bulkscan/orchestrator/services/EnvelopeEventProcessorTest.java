@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher;
@@ -25,7 +26,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.JURSIDICTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.THE_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelopeJson;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseTypeId.BULK_SCANNED;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EnvelopeEventProcessorTest {
@@ -43,7 +43,7 @@ public class EnvelopeEventProcessorTest {
     @Before
     public void before() {
         processor = new EnvelopeEventProcessor(caseRetriever, eventPublisherContainer);
-        when(caseRetriever.retrieve(eq(JURSIDICTION), eq(BULK_SCANNED), eq(CASE_REF))).thenReturn(THE_CASE);
+        when(caseRetriever.retrieve(eq(JURSIDICTION), eq(SampleData.BULK_SCANNED_CASE_TYPE), eq(CASE_REF))).thenReturn(THE_CASE);
         when(eventPublisherContainer.getPublisher(any(Envelope.class), any(CaseDetails.class)))
             .thenReturn(getDummyPublisher());
         when(eventPublisherContainer.getPublisher(any(Envelope.class), eq(null)))
@@ -108,7 +108,7 @@ public class EnvelopeEventProcessorTest {
     }
 
     private EventPublisher getDummyPublisher() {
-        return (Envelope envelope) -> {
+        return (Envelope envelope, String caseTypeId) -> {
             //
         };
     }
