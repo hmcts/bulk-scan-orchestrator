@@ -43,7 +43,8 @@ public class EnvelopeEventProcessorTest {
     @Before
     public void before() {
         processor = new EnvelopeEventProcessor(caseRetriever, eventPublisherContainer);
-        when(caseRetriever.retrieve(eq(JURSIDICTION), eq(SampleData.BULK_SCANNED_CASE_TYPE), eq(CASE_REF))).thenReturn(THE_CASE);
+        when(caseRetriever.retrieve(eq(JURSIDICTION), eq(SampleData.BULK_SCANNED_CASE_TYPE),
+            eq(CASE_REF))).thenReturn(THE_CASE);
         when(eventPublisherContainer.getPublisher(any(Envelope.class), any(CaseDetails.class)))
             .thenReturn(getDummyPublisher());
         when(eventPublisherContainer.getPublisher(any(Envelope.class), eq(null)))
