@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseTypeId;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
@@ -64,7 +63,7 @@ public class SupplementaryEvidenceTest {
 
         CaseDetails updatedCaseDetails = caseRetriever.retrieve(
             caseDetails.getJurisdiction(),
-            CaseTypeId.BULK_SCANNED,
+            SampleData.BULK_SCANNED_CASE_TYPE,
             String.valueOf(caseDetails.getId())
         );
 
@@ -83,7 +82,7 @@ public class SupplementaryEvidenceTest {
 
         CaseDetails updatedCaseDetails = caseRetriever.retrieve(
             caseDetails.getJurisdiction(),
-            CaseTypeId.BULK_SCANNED,
+            SampleData.BULK_SCANNED_CASE_TYPE,
             String.valueOf(caseDetails.getId())
         );
 

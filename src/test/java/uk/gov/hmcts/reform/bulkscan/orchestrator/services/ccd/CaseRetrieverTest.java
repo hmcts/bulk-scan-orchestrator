@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -23,7 +24,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.SERVICE_TOKEN
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.THE_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_ID;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_TOKEN;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseTypeId.BULK_SCANNED;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CaseRetrieverTest {
@@ -34,7 +34,7 @@ public class CaseRetrieverTest {
 
     private CaseRetriever retriever;
 
-    private static final String caseTypeId = BULK_SCANNED.getId();
+    private static final String caseTypeId = SampleData.BULK_SCANNED_CASE_TYPE;
 
     @Test
     public void should_retrieve_case_successfully() {
@@ -44,7 +44,7 @@ public class CaseRetrieverTest {
             .willReturn(THE_CASE);
         given(authenticator.createForJurisdiction(JURSIDICTION)).willReturn(AUTH_DETAILS);
 
-        CaseDetails theCase = retriever.retrieve(JURSIDICTION, BULK_SCANNED, CASE_REF);
+        CaseDetails theCase = retriever.retrieve(JURSIDICTION, caseTypeId, CASE_REF);
         assertThat(theCase.getId()).isEqualTo(CASE_ID);
     }
 
@@ -65,7 +65,7 @@ public class CaseRetrieverTest {
             .willThrow(exception);
         given(authenticator.createForJurisdiction(JURSIDICTION)).willReturn(AUTH_DETAILS);
 
-        CaseDetails theCase = retriever.retrieve(JURSIDICTION, BULK_SCANNED, CASE_REF);
+        CaseDetails theCase = retriever.retrieve(JURSIDICTION, caseTypeId, CASE_REF);
 
         assertThat(theCase).isNull();
     }
@@ -87,6 +87,6 @@ public class CaseRetrieverTest {
             .willThrow(exception);
         given(authenticator.createForJurisdiction(JURSIDICTION)).willReturn(AUTH_DETAILS);
 
-        assertThatCode(() -> retriever.retrieve(JURSIDICTION, BULK_SCANNED, CASE_REF)).isEqualTo(exception);
+        assertThatCode(() -> retriever.retrieve(JURSIDICTION, caseTypeId, CASE_REF)).isEqualTo(exception);
     }
 }
