@@ -24,7 +24,7 @@ public class CallbackProcessorImpl implements CallbackProcessor {
                 isAttachEvent(type),
                 isAboutToStart(eventId)
             )
-            .ap((aType, anEventId) -> attach(caseDetails))
+            .ap((theType, anEventId) -> attach(caseDetails))
             .getOrElseGet(Value::toJavaList);
     }
 
@@ -35,17 +35,18 @@ public class CallbackProcessorImpl implements CallbackProcessor {
     private Validation<String, String> isAboutToStart(String eventId) {
         return ABOUT_TO_SUBMIT.equals(eventId)
             ? valid(eventId)
-            : invalid(internalError("event-id: %s invalid", eventId));
+            : internalError("event-id: %s invalid", eventId);
+    }
+
+    @NotNull
+    private Validation<String, String> internalError(String error, String eventId) {
+        return invalid(format("Internal Error: " + error, eventId));
     }
 
     private Validation<String, String> isAttachEvent(String type) {
         return "attach_case".equals(type)
             ? valid(type)
-            : invalid(internalError("invalid type supplied: %s", type));
+            : internalError("invalid type supplied: %s", type);
     }
 
-    @NotNull
-    private String internalError(String s, String eventId) {
-        return format("Internal Error: " + s, eventId);
-    }
 }
