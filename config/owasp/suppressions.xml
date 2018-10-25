@@ -17,6 +17,14 @@
     <cve>CVE-2017-8316</cve>
   </suppress>
 
+  <suppress>
+  <notes><![CDATA[
+      used in the integration tests.
+    ]]></notes>
+    <filePath regex="true">^.*groovy.*-2\.4\.15\.jar$</filePath>
+  <cve>CVE-2016-6497</cve>
+</suppress>
+
   <!-- this is for the TEST jar wiremock-standalone -->
   <suppress>
     <notes><![CDATA[
