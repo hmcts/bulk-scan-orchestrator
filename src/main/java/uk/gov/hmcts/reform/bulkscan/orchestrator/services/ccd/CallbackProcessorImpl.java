@@ -18,10 +18,10 @@ import static uk.gov.hmcts.reform.ccd.client.model.CallbackTypes.ABOUT_TO_SUBMIT
 public class CallbackProcessorImpl implements CallbackProcessor {
 
     @Override
-    public List<String> process(String type, String eventId, CaseDetails caseDetails) {
+    public List<String> process(String eventType, String eventId, CaseDetails caseDetails) {
         return Validation
             .combine(
-                isAttachEvent(type),
+                isAttachEvent(eventType),
                 isAboutToSubmit(eventId)
             )
             .ap((theType, anEventId) -> attach(caseDetails))
