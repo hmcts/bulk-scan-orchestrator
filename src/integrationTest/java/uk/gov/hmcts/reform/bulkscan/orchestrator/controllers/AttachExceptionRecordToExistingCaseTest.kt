@@ -32,7 +32,7 @@ class AttachExceptionRecordToExistingCaseTest {
     fun `should be able to call the ccd event endpoint`() {
         given()
             .body(CallbackRequest.builder().build())
-            .post("/callback/{type}", "attachToCaseReference")
+            .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
             .body("errors.size()", equalTo(0))
