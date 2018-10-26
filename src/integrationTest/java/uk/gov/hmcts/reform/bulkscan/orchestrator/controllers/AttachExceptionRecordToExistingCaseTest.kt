@@ -29,6 +29,7 @@ class AttachExceptionRecordToExistingCaseTest {
         RestAssured.requestSpecification = RequestSpecBuilder().setPort(applicationPort).setContentType(JSON).build()
     }
 
+
     private val request = CallbackRequest.builder().eventId(CallbackTypes.ABOUT_TO_SUBMIT)
 
     @Test
@@ -40,7 +41,6 @@ class AttachExceptionRecordToExistingCaseTest {
             .statusCode(200)
             .body("errors.size()", equalTo(0))
     }
-
     @Test
     fun `should fail if invalid eventId set`() {
         given()
@@ -50,7 +50,6 @@ class AttachExceptionRecordToExistingCaseTest {
             .statusCode(200)
             .body("errors", contains("Internal Error: event-id: invalid invalid"))
     }
-
     @Test
     fun `should fail if no eventId set`() {
         given()
@@ -60,7 +59,6 @@ class AttachExceptionRecordToExistingCaseTest {
             .statusCode(200)
             .body("errors", contains("Internal Error: event-id: null invalid"))
     }
-
     @Test
     fun `should create error if type in incorrect`() {
         given()
