@@ -1,31 +1,61 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
-import com.google.common.collect.ImmutableList;
+import io.vavr.Value;
+import io.vavr.control.Validation;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackTypes;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
 
+import static io.vavr.control.Validation.invalid;
+import static io.vavr.control.Validation.valid;
 import static java.lang.String.format;
+import static java.util.Collections.emptyList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackProcessor.CallbackValidations.isAboutToSubmit;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackProcessor.CallbackValidations.isAttachEvent;
+import static uk.gov.hmcts.reform.ccd.client.model.CallbackTypes.ABOUT_TO_SUBMIT;
 
 @Service
 public class CallbackProcessor {
+    private static Logger log = LoggerFactory.getLogger(CallbackProcessor.class);
 
-    public List<String> process(String type, String eventId, CaseDetails caseDetails) {
-        if (isAttachEvent(type)) {
-            if (CallbackTypes.ABOUT_TO_SUBMIT.equals(eventId)) {
-                return ImmutableList.of();
-            } else {
-                return ImmutableList.of(format("Internal Error: event-id: %s invalid", eventId));
-            }
+    public List<String> process(String eventType, String eventId, CaseDetails caseDetails) {
+        return Validation
+            .combine(
+                isAttachEvent(eventType),
+                isAboutToSubmit(eventId)
+            )
+            .ap((theType, anEventId) -> attach())
+            .getOrElseGet(Value::toJavaList);
+    }
 
-        } else {
-            return ImmutableList.of(format("Internal Error: invalid type supplied: %s", type));
+    List<String> attach() {
+        return emptyList();
+    }
+
+    interface CallbackValidations {
+
+        static Validation<String, String> isAboutToSubmit(String eventId) {
+            return ABOUT_TO_SUBMIT.equals(eventId)
+                ? valid(eventId)
+                : internalError("event-id: %s invalid", eventId);
+        }
+
+        @NotNull
+        static <T> Validation<String, T> internalError(String error, T arg1) {
+            log.error("{}:{}", error, arg1);
+            return invalid(format("Internal Error: " + error, arg1));
+        }
+
+
+        static Validation<String, String> isAttachEvent(String type) {
+            return "attach_case".equals(type)
+                ? valid(type)
+                : internalError("invalid type supplied: %s", type);
         }
     }
 
-    private boolean isAttachEvent(String type) {
-        return "attach_case".equals(type);
-    }
 }
