@@ -7,13 +7,14 @@ import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Configuration;
 
-import javax.annotation.PostConstruct;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import javax.annotation.PostConstruct;
 
 @Configuration
-@ConditionalOnExpression("#{!environment.getProperty('spring.profiles.active').contains('integration') && !environment.getProperty('spring.profiles.active').contains('functional')}")
+@ConditionalOnExpression("#{!environment.getProperty('spring.profiles.active').contains('integration') "
+                        + " && !environment.getProperty('spring.profiles.active').contains('functional')}")
 public class QueueConfig {
 
     private final QueueClient client;
