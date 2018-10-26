@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -16,11 +16,11 @@ public class ExceptionRecord implements CaseData {
     @JsonProperty("poBoxJurisdiction")
     public final String jurisdiction;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ss.SSS")
-    public final LocalDateTime deliveryDate;
+    // tmp
+    public final LocalDate deliveryDate;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ss.SSS")
-    public final LocalDateTime openingDate;
+    // tmp
+    public final LocalDate openingDate;
 
     public final List<CcdCollectionElement<ScannedDocument>> scanRecords;
 
@@ -35,8 +35,8 @@ public class ExceptionRecord implements CaseData {
         this.classification = classification;
         this.poBox = poBox;
         this.jurisdiction = jurisdiction;
-        this.deliveryDate = deliveryDate;
-        this.openingDate = openingDate;
+        this.deliveryDate = deliveryDate.toLocalDate();
+        this.openingDate = openingDate.toLocalDate();
         this.scanRecords = scannedRecords;
     }
 }
