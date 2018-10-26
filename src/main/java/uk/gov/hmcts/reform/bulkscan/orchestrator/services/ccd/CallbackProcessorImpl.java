@@ -14,7 +14,10 @@ import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackProcessorImpl.CallbackValidations.*;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackProcessorImpl.CallbackValidations.hasCaseDetails;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackProcessorImpl.CallbackValidations.internalError;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackProcessorImpl.CallbackValidations.isAboutToSubmit;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackProcessorImpl.CallbackValidations.isAttachEvent;
 import static uk.gov.hmcts.reform.ccd.client.model.CallbackTypes.ABOUT_TO_SUBMIT;
 
 @Service
