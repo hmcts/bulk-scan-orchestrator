@@ -35,7 +35,7 @@ public class CcdCallbackController {
         return ok().body(
             AboutToStartOrSubmitCallbackResponse
                 .builder()
-                .errors(callbackProcessor.process(type,callback.getEventId(),callback.getCaseDetails()))
+                .errors(callbackProcessor.process(type, callback.getEventId(), callback.getCaseDetails()))
                 .build()
         );
     }
