@@ -15,6 +15,7 @@ import u.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.PortWaiter.wa
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.IntegrationTest
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest
 import uk.gov.hmcts.reform.ccd.client.model.CallbackTypes
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails
 
 @ExtendWith(SpringExtension::class)
 @IntegrationTest
@@ -29,7 +30,10 @@ class AttachExceptionRecordToExistingCaseTest {
         RestAssured.requestSpecification = RequestSpecBuilder().setPort(applicationPort).setContentType(JSON).build()
     }
 
-    private val request = CallbackRequest.builder().eventId(CallbackTypes.ABOUT_TO_SUBMIT)
+    private val request = CallbackRequest
+        .builder()
+        .caseDetails(CaseDetails.builder().build())
+        .eventId(CallbackTypes.ABOUT_TO_SUBMIT)
 
     @Test
     fun `should successfully callback with correct information`() {
@@ -39,6 +43,16 @@ class AttachExceptionRecordToExistingCaseTest {
             .then()
             .statusCode(200)
             .body("errors.size()", equalTo(0))
+    }
+
+    @Test
+    fun `should fail with the correct error when no case data is supplied`() {
+        given()
+            .body(request.caseDetails(null).build())
+            .post("/callback/{type}", "attach_case")
+            .then()
+            .statusCode(200)
+            .body("errors", contains("Internal Error: no Case details supplied"))
     }
 
     @Test
