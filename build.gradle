@@ -176,7 +176,7 @@ dependencies {
   compile group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '0.0.2'
   compile group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: '4.3.0'
 
-  compile group: 'com.microsoft.azure', name: 'azure-servicebus', version: '1.2.7'
+  compile group: 'com.microsoft.azure', name: 'azure-servicebus', version: '1.2.8'
 
   annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
 
