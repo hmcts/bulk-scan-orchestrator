@@ -17,7 +17,7 @@ public class CallbackProcessor {
             if (CallbackTypes.ABOUT_TO_SUBMIT.equals(eventId)) {
                 return ImmutableList.of();
             } else {
-                return ImmutableList.of(format("Internal Error: : event-id: %s invalid", eventId));
+                return ImmutableList.of(format("Internal Error: event-id: %s invalid", eventId));
             }
 
         } else {
