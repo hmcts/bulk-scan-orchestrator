@@ -43,16 +43,16 @@ public class CallbackProcessor {
                 hasCaseReference(caseDetails),
                 hasCaseDetails(caseDetails)
             )
-            .ap(this::attach)
+            .ap(this::attachCase)
             .getOrElseGet(Value::toJavaList);
     }
 
-    private List<String> attach(String theType,
-                                String anEventId,
-                                String jurisdiction,
-                                String caseTypeId,
-                                String caseRef,
-                                CaseDetails theCase) {
+    private List<String> attachCase(String theType,
+                                    String anEventId,
+                                    String jurisdiction,
+                                    String caseTypeId,
+                                    String caseRef,
+                                    CaseDetails theCase) {
         try {
             CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
             startAttachEvent(authenticator, caseRef, jurisdiction, caseTypeId);

@@ -97,6 +97,27 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
+    fun `should fail with the correct error when null case data is supplied`() {
+        given()
+            .setBody(request.caseDetails(defaultCase().data(null).build()))
+            .postToCallback()
+            .then()
+            .statusCode(200)
+            .shouldContainError("Internal Error: no case reference found: null")
+    }
+
+    @Test
+    fun `should fail with the correct error when no case reference supplied`() {
+        given()
+            .setBody(request.caseDetails(defaultCase().data(mutableMapOf()).build()))
+            .postToCallback()
+            .then()
+            .statusCode(200)
+            .shouldContainError("Internal Error: no case reference found: null")
+            .shouldContainError("Internal Error: no case details supplied")
+    }
+
+    @Test
     fun `should fail with the correct error when start event api call fails`() {
         wireMock.register(startEvent.willReturn(status(404)))
 

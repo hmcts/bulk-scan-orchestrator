@@ -15,6 +15,7 @@ import static uk.gov.hmcts.reform.ccd.client.model.CallbackTypes.ABOUT_TO_SUBMIT
 interface CallbackValidations {
     Logger log = LoggerFactory.getLogger(CallbackProcessor.class);
     String ATTACH_TO_CASE_REFERENCE = "attachToCaseReference";
+    String ATTACH_RECORD = "attachRecord";
 
     static Validation<String, CaseDetails> hasCaseDetails(CaseDetails caseDetails) {
         return caseDetails != null
