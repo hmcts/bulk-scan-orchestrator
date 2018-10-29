@@ -43,22 +43,30 @@ public class CallbackProcessor {
                 hasCaseReference(caseDetails),
                 hasCaseDetails(caseDetails)
             )
-            .ap((theType, anEventId, jurisdiction, caseTypeId, caseRef, theCase) -> attach(jurisdiction, caseTypeId, caseRef))
+            .ap(this::attach)
             .getOrElseGet(Value::toJavaList);
     }
 
-    private List<String> attach(String jurisdiction, String caseTypeId, String caseRef) {
+    private List<String> attach(String theType,
+                                String anEventId,
+                                String jurisdiction,
+                                String caseTypeId,
+                                String caseRef,
+                                CaseDetails theCase) {
         try {
             CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
             startAttachEvent(authenticator, caseRef, jurisdiction, caseTypeId);
         } catch (FeignException e) {
             log.error("Start event failed", e);
-            return ImmutableList.of(format("Internal Error: Start event filed with %d status", e.status()));
+            return ImmutableList.of(format("Internal Error: start event call failed with %d", e.status()));
         }
         return emptyList();
     }
 
-    private void startAttachEvent(CcdAuthenticator authenticator, String caseReference, String jurisdiction, String caseTypeId) {
+    private void startAttachEvent(CcdAuthenticator authenticator,
+                                  String caseReference,
+                                  String jurisdiction,
+                                  String caseTypeId) {
         ccdApi.startEventForCaseWorker(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
