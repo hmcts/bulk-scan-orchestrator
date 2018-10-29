@@ -57,7 +57,7 @@ public class ExceptionRecordCreationTest {
             SampleData.JURSIDICTION,
             EnvelopeEventProcessor.EXCEPTION_RECORD_CASE_TYPE,
             ImmutableMap.of(
-                "case.data.poBox", randomPoBox.toString()
+                "case.poBox", randomPoBox.toString()
             )
         );
 
