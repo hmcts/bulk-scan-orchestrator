@@ -20,7 +20,7 @@ import static org.awaitility.Awaitility.await;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Import(FunctionalQueueConfig.class)
-@ActiveProfiles("nosb")
+@ActiveProfiles("nosb")  // no servicebus queue handler registration
 public class ReadFromTheQueueTest {
 
     @Autowired

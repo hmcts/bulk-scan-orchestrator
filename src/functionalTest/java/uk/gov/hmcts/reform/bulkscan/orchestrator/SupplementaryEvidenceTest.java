@@ -26,7 +26,7 @@ import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@ActiveProfiles("nosb")
+@ActiveProfiles("nosb") // no servicebus queue handler registration
 public class SupplementaryEvidenceTest {
 
     @Autowired

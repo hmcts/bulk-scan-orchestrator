@@ -18,7 +18,7 @@ import java.lang.System.setProperty
 
 @Import(Application::class)
 @Configuration
-@Profile("integration","nosb")
+@Profile("integration","nosb")  // no servicebus queue handler registration
 class IntegrationTestConfig : ApplicationContextInitializer<ConfigurableApplicationContext> {
     override fun initialize(ctx: ConfigurableApplicationContext) {
         setProperty("wiremock.port", findAvailableTcpPort().toString())
