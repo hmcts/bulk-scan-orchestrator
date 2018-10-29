@@ -21,10 +21,14 @@ private val logger = LoggerFactory.getLogger(EnvelopeMessager::class.java)
 class EnvelopeMessager( @Autowired client: QueueClient) : IQueueClient by client{
 
     @Throws(JSONException::class, ServiceBusException::class, InterruptedException::class)
-    fun sendMessageFromFile(jsonFileName: String, caseRef: Long?) {
+    fun sendMessageFromFile(jsonFileName: String, caseRef: String?, poBox: UUID?) {
 
         val updateCaseData = JSONObject(SampleData.fileContentAsString(jsonFileName))
-        updateCaseData.put("case_ref", "$caseRef")
+        updateCaseData.put("case_ref", caseRef)
+
+        if (poBox != null) {
+            updateCaseData.put("po_box", poBox)
+        }
 
         val message = Message()
         message.messageId = UUID.randomUUID().toString()
