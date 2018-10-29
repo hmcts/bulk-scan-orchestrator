@@ -8,14 +8,17 @@ import io.restassured.response.Response
 import io.restassured.response.ValidatableResponse
 import io.restassured.response.ValidatableResponseOptions
 import io.restassured.specification.RequestSpecification
-import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.equalTo
+import org.hamcrest.Matchers.hasItem
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import u.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.PortWaiter.waitFor
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_REF
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_TYPE_BULK_SCAN
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.JURIDICTION
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.IntegrationTest
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.CallbackRequestBuilder
@@ -26,7 +29,7 @@ typealias ResponseValidation = ValidatableResponseOptions<ValidatableResponse, R
 
 fun RequestSpecification.postToCallback(type: String = "attach_case") = post("/callback/{type}", type)
 fun RequestSpecification.setBody(builder: CallbackRequestBuilder) = body(builder.build())
-fun ResponseValidation.shouldContainError(error: String) = body("errors", contains(error))
+fun ResponseValidation.shouldContainError(error: String) = body("errors", hasItem(error))
 
 @ExtendWith(SpringExtension::class)
 @IntegrationTest
@@ -43,8 +46,15 @@ class AttachExceptionRecordToExistingCaseTest {
 
     private val request = CallbackRequest
         .builder()
-        .caseDetails(CaseDetails.builder().build())
+        .caseDetails(defaultCase().build())
         .eventId(CallbackTypes.ABOUT_TO_SUBMIT)
+
+    private fun defaultCase(): CaseDetails.CaseDetailsBuilder {
+        return CaseDetails.builder()
+            .jurisdiction(JURIDICTION)
+            .caseTypeId(CASE_TYPE_BULK_SCAN)
+            .data(mutableMapOf(("attachToCaseReference" to CASE_REF)) as Map<String, Any>?)
+    }
 
     @Test
     fun `should successfully callback with correct information`() {
@@ -57,13 +67,33 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-    fun `should fail with the correct error when no case data is supplied`() {
+    fun `should fail with the correct error when no case details is supplied`() {
         given()
             .setBody(request.caseDetails(null))
             .postToCallback()
             .then()
             .statusCode(200)
-            .shouldContainError("Internal Error: no Case details supplied")
+            .shouldContainError("Internal Error: no case details supplied")
+    }
+
+    @Test
+    fun `should fail with the correct error when null case data is supplied`() {
+        given()
+            .setBody(request.caseDetails(defaultCase().data(null).build()))
+            .postToCallback()
+            .then()
+            .statusCode(200)
+            .shouldContainError("Internal Error: no case reference found: null")
+    }
+
+    @Test
+    fun `should fail with the correct error when no case reference supplied`() {
+        given()
+            .setBody(request.caseDetails(defaultCase().data(mutableMapOf()).build()))
+            .postToCallback()
+            .then()
+            .statusCode(200)
+            .shouldContainError("Internal Error: no case reference found: null")
     }
 
     @Test
