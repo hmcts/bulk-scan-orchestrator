@@ -49,7 +49,11 @@ public class SupplementaryEvidenceTest {
     @Test
     public void should_attach_supplementary_evidence_to_the_case() throws Exception {
         // when
-        envelopeMessager.sendMessageFromFile("envelopes/update-envelope.json", String.valueOf(caseDetails.getId()));
+        envelopeMessager.sendMessageFromFile(
+            "envelopes/supplementary-evidence-envelope.json",
+            String.valueOf(caseDetails.getId()),
+            null
+        );
 
         // then
         await("Supplementary evidence is attached to the case in ccd")
@@ -57,7 +61,7 @@ public class SupplementaryEvidenceTest {
             .pollInterval(Duration.TWO_SECONDS)
             .until(() -> hasCaseBeenUpdatedWithSupplementaryEvidence(caseDetails));
 
-        verifySupplementaryEvidenceDetailsUpdated(caseDetails, "envelopes/update-envelope.json");
+        verifySupplementaryEvidenceDetailsUpdated(caseDetails, "envelopes/supplementary-evidence-envelope.json");
     }
 
     private void verifySupplementaryEvidenceDetailsUpdated(CaseDetails caseDetails, String jsonFileName) {
