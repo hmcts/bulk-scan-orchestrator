@@ -13,7 +13,7 @@ import java.util.concurrent.ThreadFactory;
 import javax.annotation.PostConstruct;
 
 @Configuration
-@Profile("!integration")
+@Profile("!nosb")
 public class QueueConfig {
 
     private final QueueClient client;

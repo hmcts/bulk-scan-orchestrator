@@ -15,6 +15,6 @@ import org.springframework.test.context.ContextConfiguration
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWireMock
-@ActiveProfiles("integration")
+@ActiveProfiles("integration","nosb")
 @ContextConfiguration(initializers = [IntegrationTestConfig::class])
 internal annotation class IntegrationTest

@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest()
-@ActiveProfiles("integration")
+@ActiveProfiles({"integration","nosb"})
 @Import({CallbackProcessor.class})
 public class RootControllerTest {
 
