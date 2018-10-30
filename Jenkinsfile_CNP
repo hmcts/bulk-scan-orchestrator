@@ -1,6 +1,11 @@
 #!groovy
-@Library("Infrastructure")
+@Library("Infrastructure@with-aks-client")
 import uk.gov.hmcts.contino.GradleBuilder
+
+import uk.gov.hmcts.contino.Kubectl
+
+import uk.gov.hmcts.contino.DockerImage
+
 
 def type = "java"
 def product = "bulk-scan"
@@ -24,12 +29,44 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
   ]
 }
 
+env.RESOURCE_GROUP = 'bulk-scan-aks-rg'
+
 withPipeline(type, product, component) {
+  before('smoketest:aks') {  // or should this be after('aksdeploy')?
+    withAksClient('nonprod') {
+      def az = { cmd -> return sh(script: "env AZURE_CONFIG_DIR=/opt/jenkins/.azure-${env.SUBSCRIPTION_NAME} az $cmd", returnStdout: true).trim() }
+
+      def dockerImage = new DockerImage(product, component, null, env.BRANCH_NAME)
+      def subscription = env.SUBSCRIPTION_NAME
+      def aksServiceName = dockerImage.getAksServiceName().toLowerCase()
+      def serviceBusSecret = "${aksServiceName}-servicebus-secret"
+      def queueName = "envelopes"
+
+      def namespace = aksServiceName
+      def kubectl = new Kubectl(this, subscription, namespace)
+      kubectl.login()
+
+      // Get service bus connection string and parse to get namespace
+      def serviceBusConnectionStr = kubectl.getSecret(serviceBusSecret, namespace, "{.data.connectionString}")
+      //Regex: Endpoint=sb:\/\/([-a-zA-Z0-9]+)\.servicebus\.windows\.net.*
+      def serviceBusNamespace = serviceBusConnectionStr.substring(14).split("\\.")[0]
+
+      // create queue
+      def queues = az "servicebus queue list --resource-group ${env.RESOURCE_GROUP} --namespace-name ${serviceBusNamespace} --query '[].name'"
+      if (!queues.contains(queueName)) {
+        az "servicebus queue create --resource-group ${env.RESOURCE_GROUP} --namespace-name ${serviceBusNamespace} --name ${queueName}"
+      }
+    }
+  }
+
   after('test') {
     builder.gradle('integration')
   }
 
   enableDockerBuild()
+  enableDeployToAKS()
   enableSlackNotifications(channel)
   loadVaultSecrets(secrets)
+
+  setVaultName('bulk-scan')
 }
