@@ -9,10 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired
 class MessageSender(@Autowired private val processor: IMessageHandler) {
     val logger: Logger = LoggerFactory.getLogger(this::class.simpleName)
     fun send(message: Message) {
-        try {
-            processor.onMessageAsync(message).get()
-        } catch (e: Exception) {
-            logger.info("Exception on sending message ", e)
-        }
+        processor.onMessageAsync(message).get()
     }
 }

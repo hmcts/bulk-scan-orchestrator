@@ -12,8 +12,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import javax.annotation.PostConstruct;
 
+/**
+ * Registers handler with Azure Service bus to read messages when
+ * they are available in the queue.
+ */
 @Configuration
-@Profile("!nosb")
+@Profile("!nosb") // do not register handler for the nosb (test) profile
 public class QueueConfig {
 
     private final QueueClient client;

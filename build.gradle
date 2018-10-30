@@ -76,6 +76,10 @@ task integration(type: Test, description: 'Runs the integration tests.', group: 
   testClassesDirs = sourceSets.integrationTest.output.classesDirs
   classpath = sourceSets.integrationTest.runtimeClasspath
   useJUnitPlatform()
+  
+  testLogging {
+    exceptionFormat = 'full'
+  }
 }
 
 task smoke(type: Test) {
