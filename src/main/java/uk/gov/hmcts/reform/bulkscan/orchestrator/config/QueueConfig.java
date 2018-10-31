@@ -50,6 +50,9 @@ public class QueueConfig {
             try {
                 client.registerMessageHandler(messageHandler, executorService);
                 return;
+            } catch (UnsupportedOperationException e) {
+                // trying to register again, ignore
+                return;
             } catch (Throwable t) {
                 tries++;
                 if (tries >= 5) {
