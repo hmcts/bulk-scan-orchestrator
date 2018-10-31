@@ -41,6 +41,7 @@ public class ExceptionRecordCreationTest {
     private DocumentManagementUploadService dmUploadService;
 
     private String dmUrl;
+
     @Before
     public void setup() {
 
