@@ -56,7 +56,7 @@ public class QueueConfig {
                     throw t;
                 }
                 log.info("Register handler error: {}. Retrying...", t.getMessage());
-                Uninterruptibles.sleepUninterruptibly(10 * tries, TimeUnit.SECONDS);
+                Uninterruptibles.sleepUninterruptibly(10L * tries, TimeUnit.SECONDS);
             }
         }
     }
