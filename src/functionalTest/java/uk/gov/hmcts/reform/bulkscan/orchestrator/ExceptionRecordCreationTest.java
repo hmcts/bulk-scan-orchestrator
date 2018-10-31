@@ -40,15 +40,16 @@ public class ExceptionRecordCreationTest {
     @Autowired
     private DocumentManagementUploadService dmUploadService;
 
-    private List<String> scannedDocumentUrls;
-
+    private String dmUrl;
     @Before
     public void setup() {
+
         UploadResponse uploadResponse = dmUploadService.uploadToDmStore(
             "Certificate.pdf",
             "documents/supplementary-evidence.pdf"
         );
-        scannedDocumentUrls = ScannedDocumentsHelper.getScannedDocumentUrls(uploadResponse);
+        List<String> scannedDocumentUrls = ScannedDocumentsHelper.getScannedDocumentUrls(uploadResponse);
+        dmUrl = scannedDocumentUrls.isEmpty() ? null : scannedDocumentUrls.get(0);
     }
 
     @DisplayName("Should create ExceptionRecord when provided/requested supplementary evidence is not present")
@@ -63,7 +64,7 @@ public class ExceptionRecordCreationTest {
             "envelopes/supplementary-evidence-envelope.json",
             "0000000000000000",
             randomPoBox,
-            scannedDocumentUrls.isEmpty() ? null : scannedDocumentUrls.get(0)
+            dmUrl
         );
 
         // then
