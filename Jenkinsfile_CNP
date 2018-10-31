@@ -32,7 +32,7 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 env.RESOURCE_GROUP = 'bulk-scan-aks-rg'
 
 withPipeline(type, product, component) {
-  before('aksdeploy') {
+  after('aksdeploy') {
     withAksClient('nonprod') {
       def az = { cmd -> return sh(script: "env AZURE_CONFIG_DIR=/opt/jenkins/.azure-${env.SUBSCRIPTION_NAME} az $cmd", returnStdout: true).trim() }
 
