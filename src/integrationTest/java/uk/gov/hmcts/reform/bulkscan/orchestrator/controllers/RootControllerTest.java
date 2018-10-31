@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest()
-@ActiveProfiles("integration")
+@ActiveProfiles({"integration","nosb"}) // no servicebus queue handler registration
 @Import({CallbackProcessor.class})
 public class RootControllerTest {
 
