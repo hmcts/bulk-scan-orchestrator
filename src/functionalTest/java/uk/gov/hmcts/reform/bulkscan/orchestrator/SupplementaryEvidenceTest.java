@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper;
@@ -17,8 +18,10 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopePar
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.document.domain.UploadResponse;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,12 +43,23 @@ public class SupplementaryEvidenceTest {
 
     private CaseDetails caseDetails;
 
+    private String dmUrl;
+
+    @Autowired
+    private DocumentManagementUploadService dmUploadService;
+
     @Before
     public void setup() {
         String caseData = SampleData.fileContentAsString("envelopes/new-envelope.json");
         Envelope newEnvelope = EnvelopeParser.parse(caseData);
 
         caseDetails = ccdCaseCreator.createCase(newEnvelope);
+
+        UploadResponse uploadResponse = dmUploadService.uploadToDmStore(
+            "supplementary-evidence.pdf",
+            "documents/supplementary-evidence.pdf"
+        );
+        dmUrl = ScannedDocumentsHelper.getScannedDocumentUrl(uploadResponse);
     }
 
     @Test
@@ -54,7 +68,8 @@ public class SupplementaryEvidenceTest {
         envelopeMessager.sendMessageFromFile(
             "envelopes/supplementary-evidence-envelope.json",
             String.valueOf(caseDetails.getId()),
-            null
+            UUID.randomUUID(),
+            dmUrl
         );
 
         // then
