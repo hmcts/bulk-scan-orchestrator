@@ -3,12 +3,14 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.document.domain.Document;
 import uk.gov.hmcts.reform.document.domain.UploadResponse;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -36,11 +38,8 @@ public class ScannedDocumentsHelper {
         );
     }
 
-    public static String getScannedDocumentUrl(UploadResponse uploadResponse) {
-        List<uk.gov.hmcts.reform.document.domain.Document> documents = uploadResponse.getEmbedded().getDocuments();
-        if (!documents.isEmpty() && documents.get(0).links != null) {
-            return documents.get(0).links.self.href;
-        }
-        return null;
+    public static List<String> getScannedDocumentUrls(UploadResponse uploadResponse) {
+        List<Document> documents = uploadResponse.getEmbedded().getDocuments();
+        return documents.stream().map(document -> document.links.self.href).collect(Collectors.toList());
     }
 }

@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.dm;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,22 +19,25 @@ public class DocumentManagementUploadService {
 
     private static final Logger log = LoggerFactory.getLogger(DocumentManagementUploadService.class);
 
-    @Autowired
-    private DocumentUploadClientApi documentUploadClientApi;
+    private final DocumentUploadClientApi documentUploadClientApi;
 
     private final CcdAuthenticatorFactory ccdAuthenticatorFactory;
 
     private static final String FILES_NAME = "files";
 
-    DocumentManagementUploadService(CcdAuthenticatorFactory ccdAuthenticatorFactory) {
+    DocumentManagementUploadService(
+        CcdAuthenticatorFactory ccdAuthenticatorFactory,
+        DocumentUploadClientApi documentUploadClientApi
+    ) {
         this.ccdAuthenticatorFactory = ccdAuthenticatorFactory;
+        this.documentUploadClientApi = documentUploadClientApi;
     }
 
-    public UploadResponse uploadToDmStore(String fileName, String filePath) {
-        log.info("Uploading {} to DM store", fileName);
+    public UploadResponse uploadToDmStore(String displayName, String filePath) {
+        log.info("Uploading {} to DM store", displayName);
         MultipartFile file = new InMemoryMultipartFile(
             FILES_NAME,
-            fileName,
+            displayName,
             MediaType.APPLICATION_PDF_VALUE,
             SampleData.fileContentAsBytes(filePath)
         );
@@ -48,7 +50,7 @@ public class DocumentManagementUploadService {
             authenticator.getUserDetails().getId(),
             singletonList(file)
         );
-        log.info("{} uploaded to DM store", fileName);
+        log.info("{} uploaded to DM store", displayName);
         return uploadResponse;
     }
 }

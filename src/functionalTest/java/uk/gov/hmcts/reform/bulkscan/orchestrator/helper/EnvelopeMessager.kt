@@ -19,10 +19,10 @@ private val logger = LoggerFactory.getLogger(EnvelopeMessager::class.java)
 
 @Service
 @Import(FunctionalQueueConfig::class)
-class EnvelopeMessager( @Autowired client: QueueClient) : IQueueClient by client{
+class EnvelopeMessager(@Autowired client: QueueClient) : IQueueClient by client {
 
     @Throws(JSONException::class, ServiceBusException::class, InterruptedException::class)
-    fun sendMessageFromFile(jsonFileName: String, caseRef: String?, poBox: UUID?,  documentUrl: String) {
+    fun sendMessageFromFile(jsonFileName: String, caseRef: String?, poBox: UUID?, documentUrl: String?) {
 
         val updateCaseData = JSONObject(SampleData.fileContentAsString(jsonFileName))
         updateCaseData.put("case_ref", caseRef)

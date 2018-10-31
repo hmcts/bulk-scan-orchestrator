@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.awaitility.Duration;
 import org.json.JSONException;
+import org.junit.Before;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,7 +38,18 @@ public class ExceptionRecordCreationTest {
     private EnvelopeMessager envelopeMessager;
 
     @Autowired
-    DocumentManagementUploadService dmUploadService;
+    private DocumentManagementUploadService dmUploadService;
+
+    private List<String> scannedDocumentUrls;
+
+    @Before
+    public void setup() {
+        UploadResponse uploadResponse = dmUploadService.uploadToDmStore(
+            "Certificate.pdf",
+            "documents/supplementary-evidence.pdf"
+        );
+        scannedDocumentUrls = ScannedDocumentsHelper.getScannedDocumentUrls(uploadResponse);
+    }
 
     @DisplayName("Should create ExceptionRecord when provided/requested supplementary evidence is not present")
     @Test
@@ -45,16 +57,13 @@ public class ExceptionRecordCreationTest {
         throws JSONException, InterruptedException, ServiceBusException {
         // given
         UUID randomPoBox = UUID.randomUUID();
-        UploadResponse uploadResponse = dmUploadService.uploadToDmStore(
-            "supplementary-evidence.pdf",
-            "documents/supplementary-evidence.pdf"
-        );
+
         // when
         envelopeMessager.sendMessageFromFile(
             "envelopes/supplementary-evidence-envelope.json",
             "0000000000000000",
             randomPoBox,
-            ScannedDocumentsHelper.getScannedDocumentUrl(uploadResponse)
+            scannedDocumentUrls.isEmpty() ? null : scannedDocumentUrls.get(0)
         );
 
         // then

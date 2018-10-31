@@ -56,10 +56,11 @@ public class SupplementaryEvidenceTest {
         caseDetails = ccdCaseCreator.createCase(newEnvelope);
 
         UploadResponse uploadResponse = dmUploadService.uploadToDmStore(
-            "supplementary-evidence.pdf",
+            "Certificate.pdf",
             "documents/supplementary-evidence.pdf"
         );
-        dmUrl = ScannedDocumentsHelper.getScannedDocumentUrl(uploadResponse);
+        List<String> scannedDocumentUrls = ScannedDocumentsHelper.getScannedDocumentUrls(uploadResponse);
+        dmUrl = scannedDocumentUrls.isEmpty() ? null : scannedDocumentUrls.get(0);
     }
 
     @Test
@@ -101,6 +102,8 @@ public class SupplementaryEvidenceTest {
         assertThat(updatedDocument.fileName).isEqualTo(queueDocument.fileName);
         assertThat(updatedDocument.controlNumber).isEqualTo(queueDocument.controlNumber);
         assertThat(updatedDocument.type).isEqualTo(queueDocument.type);
+        assertThat(updatedDocument.url).isNotNull();
+        assertThat(updatedDocument.url.documentUrl).isEqualTo(dmUrl);
     }
 
     private boolean hasCaseBeenUpdatedWithSupplementaryEvidence(CaseDetails caseDetails) {
