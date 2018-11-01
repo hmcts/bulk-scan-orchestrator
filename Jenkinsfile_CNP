@@ -54,8 +54,8 @@ withPipeline(type, product, component) {
       // Set environment
       env.QUEUE_READ_CONN_STRING = "${serviceBusConnectionStr};EntityPath=envelopes"
       env.QUEUE_WRITE_CONN_STRING = "${serviceBusConnectionStr};EntityPath=envelopes"
-      env.s2s_name = 'bulk_scan_orchestrator'
-      env.s2s_url = 'http://rpe-service-auth-provider-aat.service.core-compute-aat.internal'
+      env.S2S_NAME = 'bulk_scan_orchestrator'
+      env.S2S_URL = 'http://rpe-service-auth-provider-aat.service.core-compute-aat.internal'
       env.document_management_url = 'http://dm-store-aat.service.core-compute-aat.internal'
       env.core_case_data_api_url = 'http://ccd-data-store-api-aat.service.core-compute-aat.internal'
       env.idam_api_url = 'https://preprod-idamapi.reform.hmcts.net:3511'
