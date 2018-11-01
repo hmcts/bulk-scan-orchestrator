@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.awaitility.Duration;
 import org.json.JSONException;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +42,7 @@ public class ExceptionRecordCreationTest {
 
     private String dmUrl;
 
-    @Before
+    @BeforeEach
     public void setup() {
 
         UploadResponse uploadResponse = dmUploadService.uploadToDmStore(
