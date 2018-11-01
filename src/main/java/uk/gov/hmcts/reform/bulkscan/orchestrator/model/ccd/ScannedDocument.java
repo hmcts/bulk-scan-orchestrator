@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDateTime;
 
+@SuppressWarnings("squid:S1135")
 public class ScannedDocument {
 
     public final String fileName;
