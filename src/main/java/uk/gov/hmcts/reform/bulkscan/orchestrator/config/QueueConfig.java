@@ -41,27 +41,6 @@ public class QueueConfig {
             namedThreadFactory
         );
 
-        /*
-        // Note: lazy init with retry otherwise AKS setup fails as a queue is
-        // created in that environment only after deployment is complete.
-        int tries = 0;
-        while (true) {
-            try {
-                client.registerMessageHandler(messageHandler, executorService);
-                return;
-            } catch (UnsupportedOperationException e) {
-                // trying to register again, ignore
-                return;
-            } catch (Throwable t) {
-                tries++;
-                if (tries >= 5) {
-                    throw t;
-                }
-                log.info("Register handler error: {}. Retrying...", t.getMessage());
-                Uninterruptibles.sleepUninterruptibly(10L * tries, TimeUnit.SECONDS);
-            }
-        }
-        */
         client.registerMessageHandler(messageHandler, executorService);
     }
 
