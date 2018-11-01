@@ -52,13 +52,13 @@ spec:
               value: "${IDAM_CLIENT_SECRET}"
             - name: IDAM_USER_PASSWORD
               value: "${IDAM_USER_PASSWORD}"
-            - name: QUEUE_READ_CONN_STRING
+            - name: SB_CONN_STRING
               valueFrom:
                 secretKeyRef:
                   name: ${SERVICE_NAME}-servicebus-secret
                   key: connectionString
             - name: QUEUE_CONNECTION_STRING
-              value: "$(QUEUE_READ_CONN_STRING);EntityPath=envelopes"
+              value: "$(SB_CONN_STRING);EntityPath=envelopes"
           resources:
             requests:
               memory: "512Mi"
