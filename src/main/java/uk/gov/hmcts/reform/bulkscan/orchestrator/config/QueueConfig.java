@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.google.common.util.concurrent.Uninterruptibles;
 import com.microsoft.azure.servicebus.IMessageHandler;
 import com.microsoft.azure.servicebus.QueueClient;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
@@ -13,7 +12,6 @@ import org.springframework.context.annotation.Profile;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 
 /**
@@ -43,6 +41,7 @@ public class QueueConfig {
             namedThreadFactory
         );
 
+        /*
         // Note: lazy init with retry otherwise AKS setup fails as a queue is
         // created in that environment only after deployment is complete.
         int tries = 0;
@@ -62,6 +61,8 @@ public class QueueConfig {
                 Uninterruptibles.sleepUninterruptibly(10L * tries, TimeUnit.SECONDS);
             }
         }
+        */
+        client.registerMessageHandler(messageHandler, executorService);
     }
 
 }
