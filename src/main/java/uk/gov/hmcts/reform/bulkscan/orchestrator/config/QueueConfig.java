@@ -21,9 +21,7 @@ import javax.annotation.PostConstruct;
 @Configuration
 @Profile("!nosb") // do not register handler for the nosb (test) profile
 public class QueueConfig {
-
-    private static final Logger log = LoggerFactory.getLogger(QueueConfig.class);
-
+    
     private final QueueClient client;
     private final IMessageHandler messageHandler;
 
