@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +28,7 @@ public class ScannedDocumentsHelper {
         return new ScannedDocument(doc.get("fileName"),
             doc.get("controlNumber"),
             doc.get("type"),
-            LocalDate.parse(doc.get("scannedDate")),
+            LocalDateTime.parse(doc.get("scannedDate")),
             null
         );
     }

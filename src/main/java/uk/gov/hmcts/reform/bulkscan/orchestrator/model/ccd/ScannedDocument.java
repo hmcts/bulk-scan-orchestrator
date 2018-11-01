@@ -2,14 +2,15 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
+@SuppressWarnings("squid:S1135")
 public class ScannedDocument {
 
     public final String fileName;
     public final String controlNumber;
     public final String type;
-    public final LocalDate scannedDate;
+    public final LocalDateTime scannedDate;
 
     // TODO: remove @JsonIgnore annotation once the url problem is solved in local env
     @JsonIgnore
@@ -19,7 +20,7 @@ public class ScannedDocument {
         String fileName,
         String controlNumber,
         String type,
-        LocalDate scannedDate,
+        LocalDateTime scannedDate,
         CcdDocument url
     ) {
         this.fileName = fileName;
