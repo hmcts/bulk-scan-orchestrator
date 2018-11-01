@@ -77,7 +77,7 @@ spec:
 apiVersion: servicecatalog.k8s.io/v1beta1
 kind: ServiceInstance
 metadata:
-  name: ${SERVICE_NAME}-servicebus-instance-aks
+  name: ${SERVICE_NAME}-servicebus-instance-2
   namespace: ${NAMESPACE}
 spec:
   #
@@ -106,11 +106,11 @@ spec:
 apiVersion: servicecatalog.k8s.io/v1beta1
 kind: ServiceBinding
 metadata:
-  name: ${SERVICE_NAME}-servicebus-binding-aks
+  name: ${SERVICE_NAME}-servicebus-binding-2
   namespace: ${NAMESPACE}
 spec:
   instanceRef:
-    name: ${SERVICE_NAME}-servicebus-instance-aks
+    name: ${SERVICE_NAME}-servicebus-instance-2
   #
   # This is the secret used above in your pod environment config
   #
