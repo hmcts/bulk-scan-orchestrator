@@ -74,6 +74,7 @@ public class SupplementaryEvidenceTest {
         );
 
         // then
+        assertThat(dmUrl).isNotNull();
         await("Supplementary evidence is attached to the case in ccd")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.TWO_SECONDS)
