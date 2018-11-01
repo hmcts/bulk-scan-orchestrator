@@ -52,6 +52,7 @@ public class QueueConfig {
                 client.registerMessageHandler(messageHandler, executorService);
                 return;
             } catch (UnsupportedOperationException e) {
+                log.info("Register handler error: {}.", e.getMessage());
                 // trying to register again, ignore
                 return;
             } catch (MessagingEntityNotFoundException e) {
