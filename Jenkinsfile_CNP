@@ -29,7 +29,7 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
   ]
 }
 
-env.RESOURCE_GROUP = 'bulk-scan-aks-rg'
+env.RESOURCE_GROUP = 'bulk-scan-aks'
 
 withPipeline(type, product, component) {
   after('aksdeploy') {
