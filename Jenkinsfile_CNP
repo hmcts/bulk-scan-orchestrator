@@ -30,6 +30,8 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 }
 
 env.RESOURCE_GROUP = 'bulk-scan-aks'
+env.document_management_url = 'http://dm-store-aat.service.core-compute-aat.internal'
+env.core_case_data_api_url = 'http://ccd-data-store-api-aat.service.core-compute-aat.internal'
 
 withPipeline(type, product, component) {
   before('smoketest:aks') {
