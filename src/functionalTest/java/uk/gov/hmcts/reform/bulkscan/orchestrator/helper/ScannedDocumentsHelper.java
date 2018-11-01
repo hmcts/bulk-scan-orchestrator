@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -18,7 +16,6 @@ import static java.util.stream.Collectors.toList;
 
 @SuppressWarnings("unchecked")
 public class ScannedDocumentsHelper {
-    private static final Logger log = LoggerFactory.getLogger(ScannedDocumentsHelper.class);
 
     private ScannedDocumentsHelper() {
         // utility class
@@ -33,7 +30,6 @@ public class ScannedDocumentsHelper {
 
     private static ScannedDocument createDocumentFromMap(Map<String, Map<String, Object>> object) {
         Map<String, Object> doc = object.get("value");
-        log.info("DM url retried from ccd case {}", doc.get("url"));
         return new ScannedDocument(String.valueOf(doc.get("fileName")),
             String.valueOf(doc.get("controlNumber")),
             String.valueOf(doc.get("type")),
