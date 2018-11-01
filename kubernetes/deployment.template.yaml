@@ -50,6 +50,8 @@ spec:
               value: "${S2S_SECRET}"
             - name: IDAM_CLIENT_SECRET
               value: "${IDAM_CLIENT_SECRET}"
+            - name: IDAM_USER_NAME
+              value: "${IDAM_USER_NAME}"
             - name: IDAM_USER_PASSWORD
               value: "${IDAM_USER_PASSWORD}"
             - name: SB_CONN_STRING
