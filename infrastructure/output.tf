@@ -44,5 +44,9 @@ output "idam_client_redirect_uri" {
   value = "${var.idam_client_redirect_uri}"
 }
 
+output "document_management_url" {
+ value = "${local.dm_store_api_url}"
+}
+
 // endregion
 

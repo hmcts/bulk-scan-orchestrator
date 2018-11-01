@@ -18,6 +18,7 @@ locals {
   sku_size = "${var.env == "prod" || var.env == "sprod" || var.env == "aat" ? "I2" : "I1"}"
 
   ccdApiUrl = "http://ccd-data-store-api-${local.local_env}.service.${local.local_ase}.internal"
+  dm_store_api_url = "http://dm-store-${local.local_env}.service.${local.local_ase}.internal"
 
   users = {
     // configures a user for a jurisdiction
