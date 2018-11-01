@@ -56,6 +56,8 @@ withPipeline(type, product, component) {
       env.QUEUE_WRITE_CONN_STRING = "${serviceBusConnectionStr};EntityPath=envelopes"
       env.document_management_url = 'http://dm-store-aat.service.core-compute-aat.internal'
       env.core_case_data_api_url = 'http://ccd-data-store-api-aat.service.core-compute-aat.internal'
+      env.idam_api_url = 'https://preprod-idamapi.reform.hmcts.net:3511'
+      env.idam_client_redirect_uri = 'https://rpe-bulk-scan-processor-sandbox.service.core-compute-sandbox.internal/oauth2/callback'
 
       // create queue
       def queues = az "servicebus queue list --resource-group ${env.RESOURCE_GROUP} --namespace-name ${serviceBusNamespace} --query '[].name'"
