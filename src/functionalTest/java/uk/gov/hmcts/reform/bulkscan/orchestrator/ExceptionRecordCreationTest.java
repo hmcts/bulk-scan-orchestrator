@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.awaitility.Duration;
 import org.json.JSONException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,10 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseSearcher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.EnvelopeEventProcessor;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.document.domain.UploadResponse;
 
 import java.util.List;
 import java.util.UUID;
@@ -33,6 +37,22 @@ public class ExceptionRecordCreationTest {
     @Autowired
     private EnvelopeMessager envelopeMessager;
 
+    @Autowired
+    private DocumentManagementUploadService dmUploadService;
+
+    private String dmUrl;
+
+    @BeforeEach
+    public void setup() {
+
+        UploadResponse uploadResponse = dmUploadService.uploadToDmStore(
+            "Certificate.pdf",
+            "documents/supplementary-evidence.pdf"
+        );
+        List<String> scannedDocumentUrls = ScannedDocumentsHelper.getScannedDocumentUrls(uploadResponse);
+        dmUrl = scannedDocumentUrls.isEmpty() ? null : scannedDocumentUrls.get(0);
+    }
+
     @DisplayName("Should create ExceptionRecord when provided/requested supplementary evidence is not present")
     @Test
     public void create_exception_record_from_supplementary_evidence()
@@ -44,7 +64,8 @@ public class ExceptionRecordCreationTest {
         envelopeMessager.sendMessageFromFile(
             "envelopes/supplementary-evidence-envelope.json",
             "0000000000000000",
-            randomPoBox
+            randomPoBox,
+            dmUrl
         );
 
         // then

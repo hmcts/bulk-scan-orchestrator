@@ -9,11 +9,11 @@
   "opening_date": "1970-01-01T00:00:00.000Z",
   "documents": [
     {
-      "file_name": "cert_updated.pdf",
-      "control_number": "control_number_updated",
+      "file_name": "certificate.pdf",
+      "control_number": "154565768",
       "type": "other",
-      "scanned_at": "1970-01-01T00:00:00.000Z",
-      "url": "https://example.gov.uk/123456"
+      "scanned_at": "2018-01-01T00:00:00.000Z",
+      "url": "http://dm-store:4460/documents/ee69aee8-1a33-40dd-9af9-d90da1b104ba"
     }
   ]
 }
