@@ -1,18 +1,15 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.collect.ImmutableList;
-import feign.FeignException;
 import io.vavr.Value;
 import io.vavr.control.Validation;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.List;
 
-import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseDetails;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseReference;
@@ -25,12 +22,12 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 @Service
 public class CallbackProcessor {
 
-    private final CoreCaseDataApi ccdApi;
     private CcdAuthenticatorFactory authFactory;
+    private final CallbackCcdApi ccdApi;
 
-    public CallbackProcessor(CoreCaseDataApi ccdApi, CcdAuthenticatorFactory authFactory) {
-        this.ccdApi = ccdApi;
+    public CallbackProcessor(CallbackCcdApi ccdApi, CcdAuthenticatorFactory authFactory) {
         this.authFactory = authFactory;
+        this.ccdApi = ccdApi;
     }
 
     public List<String> process(String eventType, String eventId, CaseDetails caseDetails) {
@@ -65,58 +62,9 @@ public class CallbackProcessor {
     @NotNull
     private List<String> attachCase(String exceptionRecordJurisdiction, String caseRef) {
         CcdAuthenticator authenticator = authFactory.createForJurisdiction(exceptionRecordJurisdiction);
-        CaseDetails theCase = getCase(caseRef, authenticator);
-        StartEventResponse event = startAttachScannedDocs(caseRef, authenticator, theCase);
+        CaseDetails theCase = ccdApi.getCase(caseRef, authenticator);
+        StartEventResponse event = ccdApi.startAttachScannedDocs(caseRef, authenticator, theCase);
         return emptyList();
     }
-
-    private StartEventResponse startAttachScannedDocs(String caseRef, CcdAuthenticator authenticator, CaseDetails theCase) {
-        try {
-            return startAttachScannedDocs(caseRef, authenticator, theCase.getJurisdiction(), theCase.getCaseTypeId());
-        } catch (FeignException e) {
-            throw error(e, "Internal Error: start event call failed case: %s Error: %s", caseRef, e.status());
-        }
-    }
-
-    private CaseDetails getCase(String caseRef, CcdAuthenticator authenticator) {
-        try {
-            return retrieveCase(caseRef, authenticator);
-        } catch (FeignException e) {
-            switch (e.status()) {
-                case 404:
-                    throw error(e, "Could not find case: %s",
-                        caseRef);
-                default:
-                    throw error(e, "Internal Error: Could not retrieve case: %s Error: %s",
-                        caseRef, e.status());
-            }
-        }
-    }
-
-    private CaseDetails retrieveCase(String caseRef, CcdAuthenticator authenticator) {
-        return ccdApi.getCase(authenticator.getUserToken(), authenticator.getServiceToken(), caseRef);
-    }
-
-    private StartEventResponse startAttachScannedDocs(String caseRef, CcdAuthenticator authenticator, String jurisdiction, String caseTypeId) {
-        return ccdApi.startEventForCaseWorker(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
-            jurisdiction,
-            caseTypeId,
-            caseRef,
-            "attachScannedDocs"
-        );
-    }
-
-    private CallbackException error(Exception e, String errorFmt, Object arg) {
-        return error(e, errorFmt, arg, null);
-    }
-
-    @NotNull
-    private CallbackException error(Exception e, String errorFmt, Object arg1, Object arg2) {
-        return new CallbackException(format(errorFmt, arg1, arg2), e);
-    }
-
 
 }
