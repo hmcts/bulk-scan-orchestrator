@@ -34,6 +34,12 @@ withPipeline(type, product, component) {
 
       // Vars needed for AKS testing
       env.RESOURCE_GROUP = 'bulk-scan-aks'
+      env.S2S_NAME = 'bulk_scan_orchestrator'
+      env.S2S_URL = 'http://rpe-service-auth-provider-aat.service.core-compute-aat.internal'
+      env.document_management_url = 'http://dm-store-aat.service.core-compute-aat.internal'
+      env.core_case_data_api_url = 'http://ccd-data-store-api-aat.service.core-compute-aat.internal'
+      env.idam_api_url = 'https://preprod-idamapi.reform.hmcts.net:3511'
+      env.idam_client_redirect_uri = 'https://rpe-bulk-scan-processor-sandbox.service.core-compute-sandbox.internal/oauth2/callback'
 
       def az = { cmd -> return sh(script: "env AZURE_CONFIG_DIR=/opt/jenkins/.azure-${env.SUBSCRIPTION_NAME} az $cmd", returnStdout: true).trim() }
 
