@@ -76,6 +76,10 @@ task integration(type: Test, description: 'Runs the integration tests.', group: 
   testClassesDirs = sourceSets.integrationTest.output.classesDirs
   classpath = sourceSets.integrationTest.runtimeClasspath
   useJUnitPlatform()
+  
+  testLogging {
+    exceptionFormat = 'full'
+  }
 }
 
 task smoke(type: Test) {
@@ -166,6 +170,7 @@ dependencies {
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: versions.springBoot
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: versions.springBoot
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-json', version: versions.springBoot
+  compile group: 'com.microsoft.azure', name: 'azure-servicebus-spring-boot-starter', version: '2.0.6'
 
   compile group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
   compile group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
@@ -181,7 +186,6 @@ dependencies {
 
   annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
 
-
   testCompile(group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot)
   testCompile group: 'com.typesafe', name: 'config', version: '1.3.3'
   testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: versions.junit
@@ -193,7 +197,8 @@ dependencies {
   testCompile group: 'org.awaitility', name: 'awaitility', version: '3.1.2'
   testCompile group: 'io.rest-assured', name: 'rest-assured', version: '3.2.0'
 
-  annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
+  functionalTestCompile group: 'uk.gov.hmcts.reform', name: 'document-management-client', version: '4.0.1'
+
   integrationTestCompile sourceSets.main.runtimeClasspath
   integrationTestCompile sourceSets.test.runtimeClasspath
 

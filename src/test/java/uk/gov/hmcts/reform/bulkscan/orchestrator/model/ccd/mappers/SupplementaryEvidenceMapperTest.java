@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.SupplementaryEvidence
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 
@@ -33,8 +33,8 @@ public class SupplementaryEvidenceMapperTest {
         assertThat(scannedDocument.type).isEqualTo(envelopeDocument.type);
         assertThat(scannedDocument.url.documentUrl).isEqualTo(envelopeDocument.url);
 
-        LocalDate expectedScannedDate =
-            envelopeDocument.scannedAt.atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDateTime expectedScannedDate =
+            envelopeDocument.scannedAt.atZone(ZoneId.systemDefault()).toLocalDateTime();
 
         assertThat(scannedDocument.scannedDate).isEqualTo(expectedScannedDate);
     }

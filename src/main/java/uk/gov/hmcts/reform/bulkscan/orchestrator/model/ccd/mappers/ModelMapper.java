@@ -30,7 +30,7 @@ public abstract class ModelMapper<T extends CaseData> {
             document.fileName,
             document.controlNumber,
             document.type,
-            getLocalDateTime(document.scannedAt).toLocalDate(),
+            getLocalDateTime(document.scannedAt),
             new CcdDocument(document.url)
         );
     }
