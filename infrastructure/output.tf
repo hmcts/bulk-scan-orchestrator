@@ -12,10 +12,6 @@ output "vaultUri" {
 
 // region: settings for functional tests
 
-output "QUEUE_READ_CONN_STRING" {
-  value = "${data.terraform_remote_state.shared_infra.queue_primary_listen_connection_string}"
-}
-
 output "QUEUE_WRITE_CONN_STRING" {
   value = "${data.terraform_remote_state.shared_infra.queue_primary_send_connection_string}"
 }
@@ -42,6 +38,10 @@ output "idam_user_name" {
 
 output "idam_client_redirect_uri" {
   value = "${var.idam_client_redirect_uri}"
+}
+
+output "document_management_url" {
+ value = "${local.dm_store_api_url}"
 }
 
 // endregion

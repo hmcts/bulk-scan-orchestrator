@@ -4,6 +4,7 @@ import com.microsoft.azure.servicebus.IQueueClient
 import com.microsoft.azure.servicebus.Message
 import com.microsoft.azure.servicebus.QueueClient
 import com.microsoft.azure.servicebus.primitives.ServiceBusException
+import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
@@ -18,13 +19,21 @@ private val logger = LoggerFactory.getLogger(EnvelopeMessager::class.java)
 
 @Service
 @Import(FunctionalQueueConfig::class)
-class EnvelopeMessager( @Autowired client: QueueClient) : IQueueClient by client{
+class EnvelopeMessager(@Autowired client: QueueClient) : IQueueClient by client {
 
     @Throws(JSONException::class, ServiceBusException::class, InterruptedException::class)
-    fun sendMessageFromFile(jsonFileName: String, caseRef: Long?) {
+    fun sendMessageFromFile(jsonFileName: String, caseRef: String?, poBox: UUID?, documentUrl: String?) {
 
         val updateCaseData = JSONObject(SampleData.fileContentAsString(jsonFileName))
-        updateCaseData.put("case_ref", "$caseRef")
+        updateCaseData.put("case_ref", caseRef)
+
+        if (poBox != null) {
+            updateCaseData.put("po_box", poBox)
+        }
+
+        val documents = updateCaseData.get("documents") as JSONArray
+        val document = documents.get(0) as JSONObject
+        document.put("url", documentUrl)
 
         val message = Message()
         message.messageId = UUID.randomUUID().toString()

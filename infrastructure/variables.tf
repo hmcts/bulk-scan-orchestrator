@@ -52,7 +52,3 @@ variable "idam_client_redirect_uri" {
 variable "s2s_name" {
   default = "bulk_scan_orchestrator"
 }
-
-variable "queue_read_interval" {
-  default = "30000"
-}

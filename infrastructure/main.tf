@@ -18,6 +18,7 @@ locals {
   sku_size = "${var.env == "prod" || var.env == "sprod" || var.env == "aat" ? "I2" : "I1"}"
 
   ccdApiUrl = "http://ccd-data-store-api-${local.local_env}.service.${local.local_ase}.internal"
+  dm_store_api_url = "http://dm-store-${local.local_env}.service.${local.local_ase}.internal"
 
   users = {
     // configures a user for a jurisdiction
@@ -42,15 +43,14 @@ locals {
   s2s_vault_url     = "https://s2s-${local.local_env}.vault.azure.net/"
 
   core_app_settings = {
-    LOGBACK_REQUIRE_ALERT_LEVEL = false
-    LOGBACK_REQUIRE_ERROR_CODE  = false
+    LOGBACK_REQUIRE_ALERT_LEVEL = "false"
+    LOGBACK_REQUIRE_ERROR_CODE  = "false"
 
     S2S_URL     = "${local.s2s_url}"
     S2S_NAME    = "${var.s2s_name}"
     S2S_SECRET  = "${data.azurerm_key_vault_secret.s2s_secret.value}"
 
     QUEUE_CONNECTION_STRING = "${data.terraform_remote_state.shared_infra.queue_primary_listen_connection_string}"
-    QUEUE_READ_INTERVAL = "${var.queue_read_interval}"
 
     IDAM_API_URL              = "${var.idam_api_url}"
     IDAM_CLIENT_SECRET        = "${data.azurerm_key_vault_secret.idam_client_secret.value}"
