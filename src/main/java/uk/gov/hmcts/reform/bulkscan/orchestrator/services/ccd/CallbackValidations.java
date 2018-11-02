@@ -10,12 +10,11 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
 import static java.lang.String.format;
-import static uk.gov.hmcts.reform.ccd.client.model.CallbackTypes.ABOUT_TO_SUBMIT;
 
-interface CallbackValidations {
-    Logger log = LoggerFactory.getLogger(CallbackProcessor.class);
+public interface CallbackValidations {
+    Logger log = LoggerFactory.getLogger(CallbackValidations.class);
     String ATTACH_TO_CASE_REFERENCE = "attachToCaseReference";
-    String ATTACH_RECORD = "attachRecord";
+    String ATTACH_TO_EXISTING_CASE = "attachToExistingCase";
 
     static Validation<String, CaseDetails> hasCaseDetails(CaseDetails caseDetails) {
         return caseDetails != null
@@ -24,7 +23,7 @@ interface CallbackValidations {
     }
 
     static Validation<String, String> isAboutToSubmit(String eventId) {
-        return ABOUT_TO_SUBMIT.equals(eventId)
+        return ATTACH_TO_EXISTING_CASE.equals(eventId)
             ? valid(eventId)
             : internalError("event-id: %s invalid", eventId);
     }
