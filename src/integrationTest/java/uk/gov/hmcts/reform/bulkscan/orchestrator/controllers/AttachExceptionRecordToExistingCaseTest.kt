@@ -125,7 +125,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @Test
     fun `should fail correctly if the case does not exist`() {
-        wireMock.register(getCase.atPriority(1).willReturn(status(404)))
+        wireMock.register(getCase.willReturn(status(404)))
         given()
             .setBody(callbackRequest)
             .postToCallback()
