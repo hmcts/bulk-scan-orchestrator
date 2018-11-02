@@ -55,12 +55,10 @@ public class SupplementaryEvidenceTest {
 
         caseDetails = ccdCaseCreator.createCase(newEnvelope);
 
-        UploadResponse uploadResponse = dmUploadService.uploadToDmStore(
+        dmUrl = dmUploadService.uploadToDmStore(
             "Certificate.pdf",
             "documents/supplementary-evidence.pdf"
         );
-        List<String> scannedDocumentUrls = ScannedDocumentsHelper.getScannedDocumentUrls(uploadResponse);
-        dmUrl = scannedDocumentUrls.isEmpty() ? null : scannedDocumentUrls.get(0);
     }
 
     @Test

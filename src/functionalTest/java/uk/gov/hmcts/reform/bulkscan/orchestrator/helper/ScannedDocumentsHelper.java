@@ -37,9 +37,4 @@ public class ScannedDocumentsHelper {
             new CcdDocument(((HashMap<String, String>) doc.get("url")).getOrDefault("document_url", null))
         );
     }
-
-    public static List<String> getScannedDocumentUrls(UploadResponse uploadResponse) {
-        List<Document> documents = uploadResponse.getEmbedded().getDocuments();
-        return documents.stream().map(document -> document.links.self.href).collect(Collectors.toList());
-    }
 }
