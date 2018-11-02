@@ -90,7 +90,6 @@ public class SupplementaryEvidenceTest {
 
         CaseDetails updatedCaseDetails = caseRetriever.retrieve(
             caseDetails.getJurisdiction(),
-            SampleData.BULK_SCANNED_CASE_TYPE,
             String.valueOf(caseDetails.getId())
         );
 
@@ -111,7 +110,6 @@ public class SupplementaryEvidenceTest {
 
         CaseDetails updatedCaseDetails = caseRetriever.retrieve(
             caseDetails.getJurisdiction(),
-            SampleData.BULK_SCANNED_CASE_TYPE,
             String.valueOf(caseDetails.getId())
         );
 
