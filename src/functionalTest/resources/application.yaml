@@ -6,9 +6,7 @@ spring:
     name: Bulk Scan Orchestrator Functional Tests
 
 queue:
-  connection-string: ${QUEUE_READ_CONN_STRING}
   write-connection-string: ${QUEUE_WRITE_CONN_STRING}
-  read-interval: ${QUEUE_READ_INTERVAL:30000} # in ms
 
 core_case_data:
   api:
