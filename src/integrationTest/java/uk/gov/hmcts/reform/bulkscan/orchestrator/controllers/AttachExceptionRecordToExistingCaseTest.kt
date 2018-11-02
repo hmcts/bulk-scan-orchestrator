@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidation
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.CallbackRequestBuilder
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse
 
 typealias ResponseValidation = ValidatableResponseOptions<ValidatableResponse, Response>
 
@@ -62,6 +63,11 @@ class AttachExceptionRecordToExistingCaseTest {
 
     private val wireMock by lazy { WireMock(wireMockPort) }
 
+    private val startEvent = get(
+        "/caseworkers/640/jurisdictions/BULKSCAN/case-types/Bulk_Scanned"
+            + "/cases/1539007368674134/event-triggers/attachScannedDocs/token"
+    ).authorised()
+
     private val getCase = get("/cases/$CASE_REF").authorised()
 
     private val caseData: CaseDetails = CaseDetails.builder()
@@ -70,9 +76,15 @@ class AttachExceptionRecordToExistingCaseTest {
         .id(Environment.CASE_REF.toLong())
         .build()
 
+    private val startEventResponse = StartEventResponse
+        .builder()
+        .eventId("someID")
+        .token("theToken").build()
+
     @BeforeEach
     fun before() {
         waitFor(applicationPort)
+        wireMock.register(startEvent.willReturn(okJson(asJson(startEventResponse))))
         wireMock.register(getCase.willReturn(okJson(asJson(caseData))))
         RestAssured.requestSpecification = RequestSpecBuilder().setPort(applicationPort).setContentType(JSON).build()
     }
@@ -100,8 +112,20 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
+    fun `should fail with the correct error when start event api call fails`() {
+        wireMock.register(startEvent.willReturn(status(404)))
+
+        given()
+            .setBody(callbackRequest)
+            .postToCallback()
+            .then()
+            .statusCode(200)
+            .shouldContainError("Internal Error: start event call failed case: 1539007368674134 Error: 404")
+    }
+
+    @Test
     fun `should fail correctly if the case does not exist`() {
-        wireMock.register(getCase.willReturn(status(404)))
+        wireMock.register(getCase.atPriority(1).willReturn(status(404)))
         given()
             .setBody(callbackRequest)
             .postToCallback()
@@ -120,7 +144,6 @@ class AttachExceptionRecordToExistingCaseTest {
             .statusCode(200)
             .shouldContainError("Internal Error: Could not retrieve case: 1539007368674134 Error: 500")
     }
-
 
     @Test
     fun `should fail with the correct error when no case details is supplied`() {

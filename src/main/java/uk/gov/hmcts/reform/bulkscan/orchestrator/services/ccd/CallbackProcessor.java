@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.List;
 
@@ -48,37 +49,73 @@ public class CallbackProcessor {
 
     private List<String> attachCase(String theType,
                                     String anEventId,
-                                    String jurisdiction,
+                                    String exceptionRecordJurisdiction,
                                     String caseTypeId,
                                     String caseRef,
                                     CaseDetails exceptionRecord) {
-        CcdAuthenticator authenticator = authFactory.createForJurisdiction(jurisdiction);
         try {
-            CaseDetails theCase = retrieveCase(caseRef, authenticator);
+            return attachCase(exceptionRecordJurisdiction, caseRef);
+        } catch (CallbackException e) {
+            String message = e.getMessage();
+            log.error(message, e);
+            return ImmutableList.of(message);
+        }
+    }
+
+    @NotNull
+    private List<String> attachCase(String exceptionRecordJurisdiction, String caseRef) {
+        CcdAuthenticator authenticator = authFactory.createForJurisdiction(exceptionRecordJurisdiction);
+        CaseDetails theCase = getCase(caseRef, authenticator);
+        StartEventResponse event = startAttachScannedDocs(caseRef, authenticator, theCase);
+        return emptyList();
+    }
+
+    private StartEventResponse startAttachScannedDocs(String caseRef, CcdAuthenticator authenticator, CaseDetails theCase) {
+        try {
+            return startAttachScannedDocs(caseRef, authenticator, theCase.getJurisdiction(), theCase.getCaseTypeId());
+        } catch (FeignException e) {
+            throw error(e, "Internal Error: start event call failed case: %s Error: %s", caseRef, e.status());
+        }
+    }
+
+    private CaseDetails getCase(String caseRef, CcdAuthenticator authenticator) {
+        try {
+            return retrieveCase(caseRef, authenticator);
         } catch (FeignException e) {
             switch (e.status()) {
                 case 404:
-                    return error("Could not find case: %s", caseRef);
+                    throw error(e, "Could not find case: %s",
+                        caseRef);
                 default:
-                    return error("Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status());
+                    throw error(e, "Internal Error: Could not retrieve case: %s Error: %s",
+                        caseRef, e.status());
             }
         }
-        return emptyList();
     }
 
     private CaseDetails retrieveCase(String caseRef, CcdAuthenticator authenticator) {
         return ccdApi.getCase(authenticator.getUserToken(), authenticator.getServiceToken(), caseRef);
     }
 
-    private List<String> error(String errorFmt, Object arg) {
-        return error(errorFmt, arg, null);
+    private StartEventResponse startAttachScannedDocs(String caseRef, CcdAuthenticator authenticator, String jurisdiction, String caseTypeId) {
+        return ccdApi.startEventForCaseWorker(
+            authenticator.getUserToken(),
+            authenticator.getServiceToken(),
+            authenticator.getUserDetails().getId(),
+            jurisdiction,
+            caseTypeId,
+            caseRef,
+            "attachScannedDocs"
+        );
+    }
+
+    private CallbackException error(Exception e, String errorFmt, Object arg) {
+        return error(e, errorFmt, arg, null);
     }
 
     @NotNull
-    private List<String> error(String errorFmt, Object arg1, Object arg2) {
-        String message = format(errorFmt, arg1, arg2);
-        log.error(message);
-        return ImmutableList.of(message);
+    private CallbackException error(Exception e, String errorFmt, Object arg1, Object arg2) {
+        return new CallbackException(format(errorFmt, arg1, arg2), e);
     }
 
 
