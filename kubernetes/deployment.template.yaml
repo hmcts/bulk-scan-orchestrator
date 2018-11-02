@@ -54,6 +54,10 @@ spec:
               value: "${IDAM_USER_NAME}"
             - name: IDAM_USER_PASSWORD
               value: "${IDAM_USER_PASSWORD}"
+            - name: IDAM_USERS_BULKSCAN_NAME
+              value: "${IDAM_USER_NAME}"
+            - name: IDAM_USERS_BULKSCAN_PASSWORD
+              value: "${IDAM_USER_PASSWORD}"
             - name: SB_CONN_STRING
               valueFrom:
                 secretKeyRef:
