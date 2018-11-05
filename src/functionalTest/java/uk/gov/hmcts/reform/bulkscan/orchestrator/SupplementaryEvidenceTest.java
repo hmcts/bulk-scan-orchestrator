@@ -1,13 +1,14 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import org.awaitility.Duration;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
@@ -26,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 @ActiveProfiles("nosb") // no servicebus queue handler registration
 public class SupplementaryEvidenceTest {
@@ -47,7 +48,7 @@ public class SupplementaryEvidenceTest {
     @Autowired
     private DocumentManagementUploadService dmUploadService;
 
-    @Before
+    @BeforeEach
     public void setup() {
         String caseData = SampleData.fileContentAsString("envelopes/new-envelope.json");
         Envelope newEnvelope = EnvelopeParser.parse(caseData);
@@ -60,6 +61,7 @@ public class SupplementaryEvidenceTest {
         );
     }
 
+    @DisplayName("Should attach supplementary evidence documents to the existing case")
     @Test
     public void should_attach_supplementary_evidence_to_the_case() throws Exception {
         // when
