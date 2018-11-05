@@ -43,12 +43,12 @@ public class EventPublisherContainer {
                     ? null
                     : caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
 
-                return new DelegatePublisher(
-                    caseDetails == null ? exceptionRecordCreator : attachDocsPublisher,
+                return caseDetails == null ? exceptionRecordCreator : new DelegatePublisher(
+                    attachDocsPublisher,
                     caseDetails
                 );
             case EXCEPTION:
-                return new DelegatePublisher(exceptionRecordCreator, null);
+                return exceptionRecordCreator;
             case NEW_APPLICATION:
             default:
                 return new DelegatePublisher(null, null);

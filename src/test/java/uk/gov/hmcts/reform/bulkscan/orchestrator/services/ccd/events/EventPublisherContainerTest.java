@@ -65,7 +65,7 @@ public class EventPublisherContainerTest {
     @Test
     public void should_get_CreateExceptionRecord_event_publisher_when_case_not_found() throws IOException {
         // when
-        DelegatePublisher eventPublisher = (DelegatePublisher) eventPublisherContainer.getPublisher(
+        EventPublisher eventPublisher = eventPublisherContainer.getPublisher(
             objectMapper.readValue(
                 envelopeJson(Classification.SUPPLEMENTARY_EVIDENCE),
                 Envelope.class
@@ -73,7 +73,7 @@ public class EventPublisherContainerTest {
         );
 
         // then
-        assertThat(eventPublisher.getDelegatedClass()).isInstanceOf(createExceptionRecord.getClass());
+        assertThat(eventPublisher).isInstanceOf(createExceptionRecord.getClass());
 
         // and
         verify(caseRetriever).retrieve(JURSIDICTION, CASE_REF);
@@ -82,7 +82,7 @@ public class EventPublisherContainerTest {
     @Test
     public void should_get_CreateExceptionRecord_event_publisher() throws IOException {
         // when
-        DelegatePublisher eventPublisher = (DelegatePublisher) eventPublisherContainer.getPublisher(
+        EventPublisher eventPublisher = eventPublisherContainer.getPublisher(
             objectMapper.readValue(
                 envelopeJson(Classification.EXCEPTION),
                 Envelope.class
@@ -90,7 +90,7 @@ public class EventPublisherContainerTest {
         );
 
         // then
-        assertThat(eventPublisher.getDelegatedClass()).isInstanceOf(createExceptionRecord.getClass());
+        assertThat(eventPublisher).isInstanceOf(createExceptionRecord.getClass());
 
         // and
         verify(caseRetriever, never()).retrieve(JURSIDICTION, CASE_REF);

@@ -17,6 +17,11 @@ class CreateExceptionRecord extends AbstractEventPublisher {
         this.mapper = mapper;
     }
 
+    @Override
+    public void publish(Envelope envelope) {
+        publish(envelope, CASE_TYPE);
+    }
+
     /**
      * Exception record does not present any existing case hence the creation of it.
      * @param envelope Original envelope
