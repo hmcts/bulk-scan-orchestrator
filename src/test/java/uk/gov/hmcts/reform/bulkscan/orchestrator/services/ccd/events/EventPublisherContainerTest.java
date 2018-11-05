@@ -95,4 +95,18 @@ public class EventPublisherContainerTest {
         // and
         verify(caseRetriever, never()).retrieve(JURSIDICTION, CASE_REF);
     }
+
+    @Test
+    public void should_get_Void_event_publisher_for_not_implemented_classification() throws IOException {
+        // when
+        DelegatePublisher eventPublisher = (DelegatePublisher) eventPublisherContainer.getPublisher(
+            objectMapper.readValue(
+                envelopeJson(Classification.NEW_APPLICATION),
+                Envelope.class
+            )
+        );
+
+        // then
+        assertThat(eventPublisher.getDelegatedClass()).isNull();
+    }
 }
