@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -11,6 +13,9 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 @Service
 @EnableConfigurationProperties(JurisdictionToUserMapping.class)
 public class CcdAuthenticatorFactory {
+
+    private static final Logger log = LoggerFactory.getLogger(CcdAuthenticatorFactory.class);
+
     private final AuthTokenGenerator s2sTokenGenerator;
     private final IdamClient idamClient;
     private final JurisdictionToUserMapping users;
@@ -25,6 +30,7 @@ public class CcdAuthenticatorFactory {
 
     public CcdAuthenticator createForJurisdiction(String jurisdiction) {
         Credential user = users.getUser(jurisdiction);
+        log.debug("Authenticating user: {}", user.getUsername());
         String userToken = idamClient.authenticateUser(user.getUsername(), user.getPassword());
         UserDetails userDetails = idamClient.getUserDetails(userToken);
 
