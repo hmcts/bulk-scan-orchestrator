@@ -81,8 +81,16 @@ public class EnvelopeEventProcessorTest {
     }
 
     private EventPublisher getDummyPublisher() {
-        return (Envelope envelope, String caseTypeId) -> {
-            //
+        return new EventPublisher() {
+            @Override
+            public void publish(Envelope envelope) {
+                //
+            }
+
+            @Override
+            public void publish(Envelope envelope, String caseTypeId) {
+                //
+            }
         };
     }
 }

@@ -18,7 +18,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.Enve
 public class EnvelopeEventProcessor implements IMessageHandler {
 
     private static final Logger log = LoggerFactory.getLogger(EnvelopeEventProcessor.class);
-    public static final String EXCEPTION_RECORD_CASE_TYPE = "ExceptionRecord";
 
     private final EventPublisherContainer eventPublisherContainer;
 
@@ -47,7 +46,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
         Envelope envelope = parse(message.getBody());
         EventPublisher eventPublisher = eventPublisherContainer.getPublisher(envelope);
 
-        eventPublisher.publish(envelope, EXCEPTION_RECORD_CASE_TYPE);
+        eventPublisher.publish(envelope);
     }
 
     @Override

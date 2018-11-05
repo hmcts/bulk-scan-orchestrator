@@ -7,9 +7,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 public class DelegatePublisher implements EventPublisher {
 
-    private static final Logger log = LoggerFactory.getLogger(DelegatePublisher.class);
+    public static final String EXCEPTION_RECORD_CASE_TYPE = "ExceptionRecord";
 
-    private static final String EXCEPTION_RECORD_CASE_TYPE = "ExceptionRecord";
+    private static final Logger log = LoggerFactory.getLogger(DelegatePublisher.class);
 
     private final EventPublisher publisher;
 
@@ -21,7 +21,7 @@ public class DelegatePublisher implements EventPublisher {
     }
 
     @Override
-    public void publish(Envelope envelope, String caseTypeId) {
+    public void publish(Envelope envelope) {
         if (publisher != null) {
             publisher.publish(envelope, this.caseTypeId);
         } else {

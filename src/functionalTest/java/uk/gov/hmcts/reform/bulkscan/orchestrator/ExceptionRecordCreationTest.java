@@ -15,7 +15,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseSearcher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.EnvelopeEventProcessor;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.DelegatePublisher;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
@@ -74,7 +74,7 @@ public class ExceptionRecordCreationTest {
     private boolean hasExceptionRecordBeenCreated(UUID randomPoBox) {
         List<CaseDetails> caseDetails = caseSearcher.search(
             SampleData.JURSIDICTION,
-            EnvelopeEventProcessor.EXCEPTION_RECORD_CASE_TYPE,
+            DelegatePublisher.EXCEPTION_RECORD_CASE_TYPE,
             ImmutableMap.of(
                 "case.poBox", randomPoBox.toString()
             )
