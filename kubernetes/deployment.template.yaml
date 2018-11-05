@@ -54,7 +54,7 @@ spec:
               value: "${IDAM_USER_NAME}"
             - name: IDAM_USER_PASSWORD
               value: "${IDAM_USER_PASSWORD}"
-            - name: IDAM_USERS_BULKSCAN_NAME
+            - name: IDAM_USERS_BULKSCAN_USERNAME
               value: "${IDAM_USER_NAME}"
             - name: IDAM_USERS_BULKSCAN_PASSWORD
               value: "${IDAM_USER_PASSWORD}"
