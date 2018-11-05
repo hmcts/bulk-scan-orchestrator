@@ -1,13 +1,11 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
 
-import com.google.common.base.Strings;
 import com.microsoft.azure.servicebus.ExceptionPhase;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisherContainer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
@@ -23,12 +21,9 @@ public class EnvelopeEventProcessor implements IMessageHandler {
     private static final Logger log = LoggerFactory.getLogger(EnvelopeEventProcessor.class);
     public static final String EXCEPTION_RECORD_CASE_TYPE = "ExceptionRecord";
 
-    private final CaseRetriever caseRetriever;
-
     private final EventPublisherContainer eventPublisherContainer;
 
-    public EnvelopeEventProcessor(CaseRetriever caseRetriever, EventPublisherContainer eventPublisherContainer) {
-        this.caseRetriever = caseRetriever;
+    public EnvelopeEventProcessor(EventPublisherContainer eventPublisherContainer) {
         this.eventPublisherContainer = eventPublisherContainer;
     }
 
@@ -51,14 +46,10 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
     private void process(IMessage message) {
         Envelope envelope = parse(message.getBody());
-        CaseDetails theCase = Strings.isNullOrEmpty(envelope.caseRef)
-            ? null
-            : caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
-        String caseTypeId = getCaseTypeId(theCase);
-        EventPublisher eventPublisher = eventPublisherContainer.getPublisher(envelope, theCase);
+        EventPublisher eventPublisher = eventPublisherContainer.getPublisher(envelope);
 
         if (eventPublisher != null) {
-            eventPublisher.publish(envelope, caseTypeId);
+            eventPublisher.publish(envelope, getCaseTypeId(null));
         } else {
             log.info(
                 "Skipped processing of envelope ID {} for case {} - classification {} not handled yet",
