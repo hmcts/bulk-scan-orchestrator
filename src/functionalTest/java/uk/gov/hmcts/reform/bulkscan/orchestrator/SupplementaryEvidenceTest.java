@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import org.awaitility.Duration;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +60,6 @@ public class SupplementaryEvidenceTest {
         );
     }
 
-    @DisplayName("Should attach supplementary evidence documents to the existing case")
     @Test
     public void should_attach_supplementary_evidence_to_the_case() throws Exception {
         // when
