@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisherContainer;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
 import java.util.concurrent.CompletableFuture;
@@ -36,7 +37,7 @@ public class EnvelopeEventProcessorTest {
     @Before
     public void before() {
         processor = new EnvelopeEventProcessor(mock(CaseRetriever.class), eventPublisherContainer);
-        when(eventPublisherContainer.getPublisher(any(Envelope.class), any()))
+        when(eventPublisherContainer.getPublisher(any(Classification.class), any()))
             .thenReturn(getDummyPublisher());
 
         given(someMessage.getBody()).willReturn(envelopeJson());
