@@ -40,8 +40,7 @@ public class EventPublisherContainerTest {
     public void setUp() {
         eventPublisherContainer = new EventPublisherContainer(
             attachDocsToSupplementaryEvidence,
-            createExceptionRecord,
-            caseRetriever
+            createExceptionRecord
         );
     }
 
@@ -55,7 +54,8 @@ public class EventPublisherContainerTest {
             objectMapper.readValue(
                 envelopeJson(Classification.SUPPLEMENTARY_EVIDENCE),
                 Envelope.class
-            )
+            ),
+            () -> caseRetriever.retrieve(JURSIDICTION, CASE_REF)
         );
 
         // then
@@ -69,7 +69,8 @@ public class EventPublisherContainerTest {
             objectMapper.readValue(
                 envelopeJson(Classification.SUPPLEMENTARY_EVIDENCE),
                 Envelope.class
-            )
+            ),
+            () -> caseRetriever.retrieve(JURSIDICTION, CASE_REF)
         );
 
         // then
@@ -86,7 +87,8 @@ public class EventPublisherContainerTest {
             objectMapper.readValue(
                 envelopeJson(Classification.EXCEPTION),
                 Envelope.class
-            )
+            ),
+            () -> caseRetriever.retrieve(JURSIDICTION, CASE_REF)
         );
 
         // then
@@ -103,10 +105,14 @@ public class EventPublisherContainerTest {
             objectMapper.readValue(
                 envelopeJson(Classification.NEW_APPLICATION),
                 Envelope.class
-            )
+            ),
+            () -> caseRetriever.retrieve(JURSIDICTION, CASE_REF)
         );
 
         // then
         assertThat(eventPublisher.getDelegatedClass()).isNull();
+
+        // and
+        verify(caseRetriever, never()).retrieve(JURSIDICTION, CASE_REF);
     }
 }

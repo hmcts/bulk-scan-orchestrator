@@ -1,11 +1,10 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
-import com.google.common.base.Strings;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.util.function.Supplier;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -14,7 +13,7 @@ import javax.validation.constraints.NotNull;
  * <ul>
  *     <li>implement {@link AbstractEventPublisher}</li>
  *     <li>include {@code private EventPublisher somePublisher;}</li>
- *     <li>use resource in {@link this#getPublisher(Envelope)}</li>
+ *     <li>use resource in {@link this#getPublisher(Envelope, Supplier)})}</li>
  * </ul>
  */
 @Component
@@ -23,25 +22,19 @@ public class EventPublisherContainer {
     private final AttachDocsToSupplementaryEvidence attachDocsPublisher;
     private final CreateExceptionRecord exceptionRecordCreator;
 
-    private final CaseRetriever caseRetriever;
-
     EventPublisherContainer(
         AttachDocsToSupplementaryEvidence attachDocsPublisher,
-        CreateExceptionRecord exceptionRecordCreator,
-        CaseRetriever caseRetriever
+        CreateExceptionRecord exceptionRecordCreator
     ) {
         this.attachDocsPublisher = attachDocsPublisher;
         this.exceptionRecordCreator = exceptionRecordCreator;
-        this.caseRetriever = caseRetriever;
     }
 
     @NotNull
-    public EventPublisher getPublisher(Envelope envelope) {
+    public EventPublisher getPublisher(Envelope envelope, Supplier<CaseDetails> caseRetrieval) {
         switch (envelope.classification) {
             case SUPPLEMENTARY_EVIDENCE:
-                CaseDetails caseDetails = Strings.isNullOrEmpty(envelope.caseRef)
-                    ? null
-                    : caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
+                CaseDetails caseDetails = caseRetrieval.get();
 
                 return caseDetails == null ? exceptionRecordCreator : new DelegatePublisher(
                     attachDocsPublisher,
