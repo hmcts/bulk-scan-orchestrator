@@ -6,6 +6,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * Container class to hold availableStrategies strategies enabled by this project.
  * In order to enable one must do:
@@ -33,6 +35,7 @@ public class EventPublisherContainer {
         this.caseRetriever = caseRetriever;
     }
 
+    @NotNull
     public EventPublisher getPublisher(Envelope envelope) {
         switch (envelope.classification) {
             case SUPPLEMENTARY_EVIDENCE:
@@ -40,12 +43,15 @@ public class EventPublisherContainer {
                     ? null
                     : caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
 
-                return caseDetails == null ? exceptionRecordCreator : attachDocsPublisher;
+                return new DelegatePublisher(
+                    caseDetails == null ? exceptionRecordCreator : attachDocsPublisher,
+                    caseDetails
+                );
             case EXCEPTION:
-                return exceptionRecordCreator;
+                return new DelegatePublisher(exceptionRecordCreator, null);
             case NEW_APPLICATION:
             default:
-                return null;
+                return new DelegatePublisher(null, null);
         }
     }
 }

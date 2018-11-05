@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisherContainer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -48,20 +47,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
         Envelope envelope = parse(message.getBody());
         EventPublisher eventPublisher = eventPublisherContainer.getPublisher(envelope);
 
-        if (eventPublisher != null) {
-            eventPublisher.publish(envelope, getCaseTypeId(null));
-        } else {
-            log.info(
-                "Skipped processing of envelope ID {} for case {} - classification {} not handled yet",
-                envelope.id,
-                envelope.caseRef,
-                envelope.classification
-            );
-        }
-    }
-
-    private String getCaseTypeId(CaseDetails theCase) {
-        return theCase == null ? EXCEPTION_RECORD_CASE_TYPE : theCase.getCaseTypeId();
+        eventPublisher.publish(envelope, EXCEPTION_RECORD_CASE_TYPE);
     }
 
     @Override

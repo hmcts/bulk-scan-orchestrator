@@ -51,7 +51,7 @@ public class EventPublisherContainerTest {
         given(caseRetriever.retrieve(JURSIDICTION, CASE_REF)).willReturn(mock(CaseDetails.class));
 
         // when
-        EventPublisher eventPublisher = eventPublisherContainer.getPublisher(
+        DelegatePublisher eventPublisher = (DelegatePublisher) eventPublisherContainer.getPublisher(
             objectMapper.readValue(
                 envelopeJson(Classification.SUPPLEMENTARY_EVIDENCE),
                 Envelope.class
@@ -59,13 +59,13 @@ public class EventPublisherContainerTest {
         );
 
         // then
-        assertThat(eventPublisher).isInstanceOf(attachDocsToSupplementaryEvidence.getClass());
+        assertThat(eventPublisher.getDelegatedClass()).isInstanceOf(attachDocsToSupplementaryEvidence.getClass());
     }
 
     @Test
     public void should_get_CreateExceptionRecord_event_publisher_when_case_not_found() throws IOException {
         // when
-        EventPublisher eventPublisher = eventPublisherContainer.getPublisher(
+        DelegatePublisher eventPublisher = (DelegatePublisher) eventPublisherContainer.getPublisher(
             objectMapper.readValue(
                 envelopeJson(Classification.SUPPLEMENTARY_EVIDENCE),
                 Envelope.class
@@ -73,7 +73,7 @@ public class EventPublisherContainerTest {
         );
 
         // then
-        assertThat(eventPublisher).isInstanceOf(createExceptionRecord.getClass());
+        assertThat(eventPublisher.getDelegatedClass()).isInstanceOf(createExceptionRecord.getClass());
 
         // and
         verify(caseRetriever).retrieve(JURSIDICTION, CASE_REF);
@@ -82,7 +82,7 @@ public class EventPublisherContainerTest {
     @Test
     public void should_get_CreateExceptionRecord_event_publisher() throws IOException {
         // when
-        EventPublisher eventPublisher = eventPublisherContainer.getPublisher(
+        DelegatePublisher eventPublisher = (DelegatePublisher) eventPublisherContainer.getPublisher(
             objectMapper.readValue(
                 envelopeJson(Classification.EXCEPTION),
                 Envelope.class
@@ -90,7 +90,7 @@ public class EventPublisherContainerTest {
         );
 
         // then
-        assertThat(eventPublisher).isInstanceOf(createExceptionRecord.getClass());
+        assertThat(eventPublisher.getDelegatedClass()).isInstanceOf(createExceptionRecord.getClass());
 
         // and
         verify(caseRetriever, never()).retrieve(JURSIDICTION, CASE_REF);
