@@ -34,6 +34,8 @@ public class DocumentManagementUploadService {
     }
 
     /**
+     * Uploads file to dm service.
+     *
      * @return URL to uploaded file
      */
     public String uploadToDmStore(String displayName, String filePath) {
