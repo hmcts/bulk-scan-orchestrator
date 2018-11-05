@@ -29,13 +29,8 @@ public class CcdAuthenticatorFactory {
     }
 
     public CcdAuthenticator createForJurisdiction(String jurisdiction) {
-
-        System.getenv().forEach((k, v) -> log.info("ENV: {}={}", k, v));
-
         Credential user = users.getUser(jurisdiction);
-
-        log.info("Authenticating {}:::{}", user.getUsername(), user.getPassword());
-
+        log.debug("Authenticating user: {}", user.getUsername());
         String userToken = idamClient.authenticateUser(user.getUsername(), user.getPassword());
         UserDetails userDetails = idamClient.getUserDetails(userToken);
 
