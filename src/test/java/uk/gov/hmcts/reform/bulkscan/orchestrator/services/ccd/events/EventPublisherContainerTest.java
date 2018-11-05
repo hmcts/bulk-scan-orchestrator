@@ -16,6 +16,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.JURSIDICTION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.EXCEPTION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.NEW_APPLICATION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.SUPPLEMENTARY_EVIDENCE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EventPublisherContainerTest {
@@ -45,10 +48,7 @@ public class EventPublisherContainerTest {
         given(caseRetriever.retrieve(JURSIDICTION, CASE_REF)).willReturn(mock(CaseDetails.class));
 
         // when
-        DelegatePublisher eventPublisher = (DelegatePublisher) eventPublisherContainer.getPublisher(
-            Classification.SUPPLEMENTARY_EVIDENCE,
-            () -> caseRetriever.retrieve(JURSIDICTION, CASE_REF)
-        );
+        DelegatePublisher eventPublisher = (DelegatePublisher) getEventPublisher(SUPPLEMENTARY_EVIDENCE);
 
         // then
         assertThat(eventPublisher.getDelegatedClass()).isInstanceOf(attachDocsToSupplementaryEvidence.getClass());
@@ -57,10 +57,7 @@ public class EventPublisherContainerTest {
     @Test
     public void should_get_CreateExceptionRecord_event_publisher_when_case_not_found() {
         // when
-        EventPublisher eventPublisher = eventPublisherContainer.getPublisher(
-            Classification.SUPPLEMENTARY_EVIDENCE,
-            () -> caseRetriever.retrieve(JURSIDICTION, CASE_REF)
-        );
+        EventPublisher eventPublisher = getEventPublisher(SUPPLEMENTARY_EVIDENCE);
 
         // then
         assertThat(eventPublisher).isInstanceOf(createExceptionRecord.getClass());
@@ -72,10 +69,7 @@ public class EventPublisherContainerTest {
     @Test
     public void should_get_CreateExceptionRecord_event_publisher() {
         // when
-        EventPublisher eventPublisher = eventPublisherContainer.getPublisher(
-            Classification.EXCEPTION,
-            () -> caseRetriever.retrieve(JURSIDICTION, CASE_REF)
-        );
+        EventPublisher eventPublisher = getEventPublisher(EXCEPTION);
 
         // then
         assertThat(eventPublisher).isInstanceOf(createExceptionRecord.getClass());
@@ -87,15 +81,19 @@ public class EventPublisherContainerTest {
     @Test
     public void should_get_Void_event_publisher_for_not_implemented_classification() {
         // when
-        DelegatePublisher eventPublisher = (DelegatePublisher) eventPublisherContainer.getPublisher(
-            Classification.NEW_APPLICATION,
-            () -> caseRetriever.retrieve(JURSIDICTION, CASE_REF)
-        );
+        DelegatePublisher eventPublisher = (DelegatePublisher) getEventPublisher(NEW_APPLICATION);
 
         // then
         assertThat(eventPublisher.getDelegatedClass()).isNull();
 
         // and
         verify(caseRetriever, never()).retrieve(JURSIDICTION, CASE_REF);
+    }
+
+    private EventPublisher getEventPublisher(Classification classification) {
+        return eventPublisherContainer.getPublisher(
+            classification,
+            () -> caseRetriever.retrieve(JURSIDICTION, CASE_REF)
+        );
     }
 }
