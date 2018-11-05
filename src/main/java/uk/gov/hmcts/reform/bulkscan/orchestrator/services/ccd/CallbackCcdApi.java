@@ -4,8 +4,12 @@ import feign.FeignException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+
+import java.util.Map;
 
 import static java.lang.String.format;
 
@@ -59,6 +63,32 @@ public class CallbackCcdApi {
                         caseRef, e.status());
             }
         }
+    }
+
+    void attachExceptionRecord(String caseRef, CcdAuthenticator authenticator, CaseDetails theCase, Map<String, Object> data, String eventId, String token) {
+        try {
+            attachCall(caseRef, authenticator, theCase, data, eventId, token);
+        } catch (FeignException e) {
+            throw error(e, "Internal Error: Could submit attach document event: %s Error: %s",
+                caseRef, e.status());
+        }
+    }
+
+    private void attachCall(String caseRef, CcdAuthenticator authenticator, CaseDetails theCase, Map<String, Object> data, String eventId, String token) {
+        ccdApi.submitEventForCaseWorker(
+            authenticator.getUserToken(),
+            authenticator.getServiceToken(),
+            authenticator.getUserDetails().getId(),
+            theCase.getJurisdiction(),
+            theCase.getCaseTypeId(),
+            caseRef,
+            true,
+            CaseDataContent.builder()
+                .data(data)
+                .event(Event.builder().id(eventId).build())
+                .eventToken(token)
+                .build()
+        );
     }
 
     private static CallbackException error(Exception e, String errorFmt, Object arg) {

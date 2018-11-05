@@ -5,8 +5,15 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.containing
 import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
+import com.github.tomakehurst.wiremock.client.WireMock.post
+import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.status
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock.verify
+import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder
+import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import io.restassured.RestAssured
 import io.restassured.RestAssured.given
 import io.restassured.builder.RequestSpecBuilder
@@ -40,6 +47,11 @@ typealias ResponseValidation = ValidatableResponseOptions<ValidatableResponse, R
 fun RequestSpecification.postToCallback(type: String = "attach_case") = post("/callback/{type}", type)
 fun RequestSpecification.setBody(builder: CallbackRequestBuilder) = body(builder.build())
 fun ResponseValidation.shouldContainError(error: String) = body("errors", hasItem(error))
+fun RequestPatternBuilder.scannedRecordFilenameAtIndex(index: Int, stringValuePattern: StringValuePattern) =
+    withRequestBody(matchingJsonPath("\$.data.scanRecords[$index].value.fileName", stringValuePattern))
+
+fun RequestPatternBuilder.scanRecordsItemIs(index: Int, stringValuePattern: StringValuePattern?) =
+    withRequestBody(matchingJsonPath("\$.data.scanRecords[$index]", stringValuePattern))
 
 fun MappingBuilder.authorised() = with(this) {
     withHeader(AUTHORIZATION, containing("eyJhbGciOiJIUzI1NiJ9."))
@@ -60,21 +72,36 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @Value("\${wiremock.port}")
     private var wireMockPort: Int = 0
-
     private val wireMock by lazy { WireMock(wireMockPort) }
-
-    private val startEvent = get(
-        "/caseworkers/640/jurisdictions/BULKSCAN/case-types/Bulk_Scanned"
-            + "/cases/1539007368674134/event-triggers/attachScannedDocs/token"
-    ).authorised()
-
+    private val caseUrl = "/caseworkers/640/jurisdictions/BULKSCAN/case-types/Bulk_Scanned/cases/1539007368674134"
+    private val startEvent = get("$caseUrl/event-triggers/attachScannedDocs/token").authorised()
+    private val submitUrl = "$caseUrl/events?ignore-warning=true"
+    private val submitEvent = post(submitUrl).authorised()
     private val getCase = get("/cases/$CASE_REF").authorised()
 
-    private val caseData: CaseDetails = CaseDetails.builder()
+    private val filename2 = "record.pdf"
+    private val filename1 = "document.pdf"
+    private val scannedDocument = mapOf("fileName" to filename1, "someString" to "someValue")
+    private val scannedRecord = mapOf("fileName" to filename2, "someString" to "someValue")
+    private val exceptionData = mapOf("attachToCaseReference" to CASE_REF, "scanRecords" to listOf(scannedRecord))
+    private val caseData = mapOf("scannedDocuments" to listOf(scannedDocument))
+
+    private val caseDetails: CaseDetails = CaseDetails.builder()
         .jurisdiction(Environment.JURIDICTION)
         .caseTypeId(Environment.CASE_TYPE_BULK_SCAN)
         .id(Environment.CASE_REF.toLong())
+        .data(caseData)
         .build()
+
+    private val exceptionRecord = CaseDetails.builder()
+        .jurisdiction(JURIDICTION)
+        .caseTypeId("ExceptionRecord")
+        .data(exceptionData)
+
+    private val callbackRequest = CallbackRequest
+        .builder()
+        .caseDetails(exceptionRecord.build())
+        .eventId(CallbackValidations.ATTACH_TO_EXISTING_CASE)
 
     private val startEventResponse = StartEventResponse
         .builder()
@@ -85,21 +112,12 @@ class AttachExceptionRecordToExistingCaseTest {
     fun before() {
         waitFor(applicationPort)
         wireMock.register(startEvent.willReturn(okJson(asJson(startEventResponse))))
-        wireMock.register(getCase.willReturn(okJson(asJson(caseData))))
+        wireMock.register(getCase.willReturn(okJson(asJson(caseDetails))))
+        wireMock.register(submitEvent.willReturn(okJson(asJson(caseDetails))))
         RestAssured.requestSpecification = RequestSpecBuilder().setPort(applicationPort).setContentType(JSON).build()
     }
 
-    private val callbackRequest = CallbackRequest
-        .builder()
-        .caseDetails(defaultExceptionCase().build())
-        .eventId(CallbackValidations.ATTACH_TO_EXISTING_CASE)
-
-    private fun defaultExceptionCase(): CaseDetails.CaseDetailsBuilder {
-        return CaseDetails.builder()
-            .jurisdiction(JURIDICTION)
-            .caseTypeId("ExceptionRecord")
-            .data(mapOf("attachToCaseReference" to CASE_REF))
-    }
+    private fun submittedScannedRecords() = postRequestedFor(urlEqualTo(submitUrl))
 
     @Test
     fun `should successfully callback with correct information`() {
@@ -109,6 +127,10 @@ class AttachExceptionRecordToExistingCaseTest {
             .then()
             .statusCode(200)
             .body("errors.size()", equalTo(0))
+//        verify(submittedScannedRecords().scanRecordsItemIs(2,WireMock.equalTo(null)))
+        verify(submittedScannedRecords().scannedRecordFilenameAtIndex(0, WireMock.equalTo(filename1)))
+        verify(submittedScannedRecords().scannedRecordFilenameAtIndex(1, WireMock.equalTo(filename2)))
+
     }
 
     @Test
@@ -158,7 +180,7 @@ class AttachExceptionRecordToExistingCaseTest {
     @Test
     fun `should fail with the correct error when null case data is supplied`() {
         given()
-            .setBody(callbackRequest.caseDetails(defaultExceptionCase().data(null).build()))
+            .setBody(callbackRequest.caseDetails(exceptionRecord.data(null).build()))
             .postToCallback()
             .then()
             .statusCode(200)
@@ -168,7 +190,7 @@ class AttachExceptionRecordToExistingCaseTest {
     @Test
     fun `should fail with the correct error when no case reference supplied`() {
         given()
-            .setBody(callbackRequest.caseDetails(defaultExceptionCase().data(mutableMapOf()).build()))
+            .setBody(callbackRequest.caseDetails(exceptionRecord.data(mutableMapOf()).build()))
             .postToCallback()
             .then()
             .statusCode(200)
