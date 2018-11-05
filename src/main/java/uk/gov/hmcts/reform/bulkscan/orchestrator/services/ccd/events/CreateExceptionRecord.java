@@ -9,6 +9,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envel
 @Component
 class CreateExceptionRecord extends AbstractEventPublisher {
 
+    static final String CASE_TYPE = "ExceptionRecord";
+
     private final ModelMapper<? extends CaseData> mapper;
 
     CreateExceptionRecord(ExceptionRecordMapper mapper) {

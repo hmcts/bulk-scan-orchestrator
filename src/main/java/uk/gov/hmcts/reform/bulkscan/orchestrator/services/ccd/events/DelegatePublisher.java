@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 public class DelegatePublisher implements EventPublisher {
 
-    public static final String EXCEPTION_RECORD_CASE_TYPE = "ExceptionRecord";
+    public static final String EXCEPTION_RECORD_CASE_TYPE = CreateExceptionRecord.CASE_TYPE;
 
     private static final Logger log = LoggerFactory.getLogger(DelegatePublisher.class);
 
