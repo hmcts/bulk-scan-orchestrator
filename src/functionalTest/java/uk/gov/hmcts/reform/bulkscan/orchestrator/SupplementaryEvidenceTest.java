@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopePar
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.document.domain.UploadResponse;
 
 import java.util.List;
 import java.util.UUID;
@@ -55,12 +54,10 @@ public class SupplementaryEvidenceTest {
 
         caseDetails = ccdCaseCreator.createCase(newEnvelope);
 
-        UploadResponse uploadResponse = dmUploadService.uploadToDmStore(
+        dmUrl = dmUploadService.uploadToDmStore(
             "Certificate.pdf",
             "documents/supplementary-evidence.pdf"
         );
-        List<String> scannedDocumentUrls = ScannedDocumentsHelper.getScannedDocumentUrls(uploadResponse);
-        dmUrl = scannedDocumentUrls.isEmpty() ? null : scannedDocumentUrls.get(0);
     }
 
     @Test
