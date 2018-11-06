@@ -47,7 +47,7 @@ public class CallbackProcessor {
             .getOrElseGet(Value::toJavaList);
     }
 
-    @SuppressWarnings({"squid:S1172", "squid:S1135", "squid:S1854", "squid:S1481"})
+    @SuppressWarnings({"squid:S1172", "squid:S1135", "squid:S1854"})
     //TODO these are for the validations of the incoming request and is a WIP
     private List<String> attachCase(String theType,
                                     String anEventId,
@@ -57,7 +57,7 @@ public class CallbackProcessor {
                                     CaseDetails exceptionRecord) {
         CcdAuthenticator authenticator = authFactory.createForJurisdiction(jurisdiction);
         try {
-            CaseDetails theCase = retrieveCase(caseRef, authenticator);
+           retrieveCase(caseRef, authenticator);
         } catch (FeignException e) {
             if (e.status() == 404) {
                 return error("Could not find case: %s", caseRef);
