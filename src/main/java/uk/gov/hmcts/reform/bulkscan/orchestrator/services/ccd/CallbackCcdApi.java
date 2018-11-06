@@ -62,7 +62,12 @@ public class CallbackCcdApi {
         }
     }
 
-    void attachExceptionRecord(String caseRef, CcdAuthenticator authenticator, CaseDetails theCase, Map<String, Object> data, String eventId, String token) {
+    void attachExceptionRecord(String caseRef,
+                               CcdAuthenticator authenticator,
+                               CaseDetails theCase,
+                               Map<String, Object> data,
+                               String eventId,
+                               String token) {
         try {
             attachCall(caseRef, authenticator, theCase, data, eventId, token);
         } catch (FeignException e) {
@@ -71,7 +76,12 @@ public class CallbackCcdApi {
         }
     }
 
-    private void attachCall(String caseRef, CcdAuthenticator authenticator, CaseDetails theCase, Map<String, Object> data, String eventId, String token) {
+    private void attachCall(String caseRef,
+                            CcdAuthenticator authenticator,
+                            CaseDetails theCase,
+                            Map<String, Object> data,
+                            String eventId,
+                            String token) {
         ccdApi.submitEventForCaseWorker(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),

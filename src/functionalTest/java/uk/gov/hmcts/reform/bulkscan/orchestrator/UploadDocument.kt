@@ -42,7 +42,7 @@ class UploadDocument(
             ) {
                 System.out.println("Trying to upload ${file.name}")
                 val result = service.uploadToDmStore(file.name, file.absolutePath)
-                System.out.println("File link: ${result.embedded.documents[0].links.self.href}")
+                System.out.println("File link: ${result}")
                 //needed since the autoconfigured sb startup if the azure.servicebus.queue-name is set
                 System.exit(0)
             } else {
