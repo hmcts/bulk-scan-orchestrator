@@ -27,7 +27,7 @@ final class CallbackValidations {
     }
 
     @NotNull
-    static Validation<String, String> isAboutToSubmit(String eventId) {
+    static Validation<String, String> isAttachToCaseEvent(String eventId) {
         return ATTACH_TO_EXISTING_CASE.equals(eventId)
             ? valid(eventId)
             : internalError("event-id: %s invalid", eventId);

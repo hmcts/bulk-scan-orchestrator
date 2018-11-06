@@ -5,6 +5,8 @@ import feign.FeignException;
 import io.vavr.Value;
 import io.vavr.control.Validation;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -17,13 +19,12 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseReference;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJurisdiction;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.isAboutToSubmit;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.isAttachEvent;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.log;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.isAttachToCaseEvent;
 
 @Service
 public class CallbackProcessor {
-
+    private final static Logger log = LoggerFactory.getLogger(CallbackProcessor.class);
     private final CoreCaseDataApi ccdApi;
     private CcdAuthenticatorFactory authFactory;
 
@@ -36,7 +37,7 @@ public class CallbackProcessor {
         return Validation
             .combine(
                 isAttachEvent(eventType),
-                isAboutToSubmit(eventId),
+                isAttachToCaseEvent(eventId),
                 hasJurisdiction(caseDetails),
                 hasCaseTypeId(caseDetails),
                 hasCaseReference(caseDetails),
