@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableMap;
 import io.vavr.Value;
 import io.vavr.control.Validation;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -17,12 +19,12 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseReference;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJurisdiction;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.isAboutToSubmit;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.isAttachEvent;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.log;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.isAttachToCaseEvent;
 
 @Service
 public class CallbackProcessor {
+    private static final Logger log = LoggerFactory.getLogger(CallbackProcessor.class);
 
     private static final String SCANNED_DOCUMENTS = "scannedDocuments";
     private static final String SCAN_RECORDS = "scanRecords";
@@ -38,7 +40,7 @@ public class CallbackProcessor {
         return Validation
             .combine(
                 isAttachEvent(eventType),
-                isAboutToSubmit(eventId),
+                isAttachToCaseEvent(eventId),
                 hasJurisdiction(caseDetails),
                 hasCaseTypeId(caseDetails),
                 hasCaseReference(caseDetails),
@@ -50,6 +52,8 @@ public class CallbackProcessor {
             .getOrElseGet(Value::toJavaList);
     }
 
+    @SuppressWarnings({"squid:S1172", "squid:S1135", "squid:S1854"})
+    //TODO these are for the validations of the incoming request and is a WIP
     private List<String> attachCase(String theType,
                                     String anEventId,
                                     String exceptionRecordJurisdiction,
@@ -57,12 +61,31 @@ public class CallbackProcessor {
                                     String caseRef,
                                     CaseDetails exceptionRecord) {
         try {
-            return attachCase(exceptionRecordJurisdiction, caseRef, exceptionRecord.getData());
+            attachCase(exceptionRecordJurisdiction, caseRef, exceptionRecord.getData());
+            return success();
         } catch (CallbackException e) {
-            String message = e.getMessage();
-            log.error(message, e);
-            return ImmutableList.of(message);
+            return createErrorList(e);
         }
+    }
+    @NotNull
+    private void attachCase(String exceptionRecordJurisdiction, String caseRef, Map<String, Object> exceptionRecordData) {
+        CcdAuthenticator authenticator = authFactory.createForJurisdiction(exceptionRecordJurisdiction);
+        CaseDetails theCase = ccdApi.getCase(caseRef, authenticator);
+        StartEventResponse event = ccdApi.startAttachScannedDocs(caseRef, authenticator, theCase);
+        ccdApi.attachExceptionRecord(caseRef,
+            authenticator,
+            theCase,
+            insertNewScannedDocument(exceptionRecordData, theCase.getData()),
+            event.getEventId(),
+            event.getToken()
+        );
+    }
+
+    @NotNull
+    private List<String> createErrorList(CallbackException e) {
+        String message = e.getMessage();
+        log.error(message, e);
+        return ImmutableList.of(message);
     }
 
     @SuppressWarnings("unchecked")
@@ -74,19 +97,8 @@ public class CallbackProcessor {
         return ImmutableMap.of(SCANNED_DOCUMENTS, caseList);
     }
 
-    @NotNull
-    private List<String> attachCase(String exceptionRecordJurisdiction, String caseRef, Map<String, Object> exceptionRecordData) {
-        CcdAuthenticator authenticator = authFactory.createForJurisdiction(exceptionRecordJurisdiction);
-        CaseDetails theCase = ccdApi.getCase(caseRef, authenticator);
-        StartEventResponse event = ccdApi.startAttachScannedDocs(caseRef, authenticator, theCase);
-        ccdApi.attachExceptionRecord(caseRef,
-            authenticator,
-            theCase,
-            insertNewScannedDocument(exceptionRecordData, theCase.getData()),
-            event.getEventId(),
-            event.getToken()
-        );
+
+    private List<String> success() {
         return emptyList();
     }
-
 }

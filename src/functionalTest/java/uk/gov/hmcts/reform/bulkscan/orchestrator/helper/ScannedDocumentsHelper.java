@@ -3,14 +3,11 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.document.domain.Document;
-import uk.gov.hmcts.reform.document.domain.UploadResponse;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -21,9 +18,9 @@ public class ScannedDocumentsHelper {
         // utility class
     }
 
-    public static List<ScannedDocument> getScannedDocuments(CaseDetails caseDetails) {
+    public static List<ScannedDocument> getScannedDocuments(CaseDetails caseDetails, String scannedDocsKey) {
         List<Map<String, Map<String, Object>>> data =
-            (List<Map<String, Map<String, Object>>>) caseDetails.getData().get("scannedDocuments");
+            (List<Map<String, Map<String, Object>>>) caseDetails.getData().get(scannedDocsKey);
 
         return data.stream().map(ScannedDocumentsHelper::createDocumentFromMap).collect(toList());
     }
@@ -36,10 +33,5 @@ public class ScannedDocumentsHelper {
             LocalDateTime.parse((String) doc.get("scannedDate")),
             new CcdDocument(((HashMap<String, String>) doc.get("url")).getOrDefault("document_url", null))
         );
-    }
-
-    public static List<String> getScannedDocumentUrls(UploadResponse uploadResponse) {
-        List<Document> documents = uploadResponse.getEmbedded().getDocuments();
-        return documents.stream().map(document -> document.links.self.href).collect(Collectors.toList());
     }
 }

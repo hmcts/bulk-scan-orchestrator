@@ -23,9 +23,6 @@ public class EnvelopeEventProcessor implements IMessageHandler {
     private static final Logger log = LoggerFactory.getLogger(EnvelopeEventProcessor.class);
     public static final String EXCEPTION_RECORD_CASE_TYPE = "ExceptionRecord";
 
-    // Next sprint we use the new API so that jurisdictions other than bulk scanned work
-    public static final String TEMP_CASE_TYPE = "Bulk_Scanned";
-
     private final CaseRetriever caseRetriever;
 
     private final EventPublisherContainer eventPublisherContainer;
@@ -56,7 +53,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
         Envelope envelope = parse(message.getBody());
         CaseDetails theCase = Strings.isNullOrEmpty(envelope.caseRef)
             ? null
-            : caseRetriever.retrieve(envelope.jurisdiction, TEMP_CASE_TYPE, envelope.caseRef);
+            : caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
         String caseTypeId = getCaseTypeId(theCase);
         EventPublisher eventPublisher = eventPublisherContainer.getPublisher(envelope, theCase);
 

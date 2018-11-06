@@ -118,6 +118,17 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     private fun submittedScannedRecords() = postRequestedFor(urlEqualTo(submitUrl))
+    private val callbackRequest = CallbackRequest
+        .builder()
+        .caseDetails(defaultExceptionCase().build())
+        .eventId("attachToExistingCase")
+
+    private fun defaultExceptionCase(): CaseDetails.CaseDetailsBuilder {
+        return CaseDetails.builder()
+            .jurisdiction(JURIDICTION)
+            .caseTypeId("ExceptionRecord")
+            .data(mapOf("attachToCaseReference" to CASE_REF))
+    }
 
     @Test
     fun `should successfully callback with correct information`() {
