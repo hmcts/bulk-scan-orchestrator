@@ -28,22 +28,14 @@ public class EventPublisherContainer {
     }
 
     public EventPublisher getPublisher(Envelope envelope, CaseDetails caseDetails) {
-        EventPublisher eventPublisher = null;
-
         switch (envelope.classification) {
             case SUPPLEMENTARY_EVIDENCE:
-                eventPublisher = caseDetails == null ? exceptionRecordCreator : attachDocsPublisher;
-
-                break;
+                return caseDetails == null ? exceptionRecordCreator : attachDocsPublisher;
             case EXCEPTION:
-                eventPublisher = exceptionRecordCreator;
-
-                break;
+                return exceptionRecordCreator;
             case NEW_APPLICATION:
             default:
-                break;
+                return null;
         }
-
-        return eventPublisher;
     }
 }

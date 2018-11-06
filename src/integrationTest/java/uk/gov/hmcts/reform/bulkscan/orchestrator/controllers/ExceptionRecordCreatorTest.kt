@@ -19,7 +19,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_TYPE_BULK_SCAN
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_TYPE_EXCEPTION_RECORD
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.caseUrl
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.getCaseUrl
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.IntegrationTest
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -49,7 +49,7 @@ class ExceptionRecordCreatorTest {
     @BeforeEach
     fun before() {
         WireMock.configureFor(server.port())
-        givenThat(get(caseUrl).willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())))
+        givenThat(get(getCaseUrl).willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())))
         givenThat(get(caseEventTriggerStartUrl).willReturn(aResponse().withBody(
             "{\"case_details\":null,\"event_id\":\"eid\",\"token\":\"etoken\"}"
         )))
@@ -62,7 +62,7 @@ class ExceptionRecordCreatorTest {
             .atMost(30, TimeUnit.SECONDS)
             .ignoreExceptions()
             .until {
-                server.verify(getRequestedFor(urlPathEqualTo(caseUrl)))
+                server.verify(getRequestedFor(urlPathEqualTo(getCaseUrl)))
                 server.verify(postRequestedFor(urlPathEqualTo(caseSubmitUrl)))
                 true
             }

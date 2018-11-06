@@ -13,6 +13,7 @@ object Environment {
 
     private val caseTypeUrl = "/caseworkers/$USER_ID/jurisdictions/$JURIDICTION/case-types/$CASE_TYPE_BULK_SCAN"
     val caseUrl = "$caseTypeUrl/cases/$CASE_REF"
+    val getCaseUrl = "/cases/$CASE_REF"
     val caseEventUrl = "$caseUrl/events"
     val caseSubmitUrl = "$caseTypeUrl/cases"
     val caseEventTriggerStartUrl = "$caseTypeUrl/event-triggers/createException/token"
