@@ -24,7 +24,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 
 @Service
 public class CallbackProcessor {
-    private static final  Logger log = LoggerFactory.getLogger(CallbackProcessor.class);
+    private static final Logger log = LoggerFactory.getLogger(CallbackProcessor.class);
     private final CoreCaseDataApi ccdApi;
     private final CcdAuthenticatorFactory authFactory;
 
@@ -47,7 +47,7 @@ public class CallbackProcessor {
             .getOrElseGet(Value::toJavaList);
     }
 
-    @SuppressWarnings({"squid:S1172", "squid:S1135"})
+    @SuppressWarnings({"squid:S1172", "squid:S1135", "squid:S1854"})
     //TODO these are for the validations of the incoming request and is a WIP
     private List<String> attachCase(String theType,
                                     String anEventId,
@@ -59,11 +59,10 @@ public class CallbackProcessor {
         try {
             CaseDetails theCase = retrieveCase(caseRef, authenticator);
         } catch (FeignException e) {
-            switch (e.status()) {
-                case 404:
-                    return error("Could not find case: %s", caseRef);
-                default:
-                    return error("Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status());
+            if (e.status() == 404) {
+                return error("Could not find case: %s", caseRef);
+            } else {
+                return error("Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status());
             }
         }
         return emptyList();
