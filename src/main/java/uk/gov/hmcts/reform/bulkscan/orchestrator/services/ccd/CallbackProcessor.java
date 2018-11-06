@@ -59,11 +59,10 @@ public class CallbackProcessor {
     }
 
     @NotNull
-    private List<String> attachCase(String exceptionRecordJurisdiction, String caseRef) {
+    private void attachCase(String exceptionRecordJurisdiction, String caseRef) {
         CcdAuthenticator authenticator = authFactory.createForJurisdiction(exceptionRecordJurisdiction);
         CaseDetails theCase = ccdApi.getCase(caseRef, authenticator);
         StartEventResponse event = ccdApi.startAttachScannedDocs(caseRef, authenticator, theCase);
-        return emptyList();
     }
 
     @NotNull
