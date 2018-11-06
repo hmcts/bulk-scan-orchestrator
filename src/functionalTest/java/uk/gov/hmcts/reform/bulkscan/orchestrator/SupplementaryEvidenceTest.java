@@ -1,13 +1,13 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import org.awaitility.Duration;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopePar
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.document.domain.UploadResponse;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 @ActiveProfiles("nosb") // no servicebus queue handler registration
 public class SupplementaryEvidenceTest {
@@ -48,19 +47,17 @@ public class SupplementaryEvidenceTest {
     @Autowired
     private DocumentManagementUploadService dmUploadService;
 
-    @Before
+    @BeforeEach
     public void setup() {
         String caseData = SampleData.fileContentAsString("envelopes/new-envelope.json");
         Envelope newEnvelope = EnvelopeParser.parse(caseData);
 
         caseDetails = ccdCaseCreator.createCase(newEnvelope);
 
-        UploadResponse uploadResponse = dmUploadService.uploadToDmStore(
+        dmUrl = dmUploadService.uploadToDmStore(
             "Certificate.pdf",
             "documents/supplementary-evidence.pdf"
         );
-        List<String> scannedDocumentUrls = ScannedDocumentsHelper.getScannedDocumentUrls(uploadResponse);
-        dmUrl = scannedDocumentUrls.isEmpty() ? null : scannedDocumentUrls.get(0);
     }
 
     @Test
@@ -90,7 +87,6 @@ public class SupplementaryEvidenceTest {
 
         CaseDetails updatedCaseDetails = caseRetriever.retrieve(
             caseDetails.getJurisdiction(),
-            SampleData.BULK_SCANNED_CASE_TYPE,
             String.valueOf(caseDetails.getId())
         );
 
@@ -111,7 +107,6 @@ public class SupplementaryEvidenceTest {
 
         CaseDetails updatedCaseDetails = caseRetriever.retrieve(
             caseDetails.getJurisdiction(),
-            SampleData.BULK_SCANNED_CASE_TYPE,
             String.valueOf(caseDetails.getId())
         );
 

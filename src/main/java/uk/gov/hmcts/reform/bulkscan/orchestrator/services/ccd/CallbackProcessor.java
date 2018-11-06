@@ -63,6 +63,9 @@ public class CallbackProcessor {
                     return error("Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status());
             }
         }
+    //TODO these are for the validations of the incoming request and is a WIP
+    @SuppressWarnings("squid:S1172")
+    private List<String> attach(CaseDetails caseDetails) {
         return emptyList();
     }
 
@@ -80,6 +83,5 @@ public class CallbackProcessor {
         log.error(message);
         return ImmutableList.of(message);
     }
-
 
 }

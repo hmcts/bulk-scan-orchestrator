@@ -11,17 +11,22 @@ import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
 import static java.lang.String.format;
 
-public interface CallbackValidations {
-    Logger log = LoggerFactory.getLogger(CallbackValidations.class);
-    String ATTACH_TO_CASE_REFERENCE = "attachToCaseReference";
-    String ATTACH_TO_EXISTING_CASE = "attachToExistingCase";
+final class CallbackValidations {
+    private static Logger log = LoggerFactory.getLogger(CallbackValidations.class);
+    private static final String ATTACH_TO_CASE_REFERENCE = "attachToCaseReference";
+    private static final String ATTACH_TO_EXISTING_CASE = "attachToExistingCase";
 
+    private CallbackValidations() {
+    }
+
+    @NotNull
     static Validation<String, CaseDetails> hasCaseDetails(CaseDetails caseDetails) {
         return caseDetails != null
             ? valid(caseDetails)
             : internalError("no case details supplied", null);
     }
 
+    @NotNull
     static Validation<String, String> isAboutToSubmit(String eventId) {
         return ATTACH_TO_EXISTING_CASE.equals(eventId)
             ? valid(eventId)
@@ -31,9 +36,11 @@ public interface CallbackValidations {
     @NotNull
     static <T> Validation<String, T> internalError(String error, T arg1) {
         log.error("{}:{}", error, arg1);
-        return invalid(format("Internal Error: " + error, arg1));
+        String formatString = "Internal Error: " + error;
+        return invalid(format(formatString, arg1));
     }
 
+    @NotNull
     static Validation<String, String> hasJurisdiction(CaseDetails theCase) {
         String jurisdiction = null;
         return theCase != null
@@ -42,6 +49,7 @@ public interface CallbackValidations {
             : internalError("invalid jurisdiction supplied: %s", jurisdiction);
     }
 
+    @NotNull
     static Validation<String, String> hasCaseReference(CaseDetails theCase) {
         Object caseReference = null;
         return theCase != null
@@ -52,6 +60,7 @@ public interface CallbackValidations {
             : internalError("no case reference found: %s", String.valueOf(caseReference));
     }
 
+    @NotNull
     static Validation<String, String> hasCaseTypeId(CaseDetails theCase) {
         String caseTypeId = null;
         return theCase != null
@@ -60,6 +69,7 @@ public interface CallbackValidations {
             : internalError("No caseType supplied: %s", caseTypeId);
     }
 
+    @NotNull
     static Validation<String, String> isAttachEvent(String type) {
         return "attach_case".equals(type)
             ? valid(type)

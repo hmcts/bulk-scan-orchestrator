@@ -8,7 +8,6 @@ public class ScannedDocument {
     public final String controlNumber;
     public final String type;
     public final LocalDateTime scannedDate;
-
     public final CcdDocument url;
 
     public ScannedDocument(
