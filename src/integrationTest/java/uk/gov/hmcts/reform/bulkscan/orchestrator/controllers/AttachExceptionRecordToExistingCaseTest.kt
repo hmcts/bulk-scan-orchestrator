@@ -36,7 +36,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_REF
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.JURIDICTION
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.IntegrationTest
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.CallbackRequestBuilder
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails
@@ -98,11 +97,6 @@ class AttachExceptionRecordToExistingCaseTest {
         .caseTypeId("ExceptionRecord")
         .data(exceptionData)
 
-    private val callbackRequest = CallbackRequest
-        .builder()
-        .caseDetails(exceptionRecord.build())
-        .eventId(CallbackValidations.ATTACH_TO_EXISTING_CASE)
-
     private val startEventResponse = StartEventResponse
         .builder()
         .eventId("someID")
@@ -120,6 +114,7 @@ class AttachExceptionRecordToExistingCaseTest {
     private fun submittedScannedRecords() = postRequestedFor(urlEqualTo(submitUrl))
     private val callbackRequest = CallbackRequest
         .builder()
+        .caseDetails(exceptionRecord.build())
         .caseDetails(defaultExceptionCase().build())
         .eventId("attachToExistingCase")
 
@@ -141,7 +136,6 @@ class AttachExceptionRecordToExistingCaseTest {
 //        verify(submittedScannedRecords().scanRecordsItemIs(2,WireMock.equalTo(null)))
         verify(submittedScannedRecords().scannedRecordFilenameAtIndex(0, WireMock.equalTo(filename1)))
         verify(submittedScannedRecords().scannedRecordFilenameAtIndex(1, WireMock.equalTo(filename2)))
-
     }
 
     @Test

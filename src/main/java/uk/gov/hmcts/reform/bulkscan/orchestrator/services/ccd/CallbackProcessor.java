@@ -36,6 +36,8 @@ public class CallbackProcessor {
         this.ccdApi = ccdApi;
     }
 
+    @SuppressWarnings("squid:S1135")
+    //TODO WIP
     public List<String> process(String eventType, String eventId, CaseDetails caseDetails) {
         return Validation
             .combine(
@@ -67,6 +69,7 @@ public class CallbackProcessor {
             return createErrorList(e);
         }
     }
+
     @NotNull
     private void attachCase(String exceptionRecordJurisdiction, String caseRef, Map<String, Object> exceptionRecordData) {
         CcdAuthenticator authenticator = authFactory.createForJurisdiction(exceptionRecordJurisdiction);
@@ -88,7 +91,8 @@ public class CallbackProcessor {
         return ImmutableList.of(message);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "squid:S1135"})
+    //TODO WIP
     private Map<String, Object> insertNewScannedDocument(Map<String, Object> exceptionData, Map<String, Object> caseData) {
         //TODO check SCANNED_DOCUMENTS exists and has a document
         //TODO check that document Id is unique and not duplicate in caseData
@@ -96,7 +100,6 @@ public class CallbackProcessor {
         caseList.addAll((List<Object>) exceptionData.get(SCAN_RECORDS));
         return ImmutableMap.of(SCANNED_DOCUMENTS, caseList);
     }
-
 
     private List<String> success() {
         return emptyList();
