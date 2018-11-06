@@ -11,8 +11,6 @@ import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
 import static java.lang.String.format;
 
-// This is put in otherwise the validations get very cumbersome in the expressions (less readable).
-@SuppressWarnings("squid:AssignmentInSubExpressionCheckAssignments")
 final class CallbackValidations {
     private static final Logger log = LoggerFactory.getLogger(CallbackValidations.class);
     private static final String ATTACH_TO_CASE_REFERENCE = "attachToCaseReference";
@@ -66,7 +64,8 @@ final class CallbackValidations {
     static Validation<String, String> hasCaseTypeId(CaseDetails theCase) {
         String caseTypeId = null;
         return theCase != null
-            && !isNullOrEmpty(caseTypeId = theCase.getCaseTypeId())
+            && (caseTypeId = theCase.getCaseTypeId()) != null
+            && !isNullOrEmpty(caseTypeId)
             ? valid(caseTypeId)
             : internalError("No caseType supplied: %s", caseTypeId);
     }
