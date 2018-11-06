@@ -51,11 +51,10 @@ public class CallbackProcessor {
                                     String caseRef,
                                     CaseDetails exceptionRecord) {
         try {
-            return attachCase(exceptionRecordJurisdiction, caseRef);
+            attachCase(exceptionRecordJurisdiction, caseRef);
+            return success();
         } catch (CallbackException e) {
-            String message = e.getMessage();
-            log.error(message, e);
-            return ImmutableList.of(message);
+            return createErrorList(e);
         }
     }
 
@@ -67,4 +66,15 @@ public class CallbackProcessor {
         return emptyList();
     }
 
+    @NotNull
+    private List<String> createErrorList(CallbackException e) {
+        String message = e.getMessage();
+        log.error(message, e);
+        return ImmutableList.of(message);
+    }
+
+    @NotNull
+    private List<String> success() {
+        return emptyList();
+    }
 }
