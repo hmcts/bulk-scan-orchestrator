@@ -66,7 +66,8 @@ final class CallbackValidations {
     static Validation<String, String> hasCaseTypeId(CaseDetails theCase) {
         String caseTypeId = null;
         return theCase != null
-            && !isNullOrEmpty(caseTypeId = theCase.getCaseTypeId())
+            && (caseTypeId = theCase.getCaseTypeId()) != null
+            && !isNullOrEmpty(caseTypeId)
             ? valid(caseTypeId)
             : internalError("No caseType supplied: %s", caseTypeId);
     }
