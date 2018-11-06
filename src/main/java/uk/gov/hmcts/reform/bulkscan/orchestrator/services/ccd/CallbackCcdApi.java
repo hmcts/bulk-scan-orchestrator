@@ -50,13 +50,10 @@ public class CallbackCcdApi {
         try {
             return retrieveCase(caseRef, authenticator);
         } catch (FeignException e) {
-            switch (e.status()) {
-                case 404:
-                    throw error(e, "Could not find case: %s",
-                        caseRef);
-                default:
-                    throw error(e, "Internal Error: Could not retrieve case: %s Error: %s",
-                        caseRef, e.status());
+            if (e.status() == 404) {
+                throw error(e, "Could not find case: %s", caseRef);
+            } else {
+                throw error(e, "Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status());
             }
         }
     }

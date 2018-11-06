@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.List;
 
@@ -17,14 +16,13 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseReference;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJurisdiction;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.isAboutToSubmit;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.isAttachEvent;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.log;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.isAttachToCaseEvent;
 
 @Service
 public class CallbackProcessor {
     private static final Logger log = LoggerFactory.getLogger(CallbackProcessor.class);
-    private final CoreCaseDataApi ccdApi;
+    private final CallbackCcdApi ccdApi;
     private final CcdAuthenticatorFactory authFactory;
 
     public CallbackProcessor(CallbackCcdApi ccdApi, CcdAuthenticatorFactory authFactory) {
