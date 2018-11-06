@@ -11,8 +11,11 @@ import static io.vavr.control.Validation.valid;
 import static java.lang.String.format;
 import static uk.gov.hmcts.reform.ccd.client.model.CallbackTypes.ABOUT_TO_SUBMIT;
 
-interface CallbackValidations {
-    Logger log = LoggerFactory.getLogger(CallbackProcessor.class);
+final class CallbackValidations {
+    private static Logger log = LoggerFactory.getLogger(CallbackValidations.class);
+
+    private CallbackValidations() {
+    }
 
     static Validation<String, CaseDetails> hasCaseDetails(CaseDetails caseDetails) {
         return caseDetails != null
@@ -20,6 +23,7 @@ interface CallbackValidations {
             : internalError("no Case details supplied", null);
     }
 
+    @NotNull
     static Validation<String, String> isAboutToSubmit(String eventId) {
         return ABOUT_TO_SUBMIT.equals(eventId)
             ? valid(eventId)
@@ -32,7 +36,7 @@ interface CallbackValidations {
         return invalid(format("Internal Error: " + error, arg1));
     }
 
-
+    @NotNull
     static Validation<String, String> isAttachEvent(String type) {
         return "attach_case".equals(type)
             ? valid(type)
