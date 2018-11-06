@@ -43,15 +43,18 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse
 
 typealias ResponseValidation = ValidatableResponseOptions<ValidatableResponse, Response>
+typealias WiremockReq = RequestPatternBuilder
 
 fun RequestSpecification.postToCallback(type: String = "attach_case") = post("/callback/{type}", type)
 fun RequestSpecification.setBody(builder: CallbackRequestBuilder) = body(builder.build())
 fun ResponseValidation.shouldContainError(error: String) = body("errors", hasItem(error))
-fun RequestPatternBuilder.scannedRecordFilenameAtIndex(index: Int, stringValuePattern: StringValuePattern) =
-    withRequestBody(matchingJsonPath("\$.data.scanRecords[$index].value.fileName", stringValuePattern))
 
-fun RequestPatternBuilder.scanRecordsItemIs(index: Int, stringValuePattern: StringValuePattern?) =
-    withRequestBody(matchingJsonPath("\$.data.scanRecords[$index]", stringValuePattern))
+fun WiremockReq.scannedRecordFilenameAtIndex(index: Int, stringValuePattern: StringValuePattern) =
+    withRequestBody(matchingJsonPath("\$.data.scannedDocuments[$index].fileName", stringValuePattern))
+
+fun WiremockReq.numberOfScannedDocumentsIs(numberOfDocuments: Int): RequestPatternBuilder =
+    withRequestBody(matchingJsonPath("\$.data.scannedDocuments.length()",
+        WireMock.equalTo(numberOfDocuments.toString())))
 
 fun MappingBuilder.authorised() = with(this) {
     withHeader(AUTHORIZATION, containing("eyJhbGciOiJIUzI1NiJ9."))
@@ -127,11 +130,23 @@ class AttachExceptionRecordToExistingCaseTest {
             .then()
             .statusCode(200)
             .body("errors.size()", equalTo(0))
-//        verify(submittedScannedRecords().scanRecordsItemIs(2,WireMock.equalTo(null)))
+        verify(submittedScannedRecords().numberOfScannedDocumentsIs(2))
         verify(submittedScannedRecords().scannedRecordFilenameAtIndex(0, WireMock.equalTo(filename1)))
         verify(submittedScannedRecords().scannedRecordFilenameAtIndex(1, WireMock.equalTo(filename2)))
-
     }
+
+
+    @Test
+    fun `should fail with the correct error when submit api call fails`() {
+        wireMock.register(submitEvent.willReturn(status(500)))
+        given()
+            .setBody(callbackRequest)
+            .postToCallback()
+            .then()
+            .statusCode(200)
+            .shouldContainError("Internal Error: submitting attach file event failed case: 1539007368674134 Error: 500")
+    }
+
 
     @Test
     fun `should fail with the correct error when start event api call fails`() {
@@ -227,3 +242,6 @@ class AttachExceptionRecordToExistingCaseTest {
             .shouldContainError("Internal Error: invalid type supplied: someType")
     }
 }
+
+
+

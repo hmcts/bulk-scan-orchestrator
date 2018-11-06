@@ -54,27 +54,34 @@ public class CallbackCcdApi {
         try {
             return retrieveCase(caseRef, authenticator);
         } catch (FeignException e) {
-            switch (e.status()) {
-                case 404:
-                    throw error(e, "Could not find case: %s",
-                        caseRef);
-                default:
-                    throw error(e, "Internal Error: Could not retrieve case: %s Error: %s",
-                        caseRef, e.status());
+            if (e.status() == 404) {
+                throw error(e, "Could not find case: %s", caseRef);
+            } else {
+                throw error(e, "Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status());
             }
         }
     }
 
-    void attachExceptionRecord(String caseRef, CcdAuthenticator authenticator, CaseDetails theCase, Map<String, Object> data, String eventId, String token) {
+    void attachExceptionRecord(String caseRef,
+                               CcdAuthenticator authenticator,
+                               CaseDetails theCase,
+                               Map<String, Object> data,
+                               String eventId,
+                               String token) {
         try {
             attachCall(caseRef, authenticator, theCase, data, eventId, token);
         } catch (FeignException e) {
-            throw error(e, "Internal Error: Could submit attach document event: %s Error: %s",
+            throw error(e, "Internal Error: submitting attach file event failed case: %s Error: %s",
                 caseRef, e.status());
         }
     }
 
-    private void attachCall(String caseRef, CcdAuthenticator authenticator, CaseDetails theCase, Map<String, Object> data, String eventId, String token) {
+    private void attachCall(String caseRef,
+                            CcdAuthenticator authenticator,
+                            CaseDetails theCase,
+                            Map<String, Object> data,
+                            String eventId,
+                            String token) {
         ccdApi.submitEventForCaseWorker(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),

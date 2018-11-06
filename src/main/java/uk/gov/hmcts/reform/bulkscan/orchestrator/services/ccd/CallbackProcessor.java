@@ -36,6 +36,8 @@ public class CallbackProcessor {
 
     public List<String> process(String eventType, String eventId, CaseDetails caseDetails) {
         return Validation
+            //TODO validate SCAN_RECORDS exists with document
+            //TODO validate and remove [-#] from caseRef
             .combine(
                 isAttachEvent(eventType),
                 isAboutToSubmit(eventId),
@@ -43,8 +45,6 @@ public class CallbackProcessor {
                 hasCaseTypeId(caseDetails),
                 hasCaseReference(caseDetails),
                 hasCaseDetails(caseDetails)
-                //TODO validate SCAN_RECORDS exists with document
-                //TODO validate and remove [-#] from caseRef
             )
             .ap(this::attachCase)
             .getOrElseGet(Value::toJavaList);
@@ -65,17 +65,10 @@ public class CallbackProcessor {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> insertNewScannedDocument(Map<String, Object> exceptionData, Map<String, Object> caseData) {
-        //TODO check SCANNED_DOCUMENTS exists and has a document
-        //TODO check that document Id is unique and not duplicate in caseData
-        List<Object> caseList = (List<Object>) caseData.get(SCANNED_DOCUMENTS);
-        caseList.addAll((List<Object>) exceptionData.get(SCAN_RECORDS));
-        return ImmutableMap.of(SCANNED_DOCUMENTS, caseList);
-    }
-
     @NotNull
-    private List<String> attachCase(String exceptionRecordJurisdiction, String caseRef, Map<String, Object> exceptionRecordData) {
+    private List<String> attachCase(String exceptionRecordJurisdiction,
+                                    String caseRef,
+                                    Map<String, Object> exceptionRecordData) {
         CcdAuthenticator authenticator = authFactory.createForJurisdiction(exceptionRecordJurisdiction);
         CaseDetails theCase = ccdApi.getCase(caseRef, authenticator);
         StartEventResponse event = ccdApi.startAttachScannedDocs(caseRef, authenticator, theCase);
@@ -89,4 +82,13 @@ public class CallbackProcessor {
         return emptyList();
     }
 
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> insertNewScannedDocument(Map<String, Object> exceptionData,
+                                                         Map<String, Object> caseData) {
+        //TODO check SCANNED_DOCUMENTS exists and has a document
+        //TODO check that document Id is unique and not duplicate in caseData
+        List<Object> caseList = (List<Object>) caseData.get(SCANNED_DOCUMENTS);
+        caseList.addAll((List<Object>) exceptionData.get(SCAN_RECORDS));
+        return ImmutableMap.of(SCANNED_DOCUMENTS, caseList);
+    }
 }

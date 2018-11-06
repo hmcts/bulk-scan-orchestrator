@@ -10,7 +10,7 @@ import javax.crypto.spec.SecretKeySpec
 
 private val LOG = LoggerFactory.getLogger(GetSasToken::class.java)
 
-@SpringBootApplication
+//@SpringBootApplication
 @ActiveProfiles("nosb")
 class GetSasToken {
 
