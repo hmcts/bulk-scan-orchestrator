@@ -23,6 +23,8 @@ public class SupplementaryEvidenceMapperTest {
         Envelope envelope = SampleData.envelope(1);
         SupplementaryEvidence supplementaryEvidence = mapper.mapEnvelope(envelope);
 
+        assertThat(supplementaryEvidence.evidenceHandled).isNull();
+
         assertThat(supplementaryEvidence.scannedDocuments.size()).isEqualTo(1);
 
         Document envelopeDocument = envelope.documents.get(0);

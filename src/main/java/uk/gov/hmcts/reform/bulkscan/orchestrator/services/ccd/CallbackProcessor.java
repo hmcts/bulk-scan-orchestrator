@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import io.vavr.Value;
 import io.vavr.control.Validation;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -21,9 +23,9 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 
 @Service
 public class CallbackProcessor {
-
-    private CcdAuthenticatorFactory authFactory;
-    private final CallbackCcdApi ccdApi;
+    private static final Logger log = LoggerFactory.getLogger(CallbackProcessor.class);
+    private final CoreCaseDataApi ccdApi;
+    private final CcdAuthenticatorFactory authFactory;
 
     public CallbackProcessor(CallbackCcdApi ccdApi, CcdAuthenticatorFactory authFactory) {
         this.authFactory = authFactory;
@@ -34,7 +36,7 @@ public class CallbackProcessor {
         return Validation
             .combine(
                 isAttachEvent(eventType),
-                isAboutToSubmit(eventId),
+                isAttachToCaseEvent(eventId),
                 hasJurisdiction(caseDetails),
                 hasCaseTypeId(caseDetails),
                 hasCaseReference(caseDetails),
@@ -44,6 +46,8 @@ public class CallbackProcessor {
             .getOrElseGet(Value::toJavaList);
     }
 
+    @SuppressWarnings({"squid:S1172", "squid:S1135", "squid:S1854"})
+    //TODO these are for the validations of the incoming request and is a WIP
     private List<String> attachCase(String theType,
                                     String anEventId,
                                     String exceptionRecordJurisdiction,
@@ -62,7 +66,7 @@ public class CallbackProcessor {
     private void attachCase(String exceptionRecordJurisdiction, String caseRef) {
         CcdAuthenticator authenticator = authFactory.createForJurisdiction(exceptionRecordJurisdiction);
         CaseDetails theCase = ccdApi.getCase(caseRef, authenticator);
-        StartEventResponse event = ccdApi.startAttachScannedDocs(caseRef, authenticator, theCase);
+        ccdApi.startAttachScannedDocs(caseRef, authenticator, theCase);
     }
 
     @NotNull
