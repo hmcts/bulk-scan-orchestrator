@@ -12,7 +12,7 @@ import static io.vavr.control.Validation.valid;
 import static java.lang.String.format;
 
 final class CallbackValidations {
-    private static Logger log = LoggerFactory.getLogger(CallbackValidations.class);
+    private static final Logger log = LoggerFactory.getLogger(CallbackValidations.class);
     private static final String ATTACH_TO_CASE_REFERENCE = "attachToCaseReference";
     private static final String ATTACH_TO_EXISTING_CASE = "attachToExistingCase";
 
