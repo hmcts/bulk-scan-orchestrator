@@ -29,7 +29,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_REF
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.JURIDICTION
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.IntegrationTest
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.CallbackRequestBuilder
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails
@@ -80,7 +79,7 @@ class AttachExceptionRecordToExistingCaseTest {
     private val callbackRequest = CallbackRequest
         .builder()
         .caseDetails(defaultExceptionCase().build())
-        .eventId(CallbackValidations.ATTACH_TO_EXISTING_CASE)
+        .eventId("attachToExistingCase")
 
     private fun defaultExceptionCase(): CaseDetails.CaseDetailsBuilder {
         return CaseDetails.builder()

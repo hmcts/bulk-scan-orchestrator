@@ -24,9 +24,9 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 
 @Service
 public class CallbackProcessor {
-    private final static Logger log = LoggerFactory.getLogger(CallbackProcessor.class);
+    private static final  Logger log = LoggerFactory.getLogger(CallbackProcessor.class);
     private final CoreCaseDataApi ccdApi;
-    private CcdAuthenticatorFactory authFactory;
+    private final CcdAuthenticatorFactory authFactory;
 
     public CallbackProcessor(CoreCaseDataApi ccdApi, CcdAuthenticatorFactory authFactory) {
         this.ccdApi = ccdApi;
