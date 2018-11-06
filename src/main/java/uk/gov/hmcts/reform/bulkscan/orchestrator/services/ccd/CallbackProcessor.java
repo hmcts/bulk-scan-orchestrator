@@ -47,7 +47,7 @@ public class CallbackProcessor {
             .getOrElseGet(Value::toJavaList);
     }
 
-    @SuppressWarnings({"squid:S1172", "squid:S1135", "squid:S1854"})
+    @SuppressWarnings({"squid:S1172", "squid:S1135", "squid:S1854", "squid:S1481"})
     //TODO these are for the validations of the incoming request and is a WIP
     private List<String> attachCase(String theType,
                                     String anEventId,
