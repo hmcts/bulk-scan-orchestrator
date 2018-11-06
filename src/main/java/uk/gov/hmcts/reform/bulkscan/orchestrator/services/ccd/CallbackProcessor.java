@@ -25,9 +25,9 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 @Service
 public class CallbackProcessor {
     private static final Logger log = LoggerFactory.getLogger(CallbackProcessor.class);
-
     private static final String SCANNED_DOCUMENTS = "scannedDocuments";
     private static final String SCAN_RECORDS = "scanRecords";
+
     private CcdAuthenticatorFactory authFactory;
     private final CallbackCcdApi ccdApi;
 

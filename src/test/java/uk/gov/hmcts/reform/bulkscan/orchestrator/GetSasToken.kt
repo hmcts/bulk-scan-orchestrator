@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator
 
 import org.slf4j.LoggerFactory
-import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.test.context.ActiveProfiles
 import java.net.URLEncoder
 import java.util.Base64
 import javax.crypto.Mac
@@ -10,8 +8,6 @@ import javax.crypto.spec.SecretKeySpec
 
 private val LOG = LoggerFactory.getLogger(GetSasToken::class.java)
 
-//@SpringBootApplication
-@ActiveProfiles("nosb")
 class GetSasToken {
 
     companion object {
