@@ -54,23 +54,36 @@ public class CallbackProcessor {
                                     String caseRef,
                                     CaseDetails exceptionRecord) {
         try {
-            return attachCase(exceptionRecordJurisdiction, caseRef);
+            attachCase(exceptionRecordJurisdiction, caseRef);
+            return success();
         } catch (CallbackException e) {
-            String message = e.getMessage();
-            log.error(message, e);
-            return ImmutableList.of(message);
+            return createErrorList(e);
         }
     }
 
     @NotNull
-    private List<String> attachCase(String exceptionRecordJurisdiction, String caseRef) {
+    private void attachCase(String exceptionRecordJurisdiction, String caseRef) {
         CcdAuthenticator authenticator = authFactory.createForJurisdiction(exceptionRecordJurisdiction);
         CaseDetails theCase = getCase(caseRef, authenticator);
         StartEventResponse event = startAttachScannedDocs(caseRef, authenticator, theCase);
+    }
+
+    @NotNull
+    private List<String> createErrorList(CallbackException e) {
+        String message = e.getMessage();
+        log.error(message, e);
+        return ImmutableList.of(message);
+    }
+
+
+    @NotNull
+    private List<String> success() {
         return emptyList();
     }
 
-    private StartEventResponse startAttachScannedDocs(String caseRef, CcdAuthenticator authenticator, CaseDetails theCase) {
+    private StartEventResponse startAttachScannedDocs(String caseRef,
+                                                      CcdAuthenticator authenticator,
+                                                      CaseDetails theCase) {
         try {
             return startAttachScannedDocs(caseRef, authenticator, theCase.getJurisdiction(), theCase.getCaseTypeId());
         } catch (FeignException e) {
@@ -78,26 +91,10 @@ public class CallbackProcessor {
         }
     }
 
-    private CaseDetails getCase(String caseRef, CcdAuthenticator authenticator) {
-        try {
-            return retrieveCase(caseRef, authenticator);
-        } catch (FeignException e) {
-            switch (e.status()) {
-                case 404:
-                    throw error(e, "Could not find case: %s",
-                        caseRef);
-                default:
-                    throw error(e, "Internal Error: Could not retrieve case: %s Error: %s",
-                        caseRef, e.status());
-            }
-        }
-    }
-
-    private CaseDetails retrieveCase(String caseRef, CcdAuthenticator authenticator) {
-        return ccdApi.getCase(authenticator.getUserToken(), authenticator.getServiceToken(), caseRef);
-    }
-
-    private StartEventResponse startAttachScannedDocs(String caseRef, CcdAuthenticator authenticator, String jurisdiction, String caseTypeId) {
+    private StartEventResponse startAttachScannedDocs(String caseRef,
+                                                      CcdAuthenticator authenticator,
+                                                      String jurisdiction,
+                                                      String caseTypeId) {
         return ccdApi.startEventForCaseWorker(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
@@ -107,6 +104,23 @@ public class CallbackProcessor {
             caseRef,
             "attachScannedDocs"
         );
+    }
+
+    private CaseDetails getCase(String caseRef, CcdAuthenticator authenticator) {
+        try {
+            return retrieveCase(caseRef, authenticator);
+        } catch (FeignException e) {
+            switch (e.status()) {
+                case 404:
+                    throw error(e, "Could not find case: %s", caseRef);
+                default:
+                    throw error(e, "Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status());
+            }
+        }
+    }
+
+    private CaseDetails retrieveCase(String caseRef, CcdAuthenticator authenticator) {
+        return ccdApi.getCase(authenticator.getUserToken(), authenticator.getServiceToken(), caseRef);
     }
 
     private CallbackException error(Exception e, String errorFmt, Object arg) {
