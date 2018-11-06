@@ -40,8 +40,6 @@ public class CallbackProcessor {
     //TODO WIP
     public List<String> process(String eventType, String eventId, CaseDetails caseDetails) {
         return Validation
-            //TODO validate SCAN_RECORDS exists with document
-            //TODO validate and remove [-#] from caseRef
             .combine(
                 isAttachEvent(eventType),
                 isAttachToCaseEvent(eventId),
@@ -93,6 +91,10 @@ public class CallbackProcessor {
         return ImmutableList.of(message);
     }
 
+    private List<String> success() {
+        return emptyList();
+    }
+
     @SuppressWarnings({"unchecked", "squid:S1135"})
     //TODO WIP
     private Map<String, Object> insertNewScannedDocument(Map<String, Object> exceptionData,
@@ -102,9 +104,5 @@ public class CallbackProcessor {
         List<Object> caseList = (List<Object>) caseData.get(SCANNED_DOCUMENTS);
         caseList.addAll((List<Object>) exceptionData.get(SCAN_RECORDS));
         return ImmutableMap.of(SCANNED_DOCUMENTS, caseList);
-    }
-
-    private List<String> success() {
-        return emptyList();
     }
 }

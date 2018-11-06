@@ -71,7 +71,7 @@ public class CallbackCcdApi {
         try {
             attachCall(caseRef, authenticator, theCase, data, eventId, token);
         } catch (FeignException e) {
-            throw error(e, "Internal Error: Could submit attach document event: %s Error: %s",
+            throw error(e, "Internal Error: submitting attach file event failed case: %s Error: %s",
                 caseRef, e.status());
         }
     }
