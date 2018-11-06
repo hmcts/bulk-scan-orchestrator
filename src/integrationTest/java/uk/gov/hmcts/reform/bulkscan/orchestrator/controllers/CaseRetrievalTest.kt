@@ -11,7 +11,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_REF
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_TYPE_BULK_SCAN
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.JURIDICTION
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.caseUrl
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.getCaseUrl
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.IntegrationTest
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory
@@ -39,8 +39,8 @@ class CaseRetrievalTest {
 
     @Test
     fun `Should call to retrieve the case from ccd`() {
-        caseRetriever.retrieve(JURIDICTION, CASE_TYPE_BULK_SCAN, CASE_REF)
+        caseRetriever.retrieve(JURIDICTION, CASE_REF)
 
-        server.verify(getRequestedFor(urlEqualTo(caseUrl)))
+        server.verify(getRequestedFor(urlEqualTo(getCaseUrl)))
     }
 }
