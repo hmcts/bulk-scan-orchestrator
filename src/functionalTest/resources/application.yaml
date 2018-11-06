@@ -29,3 +29,4 @@ idam:
       password: ${IDAM_USER_PASSWORD:Password12}
 
 document_management.url: http://dm-store:4460
+test-url: ${TEST_URL:http://localhost:8582}

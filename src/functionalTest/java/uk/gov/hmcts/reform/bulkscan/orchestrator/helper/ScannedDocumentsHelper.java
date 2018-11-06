@@ -18,9 +18,9 @@ public class ScannedDocumentsHelper {
         // utility class
     }
 
-    public static List<ScannedDocument> getScannedDocuments(CaseDetails caseDetails) {
+    public static List<ScannedDocument> getScannedDocuments(CaseDetails caseDetails, String scannedDocsKey) {
         List<Map<String, Map<String, Object>>> data =
-            (List<Map<String, Map<String, Object>>>) caseDetails.getData().get("scannedDocuments");
+            (List<Map<String, Map<String, Object>>>) caseDetails.getData().get(scannedDocsKey);
 
         return data.stream().map(ScannedDocumentsHelper::createDocumentFromMap).collect(toList());
     }
