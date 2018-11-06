@@ -26,8 +26,9 @@ public class CallbackProcessor {
             .getOrElseGet(Value::toJavaList);
     }
 
+
+    @SuppressWarnings({"squid:S1172","squid:S1135"})
     //TODO these are for the validations of the incoming request and is a WIP
-    @SuppressWarnings("squid:S1172")
     private List<String> attach(CaseDetails caseDetails) {
         return emptyList();
     }
