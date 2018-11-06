@@ -68,7 +68,7 @@ public class CallbackProcessor {
     private void attachCase(String exceptionRecordJurisdiction, String caseRef) {
         CcdAuthenticator authenticator = authFactory.createForJurisdiction(exceptionRecordJurisdiction);
         CaseDetails theCase = getCase(caseRef, authenticator);
-        StartEventResponse event = startAttachScannedDocs(caseRef, authenticator, theCase);
+        startAttachScannedDocs(caseRef, authenticator, theCase);
     }
 
     @NotNull
@@ -77,7 +77,6 @@ public class CallbackProcessor {
         log.error(message, e);
         return ImmutableList.of(message);
     }
-
 
     @NotNull
     private List<String> success() {
@@ -133,6 +132,4 @@ public class CallbackProcessor {
     private CallbackException error(Exception e, String errorFmt, Object arg1, Object arg2) {
         return new CallbackException(format(errorFmt, arg1, arg2), e);
     }
-
-
 }
