@@ -33,7 +33,12 @@ public class DocumentManagementUploadService {
         this.documentUploadClientApi = documentUploadClientApi;
     }
 
-    public UploadResponse uploadToDmStore(String displayName, String filePath) {
+    /**
+     * Uploads file to dm service.
+     *
+     * @return URL to uploaded file
+     */
+    public String uploadToDmStore(String displayName, String filePath) {
         log.info("Uploading {} to DM store", displayName);
         MultipartFile file = new InMemoryMultipartFile(
             FILES_NAME,
@@ -51,6 +56,13 @@ public class DocumentManagementUploadService {
             singletonList(file)
         );
         log.info("{} uploaded to DM store", displayName);
-        return uploadResponse;
+
+        return uploadResponse
+            .getEmbedded()
+            .getDocuments()
+            .get(0)
+            .links
+            .self
+            .href;
     }
 }
