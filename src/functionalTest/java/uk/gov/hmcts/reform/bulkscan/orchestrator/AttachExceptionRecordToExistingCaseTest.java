@@ -6,6 +6,7 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,7 +98,7 @@ public class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-//    @Disabled
+    @Disabled
     public void should_atatch_exception_record_to_the_existing_case() {
 
         // when
