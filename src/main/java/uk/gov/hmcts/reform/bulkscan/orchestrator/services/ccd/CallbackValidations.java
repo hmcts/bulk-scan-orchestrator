@@ -16,6 +16,9 @@ final class CallbackValidations {
     private static final String ATTACH_TO_CASE_REFERENCE = "attachToCaseReference";
     private static final String ATTACH_TO_EXISTING_CASE = "attachToExistingCase";
 
+    private CallbackValidations() {
+    }
+
     @NotNull
     static Validation<String, CaseDetails> hasCaseDetails(CaseDetails caseDetails) {
         return caseDetails != null

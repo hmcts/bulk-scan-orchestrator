@@ -11,7 +11,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser;
@@ -25,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getScannedDocuments;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -90,7 +90,7 @@ public class SupplementaryEvidenceTest {
             String.valueOf(caseDetails.getId())
         );
 
-        List<ScannedDocument> updatedScannedDocuments = ScannedDocumentsHelper.getScannedDocuments(updatedCaseDetails);
+        List<ScannedDocument> updatedScannedDocuments = getScannedDocuments(updatedCaseDetails, "scannedDocuments");
 
         ScannedDocument updatedDocument = updatedScannedDocuments.get(0);
 
@@ -110,7 +110,7 @@ public class SupplementaryEvidenceTest {
             String.valueOf(caseDetails.getId())
         );
 
-        List<ScannedDocument> updatedScannedDocuments = ScannedDocumentsHelper.getScannedDocuments(updatedCaseDetails);
+        List<ScannedDocument> updatedScannedDocuments = getScannedDocuments(updatedCaseDetails, "scannedDocuments");
         return updatedScannedDocuments.size() > 0;
     }
 }
