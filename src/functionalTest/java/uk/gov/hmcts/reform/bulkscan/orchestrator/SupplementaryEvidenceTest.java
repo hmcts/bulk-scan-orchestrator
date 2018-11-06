@@ -90,7 +90,7 @@ public class SupplementaryEvidenceTest {
             String.valueOf(caseDetails.getId())
         );
 
-        List<ScannedDocument> updatedScannedDocuments = ScannedDocumentsHelper.getScannedDocuments(updatedCaseDetails);
+        List<ScannedDocument> updatedScannedDocuments = ScannedDocumentsHelper.getScannedDocuments(updatedCaseDetails, "scannedDocuments");
 
         ScannedDocument updatedDocument = updatedScannedDocuments.get(0);
 
@@ -110,7 +110,7 @@ public class SupplementaryEvidenceTest {
             String.valueOf(caseDetails.getId())
         );
 
-        List<ScannedDocument> updatedScannedDocuments = ScannedDocumentsHelper.getScannedDocuments(updatedCaseDetails);
+        List<ScannedDocument> updatedScannedDocuments = ScannedDocumentsHelper.getScannedDocuments(updatedCaseDetails, "scannedDocuments");
         return updatedScannedDocuments.size() > 0;
     }
 }
