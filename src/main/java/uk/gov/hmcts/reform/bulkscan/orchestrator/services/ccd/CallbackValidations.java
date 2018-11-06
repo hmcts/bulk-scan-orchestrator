@@ -11,15 +11,12 @@ import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
 import static java.lang.String.format;
 
-public interface CallbackValidations {
-    Logger log = LoggerFactory.getLogger(CallbackValidations.class);
-    String ATTACH_TO_CASE_REFERENCE = "attachToCaseReference";
-    String ATTACH_TO_EXISTING_CASE = "attachToExistingCase";
 final class CallbackValidations {
     private static final Logger log = LoggerFactory.getLogger(CallbackValidations.class);
     private static final String ATTACH_TO_CASE_REFERENCE = "attachToCaseReference";
-    private static final String ATTACH_RECORD = "attachRecord";
+    private static final String ATTACH_TO_EXISTING_CASE = "attachToExistingCase";
 
+    @NotNull
     static Validation<String, CaseDetails> hasCaseDetails(CaseDetails caseDetails) {
         return caseDetails != null
             ? valid(caseDetails)
