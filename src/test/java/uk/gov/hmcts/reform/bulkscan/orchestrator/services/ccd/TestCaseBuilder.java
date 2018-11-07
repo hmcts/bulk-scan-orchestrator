@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails.CaseDetailsBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +11,7 @@ class TestCaseBuilder {
     private TestCaseBuilder(){
     }
 
-    static CaseDetails createCaseWith(Function<CaseDetails.CaseDetailsBuilder, CaseDetails.CaseDetailsBuilder> builder) {
+    static CaseDetails createCaseWith(Function<CaseDetailsBuilder, CaseDetailsBuilder> builder) {
         return builder.apply(CaseDetails.builder()).build();
     }
 
