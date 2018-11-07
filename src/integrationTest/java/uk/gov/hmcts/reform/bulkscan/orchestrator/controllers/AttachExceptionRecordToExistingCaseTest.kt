@@ -64,16 +64,15 @@ class AttachExceptionRecordToExistingCaseTest {
         .id(Environment.CASE_REF.toLong())
         .build()
 
+    private fun ccdGetCaseMapping() = get("/cases/$CASE_REF")
+        .hasAuthoriseTokenContaining("eyJqdGkiOiJwMTY1bzNlY2c1dmExMjJ1anFi")
+    //TODO seems to be a bug in Wiremock ?
+//     .hasS2STokenContaining("binwtl8TgeDrAVV0LlCTRtb")
+
     @BeforeEach
     fun before() {
         waitFor(applicationPort)
-        wireMock.register(
-            get("/cases/$CASE_REF")
-                .hasAuthoriseTokenContaining("eyJqdGkiOiJwMTY1bzNlY2c1dmExMjJ1anFi")
-                //TODO seems to be a bug in Wiremock ?
-//                .hasS2STokenContaining("binwtl8TgeDrAVV0LlCTRtb")
-                .willReturn(okJson(asJson(caseData)))
-        )
+        wireMock.register(ccdGetCaseMapping().willReturn(okJson(asJson(caseData))))
         RestAssured.requestSpecification = RequestSpecBuilder().setPort(applicationPort).setContentType(JSON).build()
     }
 
@@ -101,11 +100,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @Test
     fun `should fail correctly if the case does not exist`() {
-        wireMock.register(
-            get("/cases/$CASE_REF").hasAuthoriseTokenContaining("eyJqdGkiOiJwMTY1bzNlY2c1dmExMjJ1anFi").willReturn(
-                status(404)
-            )
-        )
+        wireMock.register(ccdGetCaseMapping().willReturn(status(404)))
         given()
             .setBody(callbackRequest)
             .postToCallback()
@@ -116,11 +111,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @Test
     fun `should fail correctly if ccd is down`() {
-        wireMock.register(
-            get("/cases/$CASE_REF").hasAuthoriseTokenContaining("eyJqdGkiOiJwMTY1bzNlY2c1dmExMjJ1anFi").willReturn(
-                status(500)
-            )
-        )
+        wireMock.register(ccdGetCaseMapping().willReturn(status(500)))
         given()
             .setBody(callbackRequest)
             .postToCallback()
