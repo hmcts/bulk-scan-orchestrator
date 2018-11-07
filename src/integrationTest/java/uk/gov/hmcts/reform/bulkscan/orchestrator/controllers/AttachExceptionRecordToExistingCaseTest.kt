@@ -66,7 +66,6 @@ class AttachExceptionRecordToExistingCaseTest {
         .hasAuthoriseTokenContaining("eyJqdGkiOiJwMTY1bzNlY2c1dmExMjJ1anFi")
         .hasS2STokenContaining("eyJzdWIiOiJidWxrX3NjYW5")
 
-
     private val caseData: CaseDetails = CaseDetails.builder()
         .jurisdiction(Environment.JURIDICTION)
         .caseTypeId(Environment.CASE_TYPE_BULK_SCAN)
