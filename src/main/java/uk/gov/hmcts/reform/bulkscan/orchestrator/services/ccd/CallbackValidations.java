@@ -87,6 +87,5 @@ final class CallbackValidations {
     @NotNull
     static Validation<String, List<Map<String, Object>>> hasAScannedDocument(CaseDetails theCase) {
         return scannedRecordValidator.validate(theCase);
-
     }
 }
