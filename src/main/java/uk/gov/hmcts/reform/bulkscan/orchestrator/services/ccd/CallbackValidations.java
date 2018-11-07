@@ -34,7 +34,7 @@ final class CallbackValidations {
     }
 
     @NotNull
-    static <T> Validation<String, T> internalError(String error, T arg1) {
+    private static <T> Validation<String, T> internalError(String error, T arg1) {
         log.error("{}:{}", error, arg1);
         String formatString = "Internal Error: " + error;
         return invalid(format(formatString, arg1));
@@ -51,13 +51,17 @@ final class CallbackValidations {
 
     @NotNull
     static Validation<String, String> hasCaseReference(CaseDetails theCase) {
-        Object caseReference = null;
+        Object caseObj = null;
+        String caseReference;
         return theCase != null
             && theCase.getData() != null
-            && (caseReference = theCase.getData().get(ATTACH_TO_CASE_REFERENCE)) != null
-            && (caseReference instanceof String)
-            ? valid((String) caseReference)
-            : internalError("no case reference found: %s", String.valueOf(caseReference));
+            && (caseObj = theCase.getData().get(ATTACH_TO_CASE_REFERENCE)) != null
+            && (caseObj instanceof String)
+            && (!(caseReference = ((String) caseObj).replaceAll("[^0-9]", "")).isEmpty())
+            ? valid(caseReference)
+            : invalid((caseObj != null)
+            ? format("Invalid case reference: '%s'", String.valueOf(caseObj))
+            : "No case reference supplied");
     }
 
     @NotNull
