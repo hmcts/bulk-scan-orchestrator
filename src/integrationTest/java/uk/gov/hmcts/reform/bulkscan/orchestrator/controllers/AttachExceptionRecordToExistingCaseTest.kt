@@ -27,7 +27,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import u.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.PortWaiter.waitFor
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_REF
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_TYPE_BULK_SCAN
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.JURIDICTION
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.USER_ID
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.IntegrationTest
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.CallbackRequestBuilder
@@ -60,8 +62,8 @@ class AttachExceptionRecordToExistingCaseTest {
     private val wireMock by lazy { WireMock(wireMockPort) }
 
     private val startEvent = get(
-        "/caseworkers/640/jurisdictions/BULKSCAN/case-types/Bulk_Scanned"
-            + "/cases/1539007368674134/event-triggers/attachScannedDocs/token"
+        "/caseworkers/$USER_ID/jurisdictions/$JURIDICTION/case-types/$CASE_TYPE_BULK_SCAN"
+            + "/cases/$CASE_REF/event-triggers/attachScannedDocs/token"
     )
         .hasAuthoriseTokenContaining("eyJqdGkiOiJwMTY1bzNlY2c1dmExMjJ1anFi")
         .hasS2STokenContaining("eyJzdWIiOiJidWxrX3NjYW5")
@@ -120,7 +122,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .postToCallback()
             .then()
             .statusCode(200)
-            .shouldContainError("Internal Error: start event call failed case: 1539007368674134 Error: 404")
+            .shouldContainError("Internal Error: start event call failed case: $CASE_REF Error: 404")
     }
 
     @Test
@@ -142,7 +144,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .postToCallback()
             .then()
             .statusCode(200)
-            .shouldContainError("Internal Error: Could not retrieve case: 1539007368674134 Error: 500")
+            .shouldContainError("Internal Error: Could not retrieve case: $CASE_REF Error: 500")
     }
 
     @Test
