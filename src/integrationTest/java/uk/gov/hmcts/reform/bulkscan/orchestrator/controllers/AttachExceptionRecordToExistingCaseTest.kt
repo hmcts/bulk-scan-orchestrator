@@ -116,7 +116,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .postToCallback()
             .then()
             .statusCode(200)
-            .shouldContainError("Internal Error: Could not retrieve case: 1539007368674134 Error: 500")
+            .shouldContainError("Internal Error: Could not retrieve case: $CASE_REF Error: 500")
     }
 
     @Test
