@@ -40,11 +40,8 @@ fun RequestSpecification.postToCallback(type: String = "attach_case") = post("/c
 fun RequestSpecification.setBody(builder: CallbackRequestBuilder) = body(builder.build())
 fun ResponseValidation.shouldContainError(error: String) = body("errors", hasItem(error))
 
-fun MappingBuilder.authorised() = with(this) {
-    withHeader(AUTHORIZATION, containing("eyJhbGciOiJIUzI1NiJ9."))
-    //TODO cant seem to make this match
-//    withHeader("ServiceAuthorization", containing("eyJhbGciOiJIUzI1NiJ9."))
-}
+fun MappingBuilder.hasAuthoriseTokenContaining(token: String) = withHeader(AUTHORIZATION, containing(token))
+fun MappingBuilder.hasS2STokenContaining(token: String) = withHeader("ServiceAuthorization", containing(token))
 
 @ExtendWith(SpringExtension::class)
 @IntegrationTest
@@ -65,15 +62,19 @@ class AttachExceptionRecordToExistingCaseTest {
     private val startEvent = get(
         "/caseworkers/640/jurisdictions/BULKSCAN/case-types/Bulk_Scanned"
             + "/cases/1539007368674134/event-triggers/attachScannedDocs/token"
-    ).authorised()
-
-    private val getCase = get("/cases/$CASE_REF").authorised()
+    )
+        .hasAuthoriseTokenContaining("eyJqdGkiOiJwMTY1bzNlY2c1dmExMjJ1anFi")
+        .hasS2STokenContaining("eyJzdWIiOiJidWxrX3NjYW5")
 
     private val caseData: CaseDetails = CaseDetails.builder()
         .jurisdiction(Environment.JURIDICTION)
         .caseTypeId(Environment.CASE_TYPE_BULK_SCAN)
         .id(Environment.CASE_REF.toLong())
         .build()
+
+    private fun ccdGetCaseMapping() = get("/cases/$CASE_REF")
+        .hasAuthoriseTokenContaining("eyJqdGkiOiJwMTY1bzNlY2c1dmExMjJ1anFi")
+        .hasS2STokenContaining("eyJzdWIiOiJidWxrX3NjYW5")
 
     private val startEventResponse = StartEventResponse
         .builder()
@@ -83,8 +84,8 @@ class AttachExceptionRecordToExistingCaseTest {
     @BeforeEach
     fun before() {
         waitFor(applicationPort)
+        wireMock.register(ccdGetCaseMapping().willReturn(okJson(asJson(caseData))))
         wireMock.register(startEvent.willReturn(okJson(asJson(startEventResponse))))
-        wireMock.register(getCase.willReturn(okJson(asJson(caseData))))
         RestAssured.requestSpecification = RequestSpecBuilder().setPort(applicationPort).setContentType(JSON).build()
     }
 
@@ -124,7 +125,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @Test
     fun `should fail correctly if the case does not exist`() {
-        wireMock.register(getCase.willReturn(status(404)))
+        wireMock.register(ccdGetCaseMapping().willReturn(status(404)))
         given()
             .setBody(callbackRequest)
             .postToCallback()
@@ -135,7 +136,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @Test
     fun `should fail correctly if ccd is down`() {
-        wireMock.register(getCase.willReturn(status(500)))
+        wireMock.register(ccdGetCaseMapping().willReturn(status(500)))
         given()
             .setBody(callbackRequest)
             .postToCallback()
