@@ -66,8 +66,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
     private fun ccdGetCaseMapping() = get("/cases/$CASE_REF")
         .hasAuthoriseTokenContaining("eyJqdGkiOiJwMTY1bzNlY2c1dmExMjJ1anFi")
-    //TODO seems to be a bug in Wiremock ?
-//     .hasS2STokenContaining("binwtl8TgeDrAVV0LlCTRtb")
+        .hasS2STokenContaining("eyJzdWIiOiJidWxrX3NjYW5")
 
     @BeforeEach
     fun before() {
