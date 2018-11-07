@@ -12,7 +12,8 @@ class CaseReferenceValidator {
     private static final String ATTACH_TO_CASE_REFERENCE = "attachToCaseReference";
 
     Validation<String, String> validate(CaseDetails theCase) {
-        return Option.of(theCase)
+        return
+            Option.of(theCase)
             .flatMap(c -> Option.of(c.getData()))
             .flatMap(data -> Option.of(data.get(ATTACH_TO_CASE_REFERENCE)))
             .flatMap(this::validateAndConvert)

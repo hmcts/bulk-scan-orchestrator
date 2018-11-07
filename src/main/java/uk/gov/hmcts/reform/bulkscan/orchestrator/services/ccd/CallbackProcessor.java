@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAScannedDocument;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseDetails;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseReference;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseTypeId;
@@ -26,7 +27,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 public class CallbackProcessor {
     private static final Logger log = LoggerFactory.getLogger(CallbackProcessor.class);
     private static final String SCANNED_DOCUMENTS = "scannedDocuments";
-    private static final String SCAN_RECORDS = "scanRecords";
 
     private CcdAuthenticatorFactory authFactory;
     private final CallbackCcdApi ccdApi;
@@ -46,6 +46,7 @@ public class CallbackProcessor {
                 hasJurisdiction(caseDetails),
                 hasCaseTypeId(caseDetails),
                 hasCaseReference(caseDetails),
+                hasAScannedDocument(caseDetails),
                 hasCaseDetails(caseDetails)
             )
             .ap(this::attachCase)
@@ -59,26 +60,26 @@ public class CallbackProcessor {
                                     String exceptionRecordJurisdiction,
                                     String caseTypeId,
                                     String caseRef,
+                                    List<Map<String, Object>> exceptionDocuments,
                                     CaseDetails exceptionRecord) {
         try {
-            attachCase(exceptionRecordJurisdiction, caseRef, exceptionRecord.getData());
+            attachCase(exceptionRecordJurisdiction, caseRef, exceptionDocuments);
             return success();
         } catch (CallbackException e) {
             return createErrorList(e);
         }
     }
 
-    @NotNull
     private void attachCase(String exceptionRecordJurisdiction,
                             String caseRef,
-                            Map<String, Object> exceptionRecordData) {
+                            List<Map<String, Object>> exceptionDocuments) {
         CcdAuthenticator authenticator = authFactory.createForJurisdiction(exceptionRecordJurisdiction);
         CaseDetails theCase = ccdApi.getCase(caseRef, authenticator);
         StartEventResponse event = ccdApi.startAttachScannedDocs(caseRef, authenticator, theCase);
         ccdApi.attachExceptionRecord(caseRef,
             authenticator,
             theCase,
-            insertNewScannedDocument(exceptionRecordData, theCase.getData()),
+            insertNewScannedDocument(exceptionDocuments, theCase.getData()),
             event.getEventId(),
             event.getToken()
         );
@@ -97,12 +98,11 @@ public class CallbackProcessor {
 
     @SuppressWarnings({"unchecked", "squid:S1135"})
     //TODO WIP
-    private Map<String, Object> insertNewScannedDocument(Map<String, Object> exceptionData,
+    private Map<String, Object> insertNewScannedDocument(List<Map<String, Object>> exceptionDocuments,
                                                          Map<String, Object> caseData) {
-        //TODO check SCANNED_DOCUMENTS exists and has a document
         //TODO check that document Id is unique and not duplicate in caseData
         List<Object> caseList = (List<Object>) caseData.get(SCANNED_DOCUMENTS);
-        caseList.addAll((List<Object>) exceptionData.get(SCAN_RECORDS));
+        caseList.addAll(exceptionDocuments);
         return ImmutableMap.of(SCANNED_DOCUMENTS, caseList);
     }
 }
