@@ -26,7 +26,7 @@ class CallbackValidationsTest {
             {"generic non number removal", caseWithReference("£1234234393"), true, "1234234393"},
             {"- removal", caseWithReference("1234-234-393"), true, "1234234393"},
             {"space removal", caseWithReference("1234 234 393"), true, "1234234393"},
-            {"prefix and post fix spaces removal", caseWithReference("  AH1234 234 393 "), true, "1234234393"},
+            {"prefix and post fix spaces removal", caseWithReference("  AH 234 393 "), true, "234393"},
             {"No numbers supplied", caseWithReference("#"), false, "Invalid case reference: '#'"},
             {"empty string", caseWithReference(""), false, "Invalid case reference: ''"},
             {"null case details", null, false, noReferenceSupplied},
@@ -45,9 +45,10 @@ class CallbackValidationsTest {
 
 
     private static Object[][] scannedRecordTestParams() {
-        String noDocumentError = "InternalError: no scanned document supplied";
+        String noDocumentError = "There were no documents in exception record";
+        CaseDetails validDoc = caseWithDocument(document("fileName.pdf"));
         return new Object[][]{
-            {"Correct map with document", caseWithDocument(document("fileName.pdf")), true, document("fileName.pdf"), null},
+            {"Correct map with document", validDoc, true, document("fileName.pdf"), null},
             {"Null case details", null, false, null, noDocumentError},
             {"Null data supplied", createCaseWith(b -> b.data(null)), false, null, noDocumentError},
             {"Empty data supplied", createCaseWith(b -> b.data(ImmutableMap.of())), false, null, noDocumentError},
@@ -59,11 +60,19 @@ class CallbackValidationsTest {
     @ParameterizedTest(name = "{0}: valid:{2} error:{4}")
     @MethodSource("scannedRecordTestParams")
     @DisplayName("Should check that at least one scanned record exists")
-    void scannedRecordTest(String caseReason, CaseDetails input, boolean valid, List<Map<String, Object>> realValue, String errorString) {
+    void scannedRecordTest(String caseReason,
+                           CaseDetails input,
+                           boolean valid,
+                           List<Map<String, Object>> realValue,
+                           String errorString) {
         checkValidation(input, valid, realValue, CallbackValidations::hasAScannedDocument, errorString);
     }
 
-    private <T> void checkValidation(CaseDetails input, boolean valid, T realValue, Function<CaseDetails, Validation<String, T>> validationMethod, String errorString) {
+    private <T> void checkValidation(CaseDetails input,
+                                     boolean valid,
+                                     T realValue,
+                                     Function<CaseDetails, Validation<String, T>> validationMethod,
+                                     String errorString) {
         Validation<String, T> validation = validationMethod.apply(input);
         if (valid) {
             assertSoftly(softly -> {

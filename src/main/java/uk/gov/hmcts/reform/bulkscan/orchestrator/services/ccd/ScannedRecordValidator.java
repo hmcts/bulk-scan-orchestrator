@@ -21,7 +21,7 @@ class ScannedRecordValidator {
                 .map(scanRecords -> (List<Map<String, Object>>) scanRecords))
             .filter(scanRecords -> scanRecords.size() > 0)
             .map(Validation::<String, List<Map<String, Object>>>valid)
-            .getOrElse(() -> invalid("InternalError: no scanned document supplied"));
+            .getOrElse(() -> invalid("There were no documents in exception record"));
     }
 
     private static Option<Object> getScannedRecord(CaseDetails theCase) {
