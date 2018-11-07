@@ -75,12 +75,12 @@ class AttachExceptionRecordToExistingCaseTest {
     private val wireMock by lazy { WireMock(wireMockPort) }
     private val caseUrl = "/caseworkers/640/jurisdictions/BULKSCAN/case-types/Bulk_Scanned/cases/1539007368674134"
 
-    private val startEvent = get("$caseUrl/event-triggers/attachScannedDocs/token")
+    private val ccdStartEvent = get("$caseUrl/event-triggers/attachScannedDocs/token")
         .hasAuthoriseTokenContaining("eyJqdGkiOiJwMTY1bzNlY2c1dmExMjJ1anFi")
         .hasS2STokenContaining("eyJzdWIiOiJidWxrX3NjYW5")
 
     private val submitUrl = "$caseUrl/events?ignore-warning=true"
-    private val submitEvent = post(submitUrl)
+    private val ccdSubmitEvent = post(submitUrl)
         .hasAuthoriseTokenContaining("eyJqdGkiOiJwMTY1bzNlY2c1dmExMjJ1anFi")
         .hasS2STokenContaining("eyJzdWIiOiJidWxrX3NjYW5")
 
@@ -116,9 +116,9 @@ class AttachExceptionRecordToExistingCaseTest {
     @BeforeEach
     fun before() {
         waitFor(applicationPort)
-        wireMock.register(ccdGetCaseMapping().willReturn(okJson(asJson(caseData))))
-        wireMock.register(startEvent.willReturn(okJson(asJson(startEventResponse))))
-        wireMock.register(submitEvent.willReturn(okJson(asJson(caseDetails))))
+        wireMock.register(ccdStartEvent.willReturn(okJson(asJson(startEventResponse))))
+        wireMock.register(ccdGetCaseMapping().willReturn(okJson(asJson(caseDetails))))
+        wireMock.register(ccdSubmitEvent.willReturn(okJson(asJson(caseDetails))))
         RestAssured.requestSpecification = RequestSpecBuilder().setPort(applicationPort).setContentType(JSON).build()
     }
 
@@ -152,7 +152,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @Test
     fun `should fail with the correct error when submit api call fails`() {
-        wireMock.register(submitEvent.willReturn(status(500)))
+        wireMock.register(ccdSubmitEvent.willReturn(status(500)))
         given()
             .setBody(callbackRequest)
             .postToCallback()
@@ -163,7 +163,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @Test
     fun `should fail with the correct error when start event api call fails`() {
-        wireMock.register(startEvent.willReturn(status(404)))
+        wireMock.register(ccdStartEvent.willReturn(status(404)))
 
         given()
             .setBody(callbackRequest)
