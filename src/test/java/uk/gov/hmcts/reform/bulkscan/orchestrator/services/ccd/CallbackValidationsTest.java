@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
+import com.google.common.collect.ImmutableMap;
 import io.vavr.control.Validation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,6 +23,7 @@ class CallbackValidationsTest {
             {caseWithReference(""), false, "Invalid case reference: ''"},
             {null, false, "No case reference supplied"},
             {createCaseWith(b -> b.data(null)), false, "No case reference supplied"},
+            {createCaseWith(b -> b.data(ImmutableMap.of())), false, "No case reference supplied"},
             {caseWithReference(null), false, "No case reference supplied"},
         };
     }
