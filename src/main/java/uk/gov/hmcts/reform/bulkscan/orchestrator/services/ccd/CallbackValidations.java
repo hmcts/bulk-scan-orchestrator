@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.util.Optional;
+
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
@@ -13,8 +15,8 @@ import static java.lang.String.format;
 
 final class CallbackValidations {
     private static final Logger log = LoggerFactory.getLogger(CallbackValidations.class);
-    private static final String ATTACH_TO_CASE_REFERENCE = "attachToCaseReference";
     private static final String ATTACH_TO_EXISTING_CASE = "attachToExistingCase";
+    private static final CaseReferenceValidator caseRefValidator = new CaseReferenceValidator();
 
     private CallbackValidations() {
     }
@@ -51,17 +53,14 @@ final class CallbackValidations {
 
     @NotNull
     static Validation<String, String> hasCaseReference(CaseDetails theCase) {
-        Object caseObj = null;
-        String caseReference;
-        return theCase != null
-            && theCase.getData() != null
-            && (caseObj = theCase.getData().get(ATTACH_TO_CASE_REFERENCE)) != null
-            && (caseObj instanceof String)
-            && (!(caseReference = ((String) caseObj).replaceAll("[^0-9]", "")).isEmpty())
-            ? valid(caseReference)
-            : invalid((caseObj != null)
-            ? format("Invalid case reference: '%s'", String.valueOf(caseObj))
-            : "No case reference supplied");
+        return caseRefValidator.validate(theCase);
+    }
+
+    private static Optional<String> validRef(Object reference) {
+        return Optional.of(reference)
+            .filter(ref -> ref instanceof String)
+            .map(ref -> ((String) ref).replaceAll("[^0-9]", ""))
+            .filter(ref -> !ref.isEmpty());
     }
 
     @NotNull
