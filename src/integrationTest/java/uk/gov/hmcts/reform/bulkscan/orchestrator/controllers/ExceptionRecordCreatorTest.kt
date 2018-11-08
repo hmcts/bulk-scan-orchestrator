@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_REF
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_TYPE_BULK_SCAN
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_TYPE_EXCEPTION_RECORD
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.getCaseUrl
@@ -31,6 +32,9 @@ class ExceptionRecordCreatorTest {
     private val mockSupplementaryMessage = Message(File(
         "src/integrationTest/resources/servicebus/message/supplementary-evidence-example.json"
     ).readText())
+    private val mockIncompleteSupplementaryMessage = Message(File(
+        "src/integrationTest/resources/servicebus/message/supplementary-evidence-example.json"
+    ).readText().replace(CASE_REF, ""))
     private val mockExceptionMessage = Message(File(
         "src/integrationTest/resources/servicebus/message/exception-example.json"
     ).readText())
@@ -63,6 +67,18 @@ class ExceptionRecordCreatorTest {
             .ignoreExceptions()
             .until {
                 server.verify(getRequestedFor(urlPathEqualTo(getCaseUrl)))
+                server.verify(postRequestedFor(urlPathEqualTo(caseSubmitUrl)))
+                true
+            }
+    }
+
+    @Test
+    fun `should create exception record for supplementary evidence when case ref is not provided`() {
+        messageSender.send(mockIncompleteSupplementaryMessage)
+        await()
+            .atMost(30, TimeUnit.SECONDS)
+            .ignoreExceptions()
+            .until {
                 server.verify(postRequestedFor(urlPathEqualTo(caseSubmitUrl)))
                 true
             }
