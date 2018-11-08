@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import feign.FeignException;
 import io.vavr.Value;
 import io.vavr.control.Validation;
-import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -13,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.List;
+import javax.annotation.Nonnull;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
