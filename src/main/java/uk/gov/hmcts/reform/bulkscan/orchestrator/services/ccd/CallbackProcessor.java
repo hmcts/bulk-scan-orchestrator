@@ -108,6 +108,8 @@ public class CallbackProcessor {
         );
     }
 
+    @SuppressWarnings( "squid:S1135")
+    //^ For 'TODO' warning
     private CaseDetails getCase(String caseRef, CcdAuthenticator authenticator) {
         try {
             // TODO: merge with `CaseRetriever` to a consistent api adaptor
