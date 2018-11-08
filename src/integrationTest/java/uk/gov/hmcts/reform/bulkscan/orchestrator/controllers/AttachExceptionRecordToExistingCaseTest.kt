@@ -182,7 +182,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .postToCallback()
             .then()
             .statusCode(200)
-            .shouldContainError("Internal Error: submitting attach file event failed case: 1539007368674134 Error: 500")
+            .shouldContainError("Internal Error: submitting attach file event failed case: $CASE_REF Error: 500")
     }
 
     @Test
