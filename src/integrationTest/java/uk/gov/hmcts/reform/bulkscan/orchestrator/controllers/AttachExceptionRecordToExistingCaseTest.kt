@@ -32,7 +32,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import u.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.PortWaiter.waitFor
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_REF
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_TYPE_BULK_SCAN
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.JURIDICTION
@@ -51,8 +50,8 @@ fun RequestSpecification.setBody(builder: CallbackRequestBuilder) = body(builder
 fun ResponseValidation.shouldContainError(error: String) = body("errors", hasItem(error))
 
 // see WireMock mapping json files
-val mockedIdamTokenSig = "q6hDG0Z1Qbinwtl8TgeDrAVV0LlCTRtbQqBYoMjd03k"
-val mockedS2sTokenSig = "X1-LdZAd5YgGFP16-dQrpqEICqRmcu1zL_zeCLyUqMjb5DVx7xoU-r8yXHfgd4tmmjGqbsBz_kLqgu8yruSbtg"
+const val mockedIdamTokenSig = "q6hDG0Z1Qbinwtl8TgeDrAVV0LlCTRtbQqBYoMjd03k"
+const val mockedS2sTokenSig = "X1-LdZAd5YgGFP16-dQrpqEICqRmcu1zL_zeCLyUqMjb5DVx7xoU-r8yXHfgd4tmmjGqbsBz_kLqgu8yruSbtg"
 fun MappingBuilder.withAuthorisationHeader() = withHeader(AUTHORIZATION, containing(mockedIdamTokenSig))
 fun MappingBuilder.withS2SHeader() = withHeader("ServiceAuthorization", containing(mockedS2sTokenSig))
 
@@ -104,9 +103,9 @@ class AttachExceptionRecordToExistingCaseTest {
     private val caseData = mapOf("scannedDocuments" to listOf(scannedDocument))
 
     private val caseDetails: CaseDetails = CaseDetails.builder()
-        .jurisdiction(Environment.JURIDICTION)
-        .caseTypeId(Environment.CASE_TYPE_BULK_SCAN)
-        .id(Environment.CASE_REF.toLong())
+        .jurisdiction(JURIDICTION)
+        .caseTypeId(CASE_TYPE_BULK_SCAN)
+        .id(CASE_REF.toLong())
         .data(caseData)
         .build()
 
@@ -137,13 +136,6 @@ class AttachExceptionRecordToExistingCaseTest {
         .builder()
         .caseDetails(exceptionRecord.build())
         .eventId("attachToExistingCase")
-
-    private fun defaultExceptionCase(): CaseDetails.CaseDetailsBuilder {
-        return CaseDetails.builder()
-            .jurisdiction(JURIDICTION)
-            .caseTypeId("ExceptionRecord")
-            .data(mapOf("attachToCaseReference" to CASE_REF))
-    }
 
     @Test
     fun `should successfully callback with correct information`() {
@@ -212,7 +204,6 @@ class AttachExceptionRecordToExistingCaseTest {
             .statusCode(200)
             .shouldContainError("Internal Error: no case details supplied")
     }
-
 
     @Test
     fun `should fail if invalid eventId set`() {
