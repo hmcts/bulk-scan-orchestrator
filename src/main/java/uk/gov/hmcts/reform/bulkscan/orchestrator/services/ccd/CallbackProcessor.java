@@ -110,6 +110,7 @@ public class CallbackProcessor {
 
     private CaseDetails getCase(String caseRef, CcdAuthenticator authenticator) {
         try {
+            // TODO: merge with `CaseRetriever` to a consistent api adaptor
             return retrieveCase(caseRef, authenticator);
         } catch (FeignException e) {
             if (e.status() == 404) {

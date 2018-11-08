@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.containing
 import com.github.tomakehurst.wiremock.client.WireMock.get
@@ -42,8 +41,9 @@ fun RequestSpecification.postToCallback(type: String = "attach_case") = post("/c
 fun RequestSpecification.setBody(builder: CallbackRequestBuilder) = body(builder.build())
 fun ResponseValidation.shouldContainError(error: String) = body("errors", hasItem(error))
 
-fun MappingBuilder.hasAuthoriseTokenContaining(token: String) = withHeader(AUTHORIZATION, containing(token))
-fun MappingBuilder.hasS2STokenContaining(token: String) = withHeader("ServiceAuthorization", containing(token))
+// see WireMock mapping json files
+val mockedIdamTokenSig = "q6hDG0Z1Qbinwtl8TgeDrAVV0LlCTRtbQqBYoMjd03k"
+val mockedS2sTokenSig = "X1-LdZAd5YgGFP16-dQrpqEICqRmcu1zL_zeCLyUqMjb5DVx7xoU-r8yXHfgd4tmmjGqbsBz_kLqgu8yruSbtg"
 
 @ExtendWith(SpringExtension::class)
 @IntegrationTest
@@ -75,8 +75,8 @@ class AttachExceptionRecordToExistingCaseTest {
         .build()
 
     private fun ccdGetCaseMapping() = get("/cases/$CASE_REF")
-        .hasAuthoriseTokenContaining("eyJqdGkiOiJwMTY1bzNlY2c1dmExMjJ1anFi")
-        .hasS2STokenContaining("eyJzdWIiOiJidWxrX3NjYW5")
+        .withHeader(AUTHORIZATION, containing(mockedIdamTokenSig))
+        .withHeader("ServiceAuthorization", containing(mockedS2sTokenSig))
 
     private val startEventResponse = StartEventResponse
         .builder()
