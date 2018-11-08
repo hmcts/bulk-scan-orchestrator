@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.Optional;
-
 import javax.annotation.Nonnull;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
