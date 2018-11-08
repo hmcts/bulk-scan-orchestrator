@@ -50,8 +50,11 @@ fun RequestSpecification.postToCallback(type: String = "attach_case") = post("/c
 fun RequestSpecification.setBody(builder: CallbackRequestBuilder) = body(builder.build())
 fun ResponseValidation.shouldContainError(error: String) = body("errors", hasItem(error))
 
-fun MappingBuilder.hasAuthoriseTokenContaining(token: String) = withHeader(AUTHORIZATION, containing(token))
-fun MappingBuilder.hasS2STokenContaining(token: String) = withHeader("ServiceAuthorization", containing(token))
+// see WireMock mapping json files
+val mockedIdamTokenSig = "q6hDG0Z1Qbinwtl8TgeDrAVV0LlCTRtbQqBYoMjd03k"
+val mockedS2sTokenSig = "X1-LdZAd5YgGFP16-dQrpqEICqRmcu1zL_zeCLyUqMjb5DVx7xoU-r8yXHfgd4tmmjGqbsBz_kLqgu8yruSbtg"
+fun MappingBuilder.withAuthorisationHeader() = withHeader(AUTHORIZATION, containing(mockedIdamTokenSig))
+fun MappingBuilder.withS2SHeader() = withHeader("ServiceAuthorization", containing(mockedS2sTokenSig))
 
 fun WiremockReq.scannedRecordFilenameAtIndex(index: Int, stringValuePattern: StringValuePattern) =
     withRequestBody(matchingJsonPath("\$.data.scannedDocuments[$index].fileName", stringValuePattern))
@@ -78,14 +81,17 @@ class AttachExceptionRecordToExistingCaseTest {
     private val caseUrl = "/caseworkers/$USER_ID/jurisdictions/$JURIDICTION" +
         "/case-types/$CASE_TYPE_BULK_SCAN/cases/$CASE_REF"
 
-    private val ccdStartEvent = get("$caseUrl/event-triggers/attachScannedDocs/token")
-        .hasAuthoriseTokenContaining("eyJqdGkiOiJwMTY1bzNlY2c1dmExMjJ1anFi")
-        .hasS2STokenContaining("eyJzdWIiOiJidWxrX3NjYW5")
+    private val ccdStartEvent = get(
+        "/caseworkers/$USER_ID/jurisdictions/$JURIDICTION/case-types/$CASE_TYPE_BULK_SCAN"
+            + "/cases/$CASE_REF/event-triggers/attachScannedDocs/token"
+    )
+        .withAuthorisationHeader()
+        .withS2SHeader()
 
     private val submitUrl = "$caseUrl/events?ignore-warning=true"
     private val ccdSubmitEvent = post(submitUrl)
-        .hasAuthoriseTokenContaining("eyJqdGkiOiJwMTY1bzNlY2c1dmExMjJ1anFi")
-        .hasS2STokenContaining("eyJzdWIiOiJidWxrX3NjYW5")
+        .withAuthorisationHeader()
+        .withS2SHeader()
 
     private val filename2 = "record.pdf"
     private val filename1 = "document.pdf"
@@ -101,9 +107,7 @@ class AttachExceptionRecordToExistingCaseTest {
         .data(caseData)
         .build()
 
-    private fun ccdGetCaseMapping() = get("/cases/$CASE_REF")
-        .hasAuthoriseTokenContaining("eyJqdGkiOiJwMTY1bzNlY2c1dmExMjJ1anFi")
-        .hasS2STokenContaining("eyJzdWIiOiJidWxrX3NjYW5")
+    private fun ccdGetCaseMapping() = get("/cases/$CASE_REF").withAuthorisationHeader().withS2SHeader()
 
     private val exceptionRecord = CaseDetails.builder()
         .jurisdiction(JURIDICTION)

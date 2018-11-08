@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import feign.FeignException;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -11,17 +10,26 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 import static java.lang.String.format;
 
+/**
+ * This class is intended to be a wrapper/adaptor/facade for the orchestrator -> CcdApi.
+ * In theory this should make the calls to ccd both easier to manage and quicker to refactor.
+ */
 @Component
-public class CallbackCcdApi {
+public class CcdApi {
     private final CoreCaseDataApi ccdApi;
+    private final CcdAuthenticatorFactory authenticatorFactory;
 
-    public CallbackCcdApi(CoreCaseDataApi ccdApi) {
-        this.ccdApi = ccdApi;
+    public CcdApi(CoreCaseDataApi feignCcdApi, CcdAuthenticatorFactory authenticator) {
+        this.ccdApi = feignCcdApi;
+        this.authenticatorFactory = authenticator;
     }
 
-    private CaseDetails retrieveCase(String caseRef, CcdAuthenticator authenticator) {
+    private CaseDetails retrieveCase(String caseRef, String jurisdiction) {
+        CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
         return ccdApi.getCase(authenticator.getUserToken(), authenticator.getServiceToken(), caseRef);
     }
 
@@ -40,19 +48,24 @@ public class CallbackCcdApi {
         );
     }
 
-    StartEventResponse startAttachScannedDocs(String caseRef,
-                                              CcdAuthenticator authenticator,
-                                              CaseDetails theCase) {
+    @Nonnull
+    StartEventResponse startAttachScannedDocs(CaseDetails theCase) {
+        String caseRef = String.valueOf(theCase.getId());
         try {
+            CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(theCase.getJurisdiction());
             return startAttachScannedDocs(caseRef, authenticator, theCase.getJurisdiction(), theCase.getCaseTypeId());
         } catch (FeignException e) {
             throw error(e, "Internal Error: start event call failed case: %s Error: %s", caseRef, e.status());
         }
     }
 
-    CaseDetails getCase(String caseRef, CcdAuthenticator authenticator) {
+    @Nonnull
+    @SuppressWarnings("squid:S1135")
+    //^ For 'TODO' warning
+    CaseDetails getCase(String caseRef, String jurisdiction) {
         try {
-            return retrieveCase(caseRef, authenticator);
+            //TODO: merge with `CaseRetriever` to a consistent api adaptor
+            return retrieveCase(caseRef, jurisdiction);
         } catch (FeignException e) {
             if (e.status() == 404) {
                 throw error(e, "Could not find case: %s", caseRef);
@@ -102,7 +115,6 @@ public class CallbackCcdApi {
         return error(e, errorFmt, arg, null);
     }
 
-    @NotNull
     private static CallbackException error(Exception e, String errorFmt, Object arg1, Object arg2) {
         return new CallbackException(format(errorFmt, arg1, arg2), e);
     }
