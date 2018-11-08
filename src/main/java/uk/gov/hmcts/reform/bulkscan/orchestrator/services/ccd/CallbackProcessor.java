@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import javax.annotation.Nonnull;
 
