@@ -1,11 +1,12 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import feign.FeignException;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+
+import javax.annotation.Nonnull;
 
 import static java.lang.String.format;
 
@@ -36,6 +37,7 @@ public class CallbackCcdApi {
         );
     }
 
+    @Nonnull
     StartEventResponse startAttachScannedDocs(String caseRef,
                                               CcdAuthenticator authenticator,
                                               CaseDetails theCase) {
@@ -46,6 +48,7 @@ public class CallbackCcdApi {
         }
     }
 
+    @Nonnull
     CaseDetails getCase(String caseRef, CcdAuthenticator authenticator) {
         try {
             return retrieveCase(caseRef, authenticator);
@@ -62,7 +65,6 @@ public class CallbackCcdApi {
         return error(e, errorFmt, arg, null);
     }
 
-    @NotNull
     private static CallbackException error(Exception e, String errorFmt, Object arg1, Object arg2) {
         return new CallbackException(format(errorFmt, arg1, arg2), e);
     }
