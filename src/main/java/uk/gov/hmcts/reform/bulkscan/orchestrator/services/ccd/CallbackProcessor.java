@@ -61,9 +61,8 @@ public class CallbackProcessor {
     }
 
     private void attachCase(String exceptionRecordJurisdiction, String caseRef) {
-        CcdAuthenticator authenticator = authFactory.createForJurisdiction(exceptionRecordJurisdiction);
-        CaseDetails theCase = ccdApi.getCase(caseRef, authenticator);
-        ccdApi.startAttachScannedDocs(caseRef, authenticator, theCase);
+        CaseDetails theCase = ccdApi.getCase(caseRef, exceptionRecordJurisdiction);
+        ccdApi.startAttachScannedDocs(theCase);
     }
 
     @Nonnull

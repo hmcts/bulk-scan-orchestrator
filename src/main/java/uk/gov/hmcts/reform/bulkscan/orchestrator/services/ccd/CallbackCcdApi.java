@@ -13,12 +13,15 @@ import static java.lang.String.format;
 @Component
 public class CallbackCcdApi {
     private final CoreCaseDataApi ccdApi;
+    private final CcdAuthenticatorFactory authenticatorFactory;
 
-    public CallbackCcdApi(CoreCaseDataApi ccdApi) {
+    public CallbackCcdApi(CoreCaseDataApi ccdApi, CcdAuthenticatorFactory authenticator) {
         this.ccdApi = ccdApi;
+        this.authenticatorFactory = authenticator;
     }
 
-    private CaseDetails retrieveCase(String caseRef, CcdAuthenticator authenticator) {
+    private CaseDetails retrieveCase(String caseRef, String jurisdiction) {
+        CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
         return ccdApi.getCase(authenticator.getUserToken(), authenticator.getServiceToken(), caseRef);
     }
 
@@ -38,10 +41,10 @@ public class CallbackCcdApi {
     }
 
     @Nonnull
-    StartEventResponse startAttachScannedDocs(String caseRef,
-                                              CcdAuthenticator authenticator,
-                                              CaseDetails theCase) {
+    StartEventResponse startAttachScannedDocs(CaseDetails theCase) {
+        String caseRef = String.valueOf(theCase.getId());
         try {
+            CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(theCase.getJurisdiction());
             return startAttachScannedDocs(caseRef, authenticator, theCase.getJurisdiction(), theCase.getCaseTypeId());
         } catch (FeignException e) {
             throw error(e, "Internal Error: start event call failed case: %s Error: %s", caseRef, e.status());
@@ -49,9 +52,9 @@ public class CallbackCcdApi {
     }
 
     @Nonnull
-    CaseDetails getCase(String caseRef, CcdAuthenticator authenticator) {
+    CaseDetails getCase(String caseRef, String jurisdiction) {
         try {
-            return retrieveCase(caseRef, authenticator);
+            return retrieveCase(caseRef, jurisdiction);
         } catch (FeignException e) {
             if (e.status() == 404) {
                 throw error(e, "Could not find case: %s", caseRef);
