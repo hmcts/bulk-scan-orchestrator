@@ -92,7 +92,8 @@ public class CcdApi {
                             CcdAuthenticator authenticator,
                             Map<String, Object> data,
                             String eventId,
-                            String token, String jurisdiction,
+                            String token,
+                            String jurisdiction,
                             String caseTypeId) {
         feignCcdApi.submitEventForCaseWorker(
             authenticator.getUserToken(),
