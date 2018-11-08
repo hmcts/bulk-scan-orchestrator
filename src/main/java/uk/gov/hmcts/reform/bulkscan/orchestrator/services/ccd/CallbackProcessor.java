@@ -57,6 +57,7 @@ public class CallbackProcessor {
                                     CaseDetails exceptionRecord) {
         CcdAuthenticator authenticator = authFactory.createForJurisdiction(jurisdiction);
         try {
+            // TODO: use `CaseRetriever`
             retrieveCase(caseRef, authenticator);
         } catch (FeignException e) {
             if (e.status() == 404) {
