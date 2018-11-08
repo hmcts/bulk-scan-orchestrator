@@ -1,20 +1,16 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.collect.ImmutableList;
-import feign.FeignException;
 import io.vavr.Value;
 import io.vavr.control.Validation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.List;
 import javax.annotation.Nonnull;
 
-import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseDetails;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseReference;
@@ -26,12 +22,10 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 @Service
 public class CallbackProcessor {
     private static final Logger log = LoggerFactory.getLogger(CallbackProcessor.class);
-    private final CoreCaseDataApi ccdApi;
-    private final CcdAuthenticatorFactory authFactory;
+    private final CcdApi ccdApi;
 
-    public CallbackProcessor(CoreCaseDataApi ccdApi, CcdAuthenticatorFactory authFactory) {
+    public CallbackProcessor(CcdApi ccdApi) {
         this.ccdApi = ccdApi;
-        this.authFactory = authFactory;
     }
 
     public List<String> process(String eventType, String eventId, CaseDetails caseDetails) {
@@ -65,9 +59,8 @@ public class CallbackProcessor {
     }
 
     private void attachCase(String exceptionRecordJurisdiction, String caseRef) {
-        CcdAuthenticator authenticator = authFactory.createForJurisdiction(exceptionRecordJurisdiction);
-        CaseDetails theCase = getCase(caseRef, authenticator);
-        startAttachScannedDocs(caseRef, authenticator, theCase);
+        CaseDetails theCase = ccdApi.getCase(caseRef, exceptionRecordJurisdiction);
+        ccdApi.startAttachScannedDocs(theCase);
     }
 
     @Nonnull
@@ -80,57 +73,5 @@ public class CallbackProcessor {
     @Nonnull
     private List<String> success() {
         return emptyList();
-    }
-
-    private StartEventResponse startAttachScannedDocs(String caseRef,
-                                                      CcdAuthenticator authenticator,
-                                                      CaseDetails theCase) {
-        try {
-            return startAttachScannedDocs(caseRef, authenticator, theCase.getJurisdiction(), theCase.getCaseTypeId());
-        } catch (FeignException e) {
-            throw error(e, "Internal Error: start event call failed case: %s Error: %s", caseRef, e.status());
-        }
-    }
-
-    private StartEventResponse startAttachScannedDocs(String caseRef,
-                                                      CcdAuthenticator authenticator,
-                                                      String jurisdiction,
-                                                      String caseTypeId) {
-        return ccdApi.startEventForCaseWorker(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
-            jurisdiction,
-            caseTypeId,
-            caseRef,
-            "attachScannedDocs"
-        );
-    }
-
-    @SuppressWarnings("squid:S1135")
-    //^ For 'TODO' warning
-    private CaseDetails getCase(String caseRef, CcdAuthenticator authenticator) {
-        try {
-            // TODO: merge with `CaseRetriever` to a consistent api adaptor
-            return retrieveCase(caseRef, authenticator);
-        } catch (FeignException e) {
-            if (e.status() == 404) {
-                throw error(e, "Could not find case: %s", caseRef);
-            } else {
-                throw error(e, "Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status());
-            }
-        }
-    }
-
-    private CaseDetails retrieveCase(String caseRef, CcdAuthenticator authenticator) {
-        return ccdApi.getCase(authenticator.getUserToken(), authenticator.getServiceToken(), caseRef);
-    }
-
-    private CallbackException error(Exception e, String errorFmt, Object arg) {
-        return error(e, errorFmt, arg, null);
-    }
-
-    private CallbackException error(Exception e, String errorFmt, Object arg1, Object arg2) {
-        return new CallbackException(format(errorFmt, arg1, arg2), e);
     }
 }
