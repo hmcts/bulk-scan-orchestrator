@@ -1,10 +1,11 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import io.vavr.control.Validation;
-import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+
+import javax.annotation.Nonnull;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static io.vavr.control.Validation.invalid;
