@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseDetails;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseReference;
@@ -59,7 +60,7 @@ public class CallbackProcessor {
                                     String caseRef,
                                     CaseDetails exceptionRecord) {
         try {
-            attachCase(exceptionRecordJurisdiction, caseRef, exceptionRecord.getData());
+            attachCase(exceptionRecordJurisdiction, caseRef, exceptionRecord);
             return success();
         } catch (CallbackException e) {
             return createErrorList(e);
@@ -68,11 +69,22 @@ public class CallbackProcessor {
 
     private void attachCase(String exceptionRecordJurisdiction,
                             String caseRef,
-                            Map<String, Object> exceptionRecordData) {
+                            CaseDetails exceptionRecord) {
         CaseDetails theCase = ccdApi.getCase(caseRef, exceptionRecordJurisdiction);
         StartEventResponse event = ccdApi.startAttachScannedDocs(theCase);
-        Map<String, Object> data = insertNewScannedDocument(exceptionRecordData, theCase.getData());
-        ccdApi.attachExceptionRecord(theCase, data, event);
+        Map<String, Object> data = insertNewScannedDocument(exceptionRecord.getData(), theCase.getData());
+        ccdApi.attachExceptionRecord(theCase, data, createEventSummary(exceptionRecord, theCase), event);
+    }
+
+    private String createEventSummary(CaseDetails exceptionRecord, CaseDetails theCase) {
+        return format("Attaching exception record(%d) document number:%s to case:%d",
+            exceptionRecord.getId(),
+            getDocumentNumber(exceptionRecord.getData()),
+            theCase.getId());
+    }
+
+    private String getDocumentNumber(Map<String, Object> data) {
+        return (String) getScannedDocuments(data).get(0).get("documentNumber");
     }
 
     @Nonnull
@@ -93,8 +105,13 @@ public class CallbackProcessor {
                                                          Map<String, Object> caseData) {
         //TODO check SCANNED_DOCUMENTS exists and has a document
         //TODO check that document Id is unique and not duplicate in caseData
-        List<Object> caseList = (List<Object>) caseData.get(SCANNED_DOCUMENTS);
-        caseList.addAll((List<Object>) exceptionData.get(SCAN_RECORDS));
+        List<Map<String, Object>> caseList = (List<Map<String, Object>>) caseData.get(SCANNED_DOCUMENTS);
+        caseList.addAll(getScannedDocuments(exceptionData));
         return ImmutableMap.of(SCANNED_DOCUMENTS, caseList);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> getScannedDocuments(Map<String, Object> exceptionData) {
+        return (List<Map<String, Object>>) exceptionData.get(SCAN_RECORDS);
     }
 }

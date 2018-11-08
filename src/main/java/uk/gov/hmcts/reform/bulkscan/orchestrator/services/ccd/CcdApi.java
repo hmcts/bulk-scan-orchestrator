@@ -75,13 +75,20 @@ public class CcdApi {
 
     void attachExceptionRecord(CaseDetails theCase,
                                Map<String, Object> data,
+                               String eventSummary,
                                StartEventResponse event) {
         String caseRef = String.valueOf(theCase.getId());
         String jurisdiction = theCase.getJurisdiction();
         String caseTypeId = theCase.getCaseTypeId();
         try {
             CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
-            attachCall(caseRef, authenticator, data, event.getEventId(), event.getToken(), jurisdiction, caseTypeId);
+            attachCall(caseRef,
+                authenticator,
+                data,
+                event.getToken(),
+                jurisdiction,
+                caseTypeId,
+                Event.builder().summary(eventSummary).id(event.getEventId()).build());
         } catch (FeignException e) {
             throw error(e, "Internal Error: submitting attach file event failed case: %s Error: %s",
                 caseRef, e.status());
@@ -91,10 +98,10 @@ public class CcdApi {
     private void attachCall(String caseRef,
                             CcdAuthenticator authenticator,
                             Map<String, Object> data,
-                            String eventId,
-                            String token,
+                            String eventToken,
                             String jurisdiction,
-                            String caseTypeId) {
+                            String caseTypeId,
+                            Event eventInfo) {
         feignCcdApi.submitEventForCaseWorker(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
@@ -105,8 +112,8 @@ public class CcdApi {
             true,
             CaseDataContent.builder()
                 .data(data)
-                .event(Event.builder().id(eventId).build())
-                .eventToken(token)
+                .event(eventInfo)
+                .eventToken(eventToken)
                 .build()
         );
     }
