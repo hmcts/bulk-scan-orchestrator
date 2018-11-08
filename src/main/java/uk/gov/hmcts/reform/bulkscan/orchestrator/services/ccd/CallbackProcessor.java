@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import feign.FeignException;
 import io.vavr.Value;
 import io.vavr.control.Validation;
-import org.jetbrains.annotations.NotNull;
+import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -64,21 +64,21 @@ public class CallbackProcessor {
         }
     }
 
-    @NotNull
+    @Nonnull
     private void attachCase(String exceptionRecordJurisdiction, String caseRef) {
         CcdAuthenticator authenticator = authFactory.createForJurisdiction(exceptionRecordJurisdiction);
         CaseDetails theCase = getCase(caseRef, authenticator);
         startAttachScannedDocs(caseRef, authenticator, theCase);
     }
 
-    @NotNull
+    @Nonnull
     private List<String> createErrorList(CallbackException e) {
         String message = e.getMessage();
         log.error(message, e);
         return ImmutableList.of(message);
     }
 
-    @NotNull
+    @Nonnull
     private List<String> success() {
         return emptyList();
     }
@@ -131,7 +131,6 @@ public class CallbackProcessor {
         return error(e, errorFmt, arg, null);
     }
 
-    @NotNull
     private CallbackException error(Exception e, String errorFmt, Object arg1, Object arg2) {
         return new CallbackException(format(errorFmt, arg1, arg2), e);
     }
