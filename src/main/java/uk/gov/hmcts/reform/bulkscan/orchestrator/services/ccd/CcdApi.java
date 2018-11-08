@@ -82,7 +82,14 @@ public class CcdApi {
         String caseTypeId = theCase.getCaseTypeId();
         try {
             CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
-            attachCall(caseRef, authenticator, data, eventSummary, event.getEventId(), event.getToken(), jurisdiction, caseTypeId);
+            attachCall(caseRef,
+                authenticator,
+                data,
+                eventSummary,
+                event.getEventId(),
+                event.getToken(),
+                jurisdiction,
+                caseTypeId);
         } catch (FeignException e) {
             throw error(e, "Internal Error: submitting attach file event failed case: %s Error: %s",
                 caseRef, e.status());
