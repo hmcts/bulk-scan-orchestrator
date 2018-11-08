@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.containing
+import com.github.tomakehurst.wiremock.client.WireMock.exactly
 import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
@@ -89,7 +91,8 @@ class AttachExceptionRecordToExistingCaseTest {
     private val caseUrl = "/caseworkers/$USER_ID/jurisdictions/$JURIDICTION" +
         "/case-types/$CASE_TYPE_BULK_SCAN/cases/$CASE_REF"
 
-    private val ccdStartEvent = get("$caseUrl/event-triggers/attachScannedDocs/token")
+    private val startEventUrl = "$caseUrl/event-triggers/attachScannedDocs/token"
+    private val ccdStartEvent = get(startEventUrl)
         .hasAuthoriseTokenContaining("eyJqdGkiOiJwMTY1bzNlY2c1dmExMjJ1anFi")
         .hasS2STokenContaining("eyJzdWIiOiJidWxrX3NjYW5")
 
@@ -140,6 +143,7 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     private fun submittedScannedRecords() = postRequestedFor(urlEqualTo(submitUrl))
+    private fun startEventRequest() = getRequestedFor(urlEqualTo(startEventUrl))
 
     private val exceptionRecordCallbackBody = CallbackRequest
         .builder()
@@ -164,6 +168,8 @@ class AttachExceptionRecordToExistingCaseTest {
             .then()
             .statusCode(200)
             .body("errors.size()", equalTo(0))
+
+        verify(startEventRequest())
         verify(submittedScannedRecords().numberOfScannedDocumentsIs(2))
         verify(submittedScannedRecords().scannedRecordFilenameAtIndex(0, WireMock.equalTo(filename)))
         verify(submittedScannedRecords().scannedRecordFilenameAtIndex(1, WireMock.equalTo(exceptionRecordFileName)))
@@ -202,6 +208,9 @@ class AttachExceptionRecordToExistingCaseTest {
             .then()
             .statusCode(200)
             .shouldContainError("Document with documentId $documentNumber is already attached to $CASE_REF")
+
+        verify(exactly(0), startEventRequest())
+        verify(exactly(0), submittedScannedRecords())
     }
 
     @Test

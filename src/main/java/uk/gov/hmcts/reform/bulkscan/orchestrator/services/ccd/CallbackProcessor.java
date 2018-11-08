@@ -78,14 +78,27 @@ public class CallbackProcessor {
                             List<Map<String, Object>> exceptionDocuments) {
         CcdAuthenticator authenticator = authFactory.createForJurisdiction(exceptionRecordJurisdiction);
         CaseDetails theCase = ccdApi.getCase(caseRef, authenticator);
+
+        //TODO check for missing scannedDocs else empty list ?
+        List<Map<String, Object>> existingDocuments = getDocuments(theCase);
+
+        //TODO assert that there is a document number on exception record ?
+        checkForDuplicateAttachment(exceptionDocuments, caseRef, existingDocuments);
+
+        //This is done so exception record does not change state if there is a document error
         StartEventResponse event = ccdApi.startAttachScannedDocs(caseRef, authenticator, theCase);
         ccdApi.attachExceptionRecord(caseRef,
             authenticator,
             theCase,
-            insertNewScannedDocument(exceptionDocuments, theCase.getData(), caseRef),
+            insertNewScannedDocument(exceptionDocuments, existingDocuments),
             event.getEventId(),
             event.getToken()
         );
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> getDocuments(CaseDetails theCase) {
+        return (List<Map<String, Object>>) theCase.getData().get(SCANNED_DOCUMENTS);
     }
 
     @NotNull
@@ -99,29 +112,24 @@ public class CallbackProcessor {
         return emptyList();
     }
 
-    @SuppressWarnings({"unchecked", "squid:S1135"})
-    //TODO WIP
     private Map<String, Object> insertNewScannedDocument(List<Map<String, Object>> exceptionDocuments,
-                                                         Map<String, Object> caseData,
-                                                         String caseRef) {
-
+                                                         List<Map<String, Object>> existingDocuments) {
         //TODO assert that there is one document in the exception record.
-        //TODO assert that there is a filename
-        //TODO assert that there is a document number
+        existingDocuments.add(exceptionDocuments.get(0));
+        return ImmutableMap.of(SCANNED_DOCUMENTS, existingDocuments);
+    }
 
-        List<Map<String, Object>> documentList = (List<Map<String, Object>>) caseData.get(SCANNED_DOCUMENTS);
+    private void checkForDuplicateAttachment(List<Map<String, Object>> exceptionDocuments,
+                                             String caseRef,
+                                             List<Map<String, Object>> existingDocuments) {
         String exceptionRecordId = (String) exceptionDocuments.get(0).get("documentNumber");
-        Set<String> existingDocuments = documentList.stream()
+        Set<String> existingDocumentIds = existingDocuments.stream()
             .map(document -> (String) document.get("documentNumber"))
             .collect(toSet());
-
-        if (existingDocuments.contains(exceptionRecordId)) {
+        if (existingDocumentIds.contains(exceptionRecordId)) {
             throw new CallbackException(
                 format("Document with documentId %s is already attached to %s", exceptionRecordId, caseRef)
             );
-        } else {
-            documentList.add(exceptionDocuments.get(0));
-            return ImmutableMap.of(SCANNED_DOCUMENTS, documentList);
         }
     }
 }
