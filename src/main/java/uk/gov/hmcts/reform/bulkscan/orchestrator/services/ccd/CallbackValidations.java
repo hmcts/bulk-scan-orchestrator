@@ -10,13 +10,11 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
 import static java.lang.String.format;
-import static uk.gov.hmcts.reform.ccd.client.model.CallbackTypes.ABOUT_TO_SUBMIT;
 
-// This is put in otherwise the validations get very cumbersome in the expressions (less readable).
-@SuppressWarnings("squid:AssignmentInSubExpressionCheckAssignments")
 final class CallbackValidations {
     private static final Logger log = LoggerFactory.getLogger(CallbackValidations.class);
     private static final String ATTACH_TO_CASE_REFERENCE = "attachToCaseReference";
+    private static final String ATTACH_TO_EXISTING_CASE = "attachToExistingCase";
 
     private CallbackValidations() {
     }
@@ -29,8 +27,8 @@ final class CallbackValidations {
     }
 
     @NotNull
-    static Validation<String, String> isAboutToSubmit(String eventId) {
-        return ABOUT_TO_SUBMIT.equals(eventId)
+    static Validation<String, String> isAttachToCaseEvent(String eventId) {
+        return ATTACH_TO_EXISTING_CASE.equals(eventId)
             ? valid(eventId)
             : internalError("event-id: %s invalid", eventId);
     }

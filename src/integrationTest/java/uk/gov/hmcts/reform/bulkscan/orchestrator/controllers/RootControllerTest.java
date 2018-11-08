@@ -2,28 +2,22 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackProcessor;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.IntegrationTest;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static io.restassured.RestAssured.given;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest()
-@ActiveProfiles({"integration","nosb"}) // no servicebus queue handler registration
-@Import({CallbackProcessor.class})
+@IntegrationTest
 public class RootControllerTest {
-
-    @Autowired
-    private transient MockMvc mockMvc;
+    @LocalServerPort
+    int serverPort;
 
     @Test
-    public void call_to_root_endpoint_should_result_with_204_response() throws Exception {
-        mockMvc.perform(get("/")).andExpect(status().isNoContent());
+    public void call_to_root_endpoint_should_result_with_204_response() {
+        given().get("http://localhost:" + serverPort + "/")
+            .then()
+            .statusCode(204);
     }
 }
