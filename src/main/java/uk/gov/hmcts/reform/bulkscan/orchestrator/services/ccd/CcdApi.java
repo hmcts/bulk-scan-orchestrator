@@ -57,7 +57,6 @@ public class CcdApi {
 
     @Nonnull
     @SuppressWarnings("squid:S1135")
-        //^ For 'TODO' warning
     CaseDetails getCase(String caseRef, String jurisdiction) {
         try {
             //TODO: merge with `CaseRetriever` to a consistent api adaptor
