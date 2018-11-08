@@ -13,8 +13,11 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toSet;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAScannedDocument;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseDetails;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseReference;
@@ -79,7 +82,7 @@ public class CallbackProcessor {
         ccdApi.attachExceptionRecord(caseRef,
             authenticator,
             theCase,
-            insertNewScannedDocument(exceptionDocuments, theCase.getData()),
+            insertNewScannedDocument(exceptionDocuments, theCase.getData(), caseRef),
             event.getEventId(),
             event.getToken()
         );
@@ -99,10 +102,26 @@ public class CallbackProcessor {
     @SuppressWarnings({"unchecked", "squid:S1135"})
     //TODO WIP
     private Map<String, Object> insertNewScannedDocument(List<Map<String, Object>> exceptionDocuments,
-                                                         Map<String, Object> caseData) {
-        //TODO check that document Id is unique and not duplicate in caseData
-        List<Object> caseList = (List<Object>) caseData.get(SCANNED_DOCUMENTS);
-        caseList.addAll(exceptionDocuments);
-        return ImmutableMap.of(SCANNED_DOCUMENTS, caseList);
+                                                         Map<String, Object> caseData,
+                                                         String caseRef) {
+
+        //TODO assert that there is one document in the exception record.
+        //TODO assert that there is a filename
+        //TODO assert that there is a document number
+
+        List<Map<String, Object>> documentList = (List<Map<String, Object>>) caseData.get(SCANNED_DOCUMENTS);
+        String exceptionRecordId = (String) exceptionDocuments.get(0).get("documentNumber");
+        Set<String> existingDocuments = documentList.stream()
+            .map(document -> (String) document.get("documentNumber"))
+            .collect(toSet());
+
+        if (existingDocuments.contains(exceptionRecordId)) {
+            throw new CallbackException(
+                format("Document with documentId %s is already attached to %s", exceptionRecordId, caseRef)
+            );
+        } else {
+            documentList.add(exceptionDocuments.get(0));
+            return ImmutableMap.of(SCANNED_DOCUMENTS, documentList);
+        }
     }
 }
