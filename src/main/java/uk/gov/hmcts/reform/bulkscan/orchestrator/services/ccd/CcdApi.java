@@ -10,13 +10,17 @@ import javax.annotation.Nonnull;
 
 import static java.lang.String.format;
 
+/**
+ * This class is intended to be a wrapper/adaptor/facade for the orchestrator -> CcdApi.
+ * In theory this should make the calls to ccd both easier to manage and quicker to refactor.
+ */
 @Component
-public class CallbackCcdApi {
+public class CcdApi {
     private final CoreCaseDataApi ccdApi;
     private final CcdAuthenticatorFactory authenticatorFactory;
 
-    public CallbackCcdApi(CoreCaseDataApi ccdApi, CcdAuthenticatorFactory authenticator) {
-        this.ccdApi = ccdApi;
+    public CcdApi(CoreCaseDataApi feignCcdApi, CcdAuthenticatorFactory authenticator) {
+        this.ccdApi = feignCcdApi;
         this.authenticatorFactory = authenticator;
     }
 

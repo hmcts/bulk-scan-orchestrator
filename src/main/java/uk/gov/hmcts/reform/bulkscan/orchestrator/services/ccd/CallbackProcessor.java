@@ -22,9 +22,9 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 @Service
 public class CallbackProcessor {
     private static final Logger log = LoggerFactory.getLogger(CallbackProcessor.class);
-    private final CallbackCcdApi ccdApi;
+    private final CcdApi ccdApi;
 
-    public CallbackProcessor(CallbackCcdApi ccdApi) {
+    public CallbackProcessor(CcdApi ccdApi) {
         this.ccdApi = ccdApi;
     }
 
