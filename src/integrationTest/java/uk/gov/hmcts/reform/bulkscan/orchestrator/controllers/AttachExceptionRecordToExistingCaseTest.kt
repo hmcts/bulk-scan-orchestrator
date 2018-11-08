@@ -66,6 +66,16 @@ fun WiremockReq.numberOfScannedDocumentsIs(numberOfDocuments: Int): RequestPatte
         )
     )
 
+fun WiremockReq.withEventSummaryOf(summary: String) =
+    withRequestBody(matchingJsonPath("\$.event.summary", WireMock.equalTo(summary)))
+
+val eventId = "someID"
+val eventToken = "theToken"
+fun RequestPatternBuilder.withCorrectEventId() =
+    withRequestBody(matchingJsonPath("\$.event.id", WireMock.equalTo(eventId)))
+fun RequestPatternBuilder.withCorrectEventToken() =
+    withRequestBody(matchingJsonPath("\$.event_token", WireMock.equalTo(eventToken)))
+
 @ExtendWith(SpringExtension::class)
 @IntegrationTest
 class AttachExceptionRecordToExistingCaseTest {
@@ -97,8 +107,17 @@ class AttachExceptionRecordToExistingCaseTest {
 
     private val filename2 = "record.pdf"
     private val filename1 = "document.pdf"
-    private val scannedDocument = mapOf("fileName" to filename1, "someString" to "someValue")
-    private val scannedRecord = mapOf("fileName" to filename2, "someString" to "someValue")
+    private val scannedDocument = mapOf(
+        "fileName" to filename1,
+        "documentNumber" to "1234",
+        "someString" to "someValue"
+    )
+    val docNumber = "4321"
+    private val scannedRecord = mapOf(
+        "fileName" to filename2,
+        "documentNumber" to docNumber,
+        "someString" to "someValue"
+    )
     private val exceptionData = mapOf("attachToCaseReference" to CASE_REF, "scanRecords" to listOf(scannedRecord))
     private val caseData = mapOf("scannedDocuments" to listOf(scannedDocument))
 
@@ -111,15 +130,17 @@ class AttachExceptionRecordToExistingCaseTest {
 
     private fun ccdGetCaseMapping() = get("/cases/$CASE_REF").withAuthorisationHeader().withS2SHeader()
 
+    val recordId = 9876L
     private val exceptionRecord = CaseDetails.builder()
         .jurisdiction(JURIDICTION)
+        .id(recordId)
         .caseTypeId("ExceptionRecord")
         .data(exceptionData)
 
     private val startEventResponse = StartEventResponse
         .builder()
-        .eventId("someID")
-        .token("theToken").build()
+        .eventId(eventId)
+        .token(eventToken).build()
 
     @BeforeEach
     fun before() {
@@ -148,6 +169,9 @@ class AttachExceptionRecordToExistingCaseTest {
         verify(submittedScannedRecords().numberOfScannedDocumentsIs(2))
         verify(submittedScannedRecords().scannedRecordFilenameAtIndex(0, WireMock.equalTo(filename1)))
         verify(submittedScannedRecords().scannedRecordFilenameAtIndex(1, WireMock.equalTo(filename2)))
+        verify(submittedScannedRecords().withEventSummaryOf("Attaching exception record($recordId) document number:$docNumber to case:$CASE_REF"))
+        verify(submittedScannedRecords().withCorrectEventId())
+        verify(submittedScannedRecords().withCorrectEventToken())
     }
 
     @Test
@@ -164,7 +188,6 @@ class AttachExceptionRecordToExistingCaseTest {
     @Test
     fun `should fail with the correct error when start event api call fails`() {
         wireMock.register(ccdStartEvent.willReturn(status(404)))
-
         given()
             .setBody(callbackRequest)
             .postToCallback()
