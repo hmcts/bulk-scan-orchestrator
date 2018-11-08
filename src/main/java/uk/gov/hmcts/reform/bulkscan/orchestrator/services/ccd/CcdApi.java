@@ -19,24 +19,24 @@ import static java.lang.String.format;
  */
 @Component
 public class CcdApi {
-    private final CoreCaseDataApi ccdApi;
+    private final CoreCaseDataApi feignCcdApi;
     private final CcdAuthenticatorFactory authenticatorFactory;
 
     public CcdApi(CoreCaseDataApi feignCcdApi, CcdAuthenticatorFactory authenticator) {
-        this.ccdApi = feignCcdApi;
+        this.feignCcdApi = feignCcdApi;
         this.authenticatorFactory = authenticator;
     }
 
     private CaseDetails retrieveCase(String caseRef, String jurisdiction) {
         CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
-        return ccdApi.getCase(authenticator.getUserToken(), authenticator.getServiceToken(), caseRef);
+        return feignCcdApi.getCase(authenticator.getUserToken(), authenticator.getServiceToken(), caseRef);
     }
 
     private StartEventResponse startAttachScannedDocs(String caseRef,
                                                       CcdAuthenticator authenticator,
                                                       String jurisdiction,
                                                       String caseTypeId) {
-        return ccdApi.startEventForCaseWorker(
+        return feignCcdApi.startEventForCaseWorker(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
             authenticator.getUserDetails().getId(),
@@ -94,7 +94,7 @@ public class CcdApi {
                             String eventId,
                             String token, String jurisdiction,
                             String caseTypeId) {
-        ccdApi.submitEventForCaseWorker(
+        feignCcdApi.submitEventForCaseWorker(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
             authenticator.getUserDetails().getId(),
