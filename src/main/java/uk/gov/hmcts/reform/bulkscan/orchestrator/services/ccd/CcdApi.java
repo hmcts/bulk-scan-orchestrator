@@ -85,11 +85,10 @@ public class CcdApi {
             attachCall(caseRef,
                 authenticator,
                 data,
-                eventSummary,
-                event.getEventId(),
                 event.getToken(),
                 jurisdiction,
-                caseTypeId);
+                caseTypeId,
+                Event.builder().summary(eventSummary).id(event.getEventId()).build());
         } catch (FeignException e) {
             throw error(e, "Internal Error: submitting attach file event failed case: %s Error: %s",
                 caseRef, e.status());
@@ -99,11 +98,10 @@ public class CcdApi {
     private void attachCall(String caseRef,
                             CcdAuthenticator authenticator,
                             Map<String, Object> data,
-                            String eventSummary,
-                            String eventId,
                             String eventToken,
                             String jurisdiction,
-                            String caseTypeId) {
+                            String caseTypeId,
+                            Event eventInfo) {
         feignCcdApi.submitEventForCaseWorker(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
@@ -114,7 +112,7 @@ public class CcdApi {
             true,
             CaseDataContent.builder()
                 .data(data)
-                .event(Event.builder().summary(eventSummary).id(eventId).build())
+                .event(eventInfo)
                 .eventToken(eventToken)
                 .build()
         );
