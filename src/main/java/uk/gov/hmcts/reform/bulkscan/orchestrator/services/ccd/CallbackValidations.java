@@ -35,7 +35,7 @@ final class CallbackValidations {
     }
 
     @Nonnull
-    static <T> Validation<String, T> internalError(String error, T arg1) {
+    private static <T> Validation<String, T> internalError(String error, T arg1) {
         log.error("{}:{}", error, arg1);
         String formatString = "Internal Error: " + error;
         return invalid(format(formatString, arg1));
