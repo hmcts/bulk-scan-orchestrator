@@ -26,11 +26,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import u.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.PortWaiter.waitFor
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_REF
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_TYPE_BULK_SCAN
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.JURIDICTION
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.USER_ID
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.IntegrationTest
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.CallbackRequestBuilder
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse
 
 typealias ResponseValidation = ValidatableResponseOptions<ValidatableResponse, Response>
 
@@ -58,6 +61,13 @@ class AttachExceptionRecordToExistingCaseTest {
 
     private val wireMock by lazy { WireMock(wireMockPort) }
 
+    private val startEvent = get(
+        "/caseworkers/$USER_ID/jurisdictions/$JURIDICTION/case-types/$CASE_TYPE_BULK_SCAN"
+            + "/cases/$CASE_REF/event-triggers/attachScannedDocs/token"
+    )
+        .withHeader(AUTHORIZATION, containing(mockedIdamTokenSig))
+        .withHeader("ServiceAuthorization", containing(mockedS2sTokenSig))
+
     private val caseData: CaseDetails = CaseDetails.builder()
         .jurisdiction(Environment.JURIDICTION)
         .caseTypeId(Environment.CASE_TYPE_BULK_SCAN)
@@ -68,10 +78,16 @@ class AttachExceptionRecordToExistingCaseTest {
         .withHeader(AUTHORIZATION, containing(mockedIdamTokenSig))
         .withHeader("ServiceAuthorization", containing(mockedS2sTokenSig))
 
+    private val startEventResponse = StartEventResponse
+        .builder()
+        .eventId("someID")
+        .token("theToken").build()
+
     @BeforeEach
     fun before() {
         waitFor(applicationPort)
         wireMock.register(ccdGetCaseMapping().willReturn(okJson(asJson(caseData))))
+        wireMock.register(startEvent.willReturn(okJson(asJson(startEventResponse))))
         RestAssured.requestSpecification = RequestSpecBuilder().setPort(applicationPort).setContentType(JSON).build()
     }
 
@@ -95,6 +111,18 @@ class AttachExceptionRecordToExistingCaseTest {
             .then()
             .statusCode(200)
             .body("errors.size()", equalTo(0))
+    }
+
+    @Test
+    fun `should fail with the correct error when start event api call fails`() {
+        wireMock.register(startEvent.willReturn(status(404)))
+
+        given()
+            .setBody(callbackRequest)
+            .postToCallback()
+            .then()
+            .statusCode(200)
+            .shouldContainError("Internal Error: start event call failed case: $CASE_REF Error: 404")
     }
 
     @Test

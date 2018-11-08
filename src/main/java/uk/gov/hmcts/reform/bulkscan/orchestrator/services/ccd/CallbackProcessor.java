@@ -4,14 +4,15 @@ import com.google.common.collect.ImmutableList;
 import feign.FeignException;
 import io.vavr.Value;
 import io.vavr.control.Validation;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.List;
+import javax.annotation.Nonnull;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
@@ -51,38 +52,85 @@ public class CallbackProcessor {
     //TODO these are for the validations of the incoming request and is a WIP
     private List<String> attachCase(String theType,
                                     String anEventId,
-                                    String jurisdiction,
+                                    String exceptionRecordJurisdiction,
                                     String caseTypeId,
                                     String caseRef,
                                     CaseDetails exceptionRecord) {
-        CcdAuthenticator authenticator = authFactory.createForJurisdiction(jurisdiction);
         try {
-            // TODO: use `CaseRetriever`
-            retrieveCase(caseRef, authenticator);
+            attachCase(exceptionRecordJurisdiction, caseRef);
+            return success();
+        } catch (CallbackException e) {
+            return createErrorList(e);
+        }
+    }
+
+    private void attachCase(String exceptionRecordJurisdiction, String caseRef) {
+        CcdAuthenticator authenticator = authFactory.createForJurisdiction(exceptionRecordJurisdiction);
+        CaseDetails theCase = getCase(caseRef, authenticator);
+        startAttachScannedDocs(caseRef, authenticator, theCase);
+    }
+
+    @Nonnull
+    private List<String> createErrorList(CallbackException e) {
+        String message = e.getMessage();
+        log.error(message, e);
+        return ImmutableList.of(message);
+    }
+
+    @Nonnull
+    private List<String> success() {
+        return emptyList();
+    }
+
+    private StartEventResponse startAttachScannedDocs(String caseRef,
+                                                      CcdAuthenticator authenticator,
+                                                      CaseDetails theCase) {
+        try {
+            return startAttachScannedDocs(caseRef, authenticator, theCase.getJurisdiction(), theCase.getCaseTypeId());
+        } catch (FeignException e) {
+            throw error(e, "Internal Error: start event call failed case: %s Error: %s", caseRef, e.status());
+        }
+    }
+
+    private StartEventResponse startAttachScannedDocs(String caseRef,
+                                                      CcdAuthenticator authenticator,
+                                                      String jurisdiction,
+                                                      String caseTypeId) {
+        return ccdApi.startEventForCaseWorker(
+            authenticator.getUserToken(),
+            authenticator.getServiceToken(),
+            authenticator.getUserDetails().getId(),
+            jurisdiction,
+            caseTypeId,
+            caseRef,
+            "attachScannedDocs"
+        );
+    }
+
+    @SuppressWarnings("squid:S1135")
+    //^ For 'TODO' warning
+    private CaseDetails getCase(String caseRef, CcdAuthenticator authenticator) {
+        try {
+            // TODO: merge with `CaseRetriever` to a consistent api adaptor
+            return retrieveCase(caseRef, authenticator);
         } catch (FeignException e) {
             if (e.status() == 404) {
-                return error("Could not find case: %s", caseRef);
+                throw error(e, "Could not find case: %s", caseRef);
             } else {
-                return error("Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status());
+                throw error(e, "Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status());
             }
         }
-        return emptyList();
     }
 
     private CaseDetails retrieveCase(String caseRef, CcdAuthenticator authenticator) {
         return ccdApi.getCase(authenticator.getUserToken(), authenticator.getServiceToken(), caseRef);
     }
 
-    private List<String> error(String errorFmt, Object arg) {
-        return error(errorFmt, arg, null);
+    private CallbackException error(Exception e, String errorFmt, Object arg) {
+        return error(e, errorFmt, arg, null);
     }
 
-    @NotNull
-    private List<String> error(String errorFmt, Object arg1, Object arg2) {
-        String message = format(errorFmt, arg1, arg2);
-        log.error(message);
-        return ImmutableList.of(message);
+    private CallbackException error(Exception e, String errorFmt, Object arg1, Object arg2) {
+        return new CallbackException(format(errorFmt, arg1, arg2), e);
     }
-
-
 }
