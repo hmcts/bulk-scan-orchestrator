@@ -110,6 +110,7 @@ public class CallbackProcessor {
         return ImmutableMap.of(SCANNED_DOCUMENTS, caseList);
     }
 
+    @SuppressWarnings("unchecked")
     private List<Map<String, Object>> getScannedDocuments(Map<String, Object> exceptionData) {
         return (List<Map<String, Object>>) exceptionData.get(SCAN_RECORDS);
     }
