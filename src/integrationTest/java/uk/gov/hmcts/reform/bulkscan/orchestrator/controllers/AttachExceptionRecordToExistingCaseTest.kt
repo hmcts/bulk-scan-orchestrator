@@ -60,9 +60,12 @@ fun WiremockReq.scannedRecordFilenameAtIndex(index: Int, stringValuePattern: Str
     withRequestBody(matchingJsonPath("\$.data.scannedDocuments[$index].fileName", stringValuePattern))
 
 fun WiremockReq.numberOfScannedDocumentsIs(numberOfDocuments: Int): RequestPatternBuilder =
-    withRequestBody(matchingJsonPath("\$.data.scannedDocuments.length()",
-        WireMock.equalTo(numberOfDocuments.toString())))
-
+    withRequestBody(
+        matchingJsonPath(
+            "\$.data.scannedDocuments.length()",
+            WireMock.equalTo(numberOfDocuments.toString())
+        )
+    )
 
 @ExtendWith(SpringExtension::class)
 @IntegrationTest
@@ -154,7 +157,6 @@ class AttachExceptionRecordToExistingCaseTest {
         verify(submittedScannedRecords().scannedRecordFilenameAtIndex(0, WireMock.equalTo(filename1)))
         verify(submittedScannedRecords().scannedRecordFilenameAtIndex(1, WireMock.equalTo(filename2)))
     }
-
 
     @Test
     fun `should fail with the correct error when submit api call fails`() {

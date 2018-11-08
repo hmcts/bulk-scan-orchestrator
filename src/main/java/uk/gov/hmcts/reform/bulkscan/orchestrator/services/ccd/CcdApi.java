@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.Map;
-
 import javax.annotation.Nonnull;
 
 import static java.lang.String.format;
@@ -61,7 +60,6 @@ public class CcdApi {
 
     @Nonnull
     @SuppressWarnings("squid:S1135")
-    //^ For 'TODO' warning
     CaseDetails getCase(String caseRef, String jurisdiction) {
         try {
             //TODO: merge with `CaseRetriever` to a consistent api adaptor
@@ -75,14 +73,15 @@ public class CcdApi {
         }
     }
 
-    void attachExceptionRecord(String caseRef,
-                               CcdAuthenticator authenticator,
-                               CaseDetails theCase,
+    void attachExceptionRecord(CaseDetails theCase,
                                Map<String, Object> data,
-                               String eventId,
-                               String token) {
+                               StartEventResponse event) {
+        String caseRef = String.valueOf(theCase.getId());
+        String jurisdiction = theCase.getJurisdiction();
+        String caseTypeId = theCase.getCaseTypeId();
         try {
-            attachCall(caseRef, authenticator, theCase, data, eventId, token);
+            CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
+            attachCall(caseRef, authenticator, data, event.getEventId(), event.getToken(), jurisdiction, caseTypeId);
         } catch (FeignException e) {
             throw error(e, "Internal Error: submitting attach file event failed case: %s Error: %s",
                 caseRef, e.status());
@@ -91,16 +90,16 @@ public class CcdApi {
 
     private void attachCall(String caseRef,
                             CcdAuthenticator authenticator,
-                            CaseDetails theCase,
                             Map<String, Object> data,
                             String eventId,
-                            String token) {
+                            String token, String jurisdiction,
+                            String caseTypeId) {
         ccdApi.submitEventForCaseWorker(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
             authenticator.getUserDetails().getId(),
-            theCase.getJurisdiction(),
-            theCase.getCaseTypeId(),
+            jurisdiction,
+            caseTypeId,
             caseRef,
             true,
             CaseDataContent.builder()

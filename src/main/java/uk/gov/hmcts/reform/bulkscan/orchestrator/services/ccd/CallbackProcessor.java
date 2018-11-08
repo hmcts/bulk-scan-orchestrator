@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -65,18 +66,13 @@ public class CallbackProcessor {
         }
     }
 
-    attachCase(String exceptionRecordJurisdiction,
-               String caseRef,
-               Map<String, Object> exceptionRecordData) {
+    private void attachCase(String exceptionRecordJurisdiction,
+                            String caseRef,
+                            Map<String, Object> exceptionRecordData) {
         CaseDetails theCase = ccdApi.getCase(caseRef, exceptionRecordJurisdiction);
-        ccdApi.startAttachScannedDocs(theCase);
-        ccdApi.attachExceptionRecord(caseRef,
-            authenticator,
-            theCase,
-            insertNewScannedDocument(exceptionRecordData, theCase.getData()),
-            event.getEventId(),
-            event.getToken()
-        );
+        StartEventResponse event = ccdApi.startAttachScannedDocs(theCase);
+        Map<String, Object> data = insertNewScannedDocument(exceptionRecordData, theCase.getData());
+        ccdApi.attachExceptionRecord(theCase, data, event);
     }
 
     @Nonnull
