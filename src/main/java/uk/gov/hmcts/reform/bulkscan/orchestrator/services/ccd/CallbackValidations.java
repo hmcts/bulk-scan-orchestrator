@@ -56,13 +56,6 @@ final class CallbackValidations {
         return caseRefValidator.validate(theCase);
     }
 
-    private static Optional<String> validRef(Object reference) {
-        return Optional.of(reference)
-            .filter(ref -> ref instanceof String)
-            .map(ref -> ((String) ref).replaceAll("[^0-9]", ""))
-            .filter(ref -> !ref.isEmpty());
-    }
-
     @Nonnull
     static Validation<String, String> hasCaseTypeId(CaseDetails theCase) {
         String caseTypeId = null;
