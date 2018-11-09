@@ -28,6 +28,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 public class CallbackProcessor {
     private static final Logger log = LoggerFactory.getLogger(CallbackProcessor.class);
     private static final String SCANNED_DOCUMENTS = "scannedDocuments";
+    private static final String SCAN_RECORDS = "scanRecords";
 
     private final CcdApi ccdApi;
 
@@ -62,7 +63,7 @@ public class CallbackProcessor {
                                     List<Map<String, Object>> exceptionDocuments,
                                     CaseDetails exceptionRecord) {
         try {
-            attachCase(exceptionRecordJurisdiction, caseRef, exceptionRecord);
+            attachCase(exceptionRecordJurisdiction, caseRef, exceptionRecord, exceptionDocuments);
             return success();
         } catch (CallbackException e) {
             return createErrorList(e);
@@ -71,10 +72,11 @@ public class CallbackProcessor {
 
     private void attachCase(String exceptionRecordJurisdiction,
                             String caseRef,
-                            CaseDetails exceptionRecord) {
+                            CaseDetails exceptionRecord,
+                            List<Map<String, Object>> exceptionDocuments) {
         CaseDetails theCase = ccdApi.getCase(caseRef, exceptionRecordJurisdiction);
         StartEventResponse event = ccdApi.startAttachScannedDocs(theCase);
-        Map<String, Object> data = insertNewScannedDocument(exceptionRecord.getData(), theCase.getData());
+        Map<String, Object> data = insertNewScannedDocument(exceptionDocuments, theCase.getData());
         ccdApi.attachExceptionRecord(theCase, data, createEventSummary(exceptionRecord, theCase), event);
     }
 
