@@ -18,7 +18,7 @@ class TestCaseBuilder {
         return builder.apply(CaseDetails.builder()).build();
     }
 
-    static CaseDetails caseWithReference(String caseReference) {
+    static CaseDetails caseWithReference(Object caseReference) {
         Map<String, Object> data = new HashMap<>();
         data.put("attachToCaseReference", caseReference);
         return createCaseWith(b -> b.data(data));

@@ -34,7 +34,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import u.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.PortWaiter.waitFor
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_REF
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_TYPE_BULK_SCAN
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.JURIDICTION
@@ -52,8 +51,11 @@ fun RequestSpecification.postToCallback(type: String = "attach_case") = post("/c
 
 fun ResponseValidation.shouldContainError(error: String) = body("errors", hasItem(error))
 
-fun MappingBuilder.hasAuthoriseTokenContaining(token: String) = withHeader(AUTHORIZATION, containing(token))
-fun MappingBuilder.hasS2STokenContaining(token: String) = withHeader("ServiceAuthorization", containing(token))
+// see WireMock mapping json files
+const val mockedIdamTokenSig = "q6hDG0Z1Qbinwtl8TgeDrAVV0LlCTRtbQqBYoMjd03k"
+const val mockedS2sTokenSig = "X1-LdZAd5YgGFP16-dQrpqEICqRmcu1zL_zeCLyUqMjb5DVx7xoU-r8yXHfgd4tmmjGqbsBz_kLqgu8yruSbtg"
+fun MappingBuilder.withAuthorisationHeader() = withHeader(AUTHORIZATION, containing(mockedIdamTokenSig))
+fun MappingBuilder.withS2SHeader() = withHeader("ServiceAuthorization", containing(mockedS2sTokenSig))
 
 fun WiremockReq.scannedRecordFilenameAtIndex(index: Int, stringValuePattern: StringValuePattern) =
     withRequestBody(matchingJsonPath("\$.data.scannedDocuments[$index].fileName", stringValuePattern))
@@ -74,6 +76,17 @@ fun document(filename: String, documentNumber: String): Map<String, String> {
     )
 }
 
+fun WiremockReq.withEventSummaryOf(summary: String) =
+    withRequestBody(matchingJsonPath("\$.event.summary", WireMock.equalTo(summary)))
+
+val eventId = "someID"
+val eventToken = "theToken"
+fun RequestPatternBuilder.withCorrectEventId() =
+    withRequestBody(matchingJsonPath("\$.event.id", WireMock.equalTo(eventId)))
+
+fun RequestPatternBuilder.withCorrectEventToken() =
+    withRequestBody(matchingJsonPath("\$.event_token", WireMock.equalTo(eventToken)))
+
 @ExtendWith(SpringExtension::class)
 @IntegrationTest
 class AttachExceptionRecordToExistingCaseTest {
@@ -93,35 +106,49 @@ class AttachExceptionRecordToExistingCaseTest {
 
     private val startEventUrl = "$caseUrl/event-triggers/attachScannedDocs/token"
     private val ccdStartEvent = get(startEventUrl)
-        .hasAuthoriseTokenContaining("eyJqdGkiOiJwMTY1bzNlY2c1dmExMjJ1anFi")
-        .hasS2STokenContaining("eyJzdWIiOiJidWxrX3NjYW5")
+        .withAuthorisationHeader()
+        .withS2SHeader()
 
     private val submitUrl = "$caseUrl/events?ignore-warning=true"
     private val ccdSubmitEvent = post(submitUrl)
-        .hasAuthoriseTokenContaining("eyJqdGkiOiJwMTY1bzNlY2c1dmExMjJ1anFi")
-        .hasS2STokenContaining("eyJzdWIiOiJidWxrX3NjYW5")
+        .withAuthorisationHeader()
+        .withS2SHeader()
 
+    private val filename2 = "record.pdf"
+    private val filename1 = "document.pdf"
+    private val scannedDocument = mapOf(
+        "fileName" to filename1,
+        "documentNumber" to "1234",
+        "someString" to "someValue"
+    )
+    val docNumber = "4321"
+    private val scannedRecord = mapOf(
+        "fileName" to filename2,
+        "documentNumber" to docNumber,
+        "someString" to "someValue"
+    )
+    private val exceptionData = mapOf("attachToCaseReference" to CASE_REF, "scanRecords" to listOf(scannedRecord))
     private val filename = "document.pdf"
     private val documentNumber = "123456"
     private val scannedDocument = document(filename, documentNumber)
     private val caseData = mapOf("scannedDocuments" to listOf(scannedDocument))
     private val caseDetails: CaseDetails = CaseDetails.builder()
-        .jurisdiction(Environment.JURIDICTION)
-        .caseTypeId(Environment.CASE_TYPE_BULK_SCAN)
-        .id(Environment.CASE_REF.toLong())
+        .jurisdiction(JURIDICTION)
+        .caseTypeId(CASE_TYPE_BULK_SCAN)
+        .id(CASE_REF.toLong())
         .data(caseData)
         .build()
 
-    private fun ccdGetCaseMapping() = get("/cases/$CASE_REF")
-        .hasAuthoriseTokenContaining("eyJqdGkiOiJwMTY1bzNlY2c1dmExMjJ1anFi")
-        .hasS2STokenContaining("eyJzdWIiOiJidWxrX3NjYW5")
+    private fun ccdGetCaseMapping() = get("/cases/$CASE_REF").withAuthorisationHeader().withS2SHeader()
 
+    val recordId = 9876L
     private val exceptionRecordFileName = "record.pdf"
     private val exceptionRecordDocumentNumber = "654321"
     private val scannedRecord = document(exceptionRecordFileName, exceptionRecordDocumentNumber)
     private val exceptionData = exceptionDataWithDoc(scannedRecord)
     private val exceptionRecord = CaseDetails.builder()
         .jurisdiction(JURIDICTION)
+        .id(recordId)
         .caseTypeId("ExceptionRecord")
         .data(exceptionData)
 
@@ -130,8 +157,8 @@ class AttachExceptionRecordToExistingCaseTest {
 
     private val startEventResponse = StartEventResponse
         .builder()
-        .eventId("someID")
-        .token("theToken").build()
+        .eventId(eventId)
+        .token(eventToken).build()
 
     @BeforeEach
     fun before() {
@@ -153,13 +180,6 @@ class AttachExceptionRecordToExistingCaseTest {
     fun RequestSpecification.setBody(builder: CallbackRequestBuilder = exceptionRecordCallbackBody) =
         body(builder.build())
 
-    private fun defaultExceptionCase(): CaseDetails.CaseDetailsBuilder {
-        return CaseDetails.builder()
-            .jurisdiction(JURIDICTION)
-            .caseTypeId("ExceptionRecord")
-            .data(mapOf("attachToCaseReference" to CASE_REF))
-    }
-
     @Test
     fun `should successfully callback with correct information`() {
         given()
@@ -173,6 +193,9 @@ class AttachExceptionRecordToExistingCaseTest {
         verify(submittedScannedRecords().numberOfScannedDocumentsIs(2))
         verify(submittedScannedRecords().scannedRecordFilenameAtIndex(0, WireMock.equalTo(filename)))
         verify(submittedScannedRecords().scannedRecordFilenameAtIndex(1, WireMock.equalTo(exceptionRecordFileName)))
+        verify(submittedScannedRecords().withEventSummaryOf("Attaching exception record($recordId) document number:$docNumber to case:$CASE_REF"))
+        verify(submittedScannedRecords().withCorrectEventId())
+        verify(submittedScannedRecords().withCorrectEventToken())
     }
 
     @Test
@@ -183,13 +206,12 @@ class AttachExceptionRecordToExistingCaseTest {
             .postToCallback()
             .then()
             .statusCode(200)
-            .shouldContainError("Internal Error: submitting attach file event failed case: 1539007368674134 Error: 500")
+            .shouldContainError("Internal Error: submitting attach file event failed case: $CASE_REF Error: 500")
     }
 
     @Test
     fun `should fail with the correct error when start event api call fails`() {
         wireMock.register(ccdStartEvent.willReturn(status(404)))
-
         given()
             .setBody()
             .postToCallback()
