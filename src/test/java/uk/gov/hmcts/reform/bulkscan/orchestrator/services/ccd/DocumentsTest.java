@@ -19,7 +19,7 @@ import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.getScannedDocuments;
 
-public class DuplicateDocumentCheckerTest {
+class DocumentsTest {
     private static final String SCANNED_DOCUMENTS = "scannedDocuments";
     private static final String DOCUMENT_NUMBER = "documentNumber";
 
