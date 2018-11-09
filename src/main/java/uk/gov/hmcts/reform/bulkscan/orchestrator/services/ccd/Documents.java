@@ -23,24 +23,24 @@ final class Documents {
     private Documents() {
     }
 
-    static Set<String> findDuplicates(List<Map<String, Object>> exceptionDocuments,
-                                      List<Map<String, Object>> existingDocuments) {
+    private static Set<String> findDuplicates(List<Map<String, Object>> exceptionDocuments,
+                                              List<Map<String, Object>> existingDocuments) {
         return Sets.intersection(getDocumentIdSet(existingDocuments), getDocumentIdSet(exceptionDocuments));
     }
 
     static void checkForDuplicatesOrElse(List<Map<String, Object>> exceptionDocuments,
                                          List<Map<String, Object>> existingDocuments,
                                          Consumer<Set<String>> duplicatesExist) {
-        Set<String> ids = Documents.findDuplicates(exceptionDocuments, existingDocuments);
+        Set<String> ids = findDuplicates(exceptionDocuments, existingDocuments);
         if (!ids.isEmpty()) {
             duplicatesExist.accept(ids);
         }
     }
 
     @NotNull
-    static Set<String> getDocumentIdSet(List<Map<String, Object>> existingDocuments) {
+    private static Set<String> getDocumentIdSet(List<Map<String, Object>> existingDocuments) {
         return existingDocuments.stream()
-            .map(document -> (String) document.get("documentNumber"))
+            .map(document -> (String) document.get(DOCUMENT_NUMBER))
             .collect(toSet());
     }
 
