@@ -32,7 +32,7 @@ class CaseReferenceValidator {
         if (valid.isPresent()) {
             return valid;
         } else {
-           return Optional.of(Validation.<String, String>invalid(format("Invalid case reference: '%s'", caseRef)));
+            return Optional.of(invalid(format("Invalid case reference: '%s'", caseRef)));
         }
     }
 }
