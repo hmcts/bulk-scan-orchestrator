@@ -17,6 +17,7 @@ import static java.lang.String.format;
 final class CallbackValidations {
     private static final Logger log = LoggerFactory.getLogger(CallbackValidations.class);
     private static final String ATTACH_TO_EXISTING_CASE = "attachToExistingCase";
+    private static final CaseReferenceValidator caseRefValidator = new CaseReferenceValidator();
 
     private static final CaseReferenceValidator caseRefValidator = new CaseReferenceValidator();
     private static final ScannedRecordValidator scannedRecordValidator = new ScannedRecordValidator();
