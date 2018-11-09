@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
+import io.vavr.control.Option;
 import io.vavr.control.Validation;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 

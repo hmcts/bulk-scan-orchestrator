@@ -88,8 +88,6 @@ public class CallbackProcessor {
         Map<String, Object> data = insertNewScannedDocument(exceptionDocuments, existingDocuments);
         StartEventResponse event = ccdApi.startAttachScannedDocs(theCase);
         ccdApi.attachExceptionRecord(theCase, data, createEventSummary(exceptionRecord, theCase), event);
-
-
     }
 
     private String createEventSummary(CaseDetails exceptionRecord, CaseDetails theCase) {
