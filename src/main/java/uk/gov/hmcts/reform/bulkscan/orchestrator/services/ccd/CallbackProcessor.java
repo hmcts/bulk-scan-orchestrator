@@ -31,6 +31,7 @@ public class CallbackProcessor {
     private static final Logger log = LoggerFactory.getLogger(CallbackProcessor.class);
     private static final String SCANNED_DOCUMENTS = "scannedDocuments";
     private static final String SCAN_RECORDS = "scanRecords";
+    private static final String DOCUMENT_NUMBER = "documentNumber";
 
     private final CcdApi ccdApi;
 
@@ -72,6 +73,8 @@ public class CallbackProcessor {
         }
     }
 
+    //FOR the to do warnings
+    @SuppressWarnings("squid:S1135")
     private void attachCase(String exceptionRecordJurisdiction,
                             String caseRef,
                             CaseDetails exceptionRecord,
@@ -98,7 +101,7 @@ public class CallbackProcessor {
     }
 
     private String getDocumentNumber(Map<String, Object> data) {
-        return (String) getScannedDocuments(data).get(0).get("documentNumber");
+        return (String) getScannedDocuments(data).get(0).get(DOCUMENT_NUMBER);
     }
 
     @Nonnull
@@ -130,9 +133,9 @@ public class CallbackProcessor {
     private void checkForDuplicateAttachment(List<Map<String, Object>> exceptionDocuments,
                                              String caseRef,
                                              List<Map<String, Object>> existingDocuments) {
-        String exceptionRecordId = (String) exceptionDocuments.get(0).get("documentNumber");
+        String exceptionRecordId = (String) exceptionDocuments.get(0).get(DOCUMENT_NUMBER);
         Set<String> existingDocumentIds = existingDocuments.stream()
-            .map(document -> (String) document.get("documentNumber"))
+            .map(document -> (String) document.get(DOCUMENT_NUMBER))
             .collect(toSet());
         if (existingDocumentIds.contains(exceptionRecordId)) {
             throw new CallbackException(
