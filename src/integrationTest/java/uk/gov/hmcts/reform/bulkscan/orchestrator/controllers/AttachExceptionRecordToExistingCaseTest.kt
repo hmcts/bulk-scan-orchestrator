@@ -176,7 +176,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .statusCode(200)
             .body("errors.size()", equalTo(0))
 
-        val summary = "Attaching exception record($recordId) document number:$exceptionRecordDocumentNumber to case:$CASE_REF"
+        val summary = "Attaching exception record($recordId) document numbers:[$exceptionRecordDocumentNumber] to case:$CASE_REF"
 
         verify(startEventRequest())
         verify(submittedScannedRecords().numberOfScannedDocumentsIs(2))
@@ -218,7 +218,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .postToCallback()
             .then()
             .statusCode(200)
-            .shouldContainError("Document with documentId $documentNumber is already attached to $CASE_REF")
+            .shouldContainError("Document with documentIds [$documentNumber] is already attached to $CASE_REF")
 
         verify(exactly(0), startEventRequest())
         verify(exactly(0), submittedScannedRecords())
