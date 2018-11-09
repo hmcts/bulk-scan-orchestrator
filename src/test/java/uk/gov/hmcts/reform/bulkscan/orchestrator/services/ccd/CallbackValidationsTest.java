@@ -8,34 +8,75 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithDocument;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithReference;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.createCaseWith;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.document;
 
 class CallbackValidationsTest {
 
     private static Object[][] caseReferenceTestParams() {
+        String noReferenceSupplied = "No case reference supplied";
         return new Object[][]{
-            {caseWithReference("£1234234393"), true, "1234234393"},
-            {caseWithReference("1234-234-393"), true, "1234234393"},
-            {caseWithReference("1234 234 393"), true, "1234234393"},
-            {caseWithReference("  AH1234 234 393"), true, "1234234393"},
-            {caseWithReference("#"), false, "Invalid case reference: '#'"},
-            {caseWithReference(""), false, "Invalid case reference: ''"},
-            {null, false, "No case reference supplied"},
-            {createCaseWith(b -> b.data(null)), false, "No case reference supplied"},
-            {createCaseWith(b -> b.data(ImmutableMap.of())), false, "No case reference supplied"},
-            {caseWithReference(null), false, "No case reference supplied"},
-            {caseWithReference(ImmutableList.of()), false, "Invalid case reference: '[]'"},
-            {caseWithReference(5), false, "Invalid case reference: '5'"},
+            {"generic non number removal", caseWithReference("£1234234393"), true, "1234234393"},
+            {"- removal", caseWithReference("1234-234-393"), true, "1234234393"},
+            {"space removal", caseWithReference("1234 234 393"), true, "1234234393"},
+            {"prefix and post fix spaces removal", caseWithReference("  AH 234 393 "), true, "234393"},
+            {"No numbers supplied", caseWithReference("#"), false, "Invalid case reference: '#'"},
+            {"empty string", caseWithReference(""), false, "Invalid case reference: ''"},
+            {"null case details", null, false, noReferenceSupplied},
+            {"null data", createCaseWith(b -> b.data(null)), false, noReferenceSupplied},
+            {"empty data", createCaseWith(b -> b.data(ImmutableMap.of())), false, noReferenceSupplied},
+            {"null case reference", caseWithReference(null), false, noReferenceSupplied},
+            {"invalid type List", caseWithReference(ImmutableList.of()), false, "Invalid case reference: '[]'"},
+            {"invalid type Integer", caseWithReference(5), false, "Invalid case reference: '5'"},
         };
     }
 
-    @ParameterizedTest(name = "valid:{1} value:{2}")
+    @ParameterizedTest(name = "{0}: valid:{2} error/value:{3}")
     @MethodSource("caseReferenceTestParams")
     @DisplayName("Should accept and remove non 0-9 chars in the case reference")
-    void caseReferenceTest(CaseDetails input, boolean valid, String realValue) {
-        Validation<String, String> validation = CallbackValidations.hasCaseReference(input);
+    void caseReferenceTest(String caseReason, CaseDetails input, boolean valid, String realValue) {
+        checkValidation(input, valid, realValue, CallbackValidations::hasCaseReference, realValue);
+    }
+
+
+    private static Object[][] scannedRecordTestParams() {
+        String noDocumentError = "There were no documents in exception record";
+        CaseDetails validDoc = caseWithDocument(document("fileName.pdf"));
+        return new Object[][]{
+            {"Correct map with document", validDoc, true, document("fileName.pdf"), null},
+            {"Null case details", null, false, null, noDocumentError},
+            {"Null data supplied", createCaseWith(b -> b.data(null)), false, null, noDocumentError},
+            {"Empty data supplied", createCaseWith(b -> b.data(ImmutableMap.of())), false, null, noDocumentError},
+            {"Null case document list", caseWithDocument(null), false, null, noDocumentError},
+            {"No items in document list", caseWithDocument(emptyList()), false, null, noDocumentError},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}: valid:{2} error:{4}")
+    @MethodSource("scannedRecordTestParams")
+    @DisplayName("Should check that at least one scanned record exists")
+    void scannedRecordTest(String caseReason,
+                           CaseDetails input,
+                           boolean valid,
+                           List<Map<String, Object>> realValue,
+                           String errorString) {
+        checkValidation(input, valid, realValue, CallbackValidations::hasAScannedDocument, errorString);
+    }
+
+    private <T> void checkValidation(CaseDetails input,
+                                     boolean valid,
+                                     T realValue,
+                                     Function<CaseDetails, Validation<String, T>> validationMethod,
+                                     String errorString) {
+        Validation<String, T> validation = validationMethod.apply(input);
         if (valid) {
             assertSoftly(softly -> {
                 softly.assertThat(validation.isValid()).isTrue();
@@ -44,7 +85,7 @@ class CallbackValidationsTest {
         } else {
             assertSoftly(softly -> {
                 softly.assertThat(validation.isValid()).isFalse();
-                softly.assertThat(validation.getError()).isEqualTo(realValue);
+                softly.assertThat(validation.getError()).isEqualTo(errorString);
             });
         }
     }

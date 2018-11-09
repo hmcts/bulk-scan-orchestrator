@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.util.List;
+import java.util.Map;
 import javax.annotation.Nonnull;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -15,7 +17,9 @@ import static java.lang.String.format;
 final class CallbackValidations {
     private static final Logger log = LoggerFactory.getLogger(CallbackValidations.class);
     private static final String ATTACH_TO_EXISTING_CASE = "attachToExistingCase";
+
     private static final CaseReferenceValidator caseRefValidator = new CaseReferenceValidator();
+    private static final ScannedRecordValidator scannedRecordValidator = new ScannedRecordValidator();
 
     private CallbackValidations() {
     }
@@ -70,5 +74,10 @@ final class CallbackValidations {
         return "attach_case".equals(type)
             ? valid(type)
             : internalError("invalid type supplied: %s", type);
+    }
+
+    @Nonnull
+    static Validation<String, List<Map<String, Object>>> hasAScannedDocument(CaseDetails theCase) {
+        return scannedRecordValidator.validate(theCase);
     }
 }

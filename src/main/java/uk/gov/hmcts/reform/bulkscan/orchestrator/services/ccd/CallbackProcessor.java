@@ -16,6 +16,7 @@ import javax.annotation.Nonnull;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAScannedDocument;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseDetails;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseReference;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseTypeId;
@@ -45,6 +46,7 @@ public class CallbackProcessor {
                 hasJurisdiction(caseDetails),
                 hasCaseTypeId(caseDetails),
                 hasCaseReference(caseDetails),
+                hasAScannedDocument(caseDetails),
                 hasCaseDetails(caseDetails)
             )
             .ap(this::attachCase)
@@ -58,9 +60,10 @@ public class CallbackProcessor {
                                     String exceptionRecordJurisdiction,
                                     String caseTypeId,
                                     String caseRef,
+                                    List<Map<String, Object>> exceptionDocuments,
                                     CaseDetails exceptionRecord) {
         try {
-            attachCase(exceptionRecordJurisdiction, caseRef, exceptionRecord);
+            attachCase(exceptionRecordJurisdiction, caseRef, exceptionRecord, exceptionDocuments);
             return success();
         } catch (CallbackException e) {
             return createErrorList(e);
@@ -69,10 +72,11 @@ public class CallbackProcessor {
 
     private void attachCase(String exceptionRecordJurisdiction,
                             String caseRef,
-                            CaseDetails exceptionRecord) {
+                            CaseDetails exceptionRecord,
+                            List<Map<String, Object>> exceptionDocuments) {
         CaseDetails theCase = ccdApi.getCase(caseRef, exceptionRecordJurisdiction);
         StartEventResponse event = ccdApi.startAttachScannedDocs(theCase);
-        Map<String, Object> data = insertNewScannedDocument(exceptionRecord.getData(), theCase.getData());
+        Map<String, Object> data = insertNewScannedDocument(exceptionDocuments, theCase.getData());
         ccdApi.attachExceptionRecord(theCase, data, createEventSummary(exceptionRecord, theCase), event);
     }
 
@@ -101,12 +105,11 @@ public class CallbackProcessor {
 
     @SuppressWarnings({"unchecked", "squid:S1135"})
     //TODO WIP
-    private Map<String, Object> insertNewScannedDocument(Map<String, Object> exceptionData,
+    private Map<String, Object> insertNewScannedDocument(List<Map<String, Object>> exceptionDocuments,
                                                          Map<String, Object> caseData) {
-        //TODO check SCANNED_DOCUMENTS exists and has a document
         //TODO check that document Id is unique and not duplicate in caseData
-        List<Map<String, Object>> caseList = (List<Map<String, Object>>) caseData.get(SCANNED_DOCUMENTS);
-        caseList.addAll(getScannedDocuments(exceptionData));
+        List<Object> caseList = (List<Object>) caseData.get(SCANNED_DOCUMENTS);
+        caseList.addAll(exceptionDocuments);
         return ImmutableMap.of(SCANNED_DOCUMENTS, caseList);
     }
 
