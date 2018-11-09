@@ -78,10 +78,10 @@ public class CallbackProcessor {
                             List<Map<String, Object>> exceptionDocuments) {
         CaseDetails theCase = ccdApi.getCase(caseRef, exceptionRecordJurisdiction);
 
-        //TODO check for missing scannedDocs else empty list ?
+        //TODO check for missing scannedDocs element else empty list ?
         List<Map<String, Object>> existingDocuments = getDocuments(theCase);
 
-        //TODO assert that there is a document number on exception record ?
+        //TODO deal with more than one document in the exception record.
         //This is done so exception record does not change state if there is a document error
         checkForDuplicateAttachment(exceptionDocuments, caseRef, existingDocuments);
 
