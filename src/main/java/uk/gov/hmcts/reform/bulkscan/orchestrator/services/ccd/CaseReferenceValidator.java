@@ -18,11 +18,11 @@ class CaseReferenceValidator {
         return Optional.ofNullable(theCase)
             .map(CaseDetails::getData)
             .map(data -> data.get(ATTACH_TO_CASE_REFERENCE))
-            .flatMap(this::getCaseRef)
+            .flatMap(this::validateCaseRef)
             .orElseGet(() -> invalid("No case reference supplied"));
     }
 
-    private Optional<Validation<String, String>> getCaseRef(Object caseRef) {
+    private Optional<Validation<String, String>> validateCaseRef(Object caseRef) {
         Optional<Validation<String, String>> valid = Optional.of(caseRef)
             .filter(aRef -> aRef instanceof String)
             .map(aRef -> ((String) aRef).replaceAll("[^0-9]", ""))
