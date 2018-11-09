@@ -116,18 +116,8 @@ class AttachExceptionRecordToExistingCaseTest {
 
     private val filename2 = "record.pdf"
     private val filename1 = "document.pdf"
-    private val scannedDocument = mapOf(
-        "fileName" to filename1,
-        "documentNumber" to "1234",
-        "someString" to "someValue"
-    )
-    val docNumber = "4321"
-    private val scannedRecord = mapOf(
-        "fileName" to filename2,
-        "documentNumber" to docNumber,
-        "someString" to "someValue"
-    )
-    private val exceptionData = mapOf("attachToCaseReference" to CASE_REF, "scanRecords" to listOf(scannedRecord))
+
+
     private val filename = "document.pdf"
     private val documentNumber = "123456"
     private val scannedDocument = document(filename, documentNumber)
@@ -166,6 +156,7 @@ class AttachExceptionRecordToExistingCaseTest {
         wireMock.register(ccdStartEvent.willReturn(okJson(asJson(startEventResponse))))
         wireMock.register(ccdGetCaseMapping().willReturn(okJson(asJson(caseDetails))))
         wireMock.register(ccdSubmitEvent.willReturn(okJson(asJson(caseDetails))))
+        wireMock.resetRequests()
         RestAssured.requestSpecification = RequestSpecBuilder().setPort(applicationPort).setContentType(JSON).build()
     }
 
@@ -189,11 +180,13 @@ class AttachExceptionRecordToExistingCaseTest {
             .statusCode(200)
             .body("errors.size()", equalTo(0))
 
+        val summary = "Attaching exception record($recordId) document number:$exceptionRecordDocumentNumber to case:$CASE_REF"
+
         verify(startEventRequest())
         verify(submittedScannedRecords().numberOfScannedDocumentsIs(2))
         verify(submittedScannedRecords().scannedRecordFilenameAtIndex(0, WireMock.equalTo(filename)))
         verify(submittedScannedRecords().scannedRecordFilenameAtIndex(1, WireMock.equalTo(exceptionRecordFileName)))
-        verify(submittedScannedRecords().withEventSummaryOf("Attaching exception record($recordId) document number:$docNumber to case:$CASE_REF"))
+        verify(submittedScannedRecords().withEventSummaryOf(summary))
         verify(submittedScannedRecords().withCorrectEventId())
         verify(submittedScannedRecords().withCorrectEventToken())
     }

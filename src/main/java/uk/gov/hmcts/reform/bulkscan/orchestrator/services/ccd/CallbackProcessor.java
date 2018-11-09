@@ -85,7 +85,7 @@ public class CallbackProcessor {
         //This is done so exception record does not change state if there is a document error
         checkForDuplicateAttachment(exceptionDocuments, caseRef, existingDocuments);
 
-        Map<String, Object> data = insertNewScannedDocument(exceptionDocuments, theCase.getData());
+        Map<String, Object> data = insertNewScannedDocument(exceptionDocuments, existingDocuments);
         StartEventResponse event = ccdApi.startAttachScannedDocs(theCase);
         ccdApi.attachExceptionRecord(theCase, data, createEventSummary(exceptionRecord, theCase), event);
 
