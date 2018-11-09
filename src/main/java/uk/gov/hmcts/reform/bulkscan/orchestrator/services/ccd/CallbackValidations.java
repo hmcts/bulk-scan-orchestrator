@@ -1,14 +1,13 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import io.vavr.control.Validation;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import javax.annotation.Nonnull;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static io.vavr.control.Validation.invalid;
@@ -25,28 +24,28 @@ final class CallbackValidations {
     private CallbackValidations() {
     }
 
-    @NotNull
+    @Nonnull
     static Validation<String, CaseDetails> hasCaseDetails(CaseDetails caseDetails) {
         return caseDetails != null
             ? valid(caseDetails)
             : internalError("no case details supplied", null);
     }
 
-    @NotNull
+    @Nonnull
     static Validation<String, String> isAttachToCaseEvent(String eventId) {
         return ATTACH_TO_EXISTING_CASE.equals(eventId)
             ? valid(eventId)
             : internalError("event-id: %s invalid", eventId);
     }
 
-    @NotNull
+    @Nonnull
     private static <T> Validation<String, T> internalError(String error, T arg1) {
         log.error("{}:{}", error, arg1);
         String formatString = "Internal Error: " + error;
         return invalid(format(formatString, arg1));
     }
 
-    @NotNull
+    @Nonnull
     static Validation<String, String> hasJurisdiction(CaseDetails theCase) {
         String jurisdiction = null;
         return theCase != null
@@ -55,19 +54,12 @@ final class CallbackValidations {
             : internalError("invalid jurisdiction supplied: %s", jurisdiction);
     }
 
-    @NotNull
+    @Nonnull
     static Validation<String, String> hasCaseReference(CaseDetails theCase) {
         return caseRefValidator.validate(theCase);
     }
 
-    private static Optional<String> validRef(Object reference) {
-        return Optional.of(reference)
-            .filter(ref -> ref instanceof String)
-            .map(ref -> ((String) ref).replaceAll("[^0-9]", ""))
-            .filter(ref -> !ref.isEmpty());
-    }
-
-    @NotNull
+    @Nonnull
     static Validation<String, String> hasCaseTypeId(CaseDetails theCase) {
         String caseTypeId = null;
         return theCase != null
@@ -77,14 +69,14 @@ final class CallbackValidations {
             : internalError("No caseType supplied: %s", caseTypeId);
     }
 
-    @NotNull
+    @Nonnull
     static Validation<String, String> isAttachEvent(String type) {
         return "attach_case".equals(type)
             ? valid(type)
             : internalError("invalid type supplied: %s", type);
     }
 
-    @NotNull
+    @Nonnull
     static Validation<String, List<Map<String, Object>>> hasAScannedDocument(CaseDetails theCase) {
         return scannedRecordValidator.validate(theCase);
     }

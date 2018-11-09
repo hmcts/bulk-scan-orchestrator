@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.vavr.control.Validation;
 import org.junit.jupiter.api.DisplayName;
@@ -33,6 +34,8 @@ class CallbackValidationsTest {
             {"null data", createCaseWith(b -> b.data(null)), false, noReferenceSupplied},
             {"empty data", createCaseWith(b -> b.data(ImmutableMap.of())), false, noReferenceSupplied},
             {"null case reference", caseWithReference(null), false, noReferenceSupplied},
+            {"invalid type List", caseWithReference(ImmutableList.of()), false, "Invalid case reference: '[]'"},
+            {"invalid type Integer", caseWithReference(5), false, "Invalid case reference: '5'"},
         };
     }
 
