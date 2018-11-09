@@ -3,9 +3,12 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 import feign.FeignException;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import java.util.Map;
 import javax.annotation.Nonnull;
 
 import static java.lang.String.format;
@@ -68,6 +71,51 @@ public class CcdApi {
                 throw error(e, "Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status());
             }
         }
+    }
+
+    void attachExceptionRecord(CaseDetails theCase,
+                               Map<String, Object> data,
+                               String eventSummary,
+                               StartEventResponse event) {
+        String caseRef = String.valueOf(theCase.getId());
+        String jurisdiction = theCase.getJurisdiction();
+        String caseTypeId = theCase.getCaseTypeId();
+        try {
+            CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
+            attachCall(caseRef,
+                authenticator,
+                data,
+                event.getToken(),
+                jurisdiction,
+                caseTypeId,
+                Event.builder().summary(eventSummary).id(event.getEventId()).build());
+        } catch (FeignException e) {
+            throw error(e, "Internal Error: submitting attach file event failed case: %s Error: %s",
+                caseRef, e.status());
+        }
+    }
+
+    private void attachCall(String caseRef,
+                            CcdAuthenticator authenticator,
+                            Map<String, Object> data,
+                            String eventToken,
+                            String jurisdiction,
+                            String caseTypeId,
+                            Event eventInfo) {
+        feignCcdApi.submitEventForCaseWorker(
+            authenticator.getUserToken(),
+            authenticator.getServiceToken(),
+            authenticator.getUserDetails().getId(),
+            jurisdiction,
+            caseTypeId,
+            caseRef,
+            true,
+            CaseDataContent.builder()
+                .data(data)
+                .event(eventInfo)
+                .eventToken(eventToken)
+                .build()
+        );
     }
 
     private static CallbackException error(Exception e, String errorFmt, Object arg) {
