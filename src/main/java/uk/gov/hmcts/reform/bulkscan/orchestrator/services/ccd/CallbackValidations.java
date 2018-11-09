@@ -14,8 +14,8 @@ import static java.lang.String.format;
 
 final class CallbackValidations {
     private static final Logger log = LoggerFactory.getLogger(CallbackValidations.class);
-    private static final String ATTACH_TO_CASE_REFERENCE = "attachToCaseReference";
     private static final String ATTACH_TO_EXISTING_CASE = "attachToExistingCase";
+    private static final CaseReferenceValidator caseRefValidator = new CaseReferenceValidator();
 
     private CallbackValidations() {
     }
@@ -52,13 +52,7 @@ final class CallbackValidations {
 
     @Nonnull
     static Validation<String, String> hasCaseReference(CaseDetails theCase) {
-        Object caseReference = null;
-        return theCase != null
-            && theCase.getData() != null
-            && (caseReference = theCase.getData().get(ATTACH_TO_CASE_REFERENCE)) != null
-            && (caseReference instanceof String)
-            ? valid((String) caseReference)
-            : internalError("no case reference found: %s", String.valueOf(caseReference));
+        return caseRefValidator.validate(theCase);
     }
 
     @Nonnull

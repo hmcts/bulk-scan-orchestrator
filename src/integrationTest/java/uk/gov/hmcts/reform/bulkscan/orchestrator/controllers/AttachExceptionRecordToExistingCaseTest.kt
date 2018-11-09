@@ -229,26 +229,6 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-    fun `should fail with the correct error when null case data is supplied`() {
-        given()
-            .setBody(callbackRequest.caseDetails(exceptionRecord.data(null).build()))
-            .postToCallback()
-            .then()
-            .statusCode(200)
-            .shouldContainError("Internal Error: no case reference found: null")
-    }
-
-    @Test
-    fun `should fail with the correct error when no case reference supplied`() {
-        given()
-            .setBody(callbackRequest.caseDetails(exceptionRecord.data(mutableMapOf()).build()))
-            .postToCallback()
-            .then()
-            .statusCode(200)
-            .shouldContainError("Internal Error: no case reference found: null")
-    }
-
-    @Test
     fun `should fail if invalid eventId set`() {
         given()
             .setBody(callbackRequest.eventId("invalid"))
