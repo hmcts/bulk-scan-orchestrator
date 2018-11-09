@@ -19,7 +19,7 @@ class ScannedRecordValidator {
             .flatMap(data -> Option.of(data)
                 .filter(list -> list instanceof List)
                 .map(scanRecords -> (List<Map<String, Object>>) scanRecords))
-            .filter(scanRecords -> scanRecords.size() > 0)
+            .filter(scanRecords -> ! scanRecords.isEmpty())
             .map(Validation::<String, List<Map<String, Object>>>valid)
             .getOrElse(() -> invalid("There were no documents in exception record"));
     }

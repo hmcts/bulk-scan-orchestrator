@@ -15,9 +15,7 @@ class CaseReferenceValidator {
 
     @Nonnull
     Validation<String, String> validate(CaseDetails theCase) {
-        return Optional.ofNullable(theCase)
-            .map(CaseDetails::getData)
-            .map(data -> data.get(ATTACH_TO_CASE_REFERENCE))
+        return getCaseRef(theCase)
             .flatMap(this::validateCaseRef)
             .orElseGet(() -> invalid("No case reference supplied"));
     }
@@ -35,4 +33,11 @@ class CaseReferenceValidator {
             return Optional.of(invalid(format("Invalid case reference: '%s'", caseRef)));
         }
     }
+
+    private Optional<Object> getCaseRef(CaseDetails theCase) {
+        return Optional.ofNullable(theCase)
+            .map(CaseDetails::getData)
+            .map(data -> data.get(ATTACH_TO_CASE_REFERENCE));
+    }
+
 }
