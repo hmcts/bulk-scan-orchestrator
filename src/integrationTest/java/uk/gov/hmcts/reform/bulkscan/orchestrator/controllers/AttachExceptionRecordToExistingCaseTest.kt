@@ -79,8 +79,8 @@ fun document(filename: String, documentNumber: String): Map<String, String> {
 fun WiremockReq.withEventSummaryOf(summary: String) =
     withRequestBody(matchingJsonPath("\$.event.summary", WireMock.equalTo(summary)))
 
-val eventId = "someID"
-val eventToken = "theToken"
+const val eventId = "someID"
+const val eventToken = "theToken"
 fun RequestPatternBuilder.withCorrectEventId() =
     withRequestBody(matchingJsonPath("\$.event.id", WireMock.equalTo(eventId)))
 
@@ -114,10 +114,6 @@ class AttachExceptionRecordToExistingCaseTest {
         .withAuthorisationHeader()
         .withS2SHeader()
 
-    private val filename2 = "record.pdf"
-    private val filename1 = "document.pdf"
-
-
     private val filename = "document.pdf"
     private val documentNumber = "123456"
     private val scannedDocument = document(filename, documentNumber)
@@ -131,7 +127,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
     private fun ccdGetCaseMapping() = get("/cases/$CASE_REF").withAuthorisationHeader().withS2SHeader()
 
-    val recordId = 9876L
+    private val recordId = 9876L
     private val exceptionRecordFileName = "record.pdf"
     private val exceptionRecordDocumentNumber = "654321"
     private val scannedRecord = document(exceptionRecordFileName, exceptionRecordDocumentNumber)
