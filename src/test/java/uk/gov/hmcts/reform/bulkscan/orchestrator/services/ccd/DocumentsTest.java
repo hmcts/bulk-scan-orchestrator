@@ -37,11 +37,11 @@ class DocumentsTest {
     }
 
     @NotNull
-    private static CaseDetails createCaseDetailsWith(Integer ... dcns) {
+    private static CaseDetails createCaseDetailsWith(Integer...dcns) {
         return CaseDetails.builder().data(ImmutableMap.of(SCANNED_DOCUMENTS, createDcnList(dcns))).build();
     }
 
-    private static List<Map<String, String>> createDcnList(Integer ... dcns) {
+    private static List<Map<String, String>> createDcnList(Integer...dcns) {
         return Stream.of(dcns)
             .map(String::valueOf)
             .map(dcn -> ImmutableMap.of(DOCUMENT_NUMBER, dcn))
