@@ -76,10 +76,7 @@ abstract class AbstractEventPublisher implements EventPublisher {
 
         CcdAuthenticator authenticator = authenticateJurisdiction(envelope.jurisdiction);
         StartEventResponse eventResponse = startEvent(authenticator, envelope, caseTypeId);
-        CaseDataContent caseDataContent = buildCaseDataContent(
-            eventResponse.getToken(),
-            mapEnvelopeToCaseDataObject(envelope)
-        );
+        CaseDataContent caseDataContent = buildCaseDataContent(eventResponse, envelope);
         submitEvent(authenticator, envelope, caseDataContent, caseTypeId);
     }
 
@@ -129,12 +126,13 @@ abstract class AbstractEventPublisher implements EventPublisher {
 
     abstract CaseData mapEnvelopeToCaseDataObject(Envelope envelope);
 
-    private CaseDataContent buildCaseDataContent(
-        String eventToken,
-        CaseData caseDataObject
+    CaseDataContent buildCaseDataContent(
+        StartEventResponse eventResponse,
+        Envelope envelope
     ) {
+        CaseData caseDataObject = mapEnvelopeToCaseDataObject(envelope);
         return CaseDataContent.builder()
-            .eventToken(eventToken)
+            .eventToken(eventResponse.getToken())
             .event(Event.builder()
                 .id(getEventTypeId())
                 .summary(getEventSummary())
