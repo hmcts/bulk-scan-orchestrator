@@ -23,7 +23,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadService.JURSIDICTION;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -74,7 +73,7 @@ public class ExceptionRecordCreationTest {
 
     private boolean hasExceptionRecordBeenCreated(UUID randomPoBox) {
         List<CaseDetails> caseDetails = caseSearcher.search(
-            JURSIDICTION,
+            SampleData.JURSIDICTION,
             EnvelopeEventProcessor.EXCEPTION_RECORD_CASE_TYPE,
             ImmutableMap.of(
                 "case.poBox", randomPoBox.toString()
