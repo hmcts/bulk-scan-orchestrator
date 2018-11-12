@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import org.awaitility.Duration;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getScannedDocuments;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getScannedDocumentsForSupplementaryEvidence;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -124,7 +125,7 @@ public class SupplementaryEvidenceTest {
             String.valueOf(caseDetails.getId())
         );
 
-        updatedScannedDocuments = getScannedDocuments(updatedCaseDetails, "scannedDocuments");
+        updatedScannedDocuments = getScannedDocumentsForSupplementaryEvidence(updatedCaseDetails);
         return updatedScannedDocuments.size() == excpectedScannedDocuments;
     }
 
@@ -150,7 +151,7 @@ public class SupplementaryEvidenceTest {
     }
 
     @NotNull
-    private JSONObject updateEnvelope(String fileName, Long caseRef) throws JSONException {
+    private JSONObject updateEnvelope(String fileName, @Nullable Long caseRef) throws JSONException {
         String updatedCase = SampleData.fileContentAsString(fileName);
         JSONObject updatedCaseData = new JSONObject(updatedCase);
 
