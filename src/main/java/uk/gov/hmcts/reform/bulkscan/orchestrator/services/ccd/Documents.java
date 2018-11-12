@@ -18,7 +18,7 @@ import static java.util.stream.Collectors.toSet;
 final class Documents {
     private static final String SCANNED_DOCUMENTS = "scannedDocuments";
     private static final String SCAN_RECORDS = "scanRecords";
-    private static final String DOCUMENT_NUMBER = "documentNumber";
+    private static final String DOCUMENT_NUMBER = "id";
 
     private Documents() {
     }
