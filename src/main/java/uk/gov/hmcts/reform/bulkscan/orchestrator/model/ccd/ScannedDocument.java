@@ -1,8 +1,12 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ScannedDocument {
 
     public final String fileName;
@@ -12,11 +16,11 @@ public class ScannedDocument {
     public final CcdDocument url;
 
     public ScannedDocument(
-        String fileName,
-        String controlNumber,
-        String type,
-        LocalDateTime scannedDate,
-        CcdDocument url
+        @JsonProperty("fileName") String fileName,
+        @JsonProperty("controlNumber") String controlNumber,
+        @JsonProperty("type") String type,
+        @JsonProperty("scannedDate") LocalDateTime scannedDate,
+        @JsonProperty("url") CcdDocument url
     ) {
         this.fileName = fileName;
         this.controlNumber = controlNumber;
