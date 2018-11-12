@@ -8,6 +8,7 @@ import java.util.Objects;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CcdDocument {
 
+    @JsonProperty("document_url")
     public final String documentUrl;
 
     public CcdDocument(@JsonProperty("document_url") String documentUrl) {
