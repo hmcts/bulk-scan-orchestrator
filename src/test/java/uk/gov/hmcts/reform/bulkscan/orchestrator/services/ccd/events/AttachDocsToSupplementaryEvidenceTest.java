@@ -15,8 +15,13 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFa
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -54,14 +59,22 @@ public class AttachDocsToSupplementaryEvidenceTest {
 
     @Test
     public void createSupplementaryEvidence_starts_and_submits_event() {
-        Envelope envelope = SampleData.envelope(2);
         String eventToken = "token123";
 
         StartEventResponse startEventResponse = mock(StartEventResponse.class);
+        CaseDetails caseDetails = mock(CaseDetails.class);
+
+        Map<String, Object> ccdData = new HashMap<>();
+        ccdData.put("scannedDocuments", emptyList());
+
         given(startEventResponse.getToken()).willReturn(eventToken);
+        given(startEventResponse.getCaseDetails()).willReturn(caseDetails);
+        given(startEventResponse.getCaseDetails().getData()).willReturn(ccdData);
 
         given(coreCaseDataApi.startEventForCaseWorker(any(), any(), any(), any(), any(), any(), any()))
             .willReturn(startEventResponse);
+
+        Envelope envelope = SampleData.envelope(2);
 
         eventPublisher.publish(envelope, SampleData.BULK_SCANNED_CASE_TYPE);
 

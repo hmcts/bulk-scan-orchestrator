@@ -1,6 +1,11 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import org.awaitility.Duration;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,10 +16,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -24,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getScannedDocuments;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getScannedDocumentsForSupplementaryEvidence;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -42,31 +47,38 @@ public class SupplementaryEvidenceTest {
 
     private CaseDetails caseDetails;
 
+    private List<ScannedDocument> updatedScannedDocuments;
+
     private String dmUrl;
 
     @Autowired
     private DocumentManagementUploadService dmUploadService;
 
+    private Envelope newEnvelope;
+    private UUID randomPoBox;
+
     @BeforeEach
     public void setup() {
-        String caseData = SampleData.fileContentAsString("envelopes/new-envelope.json");
-        Envelope newEnvelope = EnvelopeParser.parse(caseData);
-
-        caseDetails = ccdCaseCreator.createCase(newEnvelope);
 
         dmUrl = dmUploadService.uploadToDmStore(
-            "Certificate.pdf",
+            "Evidence2.pdf",
             "documents/supplementary-evidence.pdf"
         );
+        randomPoBox = UUID.randomUUID();
     }
 
     @Test
-    public void should_attach_supplementary_evidence_to_the_case() throws Exception {
+    public void should_attach_supplementary_evidence_to_the_case_with_no_evidence_docs() throws Exception {
+        //given
+        String caseData = SampleData.fileContentAsString("envelopes/new-envelope.json");
+        newEnvelope = EnvelopeParser.parse(caseData);
+        caseDetails = ccdCaseCreator.createCase(newEnvelope);
+
         // when
         envelopeMessager.sendMessageFromFile(
             "envelopes/supplementary-evidence-envelope.json",
             String.valueOf(caseDetails.getId()),
-            UUID.randomUUID(),
+            randomPoBox,
             dmUrl
         );
 
@@ -75,42 +87,81 @@ public class SupplementaryEvidenceTest {
         await("Supplementary evidence is attached to the case in ccd")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.TWO_SECONDS)
-            .until(() -> hasCaseBeenUpdatedWithSupplementaryEvidence(caseDetails));
+            .until(() -> hasCaseBeenUpdatedWithSupplementaryEvidence(caseDetails, 1));
 
-        verifySupplementaryEvidenceDetailsUpdated(caseDetails, "envelopes/supplementary-evidence-envelope.json");
+        verifySupplementaryEvidenceDetailsUpdated(1);
     }
 
-    private void verifySupplementaryEvidenceDetailsUpdated(CaseDetails caseDetails, String jsonFileName) {
+    @Test
+    public void should_attach_supplementary_evidence_to_the_case_with_existing_evidence_docs() throws Exception {
+        //given
+        JSONObject newCaseData = updateEnvelope("envelopes/new-envelope-with-evidence.json", null);
+        newEnvelope = EnvelopeParser.parse(newCaseData.toString());
+        caseDetails = ccdCaseCreator.createCase(newEnvelope);
 
-        String caseData = SampleData.fileContentAsString(jsonFileName);
-        Envelope updatedEnvelope = EnvelopeParser.parse(caseData);
+        // when
+        envelopeMessager.sendMessageFromFile(
+            "envelopes/supplementary-evidence-envelope.json",
+            String.valueOf(caseDetails.getId()),
+            randomPoBox,
+            dmUrl
+        );
 
+        // then
+        assertThat(dmUrl).isNotNull();
+        await("Supplementary evidence is attached to the case in ccd")
+            .atMost(60, TimeUnit.SECONDS)
+            .pollInterval(Duration.TWO_SECONDS)
+            .until(() -> hasCaseBeenUpdatedWithSupplementaryEvidence(caseDetails, 2));
+
+        verifySupplementaryEvidenceDetailsUpdated(2);
+    }
+
+    private boolean hasCaseBeenUpdatedWithSupplementaryEvidence(
+        CaseDetails caseDetails, int excpectedScannedDocuments
+    ) {
         CaseDetails updatedCaseDetails = caseRetriever.retrieve(
             caseDetails.getJurisdiction(),
             String.valueOf(caseDetails.getId())
         );
 
-        List<ScannedDocument> updatedScannedDocuments = getScannedDocuments(updatedCaseDetails, "scannedDocuments");
-
-        ScannedDocument updatedDocument = updatedScannedDocuments.get(0);
-
-        Document queueDocument = updatedEnvelope.documents.get(0);
-
-        assertThat(updatedDocument.fileName).isEqualTo(queueDocument.fileName);
-        assertThat(updatedDocument.controlNumber).isEqualTo(queueDocument.controlNumber);
-        assertThat(updatedDocument.type).isEqualTo(queueDocument.type);
-        assertThat(updatedDocument.url).isNotNull();
-        assertThat(updatedDocument.url.documentUrl).isEqualTo(dmUrl);
+        updatedScannedDocuments = getScannedDocumentsForSupplementaryEvidence(updatedCaseDetails);
+        return updatedScannedDocuments.size() == excpectedScannedDocuments;
     }
 
-    private boolean hasCaseBeenUpdatedWithSupplementaryEvidence(CaseDetails caseDetails) {
+    private void verifySupplementaryEvidenceDetailsUpdated(int expectedScannedDocuments) throws JSONException {
 
-        CaseDetails updatedCaseDetails = caseRetriever.retrieve(
-            caseDetails.getJurisdiction(),
-            String.valueOf(caseDetails.getId())
+        JSONObject updatedCaseData = updateEnvelope(
+            "envelopes/supplementary-evidence-envelope.json",
+            caseDetails.getId()
         );
 
-        List<ScannedDocument> updatedScannedDocuments = getScannedDocuments(updatedCaseDetails, "scannedDocuments");
-        return updatedScannedDocuments.size() > 0;
+        Envelope updatedEnvelope = EnvelopeParser.parse(updatedCaseData.toString());
+        List<ScannedDocument> scannedDocumentList = ScannedDocumentsHelper.getScannedDocuments(newEnvelope);
+
+        List<ScannedDocument> scannedDocumentList2 = ScannedDocumentsHelper.getScannedDocuments(updatedEnvelope);
+        if (!scannedDocumentList2.isEmpty()) {
+            scannedDocumentList.addAll(scannedDocumentList2);
+        }
+
+        assertThat(updatedScannedDocuments).isNotEmpty();
+        assertThat(updatedScannedDocuments.size()).isEqualTo(expectedScannedDocuments);
+        assertThat(scannedDocumentList.size()).isEqualTo(expectedScannedDocuments);
+        assertThat(scannedDocumentList).containsAll(updatedScannedDocuments);
+    }
+
+    @NotNull
+    private JSONObject updateEnvelope(String fileName, @Nullable Long caseRef) throws JSONException {
+        String updatedCase = SampleData.fileContentAsString(fileName);
+        JSONObject updatedCaseData = new JSONObject(updatedCase);
+
+        if (caseRef != null) {
+            updatedCaseData.put("case_ref", caseRef);
+        }
+
+        JSONArray documents = updatedCaseData.getJSONArray("documents");
+        JSONObject document = (JSONObject) documents.get(0);
+        document.put("url", dmUrl);
+        return updatedCaseData;
     }
 }
