@@ -71,7 +71,7 @@ fun WiremockReq.numberOfScannedDocumentsIs(numberOfDocuments: Int): RequestPatte
 fun document(filename: String, documentNumber: String): Map<String, String> {
     return mapOf(
         "fileName" to filename,
-        "documentNumber" to documentNumber,
+        "id" to documentNumber,
         "someString" to "someValue"
     )
 }

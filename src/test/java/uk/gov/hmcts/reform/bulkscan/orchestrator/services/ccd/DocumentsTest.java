@@ -21,7 +21,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.g
 
 class DocumentsTest {
     private static final String SCANNED_DOCUMENTS = "scannedDocuments";
-    private static final String DOCUMENT_NUMBER = "documentNumber";
+    private static final String DOCUMENT_NUMBER = "id";
 
     private static Object[][] documentDuplicateTestParam() {
         return new Object[][]{
