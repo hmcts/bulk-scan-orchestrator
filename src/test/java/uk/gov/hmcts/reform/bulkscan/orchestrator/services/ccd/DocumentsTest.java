@@ -22,7 +22,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.g
 
 class DocumentsTest {
     private static final String SCANNED_DOCUMENTS = "scannedDocuments";
-    private static final String DOCUMENT_NUMBER = "id";
+    private static final String CONTROL_NUMBER = "controlNumber";
 
     private static Object[][] documentDuplicateTestParam() {
         return new Object[][]{
@@ -47,7 +47,7 @@ class DocumentsTest {
             .map(String::valueOf)
             .map(dcn -> ImmutableMap.<String, Object>of(
                 DOCUMENT_NUMBER, UUID.randomUUID().toString(),
-                "value", ImmutableMap.of("controlNumber", dcn))
+                "value", ImmutableMap.of(CONTROL_NUMBER, dcn))
             )
             .collect(toImmutableList());
     }

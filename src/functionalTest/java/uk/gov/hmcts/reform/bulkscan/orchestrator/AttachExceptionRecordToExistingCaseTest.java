@@ -36,6 +36,8 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadService.JURSIDICTION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadService.fileContentAsString;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getScannedDocumentsForExceptionRecord;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getScannedDocumentsForSupplementaryEvidence;
 
@@ -73,7 +75,7 @@ public class AttachExceptionRecordToExistingCaseTest {
 
     @BeforeEach
     public void setup() throws InterruptedException, ServiceBusException, JSONException {
-        String caseData = SampleData.fileContentAsString("envelopes/new-envelope.json");
+        String caseData = fileContentAsString("envelopes/new-envelope.json");
         Envelope newEnvelope = EnvelopeParser.parse(caseData);
 
         existingCase = ccdCaseCreator.createCase(newEnvelope);
@@ -127,7 +129,7 @@ public class AttachExceptionRecordToExistingCaseTest {
 
     private boolean isExceptionRecordCreated(UUID randomPoBox) {
         List<CaseDetails> caseDetailsList = caseSearcher.search(
-            SampleData.JURSIDICTION,
+            JURSIDICTION,
             EnvelopeEventProcessor.EXCEPTION_RECORD_CASE_TYPE,
             ImmutableMap.of(
                 "case.poBox", randomPoBox.toString()

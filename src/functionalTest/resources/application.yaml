@@ -1,3 +1,14 @@
+logging:
+  ROOT: INFO
+  level:
+    com.netflix: ERROR
+    uk.gov.hmcts.reform.bulkscan: INFO
+    org.springframework: ERROR
+    com.microsoft: ERROR
+    org.apache.qpid: ERROR
+    org.apache.catalina: ERROR
+    springfox.documentation: ERROR
+
 scheduling:
   enabled: false
 
@@ -6,7 +17,7 @@ spring:
     name: Bulk Scan Orchestrator Functional Tests
 
 queue:
-  write-connection-string: ${QUEUE_WRITE_CONN_STRING}
+  write-connection-string: Endpoint=sb://bulk-scan-servicebus-kevin.servicebus.windows.net/;SharedAccessKeyName=listen;SharedAccessKey=SCVVbXsYWwg+w4PbriKxaG0PnluST6LXcYVWRV5vDos=;EntityPath=envelopes
 
 core_case_data:
   api:
@@ -29,4 +40,3 @@ idam:
       password: ${IDAM_USER_PASSWORD:Password12}
 
 document_management.url: http://dm-store:4460
-test-url: ${TEST_URL:http://localhost:8582}

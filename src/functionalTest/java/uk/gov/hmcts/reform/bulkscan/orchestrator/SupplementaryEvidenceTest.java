@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getScannedDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getScannedDocumentsForSupplementaryEvidence;
 
 @ExtendWith(SpringExtension.class)
@@ -70,7 +71,7 @@ public class SupplementaryEvidenceTest {
     @Test
     public void should_attach_supplementary_evidence_to_the_case_with_no_evidence_docs() throws Exception {
         //given
-        String caseData = SampleData.fileContentAsString("envelopes/new-envelope.json");
+        String caseData = DocumentManagementUploadService.fileContentAsString("envelopes/new-envelope.json");
         newEnvelope = EnvelopeParser.parse(caseData);
         caseDetails = ccdCaseCreator.createCase(newEnvelope);
 
@@ -152,7 +153,7 @@ public class SupplementaryEvidenceTest {
 
     @NotNull
     private JSONObject updateEnvelope(String fileName, @Nullable Long caseRef) throws JSONException {
-        String updatedCase = SampleData.fileContentAsString(fileName);
+        String updatedCase = DocumentManagementUploadService.fileContentAsString(fileName);
         JSONObject updatedCaseData = new JSONObject(updatedCase);
 
         if (caseRef != null) {
