@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam;
 
-import com.google.common.collect.ImmutableMap;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.AbstractMap;
+import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Map.Entry;
@@ -12,7 +12,7 @@ import static java.util.stream.Collectors.toMap;
 @ConfigurationProperties(prefix = "idam")
 public class JurisdictionToUserMapping {
 
-    private Map<String, Credential> users = ImmutableMap.of();
+    private Map<String, Credential> users = new HashMap<>();
 
     public void setUsers(Map<String, Map<String, String>> users) {
         this.users = users

@@ -183,6 +183,7 @@ dependencies {
 
   compile group: 'com.microsoft.azure', name: 'azure-servicebus', version: '1.2.8'
   compile group: 'io.vavr', name: 'vavr', version: '0.9.2'
+  compile group: 'com.google.guava', name: 'guava', version: '27.0-jre'
 
   annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
 

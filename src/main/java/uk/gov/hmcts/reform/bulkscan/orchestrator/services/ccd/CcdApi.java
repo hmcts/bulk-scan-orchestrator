@@ -62,7 +62,7 @@ public class CcdApi {
     @SuppressWarnings("squid:S1135")
     CaseDetails getCase(String caseRef, String jurisdiction) {
         try {
-            //TODO: merge with `CaseRetriever` to a consistent api adaptor
+            //TODO: RPE-823 merge with `CaseRetriever` to a consistent api adaptor
             return retrieveCase(caseRef, jurisdiction);
         } catch (FeignException e) {
             if (e.status() == 404) {

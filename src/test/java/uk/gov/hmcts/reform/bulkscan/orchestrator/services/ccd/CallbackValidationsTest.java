@@ -68,7 +68,7 @@ class CallbackValidationsTest {
                            boolean valid,
                            List<Map<String, Object>> realValue,
                            String errorString) {
-        checkValidation(input, valid, realValue, CallbackValidations::hasAScannedDocument, errorString);
+        checkValidation(input, valid, realValue, CallbackValidations::hasAScannedRecord, errorString);
     }
 
     private <T> void checkValidation(CaseDetails input,
