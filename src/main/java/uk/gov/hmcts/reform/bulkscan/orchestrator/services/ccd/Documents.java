@@ -54,7 +54,7 @@ final class Documents {
     @Nonnull
     @SuppressWarnings({"unchecked","squid:S1135"})
     static List<Map<String, Object>> getScannedDocuments(CaseDetails theCase) {
-        //TODO check that the SCANNED_DOCUMENTS exists first or return a new list ?
+        //TODO: RPE-822 check that the SCANNED_DOCUMENTS exists first or return a new list ?
         return (List<Map<String, Object>>) theCase.getData().get(SCANNED_DOCUMENTS);
     }
 

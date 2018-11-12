@@ -38,7 +38,7 @@ public class CallbackProcessor {
     }
 
     @SuppressWarnings("squid:S1135")
-    //TODO WIP
+    //TODO: RPE-822 cleanup
     public List<String> process(String eventType, String eventId, CaseDetails caseDetails) {
         return Validation
             .combine(
@@ -55,7 +55,7 @@ public class CallbackProcessor {
     }
 
     @SuppressWarnings({"squid:S1172", "squid:S1135", "squid:S1854"})
-    //TODO these are for the validations of the incoming request and is a WIP
+    //TODO: RPE-822 these are for the validations of the incoming request and is a WIP
     private List<String> attachCase(String theType,
                                     String anEventId,
                                     String exceptionRecordJurisdiction,
