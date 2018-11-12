@@ -1,10 +1,8 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
@@ -51,12 +49,7 @@ public class ScannedDocumentsHelper {
     }
 
     private static ScannedDocument createScannedDocumentWithCcdData(Map<String, Object> object) {
-        CcdCollectionElement<ScannedDocument> ccdScannedDocs = objectMapper.convertValue(
-            object,
-            new TypeReference<CcdCollectionElement<ScannedDocument>>() {
-            }
-        );
-        return ccdScannedDocs.value;
+        return objectMapper.convertValue(object.get("value"), ScannedDocument.class);
     }
 
     private static ScannedDocument mapDocument(Document document) {

@@ -6,10 +6,9 @@ import java.util.Objects;
 
 public class CcdDocument {
 
-    @JsonProperty("document_url")
     public final String documentUrl;
 
-    public CcdDocument(String documentUrl) {
+    public CcdDocument(@JsonProperty("document_url") String documentUrl) {
         this.documentUrl = documentUrl;
     }
 
