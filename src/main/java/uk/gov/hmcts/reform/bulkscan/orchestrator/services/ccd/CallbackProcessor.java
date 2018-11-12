@@ -119,5 +119,4 @@ public class CallbackProcessor {
     private List<String> success() {
         return emptyList();
     }
-
 }
