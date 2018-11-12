@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CcdDocument {
 
     public final String documentUrl;
