@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
@@ -37,14 +38,17 @@ class DocumentsTest {
     }
 
     @NotNull
-    private static CaseDetails createCaseDetailsWith(Integer...dcns) {
+    private static CaseDetails createCaseDetailsWith(Integer... dcns) {
         return CaseDetails.builder().data(ImmutableMap.of(SCANNED_DOCUMENTS, createDcnList(dcns))).build();
     }
 
-    private static List<Map<String, String>> createDcnList(Integer...dcns) {
+    private static List<Map<String, Object>> createDcnList(Integer... dcns) {
         return Stream.of(dcns)
             .map(String::valueOf)
-            .map(dcn -> ImmutableMap.of(DOCUMENT_NUMBER, dcn))
+            .map(dcn -> ImmutableMap.<String, Object>of(
+                DOCUMENT_NUMBER, UUID.randomUUID().toString(),
+                "value", ImmutableMap.of("controlNumber", dcn))
+            )
             .collect(toImmutableList());
     }
 

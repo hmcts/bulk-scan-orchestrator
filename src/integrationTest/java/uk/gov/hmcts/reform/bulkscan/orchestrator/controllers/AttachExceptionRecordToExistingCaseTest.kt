@@ -43,6 +43,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.CallbackRequestBuilder
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse
+import java.util.UUID
 
 typealias ResponseValidation = ValidatableResponseOptions<ValidatableResponse, Response>
 typealias WiremockReq = RequestPatternBuilder
@@ -68,10 +69,11 @@ fun WiremockReq.numberOfScannedDocumentsIs(numberOfDocuments: Int): RequestPatte
         )
     )
 
-fun document(filename: String, documentNumber: String): Map<String, String> {
+fun document(filename: String, documentNumber: String): Map<String, Any> {
     return mapOf(
         "fileName" to filename,
-        "id" to documentNumber,
+        "id" to  UUID.randomUUID().toString(),
+        "value" to mapOf("controlNumber" to documentNumber, "someNumber" to 3 ),
         "someString" to "someValue"
     )
 }
@@ -138,7 +140,7 @@ class AttachExceptionRecordToExistingCaseTest {
         .caseTypeId("ExceptionRecord")
         .data(exceptionData)
 
-    private fun exceptionDataWithDoc(map: Map<String, String>) =
+    private fun exceptionDataWithDoc(map: Map<String, Any>) =
         mapOf("attachToCaseReference" to CASE_REF, "scanRecords" to listOf(map))
 
     private val startEventResponse = StartEventResponse

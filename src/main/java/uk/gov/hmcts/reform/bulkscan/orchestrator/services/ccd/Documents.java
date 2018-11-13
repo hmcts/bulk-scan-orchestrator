@@ -3,11 +3,13 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import javax.annotation.Nonnull;
@@ -18,7 +20,6 @@ import static java.util.stream.Collectors.toSet;
 final class Documents {
     private static final String SCANNED_DOCUMENTS = "scannedDocuments";
     private static final String SCAN_RECORDS = "scanRecords";
-    private static final String DOCUMENT_NUMBER = "id";
 
     private Documents() {
     }
@@ -40,19 +41,30 @@ final class Documents {
     @NotNull
     private static Set<String> getDocumentIdSet(List<Map<String, Object>> existingDocuments) {
         return existingDocuments.stream()
-            .map(document -> (String) document.get(DOCUMENT_NUMBER))
+            .map(Documents::getDocumentId)
+            .filter(StringUtils::isNotEmpty)
             .collect(toSet());
+    }
+
+    private static String getDocumentId(Map<String, Object> document) {
+        return Optional.ofNullable(document)
+            .map(doc -> doc.get("value"))
+            .filter(item -> item instanceof Map)
+            .map(map -> ((Map) map).get("controlNumber"))
+            .filter(item -> item instanceof String)
+            .map(item -> (String) item)
+            .orElse("");
     }
 
     static List<String> getDocumentNumbers(List<Map<String, Object>> documents) {
         return documents
             .stream()
-            .map(doc -> (String) doc.get(DOCUMENT_NUMBER))
+            .map(doc -> (String) getDocumentId(doc))
             .collect(toImmutableList());
     }
 
     @Nonnull
-    @SuppressWarnings({"unchecked","squid:S1135"})
+    @SuppressWarnings({"unchecked", "squid:S1135"})
     static List<Map<String, Object>> getScannedDocuments(CaseDetails theCase) {
         //TODO: RPE-822 check that the SCANNED_DOCUMENTS exists first or return a new list ?
         return (List<Map<String, Object>>) theCase.getData().get(SCANNED_DOCUMENTS);
