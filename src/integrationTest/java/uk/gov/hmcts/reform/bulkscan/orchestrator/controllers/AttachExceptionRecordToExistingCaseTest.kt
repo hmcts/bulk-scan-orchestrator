@@ -72,8 +72,8 @@ fun WiremockReq.numberOfScannedDocumentsIs(numberOfDocuments: Int): RequestPatte
 fun document(filename: String, documentNumber: String): Map<String, Any> {
     return mapOf(
         "fileName" to filename,
-        "id" to  UUID.randomUUID().toString(),
-        "value" to mapOf("controlNumber" to documentNumber, "someNumber" to 3 ),
+        "id" to UUID.randomUUID().toString(),
+        "value" to mapOf("controlNumber" to documentNumber, "someNumber" to 3),
         "someString" to "someValue"
     )
 }
@@ -178,7 +178,8 @@ class AttachExceptionRecordToExistingCaseTest {
             .statusCode(200)
             .body("errors.size()", equalTo(0))
 
-        val summary = "Attaching exception record($recordId) document numbers:[$exceptionRecordDocumentNumber] to case:$CASE_REF"
+        val summary =
+            "Attaching exception record($recordId) document numbers:[$exceptionRecordDocumentNumber] to case:$CASE_REF"
 
         verify(startEventRequest())
         verify(submittedScannedRecords().numberOfScannedDocumentsIs(2))
@@ -220,7 +221,10 @@ class AttachExceptionRecordToExistingCaseTest {
             .postToCallback()
             .then()
             .statusCode(200)
-            .shouldContainError("Document with documentIds [$documentNumber] is already attached to $CASE_REF")
+            .shouldContainError(
+                "Document(s) with control number [$documentNumber] are already attached " +
+                    "to case reference: $CASE_REF"
+            )
 
         verify(exactly(0), startEventRequest())
         verify(exactly(0), submittedScannedRecords())

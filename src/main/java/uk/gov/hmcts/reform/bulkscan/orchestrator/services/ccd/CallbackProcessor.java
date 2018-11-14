@@ -97,7 +97,8 @@ public class CallbackProcessor {
 
     private void throwDuplicateError(String caseRef, Set<String> duplicateIds) {
         throw new CallbackException(
-            format("Document with documentIds %s is already attached to %s", duplicateIds, caseRef)
+            format("Document(s) with control number %s are already attached to case reference: %s",
+                duplicateIds, caseRef)
         );
     }
 
