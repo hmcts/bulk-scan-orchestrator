@@ -20,7 +20,6 @@ import static java.util.stream.Collectors.toSet;
 
 final class Documents {
     private static final String SCANNED_DOCUMENTS = "scannedDocuments";
-    private static final String SCAN_RECORDS = "scanRecords";
 
     private Documents() {
     }
