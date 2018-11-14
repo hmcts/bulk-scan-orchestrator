@@ -96,20 +96,20 @@ public class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-    public void should_atatch_exception_record_to_the_existing_case() throws JSONException {
+    public void should_atatch_exception_record_to_the_existing_case() {
         //given
-        Envelope newEnvelope = updateEnvelope("envelopes/new-envelope.json");
+        String caseData = SampleData.fileContentAsString("envelopes/new-envelope.json");
+        Envelope newEnvelope = EnvelopeParser.parse(caseData);
         caseDetails = ccdCaseCreator.createCase(newEnvelope);
 
         // when
-        callCallbackUrlToAttachExceptionToCase();
+        callCallbackUrlToAttachExceptionToCase(caseDetails, exceptionRecord);
 
         //then
         await("Exception record is attached to the case")
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
-            .until(this::isExceptionRecordAttachedToTheCase);
-        verifyExistingCaseIsUpdatedWithExceptionRecordData();
+            .until(() -> isExceptionRecordAttachedToTheCase(1));
     }
 
     @Test
@@ -119,18 +119,16 @@ public class AttachExceptionRecordToExistingCaseTest {
         caseDetails = ccdCaseCreator.createCase(newEnvelope);
 
         // when
-        callCallbackUrlToAttachExceptionToCase();
+        callCallbackUrlToAttachExceptionToCase(caseDetails, exceptionRecord);
 
         //then
         await("Exception record is attached to the case")
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
-            .until(this::isExceptionRecordAttachedToTheCase);
-
-        verifyExistingCaseIsUpdatedWithExceptionRecordData();
+            .until(() -> isExceptionRecordAttachedToTheCase(2));
     }
 
-    public void callCallbackUrlToAttachExceptionToCase() {
+    private void callCallbackUrlToAttachExceptionToCase(CaseDetails caseDetails, CaseDetails exceptionRecord) {
         Map<String, Object> caseData = exceptionRecord.getData();
         caseData.put("attachToCaseReference", String.valueOf(caseDetails.getId()));
 
@@ -163,30 +161,21 @@ public class AttachExceptionRecordToExistingCaseTest {
         return exceptionRecord != null;
     }
 
-    private Boolean isExceptionRecordAttachedToTheCase() {
-        caseDetails = caseRetriever.retrieve(
+    private Boolean isExceptionRecordAttachedToTheCase(int expectedScannedDocsSize) {
+
+        CaseDetails updatedCase = caseRetriever.retrieve(
             caseDetails.getJurisdiction(),
             String.valueOf(caseDetails.getId())
         );
 
-        List<ScannedDocument> updatedScannedDocuments = getScannedDocumentsForSupplementaryEvidence(caseDetails);
-
-        List<ScannedDocument> scannedDocuments = getScannedDocumentsForExceptionRecord(exceptionRecord);
-
-        return updatedScannedDocuments.size() == scannedDocuments.size();
-    }
-
-    private void verifyExistingCaseIsUpdatedWithExceptionRecordData() {
-        List<ScannedDocument> updatedScannedDocuments = getScannedDocumentsForSupplementaryEvidence(caseDetails);
-
+        List<ScannedDocument> updatedScannedDocuments = getScannedDocumentsForSupplementaryEvidence(updatedCase);
         List<ScannedDocument> scannedDocuments = getScannedDocumentsForExceptionRecord(exceptionRecord);
 
         assertThat(scannedDocuments).isNotEmpty();
         assertThat(updatedScannedDocuments).isNotEmpty();
 
-        assertThat(scannedDocuments.size()).isEqualTo(updatedScannedDocuments.size());
-
-        assertThat(updatedScannedDocuments).containsAll(scannedDocuments);
+        return updatedScannedDocuments.size() == expectedScannedDocsSize
+            && updatedScannedDocuments.containsAll(scannedDocuments);
     }
 
     private Envelope updateEnvelope(String envelope) throws JSONException {
@@ -194,8 +183,10 @@ public class AttachExceptionRecordToExistingCaseTest {
         JSONObject updatedCaseData = new JSONObject(updatedCase);
 
         JSONArray documents = updatedCaseData.getJSONArray("documents");
-        JSONObject document = (JSONObject) documents.get(0);
-        document.put("url", dmUrl);
-        return EnvelopeParser.parse(String.valueOf(document));
+        for (int i = 0; i < documents.length(); i++) {
+            JSONObject document = (JSONObject) documents.get(0);
+            document.put("url", dmUrl);
+        }
+        return EnvelopeParser.parse(updatedCaseData.toString());
     }
 }
