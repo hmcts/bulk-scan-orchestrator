@@ -3,10 +3,10 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 import com.google.common.collect.ImmutableMap;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import io.restassured.RestAssured;
-import io.restassured.response.Response;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.logging.appinsights.SyntheticHeaders;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -67,16 +68,12 @@ public class AttachExceptionRecordToExistingCaseTest {
 
     private String dmUrl;
 
-    private CaseDetails existingCase;
+    private CaseDetails caseDetails;
 
-    private CaseDetails exceptionRecordCase;
+    private CaseDetails exceptionRecord;
 
     @BeforeEach
     public void setup() throws InterruptedException, ServiceBusException, JSONException {
-        String caseData = SampleData.fileContentAsString("envelopes/new-envelope.json");
-        Envelope newEnvelope = EnvelopeParser.parse(caseData);
-
-        existingCase = ccdCaseCreator.createCase(newEnvelope);
 
         dmUrl = dmUploadService.uploadToDmStore(
             "Certificate.pdf",
@@ -84,6 +81,7 @@ public class AttachExceptionRecordToExistingCaseTest {
         );
 
         UUID randomPoBox = UUID.randomUUID();
+
         envelopeMessager.sendMessageFromFile(
             "envelopes/supplementary-evidence-envelope.json",
             "0000000000000000",
@@ -95,34 +93,61 @@ public class AttachExceptionRecordToExistingCaseTest {
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
             .until(() -> isExceptionRecordCreated(randomPoBox));
-
     }
 
     @Test
-    @Disabled
-    public void should_atatch_exception_record_to_the_existing_case() {
+    public void should_atatch_exception_record_to_the_existing_case() throws JSONException {
+        //given
+        Envelope newEnvelope = updateEnvelope("envelopes/new-envelope.json");
+        caseDetails = ccdCaseCreator.createCase(newEnvelope);
 
         // when
+        callCallbackUrlToAttachExceptionToCase();
+
+        //then
+        await("Exception record is attached to the case")
+            .atMost(60, TimeUnit.SECONDS)
+            .pollDelay(2, TimeUnit.SECONDS)
+            .until(this::isExceptionRecordAttachedToTheCase);
+        verifyExistingCaseIsUpdatedWithExceptionRecordData();
+    }
+
+    @Test
+    public void should_atatch_exception_record_to_the_existing_case_with_evidence_documents() throws JSONException {
+        //given
+        Envelope newEnvelope = updateEnvelope("envelopes/new-envelope-with-evidence.json");
+        caseDetails = ccdCaseCreator.createCase(newEnvelope);
+
+        // when
+        callCallbackUrlToAttachExceptionToCase();
+
+        //then
+        await("Exception record is attached to the case")
+            .atMost(60, TimeUnit.SECONDS)
+            .pollDelay(2, TimeUnit.SECONDS)
+            .until(this::isExceptionRecordAttachedToTheCase);
+
+        verifyExistingCaseIsUpdatedWithExceptionRecordData();
+    }
+
+    public void callCallbackUrlToAttachExceptionToCase() {
+        Map<String, Object> caseData = exceptionRecord.getData();
+        caseData.put("attachToCaseReference", String.valueOf(caseDetails.getId()));
+
         CallbackRequest callbackRequest = CallbackRequest
             .builder()
-            .eventId("attach_case")
-            .caseDetails(exceptionRecordCase)
-            .caseDetailsBefore(existingCase)
+            .eventId("attachToExistingCase")
+            .caseDetails(exceptionRecord)
             .build();
 
-        Response callbackResponse = RestAssured
+        RestAssured
             .given()
             .baseUri(testUrl)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .header(SyntheticHeaders.SYNTHETIC_TEST_SOURCE, "Bulk Scan Orchestrator Functional test")
             .body(callbackRequest)
             .when()
-            .post("/callback/{type}", "attach_case")
-            .andReturn();
-
-        //then
-        assertThat(callbackResponse.getStatusCode()).isEqualTo(200);
-        verifyExistingCaseIsUpdatedWithExceptionRecordCaseDetails();
+            .post("/callback/attach_case");
     }
 
     private boolean isExceptionRecordCreated(UUID randomPoBox) {
@@ -134,33 +159,43 @@ public class AttachExceptionRecordToExistingCaseTest {
             )
         );
 
-        exceptionRecordCase = caseDetailsList.isEmpty() ? null : caseDetailsList.get(0);
-        return exceptionRecordCase != null;
+        exceptionRecord = caseDetailsList.isEmpty() ? null : caseDetailsList.get(0);
+        return exceptionRecord != null;
     }
 
-    private void verifyExistingCaseIsUpdatedWithExceptionRecordCaseDetails() {
-        CaseDetails updatedCase = caseRetriever.retrieve(
-            existingCase.getJurisdiction(),
-            String.valueOf(existingCase.getId())
+    private Boolean isExceptionRecordAttachedToTheCase() {
+        caseDetails = caseRetriever.retrieve(
+            caseDetails.getJurisdiction(),
+            String.valueOf(caseDetails.getId())
         );
 
-        List<ScannedDocument> updatedScannedDocuments = getScannedDocumentsForSupplementaryEvidence(updatedCase);
+        List<ScannedDocument> updatedScannedDocuments = getScannedDocumentsForSupplementaryEvidence(caseDetails);
 
-        List<ScannedDocument> scannedDocuments = getScannedDocumentsForExceptionRecord(exceptionRecordCase);
+        List<ScannedDocument> scannedDocuments = getScannedDocumentsForExceptionRecord(exceptionRecord);
+
+        return updatedScannedDocuments.size() == scannedDocuments.size();
+    }
+
+    private void verifyExistingCaseIsUpdatedWithExceptionRecordData() {
+        List<ScannedDocument> updatedScannedDocuments = getScannedDocumentsForSupplementaryEvidence(caseDetails);
+
+        List<ScannedDocument> scannedDocuments = getScannedDocumentsForExceptionRecord(exceptionRecord);
 
         assertThat(scannedDocuments).isNotEmpty();
-        assertThat(scannedDocuments.size()).isEqualTo(1);
-
         assertThat(updatedScannedDocuments).isNotEmpty();
-        assertThat(updatedScannedDocuments.size()).isEqualTo(1);
 
-        ScannedDocument updatedCaseEvidence = updatedScannedDocuments.get(0);
-        ScannedDocument caseEvidence = scannedDocuments.get(0);
+        assertThat(scannedDocuments.size()).isEqualTo(updatedScannedDocuments.size());
 
-        assertThat(updatedCaseEvidence.url).isEqualTo(caseEvidence.url);
-        assertThat(updatedCaseEvidence.controlNumber).isEqualTo(caseEvidence.controlNumber);
-        assertThat(updatedCaseEvidence.type).isEqualTo(caseEvidence.type);
-        assertThat(updatedCaseEvidence.fileName).isEqualTo(caseEvidence.fileName);
-        assertThat(updatedCaseEvidence.scannedDate).isEqualTo(caseEvidence.scannedDate);
+        assertThat(updatedScannedDocuments).containsAll(scannedDocuments);
+    }
+
+    private Envelope updateEnvelope(String envelope) throws JSONException {
+        String updatedCase = SampleData.fileContentAsString(envelope);
+        JSONObject updatedCaseData = new JSONObject(updatedCase);
+
+        JSONArray documents = updatedCaseData.getJSONArray("documents");
+        JSONObject document = (JSONObject) documents.get(0);
+        document.put("url", dmUrl);
+        return EnvelopeParser.parse(String.valueOf(document));
     }
 }
