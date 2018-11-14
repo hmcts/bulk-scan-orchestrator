@@ -259,27 +259,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .postToCallback()
             .then()
             .statusCode(200)
-            .shouldContainError("Internal Error: no case details supplied")
-    }
-
-    @Test
-    fun `should fail if invalid eventId set`() {
-        given()
-            .setBody(exceptionRecordCallbackBody.eventId("invalid"))
-            .postToCallback()
-            .then()
-            .statusCode(200)
-            .shouldContainError("Internal Error: event-id: invalid invalid")
-    }
-
-    @Test
-    fun `should fail if no eventId set`() {
-        given()
-            .setBody(exceptionRecordCallbackBody.eventId(null))
-            .postToCallback()
-            .then()
-            .statusCode(200)
-            .shouldContainError("Internal Error: event-id: null invalid")
+            .shouldContainError("Internal Error: callback or case details were empty")
     }
 
     @Test
@@ -288,7 +268,6 @@ class AttachExceptionRecordToExistingCaseTest {
             .setBody()
             .postToCallback("someType")
             .then()
-            .statusCode(200)
-            .shouldContainError("Internal Error: invalid type supplied: someType")
+            .statusCode(404)
     }
 }
