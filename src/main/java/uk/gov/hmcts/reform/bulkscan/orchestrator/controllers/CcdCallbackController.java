@@ -34,16 +34,16 @@ public class CcdCallbackController {
     )
     public ResponseEntity<CallbackResponse> handleCallback(@RequestBody CallbackRequest callback) {
         if (callback != null && callback.getCaseDetails() != null) {
-            return respondWith(attachCaseCallbackService.process(callback.getCaseDetails()));
+            return respondWithErrorList(attachCaseCallbackService.process(callback.getCaseDetails()));
         } else {
-            return respondWith(ImmutableList.of("Internal Error: callback or case details were empty"));
+            return respondWithErrorList(ImmutableList.of("Internal Error: callback or case details were empty"));
         }
     }
 
     @NotNull
-    private ResponseEntity<CallbackResponse> respondWith(List<String> errors) {
-        return ok().body(
-            AboutToStartOrSubmitCallbackResponse
+    private ResponseEntity<CallbackResponse> respondWithErrorList(List<String> errors) {
+        return ok()
+            .body(AboutToStartOrSubmitCallbackResponse
                 .builder()
                 .errors(errors)
                 .build());
