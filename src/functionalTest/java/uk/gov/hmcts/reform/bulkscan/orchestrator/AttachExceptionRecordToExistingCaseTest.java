@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.EnvelopeEventProcessor;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackProcessor;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
@@ -55,9 +54,6 @@ public class AttachExceptionRecordToExistingCaseTest {
 
     @Autowired
     private CaseSearcher caseSearcher;
-
-    @Autowired
-    private CallbackProcessor callbackProcessor;
 
     @Autowired
     private EnvelopeMessager envelopeMessager;
