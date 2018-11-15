@@ -38,5 +38,6 @@
     <cve>CVE-2017-9735</cve>
     <cve>CVE-2018-5968</cve>
     <cve>CVE-2018-7489</cve>
+    <cve>CVE-2018-10237</cve><!-- shaded guava dependency v20.0 -->
   </suppress>
 </suppressions>

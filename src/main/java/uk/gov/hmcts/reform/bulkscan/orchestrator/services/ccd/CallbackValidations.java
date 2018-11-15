@@ -22,6 +22,12 @@ final class CallbackValidations {
     private CallbackValidations() {
     }
 
+    /*
+     * These errors created here are for errors not related to the user input. Hence putting internal in
+     * front of the error so the user knows that they are not responsible and will not spend ages trying
+     * to get it to work. I would suggest passing this via customer support people to verify that the strings
+     * are good enough for the users and contain the right information to triage issues.
+     */
     @Nonnull
     private static <T> Validation<String, T> internalError(String error, T arg1) {
         log.error("{}:{}", error, arg1);
