@@ -140,6 +140,7 @@ public class AttachExceptionRecordToExistingCaseTest {
 
         RestAssured
             .given()
+            .relaxedHTTPSValidation()
             .baseUri(testUrl)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .header(SyntheticHeaders.SYNTHETIC_TEST_SOURCE, "Bulk Scan Orchestrator Functional test")
@@ -174,8 +175,10 @@ public class AttachExceptionRecordToExistingCaseTest {
         assertThat(scannedDocuments).isNotEmpty();
         assertThat(updatedScannedDocuments).isNotEmpty();
 
-        return updatedScannedDocuments.size() == expectedScannedDocsSize
-            && updatedScannedDocuments.containsAll(scannedDocuments);
+        assertThat(updatedScannedDocuments).isEqualTo(expectedScannedDocsSize);
+
+        assertThat(updatedScannedDocuments).containsAll(scannedDocuments);
+        return true;
     }
 
     private Envelope updateEnvelope(String envelope) throws JSONException {
