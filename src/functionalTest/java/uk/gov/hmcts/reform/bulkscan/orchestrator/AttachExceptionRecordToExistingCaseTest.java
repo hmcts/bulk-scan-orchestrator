@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.EnvelopeEventProcessor;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackProcessor;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
@@ -58,17 +57,12 @@ public class AttachExceptionRecordToExistingCaseTest {
     private CaseSearcher caseSearcher;
 
     @Autowired
-    private CallbackProcessor callbackProcessor;
-
-    @Autowired
     private EnvelopeMessager envelopeMessager;
 
     @Autowired
     private DocumentManagementUploadService dmUploadService;
 
     private String dmUrl;
-
-    private CaseDetails caseDetails;
 
     private CaseDetails exceptionRecord;
 
@@ -96,11 +90,9 @@ public class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-    public void should_atatch_exception_record_to_the_existing_case() {
+    public void should_attach_exception_record_to_the_existing_case_with_no_evidence() {
         //given
-        String caseData = SampleData.fileContentAsString("envelopes/new-envelope.json");
-        Envelope newEnvelope = EnvelopeParser.parse(caseData);
-        caseDetails = ccdCaseCreator.createCase(newEnvelope);
+        CaseDetails caseDetails = createCase("envelopes/new-envelope.json");
 
         // when
         callCallbackUrlToAttachExceptionToCase(caseDetails, exceptionRecord);
@@ -109,14 +101,16 @@ public class AttachExceptionRecordToExistingCaseTest {
         await("Exception record is attached to the case")
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
-            .until(() -> isExceptionRecordAttachedToTheCase(1));
+            .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 1));
+
+        verifyExistingCaseIsUpdatedWithExceptionRecordData(caseDetails, exceptionRecord);
     }
 
     @Test
-    public void should_atatch_exception_record_to_the_existing_case_with_evidence_documents() throws JSONException {
+    public void should_attach_exception_record_to_the_existing_case_with_evidence_documents() throws JSONException {
         //given
         Envelope newEnvelope = updateEnvelope("envelopes/new-envelope-with-evidence.json");
-        caseDetails = ccdCaseCreator.createCase(newEnvelope);
+        CaseDetails caseDetails = ccdCaseCreator.createCase(newEnvelope);
 
         // when
         callCallbackUrlToAttachExceptionToCase(caseDetails, exceptionRecord);
@@ -125,7 +119,9 @@ public class AttachExceptionRecordToExistingCaseTest {
         await("Exception record is attached to the case")
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
-            .until(() -> isExceptionRecordAttachedToTheCase(2));
+            .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 2));
+
+        verifyExistingCaseIsUpdatedWithExceptionRecordData(caseDetails, exceptionRecord);
     }
 
     private void callCallbackUrlToAttachExceptionToCase(CaseDetails caseDetails, CaseDetails exceptionRecord) {
@@ -162,7 +158,7 @@ public class AttachExceptionRecordToExistingCaseTest {
         return exceptionRecord != null;
     }
 
-    private Boolean isExceptionRecordAttachedToTheCase(int expectedScannedDocsSize) {
+    private Boolean isExceptionRecordAttachedToTheCase(CaseDetails caseDetails, int expectedScannedDocsSize) {
 
         CaseDetails updatedCase = caseRetriever.retrieve(
             caseDetails.getJurisdiction(),
@@ -170,15 +166,34 @@ public class AttachExceptionRecordToExistingCaseTest {
         );
 
         List<ScannedDocument> updatedScannedDocuments = getScannedDocumentsForSupplementaryEvidence(updatedCase);
-        List<ScannedDocument> scannedDocuments = getScannedDocumentsForExceptionRecord(exceptionRecord);
 
-        assertThat(scannedDocuments).isNotEmpty();
+        return !updatedScannedDocuments.isEmpty()
+            && updatedScannedDocuments.size() == expectedScannedDocsSize;
+    }
+
+    private void verifyExistingCaseIsUpdatedWithExceptionRecordData(
+        CaseDetails caseDetails,
+        CaseDetails exceptionRecord
+    ) {
+        CaseDetails updatedCase = caseRetriever.retrieve(
+            caseDetails.getJurisdiction(),
+            String.valueOf(caseDetails.getId())
+        );
+
+        List<ScannedDocument> updatedScannedDocuments = getScannedDocumentsForSupplementaryEvidence(updatedCase);
+
+        List<ScannedDocument> exceptionRecordDocuments = getScannedDocumentsForExceptionRecord(exceptionRecord);
+
         assertThat(updatedScannedDocuments).isNotEmpty();
+        assertThat(exceptionRecordDocuments).isNotEmpty();
 
-        assertThat(updatedScannedDocuments).isEqualTo(expectedScannedDocsSize);
+        assertThat(updatedScannedDocuments).containsAll(exceptionRecordDocuments);
+    }
 
-        assertThat(updatedScannedDocuments).containsAll(scannedDocuments);
-        return true;
+    private CaseDetails createCase(String jsonFileName) {
+        String caseData = SampleData.fileContentAsString(jsonFileName);
+        Envelope newEnvelope = EnvelopeParser.parse(caseData);
+        return ccdCaseCreator.createCase(newEnvelope);
     }
 
     private Envelope updateEnvelope(String envelope) throws JSONException {
