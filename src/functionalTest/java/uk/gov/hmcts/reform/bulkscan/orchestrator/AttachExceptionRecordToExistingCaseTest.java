@@ -95,7 +95,7 @@ public class AttachExceptionRecordToExistingCaseTest {
         CaseDetails caseDetails = createCase("envelopes/new-envelope.json");
 
         // when
-        callCallbackUrlToAttachExceptionToCase(caseDetails, exceptionRecord);
+        invokeCallbackEndpointForLinkingDocsToCase(caseDetails, exceptionRecord);
 
         //then
         await("Exception record is attached to the case")
@@ -113,7 +113,7 @@ public class AttachExceptionRecordToExistingCaseTest {
         CaseDetails caseDetails = ccdCaseCreator.createCase(newEnvelope);
 
         // when
-        callCallbackUrlToAttachExceptionToCase(caseDetails, exceptionRecord);
+        invokeCallbackEndpointForLinkingDocsToCase(caseDetails, exceptionRecord);
 
         //then
         await("Exception record is attached to the case")
@@ -124,7 +124,7 @@ public class AttachExceptionRecordToExistingCaseTest {
         verifyExistingCaseIsUpdatedWithExceptionRecordData(caseDetails, exceptionRecord);
     }
 
-    private void callCallbackUrlToAttachExceptionToCase(CaseDetails caseDetails, CaseDetails exceptionRecord) {
+    private void invokeCallbackEndpointForLinkingDocsToCase(CaseDetails caseDetails, CaseDetails exceptionRecord) {
         Map<String, Object> caseData = exceptionRecord.getData();
         caseData.put("attachToCaseReference", String.valueOf(caseDetails.getId()));
 
