@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.logging.appinsights.SyntheticHeaders;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -86,7 +87,9 @@ public class AttachExceptionRecordToExistingCaseTest {
         await("Exception record is created")
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
-            .until(() -> isExceptionRecordCreated(randomPoBox));
+            .until(() -> lookUpExceptionRecord(randomPoBox).isPresent());
+
+        exceptionRecord = lookUpExceptionRecord(randomPoBox).get();
     }
 
     @Test
@@ -145,7 +148,7 @@ public class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/attach_case");
     }
 
-    private boolean isExceptionRecordCreated(UUID randomPoBox) {
+    private Optional<CaseDetails> lookUpExceptionRecord(UUID randomPoBox) {
         List<CaseDetails> caseDetailsList = caseSearcher.search(
             SampleData.JURSIDICTION,
             EnvelopeEventProcessor.EXCEPTION_RECORD_CASE_TYPE,
@@ -153,9 +156,7 @@ public class AttachExceptionRecordToExistingCaseTest {
                 "case.poBox", randomPoBox.toString()
             )
         );
-
-        exceptionRecord = caseDetailsList.isEmpty() ? null : caseDetailsList.get(0);
-        return exceptionRecord != null;
+        return caseDetailsList.stream().findFirst();
     }
 
     private Boolean isExceptionRecordAttachedToTheCase(CaseDetails caseDetails, int expectedScannedDocsSize) {
@@ -167,8 +168,7 @@ public class AttachExceptionRecordToExistingCaseTest {
 
         List<ScannedDocument> updatedScannedDocuments = getScannedDocumentsForSupplementaryEvidence(updatedCase);
 
-        return !updatedScannedDocuments.isEmpty()
-            && updatedScannedDocuments.size() == expectedScannedDocsSize;
+        return updatedScannedDocuments.size() == expectedScannedDocsSize;
     }
 
     private void verifyExistingCaseIsUpdatedWithExceptionRecordData(
