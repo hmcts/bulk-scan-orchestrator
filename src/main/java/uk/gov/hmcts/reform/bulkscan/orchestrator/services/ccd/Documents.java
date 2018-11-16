@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -19,14 +20,16 @@ import static java.util.stream.Collectors.toSet;
 
 final class Documents {
     private static final String SCANNED_DOCUMENTS = "scannedDocuments";
-    private static final String SCAN_RECORDS = "scanRecords";
 
     private Documents() {
     }
 
     private static Set<String> findDuplicates(List<Map<String, Object>> exceptionDocuments,
                                               List<Map<String, Object>> existingDocuments) {
-        return Sets.intersection(getDocumentIdSet(existingDocuments), getDocumentIdSet(exceptionDocuments));
+        return Sets.intersection(
+            getDocumentIdSet(existingDocuments),
+            getDocumentIdSet(exceptionDocuments)
+        );
     }
 
     static void checkForDuplicatesOrElse(List<Map<String, Object>> exceptionDocuments,
@@ -59,21 +62,19 @@ final class Documents {
     static List<String> getDocumentNumbers(List<Map<String, Object>> documents) {
         return documents
             .stream()
-            .map(doc -> (String) getDocumentId(doc))
+            .map(Documents::getDocumentId)
             .collect(toImmutableList());
     }
 
     @Nonnull
-    @SuppressWarnings({"unchecked", "squid:S1135"})
+    @SuppressWarnings("unchecked")
     static List<Map<String, Object>> getScannedDocuments(CaseDetails theCase) {
-        //TODO: RPE-822 check that the SCANNED_DOCUMENTS exists first or return a new list ?
-        return (List<Map<String, Object>>) theCase.getData().get(SCANNED_DOCUMENTS);
+        return (List<Map<String, Object>>)
+            Optional.ofNullable(theCase.getData())
+                .map(map -> map.get(SCANNED_DOCUMENTS))
+                .orElseGet(Lists::newArrayList);
     }
 
-    @SuppressWarnings("unchecked")
-    static List<Map<String, Object>> getScannedRecords(Map<String, Object> exceptionData) {
-        return (List<Map<String, Object>>) exceptionData.get(SCAN_RECORDS);
-    }
 
     static Map<String, Object> insertNewRecords(List<Map<String, Object>> exceptionDocuments,
                                                 List<Map<String, Object>> existingDocuments) {
