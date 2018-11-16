@@ -9,14 +9,12 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
 import static java.lang.String.format;
 
 final class CallbackValidations {
     private static final Logger log = LoggerFactory.getLogger(CallbackValidations.class);
-    private static final String ATTACH_TO_EXISTING_CASE = "attachToExistingCase";
 
     private static final CaseReferenceValidator caseRefValidator = new CaseReferenceValidator();
     private static final ScannedRecordValidator scannedRecordValidator = new ScannedRecordValidator();
@@ -24,20 +22,12 @@ final class CallbackValidations {
     private CallbackValidations() {
     }
 
-    @Nonnull
-    static Validation<String, CaseDetails> hasCaseDetails(CaseDetails caseDetails) {
-        return caseDetails != null
-            ? valid(caseDetails)
-            : internalError("no case details supplied", null);
-    }
-
-    @Nonnull
-    static Validation<String, String> isAttachToCaseEvent(String eventId) {
-        return ATTACH_TO_EXISTING_CASE.equals(eventId)
-            ? valid(eventId)
-            : internalError("event-id: %s invalid", eventId);
-    }
-
+    /*
+     * These errors created here are for errors not related to the user input. Hence putting internal in
+     * front of the error so the user knows that they are not responsible and will not spend ages trying
+     * to get it to work. I would suggest passing this via customer support people to verify that the strings
+     * are good enough for the users and contain the right information to triage issues.
+     */
     @Nonnull
     private static <T> Validation<String, T> internalError(String error, T arg1) {
         log.error("{}:{}", error, arg1);
@@ -60,20 +50,11 @@ final class CallbackValidations {
     }
 
     @Nonnull
-    static Validation<String, String> hasCaseTypeId(CaseDetails theCase) {
-        String caseTypeId = null;
+    static Validation<String, Long> hasAnId(CaseDetails theCase) {
         return theCase != null
-            && (caseTypeId = theCase.getCaseTypeId()) != null
-            && !isNullOrEmpty(caseTypeId)
-            ? valid(caseTypeId)
-            : internalError("No caseType supplied: %s", caseTypeId);
-    }
-
-    @Nonnull
-    static Validation<String, String> isAttachEvent(String type) {
-        return "attach_case".equals(type)
-            ? valid(type)
-            : internalError("invalid type supplied: %s", type);
+            && theCase.getId() != null
+            ? valid(theCase.getId())
+            : invalid("Exception case has no Id");
     }
 
     @Nonnull

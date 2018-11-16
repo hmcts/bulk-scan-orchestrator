@@ -17,66 +17,51 @@ import javax.annotation.Nonnull;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAScannedRecord;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseDetails;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAnId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseReference;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJurisdiction;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.isAttachEvent;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.isAttachToCaseEvent;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.checkForDuplicatesOrElse;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.getDocumentNumbers;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.getScannedDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.insertNewRecords;
 
 @Service
-public class CallbackProcessor {
-    private static final Logger log = LoggerFactory.getLogger(CallbackProcessor.class);
+public class AttachCaseCallbackService {
+    private static final Logger log = LoggerFactory.getLogger(AttachCaseCallbackService.class);
     private final CcdApi ccdApi;
 
-    public CallbackProcessor(CcdApi ccdApi) {
+    public AttachCaseCallbackService(CcdApi ccdApi) {
         this.ccdApi = ccdApi;
     }
 
-    @SuppressWarnings("squid:S1135")
-    //TODO: RPE-822 cleanup
-    public List<String> process(String eventType, String eventId, CaseDetails caseDetails) {
+    public List<String> process(CaseDetails caseDetails) {
         return Validation
             .combine(
-                isAttachEvent(eventType),
-                isAttachToCaseEvent(eventId),
                 hasJurisdiction(caseDetails),
-                hasCaseTypeId(caseDetails),
                 hasCaseReference(caseDetails),
-                hasAScannedRecord(caseDetails),
-                hasCaseDetails(caseDetails)
+                hasAnId(caseDetails),
+                hasAScannedRecord(caseDetails)
             )
             .ap(this::attachCase)
             .getOrElseGet(Value::toJavaList);
     }
 
-    @SuppressWarnings({"squid:S1172", "squid:S1135", "squid:S1854"})
-    //TODO: RPE-822 these are for the validations of the incoming request and is a WIP
-    private List<String> attachCase(String theType,
-                                    String anEventId,
-                                    String exceptionRecordJurisdiction,
-                                    String caseTypeId,
+    private List<String> attachCase(String exceptionRecordJurisdiction,
                                     String caseRef,
-                                    List<Map<String, Object>> exceptionDocuments,
-                                    CaseDetails exceptionRecord) {
+                                    Long exceptionRecordReference,
+                                    List<Map<String, Object>> exceptionDocuments) {
         try {
-            attachCase(exceptionRecordJurisdiction, caseRef, exceptionRecord, exceptionDocuments);
+            doAttachCase(exceptionRecordJurisdiction, caseRef, exceptionDocuments, exceptionRecordReference);
             return success();
         } catch (CallbackException e) {
             return createErrorList(e);
         }
     }
 
-    //FOR the to do warnings
-    @SuppressWarnings("squid:S1135")
-    private void attachCase(String exceptionRecordJurisdiction,
-                            String caseRef,
-                            CaseDetails exceptionRecord,
-                            List<Map<String, Object>> exceptionDocuments) {
+    private void doAttachCase(String exceptionRecordJurisdiction,
+                              String caseRef,
+                              List<Map<String, Object>> exceptionDocuments,
+                              Long exceptionRecordReference) {
         CaseDetails theCase = ccdApi.getCase(caseRef, exceptionRecordJurisdiction);
         List<Map<String, Object>> scannedDocuments = getScannedDocuments(theCase);
 
@@ -91,7 +76,7 @@ public class CallbackProcessor {
 
         ccdApi.attachExceptionRecord(theCase,
             insertNewRecords(exceptionDocuments, scannedDocuments),
-            createEventSummary(exceptionRecord, theCase),
+            createEventSummary(theCase, exceptionRecordReference, exceptionDocuments),
             event);
     }
 
@@ -102,10 +87,12 @@ public class CallbackProcessor {
         );
     }
 
-    private String createEventSummary(CaseDetails exceptionRecord, CaseDetails theCase) {
+    private String createEventSummary(CaseDetails theCase,
+                                      Long exceptionRecordId,
+                                      List<Map<String, Object>> exceptionDocuments) {
         return format("Attaching exception record(%d) document numbers:%s to case:%d",
-            exceptionRecord.getId(),
-            getDocumentNumbers(Documents.getScannedRecords(exceptionRecord.getData())),
+            exceptionRecordId,
+            getDocumentNumbers(exceptionDocuments),
             theCase.getId());
     }
 
