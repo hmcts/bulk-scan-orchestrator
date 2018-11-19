@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
  * class PublisherName extends AbstractEventPublisher {
  *
  *     PublisherName() {
- *         super(CASE_TYPE_ID);
  *         // any extra autowiring needed
  *     }
  *
@@ -52,8 +51,6 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
  * private final EventPublisher somePublisher;}</pre>
  * <p/>
  * Then include each publisher in {@link EventPublisherContainer}
- * <p/>
- * {@code CASE_TYPE_ID}s are publicly available in {@code EventPublisher} interface
  */
 abstract class AbstractEventPublisher implements EventPublisher {
 

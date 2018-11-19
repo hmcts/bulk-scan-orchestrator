@@ -1,8 +1,11 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+
+import java.util.function.Supplier;
+import javax.validation.constraints.NotNull;
 
 /**
  * Container class to hold availableStrategies strategies enabled by this project.
@@ -10,7 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
  * <ul>
  *     <li>implement {@link AbstractEventPublisher}</li>
  *     <li>include {@code private EventPublisher somePublisher;}</li>
- *     <li>use resource in {@link this#getPublisher(Envelope, CaseDetails)}</li>
+ *     <li>use resource in {@link this#getPublisher(Classification, Supplier)})}</li>
  * </ul>
  */
 @Component
@@ -27,15 +30,24 @@ public class EventPublisherContainer {
         this.exceptionRecordCreator = exceptionRecordCreator;
     }
 
-    public EventPublisher getPublisher(Envelope envelope, CaseDetails caseDetails) {
-        switch (envelope.classification) {
+    @NotNull
+    public EventPublisher getPublisher(
+        Classification envelopeClassification,
+        Supplier<CaseDetails> caseRetrieval
+    ) {
+        switch (envelopeClassification) {
             case SUPPLEMENTARY_EVIDENCE:
-                return caseDetails == null ? exceptionRecordCreator : attachDocsPublisher;
+                CaseDetails caseDetails = caseRetrieval.get();
+
+                return caseDetails == null ? exceptionRecordCreator : new DelegatePublisher(
+                    attachDocsPublisher,
+                    caseDetails
+                );
             case EXCEPTION:
                 return exceptionRecordCreator;
             case NEW_APPLICATION:
             default:
-                return null;
+                return new DelegatePublisher(null, null);
         }
     }
 }

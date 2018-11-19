@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envel
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser.parse;
 
@@ -21,7 +22,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.Enve
 public class EnvelopeEventProcessor implements IMessageHandler {
 
     private static final Logger log = LoggerFactory.getLogger(EnvelopeEventProcessor.class);
-    public static final String EXCEPTION_RECORD_CASE_TYPE = "ExceptionRecord";
 
     private final CaseRetriever caseRetriever;
 
@@ -51,26 +51,15 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
     private void process(IMessage message) {
         Envelope envelope = parse(message.getBody());
-        CaseDetails theCase = Strings.isNullOrEmpty(envelope.caseRef)
+        Supplier<CaseDetails> caseRetrieval = () -> Strings.isNullOrEmpty(envelope.caseRef)
             ? null
             : caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
-        String caseTypeId = getCaseTypeId(theCase);
-        EventPublisher eventPublisher = eventPublisherContainer.getPublisher(envelope, theCase);
+        EventPublisher eventPublisher = eventPublisherContainer.getPublisher(
+            envelope.classification,
+            caseRetrieval
+        );
 
-        if (eventPublisher != null) {
-            eventPublisher.publish(envelope, caseTypeId);
-        } else {
-            log.info(
-                "Skipped processing of envelope ID {} for case {} - classification {} not handled yet",
-                envelope.id,
-                envelope.caseRef,
-                envelope.classification
-            );
-        }
-    }
-
-    private String getCaseTypeId(CaseDetails theCase) {
-        return theCase == null ? EXCEPTION_RECORD_CASE_TYPE : theCase.getCaseTypeId();
+        eventPublisher.publish(envelope);
     }
 
     @Override
