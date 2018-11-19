@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getScannedDocuments;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getScannedDocumentsForSupplementaryEvidence;
 
 @Component
 class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
@@ -35,7 +34,7 @@ class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
     @Override
     public CaseDataContent buildCaseDataContent(StartEventResponse eventResponse, Envelope envelope) {
 
-        List<ScannedDocument> ccdScannedDocuments = getScannedDocumentsForSupplementaryEvidence(
+        List<ScannedDocument> ccdScannedDocuments = getScannedDocuments(
             eventResponse.getCaseDetails()
         );
 

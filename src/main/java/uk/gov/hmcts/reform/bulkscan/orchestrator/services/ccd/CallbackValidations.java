@@ -17,7 +17,7 @@ final class CallbackValidations {
     private static final Logger log = LoggerFactory.getLogger(CallbackValidations.class);
 
     private static final CaseReferenceValidator caseRefValidator = new CaseReferenceValidator();
-    private static final ScannedRecordValidator scannedRecordValidator = new ScannedRecordValidator();
+    private static final ScannedDocumentValidator scannedDocumentValidator = new ScannedDocumentValidator();
 
     private CallbackValidations() {
     }
@@ -59,6 +59,6 @@ final class CallbackValidations {
 
     @Nonnull
     static Validation<String, List<Map<String, Object>>> hasAScannedRecord(CaseDetails theCase) {
-        return scannedRecordValidator.validate(theCase);
+        return scannedDocumentValidator.validate(theCase);
     }
 }
