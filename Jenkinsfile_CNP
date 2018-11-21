@@ -9,7 +9,7 @@ def type = "java"
 def product = "bulk-scan"
 def component = "orchestrator"
 
-def channel = '#rpe-build-notices'
+def channel = '#bsp-build-notices'
 GradleBuilder builder = new GradleBuilder(this, product)
 
 List<LinkedHashMap<String, Object>> secrets = [
