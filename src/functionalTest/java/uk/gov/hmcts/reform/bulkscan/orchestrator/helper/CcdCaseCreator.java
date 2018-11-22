@@ -20,7 +20,7 @@ public class CcdCaseCreator {
 
     private static final String JURISDICTION = "BULKSCAN";
     private static final String CASE_TYPE_ID = "Bulk_Scanned";
-    private static final String CREATE_CASE_EVENT_TYPE_ID = "receiveRecords";
+    private static final String CREATE_CASE_EVENT_TYPE_ID = "createCase";
 
     private final CcdAuthenticatorFactory ccdAuthenticatorFactory;
     private final CoreCaseDataApi coreCaseDataApi;

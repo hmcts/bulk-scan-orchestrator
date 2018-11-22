@@ -26,7 +26,7 @@ class TestCaseBuilder {
 
     static CaseDetails caseWithDocument(List<Map<String, Object>> caseReference) {
         Map<String, Object> data = new HashMap<>();
-        data.put("scanRecords", caseReference);
+        data.put("scannedDocuments", caseReference);
         return createCaseWith(b -> b.data(data));
     }
 

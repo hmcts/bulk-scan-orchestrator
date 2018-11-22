@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getScannedDocumentsForSupplementaryEvidence;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getScannedDocuments;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -125,7 +125,7 @@ public class SupplementaryEvidenceTest {
             String.valueOf(caseDetails.getId())
         );
 
-        updatedScannedDocuments = getScannedDocumentsForSupplementaryEvidence(updatedCaseDetails);
+        updatedScannedDocuments = getScannedDocuments(updatedCaseDetails);
         return updatedScannedDocuments.size() == excpectedScannedDocuments;
     }
 

@@ -141,7 +141,7 @@ class AttachExceptionRecordToExistingCaseTest {
         .data(exceptionData)
 
     private fun exceptionDataWithDoc(map: Map<String, Any>) =
-        mapOf("attachToCaseReference" to CASE_REF, "scanRecords" to listOf(map))
+        mapOf("attachToCaseReference" to CASE_REF, "scannedDocuments" to listOf(map))
 
     private val startEventResponse = StartEventResponse
         .builder()
