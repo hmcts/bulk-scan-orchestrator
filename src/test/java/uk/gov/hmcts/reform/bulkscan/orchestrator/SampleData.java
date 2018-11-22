@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -139,7 +140,8 @@ public class SampleData {
                     String.format("control_number_%s", index),
                     String.format("type_%s", index),
                     LocalDate.parse("2018-10-01").plus(index, DAYS).atStartOfDay().toInstant(ZoneOffset.UTC),
-                    String.format("https://example.gov.uk/%s", index)
+                    String.format("https://example.gov.uk/%s", index),
+                    Base64.getEncoder().encodeToString(String.format("test_%s", index).getBytes())
                 )
             ).limit(numberOfDocuments)
             .collect(Collectors.toList());

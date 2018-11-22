@@ -19,36 +19,37 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.DatetimeHelper.toIso8601
 
 public class EnvelopeParserTest {
 
-    private Envelope envelope;
+    private Envelope envelope = new Envelope(
+        "975b339d-4531-4e32-8ebe-a7bc4650f33a",
+        "case_ref_number",
+        "po_box",
+        "jurisdiction",
+        "zip-file-test.zip",
+        Instant.now(),
+        Instant.now(),
+        Classification.SUPPLEMENTARY_EVIDENCE,
+        asList(
+            new Document(
+                "doc1_file_name",
+                "doc1_control_number",
+                "doc1_type",
+                Instant.now(),
+                "doc1_url",
+                "dGVzdAo="
+            ),
+            new Document(
+                "doc2_file_name",
+                "doc2_control_number",
+                "doc2_type",
+                Instant.now(),
+                "doc2_url",
+                null
+            )
+        )
+    );
 
     @Before
     public void setUp() {
-        this.envelope = new Envelope(
-            "975b339d-4531-4e32-8ebe-a7bc4650f33a",
-            "case_ref_number",
-            "po_box",
-            "jurisdiction",
-            "zip-file-test.zip",
-            Instant.now(),
-            Instant.now(),
-            Classification.SUPPLEMENTARY_EVIDENCE,
-            asList(
-                new Document(
-                    "doc1_file_name",
-                    "doc1_control_number",
-                    "doc1_type",
-                    Instant.now(),
-                    "doc1_url"
-                ),
-                new Document(
-                    "doc2_file_name",
-                    "doc2_control_number",
-                    "doc2_type",
-                    Instant.now(),
-                    "doc2_url"
-                )
-            )
-        );
     }
 
     @Test
@@ -178,6 +179,7 @@ public class EnvelopeParserTest {
             .put("control_number", doc.controlNumber)
             .put("type", doc.type)
             .put("scanned_at", toIso8601(doc.scannedAt))
-            .put("url", doc.url);
+            .put("url", doc.url)
+            .put("ocr_data", doc.ocrData);
     }
 }
