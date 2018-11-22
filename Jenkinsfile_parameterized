@@ -1,7 +1,7 @@
 #!groovy
 @Library(value="Infrastructure", changelog=false) _
 
-def channel = '#rpe-build-notices'
+def channel = '#bsp-build-notices'
 
 properties([
   parameters([
