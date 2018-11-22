@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -139,7 +140,8 @@ public class SampleData {
                     String.format("control_number_%s", index),
                     String.format("type_%s", index),
                     LocalDate.parse("2018-10-01").plus(index, DAYS).atStartOfDay().toInstant(ZoneOffset.UTC),
-                    String.format("https://example.gov.uk/%s", index)
+                    String.format("https://example.gov.uk/%s", index),
+                    ImmutableMap.of("key_" + index, "value_" + index)
                 )
             ).limit(numberOfDocuments)
             .collect(Collectors.toList());
