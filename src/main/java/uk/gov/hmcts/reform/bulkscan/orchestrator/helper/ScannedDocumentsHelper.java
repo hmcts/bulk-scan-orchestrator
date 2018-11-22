@@ -30,14 +30,7 @@ public class ScannedDocumentsHelper {
     }
 
     @SuppressWarnings("unchecked")
-    public static List<ScannedDocument> getScannedDocumentsForExceptionRecord(CaseDetails caseDetails) {
-        List<Map<String, Object>> data = (List<Map<String, Object>>) caseDetails.getData().get("scanRecords");
-
-        return data.stream().map(ScannedDocumentsHelper::createScannedDocumentWithCcdData).collect(toList());
-    }
-
-    @SuppressWarnings("unchecked")
-    public static List<ScannedDocument> getScannedDocumentsForSupplementaryEvidence(CaseDetails caseDetails) {
+    public static List<ScannedDocument> getScannedDocuments(CaseDetails caseDetails) {
         List<Map<String, Object>> data = (List<Map<String, Object>>) caseDetails.getData().get("scannedDocuments");
 
         return data.stream().map(ScannedDocumentsHelper::createScannedDocumentWithCcdData).collect(toList());

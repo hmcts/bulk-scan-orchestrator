@@ -9,15 +9,15 @@ import java.util.Optional;
 
 import static io.vavr.control.Validation.invalid;
 
-class ScannedRecordValidator {
-    private static final String SCAN_RECORDS = "scanRecords";
+class ScannedDocumentValidator {
+    private static final String SCANNED_DOCUMENTS = "scannedDocuments";
 
     @SuppressWarnings("unchecked")
     Validation<String, List<Map<String, Object>>> validate(CaseDetails theCase) {
         return getScannedRecord(theCase)
             .filter(list -> list instanceof List)
-            .map(scanRecords -> (List<Map<String, Object>>) scanRecords)
-            .filter(scanRecords -> !scanRecords.isEmpty())
+            .map(scannedDocuments -> (List<Map<String, Object>>) scannedDocuments)
+            .filter(scannedDocuments -> !scannedDocuments.isEmpty())
             .map(Validation::<String, List<Map<String, Object>>>valid)
             .orElseGet(() -> invalid("There were no documents in exception record"));
     }
@@ -25,6 +25,6 @@ class ScannedRecordValidator {
     private static Optional<Object> getScannedRecord(CaseDetails theCase) {
         return Optional.ofNullable(theCase)
             .map(CaseDetails::getData)
-            .map(data -> data.get(SCAN_RECORDS));
+            .map(data -> data.get(SCANNED_DOCUMENTS));
     }
 }

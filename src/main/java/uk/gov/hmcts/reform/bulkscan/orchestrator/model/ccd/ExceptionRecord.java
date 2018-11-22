@@ -19,7 +19,7 @@ public class ExceptionRecord implements CaseData {
 
     public final LocalDateTime openingDate;
 
-    public final List<CcdCollectionElement<ScannedDocument>> scanRecords;
+    public final List<CcdCollectionElement<ScannedDocument>> scannedDocuments;
 
     public ExceptionRecord(
         String classification,
@@ -27,13 +27,13 @@ public class ExceptionRecord implements CaseData {
         String jurisdiction,
         LocalDateTime deliveryDate,
         LocalDateTime openingDate,
-        List<CcdCollectionElement<ScannedDocument>> scannedRecords
+        List<CcdCollectionElement<ScannedDocument>> scannedDocuments
     ) {
         this.classification = classification;
         this.poBox = poBox;
         this.jurisdiction = jurisdiction;
         this.deliveryDate = deliveryDate;
         this.openingDate = openingDate;
-        this.scanRecords = scannedRecords;
+        this.scannedDocuments = scannedDocuments;
     }
 }

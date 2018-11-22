@@ -37,8 +37,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getScannedDocumentsForExceptionRecord;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getScannedDocumentsForSupplementaryEvidence;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getScannedDocuments;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -166,7 +165,7 @@ public class AttachExceptionRecordToExistingCaseTest {
             String.valueOf(caseDetails.getId())
         );
 
-        List<ScannedDocument> updatedScannedDocuments = getScannedDocumentsForSupplementaryEvidence(updatedCase);
+        List<ScannedDocument> updatedScannedDocuments = getScannedDocuments(updatedCase);
 
         return updatedScannedDocuments.size() == expectedScannedDocsSize;
     }
@@ -180,9 +179,9 @@ public class AttachExceptionRecordToExistingCaseTest {
             String.valueOf(caseDetails.getId())
         );
 
-        List<ScannedDocument> updatedScannedDocuments = getScannedDocumentsForSupplementaryEvidence(updatedCase);
+        List<ScannedDocument> updatedScannedDocuments = getScannedDocuments(updatedCase);
 
-        List<ScannedDocument> exceptionRecordDocuments = getScannedDocumentsForExceptionRecord(exceptionRecord);
+        List<ScannedDocument> exceptionRecordDocuments = getScannedDocuments(exceptionRecord);
 
         assertThat(updatedScannedDocuments).isNotEmpty();
         assertThat(exceptionRecordDocuments).isNotEmpty();

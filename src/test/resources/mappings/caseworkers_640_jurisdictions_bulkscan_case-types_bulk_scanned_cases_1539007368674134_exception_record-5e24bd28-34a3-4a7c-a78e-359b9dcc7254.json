@@ -7,7 +7,7 @@
     "bodyPatterns": [
       {
         "matchesJsonPath": {
-          "expression": "$.data.scanRecords[0].value.fileName",
+          "expression": "$.data.scannedDocuments[0].value.fileName",
           "contains": "testfilename"
         }
       }
