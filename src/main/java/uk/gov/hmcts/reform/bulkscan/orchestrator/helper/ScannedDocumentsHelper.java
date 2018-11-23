@@ -50,6 +50,7 @@ public class ScannedDocumentsHelper {
             document.controlNumber,
             document.type,
             document.scannedAt.atZone(ZoneId.systemDefault()).toLocalDateTime(),
-            new CcdDocument(String.valueOf(document.url)));
+            new CcdDocument(String.valueOf(document.url)),
+            null);
     }
 }

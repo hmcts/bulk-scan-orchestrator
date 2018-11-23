@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -105,7 +106,7 @@ public class AttachExceptionRecordToExistingCaseTest {
             .pollDelay(2, TimeUnit.SECONDS)
             .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 1));
 
-        verifyExistingCaseIsUpdatedWithExceptionRecordData(caseDetails, exceptionRecord);
+        verifyExistingCaseIsUpdatedWithExceptionRecordData(caseDetails, exceptionRecord, 1);
     }
 
     @Test
@@ -123,7 +124,7 @@ public class AttachExceptionRecordToExistingCaseTest {
             .pollDelay(2, TimeUnit.SECONDS)
             .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 2));
 
-        verifyExistingCaseIsUpdatedWithExceptionRecordData(caseDetails, exceptionRecord);
+        verifyExistingCaseIsUpdatedWithExceptionRecordData(caseDetails, exceptionRecord, 1);
     }
 
     private void invokeCallbackEndpointForLinkingDocsToCase(CaseDetails caseDetails, CaseDetails exceptionRecord) {
@@ -172,7 +173,8 @@ public class AttachExceptionRecordToExistingCaseTest {
 
     private void verifyExistingCaseIsUpdatedWithExceptionRecordData(
         CaseDetails caseDetails,
-        CaseDetails exceptionRecord
+        CaseDetails exceptionRecord,
+        int expectedExceptionRecordsSize
     ) {
         CaseDetails updatedCase = caseRetriever.retrieve(
             caseDetails.getJurisdiction(),
@@ -187,6 +189,25 @@ public class AttachExceptionRecordToExistingCaseTest {
         assertThat(exceptionRecordDocuments).isNotEmpty();
 
         assertThat(updatedScannedDocuments).containsAll(exceptionRecordDocuments);
+
+        isExceptionReferenceAttachedToTheScannedDocuments(
+            updatedScannedDocuments,
+            exceptionRecord.getId(),
+            expectedExceptionRecordsSize
+        );
+    }
+
+    private void isExceptionReferenceAttachedToTheScannedDocuments(
+        List<ScannedDocument> updatedScannedDocuments,
+        Long id,
+        int expectedDocumentsSize
+    ) {
+        List<ScannedDocument> scannedDocuments = updatedScannedDocuments
+            .stream()
+            .filter(document -> String.valueOf(id).equals(document.exceptionReference))
+            .collect(Collectors.toList());
+
+        assertThat(scannedDocuments.size()).isEqualTo(expectedDocumentsSize);
     }
 
     private CaseDetails createCase(String jsonFileName) {
