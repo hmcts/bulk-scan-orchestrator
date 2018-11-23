@@ -46,10 +46,13 @@ public class ScannedDocumentsHelper {
     }
 
     private static ScannedDocument mapDocument(Document document) {
-        return new ScannedDocument(document.fileName,
+        return new ScannedDocument(
+            document.fileName,
             document.controlNumber,
             document.type,
             document.scannedAt.atZone(ZoneId.systemDefault()).toLocalDateTime(),
-            new CcdDocument(String.valueOf(document.url)));
+            new CcdDocument(String.valueOf(document.url)),
+            null
+        );
     }
 }

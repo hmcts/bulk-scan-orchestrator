@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 import static java.lang.String.format;
@@ -46,6 +47,8 @@ public class AttachCaseCallbackService {
             .getOrElseGet(Value::toJavaList);
     }
 
+    //The code below need to be rewritten to reuse the EventPublisher class
+
     private List<String> attachCase(String exceptionRecordJurisdiction,
                                     String caseRef,
                                     Long exceptionRecordReference,
@@ -72,12 +75,26 @@ public class AttachCaseCallbackService {
             ids -> throwDuplicateError(caseRef, ids)
         );
 
+        attachExceptionRecordReference(exceptionDocuments, exceptionRecordReference);
+
         StartEventResponse event = ccdApi.startAttachScannedDocs(theCase);
 
         ccdApi.attachExceptionRecord(theCase,
             insertNewRecords(exceptionDocuments, scannedDocuments),
             createEventSummary(theCase, exceptionRecordReference, exceptionDocuments),
             event);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void attachExceptionRecordReference(
+        List<Map<String, Object>> exceptionDocuments,
+        Long exceptionRecordReference
+    ) {
+        exceptionDocuments.stream().map(doc -> {
+            Map<String, Object> document = (Map<String, Object>) doc.get("value");
+            document.put("exceptionRecordReference", String.valueOf(exceptionRecordReference));
+            return doc;
+        }).collect(Collectors.toList());
     }
 
     private void throwDuplicateError(String caseRef, Set<String> duplicateIds) {
