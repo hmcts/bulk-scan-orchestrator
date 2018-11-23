@@ -169,7 +169,7 @@ configurations.all {
     // unfortunately, not propagating and applying an override for transitive dependencies
     // no hard dependencies found and spring dependency manager solves any incompatibilities
     // this change originated from https://nvd.nist.gov/vuln/detail/CVE-2018-10237
-    force "com.google.guava:guava:27.0-jre"
+    force "com.google.guava:guava:27.0.1-jre"
   }
 }
 
