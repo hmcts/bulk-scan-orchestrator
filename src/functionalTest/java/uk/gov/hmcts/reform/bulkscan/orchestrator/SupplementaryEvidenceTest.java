@@ -124,9 +124,10 @@ public class SupplementaryEvidenceTest {
             caseDetails.getJurisdiction(),
             String.valueOf(caseDetails.getId())
         );
+        String evidenceHandled = (String) updatedCaseDetails.getData().getOrDefault("evidenceHandled", "NO_VALUE");
 
         updatedScannedDocuments = getScannedDocuments(updatedCaseDetails);
-        return updatedScannedDocuments.size() == excpectedScannedDocuments;
+        return updatedScannedDocuments.size() == excpectedScannedDocuments && evidenceHandled.equals("No");
     }
 
     private void verifySupplementaryEvidenceDetailsUpdated(int expectedScannedDocuments) throws JSONException {
