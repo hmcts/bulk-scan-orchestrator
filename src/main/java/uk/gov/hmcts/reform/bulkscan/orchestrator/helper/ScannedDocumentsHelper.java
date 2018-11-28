@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envel
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +42,16 @@ public class ScannedDocumentsHelper {
         return documents.stream().map(ScannedDocumentsHelper::mapDocument).collect(toList());
     }
 
+    @SuppressWarnings("unchecked")
+    public static List<Document> getDocuments(CaseDetails caseDetails) {
+        List<Map<String, Object>> data = (List<Map<String, Object>>) caseDetails.getData().get("scannedDocuments");
+
+        return data.stream()
+            .map(ScannedDocumentsHelper::createScannedDocumentWithCcdData)
+            .map(ScannedDocumentsHelper::mapScannedDocument)
+            .collect(toList());
+    }
+
     private static ScannedDocument createScannedDocumentWithCcdData(Map<String, Object> object) {
         return objectMapper.convertValue(object.get("value"), ScannedDocument.class);
     }
@@ -53,6 +64,16 @@ public class ScannedDocumentsHelper {
             document.scannedAt.atZone(ZoneId.systemDefault()).toLocalDateTime(),
             new CcdDocument(String.valueOf(document.url)),
             null
+        );
+    }
+
+    private static Document mapScannedDocument(ScannedDocument scannedDocument) {
+        return new Document(
+            scannedDocument.fileName,
+            scannedDocument.controlNumber,
+            scannedDocument.type,
+            scannedDocument.scannedDate.toInstant(ZoneOffset.UTC),
+            scannedDocument.url.documentUrl
         );
     }
 }

@@ -17,7 +17,7 @@ public class Envelope {
     public final Instant deliveryDate;
     public final Instant openingDate;
     public final Classification classification;
-    public final List<Document> documents;
+    public List<Document> documents;
 
     public Envelope(
         @JsonProperty(value = "id", required = true) String id,
@@ -39,5 +39,9 @@ public class Envelope {
         this.openingDate = openingDate;
         this.classification = classification;
         this.documents = documents;
+    }
+
+    public void addDocuments(List<Document> documents) {
+        this.documents.addAll(documents);
     }
 }
