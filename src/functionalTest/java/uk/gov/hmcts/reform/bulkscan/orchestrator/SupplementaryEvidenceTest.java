@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
+import com.google.common.base.Strings;
 import org.awaitility.Duration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -124,7 +125,9 @@ public class SupplementaryEvidenceTest {
             caseDetails.getJurisdiction(),
             String.valueOf(caseDetails.getId())
         );
-        String evidenceHandled = (String) updatedCaseDetails.getData().getOrDefault("evidenceHandled", "NO_VALUE");
+        String evidenceHandled = Strings.nullToEmpty(
+            (String) updatedCaseDetails.getData().getOrDefault("evidenceHandled", "NO_VALUE")
+        );
 
         updatedScannedDocuments = getScannedDocuments(updatedCaseDetails);
         return updatedScannedDocuments.size() == excpectedScannedDocuments && evidenceHandled.equals("No");
