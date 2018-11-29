@@ -17,7 +17,7 @@ public class Envelope {
     public final Instant deliveryDate;
     public final Instant openingDate;
     public final Classification classification;
-    public List<Document> documents;
+    public final List<Document> documents;
 
     public Envelope(
         @JsonProperty(value = "id", required = true) String id,
