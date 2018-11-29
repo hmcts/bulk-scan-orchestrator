@@ -13,6 +13,6 @@ public class SupplementaryEvidenceMapper extends ModelMapper<SupplementaryEviden
 
     @Override
     public SupplementaryEvidence mapEnvelope(Envelope envelope) {
-        return new SupplementaryEvidence(mapDocuments(envelope.getDocuments()));
+        return new SupplementaryEvidence(mapDocuments(envelope.documents));
     }
 }

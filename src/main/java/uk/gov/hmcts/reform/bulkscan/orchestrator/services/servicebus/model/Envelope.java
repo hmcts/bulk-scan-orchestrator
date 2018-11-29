@@ -17,7 +17,7 @@ public class Envelope {
     public final Instant deliveryDate;
     public final Instant openingDate;
     public final Classification classification;
-    private List<Document> documents;
+    public List<Document> documents;
 
     public Envelope(
         @JsonProperty(value = "id", required = true) String id,
@@ -43,9 +43,5 @@ public class Envelope {
 
     public void addDocuments(List<Document> documents) {
         this.documents.addAll(documents);
-    }
-
-    public List<Document> getDocuments() {
-        return documents;
     }
 }

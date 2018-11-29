@@ -65,8 +65,8 @@ public class EnvelopeParserTest {
                 .put("opening_date", envelope.openingDate)
                 .put("classification", envelope.classification.toString().toLowerCase())
                 .put("documents", new JSONArray()
-                    .put(toJson(envelope.getDocuments().get(0)))
-                    .put(toJson(envelope.getDocuments().get(1)))
+                    .put(toJson(envelope.documents.get(0)))
+                    .put(toJson(envelope.documents.get(1)))
                 )
                 .toString();
 
@@ -91,8 +91,8 @@ public class EnvelopeParserTest {
                 .put("opening_date", envelope.openingDate)
                 .put("classification", envelope.classification.toString().toLowerCase())
                 .put("documents", new JSONArray()
-                    .put(toJson(envelope.getDocuments().get(0)))
-                    .put(toJson(envelope.getDocuments().get(1)))
+                    .put(toJson(envelope.documents.get(0)))
+                    .put(toJson(envelope.documents.get(1)))
                 )
                 .put("some_extra_ignored_field", "some_ignored_value")
                 .toString();
