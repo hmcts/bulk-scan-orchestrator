@@ -38,7 +38,7 @@ public class ScannedDocumentsHelper {
     }
 
     public static List<ScannedDocument> getScannedDocuments(Envelope envelope) {
-        List<Document> documents = envelope.documents;
+        List<Document> documents = envelope.getDocuments();
         return documents.stream().map(ScannedDocumentsHelper::mapDocument).collect(toList());
     }
 

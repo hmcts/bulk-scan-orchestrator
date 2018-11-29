@@ -19,7 +19,7 @@ public class ExceptionRecordMapper extends ModelMapper<ExceptionRecord> {
             envelope.jurisdiction,
             getLocalDateTime(envelope.deliveryDate),
             getLocalDateTime(envelope.openingDate),
-            mapDocuments(envelope.documents)
+            mapDocuments(envelope.getDocuments())
         );
     }
 }

@@ -27,7 +27,7 @@ public class SupplementaryEvidenceMapperTest {
 
         assertThat(supplementaryEvidence.scannedDocuments.size()).isEqualTo(1);
 
-        Document envelopeDocument = envelope.documents.get(0);
+        Document envelopeDocument = envelope.getDocuments().get(0);
         ScannedDocument scannedDocument = supplementaryEvidence.scannedDocuments.get(0).value;
 
         assertThat(scannedDocument.controlNumber).isEqualTo(envelopeDocument.controlNumber);
@@ -50,7 +50,7 @@ public class SupplementaryEvidenceMapperTest {
         assertThat(supplementaryEvidence.scannedDocuments.size()).isEqualTo(numberOfDocuments);
 
         List<String> expectedDocumentFileNames =
-            envelope.documents.stream().map(d -> d.fileName).collect(toList());
+            envelope.getDocuments().stream().map(d -> d.fileName).collect(toList());
 
         List<String> actualDocumentFileNames =
             supplementaryEvidence.scannedDocuments.stream().map(d -> d.value.fileName).collect(toList());
