@@ -25,17 +25,25 @@ locals {
     // add secrets to all bulk-scan vaults in the form idam-users-<jurisdiction>-username idam-users-<jurisdiction>-password
     SSCS = "idam-users-sscs"
     BULKSCAN = "idam-users-bulkscan"
+    DIVORCE = "idam-users-div"
   }
 
-  users_secret_names = "${values(local.users)}"
+  all_jurisdictions     = "${keys(local.users)}"
+  supported_user_keys   = "${matchkeys(local.all_jurisdictions, local.all_jurisdictions, var.supported_jurisdictions)}"
+  supported_user_values = "${matchkeys(values(local.users), local.all_jurisdictions, var.supported_jurisdictions)}"
+
+  # a subset of local.users, limited to the supported jurisdictions
+  supported_users       = "${zipmap(local.supported_user_keys, local.supported_user_values)}"
+
+  users_secret_names = "${values(local.supported_users)}"
 
   users_usernames_settings = "${zipmap(
-                                    formatlist("IDAM_USERS_%s_USERNAME", keys(local.users)),
+                                    formatlist("IDAM_USERS_%s_USERNAME", keys(local.supported_users)),
                                     data.azurerm_key_vault_secret.idam_users_usernames.*.value
                                 )}"
 
   users_passwords_settings = "${zipmap(
-                                    formatlist("IDAM_USERS_%s_PASSWORD", keys(local.users)),
+                                    formatlist("IDAM_USERS_%s_PASSWORD", keys(local.supported_users)),
                                     data.azurerm_key_vault_secret.idam_users_passwords.*.value
                                 )}"
 

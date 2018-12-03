@@ -52,3 +52,9 @@ variable "idam_client_redirect_uri" {
 variable "s2s_name" {
   default = "bulk_scan_orchestrator"
 }
+
+variable "supported_jurisdictions" {
+  type = "list"
+  description = "Jurisdictions to be supported by Bulk Scan in the given environment. Bulk Scan will only be able to map these ones to IDAM user credentials"
+  default = ["SSCS", "BULKSCAN"]
+}
