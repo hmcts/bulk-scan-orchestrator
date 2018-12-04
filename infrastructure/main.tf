@@ -25,7 +25,6 @@ locals {
     // add secrets to all bulk-scan vaults in the form idam-users-<jurisdiction>-username idam-users-<jurisdiction>-password
     SSCS = "idam-users-sscs"
     BULKSCAN = "idam-users-bulkscan"
-    DIVORCE = "idam-users-div"
   }
 
   all_jurisdictions     = "${keys(local.users)}"
