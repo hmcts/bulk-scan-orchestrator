@@ -8,7 +8,7 @@ object Environment {
     val USER_ID = "640"
     val JURIDICTION = "BULKSCAN"
     const val CASE_TYPE_BULK_SCAN = "Bulk_Scanned"
-    const val CASE_TYPE_EXCEPTION_RECORD = "ExceptionRecord"
+    const val CASE_TYPE_EXCEPTION_RECORD = "BULKSCAN_ExceptionRecord"
     val CASE_REF = "1539007368674134"
 
     private val caseTypeUrl = "/caseworkers/$USER_ID/jurisdictions/$JURIDICTION/case-types/$CASE_TYPE_BULK_SCAN"

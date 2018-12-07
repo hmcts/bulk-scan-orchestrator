@@ -19,7 +19,7 @@ class CreateExceptionRecord extends AbstractEventPublisher {
 
     @Override
     public void publish(Envelope envelope) {
-        publish(envelope, CASE_TYPE);
+        publish(envelope, envelope.jurisdiction + "_" + CASE_TYPE);
     }
 
     /**
