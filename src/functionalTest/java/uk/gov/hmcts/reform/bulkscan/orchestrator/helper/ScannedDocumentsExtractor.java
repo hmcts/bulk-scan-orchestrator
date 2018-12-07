@@ -37,7 +37,8 @@ public class ScannedDocumentsExtractor {
             document.type,
             document.scannedAt.atZone(ZoneId.systemDefault()).toLocalDateTime(),
             new CcdDocument(String.valueOf(document.url)),
-            null
+            null,
+            ScannedDocumentsHelper.mapOcrDataToCcdFormat(document.ocrData)
         );
     }
 }

@@ -11,7 +11,9 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.mapOcrDataToCcdFormat;
 
 public abstract class ModelMapper<T extends CaseData> {
 
@@ -22,7 +24,7 @@ public abstract class ModelMapper<T extends CaseData> {
             .stream()
             .map(this::mapDocument)
             .map(CcdCollectionElement::new)
-            .collect(Collectors.toList());
+            .collect(toList());
     }
 
     private ScannedDocument mapDocument(Document document) {
@@ -32,11 +34,13 @@ public abstract class ModelMapper<T extends CaseData> {
             document.type,
             getLocalDateTime(document.scannedAt),
             new CcdDocument(document.url),
-            null
+            null,
+            mapOcrDataToCcdFormat(document.ocrData)
         );
     }
 
     LocalDateTime getLocalDateTime(Instant instant) {
         return instant.atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
+
 }

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -17,6 +17,7 @@ public class ScannedDocument {
     public final String exceptionReference;
     public final LocalDateTime scannedDate;
     public final CcdDocument url;
+    public final List<CcdCollectionElement<CcdKeyValue>> ocrData;
 
     public ScannedDocument(
         @JsonProperty("fileName") String fileName,
@@ -24,7 +25,8 @@ public class ScannedDocument {
         @JsonProperty("type") String type,
         @JsonProperty("scannedDate") LocalDateTime scannedDate,
         @JsonProperty("url") CcdDocument url,
-        @JsonProperty("exceptionRecordReference") String exceptionReference
+        @JsonProperty("exceptionRecordReference") String exceptionReference,
+        @JsonProperty("scanOCRData") List<CcdCollectionElement<CcdKeyValue>> ocrData
     ) {
         this.fileName = fileName;
         this.controlNumber = controlNumber;
@@ -32,26 +34,6 @@ public class ScannedDocument {
         this.scannedDate = scannedDate;
         this.url = url;
         this.exceptionReference = exceptionReference;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ScannedDocument that = (ScannedDocument) o;
-        return Objects.equals(fileName, that.fileName)
-            && Objects.equals(controlNumber, that.controlNumber)
-            && Objects.equals(type, that.type)
-            && Objects.equals(scannedDate, that.scannedDate)
-            && Objects.equals(url, that.url);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(fileName, controlNumber, type, scannedDate, url);
+        this.ocrData = ocrData;
     }
 }
