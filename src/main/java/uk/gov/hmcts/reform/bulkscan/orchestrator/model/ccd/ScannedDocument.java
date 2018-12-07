@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -32,26 +31,5 @@ public class ScannedDocument {
         this.scannedDate = scannedDate;
         this.url = url;
         this.exceptionReference = exceptionReference;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ScannedDocument that = (ScannedDocument) o;
-        return Objects.equals(fileName, that.fileName)
-            && Objects.equals(controlNumber, that.controlNumber)
-            && Objects.equals(type, that.type)
-            && Objects.equals(scannedDate, that.scannedDate)
-            && Objects.equals(url, that.url);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(fileName, controlNumber, type, scannedDate, url);
     }
 }
