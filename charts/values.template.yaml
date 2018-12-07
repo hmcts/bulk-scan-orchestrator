@@ -1,0 +1,35 @@
+---
+java:
+  name: ${SERVICE_NAME}
+  image: ${IMAGE_NAME}
+  applicationPort: 8582
+  cpuRequests: 200m
+  readinessDelay: 45
+  livenessDelay: 45
+  ingressHost: ${SERVICE_FQDN}  
+  environment:
+    S2S_SECRET: "${S2S_SECRET}"
+    IDAM_CLIENT_SECRET: "${IDAM_CLIENT_SECRET}"
+    IDAM_USERS_BULKSCAN_USERNAME: "${IDAM_USER_NAME}"
+    IDAM_USERS_BULKSCAN_PASSWORD: "${IDAM_USER_PASSWORD}"
+    QUEUE_CONNECTION_STRING: "$(SB_CONN_STRING);EntityPath=envelopes"
+  configmap:
+    LOGBACK_REQUIRE_ALERT_LEVEL: "false"
+    LOGBACK_REQUIRE_ERROR_CODE: "false"
+    S2S_NAME: "bulk_scan_orchestrator"
+    S2S_URL: "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
+    IDAM_API_URL: "https://preprod-idamapi.reform.hmcts.net:3511"
+    IDAM_CLIENT_REDIRECT_URI: "https://rpe-bulk-scan-processor-sandbox.service.core-compute-sandbox.internal/oauth2/callback"
+    CORE_CASE_DATA_API_URL: "http://ccd-data-store-api-aat.service.core-compute-aat.internal"
+    DOCUMENT_MANAGEMENT_URL: "http://dm-store-aat.service.core-compute-aat.internal"
+  secrets:
+    SB_CONN_STRING:
+      secretRef: servicebus-${SERVICE_NAME}-secret
+      key: connectionString
+servicebus:
+  setup:
+    queues:
+      -envelopes
+
+
+  

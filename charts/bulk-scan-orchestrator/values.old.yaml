@@ -1,0 +1,34 @@
+---
+java:
+  name: bulk-scan-orchestrator
+  image: hmcts.azurecr.io/bulk-scan-orchestrator@sha256:85dd5e1b1054c68aaa5e356ee07de2e0d9be5b1540d82b8466d3f2106ace3c9a
+  applicationPort: 8582
+  cpuRequests: 200m
+  readinessDelay: 45
+  livenessDelay: 45
+  ingressHost: bulk-scan-orchestator.local  
+  environment:
+    S2S_SECRET: "AAAA"
+    IDAM_CLIENT_SECRET: "AAAA"
+    IDAM_USERS_BULKSCAN_USERNAME: "bulkscan+ccd@gmail.com"
+    IDAM_USERS_BULKSCAN_PASSWORD: "Password12"
+    QUEUE_CONNECTION_STRING: "$(SB_CONN_STRING);EntityPath=envelopes"
+  configmap:
+    LOGBACK_REQUIRE_ALERT_LEVEL: "false"
+    LOGBACK_REQUIRE_ERROR_CODE: "false"
+    S2S_NAME: "bulk_scan_orchestrator"
+    S2S_URL: "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
+    IDAM_API_URL: "https://preprod-idamapi.reform.hmcts.net:3511"
+    IDAM_CLIENT_REDIRECT_URI: "https://rpe-bulk-scan-processor-sandbox.service.core-compute-sandbox.internal/oauth2/callback"
+    CORE_CASE_DATA_API_URL: "http://ccd-data-store-api-aat.service.core-compute-aat.internal"
+    DOCUMENT_MANAGEMENT_URL: "http://dm-store-aat.service.core-compute-aat.internal"
+  secrets:
+    SB_CONN_STRING:
+      secretRef: servicebus-bulk-scan-testing-secret
+      key: connectionString
+servicebus:
+  setup:
+    queues:
+    - envelopes
+
+  
