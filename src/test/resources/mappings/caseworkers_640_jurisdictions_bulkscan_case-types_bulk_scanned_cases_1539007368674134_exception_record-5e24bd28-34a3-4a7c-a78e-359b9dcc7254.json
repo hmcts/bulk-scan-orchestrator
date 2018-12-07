@@ -2,7 +2,7 @@
   "id" : "5e24bd28-34a3-4a7c-a78e-359b9dcc7254",
   "name" : "caseworkers_640_jurisdictions_bulkscan_case-types_bulk_scanned_cases_1539007368674134_events",
   "request" : {
-    "url" : "/caseworkers/640/jurisdictions/BULKSCAN/case-types/ExceptionRecord/cases?ignore-warning=true",
+    "url" : "/caseworkers/640/jurisdictions/BULKSCAN/case-types/BULKSCAN_ExceptionRecord/cases?ignore-warning=true",
     "method" : "POST",
     "bodyPatterns": [
       {

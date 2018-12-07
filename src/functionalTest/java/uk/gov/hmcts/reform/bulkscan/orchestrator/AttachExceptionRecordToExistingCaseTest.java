@@ -151,7 +151,7 @@ public class AttachExceptionRecordToExistingCaseTest {
     private Optional<CaseDetails> lookUpExceptionRecord(UUID randomPoBox) {
         List<CaseDetails> caseDetailsList = caseSearcher.search(
             SampleData.JURSIDICTION,
-            DelegatePublisher.EXCEPTION_RECORD_CASE_TYPE,
+            SampleData.JURSIDICTION + "_" + DelegatePublisher.EXCEPTION_RECORD_CASE_TYPE,
             ImmutableMap.of(
                 "case.poBox", randomPoBox.toString()
             )

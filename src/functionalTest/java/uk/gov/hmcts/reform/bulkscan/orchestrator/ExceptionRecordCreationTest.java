@@ -74,7 +74,7 @@ public class ExceptionRecordCreationTest {
     private boolean hasExceptionRecordBeenCreated(UUID randomPoBox) {
         List<CaseDetails> caseDetails = caseSearcher.search(
             SampleData.JURSIDICTION,
-            DelegatePublisher.EXCEPTION_RECORD_CASE_TYPE,
+            SampleData.JURSIDICTION + "_" + DelegatePublisher.EXCEPTION_RECORD_CASE_TYPE,
             ImmutableMap.of(
                 "case.poBox", randomPoBox.toString()
             )
