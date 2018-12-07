@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus;
 
+import com.google.common.collect.ImmutableMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -38,14 +39,16 @@ public class EnvelopeParserTest {
                     "doc1_control_number",
                     "doc1_type",
                     Instant.now(),
-                    "doc1_url"
+                    "doc1_url",
+                    ImmutableMap.of("key1", "value1")
                 ),
                 new Document(
                     "doc2_file_name",
                     "doc2_control_number",
                     "doc2_type",
                     Instant.now(),
-                    "doc2_url"
+                    "doc2_url",
+                    null
                 )
             )
         );
@@ -178,6 +181,7 @@ public class EnvelopeParserTest {
             .put("control_number", doc.controlNumber)
             .put("type", doc.type)
             .put("scanned_at", toIso8601(doc.scannedAt))
-            .put("url", doc.url);
+            .put("url", doc.url)
+            .put("ocr_data", doc.ocrData != null ? new JSONObject(doc.ocrData) : null);
     }
 }
