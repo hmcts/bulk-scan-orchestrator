@@ -1,12 +1,12 @@
 ---
 java:
-  name: bulk-scan-testing2
-  image: hmcts.azurecr.io/bulk-scan-orchestrator@sha256:85dd5e1b1054c68aaa5e356ee07de2e0d9be5b1540d82b8466d3f2106ace3c9a
+  name: bulk-scan-test4
+  image: hmcts.azurecr.io/hmcts/bulk-scan-orchestrator:latest
   applicationPort: 8582
   cpuRequests: 200m
   readinessDelay: 45
   livenessDelay: 45
-  ingressHost: bulk-scan-testing2.service.core-compute-saat.internal  
+  ingressHost: bulk-scan-test4.service.core-compute-saat.internal  
   environment:
     S2S_SECRET: "AAAA"
     IDAM_CLIENT_SECRET: "AAAA"
@@ -24,7 +24,7 @@ java:
     DOCUMENT_MANAGEMENT_URL: "http://dm-store-aat.service.core-compute-aat.internal"
   secrets:
     SB_CONN_STRING:
-      secretRef: servicebus-bulk-scan-testing2-secret
+      secretRef: servicebus-bulk-scan-test4-secret
       key: connectionString
 servicebus:
   setup:
