@@ -21,13 +21,17 @@ public class ExceptionRecord implements CaseData {
 
     public final List<CcdCollectionElement<ScannedDocument>> scannedDocuments;
 
+    @JsonProperty("scanOCRData")
+    public final List<CcdCollectionElement<CcdKeyValue>> ocrData;
+
     public ExceptionRecord(
         String classification,
         String poBox,
         String jurisdiction,
         LocalDateTime deliveryDate,
         LocalDateTime openingDate,
-        List<CcdCollectionElement<ScannedDocument>> scannedDocuments
+        List<CcdCollectionElement<ScannedDocument>> scannedDocuments,
+        List<CcdCollectionElement<CcdKeyValue>> ocrData
     ) {
         this.classification = classification;
         this.poBox = poBox;
@@ -35,5 +39,6 @@ public class ExceptionRecord implements CaseData {
         this.deliveryDate = deliveryDate;
         this.openingDate = openingDate;
         this.scannedDocuments = scannedDocuments;
+        this.ocrData = ocrData;
     }
 }

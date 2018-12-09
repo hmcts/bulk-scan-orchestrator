@@ -128,7 +128,8 @@ public class SampleData {
             Instant.now(),
             Instant.now(),
             Classification.NEW_APPLICATION,
-            documents(numberOfDocuments)
+            documents(numberOfDocuments),
+            ImmutableMap.of("key1", "value1")
         );
     }
 
@@ -140,8 +141,7 @@ public class SampleData {
                     String.format("control_number_%s", index),
                     String.format("type_%s", index),
                     LocalDate.parse("2018-10-01").plus(index, DAYS).atStartOfDay().toInstant(ZoneOffset.UTC),
-                    String.format("https://example.gov.uk/%s", index),
-                    ImmutableMap.of("key_" + index, "value_" + index)
+                    String.format("https://example.gov.uk/%s", index)
                 )
             ).limit(numberOfDocuments)
             .collect(Collectors.toList());

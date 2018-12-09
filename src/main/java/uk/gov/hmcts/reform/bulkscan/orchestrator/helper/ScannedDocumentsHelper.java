@@ -47,9 +47,7 @@ public class ScannedDocumentsHelper {
             scannedDocument.controlNumber,
             scannedDocument.type,
             scannedDocument.scannedDate.toInstant(ZoneOffset.UTC),
-            scannedDocument.url.documentUrl,
-            // TODO: set ocr data
-            null
+            scannedDocument.url.documentUrl
         );
     }
 }

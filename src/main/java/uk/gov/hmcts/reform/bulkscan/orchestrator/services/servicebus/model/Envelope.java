@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Envelope {
@@ -18,6 +19,7 @@ public class Envelope {
     public final Instant openingDate;
     public final Classification classification;
     public final List<Document> documents;
+    public final Map<String, String> ocrData;
 
     public Envelope(
         @JsonProperty(value = "id", required = true) String id,
@@ -28,7 +30,8 @@ public class Envelope {
         @JsonProperty(value = "delivery_date", required = true) Instant deliveryDate,
         @JsonProperty(value = "opening_date", required = true) Instant openingDate,
         @JsonProperty(value = "classification", required = true) Classification classification,
-        @JsonProperty(value = "documents", required = true) List<Document> documents
+        @JsonProperty(value = "documents", required = true) List<Document> documents,
+        @JsonProperty(value = "ocr_data") Map<String, String> ocrData
     ) {
         this.id = id;
         this.caseRef = caseRef;
@@ -39,6 +42,7 @@ public class Envelope {
         this.openingDate = openingDate;
         this.classification = classification;
         this.documents = documents;
+        this.ocrData = ocrData;
     }
 
     public void addDocuments(List<Document> documents) {
