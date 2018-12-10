@@ -13,10 +13,10 @@
       "control_number": "control_number",
       "type": "doc_type",
       "scanned_at": "1970-01-01T00:00:00.000Z",
-      "url": "https://example.gov.uk/123",
-      "ocr_data": {
-        "key1": "value1"
-      }
+      "url": "https://example.gov.uk/123"
     }
-  ]
+  ],
+  "ocr_data": {
+    "key1": "value1"
+  }
 }

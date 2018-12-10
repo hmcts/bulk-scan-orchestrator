@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envel
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +36,7 @@ public class ScannedDocumentsExtractor {
             document.fileName,
             document.controlNumber,
             document.type,
-            document.scannedAt.atZone(ZoneId.systemDefault()).toLocalDateTime(),
+            ZonedDateTime.ofInstant(document.scannedAt, ZoneId.systemDefault()).toLocalDateTime(),
             new CcdDocument(String.valueOf(document.url)),
             null
         );

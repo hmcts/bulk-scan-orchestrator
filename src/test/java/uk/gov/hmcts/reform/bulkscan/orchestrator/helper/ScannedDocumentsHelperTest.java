@@ -39,8 +39,7 @@ public class ScannedDocumentsHelperTest {
             "1111001",
             "Other",
             Instant.parse("2018-12-01T12:34:56.123Z"),
-            "https://doc-url-1.example.com",
-            null
+            "https://doc-url-1.example.com"
         );
 
         assertThat(document).isEqualToComparingFieldByField(expectedDocument);

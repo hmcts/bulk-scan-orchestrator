@@ -18,9 +18,9 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -119,6 +119,10 @@ public class SampleData {
     }
 
     public static Envelope envelope(int numberOfDocuments) {
+        return envelope(numberOfDocuments, ImmutableMap.of("fieldName1", "value1"));
+    }
+
+    public static Envelope envelope(int numberOfDocuments, Map<String, String> ocrData) {
         return new Envelope(
             "eb9c3598-35fc-424e-b05a-902ee9f11d56",
             CASE_REF,
@@ -128,7 +132,8 @@ public class SampleData {
             Instant.now(),
             Instant.now(),
             Classification.NEW_APPLICATION,
-            documents(numberOfDocuments)
+            documents(numberOfDocuments),
+            ocrData
         );
     }
 
@@ -139,9 +144,8 @@ public class SampleData {
                     String.format("file_%s.pdf", index),
                     String.format("control_number_%s", index),
                     String.format("type_%s", index),
-                    LocalDate.parse("2018-10-01").plus(index, DAYS).atStartOfDay().toInstant(ZoneOffset.UTC),
-                    String.format("https://example.gov.uk/%s", index),
-                    ImmutableMap.of("key_" + index, "value_" + index)
+                    ZonedDateTime.parse("2018-10-01T00:00:00Z").plus(index, DAYS).toInstant(),
+                    String.format("https://example.gov.uk/%s", index)
                 )
             ).limit(numberOfDocuments)
             .collect(Collectors.toList());

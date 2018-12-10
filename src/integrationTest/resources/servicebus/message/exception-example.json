@@ -15,5 +15,9 @@
       "scanned_at": "2018-01-01T12:34:56.123Z",
       "url": "http://test-url"
     }
-  ]
+  ],
+  "ocr_data": {
+    "field1": "value1",
+    "field2": "value2"
+  }
 }
