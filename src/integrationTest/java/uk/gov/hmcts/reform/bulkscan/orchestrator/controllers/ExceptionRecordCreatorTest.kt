@@ -29,16 +29,6 @@ import java.util.concurrent.TimeUnit
 @IntegrationTest
 class ExceptionRecordCreatorTest {
 
-    private val mockSupplementaryMessage = Message(File(
-        "src/integrationTest/resources/servicebus/message/supplementary-evidence-example.json"
-    ).readText())
-    private val mockIncompleteSupplementaryMessage = Message(File(
-        "src/integrationTest/resources/servicebus/message/supplementary-evidence-example.json"
-    ).readText().replace(CASE_REF, ""))
-    private val mockExceptionMessage = Message(File(
-        "src/integrationTest/resources/servicebus/message/exception-example.json"
-    ).readText())
-
     private val caseEventTriggerStartUrl = Environment.caseEventTriggerStartUrl
         .replace(CASE_TYPE_BULK_SCAN, CASE_TYPE_EXCEPTION_RECORD)
     private val caseSubmitUrl = Environment.caseSubmitUrl
@@ -61,7 +51,7 @@ class ExceptionRecordCreatorTest {
 
     @Test
     fun `should create exception record for supplementary evidence when case record is not found`() {
-        messageSender.send(mockSupplementaryMessage)
+        messageSender.send(messageFromFile("supplementary-evidence-example.json"))
         await()
             .atMost(30, TimeUnit.SECONDS)
             .ignoreExceptions()
@@ -74,6 +64,10 @@ class ExceptionRecordCreatorTest {
 
     @Test
     fun `should create exception record for supplementary evidence when case ref is not provided`() {
+        val mockIncompleteSupplementaryMessage = Message(File(
+            "src/integrationTest/resources/servicebus/message/supplementary-evidence-example.json"
+        ).readText().replace(CASE_REF, ""))
+
         messageSender.send(mockIncompleteSupplementaryMessage)
         await()
             .atMost(30, TimeUnit.SECONDS)
@@ -86,7 +80,7 @@ class ExceptionRecordCreatorTest {
 
     @Test
     fun `should create exception record for new exception case type`() {
-        messageSender.send(mockExceptionMessage)
+        messageSender.send(messageFromFile("exception-example.json"))
         await()
             .atMost(30, TimeUnit.SECONDS)
             .ignoreExceptions()
@@ -94,5 +88,12 @@ class ExceptionRecordCreatorTest {
                 server.verify(postRequestedFor(urlPathEqualTo(caseSubmitUrl)))
                 true
             }
+    }
+
+    fun messageFromFile(fileName: String): Message {
+        return Message(
+            File("src/integrationTest/resources/servicebus/message/$fileName")
+                .readText()
+        )
     }
 }
