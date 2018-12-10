@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
 import java.util.List;
+import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
 
@@ -26,21 +27,18 @@ public class ExceptionRecordMapper extends ModelMapper<ExceptionRecord> {
             getLocalDateTime(envelope.deliveryDate),
             getLocalDateTime(envelope.openingDate),
             mapDocuments(envelope.documents),
-            mapOcrData(envelope)
+            mapOcrData(envelope.ocrData)
         );
     }
 
-    private List<CcdCollectionElement<CcdKeyValue>> mapOcrData(Envelope envelope) {
-        if (envelope.ocrData != null) {
-            return envelope
-                .ocrData
+    private List<CcdCollectionElement<CcdKeyValue>> mapOcrData(Map<String, String> ocrData) {
+        if (ocrData != null) {
+            return ocrData
                 .entrySet()
                 .stream()
-                .map(entry ->
-                    new CcdCollectionElement<>(
-                        new CcdKeyValue(entry.getKey(), entry.getValue())
-                    )
-                ).collect(toList());
+                .map(entry -> new CcdKeyValue(entry.getKey(), entry.getValue()))
+                .map(CcdCollectionElement::new)
+                .collect(toList());
         } else {
             return null;
         }
