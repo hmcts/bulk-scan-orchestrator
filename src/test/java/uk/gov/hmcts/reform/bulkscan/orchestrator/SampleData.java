@@ -18,8 +18,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -140,7 +139,7 @@ public class SampleData {
                     String.format("file_%s.pdf", index),
                     String.format("control_number_%s", index),
                     String.format("type_%s", index),
-                    LocalDate.parse("2018-10-01").plus(index, DAYS).atStartOfDay().toInstant(ZoneOffset.UTC),
+                    ZonedDateTime.parse("2018-10-01T00:00:00Z").plus(index, DAYS).toInstant(),
                     String.format("https://example.gov.uk/%s", index)
                 )
             ).limit(numberOfDocuments)

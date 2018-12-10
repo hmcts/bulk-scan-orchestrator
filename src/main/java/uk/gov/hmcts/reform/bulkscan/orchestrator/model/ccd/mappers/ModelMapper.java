@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envel
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,6 +38,6 @@ public abstract class ModelMapper<T extends CaseData> {
     }
 
     LocalDateTime getLocalDateTime(Instant instant) {
-        return instant.atZone(ZoneId.systemDefault()).toLocalDateTime();
+        return ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDateTime();
     }
 }

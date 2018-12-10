@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +46,7 @@ public class ScannedDocumentsHelper {
             scannedDocument.fileName,
             scannedDocument.controlNumber,
             scannedDocument.type,
-            scannedDocument.scannedDate.toInstant(ZoneOffset.UTC),
+            scannedDocument.scannedDate.atZone(ZoneId.systemDefault()).toInstant(),
             scannedDocument.url.documentUrl
         );
     }
