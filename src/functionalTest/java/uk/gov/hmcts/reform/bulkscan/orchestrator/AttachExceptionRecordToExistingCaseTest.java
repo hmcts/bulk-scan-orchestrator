@@ -36,6 +36,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsExtractor.getScannedDocuments;
@@ -195,6 +196,12 @@ public class AttachExceptionRecordToExistingCaseTest {
             exceptionRecord.getId(),
             expectedExceptionRecordsSize
         );
+
+        Map<String, String> exceptionRecordOcrData = getOcrData(exceptionRecord);
+
+        if (exceptionRecordOcrData != null) {
+            assertThat(getOcrData(updatedCase)).isEqualTo(getOcrData(exceptionRecord));
+        }
     }
 
     private void isExceptionReferenceAttachedToTheScannedDocuments(
@@ -226,5 +233,25 @@ public class AttachExceptionRecordToExistingCaseTest {
             document.put("url", dmUrl);
         }
         return EnvelopeParser.parse(updatedCaseData.toString());
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, String> getOcrData(CaseDetails caseDetails) {
+        List<Map<String, Object>> ccdOcrData =
+            (List<Map<String, Object>>) caseDetails.getData().get("scanOCRData");
+
+        if (ccdOcrData != null) {
+            return ccdOcrData
+                .stream()
+                .map(ccdCollectionElement -> ((Map<String, String>) ccdCollectionElement.get("value")))
+                .collect(
+                    toMap(
+                        map -> map.get("key"),
+                        map -> map.get("value")
+                    )
+                );
+        } else {
+            return null;
+        }
     }
 }

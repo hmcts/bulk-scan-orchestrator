@@ -71,6 +71,28 @@ public class ExceptionRecordCreationTest {
             .until(() -> hasExceptionRecordBeenCreated(randomPoBox));
     }
 
+    @DisplayName("Should create ExceptionRecord when classification is NEW_APPLICATION")
+    @Test
+    public void should_create_exception_record_for_new_application()
+        throws JSONException, InterruptedException, ServiceBusException {
+        // given
+        UUID randomPoBox = UUID.randomUUID();
+
+        // when
+        envelopeMessager.sendMessageFromFile(
+            "envelopes/new-envelope-with-evidence.json",
+            "0000000000000000",
+            randomPoBox,
+            dmUrl
+        );
+
+        // then
+        await("Exception record should be created")
+            .atMost(60, TimeUnit.SECONDS)
+            .pollInterval(Duration.FIVE_SECONDS)
+            .until(() -> hasExceptionRecordBeenCreated(randomPoBox));
+    }
+
     private boolean hasExceptionRecordBeenCreated(UUID randomPoBox) {
         List<CaseDetails> caseDetails = caseSearcher.search(
             SampleData.JURSIDICTION,

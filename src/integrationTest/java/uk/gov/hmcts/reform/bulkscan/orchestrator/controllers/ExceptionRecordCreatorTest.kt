@@ -90,6 +90,18 @@ class ExceptionRecordCreatorTest {
             }
     }
 
+    @Test
+    fun `should create exception record for new application case type`() {
+        messageSender.send(messageFromFile("new-application-example.json"))
+        await()
+            .atMost(30, TimeUnit.SECONDS)
+            .ignoreExceptions()
+            .until {
+                server.verify(postRequestedFor(urlPathEqualTo(caseSubmitUrl)))
+                true
+            }
+    }
+
     fun messageFromFile(fileName: String): Message {
         return Message(
             File("src/integrationTest/resources/servicebus/message/$fileName")
