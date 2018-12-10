@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -118,6 +119,10 @@ public class SampleData {
     }
 
     public static Envelope envelope(int numberOfDocuments) {
+        return envelope(numberOfDocuments, ImmutableMap.of("fieldName1", "value1"));
+    }
+
+    public static Envelope envelope(int numberOfDocuments, Map<String, String> ocrData) {
         return new Envelope(
             "eb9c3598-35fc-424e-b05a-902ee9f11d56",
             CASE_REF,
@@ -128,7 +133,7 @@ public class SampleData {
             Instant.now(),
             Classification.NEW_APPLICATION,
             documents(numberOfDocuments),
-            ImmutableMap.of("key1", "value1")
+            ocrData
         );
     }
 
