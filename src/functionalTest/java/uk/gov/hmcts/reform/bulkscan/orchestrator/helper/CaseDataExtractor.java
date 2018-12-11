@@ -12,10 +12,11 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
-public class ScannedDocumentsExtractor {
+public class CaseDataExtractor {
 
-    private ScannedDocumentsExtractor() {
+    private CaseDataExtractor() {
         // utility class
     }
 
@@ -28,7 +29,27 @@ public class ScannedDocumentsExtractor {
 
     public static List<ScannedDocument> getScannedDocuments(Envelope envelope) {
         List<Document> documents = envelope.documents;
-        return documents.stream().map(ScannedDocumentsExtractor::mapDocument).collect(toList());
+        return documents.stream().map(CaseDataExtractor::mapDocument).collect(toList());
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Map<String, String> getOcrData(CaseDetails caseDetails) {
+        List<Map<String, Object>> ccdOcrData =
+            (List<Map<String, Object>>) caseDetails.getData().get("scanOCRData");
+
+        if (ccdOcrData != null) {
+            return ccdOcrData
+                .stream()
+                .map(ccdCollectionElement -> ((Map<String, String>) ccdCollectionElement.get("value")))
+                .collect(
+                    toMap(
+                        map -> map.get("key"),
+                        map -> map.get("value")
+                    )
+                );
+        } else {
+            return null;
+        }
     }
 
     private static ScannedDocument mapDocument(Document document) {

@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import com.google.common.collect.ImmutableMap;
-import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import io.restassured.RestAssured;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,10 +35,10 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsExtractor.getScannedDocuments;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getOcrData;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getScannedDocuments;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -66,37 +65,20 @@ public class AttachExceptionRecordToExistingCaseTest {
 
     private String dmUrl;
 
-    private CaseDetails exceptionRecord;
-
     @BeforeEach
-    public void setup() throws InterruptedException, ServiceBusException, JSONException {
+    public void setup() throws Exception {
 
         dmUrl = dmUploadService.uploadToDmStore(
             "Certificate.pdf",
             "documents/supplementary-evidence.pdf"
         );
-
-        UUID randomPoBox = UUID.randomUUID();
-
-        envelopeMessager.sendMessageFromFile(
-            "envelopes/supplementary-evidence-envelope.json",
-            "0000000000000000",
-            randomPoBox,
-            dmUrl
-        );
-
-        await("Exception record is created")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollDelay(2, TimeUnit.SECONDS)
-            .until(() -> lookUpExceptionRecord(randomPoBox).isPresent());
-
-        exceptionRecord = lookUpExceptionRecord(randomPoBox).get();
     }
 
     @Test
-    public void should_attach_exception_record_to_the_existing_case_with_no_evidence() {
+    public void should_attach_exception_record_to_the_existing_case_with_no_evidence() throws Exception {
         //given
         CaseDetails caseDetails = createCase("envelopes/new-envelope.json");
+        CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
         // when
         invokeCallbackEndpointForLinkingDocsToCase(caseDetails, exceptionRecord);
@@ -111,10 +93,11 @@ public class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-    public void should_attach_exception_record_to_the_existing_case_with_evidence_documents() throws JSONException {
+    public void should_attach_exception_record_to_the_existing_case_with_evidence_documents() throws Exception {
         //given
         Envelope newEnvelope = updateEnvelope("envelopes/new-envelope-with-evidence.json");
         CaseDetails caseDetails = ccdCaseCreator.createCase(newEnvelope);
+        CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
         // when
         invokeCallbackEndpointForLinkingDocsToCase(caseDetails, exceptionRecord);
@@ -149,6 +132,19 @@ public class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/attach_case");
     }
 
+    private CaseDetails createExceptionRecord(String resourceName) throws Exception {
+        UUID poBox = UUID.randomUUID();
+
+        envelopeMessager.sendMessageFromFile(resourceName, "0000000000000000", poBox, dmUrl);
+
+        await("Exception record is created")
+            .atMost(60, TimeUnit.SECONDS)
+            .pollDelay(2, TimeUnit.SECONDS)
+            .until(() -> lookUpExceptionRecord(poBox).isPresent());
+
+        return lookUpExceptionRecord(poBox).get();
+    }
+
     private Optional<CaseDetails> lookUpExceptionRecord(UUID randomPoBox) {
         List<CaseDetails> caseDetailsList = caseSearcher.search(
             SampleData.JURSIDICTION,
@@ -173,13 +169,13 @@ public class AttachExceptionRecordToExistingCaseTest {
     }
 
     private void verifyExistingCaseIsUpdatedWithExceptionRecordData(
-        CaseDetails caseDetails,
+        CaseDetails originalCase,
         CaseDetails exceptionRecord,
         int expectedExceptionRecordsSize
     ) {
         CaseDetails updatedCase = caseRetriever.retrieve(
-            caseDetails.getJurisdiction(),
-            String.valueOf(caseDetails.getId())
+            originalCase.getJurisdiction(),
+            String.valueOf(originalCase.getId())
         );
 
         List<ScannedDocument> updatedScannedDocuments = getScannedDocuments(updatedCase);
@@ -197,10 +193,20 @@ public class AttachExceptionRecordToExistingCaseTest {
             expectedExceptionRecordsSize
         );
 
+        assertCorrectOcrDataAfterUpdate(originalCase, exceptionRecord, updatedCase);
+    }
+
+    private void assertCorrectOcrDataAfterUpdate(
+        CaseDetails originalCase,
+        CaseDetails exceptionRecord,
+        CaseDetails updatedCase
+    ) {
         Map<String, String> exceptionRecordOcrData = getOcrData(exceptionRecord);
 
-        if (exceptionRecordOcrData != null) {
-            assertThat(getOcrData(updatedCase)).isEqualTo(getOcrData(exceptionRecord));
+        if (exceptionRecordOcrData.isEmpty()) {
+            assertThat(getOcrData(updatedCase)).isEqualTo(getOcrData(originalCase));
+        } else {
+            assertThat(getOcrData(updatedCase)).isEqualTo(exceptionRecordOcrData);
         }
     }
 
@@ -233,25 +239,5 @@ public class AttachExceptionRecordToExistingCaseTest {
             document.put("url", dmUrl);
         }
         return EnvelopeParser.parse(updatedCaseData.toString());
-    }
-
-    @SuppressWarnings("unchecked")
-    private Map<String, String> getOcrData(CaseDetails caseDetails) {
-        List<Map<String, Object>> ccdOcrData =
-            (List<Map<String, Object>>) caseDetails.getData().get("scanOCRData");
-
-        if (ccdOcrData != null) {
-            return ccdOcrData
-                .stream()
-                .map(ccdCollectionElement -> ((Map<String, String>) ccdCollectionElement.get("value")))
-                .collect(
-                    toMap(
-                        map -> map.get("key"),
-                        map -> map.get("value")
-                    )
-                );
-        } else {
-            return null;
-        }
     }
 }

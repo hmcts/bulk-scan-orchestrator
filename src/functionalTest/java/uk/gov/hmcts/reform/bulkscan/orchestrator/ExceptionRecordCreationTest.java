@@ -19,10 +19,13 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.DelegatePub
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getOcrData;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -91,17 +94,26 @@ public class ExceptionRecordCreationTest {
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.FIVE_SECONDS)
             .until(() -> hasExceptionRecordBeenCreated(randomPoBox));
+
+        CaseDetails caseDetails = findCasesByPoBox(randomPoBox).get(0);
+        assertThat(caseDetails.getCaseTypeId()).isEqualTo("BULKSCAN_ExceptionRecord");
+        assertThat(caseDetails.getJurisdiction()).isEqualTo("BULKSCAN");
+
+        Map<String, String> expectedOcrData = ImmutableMap.of("field1", "value1", "field2", "value2");
+        assertThat(getOcrData(caseDetails)).isEqualTo(expectedOcrData);
     }
 
-    private boolean hasExceptionRecordBeenCreated(UUID randomPoBox) {
-        List<CaseDetails> caseDetails = caseSearcher.search(
+    private boolean hasExceptionRecordBeenCreated(UUID poBox) {
+        return findCasesByPoBox(poBox).size() == 1;
+    }
+
+    private List<CaseDetails> findCasesByPoBox(UUID poBox) {
+        return caseSearcher.search(
             SampleData.JURSIDICTION,
             SampleData.JURSIDICTION + "_" + DelegatePublisher.EXCEPTION_RECORD_CASE_TYPE,
             ImmutableMap.of(
-                "case.poBox", randomPoBox.toString()
+                "case.poBox", poBox.toString()
             )
         );
-
-        return caseDetails.size() == 1;
     }
 }
