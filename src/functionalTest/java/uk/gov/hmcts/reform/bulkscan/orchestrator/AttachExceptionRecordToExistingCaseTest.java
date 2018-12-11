@@ -37,7 +37,6 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getOcrData;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getScannedDocuments;
 
 @ExtendWith(SpringExtension.class)
@@ -192,22 +191,6 @@ public class AttachExceptionRecordToExistingCaseTest {
             exceptionRecord.getId(),
             expectedExceptionRecordsSize
         );
-
-        assertCorrectOcrDataAfterUpdate(originalCase, exceptionRecord, updatedCase);
-    }
-
-    private void assertCorrectOcrDataAfterUpdate(
-        CaseDetails originalCase,
-        CaseDetails exceptionRecord,
-        CaseDetails updatedCase
-    ) {
-        Map<String, String> exceptionRecordOcrData = getOcrData(exceptionRecord);
-
-        if (exceptionRecordOcrData.isEmpty()) {
-            assertThat(getOcrData(updatedCase)).isEqualTo(getOcrData(originalCase));
-        } else {
-            assertThat(getOcrData(updatedCase)).isEqualTo(exceptionRecordOcrData);
-        }
     }
 
     private void isExceptionReferenceAttachedToTheScannedDocuments(
