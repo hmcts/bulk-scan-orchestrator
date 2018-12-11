@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Class
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -67,7 +68,7 @@ public class EventPublisherContainerTest {
     }
 
     @Test
-    public void should_get_CreateExceptionRecord_event_publisher() {
+    public void should_get_CreateExceptionRecord_event_publisher_for_exception() {
         // when
         EventPublisher eventPublisher = getEventPublisher(EXCEPTION);
 
@@ -79,15 +80,15 @@ public class EventPublisherContainerTest {
     }
 
     @Test
-    public void should_get_Void_event_publisher_for_not_implemented_classification() {
+    public void should_get_CreateExceptionRecord_event_publisher_for_new_application() {
         // when
-        DelegatePublisher eventPublisher = (DelegatePublisher) getEventPublisher(NEW_APPLICATION);
+        EventPublisher eventPublisher = getEventPublisher(NEW_APPLICATION);
 
         // then
-        assertThat(eventPublisher.getDelegatedClass()).isNull();
+        assertThat(eventPublisher).isInstanceOf(CreateExceptionRecord.class);
 
         // and
-        verify(caseRetriever, never()).retrieve(JURSIDICTION, CASE_REF);
+        verify(caseRetriever, never()).retrieve(any(), any());
     }
 
     private EventPublisher getEventPublisher(Classification classification) {
