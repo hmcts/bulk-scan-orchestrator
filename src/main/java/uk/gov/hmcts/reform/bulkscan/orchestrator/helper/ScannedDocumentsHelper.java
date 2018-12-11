@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.util.Assert;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -29,9 +30,14 @@ public class ScannedDocumentsHelper {
 
     @SuppressWarnings("unchecked")
     public static List<Document> getDocuments(CaseDetails caseDetails) {
-        List<Map<String, Object>> data = (List<Map<String, Object>>) caseDetails.getData().get("scannedDocuments");
+        Map<String, Object> caseData = caseDetails.getData();
+        Assert.notNull(caseData, "Case Data must not be null");
 
-        return data.stream()
+        List<Map<String, Object>> scannedDocuments = (List<Map<String, Object>>) caseData.get("scannedDocuments");
+        // ccd returns an empty list when scanned documents are not present.
+        Assert.notNull(scannedDocuments, "Scanned Documents must not be null");
+
+        return scannedDocuments.stream()
             .map(ScannedDocumentsHelper::createScannedDocumentWithCcdData)
             .map(ScannedDocumentsHelper::mapScannedDocument)
             .collect(toList());
