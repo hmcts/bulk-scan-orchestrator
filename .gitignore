@@ -19,3 +19,4 @@
 
 .DS_store
 /src/main/resources/application-default.yaml
+/chart/charts/*.tgz
