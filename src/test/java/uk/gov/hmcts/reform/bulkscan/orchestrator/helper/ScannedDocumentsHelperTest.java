@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 
-import org.json.JSONObject;
 import org.junit.Test;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -10,7 +9,6 @@ import java.time.Instant;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.fileContentAsBytes;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.objectMapper;
 
@@ -28,28 +26,13 @@ public class ScannedDocumentsHelperTest {
     }
 
     @Test
-    public void getDocuments_should_throw_exception_when_scannedDocuments_are_missing()
+    public void getDocuments_should_return_empty_collection_when_scannedDocuments_are_missing()
         throws Exception {
         CaseDetails caseDetails = getCaseDetails("case-data/missing-scanned-documents.json");
 
-        Throwable throwable = catchThrowable(() -> ScannedDocumentsHelper.getDocuments(caseDetails));
+        List<Document> documents = ScannedDocumentsHelper.getDocuments(caseDetails);
 
-        assertThat(throwable)
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Scanned Documents must not be null");
-    }
-
-    @Test
-    public void getDocuments_should_throws_exception_when_caseData_is_missing()
-        throws IOException {
-        JSONObject emptyCase = new JSONObject();
-        CaseDetails caseDetails = objectMapper.readValue(emptyCase.toString().getBytes(), CaseDetails.class);
-
-        Throwable throwable = catchThrowable(() -> ScannedDocumentsHelper.getDocuments(caseDetails));
-
-        assertThat(throwable)
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Case Data must not be null");
+        assertThat(documents).isEmpty();
     }
 
     @Test
