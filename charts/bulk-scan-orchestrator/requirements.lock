@@ -1,0 +1,9 @@
+dependencies:
+- name: servicebus
+  repository: file:///Users/kevin/projects/moj/chart-servicebus/servicebus
+  version: 0.0.1
+- name: java
+  repository: file:///Users/kevin/projects/moj/chart-java/java
+  version: 0.0.8
+digest: sha256:1857041ccaa65b30c8ac78b0cb5682bb75aeb1e6ebd376f4afc89cec82b80c59
+generated: 2018-12-12T10:40:19.419939Z

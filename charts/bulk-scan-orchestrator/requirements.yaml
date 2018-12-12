@@ -1,9 +1,8 @@
 dependencies:
   - name: servicebus
     version: 0.0.1
-    repository: '@hmcts'
+    repository: file:///Users/kevin/projects/moj/chart-servicebus/servicebus
 
   - name: java
     version: 0.0.8
-    repository: java
-    repository: '@hmcts'
+    repository: file:///Users/kevin/projects/moj/chart-java/java

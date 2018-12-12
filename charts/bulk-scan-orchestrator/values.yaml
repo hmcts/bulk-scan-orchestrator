@@ -1,18 +1,17 @@
 ---
 java:
-  name: bulk-scan-test4
+  name: bulk-scan-orchetrator
   image: hmcts.azurecr.io/hmcts/bulk-scan-orchestrator:latest
   applicationPort: 8582
   cpuRequests: 200m
   readinessDelay: 45
   livenessDelay: 45
-  ingressHost: bulk-scan-test4.service.core-compute-saat.internal  
+  ingressHost: bulk-scan-orchetrator.service.core-compute-saat.internal  
   environment:
     S2S_SECRET: "AAAA"
     IDAM_CLIENT_SECRET: "AAAA"
     IDAM_USERS_BULKSCAN_USERNAME: "bulkscan+ccd@gmail.com"
     IDAM_USERS_BULKSCAN_PASSWORD: "Password12"
-    QUEUE_CONNECTION_STRING: "$(SB_CONN_STRING);EntityPath=envelopes"
   configmap:
     LOGBACK_REQUIRE_ALERT_LEVEL: "false"
     LOGBACK_REQUIRE_ERROR_CODE: "false"
@@ -23,10 +22,11 @@ java:
     CORE_CASE_DATA_API_URL: "http://ccd-data-store-api-aat.service.core-compute-aat.internal"
     DOCUMENT_MANAGEMENT_URL: "http://dm-store-aat.service.core-compute-aat.internal"
   secrets:
-    SB_CONN_STRING:
-      secretRef: servicebus-bulk-scan-test4-secret
+    QUEUE_CONNECTION_STRING:
+      secretRef: servicebus-secret-queue-bulk-scan-orchetrator-envelopes
       key: connectionString
 servicebus:
+  resourceGroup: bulk-scan-aks
   setup:
     queues:
-     - envelopes
+     - name: envelopes
