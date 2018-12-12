@@ -1,4 +1,4 @@
-#!groovy @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure")
+#!groovy @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure")
 import uk.gov.hmcts.contino.GradleBuilder
 @Library("Infrastructure")
 
@@ -27,18 +27,29 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
   ]
 }
 
+
+
 node {
   stage('Secrets') {
     withSubscription('nonprod') {
-      wrap([
-        $class                   : 'AzureKeyVaultBuildWrapper',
-        azureKeyVaultSecrets     : secrets,
-        keyVaultURLOverride      : "https://bulk-scan-aat.vault.azure.net/",
-        applicationIDOverride    : env.AZURE_CLIENT_ID,
-        applicationSecretOverride: env.AZURE_CLIENT_SECRET
-      ]) {
-        sh "env"
-      }
+      wrapSecrets(['bulk-scan-${env}', secrets], "aat")
     }
   }
+}
+
+private def wrapSecrets(Map<String, List<Map<String, Object>>> secrets, String env) {
+  secrets.keySet()
+    .forEach(
+      key > {
+        wrap([
+          $class                   : 'AzureKeyVaultBuildWrapper',
+          azureKeyVaultSecrets     : secrets.get(key),
+          keyVaultURLOverride      : "https://${key.replace('${env}', env)}.vault.azure.net/",
+          applicationIDOverride    : env.AZURE_CLIENT_ID,
+          applicationSecretOverride: env.AZURE_CLIENT_SECRET
+        ]) {
+          sh "env"
+        }
+      }
+  )
 }
