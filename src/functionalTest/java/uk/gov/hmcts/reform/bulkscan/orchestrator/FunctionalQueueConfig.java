@@ -9,13 +9,13 @@ import org.springframework.context.annotation.Bean;
 
 public class FunctionalQueueConfig {
 
-    @Value("${queue.write-connection-string}")
-    private String queueWriteConnectionString;
+    @Value("${queue.connection-string}")
+    private String queueConnectionString;
 
     @Bean
     QueueClient testWriteClient() throws ServiceBusException, InterruptedException {
         return new QueueClient(
-            new ConnectionStringBuilder(queueWriteConnectionString),
+            new ConnectionStringBuilder(queueConnectionString),
             ReceiveMode.PEEKLOCK
         );
     }
