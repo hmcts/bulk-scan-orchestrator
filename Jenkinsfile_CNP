@@ -47,8 +47,10 @@ withPipeline(type, product, component) {
       def subscription = env.SUBSCRIPTION_NAME
       def aksServiceName = dockerImage.getAksServiceName().toLowerCase()
       def serviceBusSecret = "${aksServiceName}-servicebus-secret"
-      def queueName = "envelopes"
-
+      def queueNames = [
+        "envelopes",
+        "notifications"
+      ]
       def namespace = aksServiceName
       def kubectl = new Kubectl(this, subscription, namespace)
       kubectl.login()
@@ -62,8 +64,10 @@ withPipeline(type, product, component) {
 
       // create queue
       def queues = az "servicebus queue list --resource-group ${env.RESOURCE_GROUP} --namespace-name ${serviceBusNamespace} --query '[].name'"
-      if (!queues.contains(queueName)) {
-        az "servicebus queue create --resource-group ${env.RESOURCE_GROUP} --namespace-name ${serviceBusNamespace} --name ${queueName}"
+      queueNames.each {
+        if (!queues.contains("${it}")) {
+          az "servicebus queue create --resource-group ${env.RESOURCE_GROUP} --namespace-name ${serviceBusNamespace} --name ${it}"
+        }
       }
     }
   }
