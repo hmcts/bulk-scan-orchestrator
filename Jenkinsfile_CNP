@@ -33,7 +33,7 @@ node {
       wrap([
         $class                   : 'AzureKeyVaultBuildWrapper',
         azureKeyVaultSecrets     : secrets,
-        keyVaultURLOverride      : keyvaultUrl,
+        keyVaultURLOverride      : "https://bulk-scan-aat.vault.azure.net/",
         applicationIDOverride    : env.AZURE_CLIENT_ID,
         applicationSecretOverride: env.AZURE_CLIENT_SECRET
       ]) {
