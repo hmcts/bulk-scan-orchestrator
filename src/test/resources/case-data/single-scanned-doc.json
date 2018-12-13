@@ -9,17 +9,7 @@
           "scannedDate": "2018-12-01T12:34:56.123Z",
           "url": {
             "document_url": "https://doc-url-1.example.com"
-          },
-          "scanOCRData": [
-            {
-              "key": "field1",
-              "value": "value1"
-            },
-            {
-              "key": "field2",
-              "value": "value2"
-            }
-          ]
+          }
         }
       }
     ]

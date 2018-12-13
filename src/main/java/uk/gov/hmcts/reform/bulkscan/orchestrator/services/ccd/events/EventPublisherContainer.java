@@ -44,8 +44,8 @@ public class EventPublisherContainer {
                     caseDetails
                 );
             case EXCEPTION:
-                return exceptionRecordCreator;
             case NEW_APPLICATION:
+                return exceptionRecordCreator;
             default:
                 return new DelegatePublisher(null, null);
         }

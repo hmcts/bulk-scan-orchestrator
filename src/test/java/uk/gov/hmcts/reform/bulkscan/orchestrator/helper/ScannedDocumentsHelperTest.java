@@ -26,6 +26,16 @@ public class ScannedDocumentsHelperTest {
     }
 
     @Test
+    public void getDocuments_should_return_empty_collection_when_scannedDocuments_are_missing()
+        throws Exception {
+        CaseDetails caseDetails = getCaseDetails("case-data/missing-scanned-documents.json");
+
+        List<Document> documents = ScannedDocumentsHelper.getDocuments(caseDetails);
+
+        assertThat(documents).isEmpty();
+    }
+
+    @Test
     public void getDocuments_should_map_document_properties_correctly() throws Exception {
         CaseDetails caseDetails = getCaseDetails("case-data/single-scanned-doc.json");
 
@@ -39,8 +49,7 @@ public class ScannedDocumentsHelperTest {
             "1111001",
             "Other",
             Instant.parse("2018-12-01T12:34:56.123Z"),
-            "https://doc-url-1.example.com",
-            null
+            "https://doc-url-1.example.com"
         );
 
         assertThat(document).isEqualToComparingFieldByField(expectedDocument);

@@ -7,7 +7,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
-import java.time.ZoneOffset;
+import java.time.ZoneId;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -29,9 +30,14 @@ public class ScannedDocumentsHelper {
 
     @SuppressWarnings("unchecked")
     public static List<Document> getDocuments(CaseDetails caseDetails) {
-        List<Map<String, Object>> data = (List<Map<String, Object>>) caseDetails.getData().get("scannedDocuments");
+        List<Map<String, Object>> scannedDocuments =
+            (List<Map<String, Object>>) caseDetails.getData().get("scannedDocuments");
 
-        return data.stream()
+        if (scannedDocuments == null) {
+            return Collections.emptyList();
+        }
+
+        return scannedDocuments.stream()
             .map(ScannedDocumentsHelper::createScannedDocumentWithCcdData)
             .map(ScannedDocumentsHelper::mapScannedDocument)
             .collect(toList());
@@ -46,10 +52,8 @@ public class ScannedDocumentsHelper {
             scannedDocument.fileName,
             scannedDocument.controlNumber,
             scannedDocument.type,
-            scannedDocument.scannedDate.toInstant(ZoneOffset.UTC),
-            scannedDocument.url.documentUrl,
-            // TODO: set ocr data
-            null
+            scannedDocument.scannedDate.atZone(ZoneId.systemDefault()).toInstant(),
+            scannedDocument.url.documentUrl
         );
     }
 }

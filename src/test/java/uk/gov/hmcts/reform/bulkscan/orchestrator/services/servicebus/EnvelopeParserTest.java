@@ -39,18 +39,17 @@ public class EnvelopeParserTest {
                     "doc1_control_number",
                     "doc1_type",
                     Instant.now(),
-                    "doc1_url",
-                    ImmutableMap.of("key1", "value1")
+                    "doc1_url"
                 ),
                 new Document(
                     "doc2_file_name",
                     "doc2_control_number",
                     "doc2_type",
                     Instant.now(),
-                    "doc2_url",
-                    null
+                    "doc2_url"
                 )
-            )
+            ),
+            ImmutableMap.of("key1", "value1")
         );
     }
 
@@ -71,6 +70,7 @@ public class EnvelopeParserTest {
                     .put(toJson(envelope.documents.get(0)))
                     .put(toJson(envelope.documents.get(1)))
                 )
+                .put("ocr_data", new JSONObject(envelope.ocrData))
                 .toString();
 
         // when
@@ -98,6 +98,7 @@ public class EnvelopeParserTest {
                     .put(toJson(envelope.documents.get(1)))
                 )
                 .put("some_extra_ignored_field", "some_ignored_value")
+                .put("ocr_data", envelope.ocrData != null ? new JSONObject(envelope.ocrData) : null)
                 .toString();
 
         // when
@@ -181,7 +182,6 @@ public class EnvelopeParserTest {
             .put("control_number", doc.controlNumber)
             .put("type", doc.type)
             .put("scanned_at", toIso8601(doc.scannedAt))
-            .put("url", doc.url)
-            .put("ocr_data", doc.ocrData != null ? new JSONObject(doc.ocrData) : null);
+            .put("url", doc.url);
     }
 }
