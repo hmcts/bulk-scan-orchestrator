@@ -112,10 +112,3 @@ data "azurerm_key_vault_secret" "s2s_secret" {
   name = "microservicekey-bulk-scan-orchestrator"
   vault_uri = "${local.s2s_vault_url}"
 }
-
-# the s2s secret is copied to app's own vault, so that Jeknins can convert it to an env variable
-resource "azurerm_key_vault_secret" "s2s_secret_for_tests" {
-  name  = "s2s-secret-for-tests"
-  value = "${data.azurerm_key_vault_secret.s2s_secret.value}"
-  vault_uri = "${data.azurerm_key_vault.key_vault.vault_uri}"
-}
