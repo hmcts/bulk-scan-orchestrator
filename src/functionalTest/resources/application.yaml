@@ -6,7 +6,7 @@ spring:
     name: Bulk Scan Orchestrator Functional Tests
 
 queue:
-  write-connection-string: ${QUEUE_WRITE_CONN_STRING}
+  connection-string: ${QUEUE_CONNECTION_STRING:"NO_VALUE_SUPPLIED"}
 
 core_case_data:
   api:
