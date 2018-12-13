@@ -2,8 +2,6 @@
 @Library("Infrastructure")
 
 import uk.gov.hmcts.contino.GradleBuilder
-import uk.gov.hmcts.contino.Kubectl
-import uk.gov.hmcts.contino.DockerImage
 
 def type = "java"
 def product = "bulk-scan"
@@ -40,35 +38,6 @@ withPipeline(type, product, component) {
       env.CORE_CASE_DATA_API_URL = 'http://ccd-data-store-api-aat.service.core-compute-aat.internal'
       env.IDAM_API_URL = 'https://preprod-idamapi.reform.hmcts.net:3511'
       env.IDAM_CLIENT_REDIRECT_URI = 'https://rpe-bulk-scan-processor-sandbox.service.core-compute-sandbox.internal/oauth2/callback'
-
-      def az = { cmd -> return sh(script: "env AZURE_CONFIG_DIR=/opt/jenkins/.azure-${env.SUBSCRIPTION_NAME} az $cmd", returnStdout: true).trim() }
-
-      def dockerImage = new DockerImage(product, component, null, env.BRANCH_NAME)
-      def subscription = env.SUBSCRIPTION_NAME
-      def aksServiceName = dockerImage.getAksServiceName().toLowerCase()
-      def serviceBusSecret = "${aksServiceName}-servicebus-secret"
-      def queueNames = [
-        "envelopes",
-        "notifications"
-      ]
-      def namespace = aksServiceName
-      def kubectl = new Kubectl(this, subscription, namespace)
-      kubectl.login()
-
-      // Get service bus connection string and parse to get namespace
-      def serviceBusConnectionStr = kubectl.getSecret(serviceBusSecret, namespace, "{.data.connectionString}")
-      //Regex: Endpoint=sb:\/\/([-a-zA-Z0-9]+)\.servicebus\.windows\.net.*
-      def serviceBusNamespace = serviceBusConnectionStr.substring(14).split("\\.")[0]
-      env.QUEUE_READ_CONN_STRING = "${serviceBusConnectionStr};EntityPath=envelopes"
-      env.QUEUE_WRITE_CONN_STRING = "${serviceBusConnectionStr};EntityPath=envelopes"
-
-      // create queue
-      def queues = az "servicebus queue list --resource-group ${env.RESOURCE_GROUP} --namespace-name ${serviceBusNamespace} --query '[].name'"
-      queueNames.each {
-        if (!queues.contains("${it}")) {
-          az "servicebus queue create --resource-group ${env.RESOURCE_GROUP} --namespace-name ${serviceBusNamespace} --name ${it}"
-        }
-      }
     }
   }
 
@@ -77,9 +46,9 @@ withPipeline(type, product, component) {
   }
 
   enableDockerBuild()
-  enableDeployToAKS()
   enableSlackNotifications(channel)
   loadVaultSecrets(secrets)
+  installCharts()
 
   setVaultName('bulk-scan')
 }
