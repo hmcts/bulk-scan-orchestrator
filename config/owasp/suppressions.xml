@@ -40,4 +40,9 @@
     <cve>CVE-2018-7489</cve>
     <cve>CVE-2018-10237</cve><!-- shaded guava dependency v20.0 -->
   </suppress>
+
+  <suppress>
+    <notes><![CDATA[ slf4j only has a beta version released with the 'fix', looks like lots of changes in it... ]]></notes>
+    <cve>CVE-2018-8088</cve>
+  </suppress>
 </suppressions>
