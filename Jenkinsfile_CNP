@@ -1,5 +1,7 @@
 #!groovy
-@Library('Infrastructure') _
+@Library('Infrastructure@feature/RPE-884-multiple-vaults-in-pipeline') _
+
+import uk.gov.hmcts.contino.PipelineCallbacks
 
 def type = "java"
 def product = "bulk-scan"
@@ -36,34 +38,12 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 node {
   stage('Secrets') {
     withSubscription('nonprod') {
-
-      environment = 'aat'
-
-      def mapToUse = new HashMap(secrets)
-
-      executeClosure(mapToUse) {
+      def pl = new PipelineCallbacks(null, this)
+      pl.loadVaultSecrets(secrets)
+      withTeamSecrets(pl, 'aat') {
         sh "env"
       }
 
-    }
-  }
-}
-
-def executeClosure(Map<String, Object> secrets, Closure body) {
-  def entry = secrets.entrySet().iterator().next()
-  def keyVaultUrl = "https://${entry.key.replace('${env}', environment)}.vault.azure.net/"
-  wrap([
-    $class                   : 'AzureKeyVaultBuildWrapper',
-    azureKeyVaultSecrets     : entry.value,
-    keyVaultURLOverride      : keyVaultUrl,
-    applicationIDOverride    : env.AZURE_CLIENT_ID,
-    applicationSecretOverride: env.AZURE_CLIENT_SECRET
-  ]) {
-    if (secrets.size() > 1) {
-      secrets.remove(entry.key)
-      return executeClosure(secrets, body)
-    } else {
-      body.call()
     }
   }
 }
