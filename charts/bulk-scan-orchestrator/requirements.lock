@@ -1,9 +1,9 @@
 dependencies:
 - name: servicebus
-  repository: file:///Users/kevin/projects/moj/chart-servicebus/servicebus
+  repository: https://hmcts.azurecr.io/helm/v1/repo
   version: 0.0.1
 - name: java
-  repository: file:///Users/kevin/projects/moj/chart-java/java
-  version: 0.0.8
-digest: sha256:1857041ccaa65b30c8ac78b0cb5682bb75aeb1e6ebd376f4afc89cec82b80c59
-generated: 2018-12-12T10:40:19.419939Z
+  repository: https://hmcts.azurecr.io/helm/v1/repo
+  version: 0.0.9
+digest: sha256:8da2912cb84003202d2c03b8b1d8543dda5e8b240fa1d0ec3df213369e6fcecb
+generated: 2018-12-13T14:16:41.474286Z
