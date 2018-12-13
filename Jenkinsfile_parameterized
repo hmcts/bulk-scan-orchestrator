@@ -1,22 +1,18 @@
 #!groovy
-@Library(value="Infrastructure", changelog=false) _
+@Library("Infrastructure")
+
+import uk.gov.hmcts.contino.GradleBuilder
+
+def type = "java"
+def product = "bulk-scan"
+def component = "orchestrator"
 
 def channel = '#bsp-build-notices'
-
-properties([
-  parameters([
-    string(name: 'PRODUCT_NAME', defaultValue: 'bulk-scan', description: ''),
-    string(name: 'APP', defaultValue: 'orchestrator', description: ''),
-    string(name: 'TYPE', defaultValue: 'java', description: ''),
-    string(name: 'ENVIRONMENT', defaultValue: 'sandbox', description: 'Environment where code should be built and deployed'),
-    choice(name: 'SUBSCRIPTION', choices: 'sandbox\nnonprod\nprod', description: 'Azure subscriptions available to build in')
-  ]),
-  [$class: 'GithubProjectProperty', projectUrlStr: 'github.com/hmcts/bulk-scan-orchestrator'],
-  pipelineTriggers([[$class: 'GitHubPushTrigger']])
-])
+GradleBuilder builder = new GradleBuilder(this, product)
 
 List<LinkedHashMap<String, Object>> secrets = [
   secret('s2s-secret-for-tests', 'S2S_SECRET'),
+  secret('idam-users-bulkscan-username', 'IDAM_USER_NAME'),
   secret('idam-users-bulkscan-password', 'IDAM_USER_PASSWORD'),
   secret('idam-client-secret', 'IDAM_CLIENT_SECRET'),
 ]
@@ -30,7 +26,28 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
   ]
 }
 
-withParameterizedPipeline(params.TYPE, params.PRODUCT_NAME, params.APP, params.ENVIRONMENT, params.SUBSCRIPTION) {
+withPipeline(type, product, component) {
+  before('smoketest:aks') {
+    withAksClient('nonprod') {
+      // Vars needed for AKS testing
+      env.RESOURCE_GROUP = 'bulk-scan-aks'
+      env.S2S_NAME = 'bulk_scan_orchestrator'
+      env.S2S_URL = 'http://rpe-service-auth-provider-aat.service.core-compute-aat.internal'
+      env.DOCUMENT_MANAGEMENT_URL = 'http://dm-store-aat.service.core-compute-aat.internal'
+      env.CORE_CASE_DATA_API_URL = 'http://ccd-data-store-api-aat.service.core-compute-aat.internal'
+      env.IDAM_API_URL = 'https://preprod-idamapi.reform.hmcts.net:3511'
+      env.IDAM_CLIENT_REDIRECT_URI = 'https://rpe-bulk-scan-processor-sandbox.service.core-compute-sandbox.internal/oauth2/callback'
+    }
+  }
+
+  after('test') {
+    builder.gradle('integration')
+  }
+
+  enableDockerBuild()
   enableSlackNotifications(channel)
   loadVaultSecrets(secrets)
+  installCharts()
+
+  setVaultName('bulk-scan')
 }
