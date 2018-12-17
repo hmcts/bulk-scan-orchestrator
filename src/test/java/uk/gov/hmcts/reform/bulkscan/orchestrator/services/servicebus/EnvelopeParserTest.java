@@ -49,7 +49,11 @@ public class EnvelopeParserTest {
                     "doc2_url"
                 )
             ),
-            ImmutableMap.of("key1", "value1")
+            ImmutableMap.of(
+                "key1", "value1",
+                "key2", "value2",
+                "key0", "value0"
+            )
         );
     }
 

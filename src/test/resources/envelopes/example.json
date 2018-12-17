@@ -17,6 +17,9 @@
     }
   ],
   "ocr_data": {
-    "key1": "value1"
+    "text_field": "some text",
+    "number_field": 123,
+    "boolean_field": true,
+    "null_field": null
   }
 }
