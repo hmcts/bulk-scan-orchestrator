@@ -18,6 +18,7 @@ public class OcrDataDeserialiser extends StdDeserializer<Map<String, String>> {
     }
 
     @Override
+    @SuppressWarnings("squid:RedundantThrowsDeclarationCheck") // it is declared signature
     public Map<String, String> deserialize(
         JsonParser p,
         DeserializationContext ctxt
