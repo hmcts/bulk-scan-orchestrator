@@ -103,6 +103,28 @@ public class ExceptionRecordCreationTest {
         assertThat(getOcrData(caseDetails)).isEqualTo(expectedOcrData);
     }
 
+    @DisplayName("Should create ExceptionRecord when provided/requested case reference is invalid")
+    @Test
+    public void create_exception_record_for_invalid_case_reference()
+        throws JSONException, InterruptedException, ServiceBusException {
+        // given
+        UUID randomPoBox = UUID.randomUUID();
+
+        // when
+        envelopeMessager.sendMessageFromFile(
+            "envelopes/supplementary-evidence-envelope.json",
+            "1234",
+            randomPoBox,
+            dmUrl
+        );
+
+        // then
+        await("Exception record being created")
+            .atMost(60, TimeUnit.SECONDS)
+            .pollInterval(Duration.FIVE_SECONDS)
+            .until(() -> hasExceptionRecordBeenCreated(randomPoBox));
+    }
+
     private boolean hasExceptionRecordBeenCreated(UUID poBox) {
         return findCasesByPoBox(poBox).size() == 1;
     }

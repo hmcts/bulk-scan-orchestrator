@@ -66,6 +66,29 @@ public class CaseRetrieverTest {
         assertThat(theCase).isNull();
     }
 
+
+    @Test
+    public void should_return_null_for_when_the_case_ref_is_not_valid() {
+        retriever = new CaseRetriever(authenticator, dataApi);
+        FeignException exception = FeignException.errorStatus(
+            "methodKey",
+            Response
+                .builder()
+                .headers(Collections.emptyMap())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .reason("Invalid Case Ref")
+                .build()
+        );
+
+        given(dataApi.getCase(USER_TOKEN, SERVICE_TOKEN, CASE_REF))
+            .willThrow(exception);
+        given(authenticator.createForJurisdiction(JURSIDICTION)).willReturn(AUTH_DETAILS);
+
+        CaseDetails theCase = retriever.retrieve(JURSIDICTION, CASE_REF);
+
+        assertThat(theCase).isNull();
+    }
+
     @Test
     public void should_throw_exception_when_api_response_is_other_than_not_found_feign_exception() {
         retriever = new CaseRetriever(authenticator, dataApi);

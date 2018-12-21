@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
@@ -40,7 +41,9 @@ public class CaseRetriever {
         } catch (FeignException exception) {
             if (exception.status() == NOT_FOUND.value()) {
                 log.info("Case not found. Ref:{}, jurisdiction:{}", caseRef, jurisdiction);
-
+                return null;
+            } else if (exception.status() == BAD_REQUEST.value()) {
+                log.info("Invalid Case Ref:{}, jurisdiction:{}", caseRef, jurisdiction);
                 return null;
             } else {
                 throw exception;
