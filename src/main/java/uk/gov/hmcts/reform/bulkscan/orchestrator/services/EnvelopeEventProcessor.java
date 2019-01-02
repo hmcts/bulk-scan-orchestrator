@@ -50,16 +50,34 @@ public class EnvelopeEventProcessor implements IMessageHandler {
     }
 
     private void process(IMessage message) {
-        Envelope envelope = parse(message.getBody());
-        Supplier<CaseDetails> caseRetrieval = () -> Strings.isNullOrEmpty(envelope.caseRef)
-            ? null
-            : caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
-        EventPublisher eventPublisher = eventPublisherContainer.getPublisher(
-            envelope.classification,
-            caseRetrieval
-        );
+        log.info("Started processing message with ID {}", message.getMessageId());
+        try {
+            Envelope envelope = parse(message.getBody());
+            log.info(
+                "Parsed message with ID {}. Envelope ID: {}, File name: {}. Jurisdiction: {}",
+                message.getMessageId(),
+                envelope.id,
+                envelope.zipFileName,
+                envelope.jurisdiction
+            );
 
-        eventPublisher.publish(envelope);
+            Supplier<CaseDetails> caseRetrieval = () -> Strings.isNullOrEmpty(envelope.caseRef)
+                ? null
+                : caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
+            EventPublisher eventPublisher = eventPublisherContainer.getPublisher(
+                envelope.classification,
+                caseRetrieval
+            );
+
+            eventPublisher.publish(envelope);
+
+            log.info("Processed message with ID {}", message.getMessageId());
+        } catch (Exception ex) {
+            throw new MessageProcessingException(
+                "Failed to process message with ID " + message.getMessageId(),
+                ex
+            );
+        }
     }
 
     @Override
