@@ -85,7 +85,7 @@ public class SupplementaryEvidenceTest {
         // then
         assertThat(dmUrl).isNotNull();
         await("Supplementary evidence is attached to the case in ccd")
-            .atMost(60, TimeUnit.SECONDS)
+            .atMost(120, TimeUnit.SECONDS)
             .pollInterval(Duration.TWO_SECONDS)
             .until(() -> hasCaseBeenUpdatedWithSupplementaryEvidence(caseDetails, 1));
 
@@ -110,7 +110,7 @@ public class SupplementaryEvidenceTest {
         // then
         assertThat(dmUrl).isNotNull();
         await("Supplementary evidence is attached to the case in ccd")
-            .atMost(60, TimeUnit.SECONDS)
+            .atMost(120, TimeUnit.SECONDS)
             .pollInterval(Duration.TWO_SECONDS)
             .until(() -> hasCaseBeenUpdatedWithSupplementaryEvidence(caseDetails, 2));
 

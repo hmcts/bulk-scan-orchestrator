@@ -84,7 +84,7 @@ public class AttachExceptionRecordToExistingCaseTest {
 
         //then
         await("Exception record is attached to the case")
-            .atMost(60, TimeUnit.SECONDS)
+            .atMost(120, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
             .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 1));
 
@@ -103,7 +103,7 @@ public class AttachExceptionRecordToExistingCaseTest {
 
         //then
         await("Exception record is attached to the case")
-            .atMost(60, TimeUnit.SECONDS)
+            .atMost(120, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
             .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 2));
 
@@ -137,7 +137,7 @@ public class AttachExceptionRecordToExistingCaseTest {
         envelopeMessager.sendMessageFromFile(resourceName, "0000000000000000", poBox, dmUrl);
 
         await("Exception record is created")
-            .atMost(60, TimeUnit.SECONDS)
+            .atMost(120, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
             .until(() -> lookUpExceptionRecord(poBox).isPresent());
 
