@@ -69,7 +69,7 @@ public class ExceptionRecordCreationTest {
 
         // then
         await("Exception record being created")
-            .atMost(1200, TimeUnit.SECONDS)
+            .atMost(1000, TimeUnit.SECONDS)
             .pollInterval(Duration.FIVE_SECONDS)
             .until(() -> hasExceptionRecordBeenCreated(randomPoBox));
     }
@@ -91,7 +91,7 @@ public class ExceptionRecordCreationTest {
 
         // then
         await("Exception record should be created")
-            .atMost(1200, TimeUnit.SECONDS)
+            .atMost(1000, TimeUnit.SECONDS)
             .pollInterval(Duration.FIVE_SECONDS)
             .until(() -> hasExceptionRecordBeenCreated(randomPoBox));
 
@@ -120,7 +120,7 @@ public class ExceptionRecordCreationTest {
 
         // then
         await("Exception record being created")
-            .atMost(1200, TimeUnit.SECONDS)
+            .atMost(1000, TimeUnit.SECONDS)
             .pollInterval(Duration.FIVE_SECONDS)
             .until(() -> hasExceptionRecordBeenCreated(randomPoBox));
     }
