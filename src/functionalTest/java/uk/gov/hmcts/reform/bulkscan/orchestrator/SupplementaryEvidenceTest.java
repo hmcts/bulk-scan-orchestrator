@@ -8,7 +8,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,7 +67,6 @@ public class SupplementaryEvidenceTest {
         randomPoBox = UUID.randomUUID();
     }
 
-    @Disabled
     @Test
     public void should_attach_supplementary_evidence_to_the_case_with_no_evidence_docs() throws Exception {
         //given
@@ -94,7 +92,6 @@ public class SupplementaryEvidenceTest {
         verifySupplementaryEvidenceDetailsUpdated(1);
     }
 
-    @Disabled
     @Test
     public void should_attach_supplementary_evidence_to_the_case_with_existing_evidence_docs() throws Exception {
         //given
