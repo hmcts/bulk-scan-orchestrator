@@ -21,7 +21,7 @@
   <notes><![CDATA[
       used in the integration tests.
     ]]></notes>
-    <filePath regex="true">^.*groovy.*-2\.4\.15\.jar$</filePath>
+    <filePath regex="true">^.*groovy.*-2\.5\.4\.jar$</filePath>
   <cve>CVE-2016-6497</cve>
 </suppress>
 
@@ -39,6 +39,7 @@
     <cve>CVE-2018-5968</cve>
     <cve>CVE-2018-7489</cve>
     <cve>CVE-2018-10237</cve><!-- shaded guava dependency v20.0 -->
+    <cve>CVE-2018-1000873</cve>
   </suppress>
 
   <suppress>
