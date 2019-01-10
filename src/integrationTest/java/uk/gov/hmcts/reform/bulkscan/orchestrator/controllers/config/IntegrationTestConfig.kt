@@ -14,11 +14,14 @@ import org.springframework.context.annotation.Profile
 import org.springframework.util.SocketUtils.findAvailableTcpPort
 import uk.gov.hmcts.reform.bulkscan.orchestrator.Application
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.MessageSender
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IMessageOperations
 import java.lang.System.setProperty
+import java.util.UUID
+
 
 @Import(Application::class)
 @Configuration
-@Profile("integration","nosb")  // no servicebus queue handler registration
+@Profile("integration", "nosb") // no servicebus queue handler registration
 class IntegrationTestConfig : ApplicationContextInitializer<ConfigurableApplicationContext> {
     override fun initialize(ctx: ConfigurableApplicationContext) {
         setProperty("wiremock.port", findAvailableTcpPort().toString())
@@ -31,4 +34,14 @@ class IntegrationTestConfig : ApplicationContextInitializer<ConfigurableApplicat
     @Bean
     fun messageSender(processor: IMessageHandler) = MessageSender(processor);
 
+    @Bean
+    fun messageOperations() = object : IMessageOperations {
+        override fun complete(lockToken: UUID?) {
+            // do nothing
+        }
+
+        override fun deadLetter(lockToken: UUID?, reason: String?, description: String?) {
+            // do nothing
+        }
+    }
 }
