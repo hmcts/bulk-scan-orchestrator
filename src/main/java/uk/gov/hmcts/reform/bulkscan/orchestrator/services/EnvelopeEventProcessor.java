@@ -71,7 +71,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
             eventPublisher.publish(envelope);
 
-            log.info("Processed message with ID {}", message.getMessageId());
+            log.info("Processed message with ID {}. File name: {}", message.getMessageId(), envelope.zipFileName);
         } catch (Exception ex) {
             throw new MessageProcessingException(
                 "Failed to process message with ID " + message.getMessageId(),
