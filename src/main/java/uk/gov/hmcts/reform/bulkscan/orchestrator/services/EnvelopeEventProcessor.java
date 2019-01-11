@@ -83,7 +83,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
             );
 
             eventPublisher.publish(envelope);
-            log.info("Processed message with ID {}", message.getMessageId());
+            log.info("Processed message with ID {}. File name: {}", message.getMessageId(), envelope.zipFileName);
             return new MessageProcessingResult(SUCCESS);
         } catch (InvalidMessageException ex) {
             log.error("Rejected message with ID {}, because it's invalid", message.getMessageId(), ex);
