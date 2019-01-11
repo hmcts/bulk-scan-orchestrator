@@ -40,6 +40,9 @@
     <cve>CVE-2018-7489</cve>
     <cve>CVE-2018-10237</cve><!-- shaded guava dependency v20.0 -->
     <cve>CVE-2018-1000873</cve>
+    <!-- Jackson-related vulnerabilities have been solved since version 2.9.7,
+     but the latest versions of some of our dependencies still use older versions of this lib -->
+    <cpe>cpe:/a:fasterxml:jackson-databind</cpe>
   </suppress>
 
   <suppress>
