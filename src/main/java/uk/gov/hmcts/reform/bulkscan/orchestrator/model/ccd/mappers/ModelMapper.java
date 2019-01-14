@@ -26,7 +26,7 @@ public abstract class ModelMapper<T extends CaseData> {
             .collect(Collectors.toList());
     }
 
-    private ScannedDocument mapDocument(Document document) {
+    ScannedDocument mapDocument(Document document) {
         return new ScannedDocument(
             document.fileName,
             document.controlNumber,

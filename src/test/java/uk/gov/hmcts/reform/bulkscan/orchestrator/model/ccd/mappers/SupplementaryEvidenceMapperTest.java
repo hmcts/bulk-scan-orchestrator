@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
@@ -32,7 +33,7 @@ public class SupplementaryEvidenceMapperTest {
 
         assertThat(scannedDocument.controlNumber).isEqualTo(envelopeDocument.controlNumber);
         assertThat(scannedDocument.fileName).isEqualTo(envelopeDocument.fileName);
-        assertThat(scannedDocument.type).isEqualTo(envelopeDocument.type);
+        assertThat(scannedDocument.type).isEqualTo(envelopeDocument.subtype);
         assertThat(scannedDocument.url.documentUrl).isEqualTo(envelopeDocument.url);
 
         LocalDateTime expectedScannedDate =
@@ -56,6 +57,58 @@ public class SupplementaryEvidenceMapperTest {
             supplementaryEvidence.scannedDocuments.stream().map(d -> d.value.fileName).collect(toList());
 
         assertThat(actualDocumentFileNames).isEqualTo(expectedDocumentFileNames);
+    }
+
+
+    @Test
+    public void map_envelope_maps_all_documents_with_subtype_values_copied_to_type() {
+        int numberOfDocuments = 2;
+        Envelope envelope = SampleData.envelope(2, null, false);
+
+        SupplementaryEvidence supplementaryEvidence = mapper.mapEnvelope(envelope);
+        assertThat(supplementaryEvidence.scannedDocuments.size()).isEqualTo(numberOfDocuments);
+
+        List<String> expectedDocumentSubtypeValues =
+            envelope.documents.stream().map(d -> d.subtype).collect(toList());
+
+        List<String> actualDocumentTypeValues =
+            supplementaryEvidence.scannedDocuments.stream().map(d -> d.value.type).collect(toList());
+
+        List<String> actualDocumentSubtypeValues =
+            supplementaryEvidence.scannedDocuments
+                .stream()
+                .filter(d -> StringUtils.isNotEmpty(d.value.type))
+                .map(d -> d.value.subtype)
+                .collect(toList());
+
+        assertThat(actualDocumentTypeValues).isEqualTo(expectedDocumentSubtypeValues);
+        assertThat(actualDocumentSubtypeValues).containsExactly(null, null);
+    }
+
+    @Test
+    public void map_envelope_maps_all_documents_with_subtype_values_null() {
+        int numberOfDocuments = 2;
+        Envelope envelope = SampleData.envelope(2, null, true);
+
+        SupplementaryEvidence supplementaryEvidence = mapper.mapEnvelope(envelope);
+        assertThat(supplementaryEvidence.scannedDocuments.size()).isEqualTo(numberOfDocuments);
+
+        List<String> expectedDocumentTypeValues =
+            envelope.documents.stream().map(d -> d.type).collect(toList());
+
+        List<String> expectedDocumentSubtypeValues =
+            envelope.documents.stream().map(d -> d.subtype).collect(toList());
+
+        List<String> actualDocumentTypeValues =
+            supplementaryEvidence.scannedDocuments.stream().map(d -> d.value.type).collect(toList());
+
+        List<String> actualDocumentSubtypeValues =
+            envelope.documents.stream().map(d -> d.subtype).collect(toList());
+
+        assertThat(expectedDocumentSubtypeValues).filteredOn(StringUtils::isEmpty).hasSize(numberOfDocuments);
+        assertThat(actualDocumentSubtypeValues).filteredOn(StringUtils::isEmpty).hasSize(numberOfDocuments);
+
+        assertThat(actualDocumentTypeValues).isEqualTo(expectedDocumentTypeValues);
     }
 
     @Test

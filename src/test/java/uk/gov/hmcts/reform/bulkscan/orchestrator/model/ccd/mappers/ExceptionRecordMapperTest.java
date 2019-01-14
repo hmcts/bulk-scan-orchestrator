@@ -54,9 +54,39 @@ public class ExceptionRecordMapperTest {
 
     @Test
     public void mapEnvelope_handles_null_ocr_data() {
-        Envelope envelope = envelope(2, null);
+        Envelope envelope = envelope(2, null, false);
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
         assertThat(exceptionRecord.ocrData).isNull();
+    }
+
+    @Test
+    public void mapEnvelope_handles_null_subtype_in_documents() {
+        Envelope envelope = envelope(2, null, true);
+
+        ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
+
+        List<String> expectedDocumentSubtypeValues =
+            envelope.documents.stream().map(d -> d.subtype).collect(toList());
+
+        List<String> actualDocumentSubtypeValues =
+            exceptionRecord.scannedDocuments.stream().map(d -> d.value.subtype).collect(toList());
+
+        assertThat(actualDocumentSubtypeValues).isEqualTo(expectedDocumentSubtypeValues);
+    }
+
+    @Test
+    public void mapEnvelope_handles_subtype_values_in_documents() {
+        Envelope envelope = envelope(2, null, false);
+
+        ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
+
+        List<String> expectedDocumentSubtypeValues =
+            envelope.documents.stream().map(d -> d.subtype).collect(toList());
+
+        List<String> actualDocumentSubtypeValues =
+            exceptionRecord.scannedDocuments.stream().map(d -> d.value.subtype).collect(toList());
+
+        assertThat(actualDocumentSubtypeValues).isEqualTo(expectedDocumentSubtypeValues);
     }
 
     private Map<String, String> ocrDataAsMap(List<CcdCollectionElement<CcdKeyValue>> ocrData) {

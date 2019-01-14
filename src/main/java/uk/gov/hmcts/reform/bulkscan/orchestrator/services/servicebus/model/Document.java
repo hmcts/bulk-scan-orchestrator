@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
@@ -11,6 +13,7 @@ public class Document {
     public final String fileName;
     public final String controlNumber;
     public final String type;
+    @JsonInclude(Include.NON_NULL)
     public final String subtype;
     public final Instant scannedAt;
     public final String url;
@@ -20,7 +23,7 @@ public class Document {
         @JsonProperty(value = "file_name", required = true) String fileName,
         @JsonProperty(value = "control_number", required = true) String controlNumber,
         @JsonProperty(value = "type", required = true) String type,
-        @JsonProperty(value = "subtype", required = true) String subtype,
+        @JsonProperty(value = "subtype") String subtype,
         @JsonProperty(value = "scanned_at", required = true) Instant scannedAt,
         @JsonProperty(value = "url", required = true) String url
     ) {
