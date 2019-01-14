@@ -47,7 +47,9 @@ public class EventPublisherContainer {
             case NEW_APPLICATION:
                 return exceptionRecordCreator;
             default:
-                return new DelegatePublisher(null, null);
+                throw new PublisherResolutionException(
+                    "Cannot resolve publisher - unrecognised envelope classification: " + envelopeClassification
+                );
         }
     }
 }
