@@ -14,6 +14,7 @@ public class ScannedDocument {
     public final String fileName;
     public final String controlNumber;
     public final String type;
+    public final String subtype;
     public final String exceptionReference;
     public final LocalDateTime scannedDate;
     public final CcdDocument url;
@@ -22,6 +23,7 @@ public class ScannedDocument {
         @JsonProperty("fileName") String fileName,
         @JsonProperty("controlNumber") String controlNumber,
         @JsonProperty("type") String type,
+        @JsonProperty("subtype") String subtype,
         @JsonProperty("scannedDate") LocalDateTime scannedDate,
         @JsonProperty("url") CcdDocument url,
         @JsonProperty("exceptionRecordReference") String exceptionReference
@@ -29,6 +31,7 @@ public class ScannedDocument {
         this.fileName = fileName;
         this.controlNumber = controlNumber;
         this.type = type;
+        this.subtype = subtype;
         this.scannedDate = scannedDate;
         this.url = url;
         this.exceptionReference = exceptionReference;
