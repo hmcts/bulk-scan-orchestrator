@@ -6,6 +6,7 @@ import com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IMessageOperations;
 
 import java.util.UUID;
@@ -24,7 +25,8 @@ public class FunctionalQueueConfig {
     }
 
     @Bean
-    IMessageOperations testMessageOperations() {
+    @Profile("nosb") // apply only when Service Bus should not be used
+    IMessageOperations testNoServiceBusMessageOperations() {
         return new IMessageOperations() {
             @Override
             public void complete(UUID lockToken) throws InterruptedException, ServiceBusException {
