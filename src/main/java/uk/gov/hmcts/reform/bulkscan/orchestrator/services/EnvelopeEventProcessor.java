@@ -123,7 +123,11 @@ public class EnvelopeEventProcessor implements IMessageHandler {
                 break;
             case POTENTIALLY_RECOVERABLE_FAILURE:
                 // do nothing - let the message lock expire
-                log.info("Allowing message with ID {} to return to queue", message.getMessageId());
+                log.info(
+                    "Allowing message with ID {} to return to queue (delivery attempt {})",
+                    message.getMessageId(),
+                    message.getDeliveryCount() + 1
+                );
                 break;
             default:
                 throw new MessageProcessingException(
