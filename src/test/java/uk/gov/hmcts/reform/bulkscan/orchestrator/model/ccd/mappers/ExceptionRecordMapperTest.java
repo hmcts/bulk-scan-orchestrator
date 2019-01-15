@@ -77,7 +77,6 @@ public class ExceptionRecordMapperTest {
                     scannedDocument.fileName,
                     scannedDocument.controlNumber,
                     scannedDocument.type,
-                    scannedDocument.subtype,
                     scannedDocument.scannedDate.atZone(ZoneId.systemDefault()).toInstant(),
                     scannedDocument.url.documentUrl
                 )
