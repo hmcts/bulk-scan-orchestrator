@@ -70,7 +70,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
         try {
             envelope = parse(message.getBody());
 
-            logParsedMessage(message, envelope);
+            logMessageParsed(message, envelope);
 
             EventPublisher eventPublisher = eventPublisherContainer.getPublisher(
                 envelope.classification,
@@ -147,7 +147,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
             : caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
     }
 
-    private void logParsedMessage(IMessage message, Envelope envelope) {
+    private void logMessageParsed(IMessage message, Envelope envelope) {
         log.info(
             "Parsed message. ID {}, Envelope ID: {}, File name: {}, Jurisdiction: {}, Classification: {}, Case: {}",
             message.getMessageId(),
