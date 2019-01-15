@@ -63,7 +63,7 @@ public class SupplementaryEvidenceMapperTest {
     @Test
     public void map_envelope_maps_all_documents_with_subtype_values_copied_to_type() {
         int numberOfDocuments = 2;
-        Envelope envelope = SampleData.envelope(2, null, false);
+        Envelope envelope = SampleData.envelope(2, null, true);
 
         SupplementaryEvidence supplementaryEvidence = mapper.mapEnvelope(envelope);
         assertThat(supplementaryEvidence.scannedDocuments.size()).isEqualTo(numberOfDocuments);
@@ -88,7 +88,7 @@ public class SupplementaryEvidenceMapperTest {
     @Test
     public void map_envelope_maps_all_documents_with_subtype_values_null() {
         int numberOfDocuments = 2;
-        Envelope envelope = SampleData.envelope(2, null, true);
+        Envelope envelope = SampleData.envelope(2, null, false);
 
         SupplementaryEvidence supplementaryEvidence = mapper.mapEnvelope(envelope);
         assertThat(supplementaryEvidence.scannedDocuments.size()).isEqualTo(numberOfDocuments);

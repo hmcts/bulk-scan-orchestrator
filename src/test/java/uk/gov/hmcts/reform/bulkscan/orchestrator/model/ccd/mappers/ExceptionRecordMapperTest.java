@@ -54,14 +54,14 @@ public class ExceptionRecordMapperTest {
 
     @Test
     public void mapEnvelope_handles_null_ocr_data() {
-        Envelope envelope = envelope(2, null, false);
+        Envelope envelope = envelope(2, null, true);
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
         assertThat(exceptionRecord.ocrData).isNull();
     }
 
     @Test
     public void mapEnvelope_handles_null_subtype_in_documents() {
-        Envelope envelope = envelope(2, null, true);
+        Envelope envelope = envelope(2, null, false);
 
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
 
@@ -76,7 +76,7 @@ public class ExceptionRecordMapperTest {
 
     @Test
     public void mapEnvelope_handles_subtype_values_in_documents() {
-        Envelope envelope = envelope(2, null, false);
+        Envelope envelope = envelope(2, null, true);
 
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
 

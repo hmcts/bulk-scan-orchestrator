@@ -120,10 +120,14 @@ public class SampleData {
     }
 
     public static Envelope envelope(int numberOfDocuments) {
-        return envelope(numberOfDocuments, ImmutableMap.of("fieldName1", "value1"), false);
+        return envelope(numberOfDocuments, ImmutableMap.of("fieldName1", "value1"), true);
     }
 
-    public static Envelope envelope(int numberOfDocuments, Map<String, String> ocrData, boolean subtypeValuesNull) {
+    public static Envelope envelope(
+        int numberOfDocuments,
+        Map<String, String> ocrData,
+        boolean setDocumentSubtypeValues
+    ) {
         return new Envelope(
             "eb9c3598-35fc-424e-b05a-902ee9f11d56",
             CASE_REF,
@@ -133,19 +137,19 @@ public class SampleData {
             Instant.now(),
             Instant.now(),
             Classification.NEW_APPLICATION,
-            documents(numberOfDocuments, subtypeValuesNull),
+            documents(numberOfDocuments, setDocumentSubtypeValues),
             ocrData
         );
     }
 
-    private static List<Document> documents(int numberOfDocuments, boolean setSubtypeValuesNull) {
+    private static List<Document> documents(int numberOfDocuments, boolean setDocumentSubtypeValues) {
         return Stream.iterate(1, i -> i + 1)
             .map(index ->
                 new Document(
                     String.format("file_%s.pdf", index),
                     String.format("control_number_%s", index),
                     String.format("type_%s", index),
-                    setSubtypeValuesNull ? null : String.format("subtype_%s", index),
+                    setDocumentSubtypeValues ? String.format("subtype_%s", index) : null,
                     ZonedDateTime.parse("2018-10-01T00:00:00Z").plus(index, DAYS).toInstant(),
                     String.format("https://example.gov.uk/%s", index)
                 )
