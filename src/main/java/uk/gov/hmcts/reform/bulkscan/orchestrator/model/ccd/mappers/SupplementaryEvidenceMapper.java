@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Docum
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
 @Component
-public class SupplementaryEvidenceMapper extends ModelMapper<SupplementaryEvidence> {
+public class SupplementaryEvidenceMapper implements ModelMapper<SupplementaryEvidence> {
 
     public SupplementaryEvidenceMapper() {
         // empty mapper construct
