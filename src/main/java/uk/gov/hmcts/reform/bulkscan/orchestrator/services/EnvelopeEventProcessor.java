@@ -92,13 +92,11 @@ public class EnvelopeEventProcessor implements IMessageHandler {
     private void tryFinaliseProcessedMessage(IMessage message, MessageProcessingResult processingResult) {
         try {
             finaliseProcessedMessage(message, processingResult);
+        } catch (InterruptedException ex) {
+            logMessageFinaliseError(message, processingResult.resultType, ex);
+            Thread.currentThread().interrupt();
         } catch (Exception ex) {
-            log.error(
-                "Failed to manage processed message with ID {}. Processing result: {}",
-                message.getMessageId(),
-                processingResult.resultType,
-                ex
-            );
+            logMessageFinaliseError(message, processingResult.resultType, ex);
         }
     }
 
@@ -134,6 +132,19 @@ public class EnvelopeEventProcessor implements IMessageHandler {
                     "Unknown message processing result type: " + processingResult.resultType
                 );
         }
+    }
+
+    private void logMessageFinaliseError(
+        IMessage message,
+        MessageProcessingResultType processingResultType,
+        Exception ex
+    ) {
+        log.error(
+            "Failed to manage processed message with ID {}. Processing result: {}",
+            message.getMessageId(),
+            processingResultType,
+            ex
+        );
     }
 
     @Override
