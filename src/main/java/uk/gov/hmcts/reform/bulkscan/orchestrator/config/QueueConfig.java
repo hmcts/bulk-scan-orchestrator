@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.microsoft.azure.servicebus.IMessageHandler;
+import com.microsoft.azure.servicebus.MessageHandlerOptions;
 import com.microsoft.azure.servicebus.QueueClient;
 import com.microsoft.azure.servicebus.primitives.MessagingEntityNotFoundException;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
+import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -49,7 +51,12 @@ public class QueueConfig {
         int tries = 0;
         while (true) {
             try {
-                client.registerMessageHandler(messageHandler, executorService);
+                client.registerMessageHandler(
+                    messageHandler,
+                    new MessageHandlerOptions(1, false, Duration.ofMinutes(5)),
+                    executorService
+                );
+
                 return;
             } catch (UnsupportedOperationException e) {
                 log.info("Register handler error: {}.", e.getMessage());
