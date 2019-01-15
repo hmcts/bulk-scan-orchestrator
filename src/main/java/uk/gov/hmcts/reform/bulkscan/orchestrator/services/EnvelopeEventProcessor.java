@@ -149,7 +149,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
     private void logMessageParsed(IMessage message, Envelope envelope) {
         log.info(
-            "Parsed message. ID {}, Envelope ID: {}, File name: {}, Jurisdiction: {}, Classification: {}, Case: {}",
+            "Parsed message. ID: {}, Envelope ID: {}, File name: {}, Jurisdiction: {}, Classification: {}, Case: {}",
             message.getMessageId(),
             envelope.id,
             envelope.zipFileName,
