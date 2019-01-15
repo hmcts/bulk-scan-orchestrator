@@ -91,7 +91,6 @@ public class SampleData {
                         .put("file_name", "hello.pdf")
                         .put("control_number", "control_number")
                         .put("type", "doc_type")
-                        .put("subtype", "doc_subtype")
                         .put("scanned_at", toIso8601(Instant.EPOCH))
                         .put("url", "https://example.gov.uk/123")
                     )
@@ -145,7 +144,6 @@ public class SampleData {
                     String.format("file_%s.pdf", index),
                     String.format("control_number_%s", index),
                     String.format("type_%s", index),
-                    String.format("subtype_%s", index),
                     ZonedDateTime.parse("2018-10-01T00:00:00Z").plus(index, DAYS).toInstant(),
                     String.format("https://example.gov.uk/%s", index)
                 )

@@ -48,7 +48,6 @@ public class ScannedDocumentsHelperTest {
             "filename1.pdf",
             "1111001",
             "Other",
-            "will",
             Instant.parse("2018-12-01T12:34:56.123Z"),
             "https://doc-url-1.example.com"
         );

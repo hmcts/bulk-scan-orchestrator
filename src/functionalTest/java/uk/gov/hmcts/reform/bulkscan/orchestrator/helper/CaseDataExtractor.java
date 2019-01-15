@@ -58,7 +58,6 @@ public class CaseDataExtractor {
             document.fileName,
             document.controlNumber,
             document.type,
-            document.subtype,
             ZonedDateTime.ofInstant(document.scannedAt, ZoneId.systemDefault()).toLocalDateTime(),
             new CcdDocument(String.valueOf(document.url)),
             null
