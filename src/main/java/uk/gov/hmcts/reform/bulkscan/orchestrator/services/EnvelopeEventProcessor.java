@@ -96,7 +96,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
             log.error(
                 "Failed to manage processed message with ID {}. Processing result: {}",
                 message.getMessageId(),
-                processingResult,
+                processingResult.resultType,
                 ex
             );
         }
