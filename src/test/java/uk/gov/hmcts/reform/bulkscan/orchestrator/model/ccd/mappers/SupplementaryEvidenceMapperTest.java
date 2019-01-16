@@ -59,6 +59,23 @@ public class SupplementaryEvidenceMapperTest {
     }
 
     @Test
+    public void from_envelope_returns_supplementary_evidence_with_subtype_value_in_documents() {
+        int numberOfDocuments = 3;
+        Envelope envelope = SampleData.envelope(3);
+
+        SupplementaryEvidence supplementaryEvidence = mapper.mapEnvelope(envelope);
+        assertThat(supplementaryEvidence.scannedDocuments.size()).isEqualTo(numberOfDocuments);
+
+        List<String> expectedDocumentSubtypeValues =
+            envelope.documents.stream().map(d -> d.subtype).collect(toList());
+
+        List<String> actualDocumentSubtypeValues =
+            supplementaryEvidence.scannedDocuments.stream().map(d -> d.value.subtype).collect(toList());
+
+        assertThat(actualDocumentSubtypeValues).isEqualTo(expectedDocumentSubtypeValues);
+    }
+
+    @Test
     public void from_envelope_handles_empty_document_list() {
         Envelope envelope = SampleData.envelope(0);
         SupplementaryEvidence supplementaryEvidence = mapper.mapEnvelope(envelope);
