@@ -12,7 +12,7 @@ import java.util.Map;
 import static java.util.stream.Collectors.toList;
 
 @Component
-public class ExceptionRecordMapper extends ModelMapper<ExceptionRecord> {
+public class ExceptionRecordMapper implements ModelMapper<ExceptionRecord> {
 
     public ExceptionRecordMapper() {
         // empty mapper construct
