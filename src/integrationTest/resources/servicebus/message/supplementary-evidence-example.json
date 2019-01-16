@@ -12,6 +12,7 @@
       "file_name": "testfilename",
       "control_number": "1234",
       "type": "other",
+      "subtype": "testSubtype",
       "scanned_at": "2018-01-01T12:34:56.123Z",
       "url": "http://test-url"
     }

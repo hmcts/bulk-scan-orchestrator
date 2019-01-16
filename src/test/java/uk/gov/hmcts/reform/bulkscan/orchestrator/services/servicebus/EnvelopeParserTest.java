@@ -38,6 +38,7 @@ public class EnvelopeParserTest {
                     "doc1_file_name",
                     "doc1_control_number",
                     "doc1_type",
+                    null,
                     Instant.now(),
                     "doc1_url"
                 ),
@@ -45,6 +46,7 @@ public class EnvelopeParserTest {
                     "doc2_file_name",
                     "doc2_control_number",
                     "doc2_type",
+                    null,
                     Instant.now(),
                     "doc2_url"
                 )
@@ -185,6 +187,7 @@ public class EnvelopeParserTest {
             .put("file_name", doc.fileName)
             .put("control_number", doc.controlNumber)
             .put("type", doc.type)
+            .put("subtype", doc.subtype)
             .put("scanned_at", toIso8601(doc.scannedAt))
             .put("url", doc.url);
     }
