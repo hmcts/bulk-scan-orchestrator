@@ -59,6 +59,27 @@ public class ExceptionRecordMapperTest {
         assertThat(exceptionRecord.ocrData).isNull();
     }
 
+    @Test
+    public void mapEnvelope_maps_subtype_values_in_documents() {
+        // given
+        Envelope envelope = envelope(2, null);
+
+        // when
+        ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
+
+        // then
+        assertThat(exceptionRecord.scannedDocuments.size()).isEqualTo(envelope.documents.size());
+
+        List<String> expectedDocumentSubtypeValues =
+            envelope.documents.stream().map(d -> d.subtype).collect(toList());
+
+        List<String> actualDocumentSubtypeValues =
+            exceptionRecord.scannedDocuments.stream().map(d -> d.value.subtype).collect(toList());
+
+        assertThat(actualDocumentSubtypeValues).isEqualTo(expectedDocumentSubtypeValues);
+
+    }
+
     private Map<String, String> ocrDataAsMap(List<CcdCollectionElement<CcdKeyValue>> ocrData) {
         return ocrData
             .stream()
@@ -77,6 +98,7 @@ public class ExceptionRecordMapperTest {
                     scannedDocument.fileName,
                     scannedDocument.controlNumber,
                     scannedDocument.type,
+                    scannedDocument.subtype,
                     scannedDocument.scannedDate.atZone(ZoneId.systemDefault()).toInstant(),
                     scannedDocument.url.documentUrl
                 )

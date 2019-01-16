@@ -16,11 +16,13 @@ import java.time.Instant;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.assertj.core.api.Assertions.tuple;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.DatetimeHelper.toIso8601;
 
 public class EnvelopeParserTest {
 
     private Envelope envelope;
+    private Instant scannedAt = Instant.now();
 
     @Before
     public void setUp() {
@@ -38,14 +40,16 @@ public class EnvelopeParserTest {
                     "doc1_file_name",
                     "doc1_control_number",
                     "doc1_type",
-                    Instant.now(),
+                    "doc1_subtype",
+                    scannedAt,
                     "doc1_url"
                 ),
                 new Document(
                     "doc2_file_name",
                     "doc2_control_number",
                     "doc2_type",
-                    Instant.now(),
+                    null,
+                    scannedAt,
                     "doc2_url"
                 )
             ),
@@ -82,6 +86,25 @@ public class EnvelopeParserTest {
 
         // then
         assertThat(result).isEqualToComparingFieldByFieldRecursively(envelope);
+
+        assertThat(result.documents)
+            .extracting("fileName", "controlNumber", "type", "subtype", "scannedAt", "url")
+            .containsOnly(
+                tuple("doc1_file_name",
+                    "doc1_control_number",
+                    "doc1_type",
+                    "doc1_subtype",
+                    scannedAt,
+                    "doc1_url"
+                ),
+                tuple("doc2_file_name",
+                    "doc2_control_number",
+                    "doc2_type",
+                    null,
+                    scannedAt,
+                    "doc2_url"
+                )
+            );
     }
 
     @Test
@@ -185,6 +208,7 @@ public class EnvelopeParserTest {
             .put("file_name", doc.fileName)
             .put("control_number", doc.controlNumber)
             .put("type", doc.type)
+            .put("subtype", doc.subtype)
             .put("scanned_at", toIso8601(doc.scannedAt))
             .put("url", doc.url);
     }
