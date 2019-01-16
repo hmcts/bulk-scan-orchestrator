@@ -100,25 +100,65 @@ abstract class AbstractEventPublisher implements EventPublisher {
         String jurisdiction = envelope.jurisdiction;
 
         if (caseRef == null) {
-            return ccdApi.startForCaseworker(
-                authenticator.getUserToken(),
-                authenticator.getServiceToken(),
-                authenticator.getUserDetails().getId(),
-                jurisdiction,
-                caseTypeId,
-                getEventTypeId()
-            );
+            return startEventForNonExistingCase(authenticator, envelope, caseTypeId, jurisdiction);
         } else {
-            return ccdApi.startEventForCaseWorker(
-                authenticator.getUserToken(),
-                authenticator.getServiceToken(),
-                authenticator.getUserDetails().getId(),
-                jurisdiction,
-                caseTypeId,
-                caseRef,
-                getEventTypeId()
-            );
+            return startEventForExistingCase(authenticator, envelope, caseTypeId, caseRef, jurisdiction);
         }
+    }
+
+    private StartEventResponse startEventForExistingCase(
+        CcdAuthenticator authenticator,
+        Envelope envelope,
+        String caseTypeId,
+        String caseRef,
+        String jurisdiction
+    ) {
+        StartEventResponse response = ccdApi.startEventForCaseWorker(
+            authenticator.getUserToken(),
+            authenticator.getServiceToken(),
+            authenticator.getUserDetails().getId(),
+            jurisdiction,
+            caseTypeId,
+            caseRef,
+            getEventTypeId()
+        );
+
+        log.info(
+            "Started CCD event of type {} for envelope with ID {}, file name {}, case ref {}, case type {}",
+            getEventTypeId(),
+            envelope.id,
+            envelope.zipFileName,
+            envelope.caseRef,
+            caseTypeId
+        );
+
+        return response;
+    }
+
+    private StartEventResponse startEventForNonExistingCase(
+        CcdAuthenticator authenticator,
+        Envelope envelope,
+        String caseTypeId,
+        String jurisdiction
+    ) {
+        StartEventResponse response = ccdApi.startForCaseworker(
+            authenticator.getUserToken(),
+            authenticator.getServiceToken(),
+            authenticator.getUserDetails().getId(),
+            jurisdiction,
+            caseTypeId,
+            getEventTypeId()
+        );
+
+        log.info(
+            "Started CCD event of type {} (no case) for envelope with ID {}, file name {}, case type {}",
+            getEventTypeId(),
+            envelope.id,
+            envelope.zipFileName,
+            caseTypeId
+        );
+
+        return response;
     }
 
     abstract CaseData mapEnvelopeToCaseDataObject(Envelope envelope);
@@ -169,6 +209,12 @@ abstract class AbstractEventPublisher implements EventPublisher {
                 caseDataContent
             );
         }
+
+        log.info(
+            "Submitted CCD event for envelope. Envelope ID: {}, file name: {}",
+            envelope.id,
+            envelope.zipFileName
+        );
     }
 
     // end region - execution steps

@@ -40,10 +40,10 @@ public class CaseRetriever {
             return caseDetails;
         } catch (FeignException exception) {
             if (exception.status() == NOT_FOUND.value()) {
-                log.info("Case not found. Ref:{}, jurisdiction:{}", caseRef, jurisdiction);
+                log.info("Case not found. Ref: {}, jurisdiction: {}", caseRef, jurisdiction, exception);
                 return null;
             } else if (exception.status() == BAD_REQUEST.value()) {
-                log.info("Invalid Case Ref:{}, jurisdiction:{}", caseRef, jurisdiction);
+                log.info("Invalid Case Ref: {}, jurisdiction: {}", caseRef, jurisdiction, exception);
                 return null;
             } else {
                 throw exception;

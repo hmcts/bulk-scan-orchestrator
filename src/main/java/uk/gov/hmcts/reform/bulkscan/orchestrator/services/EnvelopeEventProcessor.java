@@ -64,22 +64,17 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
     private MessageProcessingResult process(IMessage message) {
         log.info("Started processing message with ID {}", message.getMessageId());
-        try {
-            Envelope envelope = parse(message.getBody());
-            log.info(
-                "Parsed message with ID {}. Envelope ID: {}, File name: {}. Jurisdiction: {}",
-                message.getMessageId(),
-                envelope.id,
-                envelope.zipFileName,
-                envelope.jurisdiction
-            );
 
-            Supplier<CaseDetails> caseRetrieval = () -> Strings.isNullOrEmpty(envelope.caseRef)
-                ? null
-                : caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
+        Envelope envelope = null;
+
+        try {
+            envelope = parse(message.getBody());
+
+            logMessageParsed(message, envelope);
+
             EventPublisher eventPublisher = eventPublisherContainer.getPublisher(
                 envelope.classification,
-                caseRetrieval
+                getCaseRetriever(envelope)
             );
 
             eventPublisher.publish(envelope);
@@ -89,7 +84,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
             log.error("Rejected message with ID {}, because it's invalid", message.getMessageId(), ex);
             return new MessageProcessingResult(UNRECOVERABLE_FAILURE, ex);
         } catch (Exception ex) {
-            log.error("Failed to process message with ID {}", message.getMessageId(), ex);
+            logMessageProcessingError(message, envelope, ex);
             return new MessageProcessingResult(POTENTIALLY_RECOVERABLE_FAILURE);
         }
     }
@@ -97,13 +92,11 @@ public class EnvelopeEventProcessor implements IMessageHandler {
     private void tryFinaliseProcessedMessage(IMessage message, MessageProcessingResult processingResult) {
         try {
             finaliseProcessedMessage(message, processingResult);
+        } catch (InterruptedException ex) {
+            logMessageFinaliseError(message, processingResult.resultType, ex);
+            Thread.currentThread().interrupt();
         } catch (Exception ex) {
-            log.error(
-                "Failed to manage processed message with ID {}. Processing result: {}",
-                message.getMessageId(),
-                processingResult,
-                ex
-            );
+            logMessageFinaliseError(message, processingResult.resultType, ex);
         }
     }
 
@@ -128,7 +121,11 @@ public class EnvelopeEventProcessor implements IMessageHandler {
                 break;
             case POTENTIALLY_RECOVERABLE_FAILURE:
                 // do nothing - let the message lock expire
-                log.info("Allowing message with ID {} to return to queue", message.getMessageId());
+                log.info(
+                    "Allowing message with ID {} to return to queue (delivery attempt {})",
+                    message.getMessageId(),
+                    message.getDeliveryCount() + 1
+                );
                 break;
             default:
                 throw new MessageProcessingException(
@@ -137,9 +134,50 @@ public class EnvelopeEventProcessor implements IMessageHandler {
         }
     }
 
+    private void logMessageFinaliseError(
+        IMessage message,
+        MessageProcessingResultType processingResultType,
+        Exception ex
+    ) {
+        log.error(
+            "Failed to manage processed message with ID {}. Processing result: {}",
+            message.getMessageId(),
+            processingResultType,
+            ex
+        );
+    }
+
     @Override
     public void notifyException(Throwable exception, ExceptionPhase phase) {
         log.error("Error while handling message at stage: " + phase, exception);
+    }
+
+    private Supplier<CaseDetails> getCaseRetriever(final Envelope envelope) {
+        return () -> Strings.isNullOrEmpty(envelope.caseRef)
+            ? null
+            : caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
+    }
+
+    private void logMessageParsed(IMessage message, Envelope envelope) {
+        log.info(
+            "Parsed message. ID: {}, Envelope ID: {}, File name: {}, Jurisdiction: {}, Classification: {}, Case: {}",
+            message.getMessageId(),
+            envelope.id,
+            envelope.zipFileName,
+            envelope.jurisdiction,
+            envelope.classification,
+            envelope.caseRef
+        );
+    }
+
+    private void logMessageProcessingError(IMessage message, Envelope envelope, Exception exception) {
+        String baseMessage = String.format("Failed to process message with ID %s.", message.getMessageId());
+
+        String fullMessage = envelope != null
+            ? baseMessage + String.format(" Envelope ID: %s, File name: %s", envelope.id, envelope.zipFileName)
+            : baseMessage;
+
+        log.error(fullMessage, exception);
     }
 
     class MessageProcessingResult {
