@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
+import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Document {
@@ -32,4 +33,26 @@ public class Document {
         this.url = url;
     }
     // endregion
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Document document = (Document) o;
+        return Objects.equals(fileName, document.fileName)
+            && Objects.equals(controlNumber, document.controlNumber)
+            && Objects.equals(type, document.type)
+            && Objects.equals(subtype, document.subtype)
+            && Objects.equals(scannedAt, document.scannedAt)
+            && Objects.equals(url, document.url);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fileName, controlNumber, type, subtype, scannedAt, url);
+    }
 }

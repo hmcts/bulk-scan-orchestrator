@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Docum
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
 import java.time.Instant;
+import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,7 +39,7 @@ public class EnvelopeParserTest {
                     "doc1_file_name",
                     "doc1_control_number",
                     "doc1_type",
-                    null,
+                    "doc1_subtype",
                     Instant.now(),
                     "doc1_url"
                 ),
@@ -109,9 +110,12 @@ public class EnvelopeParserTest {
 
         // when
         Envelope result = EnvelopeParser.parse(json.getBytes());
+        List<Document> parsedDocuments = result.documents;
+        List<Document> documents = envelope.documents;
 
         // then
         assertThat(result).isEqualToComparingFieldByFieldRecursively(envelope);
+        assertThat(parsedDocuments).containsAll(documents);
     }
 
     @Test
