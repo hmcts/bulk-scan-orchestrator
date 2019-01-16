@@ -15,8 +15,8 @@ public class QueueClientsConfig {
 
     @Bean("envelopes")
     public QueueClient envelopesQueueClient(
-        @Value("${azure.servicebus.connection-string}") String connectionString,
-        @Value("${azure.servicebus.queue-name}") String queueName
+        @Value("${azure.servicebus.envelopes.connection-string}") String connectionString,
+        @Value("${azure.servicebus.envelopes.queue-name}") String queueName
     ) throws InterruptedException, ServiceBusException {
         return new QueueClient(
             new ConnectionStringBuilder(connectionString, queueName),

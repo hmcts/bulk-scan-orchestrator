@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public class FunctionalQueueConfig {
 
-    @Value("${queue.write-connection-string}")
+    @Value("${queue.envelopes.write-connection-string}")
     private String queueWriteConnectionString;
 
     @Bean
