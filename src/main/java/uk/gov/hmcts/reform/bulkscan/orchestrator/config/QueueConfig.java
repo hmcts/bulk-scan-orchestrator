@@ -9,6 +9,7 @@ import com.microsoft.azure.servicebus.primitives.MessagingEntityNotFoundExceptio
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
@@ -29,11 +30,14 @@ public class QueueConfig {
 
     private static final Logger log = LoggerFactory.getLogger(QueueConfig.class);
 
-    private final QueueClient client;
+    private final QueueClient envelopesQueueClient;
     private final IMessageHandler messageHandler;
 
-    public QueueConfig(QueueClient client, IMessageHandler messageHandler) {
-        this.client = client;
+    public QueueConfig(
+        @Qualifier("envelopes") QueueClient envelopesQueueClient,
+        IMessageHandler messageHandler
+    ) {
+        this.envelopesQueueClient = envelopesQueueClient;
         this.messageHandler = messageHandler;
     }
 
@@ -51,7 +55,7 @@ public class QueueConfig {
         int tries = 0;
         while (true) {
             try {
-                client.registerMessageHandler(
+                envelopesQueueClient.registerMessageHandler(
                     messageHandler,
                     new MessageHandlerOptions(1, false, Duration.ofMinutes(5)),
                     executorService
