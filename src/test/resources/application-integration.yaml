@@ -13,6 +13,3 @@ idam:
     bulkscan:
       username: bulkscanorchestrator+systemupdate@gmail.com
       password: Password12
-
-queue:
-  read-interval: 2000
