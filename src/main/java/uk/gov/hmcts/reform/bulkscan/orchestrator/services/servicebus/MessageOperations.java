@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus;
 import com.microsoft.azure.servicebus.QueueClient;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +16,7 @@ public class MessageOperations implements IMessageOperations {
     private QueueClient queueClient;
 
     @Autowired
-    public MessageOperations(QueueClient queueClient) {
+    public MessageOperations(@Qualifier("envelopes") QueueClient queueClient) {
         this.queueClient = queueClient;
     }
 
