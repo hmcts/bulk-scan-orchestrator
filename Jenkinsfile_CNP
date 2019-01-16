@@ -59,7 +59,7 @@ withPipeline(type, product, component) {
       def serviceBusConnectionStr = kubectl.getSecret(serviceBusSecret, namespace, "{.data.connectionString}")
       //Regex: Endpoint=sb:\/\/([-a-zA-Z0-9]+)\.servicebus\.windows\.net.*
       def serviceBusNamespace = serviceBusConnectionStr.substring(14).split("\\.")[0]
-      env.QUEUE_READ_CONN_STRING = "${serviceBusConnectionStr};EntityPath=envelopes"
+
       env.ENVELOPES_QUEUE_WRITE_CONN_STRING = "${serviceBusConnectionStr};EntityPath=envelopes"
 
       // create queue
