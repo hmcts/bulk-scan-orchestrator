@@ -12,16 +12,17 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Docum
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
 import java.time.Instant;
-import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.assertj.core.api.Assertions.tuple;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.DatetimeHelper.toIso8601;
 
 public class EnvelopeParserTest {
 
     private Envelope envelope;
+    private Instant scannedAt = Instant.now();
 
     @Before
     public void setUp() {
@@ -40,7 +41,7 @@ public class EnvelopeParserTest {
                     "doc1_control_number",
                     "doc1_type",
                     "doc1_subtype",
-                    Instant.now(),
+                    scannedAt,
                     "doc1_url"
                 ),
                 new Document(
@@ -48,7 +49,7 @@ public class EnvelopeParserTest {
                     "doc2_control_number",
                     "doc2_type",
                     null,
-                    Instant.now(),
+                    scannedAt,
                     "doc2_url"
                 )
             ),
@@ -85,6 +86,25 @@ public class EnvelopeParserTest {
 
         // then
         assertThat(result).isEqualToComparingFieldByFieldRecursively(envelope);
+
+        assertThat(result.documents)
+            .extracting("fileName", "controlNumber", "type", "subtype", "scannedAt", "url")
+            .containsOnly(
+                tuple("doc1_file_name",
+                    "doc1_control_number",
+                    "doc1_type",
+                    "doc1_subtype",
+                    scannedAt,
+                    "doc1_url"
+                ),
+                tuple("doc2_file_name",
+                    "doc2_control_number",
+                    "doc2_type",
+                    null,
+                    scannedAt,
+                    "doc2_url"
+                )
+            );
     }
 
     @Test
@@ -110,12 +130,9 @@ public class EnvelopeParserTest {
 
         // when
         Envelope result = EnvelopeParser.parse(json.getBytes());
-        List<Document> parsedDocuments = result.documents;
-        List<Document> documents = envelope.documents;
 
         // then
         assertThat(result).isEqualToComparingFieldByFieldRecursively(envelope);
-        assertThat(parsedDocuments).containsAll(documents);
     }
 
     @Test
