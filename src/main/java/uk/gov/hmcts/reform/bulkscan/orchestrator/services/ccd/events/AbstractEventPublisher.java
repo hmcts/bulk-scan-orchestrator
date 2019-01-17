@@ -201,7 +201,8 @@ abstract class AbstractEventPublisher implements EventPublisher {
                 );
 
             log.info(
-                "Created CCD case for envelope. Envelope ID: {}, file name: {}, case ID: {}",
+                "Created CCD case of type {}. Envelope ID: {}, file name: {}, case ID: {}",
+                caseTypeId,
                 envelope.id,
                 envelope.zipFileName,
                 response.getId()
@@ -219,7 +220,8 @@ abstract class AbstractEventPublisher implements EventPublisher {
             );
 
             log.info(
-                "Submitted CCD event for envelope. Envelope ID: {}, file name: {}",
+                "Submitted CCD event of type {}. Envelope ID: {}, file name: {}",
+                this.getEventTypeId(),
                 envelope.id,
                 envelope.zipFileName
             );
