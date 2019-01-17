@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisherContainer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IMessageOperations;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.ProcessedEnvelopeNotifier;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.InvalidMessageException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -31,15 +32,18 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
     private final CaseRetriever caseRetriever;
     private final EventPublisherContainer eventPublisherContainer;
+    private final ProcessedEnvelopeNotifier processedEnvelopeNotifier;
     private final IMessageOperations messageOperations;
 
     public EnvelopeEventProcessor(
         CaseRetriever caseRetriever,
         EventPublisherContainer eventPublisherContainer,
+        ProcessedEnvelopeNotifier processedEnvelopeNotifier,
         IMessageOperations messageOperations
     ) {
         this.caseRetriever = caseRetriever;
         this.eventPublisherContainer = eventPublisherContainer;
+        this.processedEnvelopeNotifier = processedEnvelopeNotifier;
         this.messageOperations = messageOperations;
     }
 
@@ -78,6 +82,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
             );
 
             eventPublisher.publish(envelope);
+            processedEnvelopeNotifier.notify(envelope.id);
             log.info("Processed message with ID {}. File name: {}", message.getMessageId(), envelope.zipFileName);
             return new MessageProcessingResult(SUCCESS);
         } catch (InvalidMessageException ex) {

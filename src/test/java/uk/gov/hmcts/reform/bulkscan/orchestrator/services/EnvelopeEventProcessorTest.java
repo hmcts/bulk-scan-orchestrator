@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisherContainer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.MessageOperations;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.ProcessedEnvelopeNotifier;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.ENVELOPE_ID;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelopeJson;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -42,11 +44,20 @@ public class EnvelopeEventProcessorTest {
     @Mock
     private MessageOperations messageOperations;
 
+    @Mock
+    private ProcessedEnvelopeNotifier processedEnvelopeNotifier;
+
     private EnvelopeEventProcessor processor;
 
     @Before
     public void before() {
-        processor = new EnvelopeEventProcessor(mock(CaseRetriever.class), eventPublisherContainer, messageOperations);
+        processor = new EnvelopeEventProcessor(
+            mock(CaseRetriever.class),
+            eventPublisherContainer,
+            processedEnvelopeNotifier,
+            messageOperations
+        );
+
         when(eventPublisherContainer.getPublisher(any(Classification.class), any()))
             .thenReturn(getDummyPublisher());
 
@@ -123,7 +134,32 @@ public class EnvelopeEventProcessorTest {
 
     @Test
     public void should_not_finalize_the_message_when_recoverable_failure() throws Exception {
-        // given
+        verifyNoInteractionsWhenMessageProcessingFails(messageOperations);
+    }
+
+    @Test
+    public void should_not_do_anything_in_notify_exception() {
+        // when
+        processor.notifyException(null, null);
+    }
+
+    @Test
+    public void should_send_message_with_envelope_id_when_processing_successful() throws Exception {
+        // when
+        CompletableFuture<Void> result = processor.onMessageAsync(someMessage);
+        result.join();
+
+        // then
+        verify(processedEnvelopeNotifier).notify(ENVELOPE_ID);
+    }
+
+    @Test
+    public void should_not_send_processed_envelope_notification_when_processing_fails() {
+        verifyNoInteractionsWhenMessageProcessingFails(processedEnvelopeNotifier);
+    }
+
+    private void verifyNoInteractionsWhenMessageProcessingFails(Object mockToVerify) {
+        // given an error occurs during message processing
         reset(eventPublisherContainer);
         willThrow(new RuntimeException("test exception"))
             .given(eventPublisherContainer)
@@ -134,13 +170,7 @@ public class EnvelopeEventProcessorTest {
         result.join();
 
         // then
-        verifyNoMoreInteractions(messageOperations);
-    }
-
-    @Test
-    public void should_not_do_anything_in_notify() {
-        // when
-        processor.notifyException(null, null);
+        verifyNoMoreInteractions(mockToVerify);
     }
 
     private EventPublisher getDummyPublisher() {

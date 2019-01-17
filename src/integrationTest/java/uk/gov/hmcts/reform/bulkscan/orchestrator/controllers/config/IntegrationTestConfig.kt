@@ -4,6 +4,8 @@ import com.github.tomakehurst.wiremock.common.Slf4jNotifier
 import com.github.tomakehurst.wiremock.core.Options
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.microsoft.azure.servicebus.IMessageHandler
+import com.microsoft.azure.servicebus.QueueClient
+import org.mockito.Mockito.mock
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
@@ -44,4 +46,7 @@ class IntegrationTestConfig : ApplicationContextInitializer<ConfigurableApplicat
             // do nothing
         }
     }
+
+    @Bean("processed-envelopes")
+    fun queueClient() = mock(QueueClient::class.java)
 }
