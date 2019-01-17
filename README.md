@@ -14,12 +14,13 @@ IDAM_USERS_BULKSCAN_PASSWORD = Password12
 - either using the environment vars or application default you will need to set
   ```
   queue:
-    connection-string: XXXXX
-    read-interval: YYYY
+    envelopes:
+      connection-string: XXXXX
+      queue-name: YYYY
   ```
   - where: 
     - XXXX is the connection string from azure to the queue you intend to use.
-    - YYYY is optional but recommended to reduce this to 500 ms for speed of development.
+    - YYYY is the name of the queue
   
   
 - add a case into ccd using the [case management ui](http://localhost:3451)

@@ -12,7 +12,7 @@ output "vaultUri" {
 
 // region: settings for functional tests
 
-output "QUEUE_WRITE_CONN_STRING" {
+output "ENVELOPES_QUEUE_WRITE_CONN_STRING" {
   value = "${data.terraform_remote_state.shared_infra.queue_primary_send_connection_string}"
 }
 

@@ -61,7 +61,7 @@ locals {
     S2S_NAME    = "${var.s2s_name}"
     S2S_SECRET  = "${data.azurerm_key_vault_secret.s2s_secret.value}"
 
-    QUEUE_CONNECTION_STRING = "${data.terraform_remote_state.shared_infra.queue_primary_listen_connection_string}"
+    ENVELOPES_QUEUE_CONNECTION_STRING = "${data.terraform_remote_state.shared_infra.envelopes_queue_primary_listen_connection_string}"
 
     IDAM_API_URL              = "${var.idam_api_url}"
     IDAM_CLIENT_SECRET        = "${data.azurerm_key_vault_secret.idam_client_secret.value}"
