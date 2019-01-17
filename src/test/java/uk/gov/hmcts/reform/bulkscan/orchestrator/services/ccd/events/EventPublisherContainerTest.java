@@ -49,10 +49,10 @@ public class EventPublisherContainerTest {
         given(caseRetriever.retrieve(JURSIDICTION, CASE_REF)).willReturn(mock(CaseDetails.class));
 
         // when
-        DelegatePublisher eventPublisher = (DelegatePublisher) getEventPublisher(SUPPLEMENTARY_EVIDENCE);
+        EventPublisher eventPublisher = getEventPublisher(SUPPLEMENTARY_EVIDENCE);
 
         // then
-        assertThat(eventPublisher.getDelegatedClass()).isInstanceOf(attachDocsToSupplementaryEvidence.getClass());
+        assertThat(eventPublisher).isInstanceOf(attachDocsToSupplementaryEvidence.getClass());
     }
 
     @Test
