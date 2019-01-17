@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFa
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
@@ -188,14 +189,22 @@ abstract class AbstractEventPublisher implements EventPublisher {
         String jurisdiction = envelope.jurisdiction;
 
         if (caseRef == null) {
-            ccdApi.submitForCaseworker(
-                authenticator.getUserToken(),
-                authenticator.getServiceToken(),
-                authenticator.getUserDetails().getId(),
-                jurisdiction,
-                caseTypeId,
-                true,
-                caseDataContent
+            CaseDetails response =
+                ccdApi.submitForCaseworker(
+                    authenticator.getUserToken(),
+                    authenticator.getServiceToken(),
+                    authenticator.getUserDetails().getId(),
+                    jurisdiction,
+                    caseTypeId,
+                    true,
+                    caseDataContent
+                );
+
+            log.info(
+                "Created CCD case for envelope. Envelope ID: {}, file name: {}, case ID: {}",
+                envelope.id,
+                envelope.zipFileName,
+                response.getId()
             );
         } else {
             ccdApi.submitEventForCaseWorker(
@@ -208,13 +217,13 @@ abstract class AbstractEventPublisher implements EventPublisher {
                 true,
                 caseDataContent
             );
-        }
 
-        log.info(
-            "Submitted CCD event for envelope. Envelope ID: {}, file name: {}",
-            envelope.id,
-            envelope.zipFileName
-        );
+            log.info(
+                "Submitted CCD event for envelope. Envelope ID: {}, file name: {}",
+                envelope.id,
+                envelope.zipFileName
+            );
+        }
     }
 
     // end region - execution steps
