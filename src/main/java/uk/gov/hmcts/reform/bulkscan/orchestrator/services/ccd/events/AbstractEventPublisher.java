@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.ModelMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
@@ -57,13 +58,16 @@ abstract class AbstractEventPublisher implements EventPublisher {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractEventPublisher.class);
 
+    private final ModelMapper<? extends CaseData> mapper;
+
     @Autowired
     private CoreCaseDataApi ccdApi;
 
     @Autowired
     private CcdAuthenticatorFactory authenticatorFactory;
 
-    AbstractEventPublisher() {
+    AbstractEventPublisher(ModelMapper<? extends CaseData> mapper) {
+        this.mapper = mapper;
     }
 
     @Override
@@ -162,7 +166,9 @@ abstract class AbstractEventPublisher implements EventPublisher {
         return response;
     }
 
-    abstract CaseData mapEnvelopeToCaseDataObject(Envelope envelope);
+    private CaseData mapEnvelopeToCaseDataObject(Envelope envelope) {
+        return mapper.mapEnvelope(envelope);
+    }
 
     CaseDataContent buildCaseDataContent(
         StartEventResponse eventResponse,
