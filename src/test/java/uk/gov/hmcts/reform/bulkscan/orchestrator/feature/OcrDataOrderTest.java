@@ -31,8 +31,7 @@ public class OcrDataOrderTest {
         assertThat(envelope.ocrData).isInstanceOf(LinkedHashMap.class);
 
         // and
-        ExceptionRecordMapper mapper = new ExceptionRecordMapper();
-        ExceptionRecord record = mapper.mapEnvelope(envelope);
+        ExceptionRecord record = ExceptionRecordMapper.mapEnvelope(envelope);
         assertThat(record.ocrData).isInstanceOf(ArrayList.class);
         assertThat(record.ocrData.size()).isEqualTo(envelope.ocrData.size());
 
