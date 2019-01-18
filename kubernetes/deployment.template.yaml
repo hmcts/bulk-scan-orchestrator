@@ -65,6 +65,8 @@ spec:
                   key: connectionString
             - name: ENVELOPES_QUEUE_CONNECTION_STRING
               value: "$(SB_CONN_STRING);EntityPath=envelopes"
+            - name: PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING
+              value: "$(SB_CONN_STRING);EntityPath=processed-envelopes"
           resources:
             requests:
               memory: "512Mi"
