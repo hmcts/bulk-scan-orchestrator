@@ -20,15 +20,13 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 
 public class ExceptionRecordMapperTest {
 
-    private final ExceptionRecordMapper mapper = new ExceptionRecordMapper();
-
     @Test
     public void mapEnvelope_maps_all_fields_correctly() {
         // given
         Envelope envelope = envelope(2);
 
         // when
-        ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
+        ExceptionRecord exceptionRecord = ExceptionRecordMapper.mapEnvelope(envelope);
 
         // then
         assertThat(exceptionRecord.classification).isEqualTo(envelope.classification.name());
@@ -55,7 +53,7 @@ public class ExceptionRecordMapperTest {
     @Test
     public void mapEnvelope_handles_null_ocr_data() {
         Envelope envelope = envelope(2, null);
-        ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
+        ExceptionRecord exceptionRecord = ExceptionRecordMapper.mapEnvelope(envelope);
         assertThat(exceptionRecord.ocrData).isNull();
     }
 
@@ -65,7 +63,7 @@ public class ExceptionRecordMapperTest {
         Envelope envelope = envelope(2, null);
 
         // when
-        ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
+        ExceptionRecord exceptionRecord = ExceptionRecordMapper.mapEnvelope(envelope);
 
         // then
         assertThat(exceptionRecord.scannedDocuments.size()).isEqualTo(envelope.documents.size());

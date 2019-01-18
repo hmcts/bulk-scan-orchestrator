@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
-import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdKeyValue;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ExceptionRecord;
@@ -10,16 +9,16 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentsMapper.getLocalDateTime;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentsMapper.mapDocuments;
 
-@Component
-public class ExceptionRecordMapper implements ModelMapper<ExceptionRecord> {
+public class ExceptionRecordMapper {
 
-    public ExceptionRecordMapper() {
-        // empty mapper construct
+    private ExceptionRecordMapper() {
+        // util class
     }
 
-    @Override
-    public ExceptionRecord mapEnvelope(Envelope envelope) {
+    public static ExceptionRecord mapEnvelope(Envelope envelope) {
         return new ExceptionRecord(
             envelope.classification.name(),
             envelope.poBox,
@@ -31,7 +30,7 @@ public class ExceptionRecordMapper implements ModelMapper<ExceptionRecord> {
         );
     }
 
-    private List<CcdCollectionElement<CcdKeyValue>> mapOcrData(Map<String, String> ocrData) {
+    private static List<CcdCollectionElement<CcdKeyValue>> mapOcrData(Map<String, String> ocrData) {
         if (ocrData != null) {
             return ocrData
                 .entrySet()

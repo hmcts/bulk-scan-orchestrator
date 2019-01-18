@@ -1,18 +1,17 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
-import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.SupplementaryEvidence;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
-@Component
-public class SupplementaryEvidenceMapper implements ModelMapper<SupplementaryEvidence> {
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentsMapper.mapDocuments;
 
-    public SupplementaryEvidenceMapper() {
-        // empty mapper construct
+public class SupplementaryEvidenceMapper {
+
+    private SupplementaryEvidenceMapper() {
+        // util class
     }
 
-    @Override
-    public SupplementaryEvidence mapEnvelope(Envelope envelope) {
+    public static SupplementaryEvidence mapEnvelope(Envelope envelope) {
         return new SupplementaryEvidence(mapDocuments(envelope.documents));
     }
 }

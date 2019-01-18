@@ -16,12 +16,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class SupplementaryEvidenceMapperTest {
 
-    private static final ModelMapper<SupplementaryEvidence> mapper = new SupplementaryEvidenceMapper();
-
     @Test
     public void from_envelope_maps_all_fields_correctly() {
         Envelope envelope = SampleData.envelope(1);
-        SupplementaryEvidence supplementaryEvidence = mapper.mapEnvelope(envelope);
+        SupplementaryEvidence supplementaryEvidence = SupplementaryEvidenceMapper.mapEnvelope(envelope);
 
         assertThat(supplementaryEvidence.evidenceHandled).isEqualTo("No");
 
@@ -46,7 +44,7 @@ public class SupplementaryEvidenceMapperTest {
         int numberOfDocuments = 12;
         Envelope envelope = SampleData.envelope(12);
 
-        SupplementaryEvidence supplementaryEvidence = mapper.mapEnvelope(envelope);
+        SupplementaryEvidence supplementaryEvidence = SupplementaryEvidenceMapper.mapEnvelope(envelope);
         assertThat(supplementaryEvidence.scannedDocuments.size()).isEqualTo(numberOfDocuments);
 
         List<String> expectedDocumentFileNames =
@@ -63,7 +61,7 @@ public class SupplementaryEvidenceMapperTest {
         int numberOfDocuments = 3;
         Envelope envelope = SampleData.envelope(3);
 
-        SupplementaryEvidence supplementaryEvidence = mapper.mapEnvelope(envelope);
+        SupplementaryEvidence supplementaryEvidence = SupplementaryEvidenceMapper.mapEnvelope(envelope);
         assertThat(supplementaryEvidence.scannedDocuments.size()).isEqualTo(numberOfDocuments);
 
         List<String> expectedDocumentSubtypeValues =
@@ -78,7 +76,7 @@ public class SupplementaryEvidenceMapperTest {
     @Test
     public void from_envelope_handles_empty_document_list() {
         Envelope envelope = SampleData.envelope(0);
-        SupplementaryEvidence supplementaryEvidence = mapper.mapEnvelope(envelope);
+        SupplementaryEvidence supplementaryEvidence = SupplementaryEvidenceMapper.mapEnvelope(envelope);
 
         assertThat(supplementaryEvidence.scannedDocuments).isEmpty();
     }
