@@ -138,7 +138,7 @@ public class EnvelopeEventProcessorTest {
     }
 
     @Test
-    public void should_not_do_anything_in_notify_exception() {
+    public void should_not_do_anything_in_notify() {
         // when
         processor.notifyException(null, null);
     }
