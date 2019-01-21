@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IMessageOperations;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IProcessedEnvelopeNotifier;
 
 import java.util.UUID;
 
@@ -42,5 +43,12 @@ public class FunctionalQueueConfig {
                 // do nothing
             }
         };
+    }
+
+    @Bean
+    @Profile("nosb") // apply only when Service Bus should not be used
+    IProcessedEnvelopeNotifier testProcessedEnvelopeNotifier() {
+        // return implementation that does nothing
+        return envelopeId -> { };
     }
 }

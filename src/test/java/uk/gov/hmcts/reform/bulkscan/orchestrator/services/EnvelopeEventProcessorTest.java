@@ -19,6 +19,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
@@ -29,8 +30,8 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.ENVELOPE_ID;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelopeJson;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.NEW_APPLICATION;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EnvelopeEventProcessorTest {
@@ -138,19 +139,26 @@ public class EnvelopeEventProcessorTest {
     }
 
     @Test
-    public void should_not_do_anything_in_notify() {
-        // when
-        processor.notifyException(null, null);
+    public void notify_exception_should_not_throw_exception() {
+        assertThatCode(() ->
+            processor.notifyException(null, null)
+        ).doesNotThrowAnyException();
     }
 
     @Test
     public void should_send_message_with_envelope_id_when_processing_successful() throws Exception {
+        // given
+        String envelopeId = UUID.randomUUID().toString();
+        IMessage message = mock(IMessage.class);
+        given(message.getBody()).willReturn(envelopeJson(NEW_APPLICATION, "caseRef123", envelopeId));
+        given(message.getLockToken()).willReturn(UUID.randomUUID());
+
         // when
-        CompletableFuture<Void> result = processor.onMessageAsync(someMessage);
+        CompletableFuture<Void> result = processor.onMessageAsync(message);
         result.join();
 
         // then
-        verify(processedEnvelopeNotifier).notify(ENVELOPE_ID);
+        verify(processedEnvelopeNotifier).notify(envelopeId);
     }
 
     @Test

@@ -65,21 +65,21 @@ public class SampleData {
     }
 
     public static byte[] envelopeJson() {
-        return envelopeJson(Classification.SUPPLEMENTARY_EVIDENCE, CASE_REF);
+        return envelopeJson(Classification.SUPPLEMENTARY_EVIDENCE, CASE_REF, ENVELOPE_ID);
     }
 
     public static byte[] envelopeJson(String caseRef) {
-        return envelopeJson(Classification.SUPPLEMENTARY_EVIDENCE, caseRef);
+        return envelopeJson(Classification.SUPPLEMENTARY_EVIDENCE, caseRef, ENVELOPE_ID);
     }
 
     public static byte[] envelopeJson(Classification classification) {
-        return envelopeJson(classification, CASE_REF);
+        return envelopeJson(classification, CASE_REF, ENVELOPE_ID);
     }
 
-    public static byte[] envelopeJson(Classification classification, String caseRef) {
+    public static byte[] envelopeJson(Classification classification, String caseRef, String envelopeId) {
         try {
             return new JSONObject()
-                .put("id", ENVELOPE_ID)
+                .put("id", envelopeId)
                 .put("case_ref", caseRef)
                 .put("po_box", PO_BOX)
                 .put("jurisdiction", JURSIDICTION)

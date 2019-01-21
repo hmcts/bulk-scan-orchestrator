@@ -18,7 +18,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
  */
 @Service
 @Profile("!nosb") // do not register for the nosb (test) profile
-public class ProcessedEnvelopeNotifier {
+public class ProcessedEnvelopeNotifier implements IProcessedEnvelopeNotifier {
 
     private final Logger log = LoggerFactory.getLogger(ProcessedEnvelopeNotifier.class);
 
