@@ -26,14 +26,12 @@ public class ProcessedEnvelopeNotifierTest {
 
     private ProcessedEnvelopeNotifier notifier;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     @Mock
     private QueueClient queueClient;
 
     @Before
     public void setUp() {
-        notifier = new ProcessedEnvelopeNotifier(queueClient, objectMapper);
+        notifier = new ProcessedEnvelopeNotifier(queueClient, new ObjectMapper());
     }
 
     @Test
