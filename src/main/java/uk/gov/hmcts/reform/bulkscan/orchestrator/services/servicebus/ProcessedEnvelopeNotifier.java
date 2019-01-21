@@ -38,7 +38,7 @@ public class ProcessedEnvelopeNotifier {
             String messageBody =
                 objectMapper.writeValueAsString(new ProcessedEnvelope(envelopeId));
 
-            IMessage message = new Message(envelopeId, messageBody, APPLICATION_JSON.getType());
+            IMessage message = new Message(envelopeId, messageBody, APPLICATION_JSON.toString());
             queueClient.send(message);
 
             log.info("Sent message to processed envelopes queue. Envelope ID: {}", envelopeId);
