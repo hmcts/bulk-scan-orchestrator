@@ -16,7 +16,7 @@ public class FunctionalQueueConfig {
     @Value("${queue.envelopes.write-connection-string}")
     private String queueWriteConnectionString;
 
-    @Bean
+    @Bean({"envelopes", "processed-envelopes"})
     QueueClient testWriteClient() throws ServiceBusException, InterruptedException {
         return new QueueClient(
             new ConnectionStringBuilder(queueWriteConnectionString),
