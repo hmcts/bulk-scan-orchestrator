@@ -17,6 +17,7 @@ import org.springframework.util.SocketUtils.findAvailableTcpPort
 import uk.gov.hmcts.reform.bulkscan.orchestrator.Application
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.MessageSender
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IMessageOperations
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.ProcessedEnvelopeNotifier
 import java.lang.System.setProperty
 import java.util.UUID
 
@@ -47,6 +48,6 @@ class IntegrationTestConfig : ApplicationContextInitializer<ConfigurableApplicat
         }
     }
 
-    @Bean("processed-envelopes")
-    fun queueClient() = mock(QueueClient::class.java)
+    @Bean
+    fun processedEnvelopeNotifier() = mock(ProcessedEnvelopeNotifier::class.java)
 }
