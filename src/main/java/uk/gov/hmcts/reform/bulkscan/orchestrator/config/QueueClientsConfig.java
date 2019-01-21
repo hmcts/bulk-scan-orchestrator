@@ -18,6 +18,21 @@ public class QueueClientsConfig {
         @Value("${azure.servicebus.envelopes.connection-string}") String connectionString,
         @Value("${azure.servicebus.envelopes.queue-name}") String queueName
     ) throws InterruptedException, ServiceBusException {
+        return createQueueClient(connectionString, queueName);
+    }
+
+    @Bean("processed-envelopes")
+    public QueueClient processedEnvelopesQueueClient(
+        @Value("${azure.servicebus.processed-envelopes.connection-string}") String connectionString,
+        @Value("${azure.servicebus.processed-envelopes.queue-name}") String queueName
+    ) throws InterruptedException, ServiceBusException {
+        return createQueueClient(connectionString, queueName);
+    }
+
+    private QueueClient createQueueClient(
+        String connectionString,
+        String queueName
+    ) throws ServiceBusException, InterruptedException {
         return new QueueClient(
             new ConnectionStringBuilder(connectionString, queueName),
             ReceiveMode.PEEKLOCK

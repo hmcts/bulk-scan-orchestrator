@@ -49,7 +49,8 @@ withPipeline(type, product, component) {
       def serviceBusSecret = "${aksServiceName}-servicebus-secret"
       def queueNames = [
         "envelopes",
-        "notifications"
+        "notifications",
+        "processed-envelopes"
       ]
       def namespace = aksServiceName
       def kubectl = new Kubectl(this, subscription, namespace)
