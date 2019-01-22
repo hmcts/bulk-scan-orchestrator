@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisherContainer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.MessageOperations;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.NotificationSendingException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.ProcessedEnvelopeNotifier;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
@@ -128,6 +129,30 @@ public class EnvelopeEventProcessorTest {
             eq(message.getLockToken()),
             eq("Message processing error"),
             contains("JsonParseException")
+        );
+
+        verifyNoMoreInteractions(messageOperations);
+    }
+
+    @Test
+    public void should_dead_letter_the_message_when_notification_sending_fails() throws Exception {
+        // given
+        String exceptionMessage = "test exception";
+
+        willThrow(new NotificationSendingException(exceptionMessage, null))
+            .given(processedEnvelopeNotifier)
+            .notify(any());
+
+
+        // when
+        CompletableFuture<Void> result = processor.onMessageAsync(someMessage);
+        result.join();
+
+        // then
+        verify(messageOperations).deadLetter(
+            eq(someMessage.getLockToken()),
+            eq("Message processing error"),
+            eq(exceptionMessage)
         );
 
         verifyNoMoreInteractions(messageOperations);
