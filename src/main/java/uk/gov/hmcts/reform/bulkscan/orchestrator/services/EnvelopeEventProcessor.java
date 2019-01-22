@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublis
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisherContainer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IMessageOperations;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IProcessedEnvelopeNotifier;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.NotificationSendingException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.InvalidMessageException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -87,6 +88,9 @@ public class EnvelopeEventProcessor implements IMessageHandler {
             return new MessageProcessingResult(SUCCESS);
         } catch (InvalidMessageException ex) {
             log.error("Rejected message with ID {}, because it's invalid", message.getMessageId(), ex);
+            return new MessageProcessingResult(UNRECOVERABLE_FAILURE, ex);
+        } catch (NotificationSendingException ex) {
+            logMessageProcessingError(message, envelope, ex);
             return new MessageProcessingResult(UNRECOVERABLE_FAILURE, ex);
         } catch (Exception ex) {
             logMessageProcessingError(message, envelope, ex);

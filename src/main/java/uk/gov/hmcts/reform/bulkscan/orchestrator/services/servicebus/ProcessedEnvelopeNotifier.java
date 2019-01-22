@@ -43,8 +43,8 @@ public class ProcessedEnvelopeNotifier implements IProcessedEnvelopeNotifier {
 
             log.info("Sent message to processed envelopes queue. Envelope ID: {}", envelopeId);
         } catch (Exception ex) {
-            throw new MessageSendingException(
-                "An error occurred when trying to send a message to processed envelopes queue",
+            throw new NotificationSendingException(
+                "An error occurred when trying to send notification about successfully processed envelope",
                 ex
             );
         }

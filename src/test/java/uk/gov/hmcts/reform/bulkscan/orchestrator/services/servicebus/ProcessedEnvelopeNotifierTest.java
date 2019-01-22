@@ -61,8 +61,8 @@ public class ProcessedEnvelopeNotifierTest {
         willThrow(exceptionToThrow).given(queueClient).send(any());
 
         assertThatThrownBy(() -> notifier.notify("envelopeId123"))
-            .isInstanceOf(MessageSendingException.class)
-            .hasMessage("An error occurred when trying to send a message to processed envelopes queue")
+            .isInstanceOf(NotificationSendingException.class)
+            .hasMessage("An error occurred when trying to send notification about successfully processed envelope")
             .hasCause(exceptionToThrow);
     }
 }
