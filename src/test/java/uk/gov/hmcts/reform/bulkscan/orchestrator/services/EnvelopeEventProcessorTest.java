@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.MessageOper
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.NotificationSendingException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.ProcessedEnvelopeNotifier;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
 import java.nio.charset.Charset;
 import java.util.UUID;
@@ -47,6 +46,9 @@ public class EnvelopeEventProcessorTest {
     private MessageOperations messageOperations;
 
     @Mock
+    EventPublisher eventPublisher;
+
+    @Mock
     private ProcessedEnvelopeNotifier processedEnvelopeNotifier;
 
     private EnvelopeEventProcessor processor;
@@ -61,7 +63,7 @@ public class EnvelopeEventProcessorTest {
         );
 
         when(eventPublisherContainer.getPublisher(any(Classification.class), any()))
-            .thenReturn(getDummyPublisher());
+            .thenReturn(eventPublisher);
 
         given(someMessage.getBody()).willReturn(envelopeJson());
         given(someMessage.getLockToken()).willReturn(UUID.randomUUID());
@@ -160,7 +162,19 @@ public class EnvelopeEventProcessorTest {
 
     @Test
     public void should_not_finalize_the_message_when_recoverable_failure() throws Exception {
-        verifyNoInteractionsWhenMessageProcessingFails(messageOperations);
+        Exception processingFailureCause = new RuntimeException(
+            "exception of type treated as recoverable"
+        );
+
+        // given an error occurs during message processing
+        willThrow(processingFailureCause).given(eventPublisher).publish(any());
+
+        // when
+        CompletableFuture<Void> result = processor.onMessageAsync(someMessage);
+        result.join();
+
+        // then the message is not finalised (completed/dead-lettered)
+        verifyNoMoreInteractions(messageOperations);
     }
 
     @Test
@@ -188,35 +202,15 @@ public class EnvelopeEventProcessorTest {
 
     @Test
     public void should_not_send_processed_envelope_notification_when_processing_fails() {
-        verifyNoInteractionsWhenMessageProcessingFails(processedEnvelopeNotifier);
-    }
-
-    private void verifyNoInteractionsWhenMessageProcessingFails(Object mockToVerify) {
-        // given an error occurs during message processing
-        reset(eventPublisherContainer);
-        willThrow(new RuntimeException("test exception"))
-            .given(eventPublisherContainer)
-            .getPublisher(any(), any());
+        // given
+        Exception processingFailureCause = new RuntimeException("test exception");
+        willThrow(processingFailureCause).given(eventPublisher).publish(any());
 
         // when
         CompletableFuture<Void> result = processor.onMessageAsync(someMessage);
         result.join();
 
-        // then
-        verifyNoMoreInteractions(mockToVerify);
-    }
-
-    private EventPublisher getDummyPublisher() {
-        return new EventPublisher() {
-            @Override
-            public void publish(Envelope envelope) {
-                //
-            }
-
-            @Override
-            public void publish(Envelope envelope, String caseTypeId) {
-                //
-            }
-        };
+        // then no notification is sent
+        verifyNoMoreInteractions(processedEnvelopeNotifier);
     }
 }
