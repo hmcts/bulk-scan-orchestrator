@@ -36,6 +36,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.mode
 @RunWith(MockitoJUnitRunner.class)
 public class EnvelopeEventProcessorTest {
 
+    private static final String DEAD_LETTER_REASON_PROCESSING_ERROR = "Message processing error";
+
     @Mock
     private IMessage someMessage;
 
@@ -129,7 +131,7 @@ public class EnvelopeEventProcessorTest {
         // then
         verify(messageOperations).deadLetter(
             eq(message.getLockToken()),
-            eq("Message processing error"),
+            eq(DEAD_LETTER_REASON_PROCESSING_ERROR),
             contains("JsonParseException")
         );
 
@@ -153,7 +155,7 @@ public class EnvelopeEventProcessorTest {
         // then
         verify(messageOperations).deadLetter(
             eq(someMessage.getLockToken()),
-            eq("Message processing error"),
+            eq(DEAD_LETTER_REASON_PROCESSING_ERROR),
             eq(exceptionMessage)
         );
 
