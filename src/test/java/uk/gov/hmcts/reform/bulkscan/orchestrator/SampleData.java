@@ -35,6 +35,7 @@ public class SampleData {
     public static final String PASSWORD = "PASSWORD";
     public static final String USER_ID = "USER_ID";
     public static final String CASE_REF = "ABC123";
+    public static final String ENVELOPE_ID = "eb9c3598-35fc-424e-b05a-902ee9f11d56";
     public static final String JURSIDICTION = "BULKSCAN";
     public static final String PO_BOX = "BULKSCAN_PO_BOX";
     public static final long CASE_ID = 23L;
@@ -64,21 +65,21 @@ public class SampleData {
     }
 
     public static byte[] envelopeJson() {
-        return envelopeJson(Classification.SUPPLEMENTARY_EVIDENCE, CASE_REF);
+        return envelopeJson(Classification.SUPPLEMENTARY_EVIDENCE, CASE_REF, ENVELOPE_ID);
     }
 
     public static byte[] envelopeJson(String caseRef) {
-        return envelopeJson(Classification.SUPPLEMENTARY_EVIDENCE, caseRef);
+        return envelopeJson(Classification.SUPPLEMENTARY_EVIDENCE, caseRef, ENVELOPE_ID);
     }
 
     public static byte[] envelopeJson(Classification classification) {
-        return envelopeJson(classification, CASE_REF);
+        return envelopeJson(classification, CASE_REF, ENVELOPE_ID);
     }
 
-    public static byte[] envelopeJson(Classification classification, String caseRef) {
+    public static byte[] envelopeJson(Classification classification, String caseRef, String envelopeId) {
         try {
             return new JSONObject()
-                .put("id", "eb9c3598-35fc-424e-b05a-902ee9f11d56")
+                .put("id", envelopeId)
                 .put("case_ref", caseRef)
                 .put("po_box", PO_BOX)
                 .put("jurisdiction", JURSIDICTION)
@@ -125,7 +126,7 @@ public class SampleData {
 
     public static Envelope envelope(int numberOfDocuments, Map<String, String> ocrData) {
         return new Envelope(
-            "eb9c3598-35fc-424e-b05a-902ee9f11d56",
+            ENVELOPE_ID,
             CASE_REF,
             PO_BOX,
             JURSIDICTION,

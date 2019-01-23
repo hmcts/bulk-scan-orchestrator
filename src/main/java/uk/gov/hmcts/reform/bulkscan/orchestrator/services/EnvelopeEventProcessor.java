@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisherContainer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IMessageOperations;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IProcessedEnvelopeNotifier;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.NotificationSendingException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.InvalidMessageException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -31,15 +33,18 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
     private final CaseRetriever caseRetriever;
     private final EventPublisherContainer eventPublisherContainer;
+    private final IProcessedEnvelopeNotifier processedEnvelopeNotifier;
     private final IMessageOperations messageOperations;
 
     public EnvelopeEventProcessor(
         CaseRetriever caseRetriever,
         EventPublisherContainer eventPublisherContainer,
+        IProcessedEnvelopeNotifier processedEnvelopeNotifier,
         IMessageOperations messageOperations
     ) {
         this.caseRetriever = caseRetriever;
         this.eventPublisherContainer = eventPublisherContainer;
+        this.processedEnvelopeNotifier = processedEnvelopeNotifier;
         this.messageOperations = messageOperations;
     }
 
@@ -78,10 +83,17 @@ public class EnvelopeEventProcessor implements IMessageHandler {
             );
 
             eventPublisher.publish(envelope);
+            processedEnvelopeNotifier.notify(envelope.id);
             log.info("Processed message with ID {}. File name: {}", message.getMessageId(), envelope.zipFileName);
             return new MessageProcessingResult(SUCCESS);
         } catch (InvalidMessageException ex) {
             log.error("Rejected message with ID {}, because it's invalid", message.getMessageId(), ex);
+            return new MessageProcessingResult(UNRECOVERABLE_FAILURE, ex);
+        } catch (NotificationSendingException ex) {
+            logMessageProcessingError(message, envelope, ex);
+
+            // CCD changes have been made, so it's better to dead-letter the message and
+            // not repeat them, at least until CCD operations become idempotent
             return new MessageProcessingResult(UNRECOVERABLE_FAILURE, ex);
         } catch (Exception ex) {
             logMessageProcessingError(message, envelope, ex);
