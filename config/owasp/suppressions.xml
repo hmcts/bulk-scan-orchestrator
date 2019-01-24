@@ -18,12 +18,12 @@
   </suppress>
 
   <suppress>
-  <notes><![CDATA[
+    <notes><![CDATA[
       used in the integration tests.
     ]]></notes>
     <filePath regex="true">^.*groovy.*-2\.5\.4\.jar$</filePath>
-  <cve>CVE-2016-6497</cve>
-</suppress>
+    <cve>CVE-2016-6497</cve>
+  </suppress>
 
   <!-- this is for the TEST jar wiremock-standalone -->
   <suppress>
@@ -46,7 +46,17 @@
   </suppress>
 
   <suppress>
-    <notes><![CDATA[ slf4j only has a beta version released with the 'fix', looks like lots of changes in it... ]]></notes>
+    <notes><![CDATA[
+      <!-- The library has vulnerabilities up to version 2.9.6 and some of our dependencies
+      still use older versions in their newest versions
+    ]]></notes>
+    <gav regex="true">^com\.fasterxml\.jackson\.core:jackson-databind:.*$</gav>
+    <cpe>cpe:/a:fasterxml:jackson-databind</cpe>
+  </suppress>
+
+  <suppress>
+    <notes>
+      <![CDATA[ slf4j only has a beta version released with the 'fix', looks like lots of changes in it... ]]></notes>
     <cve>CVE-2018-8088</cve>
   </suppress>
 </suppressions>
