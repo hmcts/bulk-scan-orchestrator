@@ -17,8 +17,14 @@
       "url": "http://test-url"
     }
   ],
-  "ocr_data": {
-    "field1": "value1",
-    "field2": "value2s"
-  }
+  "ocr_data": [
+    {
+      "metadata_field_name": "field1",
+      "metadata_field_value": "value1"
+    },
+    {
+      "metadata_field_name": "field2",
+      "metadata_field_value": "value2"
+    }
+  ]
 }

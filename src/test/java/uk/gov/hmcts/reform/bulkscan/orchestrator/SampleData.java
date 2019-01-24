@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.Credential;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.OcrDataField;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
@@ -20,7 +21,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -121,10 +121,10 @@ public class SampleData {
     }
 
     public static Envelope envelope(int numberOfDocuments) {
-        return envelope(numberOfDocuments, ImmutableMap.of("fieldName1", "value1"));
+        return envelope(numberOfDocuments, ImmutableList.of(new OcrDataField("fieldName1", "value1")));
     }
 
-    public static Envelope envelope(int numberOfDocuments, Map<String, String> ocrData) {
+    public static Envelope envelope(int numberOfDocuments, List<OcrDataField> ocrData) {
         return new Envelope(
             ENVELOPE_ID,
             CASE_REF,

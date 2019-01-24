@@ -9,6 +9,14 @@ public class CcdCollectionElementComparator implements Comparator<CcdCollectionE
 
     @Override
     public int compare(CcdCollectionElement<CcdKeyValue> o1, CcdCollectionElement<CcdKeyValue> o2) {
-        return o1.value.key.compareTo(o2.value.key) & o1.value.value.compareTo(o2.value.value);
+        return o1.value.key.compareTo(o2.value.key) & compareValues(o1.value, o2.value);
     }
+
+    private int compareValues(CcdKeyValue o1, CcdKeyValue o2) {
+        if (o1.value == null && o2.value == null) {
+            return 0;
+        }
+        return o1.value.compareTo(o2.value);
+    }
+
 }

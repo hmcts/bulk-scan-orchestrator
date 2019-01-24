@@ -1,7 +1,8 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,8 +11,10 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.OcrDataField;
 
 import java.time.Instant;
+import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -53,10 +56,10 @@ public class EnvelopeParserTest {
                     "doc2_url"
                 )
             ),
-            ImmutableMap.of(
-                "key1", "value1",
-                "key2", "value2",
-                "key0", "value0"
+            ImmutableList.of(
+                new OcrDataField("key1", "value1"),
+                new OcrDataField("key2", "value2"),
+                new OcrDataField("key0", "value0")
             )
         );
     }
@@ -78,7 +81,7 @@ public class EnvelopeParserTest {
                     .put(toJson(envelope.documents.get(0)))
                     .put(toJson(envelope.documents.get(1)))
                 )
-                .put("ocr_data", new JSONObject(envelope.ocrData))
+                .put("ocr_data", toOcrJson(envelope.ocrData))
                 .toString();
 
         // when
@@ -125,7 +128,7 @@ public class EnvelopeParserTest {
                     .put(toJson(envelope.documents.get(1)))
                 )
                 .put("some_extra_ignored_field", "some_ignored_value")
-                .put("ocr_data", envelope.ocrData != null ? new JSONObject(envelope.ocrData) : null)
+                .put("ocr_data", toOcrJson(envelope.ocrData))
                 .toString();
 
         // when
@@ -212,4 +215,18 @@ public class EnvelopeParserTest {
             .put("scanned_at", toIso8601(doc.scannedAt))
             .put("url", doc.url);
     }
+
+    private JSONArray toOcrJson(List<OcrDataField> ocrDataFields) throws JSONException {
+        JSONArray ocrJson = new JSONArray();
+        JSONObject ocrDataEntry;
+
+        for (OcrDataField ocrField : ocrDataFields) {
+            ocrDataEntry = new JSONObject();
+            ocrDataEntry.put("metadata_field_name", ocrField.name);
+            ocrDataEntry.put("metadata_field_value", ocrField.value);
+            ocrJson.put(ocrDataEntry);
+        }
+        return ocrJson;
+    }
+
 }

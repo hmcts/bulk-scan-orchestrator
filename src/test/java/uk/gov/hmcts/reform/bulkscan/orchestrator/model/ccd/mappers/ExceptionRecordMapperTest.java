@@ -7,14 +7,14 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.OcrDataField;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 
@@ -49,7 +49,9 @@ public class ExceptionRecordMapperTest {
             .usingFieldByFieldElementComparator()
             .containsAll(envelope.documents);
 
-        assertThat(ocrDataAsMap(exceptionRecord.ocrData)).isEqualTo(envelope.ocrData);
+        assertThat(ocrDataAsList(exceptionRecord.ocrData))
+            .usingFieldByFieldElementComparator()
+            .containsAll(envelope.ocrData);
     }
 
     @Test
@@ -80,13 +82,11 @@ public class ExceptionRecordMapperTest {
 
     }
 
-    private Map<String, String> ocrDataAsMap(List<CcdCollectionElement<CcdKeyValue>> ocrData) {
+    private List<OcrDataField> ocrDataAsList(List<CcdCollectionElement<CcdKeyValue>> ocrData) {
         return ocrData
             .stream()
-            .map(element -> element.value)
-            .collect(
-                toMap(kv -> kv.key, kv -> kv.value)
-            );
+            .map(element -> new OcrDataField(element.value.key, element.value.value))
+            .collect(Collectors.toList());
     }
 
     private List<Document> toEnvelopeDocuments(List<CcdCollectionElement<ScannedDocument>> ccdDocuments) {
