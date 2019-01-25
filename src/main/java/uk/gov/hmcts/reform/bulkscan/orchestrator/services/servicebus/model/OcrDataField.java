@@ -5,9 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class OcrDataField {
 
-    @JsonProperty(value = "metadata_field_name")
     public String name;
-    @JsonProperty(value = "metadata_field_value")
     public String value;
 
     @JsonCreator

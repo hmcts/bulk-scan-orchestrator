@@ -13,9 +13,14 @@ public class CcdCollectionElementComparator implements Comparator<CcdCollectionE
     }
 
     private int compareValues(CcdKeyValue o1, CcdKeyValue o2) {
-        if (o1.value == null && o2.value == null) {
-            return 0;
+        if (o1.value == null) {
+            return o2.value == null ? 0 : -1;
         }
+
+        if (o2.value == null) {
+            return 1;
+        }
+
         return o1.value.compareTo(o2.value);
     }
 
