@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class OcrDataField {
 
-    public String name;
-    public String value;
+    public final String name;
+    public final String value;
 
     @JsonCreator
     public OcrDataField(
