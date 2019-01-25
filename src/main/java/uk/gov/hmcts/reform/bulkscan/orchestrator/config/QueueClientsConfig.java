@@ -5,6 +5,7 @@ import com.microsoft.azure.servicebus.ReceiveMode;
 import com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -14,11 +15,18 @@ import org.springframework.context.annotation.Profile;
 public class QueueClientsConfig {
 
     @Bean("envelopes")
+    @ConditionalOnProperty(prefix = "azure.servicebus.envelopes", name = "enabled", matchIfMissing = true)
     public QueueClient envelopesQueueClient(
         @Value("${azure.servicebus.envelopes.connection-string}") String connectionString,
         @Value("${azure.servicebus.envelopes.queue-name}") String queueName
     ) throws InterruptedException, ServiceBusException {
         return createQueueClient(connectionString, queueName);
+    }
+
+    @Bean("envelopes")
+    @ConditionalOnProperty(prefix = "azure.servicebus.envelopes", name = "enabled", matchIfMissing = true)
+    public QueueClient emptyEnvelopesQueueClient() {
+        return null;
     }
 
     @Bean("processed-envelopes")
