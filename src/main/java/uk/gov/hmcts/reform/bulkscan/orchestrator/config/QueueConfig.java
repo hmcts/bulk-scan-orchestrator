@@ -43,6 +43,10 @@ public class QueueConfig {
 
     @PostConstruct
     public void initialise() throws ServiceBusException, InterruptedException {
+        setUpEnvelopeQueueReader();
+    }
+
+    private void setUpEnvelopeQueueReader() throws ServiceBusException, InterruptedException {
         // Note: single threaded queue reader for now to keep it simple.
         ThreadFactory namedThreadFactory =
             new ThreadFactoryBuilder().setNameFormat("queue-reader-%d").build();
