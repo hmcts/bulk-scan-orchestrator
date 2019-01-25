@@ -20,6 +20,7 @@ azure:
     envelopes:
       connection-string: ${ENVELOPES_QUEUE_CONNECTION_STRING:"NO_VALUE_SUPPLIED"}
       queue-name: envelopes
+      enabled: ${ENVELOPES_QUEUE_LISTENER_ENABLED:true}
     processed-envelopes:
       connection-string: ${PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING:"NO_VALUE_SUPPLIED"}
       queue-name: processed-envelopes

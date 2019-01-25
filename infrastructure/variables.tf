@@ -58,3 +58,8 @@ variable "supported_jurisdictions" {
   description = "Jurisdictions to be supported by Bulk Scan in the given environment. Bulk Scan will only be able to map these ones to IDAM user credentials"
   default = ["SSCS", "BULKSCAN", "PROBATE"]
 }
+
+variable "envelope_queue_listener_enabled" {
+  type = "string"
+  default = "true"
+}

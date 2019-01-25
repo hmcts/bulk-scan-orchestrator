@@ -64,6 +64,8 @@ locals {
     ENVELOPES_QUEUE_CONNECTION_STRING           = "${data.terraform_remote_state.shared_infra.envelopes_queue_primary_listen_connection_string}"
     PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING = "${data.terraform_remote_state.shared_infra.processed_envelopes_queue_primary_send_connection_string}"
 
+    ENVELOPES_QUEUE_LISTENER_ENABLED = "${var.envelope_queue_listener_enabled}"
+
     IDAM_API_URL              = "${var.idam_api_url}"
     IDAM_CLIENT_SECRET        = "${data.azurerm_key_vault_secret.idam_client_secret.value}"
     IDAM_CLIENT_REDIRECT_URI  = "${var.idam_client_redirect_uri}"
