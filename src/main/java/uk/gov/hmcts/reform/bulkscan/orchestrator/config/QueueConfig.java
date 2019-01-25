@@ -10,6 +10,7 @@ import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
@@ -33,6 +34,8 @@ public class QueueConfig {
     private final QueueClient envelopesQueueClient;
     private final IMessageHandler messageHandler;
 
+    @Value("${azure.servicebus.envelopes.enabled}") boolean envelopeQueueReaderEnabled;
+
     public QueueConfig(
         @Qualifier("envelopes") QueueClient envelopesQueueClient,
         IMessageHandler messageHandler
@@ -43,7 +46,9 @@ public class QueueConfig {
 
     @PostConstruct
     public void initialise() throws ServiceBusException, InterruptedException {
-        setUpEnvelopeQueueReader();
+        if (envelopeQueueReaderEnabled) {
+            setUpEnvelopeQueueReader();
+        }
     }
 
     private void setUpEnvelopeQueueReader() throws ServiceBusException, InterruptedException {
