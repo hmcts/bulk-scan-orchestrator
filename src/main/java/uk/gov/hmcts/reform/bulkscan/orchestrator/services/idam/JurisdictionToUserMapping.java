@@ -22,6 +22,10 @@ public class JurisdictionToUserMapping {
             .collect(toMap(Entry::getKey, Entry::getValue));
     }
 
+    public Map<String, Credential> getUsers() {
+        return users;
+    }
+
     private Entry<String, Credential> createEntry(Entry<String, Map<String, String>> entry) {
         String key = entry.getKey().toLowerCase();
         Credential cred = new Credential(entry.getValue().get("username"), entry.getValue().get("password"));
