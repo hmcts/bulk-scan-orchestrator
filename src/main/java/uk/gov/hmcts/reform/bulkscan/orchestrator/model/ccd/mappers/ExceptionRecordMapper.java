@@ -5,9 +5,9 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdKeyValue;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.OcrDataField;
 
 import java.util.List;
-import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
 
@@ -31,16 +31,14 @@ public class ExceptionRecordMapper implements ModelMapper<ExceptionRecord> {
         );
     }
 
-    private List<CcdCollectionElement<CcdKeyValue>> mapOcrData(Map<String, String> ocrData) {
+    private List<CcdCollectionElement<CcdKeyValue>> mapOcrData(List<OcrDataField> ocrData) {
         if (ocrData != null) {
             return ocrData
-                .entrySet()
                 .stream()
-                .map(entry -> new CcdKeyValue(entry.getKey(), entry.getValue()))
+                .map(ocrDataField -> new CcdKeyValue(ocrDataField.name, ocrDataField.value))
                 .map(CcdCollectionElement::new)
                 .collect(toList());
-        } else {
-            return null;
         }
+        return null;
     }
 }

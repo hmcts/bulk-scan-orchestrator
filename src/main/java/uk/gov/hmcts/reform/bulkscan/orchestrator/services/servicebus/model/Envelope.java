@@ -2,12 +2,9 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.util.OcrDataDeserialiser;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Envelope {
@@ -21,7 +18,7 @@ public class Envelope {
     public final Instant openingDate;
     public final Classification classification;
     public final List<Document> documents;
-    public final Map<String, String> ocrData;
+    public final List<OcrDataField> ocrData;
 
     public Envelope(
         @JsonProperty(value = "id", required = true) String id,
@@ -33,8 +30,7 @@ public class Envelope {
         @JsonProperty(value = "opening_date", required = true) Instant openingDate,
         @JsonProperty(value = "classification", required = true) Classification classification,
         @JsonProperty(value = "documents", required = true) List<Document> documents,
-        @JsonDeserialize(using = OcrDataDeserialiser.class)
-        @JsonProperty(value = "ocr_data") Map<String, String> ocrData
+        @JsonProperty(value = "ocr_data") List<OcrDataField> ocrData
     ) {
         this.id = id;
         this.caseRef = caseRef;
