@@ -48,20 +48,20 @@ public class JurisdictionEndpoint {
             .stream()
             .collect(Collectors.toMap(
                 Entry::getKey,
-                entry -> checkCredentials(entry.getValue())
+                entry -> checkCredentials(entry.getKey(), entry.getValue())
             ));
     }
 
     @ReadOperation
     public HttpStatus jurisdiction(@Selector String jurisdiction) {
         try {
-            return checkCredentials(credentialProvider.apply(jurisdiction));
+            return checkCredentials(jurisdiction, credentialProvider.apply(jurisdiction));
         } catch (NoUserConfiguredException exception) {
             return HttpStatus.UNAUTHORIZED;
         }
     }
 
-    private HttpStatus checkCredentials(Credential credential) {
+    private HttpStatus checkCredentials(String jurisdiction, Credential credential) {
         try {
             idamClient.authenticateUser(credential.getUsername(), credential.getPassword());
 
@@ -69,13 +69,23 @@ public class JurisdictionEndpoint {
 
             return HttpStatus.OK;
         } catch (FeignException exception) {
-            log.warn("An error occurred while authenticating {}", credential.getUsername(), exception);
+            log.warn(
+                "An error occurred while authenticating {} jurisdiction with {} username",
+                jurisdiction,
+                credential.getUsername(),
+                exception
+            );
 
             // in current state unable to set response code <200 to test such situation
             // but running manually received `0` status code which crashed the endpoint response itself
             return Optional.ofNullable(HttpStatus.resolve(exception.status())).orElse(HttpStatus.UNAUTHORIZED);
         } catch (Exception exception) {
-            log.error("An error occurred while authenticating {}", credential.getUsername(), exception);
+            log.error(
+                "An error occurred while authenticating {} jurisdiction with {} username",
+                jurisdiction,
+                credential.getUsername(),
+                exception
+            );
 
             return HttpStatus.UNAUTHORIZED;
         }
