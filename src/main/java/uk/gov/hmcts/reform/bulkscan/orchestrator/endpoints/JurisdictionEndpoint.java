@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.NoUserConfiguredE
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -62,7 +63,9 @@ public class JurisdictionEndpoint {
 
             return HttpStatus.OK;
         } catch (FeignException exception) {
-            return HttpStatus.valueOf(exception.status());
+            // in current state unable to set response code <200 to test such situation
+            // but running manually received `0` status code which crashed the endpoint response itself
+            return Optional.ofNullable(HttpStatus.resolve(exception.status())).orElse(HttpStatus.UNAUTHORIZED);
         } catch (Exception exception) {
             return HttpStatus.UNAUTHORIZED;
         }
