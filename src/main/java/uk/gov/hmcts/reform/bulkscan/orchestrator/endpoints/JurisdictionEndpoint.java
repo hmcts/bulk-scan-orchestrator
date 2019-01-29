@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.Map.Entry;
@@ -28,22 +27,20 @@ public class JurisdictionEndpoint {
 
     private static final Logger log = LoggerFactory.getLogger(JurisdictionEndpoint.class);
 
-    private final Map<String, Credential> jurisdictions;
-    private final Function<String, Credential> credentialProvider;
+    private final JurisdictionToUserMapping jurisdictionMapping;
     private final IdamClient idamClient;
 
     public JurisdictionEndpoint(
         JurisdictionToUserMapping mapping,
         IdamClient idamClient
     ) {
-        jurisdictions = mapping.getUsers();
-        credentialProvider = mapping::getUser;
+        jurisdictionMapping = mapping;
         this.idamClient = idamClient;
     }
 
     @ReadOperation
     public Map<String, HttpStatus> jurisdictions() {
-        return jurisdictions
+        return jurisdictionMapping.getUsers()
             .entrySet()
             .stream()
             .collect(Collectors.toMap(
@@ -55,7 +52,7 @@ public class JurisdictionEndpoint {
     @ReadOperation
     public HttpStatus jurisdiction(@Selector String jurisdiction) {
         try {
-            return checkCredentials(jurisdiction, credentialProvider.apply(jurisdiction));
+            return checkCredentials(jurisdiction, jurisdictionMapping.getUser(jurisdiction));
         } catch (NoUserConfiguredException exception) {
             return HttpStatus.UNAUTHORIZED;
         }
