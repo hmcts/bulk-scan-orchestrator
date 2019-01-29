@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.endpoints;
 
+import feign.FeignException;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.actuate.endpoint.annotation.Selector;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.Credential;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.JurisdictionToUserMapping;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.NoUserConfiguredException;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -23,10 +25,15 @@ public class JurisdictionEndpoint {
 
     private final Map<String, Credential> jurisdictions;
     private final Function<String, Credential> credentialProvider;
+    private final IdamClient idamClient;
 
-    public JurisdictionEndpoint(JurisdictionToUserMapping mapping) {
+    public JurisdictionEndpoint(
+        JurisdictionToUserMapping mapping,
+        IdamClient idamClient
+    ) {
         jurisdictions = mapping.getUsers();
         credentialProvider = mapping::getUser;
+        this.idamClient = idamClient;
     }
 
     @ReadOperation
@@ -50,6 +57,14 @@ public class JurisdictionEndpoint {
     }
 
     private HttpStatus checkCredentials(Credential credential) {
-        return HttpStatus.OK;
+        try {
+            idamClient.authenticateUser(credential.getUsername(), credential.getPassword());
+
+            return HttpStatus.OK;
+        } catch (FeignException exception) {
+            return HttpStatus.valueOf(exception.status());
+        } catch (Exception exception) {
+            return HttpStatus.UNAUTHORIZED;
+        }
     }
 }
