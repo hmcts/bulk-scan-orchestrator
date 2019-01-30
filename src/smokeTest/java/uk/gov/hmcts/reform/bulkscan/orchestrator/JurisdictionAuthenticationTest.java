@@ -1,15 +1,15 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.ConfigFactory;
 import io.restassured.RestAssured;
-import io.restassured.mapper.TypeRef;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.TestPropertySource;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.out.JurisdictionConfigurationStatus;
 import uk.gov.hmcts.reform.logging.appinsights.SyntheticHeaders;
 
-import java.util.Map;
+import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,19 +20,31 @@ public class JurisdictionAuthenticationTest {
 
     @DisplayName("Each configured jurisdiction should have valid credentials")
     @Test
-    public void each_jurisdiction_should_have_valid_credentials() {
-        String failMessage = "Misconfigured %s jurisdiction, response code: %s. Check the logs for more details";
-        Map<String, HttpStatus> response = RestAssured
+    public void each_jurisdiction_should_have_valid_credentials() throws IOException {
+        String failMessage = "Misconfigured %s jurisdiction, error description: %s. Check the logs for more details";
+        byte[] response = RestAssured
             .given()
             .relaxedHTTPSValidation()
             .baseUri(TEST_URL)
             .header(SyntheticHeaders.SYNTHETIC_TEST_SOURCE, "Bulk Scan Orchestrator smoke test")
             .get("/jurisdictions")
-            .as(new TypeRef<Map<String, HttpStatus>>() {});
+            .andReturn()
+            .asByteArray();
+        ObjectMapper mapper = new ObjectMapper();
 
-        response.forEach((jurisdiction, httpStatus) -> assertThat(httpStatus)
-            .withFailMessage(failMessage, jurisdiction, httpStatus)
-            .isEqualTo(HttpStatus.OK)
+        mapper.readTree(response).elements().forEachRemaining(responseStatus -> {
+            JurisdictionConfigurationStatus status = new JurisdictionConfigurationStatus(
+                responseStatus.get("jurisdiction").asText(),
+                responseStatus.get("is_correct").asBoolean(),
+                responseStatus.get("error_description").asText()
+            );
+
+            assertThat(status)
+                .withFailMessage(failMessage, status.jurisdiction, status.errorDescription)
+                .isEqualToComparingFieldByField(
+                    new JurisdictionConfigurationStatus(status.jurisdiction, true)
+                );
+            }
         );
     }
 }

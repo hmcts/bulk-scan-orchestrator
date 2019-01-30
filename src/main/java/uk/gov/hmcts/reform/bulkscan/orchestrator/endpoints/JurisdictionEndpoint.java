@@ -7,18 +7,15 @@ import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.actuate.endpoint.annotation.Selector;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.out.JurisdictionConfigurationStatus;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.Credential;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.JurisdictionToUserMapping;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.NoUserConfiguredException;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 
-import java.util.Map;
-import java.util.Optional;
+import java.util.List;
 import java.util.stream.Collectors;
-
-import static java.util.Map.Entry;
 
 @Component
 @Endpoint(id = "jurisdictions")
@@ -39,32 +36,30 @@ public class JurisdictionEndpoint {
     }
 
     @ReadOperation
-    public Map<String, HttpStatus> jurisdictions() {
+    public List<JurisdictionConfigurationStatus> jurisdictions() {
         return jurisdictionMapping.getUsers()
             .entrySet()
             .stream()
-            .collect(Collectors.toMap(
-                Entry::getKey,
-                entry -> checkCredentials(entry.getKey(), entry.getValue())
-            ));
+            .map(entry -> checkCredentials(entry.getKey(), entry.getValue()))
+            .collect(Collectors.toList());
     }
 
     @ReadOperation
-    public HttpStatus jurisdiction(@Selector String jurisdiction) {
+    public JurisdictionConfigurationStatus jurisdiction(@Selector String jurisdiction) {
         try {
             return checkCredentials(jurisdiction, jurisdictionMapping.getUser(jurisdiction));
         } catch (NoUserConfiguredException exception) {
-            return HttpStatus.UNAUTHORIZED;
+            return new JurisdictionConfigurationStatus(jurisdiction, false, exception.getMessage());
         }
     }
 
-    private HttpStatus checkCredentials(String jurisdiction, Credential credential) {
+    private JurisdictionConfigurationStatus checkCredentials(String jurisdiction, Credential credential) {
         try {
             idamClient.authenticateUser(credential.getUsername(), credential.getPassword());
 
             log.debug("Successful authentication");
 
-            return HttpStatus.OK;
+            return new JurisdictionConfigurationStatus(jurisdiction, true);
         } catch (FeignException exception) {
             log.warn(
                 "An error occurred while authenticating {} jurisdiction with {} username",
@@ -73,9 +68,7 @@ public class JurisdictionEndpoint {
                 exception
             );
 
-            // in current state unable to set response code <200 to test such situation
-            // but running manually received `0` status code which crashed the endpoint response itself
-            return Optional.ofNullable(HttpStatus.resolve(exception.status())).orElse(HttpStatus.UNAUTHORIZED);
+            return new JurisdictionConfigurationStatus(jurisdiction, false, exception.getMessage());
         } catch (Exception exception) {
             log.error(
                 "An error occurred while authenticating {} jurisdiction with {} username",
@@ -84,7 +77,7 @@ public class JurisdictionEndpoint {
                 exception
             );
 
-            return HttpStatus.UNAUTHORIZED;
+            return new JurisdictionConfigurationStatus(jurisdiction, false, exception.getMessage());
         }
     }
 }
