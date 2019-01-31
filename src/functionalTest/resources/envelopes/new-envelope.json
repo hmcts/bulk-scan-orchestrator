@@ -5,8 +5,8 @@
   "jurisdiction": "BULKSCAN",
   "classification": "NEW_APPLICATION",
   "zip_file_name": "zip-file-test.zip",
-  "delivery_date": "1970-01-01T00:00:00.000Z",
-  "opening_date": "1970-01-01T00:00:00.000Z",
+  "delivery_date": "1970-01-01T00:00:00Z",
+  "opening_date": "1970-01-01T00:00:00Z",
   "documents": [
   ]
 }

@@ -5,15 +5,15 @@
   "jurisdiction": "BULKSCAN",
   "classification": "NEW_APPLICATION",
   "zip_file_name": "zip-file-test.zip",
-  "delivery_date": "1970-01-01T00:00:00.000Z",
-  "opening_date": "1970-01-01T00:00:00.000Z",
+  "delivery_date": "1970-01-01T00:00:00Z",
+  "opening_date": "1970-01-01T00:00:00Z",
   "documents": [
     {
       "file_name": "certificate1.pdf",
       "control_number": "154565768",
       "type": "other",
       "subtype": null,
-      "scanned_at": "2018-01-01T10:30:00.000Z",
+      "scanned_at": "2018-01-01T10:30:00Z",
       "url": "http://dm-store:4460/documents/ee69aee8-1a33-40dd-9af9-d90da1b104ba"
     }
   ],
