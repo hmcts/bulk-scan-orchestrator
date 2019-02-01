@@ -20,14 +20,14 @@ import java.util.stream.Collectors;
 @Component
 @Endpoint(id = "idam-config-status")
 @EnableConfigurationProperties(JurisdictionToUserMapping.class)
-public class JurisdictionEndpoint {
+public class IdamConfigStatusEndpoint {
 
-    private static final Logger log = LoggerFactory.getLogger(JurisdictionEndpoint.class);
+    private static final Logger log = LoggerFactory.getLogger(IdamConfigStatusEndpoint.class);
 
     private final JurisdictionToUserMapping jurisdictionMapping;
     private final IdamClient idamClient;
 
-    public JurisdictionEndpoint(
+    public IdamConfigStatusEndpoint(
         JurisdictionToUserMapping mapping,
         IdamClient idamClient
     ) {

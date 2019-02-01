@@ -14,7 +14,7 @@ import java.io.IOException;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @TestPropertySource("classpath:application.conf")
-public class JurisdictionAuthenticationTest {
+public class IdamConfigStatusTest {
 
     private static final String TEST_URL = ConfigFactory.load().getString("test-url");
 

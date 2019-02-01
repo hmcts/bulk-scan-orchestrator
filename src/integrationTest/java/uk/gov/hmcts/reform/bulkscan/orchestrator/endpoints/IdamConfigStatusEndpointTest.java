@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 @IntegrationTest
 @AutoConfigureMockMvc
-public class JurisdictionEndpointTest {
+public class IdamConfigStatusEndpointTest {
 
     @Autowired
     private MockMvc mvc;

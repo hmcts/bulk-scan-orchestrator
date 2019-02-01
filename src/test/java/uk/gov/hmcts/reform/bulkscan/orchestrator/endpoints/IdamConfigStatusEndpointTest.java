@@ -26,7 +26,7 @@ import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.BDDMockito.willThrow;
 
 @ExtendWith(MockitoExtension.class)
-public class JurisdictionEndpointTest {
+public class IdamConfigStatusEndpointTest {
 
     private static final String VALID_JURISDICTION = "jurisdiction";
 
@@ -54,14 +54,14 @@ public class JurisdictionEndpointTest {
     @Mock
     private IdamClient idamClient;
 
-    private JurisdictionEndpoint endpoint;
+    private IdamConfigStatusEndpoint endpoint;
 
     @BeforeEach
     public void setUp() {
         JurisdictionToUserMapping mapping = new JurisdictionToUserMapping();
         mapping.setUsers(USERS);
 
-        endpoint = new JurisdictionEndpoint(mapping, idamClient);
+        endpoint = new IdamConfigStatusEndpoint(mapping, idamClient);
     }
 
     @DisplayName("Should respond OK for specific jurisdiction which is correctly configured")
