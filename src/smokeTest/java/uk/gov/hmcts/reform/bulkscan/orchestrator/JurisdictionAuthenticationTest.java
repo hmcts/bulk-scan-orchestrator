@@ -21,7 +21,6 @@ public class JurisdictionAuthenticationTest {
     @DisplayName("Each configured jurisdiction should have valid credentials")
     @Test
     public void each_jurisdiction_should_have_valid_credentials() throws IOException {
-        String failMessage = "Misconfigured %s jurisdiction, error description: %s. Check the logs for more details";
         byte[] response = RestAssured
             .given()
             .relaxedHTTPSValidation()
@@ -39,11 +38,13 @@ public class JurisdictionAuthenticationTest {
                 responseStatus.get("error_description").asText()
             );
 
-            assertThat(status)
-                .withFailMessage(failMessage, status.jurisdiction, status.errorDescription)
-                .isEqualToComparingFieldByField(
-                    new JurisdictionConfigurationStatus(status.jurisdiction, true)
-                );
+            assertThat(status.isCorrect)
+                .withFailMessage(
+                    "Misconfigured %s jurisdiction, error description: %s. Check the logs for more details",
+                    status.jurisdiction,
+                    status.errorDescription
+                )
+                .isTrue();
             }
         );
     }
