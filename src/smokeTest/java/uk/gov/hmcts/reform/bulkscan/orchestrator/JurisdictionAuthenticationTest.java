@@ -26,7 +26,7 @@ public class JurisdictionAuthenticationTest {
             .relaxedHTTPSValidation()
             .baseUri(TEST_URL)
             .header(SyntheticHeaders.SYNTHETIC_TEST_SOURCE, "Bulk Scan Orchestrator smoke test")
-            .get("/jurisdictions")
+            .get("/idam-config-status")
             .andReturn()
             .asByteArray();
         ObjectMapper mapper = new ObjectMapper();

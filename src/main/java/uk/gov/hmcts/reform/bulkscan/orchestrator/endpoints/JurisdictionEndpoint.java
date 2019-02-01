@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-@Endpoint(id = "jurisdictions")
+@Endpoint(id = "idam-config-status")
 @EnableConfigurationProperties(JurisdictionToUserMapping.class)
 public class JurisdictionEndpoint {
 

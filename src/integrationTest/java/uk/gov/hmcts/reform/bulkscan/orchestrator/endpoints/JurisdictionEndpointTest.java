@@ -26,7 +26,7 @@ public class JurisdictionEndpointTest {
         ObjectMapper mapper = new ObjectMapper();
 
         byte[] response = mvc
-            .perform(get("/jurisdictions"))
+            .perform(get("/idam-config-status"))
             .andReturn()
             .getResponse()
             .getContentAsByteArray();
