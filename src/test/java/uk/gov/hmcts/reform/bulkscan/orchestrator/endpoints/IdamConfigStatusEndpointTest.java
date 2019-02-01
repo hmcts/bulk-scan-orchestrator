@@ -64,25 +64,25 @@ public class IdamConfigStatusEndpointTest {
         endpoint = new IdamConfigStatusEndpoint(mapping, idamClient);
     }
 
-    @DisplayName("Should respond OK for specific jurisdiction which is correctly configured")
+    @DisplayName("Should respond with status message stating given jurisdiction is correctly configured")
     @Test
-    public void should_respond_200_when_specific_jurisdiction_is_correctly_configured() {
+    public void should_respond_accordingly_for_correct_jurisdiction_config() {
         willReturn("token").given(idamClient).authenticateUser("username", "password");
 
         assertThat(endpoint.jurisdiction(VALID_JURISDICTION)).isEqualToComparingFieldByField(VALID_RESPONSE);
     }
 
-    @DisplayName("Should respond UNAUTHORISED for specific jurisdiction which is incorrectly configured")
+    @DisplayName("Should respond with expected status given jurisdiction is configured incorrectly")
     @Test
-    public void should_respond_401_when_specific_jurisdiction_is_incorrectly_configured() {
+    public void should_respond_accordingly_for_incorrect_jurisdiction_config() {
         willThrow(new RuntimeException("oh no")).given(idamClient).authenticateUser("user", "pass");
 
         assertThat(endpoint.jurisdiction(INVALID_JURISDICTION)).isEqualToComparingFieldByField(INVALID_RESPONSE);
     }
 
-    @DisplayName("Should respond UNAUTHORISED for specific jurisdiction which does not exist")
+    @DisplayName("Should respond with expected status given jurisdiction does not exist in the configuration setup")
     @Test
-    public void should_respond_401_when_specific_jurisdiction_does_not_exist() {
+    public void should_respond_accordingly_for_jurisdiction_which_is_not_present_in_config() {
         assertThat(endpoint.jurisdiction("not give access")).isEqualToComparingFieldByField(
             new JurisdictionConfigurationStatus(
                 "not give access",
@@ -93,9 +93,9 @@ public class IdamConfigStatusEndpointTest {
         verify(idamClient, never()).authenticateUser(anyString(), anyString());
     }
 
-    @DisplayName("Should respond statuses of all configured jurisdictions")
+    @DisplayName("Should respond with all configured jurisdictions and not crash with exceptions")
     @Test
-    public void should_respond_without_failure_when_requesting_info_on_all_jursidictions() {
+    public void should_respond_without_failure_when_requesting_info_on_all_jurisdictions() {
         willReturn("token").given(idamClient).authenticateUser("username", "password");
         willThrow(new RuntimeException("oh no")).given(idamClient).authenticateUser("user", "pass");
 
@@ -104,9 +104,9 @@ public class IdamConfigStatusEndpointTest {
             .containsExactly(VALID_RESPONSE, INVALID_RESPONSE);
     }
 
-    @DisplayName("Should respond with specific status code extracted from feign client exception")
+    @DisplayName("Should respond with status message for given jurisdiction in case FeignException is received")
     @Test
-    public void should_respond_with_specific_status_code_when_extracted_from_feign_client() {
+    public void should_respond_as_incorrect_setup_when_feign_client_exception_is_received() {
         FeignException exception = FeignException
             .errorStatus("method key", Response
                 .builder()
