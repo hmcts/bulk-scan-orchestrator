@@ -91,16 +91,26 @@ public class EnvelopeParserTest {
         assertThat(result).isEqualToComparingFieldByFieldRecursively(envelope);
 
         assertThat(result.documents)
-            .extracting("fileName", "controlNumber", "type", "subtype", "scannedAt", "url")
+            .extracting(
+                doc -> tuple(
+                    doc.fileName,
+                    doc.controlNumber,
+                    doc.type,
+                    doc.subtype,
+                    doc.scannedAt,
+                    doc.url)
+            )
             .containsOnly(
-                tuple("doc1_file_name",
+                tuple(
+                    "doc1_file_name",
                     "doc1_control_number",
                     "doc1_type",
                     "doc1_subtype",
                     scannedAt,
                     "doc1_url"
                 ),
-                tuple("doc2_file_name",
+                tuple(
+                    "doc2_file_name",
                     "doc2_control_number",
                     "doc2_type",
                     null,
