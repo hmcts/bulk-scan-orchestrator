@@ -54,9 +54,6 @@ locals {
   s2s_vault_url     = "https://s2s-${local.local_env}.vault.azure.net/"
 
   core_app_settings = {
-    LOGBACK_REQUIRE_ALERT_LEVEL = "false"
-    LOGBACK_REQUIRE_ERROR_CODE  = "false"
-
     S2S_URL     = "${local.s2s_url}"
     S2S_NAME    = "${var.s2s_name}"
     S2S_SECRET  = "${data.azurerm_key_vault_secret.s2s_secret.value}"
