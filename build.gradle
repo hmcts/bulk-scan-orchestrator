@@ -160,7 +160,7 @@ def versions = [
   reformLogging   : '3.0.3',
   springBoot      : springBoot.class.package.implementationVersion,
   springfoxSwagger: '2.9.2',
-  junit           : '5.3.1'
+  junit           : '5.3.2'
 ]
 
 dependencyManagement {
