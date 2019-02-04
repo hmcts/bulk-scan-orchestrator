@@ -57,7 +57,7 @@ public class IdamConfigStatusEndpoint {
         try {
             idamClient.authenticateUser(credential.getUsername(), credential.getPassword());
 
-            log.debug("Successful authentication");
+            log.debug("Successful authentication of {} jurisdiction", jurisdiction);
 
             return new JurisdictionConfigurationStatus(jurisdiction, true);
         } catch (FeignException exception) {
