@@ -10,14 +10,6 @@
   </suppress>
 
   <suppress>
-    <notes><![CDATA[
-      Introduced via kotlin stdlib. Kotlin only used in integration tests
-    ]]></notes>
-    <gav regex="true">^org\.jetbrains:annotations:13\.0$</gav>
-    <cve>CVE-2017-8316</cve>
-  </suppress>
-
-  <suppress>
     <notes><![CDATA[No fix is available]]></notes>
     <gav regex="true">^org\.springframework\.security:spring-security-rsa:1\.0\.7\.RELEASE$</gav>
     <cve>CVE-2011-2731</cve>
