@@ -29,23 +29,23 @@ public class SupplementaryEvidenceMapperTest {
         assertThat(result.evidenceHandled).isEqualTo("No");
         assertThat(result.scannedDocuments).hasSize(5);
         assertThat(result.scannedDocuments)
-            .extracting(doc ->
+            .extracting(ccdDoc ->
                 tuple(
-                    doc.value.fileName,
-                    doc.value.controlNumber,
-                    doc.value.type,
-                    doc.value.subtype,
-                    doc.value.url.documentUrl,
-                    doc.value.scannedDate
+                    ccdDoc.value.fileName,
+                    ccdDoc.value.controlNumber,
+                    ccdDoc.value.type,
+                    ccdDoc.value.subtype,
+                    ccdDoc.value.url.documentUrl,
+                    ccdDoc.value.scannedDate
                 ))
-            .containsExactlyElementsOf(envelope.documents.stream().map(doc ->
+            .containsExactlyElementsOf(envelope.documents.stream().map(envDoc ->
                 tuple(
-                    doc.fileName,
-                    doc.controlNumber,
-                    doc.type,
-                    doc.subtype,
-                    doc.url,
-                    toLocalDateTime(doc.scannedAt)
+                    envDoc.fileName,
+                    envDoc.controlNumber,
+                    envDoc.type,
+                    envDoc.subtype,
+                    envDoc.url,
+                    toLocalDateTime(envDoc.scannedAt)
                 )).collect(toList())
             );
     }
