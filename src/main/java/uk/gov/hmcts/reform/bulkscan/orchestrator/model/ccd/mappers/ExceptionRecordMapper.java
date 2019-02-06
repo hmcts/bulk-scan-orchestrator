@@ -10,15 +10,16 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.OcrDa
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentMapper.getLocalDateTime;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentMapper.mapDocuments;
 
 @Component
-public class ExceptionRecordMapper implements ModelMapper<ExceptionRecord> {
+public class ExceptionRecordMapper {
 
     public ExceptionRecordMapper() {
         // empty mapper construct
     }
 
-    @Override
     public ExceptionRecord mapEnvelope(Envelope envelope) {
         return new ExceptionRecord(
             envelope.classification.name(),

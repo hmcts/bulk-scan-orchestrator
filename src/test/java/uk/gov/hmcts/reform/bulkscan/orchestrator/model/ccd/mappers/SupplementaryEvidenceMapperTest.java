@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class SupplementaryEvidenceMapperTest {
 
-    private static final ModelMapper<SupplementaryEvidence> mapper = new SupplementaryEvidenceMapper();
+    private static final SupplementaryEvidenceMapper mapper = new SupplementaryEvidenceMapper();
 
     @Test
     public void from_envelope_maps_all_fields_correctly() {
