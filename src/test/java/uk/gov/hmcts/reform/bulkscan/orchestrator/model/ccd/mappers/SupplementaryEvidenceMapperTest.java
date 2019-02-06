@@ -2,9 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
 import org.junit.Test;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.SupplementaryEvidence;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
 import java.time.Instant;
@@ -13,6 +11,7 @@ import java.time.ZoneId;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 public class SupplementaryEvidenceMapperTest {
 
@@ -21,55 +20,34 @@ public class SupplementaryEvidenceMapperTest {
     @Test
     public void from_envelope_maps_all_fields_correctly() {
         // given
-        Envelope envelope = SampleData.envelope(1);
+        Envelope envelope = SampleData.envelope(5);
 
         // when
         SupplementaryEvidence result = mapper.mapEnvelope(envelope);
 
         // then
         assertThat(result.evidenceHandled).isEqualTo("No");
-        assertThat(result.scannedDocuments).hasSize(1);
-
-        Document envelopeDoc = envelope.documents.get(0);
-        ScannedDocument resultDoc = result.scannedDocuments.get(0).value;
-
-        assertThat(resultDoc.controlNumber).isEqualTo(envelopeDoc.controlNumber);
-        assertThat(resultDoc.fileName).isEqualTo(envelopeDoc.fileName);
-        assertThat(resultDoc.type).isEqualTo(envelopeDoc.type);
-        assertThat(resultDoc.url.documentUrl).isEqualTo(envelopeDoc.url);
-        assertThat(resultDoc.scannedDate).isEqualTo(toLocalDateTime(envelopeDoc.scannedAt));
-    }
-
-    @Test
-    public void from_envelope_returns_supplementary_evidence_with_all_documents() {
-        // given
-        int numberOfDocuments = 12;
-        Envelope envelope = SampleData.envelope(12);
-
-        // when
-        SupplementaryEvidence result = mapper.mapEnvelope(envelope);
-
-        // then
-        assertThat(result.scannedDocuments.size()).isEqualTo(numberOfDocuments);
+        assertThat(result.scannedDocuments).hasSize(5);
         assertThat(result.scannedDocuments)
-            .extracting(doc -> doc.value.fileName)
-            .containsExactlyElementsOf(envelope.documents.stream().map(d -> d.fileName).collect(toList()));
-    }
-
-    @Test
-    public void from_envelope_returns_supplementary_evidence_with_subtype_value_in_documents() {
-        // given
-        int numberOfDocuments = 3;
-        Envelope envelope = SampleData.envelope(3);
-
-        // when
-        SupplementaryEvidence result = mapper.mapEnvelope(envelope);
-
-        // then
-        assertThat(result.scannedDocuments).hasSize(numberOfDocuments);
-        assertThat(result.scannedDocuments)
-            .extracting(doc -> doc.value.subtype)
-            .containsExactlyElementsOf(envelope.documents.stream().map(d -> d.subtype).collect(toList()));
+            .extracting(ccdDoc ->
+                tuple(
+                    ccdDoc.value.fileName,
+                    ccdDoc.value.controlNumber,
+                    ccdDoc.value.type,
+                    ccdDoc.value.subtype,
+                    ccdDoc.value.url.documentUrl,
+                    ccdDoc.value.scannedDate
+                ))
+            .containsExactlyElementsOf(envelope.documents.stream().map(envDoc ->
+                tuple(
+                    envDoc.fileName,
+                    envDoc.controlNumber,
+                    envDoc.type,
+                    envDoc.subtype,
+                    envDoc.url,
+                    toLocalDateTime(envDoc.scannedAt)
+                )).collect(toList())
+            );
     }
 
     @Test
