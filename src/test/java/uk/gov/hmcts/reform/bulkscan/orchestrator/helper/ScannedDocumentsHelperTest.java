@@ -21,7 +21,7 @@ public class ScannedDocumentsHelperTest {
         List<Document> documents = ScannedDocumentsHelper.getDocuments(caseDetails);
 
         assertThat(documents)
-            .extracting("controlNumber")
+            .extracting(doc -> doc.controlNumber)
             .containsExactlyInAnyOrder("1000", "2000", "3000");
     }
 
