@@ -28,7 +28,7 @@ public class SupplementaryEvidenceMapperTest {
 
         // then
         assertThat(result.evidenceHandled).isEqualTo("No");
-        assertThat(result.scannedDocuments.size()).isEqualTo(1);
+        assertThat(result.scannedDocuments).hasSize(1);
 
         Document envelopeDoc = envelope.documents.get(0);
         ScannedDocument resultDoc = result.scannedDocuments.get(0).value;
@@ -66,7 +66,7 @@ public class SupplementaryEvidenceMapperTest {
         SupplementaryEvidence result = mapper.mapEnvelope(envelope);
 
         // then
-        assertThat(result.scannedDocuments.size()).isEqualTo(numberOfDocuments);
+        assertThat(result.scannedDocuments).hasSize(numberOfDocuments);
         assertThat(result.scannedDocuments)
             .extracting(doc -> doc.value.subtype)
             .containsExactlyElementsOf(envelope.documents.stream().map(d -> d.subtype).collect(toList()));
