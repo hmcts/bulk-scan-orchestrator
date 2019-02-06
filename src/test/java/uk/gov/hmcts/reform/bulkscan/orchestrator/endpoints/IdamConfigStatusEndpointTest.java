@@ -40,17 +40,6 @@ public class IdamConfigStatusEndpointTest {
         INVALID_JURISDICTION, false, "oh no"
     );
 
-    private static final Map<String, Map<String, String>> USERS = ImmutableMap.of(
-        VALID_JURISDICTION, ImmutableMap.of(
-            "username", "username",
-            "password","password"
-        ),
-        INVALID_JURISDICTION, ImmutableMap.of(
-            "username", "user",
-            "password", "pass"
-        )
-    );
-
     @Mock
     private IdamClient idamClient;
 
@@ -58,8 +47,18 @@ public class IdamConfigStatusEndpointTest {
 
     @BeforeEach
     public void setUp() {
+        Map<String, Map<String, String>> users = ImmutableMap.of(
+            VALID_JURISDICTION, ImmutableMap.of(
+                "username", "username",
+                "password","password"
+            ),
+            INVALID_JURISDICTION, ImmutableMap.of(
+                "username", "user",
+                "password", "pass"
+            )
+        );
         JurisdictionToUserMapping mapping = new JurisdictionToUserMapping();
-        mapping.setUsers(USERS);
+        mapping.setUsers(users);
 
         endpoint = new IdamConfigStatusEndpoint(mapping, idamClient);
     }
