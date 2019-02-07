@@ -39,7 +39,11 @@ class EnvelopeMessager(@Autowired client: QueueClient) : IQueueClient by client 
         message.messageId = UUID.randomUUID().toString()
         message.body = updateCaseData.toString().toByteArray()
 
-        logger.info("Sending message to queue for the Case ID {} for updating the case", caseRef)
+        logger.info(
+            "Sending message to queue for the Case ID {}:\n {}",
+            caseRef,
+            updateCaseData.toString()
+        )
         send(message)
     }
 

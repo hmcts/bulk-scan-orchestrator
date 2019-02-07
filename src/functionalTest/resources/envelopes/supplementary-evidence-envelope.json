@@ -1,7 +1,7 @@
 {
   "id": "0192",
-  "case_ref": "1539860706648396",
-  "po_box": "BULKSCAN PO BOX",
+  "case_ref": "==THIS WILL BE OVERWRITTEN IN TEST==",
+  "po_box": "==THIS WILL BE OVERWRITTEN IN TEST==",
   "jurisdiction": "BULKSCAN",
   "classification": "SUPPLEMENTARY_EVIDENCE",
   "zip_file_name": "zip-file-test-updated.zip",
@@ -14,7 +14,7 @@
       "type": "other",
       "subtype": null,
       "scanned_at": "2018-01-01T11:20:00.000Z",
-      "url": "http://dm-store:4460/documents/ee69aee8-1a33-40dd-9af9-d90da1b104babc"
+      "url": "==THIS WILL BE OVERWRITTEN IN TEST=="
     }
   ]
 }
