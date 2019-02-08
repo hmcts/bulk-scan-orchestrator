@@ -59,7 +59,7 @@ public class SupplementaryEvidenceMapperTest {
     }
 
     @Test
-    public void should_not_add_document_from_envelope_if_its_already_present() {
+    public void should_not_add_document_from_envelope_if_document_with_the_same_url_is_already_present_in_case() {
         // given
         List<Document> existingDocs =
             asList(
