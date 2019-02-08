@@ -33,12 +33,12 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import u.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.PortWaiter.waitFor
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_REF
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_TYPE_BULK_SCAN
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.JURIDICTION
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.USER_ID
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.IntegrationTest
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.PortWaiter.waitFor
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.CallbackRequestBuilder
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails
