@@ -1,0 +1,63 @@
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
+
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.microsoft.azure.servicebus.Message;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.util.MessageSender;
+
+import java.util.concurrent.TimeUnit;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static org.awaitility.Awaitility.await;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.fileContentAsString;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_EVENT_URL;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.GET_CASE_URL;
+
+@ExtendWith(SpringExtension.class)
+@IntegrationTest
+class SupplementaryEvidenceCreatorTest {
+
+    private static final Message mockMessage = new Message(fileContentAsString(
+        "servicebus/message/supplementary-evidence-example.json"
+    ));
+    private static final String mockResponse = fileContentAsString("ccd/response/sample-case.json");
+
+    @Autowired
+    @Lazy
+    private WireMockServer server;
+
+    @Autowired
+    @Lazy
+    private MessageSender messageSender;
+
+    @DisplayName("Should call ccd to attach supplementary evidence for caseworker")
+    @Test
+    void should_call_ccd_to_attach_supplementary_evidence_for_caseworker() {
+        // given
+        new WireMock(server.port()).register(get(GET_CASE_URL).willReturn(aResponse().withBody(mockResponse)));
+
+        // when
+        messageSender.send(mockMessage);
+
+        // then
+        await()
+            .atMost(60, TimeUnit.SECONDS)
+            .pollInterval(2, TimeUnit.SECONDS)
+            .ignoreExceptions()
+            .until(() -> {
+                server.verify(postRequestedFor(urlPathEqualTo(CASE_EVENT_URL)));
+
+                return true;
+            });
+    }
+}
