@@ -27,10 +27,10 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.GET_C
 @IntegrationTest
 class SupplementaryEvidenceCreatorTest {
 
-    private static final Message mockMessage = new Message(fileContentAsString(
+    private static final Message MOCK_MESSAGE = new Message(fileContentAsString(
         "servicebus/message/supplementary-evidence-example.json"
     ));
-    private static final String mockResponse = fileContentAsString("ccd/response/sample-case.json");
+    private static final String MOCK_RESPONSE = fileContentAsString("ccd/response/sample-case.json");
 
     @Autowired
     @Lazy
@@ -44,10 +44,10 @@ class SupplementaryEvidenceCreatorTest {
     @Test
     void should_call_ccd_to_attach_supplementary_evidence_for_caseworker() {
         // given
-        new WireMock(server.port()).register(get(GET_CASE_URL).willReturn(aResponse().withBody(mockResponse)));
+        new WireMock(server.port()).register(get(GET_CASE_URL).willReturn(aResponse().withBody(MOCK_RESPONSE)));
 
         // when
-        messageSender.send(mockMessage);
+        messageSender.send(MOCK_MESSAGE);
 
         // then
         await()
