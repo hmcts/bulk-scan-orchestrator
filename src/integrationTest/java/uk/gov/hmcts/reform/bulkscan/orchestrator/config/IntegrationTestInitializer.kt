@@ -24,7 +24,7 @@ import java.util.UUID
 @Import(Application::class)
 @Configuration
 @Profile("integration", "nosb") // no servicebus queue handler registration
-class IntegrationTestConfig : ApplicationContextInitializer<ConfigurableApplicationContext> {
+class IntegrationTestInitializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
     override fun initialize(ctx: ConfigurableApplicationContext) {
         setProperty("wiremock.port", findAvailableTcpPort().toString())
     }
