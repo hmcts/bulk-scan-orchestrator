@@ -16,12 +16,12 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_REF
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_TYPE_BULK_SCAN
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_TYPE_EXCEPTION_RECORD
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.getCaseUrl
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.IntegrationTest
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_BULK_SCAN
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_EXCEPTION_RECORD
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.getCaseUrl
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest
 import java.io.File
 import java.util.concurrent.TimeUnit
 

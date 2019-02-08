@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config
+package uk.gov.hmcts.reform.bulkscan.orchestrator.config
 
 /**
  * This Singleton contains all the environmental items needed in the integration test profile.

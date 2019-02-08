@@ -1,10 +1,9 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config
+package uk.gov.hmcts.reform.bulkscan.orchestrator.config
 
 import com.github.tomakehurst.wiremock.common.Slf4jNotifier
 import com.github.tomakehurst.wiremock.core.Options
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.microsoft.azure.servicebus.IMessageHandler
-import com.microsoft.azure.servicebus.QueueClient
 import org.mockito.Mockito.mock
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.ApplicationContextInitializer
