@@ -18,11 +18,26 @@
   </suppress>
 
   <suppress>
+    <notes><![CDATA[No fix is available]]></notes>
+    <gav regex="true">^org\.springframework\.security:spring-security-rsa:1\.0\.7\.RELEASE$</gav>
+    <cve>CVE-2011-2731</cve>
+    <cve>CVE-2011-2732</cve>
+    <cve>CVE-2012-5055</cve>
+    <cve>CVE-2018-1260</cve>
+  </suppress>
+
+  <suppress>
     <notes><![CDATA[
       used in the integration tests.
     ]]></notes>
-    <filePath regex="true">^.*groovy.*-2\.5\.4\.jar$</filePath>
+    <filePath regex="true">^.*groovy.*-2\.5\.5\.jar$</filePath>
     <cve>CVE-2016-6497</cve>
+  </suppress>
+
+  <suppress>
+    <notes><![CDATA[No fix is availabel]]></notes>
+    <gav regex="true">^com\.sun\.jersey\.contribs:jersey-apache-client4:1\.19\.1$</gav>
+    <cve>CVE-2006-0550</cve>
   </suppress>
 
   <!-- this is for the TEST jar wiremock-standalone -->
@@ -36,27 +51,11 @@
     <cve>CVE-2017-7657</cve>
     <cve>CVE-2017-7658</cve>
     <cve>CVE-2017-9735</cve>
-    <cve>CVE-2018-5968</cve>
-    <cve>CVE-2018-7489</cve>
-    <cve>CVE-2018-10237</cve><!-- shaded guava dependency v20.0 -->
+    <cve>CVE-2018-10237</cve>
     <cve>CVE-2018-1000873</cve>
-    <!-- Jackson-related vulnerabilities have been solved since version 2.9.7,
-     but the latest versions of some of our dependencies still use older versions of this lib -->
+    <cve>CVE-2018-12536</cve>
+    <!-- shaded jackson dependency. nothing to do here. please review on next release -->
     <cpe>cpe:/a:fasterxml:jackson-databind</cpe>
   </suppress>
 
-  <suppress>
-    <notes><![CDATA[
-      <!-- The library has vulnerabilities up to version 2.9.6 and some of our dependencies
-      still use older versions in their newest versions
-    ]]></notes>
-    <gav regex="true">^com\.fasterxml\.jackson\.core:jackson-databind:.*$</gav>
-    <cpe>cpe:/a:fasterxml:jackson-databind</cpe>
-  </suppress>
-
-  <suppress>
-    <notes>
-      <![CDATA[ slf4j only has a beta version released with the 'fix', looks like lots of changes in it... ]]></notes>
-    <cve>CVE-2018-8088</cve>
-  </suppress>
 </suppressions>
