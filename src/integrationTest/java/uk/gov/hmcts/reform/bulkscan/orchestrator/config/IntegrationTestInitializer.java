@@ -10,9 +10,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.MessageSender;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IMessageOperations;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.ProcessedEnvelopeNotifier;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.util.MessageSender;
 
 import java.util.UUID;
 

@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_BU
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_EXCEPTION_RECORD
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.GET_CASE_URL
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest
+import uk.gov.hmcts.reform.bulkscan.orchestrator.util.MessageSender
 import java.io.File
 import java.util.concurrent.TimeUnit
 

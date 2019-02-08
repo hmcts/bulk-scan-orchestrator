@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.config
+package uk.gov.hmcts.reform.bulkscan.orchestrator.util
 
 import org.awaitility.Awaitility.await
 import java.net.Socket

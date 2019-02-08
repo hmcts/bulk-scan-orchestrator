@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers
+package uk.gov.hmcts.reform.bulkscan.orchestrator.util
 
 import com.microsoft.azure.servicebus.IMessageHandler
 import com.microsoft.azure.servicebus.Message
