@@ -9,7 +9,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.SupplementaryEvidence;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.SupplementaryEvidenceMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
@@ -45,10 +44,10 @@ public class AttachDocsToSupplementaryEvidenceTest {
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
 
-    private static final SupplementaryEvidenceMapper mapper = new SupplementaryEvidenceMapper();
+    private SupplementaryEvidenceMapper mapper = mock(SupplementaryEvidenceMapper.class);
 
     @InjectMocks
-    private EventPublisher eventPublisher = new AttachDocsToSupplementaryEvidence(mapper);
+    private AttachDocsToSupplementaryEvidence eventPublisher = new AttachDocsToSupplementaryEvidence(mapper);
 
     @Before
     public void setUp() {
@@ -59,6 +58,7 @@ public class AttachDocsToSupplementaryEvidenceTest {
 
     @Test
     public void createSupplementaryEvidence_starts_and_submits_event() {
+        // given
         String eventToken = "token123";
 
         StartEventResponse startEventResponse = mock(StartEventResponse.class);
@@ -76,27 +76,10 @@ public class AttachDocsToSupplementaryEvidenceTest {
 
         Envelope envelope = SampleData.envelope(2);
 
+        // when
         eventPublisher.publish(envelope, SampleData.BULK_SCANNED_CASE_TYPE);
 
-        verifyEventStarted(envelope);
-        verifyEventSubmitted(envelope, eventToken);
-    }
-
-    private void assertCaseDataContentHasRightData(
-        CaseDataContent caseDataContent,
-        String eventToken,
-        Envelope envelope
-    ) {
-        assertThat(caseDataContent.getEventToken()).isEqualTo(eventToken);
-        assertThat(caseDataContent.getEvent().getId()).isEqualTo(EVENT_TYPE_ID);
-        assertThat(caseDataContent.getEvent().getSummary()).isEqualTo("Attach scanned documents");
-
-        SupplementaryEvidence supplementaryEvidence = mapper.mapEnvelope(envelope);
-
-        assertThat(caseDataContent.getData()).isEqualToComparingFieldByFieldRecursively(supplementaryEvidence);
-    }
-
-    private void verifyEventStarted(Envelope envelope) {
+        // then
         verify(coreCaseDataApi).startEventForCaseWorker(
             USER_TOKEN,
             SERVICE_TOKEN,
@@ -106,11 +89,7 @@ public class AttachDocsToSupplementaryEvidenceTest {
             envelope.caseRef,
             EVENT_TYPE_ID
         );
-    }
-
-    private void verifyEventSubmitted(Envelope envelope, String eventToken) {
-        ArgumentCaptor<CaseDataContent> caseDataContentCaptor =
-            ArgumentCaptor.forClass(CaseDataContent.class);
+        ArgumentCaptor<CaseDataContent> caseDataContentCaptor = ArgumentCaptor.forClass(CaseDataContent.class);
 
         verify(coreCaseDataApi).submitEventForCaseWorker(
             eq(USER_TOKEN),
@@ -123,6 +102,12 @@ public class AttachDocsToSupplementaryEvidenceTest {
             caseDataContentCaptor.capture()
         );
 
-        assertCaseDataContentHasRightData(caseDataContentCaptor.getValue(), eventToken, envelope);
+        verify(mapper).map(emptyList(), envelope.documents);
+
+        CaseDataContent caseDataContent = caseDataContentCaptor.getValue();
+        assertThat(caseDataContent.getEventToken()).isEqualTo(eventToken);
+        assertThat(caseDataContent.getEvent().getId()).isEqualTo(EVENT_TYPE_ID);
+        assertThat(caseDataContent.getEvent().getSummary()).isEqualTo("Attach scanned documents");
     }
+
 }
