@@ -45,31 +45,25 @@ public class SupplementaryEvidenceTest {
     @Autowired
     private EnvelopeMessager envelopeMessager;
 
-    private CaseDetails caseDetails;
+    private CaseDetails caseDetails; // TODO: remove
 
-    private List<ScannedDocument> updatedScannedDocuments;
-
-    private String dmUrl;
+    private List<ScannedDocument> updatedScannedDocuments; // TODO: remove
 
     @Autowired
     private DocumentManagementUploadService dmUploadService;
 
-    private Envelope newEnvelope;
-    private UUID randomPoBox;
+    private Envelope newEnvelope; // TODO: remove
+    private UUID randomPoBox; // TODO: remove
 
     @BeforeEach
     public void setup() {
-
-        dmUrl = dmUploadService.uploadToDmStore(
-            "Evidence2.pdf",
-            "documents/supplementary-evidence.pdf"
-        );
         randomPoBox = UUID.randomUUID();
     }
 
     @Test
     public void should_attach_supplementary_evidence_to_the_case_with_no_evidence_docs() throws Exception {
         //given
+        String dmUrl = dmUploadService.uploadToDmStore("Evidence2.pdf", "documents/supplementary-evidence.pdf");
         String caseData = SampleData.fileContentAsString("envelopes/new-envelope.json");
         newEnvelope = EnvelopeParser.parse(caseData);
         caseDetails = ccdCaseCreator.createCase(newEnvelope);
@@ -95,7 +89,10 @@ public class SupplementaryEvidenceTest {
     @Test
     public void should_attach_supplementary_evidence_to_the_case_with_existing_evidence_docs() throws Exception {
         //given
-        JSONObject newCaseData = updateEnvelope("envelopes/new-envelope-with-evidence.json", null);
+        String dmUrlOriginal = dmUploadService.uploadToDmStore("original.pdf", "documents/supplementary-evidence.pdf");
+        String dmUrlNew = dmUploadService.uploadToDmStore("new.pdf", "documents/supplementary-evidence.pdf");
+
+        JSONObject newCaseData = updateEnvelope("envelopes/new-envelope-with-evidence.json", null, dmUrlOriginal);
         newEnvelope = EnvelopeParser.parse(newCaseData.toString());
         caseDetails = ccdCaseCreator.createCase(newEnvelope);
 
@@ -104,11 +101,10 @@ public class SupplementaryEvidenceTest {
             "envelopes/supplementary-evidence-envelope.json",
             String.valueOf(caseDetails.getId()),
             randomPoBox,
-            dmUrl
+            dmUrlNew
         );
 
         // then
-        assertThat(dmUrl).isNotNull();
         await("Supplementary evidence is attached to the case in ccd")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.TWO_SECONDS)
@@ -132,29 +128,13 @@ public class SupplementaryEvidenceTest {
         return updatedScannedDocuments.size() == excpectedScannedDocuments && evidenceHandled.equals("No");
     }
 
-    private void verifySupplementaryEvidenceDetailsUpdated(int expectedScannedDocuments) throws JSONException {
-
-        JSONObject updatedCaseData = updateEnvelope(
-            "envelopes/supplementary-evidence-envelope.json",
-            caseDetails.getId()
-        );
-
-        Envelope updatedEnvelope = EnvelopeParser.parse(updatedCaseData.toString());
-        List<ScannedDocument> scannedDocumentList = getScannedDocuments(newEnvelope);
-
-        List<ScannedDocument> scannedDocumentList2 = getScannedDocuments(updatedEnvelope);
-        if (!scannedDocumentList2.isEmpty()) {
-            scannedDocumentList.addAll(scannedDocumentList2);
-        }
-
+    private void verifySupplementaryEvidenceDetailsUpdated(int expectedScannedDocuments) {
         assertThat(updatedScannedDocuments).isNotEmpty();
         assertThat(updatedScannedDocuments.size()).isEqualTo(expectedScannedDocuments);
-        assertThat(scannedDocumentList.size()).isEqualTo(expectedScannedDocuments);
-        assertThat(scannedDocumentList).containsAll(updatedScannedDocuments);
     }
 
     @NotNull
-    private JSONObject updateEnvelope(String fileName, @Nullable Long caseRef) throws JSONException {
+    private JSONObject updateEnvelope(String fileName, @Nullable Long caseRef, String docUrl) throws JSONException {
         String updatedCase = SampleData.fileContentAsString(fileName);
         JSONObject updatedCaseData = new JSONObject(updatedCase);
 
@@ -164,7 +144,7 @@ public class SupplementaryEvidenceTest {
 
         JSONArray documents = updatedCaseData.getJSONArray("documents");
         JSONObject document = (JSONObject) documents.get(0);
-        document.put("url", dmUrl);
+        document.put("url", docUrl);
         return updatedCaseData;
     }
 }
