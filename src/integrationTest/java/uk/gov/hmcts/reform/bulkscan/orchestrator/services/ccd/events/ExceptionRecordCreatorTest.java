@@ -34,9 +34,9 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.GET_C
 @IntegrationTest
 class ExceptionRecordCreatorTest {
 
-    private static final String caseEventTriggerStartUrl = Environment.CASE_EVENT_TRIGGER_START_URL
+    private static final String CASE_EVENT_TRIGGER_START_URL = Environment.CASE_EVENT_TRIGGER_START_URL
         .replace(CASE_TYPE_BULK_SCAN, CASE_TYPE_EXCEPTION_RECORD);
-    private static final String caseSubmitUrl = Environment.CASE_SUBMIT_URL
+    private static final String CASE_SUBMIT_URL = Environment.CASE_SUBMIT_URL
         .replace(CASE_TYPE_BULK_SCAN, CASE_TYPE_EXCEPTION_RECORD);
 
     @Autowired
@@ -52,7 +52,7 @@ class ExceptionRecordCreatorTest {
         WireMock.configureFor(server.port());
 
         givenThat(get(GET_CASE_URL).willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())));
-        givenThat(get(caseEventTriggerStartUrl).willReturn(aResponse().withBody(
+        givenThat(get(CASE_EVENT_TRIGGER_START_URL).willReturn(aResponse().withBody(
             "{\"case_details\":null,\"event_id\":\"eid\",\"token\":\"etoken\"}"
         )));
     }
@@ -67,7 +67,7 @@ class ExceptionRecordCreatorTest {
             .ignoreExceptions()
             .until(() -> {
                 server.verify(getRequestedFor(urlPathEqualTo(GET_CASE_URL)));
-                server.verify(postRequestedFor(urlPathEqualTo(caseSubmitUrl)));
+                server.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
                 return true;
             });
     }
@@ -85,7 +85,7 @@ class ExceptionRecordCreatorTest {
             .atMost(30, TimeUnit.SECONDS)
             .ignoreExceptions()
             .until(() -> {
-                server.verify(postRequestedFor(urlPathEqualTo(caseSubmitUrl)));
+                server.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
 
                 return true;
             });
@@ -100,7 +100,7 @@ class ExceptionRecordCreatorTest {
             .atMost(30, TimeUnit.SECONDS)
             .ignoreExceptions()
             .until(() -> {
-                server.verify(postRequestedFor(urlPathEqualTo(caseSubmitUrl)));
+                server.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
 
                 return true;
             });
@@ -115,7 +115,7 @@ class ExceptionRecordCreatorTest {
             .atMost(30, TimeUnit.SECONDS)
             .ignoreExceptions()
             .until(() -> {
-                server.verify(postRequestedFor(urlPathEqualTo(caseSubmitUrl)));
+                server.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
 
                 return true;
             });
