@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import static java.util.Collections.emptyList;
+
 @Service
 public class CcdCaseCreator {
 
@@ -59,7 +61,7 @@ public class CcdCaseCreator {
                 .summary("create new case")
                 .description("create new case for tests")
                 .build())
-            .data(supplementaryEvidenceMapper.mapEnvelope(envelope))
+            .data(supplementaryEvidenceMapper.map(emptyList(), envelope.documents))
             .build();
     }
 

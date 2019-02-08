@@ -43,8 +43,4 @@ public class Envelope {
         this.documents = documents;
         this.ocrData = ocrData;
     }
-
-    public void addDocuments(List<Document> documents) {
-        this.documents.addAll(documents);
-    }
 }
