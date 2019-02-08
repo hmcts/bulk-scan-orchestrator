@@ -89,8 +89,8 @@ public class SupplementaryEvidenceTest {
     @Test
     public void should_attach_supplementary_evidence_to_the_case_with_existing_evidence_docs() throws Exception {
         //given
-        String dmUrlOriginal = dmUploadService.uploadToDmStore("Evidence_original.pdf", "documents/supplementary-evidence.pdf");
-        String dmUrlNew = dmUploadService.uploadToDmStore("Evidence_new.pdf", "documents/supplementary-evidence.pdf");
+        String dmUrlOriginal = dmUploadService.uploadToDmStore("original.pdf", "documents/supplementary-evidence.pdf");
+        String dmUrlNew = dmUploadService.uploadToDmStore("new.pdf", "documents/supplementary-evidence.pdf");
 
         JSONObject newCaseData = updateEnvelope("envelopes/new-envelope-with-evidence.json", null, dmUrlOriginal);
         newEnvelope = EnvelopeParser.parse(newCaseData.toString());
