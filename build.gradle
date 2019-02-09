@@ -51,12 +51,7 @@ tasks.withType(JavaCompile) {
   options.compilerArgs << "-Xlint:unchecked" << "-Werror"
 }
 
-compileKotlin {
-  kotlinOptions {
-    jvmTarget = "1.8"
-  }
-}
-compileTestKotlin {
+compileFunctionalTestKotlin {
   kotlinOptions {
     jvmTarget = "1.8"
   }
