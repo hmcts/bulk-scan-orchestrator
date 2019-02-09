@@ -185,8 +185,6 @@ dependencyManagement {
 }
 
 dependencies {
-  integrationTestCompile group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib-jdk8'
-  integrationTestCompile group: 'org.jetbrains.kotlin', name: 'kotlin-reflect'
   functionalTestCompile group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib-jdk8'
   functionalTestCompile group: 'org.jetbrains.kotlin', name: 'kotlin-reflect'
 
