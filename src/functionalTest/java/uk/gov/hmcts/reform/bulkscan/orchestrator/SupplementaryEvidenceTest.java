@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static java.util.Collections.emptyList;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -51,9 +52,7 @@ public class SupplementaryEvidenceTest {
     public void should_attach_supplementary_evidence_to_the_case_with_no_evidence_docs() throws Exception {
         //given
         String dmUrl = dmUploadService.uploadToDmStore("Evidence2.pdf", "documents/supplementary-evidence.pdf");
-        String caseData = SampleData.fileContentAsString("envelopes/new-envelope.json");
-        Envelope newEnvelope = EnvelopeParser.parse(caseData);
-        CaseDetails caseDetails = ccdCaseCreator.createCase(newEnvelope);
+        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList());
 
         // when
         envelopeMessager.sendMessageFromFile(
@@ -77,9 +76,10 @@ public class SupplementaryEvidenceTest {
         String dmUrlOriginal = dmUploadService.uploadToDmStore("original.pdf", "documents/supplementary-evidence.pdf");
         String dmUrlNew = dmUploadService.uploadToDmStore("new.pdf", "documents/supplementary-evidence.pdf");
 
+        // TODO: simply create a list of docs instead
         JSONObject newCaseData = updateEnvelope("envelopes/new-envelope-with-evidence.json", null, dmUrlOriginal);
         Envelope newEnvelope = EnvelopeParser.parse(newCaseData.toString());
-        CaseDetails caseDetails = ccdCaseCreator.createCase(newEnvelope);
+        CaseDetails caseDetails = ccdCaseCreator.createCase(newEnvelope.documents);
 
         // when
         envelopeMessager.sendMessageFromFile(
