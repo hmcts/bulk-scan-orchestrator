@@ -48,13 +48,19 @@ public class ScannedDocumentsHelper {
     }
 
     private static Document mapScannedDocument(ScannedDocument scannedDocument) {
-        return new Document(
-            scannedDocument.fileName,
-            scannedDocument.controlNumber,
-            scannedDocument.type,
-            scannedDocument.subtype,
-            scannedDocument.scannedDate.atZone(ZoneId.systemDefault()).toInstant(),
-            scannedDocument.url.documentUrl
-        );
+        if (scannedDocument == null) {
+            return null;
+        } else {
+            return new Document(
+                scannedDocument.fileName,
+                scannedDocument.controlNumber,
+                scannedDocument.type,
+                scannedDocument.subtype,
+                scannedDocument.scannedDate == null
+                    ? null
+                    : scannedDocument.scannedDate.atZone(ZoneId.systemDefault()).toInstant(),
+                scannedDocument.url.documentUrl
+            );
+        }
     }
 }
