@@ -8,11 +8,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_REF
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_TYPE_BULK_SCAN
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.JURIDICTION
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.getCaseUrl
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.IntegrationTest
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURISDICTION
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.GET_CASE_URL
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi
@@ -39,8 +38,8 @@ class CaseRetrievalTest {
 
     @Test
     fun `Should call to retrieve the case from ccd`() {
-        caseRetriever.retrieve(JURIDICTION, CASE_REF)
+        caseRetriever.retrieve(JURISDICTION, CASE_REF)
 
-        server.verify(getRequestedFor(urlEqualTo(getCaseUrl)))
+        server.verify(getRequestedFor(urlEqualTo(GET_CASE_URL)))
     }
 }
