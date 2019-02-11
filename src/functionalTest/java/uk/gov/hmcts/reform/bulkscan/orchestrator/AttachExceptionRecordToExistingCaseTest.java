@@ -94,8 +94,9 @@ public class AttachExceptionRecordToExistingCaseTest {
     @Test
     public void should_attach_exception_record_to_the_existing_case_with_evidence_documents() throws Exception {
         //given
+        // TODO: simply create list of docs in code
         Envelope newEnvelope = updateEnvelope("envelopes/new-envelope-with-evidence.json");
-        CaseDetails caseDetails = ccdCaseCreator.createCase(newEnvelope);
+        CaseDetails caseDetails = ccdCaseCreator.createCase(newEnvelope.documents);
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
         // when
@@ -207,9 +208,10 @@ public class AttachExceptionRecordToExistingCaseTest {
     }
 
     private CaseDetails createCase(String jsonFileName) {
+        // TODO: simply create a list of documents in code instead
         String caseData = SampleData.fileContentAsString(jsonFileName);
         Envelope newEnvelope = EnvelopeParser.parse(caseData);
-        return ccdCaseCreator.createCase(newEnvelope);
+        return ccdCaseCreator.createCase(newEnvelope.documents);
     }
 
     private Envelope updateEnvelope(String envelope) throws JSONException {
