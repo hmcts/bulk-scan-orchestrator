@@ -2,9 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import com.google.common.collect.ImmutableMap;
 import io.restassured.RestAssured;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,11 +20,13 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.DelegatePublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.logging.appinsights.SyntheticHeaders;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,6 +34,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getScannedDocuments;
@@ -94,9 +94,10 @@ public class AttachExceptionRecordToExistingCaseTest {
     @Test
     public void should_attach_exception_record_to_the_existing_case_with_evidence_documents() throws Exception {
         //given
-        // TODO: simply create list of docs in code
-        Envelope newEnvelope = updateEnvelope("envelopes/new-envelope-with-evidence.json");
-        CaseDetails caseDetails = ccdCaseCreator.createCase(newEnvelope.documents);
+        CaseDetails caseDetails =
+            ccdCaseCreator.createCase(singletonList(
+                new Document("certificate1.pdf", "154565768", "other", null, Instant.now(), dmUrl)
+            ));
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
         // when
@@ -212,17 +213,5 @@ public class AttachExceptionRecordToExistingCaseTest {
         String caseData = SampleData.fileContentAsString(jsonFileName);
         Envelope newEnvelope = EnvelopeParser.parse(caseData);
         return ccdCaseCreator.createCase(newEnvelope.documents);
-    }
-
-    private Envelope updateEnvelope(String envelope) throws JSONException {
-        String updatedCase = SampleData.fileContentAsString(envelope);
-        JSONObject updatedCaseData = new JSONObject(updatedCase);
-
-        JSONArray documents = updatedCaseData.getJSONArray("documents");
-        for (int i = 0; i < documents.length(); i++) {
-            JSONObject document = (JSONObject) documents.get(0);
-            document.put("url", dmUrl);
-        }
-        return EnvelopeParser.parse(updatedCaseData.toString());
     }
 }
