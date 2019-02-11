@@ -33,12 +33,12 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_REF
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_TYPE_BULK_SCAN
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.JURIDICTION
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.USER_ID
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.IntegrationTest
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.PortWaiter.waitFor
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_BULK_SCAN
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURISDICTION
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.USER_ID
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.PortWaiter.waitFor
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.CallbackRequestBuilder
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails
@@ -103,7 +103,7 @@ class AttachExceptionRecordToExistingCaseTest {
     @Value("\${wiremock.port}")
     private var wireMockPort: Int = 0
     private val wireMock by lazy { WireMock(wireMockPort) }
-    private val caseUrl = "/caseworkers/$USER_ID/jurisdictions/$JURIDICTION" +
+    private val caseUrl = "/caseworkers/$USER_ID/jurisdictions/$JURISDICTION" +
         "/case-types/$CASE_TYPE_BULK_SCAN/cases/$CASE_REF"
 
     private val startEventUrl = "$caseUrl/event-triggers/attachScannedDocs/token"
@@ -121,7 +121,7 @@ class AttachExceptionRecordToExistingCaseTest {
     private val scannedDocument = document(filename, documentNumber)
     private val caseData = mapOf("scannedDocuments" to listOf(scannedDocument))
     private val caseDetails: CaseDetails = CaseDetails.builder()
-        .jurisdiction(JURIDICTION)
+        .jurisdiction(JURISDICTION)
         .caseTypeId(CASE_TYPE_BULK_SCAN)
         .id(CASE_REF.toLong())
         .data(caseData)
@@ -135,7 +135,7 @@ class AttachExceptionRecordToExistingCaseTest {
     private val scannedRecord = document(exceptionRecordFileName, exceptionRecordDocumentNumber)
     private val exceptionData = exceptionDataWithDoc(scannedRecord)
     private val exceptionRecord = CaseDetails.builder()
-        .jurisdiction(JURIDICTION)
+        .jurisdiction(JURISDICTION)
         .id(recordId)
         .caseTypeId("ExceptionRecord")
         .data(exceptionData)

@@ -16,12 +16,12 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_REF
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_TYPE_BULK_SCAN
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.CASE_TYPE_EXCEPTION_RECORD
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.getCaseUrl
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.IntegrationTest
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_BULK_SCAN
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_EXCEPTION_RECORD
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.GET_CASE_URL
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -29,9 +29,9 @@ import java.util.concurrent.TimeUnit
 @IntegrationTest
 class ExceptionRecordCreatorTest {
 
-    private val caseEventTriggerStartUrl = Environment.caseEventTriggerStartUrl
+    private val caseEventTriggerStartUrl = Environment.CASE_EVENT_TRIGGER_START_URL
         .replace(CASE_TYPE_BULK_SCAN, CASE_TYPE_EXCEPTION_RECORD)
-    private val caseSubmitUrl = Environment.caseSubmitUrl
+    private val caseSubmitUrl = Environment.CASE_SUBMIT_URL
         .replace(CASE_TYPE_BULK_SCAN, CASE_TYPE_EXCEPTION_RECORD)
 
     @Autowired
@@ -43,7 +43,7 @@ class ExceptionRecordCreatorTest {
     @BeforeEach
     fun before() {
         WireMock.configureFor(server.port())
-        givenThat(get(getCaseUrl).willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())))
+        givenThat(get(GET_CASE_URL).willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())))
         givenThat(get(caseEventTriggerStartUrl).willReturn(aResponse().withBody(
             "{\"case_details\":null,\"event_id\":\"eid\",\"token\":\"etoken\"}"
         )))
@@ -56,7 +56,7 @@ class ExceptionRecordCreatorTest {
             .atMost(30, TimeUnit.SECONDS)
             .ignoreExceptions()
             .until {
-                server.verify(getRequestedFor(urlPathEqualTo(getCaseUrl)))
+                server.verify(getRequestedFor(urlPathEqualTo(GET_CASE_URL)))
                 server.verify(postRequestedFor(urlPathEqualTo(caseSubmitUrl)))
                 true
             }

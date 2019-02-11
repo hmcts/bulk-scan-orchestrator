@@ -13,9 +13,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.caseEventUrl
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.Environment.getCaseUrl
-import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.config.IntegrationTest
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_EVENT_URL
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.GET_CASE_URL
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -37,7 +37,7 @@ class SupplementaryEvidenceCreatorTest {
     @BeforeEach
     fun before() {
         //We need to do this because of an issue with the way AutoConfigureWireMock works with profiles.
-        WireMock(server.port()).register(get(getCaseUrl).willReturn(aResponse().withBody(mockResponse)))
+        WireMock(server.port()).register(get(GET_CASE_URL).willReturn(aResponse().withBody(mockResponse)))
 
         messageSender.send(mockMessage)
     }
@@ -49,7 +49,7 @@ class SupplementaryEvidenceCreatorTest {
             .pollInterval(2, TimeUnit.SECONDS)
             .ignoreExceptions()
             .until {
-                server.verify(postRequestedFor(urlPathEqualTo(caseEventUrl)))
+                server.verify(postRequestedFor(urlPathEqualTo(CASE_EVENT_URL)))
                 true
             }
     }
