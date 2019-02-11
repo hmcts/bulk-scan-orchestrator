@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.client.MappingBuilder
@@ -38,7 +38,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_BU
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURISDICTION
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.USER_ID
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest
-import uk.gov.hmcts.reform.bulkscan.orchestrator.config.PortWaiter.waitFor
+import uk.gov.hmcts.reform.bulkscan.orchestrator.util.PortWaiter.waitFor
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.CallbackRequestBuilder
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails

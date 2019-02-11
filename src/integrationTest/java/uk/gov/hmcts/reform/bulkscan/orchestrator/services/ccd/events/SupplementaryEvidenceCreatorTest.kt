@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
@@ -16,6 +16,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_EVENT_URL
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.GET_CASE_URL
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest
+import uk.gov.hmcts.reform.bulkscan.orchestrator.util.MessageSender
 import java.io.File
 import java.util.concurrent.TimeUnit
 
