@@ -1,9 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import com.google.common.collect.ImmutableMap;
-import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.awaitility.Duration;
-import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -54,8 +52,7 @@ public class ExceptionRecordCreationTest {
 
     @DisplayName("Should create ExceptionRecord when provided/requested supplementary evidence is not present")
     @Test
-    public void create_exception_record_from_supplementary_evidence()
-        throws JSONException, InterruptedException, ServiceBusException {
+    public void create_exception_record_from_supplementary_evidence() throws Exception {
         // given
         UUID randomPoBox = UUID.randomUUID();
 
@@ -71,13 +68,12 @@ public class ExceptionRecordCreationTest {
         await("Exception record being created")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.FIVE_SECONDS)
-            .until(() -> hasExceptionRecordBeenCreated(randomPoBox));
+            .until(() -> findCasesByPoBox(randomPoBox).size() == 1);
     }
 
     @DisplayName("Should create ExceptionRecord when classification is NEW_APPLICATION")
     @Test
-    public void should_create_exception_record_for_new_application()
-        throws JSONException, InterruptedException, ServiceBusException {
+    public void should_create_exception_record_for_new_application() throws Exception {
         // given
         UUID randomPoBox = UUID.randomUUID();
 
@@ -93,7 +89,7 @@ public class ExceptionRecordCreationTest {
         await("Exception record should be created")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.FIVE_SECONDS)
-            .until(() -> hasExceptionRecordBeenCreated(randomPoBox));
+            .until(() -> findCasesByPoBox(randomPoBox).size() == 1);
 
         CaseDetails caseDetails = findCasesByPoBox(randomPoBox).get(0);
         assertThat(caseDetails.getCaseTypeId()).isEqualTo("BULKSCAN_ExceptionRecord");
@@ -105,8 +101,7 @@ public class ExceptionRecordCreationTest {
 
     @DisplayName("Should create ExceptionRecord when provided/requested case reference is invalid")
     @Test
-    public void create_exception_record_for_invalid_case_reference()
-        throws JSONException, InterruptedException, ServiceBusException {
+    public void create_exception_record_for_invalid_case_reference() throws Exception {
         // given
         UUID randomPoBox = UUID.randomUUID();
 
@@ -122,11 +117,7 @@ public class ExceptionRecordCreationTest {
         await("Exception record being created")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.FIVE_SECONDS)
-            .until(() -> hasExceptionRecordBeenCreated(randomPoBox));
-    }
-
-    private boolean hasExceptionRecordBeenCreated(UUID poBox) {
-        return findCasesByPoBox(poBox).size() == 1;
+            .until(() -> findCasesByPoBox(randomPoBox).size() == 1);
     }
 
     private List<CaseDetails> findCasesByPoBox(UUID poBox) {
