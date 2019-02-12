@@ -114,11 +114,14 @@ class AttachExceptionRecordToExistingCaseTest {
         exceptionRecordDocumentNumber
     );
     private static final Map<String, Object> exceptionData = exceptionDataWithDoc(scannedRecord);
-    private static final CaseDetails.CaseDetailsBuilder exceptionRecord = CaseDetails.builder()
-        .jurisdiction(JURISDICTION)
-        .id(recordId)
-        .caseTypeId("ExceptionRecord")
-        .data(exceptionData);
+
+    private CaseDetails.CaseDetailsBuilder exceptionRecordBuilder() {
+        return CaseDetails.builder()
+            .jurisdiction(JURISDICTION)
+            .id(recordId)
+            .caseTypeId("ExceptionRecord")
+            .data(exceptionData);
+    }
 
     private static Map<String, Object> document(String filename, String documentNumber) {
         return ImmutableMap.of(
@@ -146,8 +149,12 @@ class AttachExceptionRecordToExistingCaseTest {
         .build();
 
     @BeforeEach
-    void before() {
+    void before() throws JsonProcessingException {
         WireMock.configureFor(server.port());
+
+        givenThat(ccdStartEvent().willReturn(okJson(MAPPER.writeValueAsString(startEventResponse))));
+        givenThat(ccdGetCaseMapping().willReturn(okJson(MAPPER.writeValueAsString(caseDetails))));
+        givenThat(ccdSubmitEvent().willReturn(okJson(MAPPER.writeValueAsString(caseDetails))));
 
         server.resetRequests();
 
@@ -165,21 +172,18 @@ class AttachExceptionRecordToExistingCaseTest {
         return getRequestedFor(urlEqualTo(startEventUrl));
     }
 
-    private CallbackRequest exceptionRecordCallbackBody = CallbackRequest
-        .builder()
-        .caseDetails(exceptionRecord.build())
-        .eventId("attachToExistingCase")
-        .build();
+    private CallbackRequest.CallbackRequestBuilder exceptionRecordCallbackBodyBuilder() {
+        return CallbackRequest
+            .builder()
+            .caseDetails(exceptionRecordBuilder().build())
+            .eventId("attachToExistingCase");
+    }
 
     @DisplayName("Should successfully callback with correct information")
     @Test
-    void should_successfully_callback_with_correct_information() throws JsonProcessingException {
-        givenThat(ccdStartEvent().willReturn(okJson(MAPPER.writeValueAsString(startEventResponse))));
-        givenThat(ccdGetCaseMapping().willReturn(okJson(MAPPER.writeValueAsString(caseDetails))));
-        givenThat(ccdSubmitEvent().willReturn(okJson(MAPPER.writeValueAsString(caseDetails))));
-
+    void should_successfully_callback_with_correct_information() {
         given()
-            .body(exceptionRecordCallbackBody)
+            .body(exceptionRecordCallbackBodyBuilder().build())
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -225,13 +229,11 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @DisplayName("Should fail with the correct error when submit api call fails")
     @Test
-    void should_fail_with_the_correct_error_when_submit_api_call_fails() throws JsonProcessingException {
-        givenThat(ccdStartEvent().willReturn(okJson(MAPPER.writeValueAsString(startEventResponse))));
-        givenThat(ccdGetCaseMapping().willReturn(okJson(MAPPER.writeValueAsString(caseDetails))));
+    void should_fail_with_the_correct_error_when_submit_api_call_fails() {
         givenThat(ccdSubmitEvent().willReturn(status(500)));
 
         given()
-            .body(exceptionRecordCallbackBody)
+            .body(exceptionRecordCallbackBodyBuilder().build())
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -243,13 +245,11 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @DisplayName("Should fail with the correct error when start event api call fails")
     @Test
-    void should_fail_with_the_correct_error_when_start_event_api_call_fails() throws JsonProcessingException {
+    void should_fail_with_the_correct_error_when_start_event_api_call_fails() {
         givenThat(ccdStartEvent().willReturn(status(404)));
-        givenThat(ccdGetCaseMapping().willReturn(okJson(MAPPER.writeValueAsString(caseDetails))));
-        givenThat(ccdSubmitEvent().willReturn(okJson(MAPPER.writeValueAsString(caseDetails))));
 
         given()
-            .body(exceptionRecordCallbackBody)
+            .body(exceptionRecordCallbackBodyBuilder().build())
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -261,17 +261,15 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @DisplayName("Should fail correctly if document is duplicate or document is already attached")
     @Test
-    void should_fail_correctly_if_document_is_duplicate_or_document_is_already_attached()
-        throws JsonProcessingException {
-        givenThat(ccdStartEvent().willReturn(okJson(MAPPER.writeValueAsString(startEventResponse))));
-        givenThat(ccdGetCaseMapping().willReturn(okJson(MAPPER.writeValueAsString(caseDetails))));
-        givenThat(ccdSubmitEvent().willReturn(okJson(MAPPER.writeValueAsString(caseDetails))));
-
-        CallbackRequest request = exceptionRecordCallbackBody;
-        request.setCaseDetails(exceptionRecord.data(exceptionDataWithDoc(scannedDocument)).build());
-
+    void should_fail_correctly_if_document_is_duplicate_or_document_is_already_attached() {
         given()
-            .body(request)
+            .body(exceptionRecordCallbackBodyBuilder()
+                .caseDetails(exceptionRecordBuilder()
+                    .data(exceptionDataWithDoc(scannedDocument))
+                    .build()
+                )
+                .build()
+            )
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -287,13 +285,11 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @DisplayName("Should fail correctly if the case does not exist")
     @Test
-    void should_fail_correctly_if_the_case_does_not_exist() throws JsonProcessingException {
-        givenThat(ccdStartEvent().willReturn(okJson(MAPPER.writeValueAsString(startEventResponse))));
+    void should_fail_correctly_if_the_case_does_not_exist() {
         givenThat(ccdGetCaseMapping().willReturn(status(404)));
-        givenThat(ccdSubmitEvent().willReturn(okJson(MAPPER.writeValueAsString(caseDetails))));
 
         given()
-            .body(exceptionRecordCallbackBody)
+            .body(exceptionRecordCallbackBodyBuilder().build())
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -302,13 +298,11 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @DisplayName("Should fail correctly if ccd is down")
     @Test
-    void should_fail_correctly_if_ccd_is_down() throws JsonProcessingException {
-        givenThat(ccdStartEvent().willReturn(okJson(MAPPER.writeValueAsString(startEventResponse))));
+    void should_fail_correctly_if_ccd_is_down() {
         givenThat(ccdGetCaseMapping().willReturn(status(500)));
-        givenThat(ccdSubmitEvent().willReturn(okJson(MAPPER.writeValueAsString(caseDetails))));
 
         given()
-            .body(exceptionRecordCallbackBody)
+            .body(exceptionRecordCallbackBodyBuilder().build())
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -320,16 +314,9 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @DisplayName("Should fail with the correct error when no case details is supplied")
     @Test
-    void should_fail_with_the_correct_error_when_no_case_details_is_supplied() throws JsonProcessingException {
-        givenThat(ccdStartEvent().willReturn(okJson(MAPPER.writeValueAsString(startEventResponse))));
-        givenThat(ccdGetCaseMapping().willReturn(okJson(MAPPER.writeValueAsString(caseDetails))));
-        givenThat(ccdSubmitEvent().willReturn(okJson(MAPPER.writeValueAsString(caseDetails))));
-
-        CallbackRequest request = exceptionRecordCallbackBody;
-        request.setCaseDetails(null);
-
+    void should_fail_with_the_correct_error_when_no_case_details_is_supplied() {
         given()
-            .body(request)
+            .body(exceptionRecordCallbackBodyBuilder().caseDetails(null).build())
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -338,13 +325,9 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @DisplayName("Should create error if type in incorrect")
     @Test
-    void should_create_error_if_type_in_incorrect() throws JsonProcessingException {
-        givenThat(ccdStartEvent().willReturn(okJson(MAPPER.writeValueAsString(startEventResponse))));
-        givenThat(ccdGetCaseMapping().willReturn(okJson(MAPPER.writeValueAsString(caseDetails))));
-        givenThat(ccdSubmitEvent().willReturn(okJson(MAPPER.writeValueAsString(caseDetails))));
-
+    void should_create_error_if_type_in_incorrect() {
         given()
-            .body(exceptionRecordCallbackBody)
+            .body(exceptionRecordCallbackBodyBuilder().build())
             .post("/callback/{type}", "someType")
             .then()
             .statusCode(404);
