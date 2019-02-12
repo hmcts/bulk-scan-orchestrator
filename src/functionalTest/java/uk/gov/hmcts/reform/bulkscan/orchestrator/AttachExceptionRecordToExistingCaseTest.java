@@ -19,9 +19,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.DelegatePublisher;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.logging.appinsights.SyntheticHeaders;
@@ -34,6 +32,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -76,7 +75,7 @@ public class AttachExceptionRecordToExistingCaseTest {
     @Test
     public void should_attach_exception_record_to_the_existing_case_with_no_evidence() throws Exception {
         //given
-        CaseDetails caseDetails = createCase("envelopes/new-envelope.json");
+        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList());
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
         // when
@@ -208,10 +207,4 @@ public class AttachExceptionRecordToExistingCaseTest {
         assertThat(scannedDocuments.size()).isEqualTo(expectedDocumentsSize);
     }
 
-    private CaseDetails createCase(String jsonFileName) {
-        // TODO: simply create a list of documents in code instead
-        String caseData = SampleData.fileContentAsString(jsonFileName);
-        Envelope newEnvelope = EnvelopeParser.parse(caseData);
-        return ccdCaseCreator.createCase(newEnvelope.documents);
-    }
 }
