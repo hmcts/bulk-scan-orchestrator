@@ -59,7 +59,9 @@ public class ScannedDocumentsHelper {
                 scannedDocument.scannedDate == null
                     ? null
                     : scannedDocument.scannedDate.atZone(ZoneId.systemDefault()).toInstant(),
-                scannedDocument.url.documentUrl
+                scannedDocument.url == null
+                    ? null
+                    : scannedDocument.url.documentUrl
             );
         }
     }
