@@ -47,14 +47,18 @@ public class ScannedDocumentsHelper {
         return objectMapper.convertValue(object.get("value"), ScannedDocument.class);
     }
 
-    private static Document mapScannedDocument(ScannedDocument scannedDocument) {
-        return new Document(
-            scannedDocument.fileName,
-            scannedDocument.controlNumber,
-            scannedDocument.type,
-            scannedDocument.subtype,
-            scannedDocument.scannedDate.atZone(ZoneId.systemDefault()).toInstant(),
-            scannedDocument.url.documentUrl
-        );
+    private static Document mapScannedDocument(ScannedDocument doc) {
+        if (doc == null) {
+            return null;
+        } else {
+            return new Document(
+                doc.fileName,
+                doc.controlNumber,
+                doc.type,
+                doc.subtype,
+                doc.scannedDate == null ? null : doc.scannedDate.atZone(ZoneId.systemDefault()).toInstant(),
+                doc.url == null ? null : doc.url.documentUrl
+            );
+        }
     }
 }
