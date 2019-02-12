@@ -57,9 +57,9 @@ public class ScannedDocumentsHelperTest {
     }
 
     @Test
-    public void should_handle_nulls() throws Exception {
+    public void should_handle_null_fields_in_document() throws Exception {
         // given
-        CaseDetails caseDetails = getCaseDetails("case-data/nulls.json");
+        CaseDetails caseDetails = getCaseDetails("case-data/null-fields-in-doc.json");
 
         // when
         List<Document> documents = ScannedDocumentsHelper.getDocuments(caseDetails);
@@ -70,6 +70,19 @@ public class ScannedDocumentsHelperTest {
             .isEqualToComparingFieldByField(
                 new Document(null, null, null, null, null, null)
             );
+    }
+
+    @Test
+    public void should_handle_null_document() throws Exception {
+        // given
+        CaseDetails caseDetails = getCaseDetails("case-data/null-doc.json");
+
+        // when
+        List<Document> documents = ScannedDocumentsHelper.getDocuments(caseDetails);
+
+        // then
+        assertThat(documents).hasSize(1);
+        assertThat(documents.get(0)).isNull();
     }
 
     private CaseDetails getCaseDetails(String resourceName) throws IOException {
