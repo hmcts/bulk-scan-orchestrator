@@ -1,0 +1,16 @@
+{
+  "case_data": {
+    "scannedDocuments": [
+      {
+        "value": {
+          "fileName": null,
+          "controlNumber": null,
+          "type": null,
+          "subtype": null,
+          "scannedDate": null,
+          "url": null
+        }
+      }
+    ]
+  }
+}

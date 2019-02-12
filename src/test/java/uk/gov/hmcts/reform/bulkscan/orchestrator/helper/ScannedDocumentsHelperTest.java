@@ -56,6 +56,22 @@ public class ScannedDocumentsHelperTest {
         assertThat(document).isEqualToComparingFieldByField(expectedDocument);
     }
 
+    @Test
+    public void should_handle_nulls() throws Exception {
+        // given
+        CaseDetails caseDetails = getCaseDetails("case-data/nulls.json");
+
+        // when
+        List<Document> documents = ScannedDocumentsHelper.getDocuments(caseDetails);
+
+        // then
+        assertThat(documents).hasSize(1);
+        assertThat(documents.get(0))
+            .isEqualToComparingFieldByField(
+                new Document(null, null, null, null, null, null)
+            );
+    }
+
     private CaseDetails getCaseDetails(String resourceName) throws IOException {
         return objectMapper.readValue(fileContentAsBytes(resourceName), CaseDetails.class);
     }
