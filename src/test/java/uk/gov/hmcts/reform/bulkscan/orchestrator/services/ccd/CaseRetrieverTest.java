@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import feign.FeignException;
+import feign.Request;
 import feign.Response;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,6 +16,7 @@ import java.util.Collections;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.AUTH_DETAILS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.CASE_ID;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.CASE_REF;
@@ -25,6 +27,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_TOKEN;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CaseRetrieverTest {
+
     @Mock
     private CoreCaseDataApi dataApi;
     @Mock
@@ -51,6 +54,7 @@ public class CaseRetrieverTest {
             "methodKey",
             Response
                 .builder()
+                .request(mock(Request.class))
                 .headers(Collections.emptyMap())
                 .status(HttpStatus.NOT_FOUND.value())
                 .reason("not found")
@@ -74,6 +78,7 @@ public class CaseRetrieverTest {
             "methodKey",
             Response
                 .builder()
+                .request(mock(Request.class))
                 .headers(Collections.emptyMap())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .reason("Invalid Case Ref")
@@ -96,6 +101,7 @@ public class CaseRetrieverTest {
             "methodKey",
             Response
                 .builder()
+                .request(mock(Request.class))
                 .headers(Collections.emptyMap())
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .reason("unauthorised")
