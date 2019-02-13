@@ -27,18 +27,24 @@ public class DocumentMapper {
     }
 
     public static ScannedDocument mapDocument(Document document) {
-        return new ScannedDocument(
-            document.fileName,
-            document.controlNumber,
-            document.type,
-            document.subtype,
-            getLocalDateTime(document.scannedAt),
-            new CcdDocument(document.url),
-            null
-        );
+        if (document == null) {
+            return null;
+        } else {
+            return new ScannedDocument(
+                document.fileName,
+                document.controlNumber,
+                document.type,
+                document.subtype,
+                getLocalDateTime(document.scannedAt),
+                new CcdDocument(document.url),
+                null
+            );
+        }
     }
 
     public static LocalDateTime getLocalDateTime(Instant instant) {
-        return ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDateTime();
+        return instant == null
+            ? null
+            : ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDateTime();
     }
 }
