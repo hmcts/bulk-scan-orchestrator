@@ -51,12 +51,7 @@ tasks.withType(JavaCompile) {
   options.compilerArgs << "-Xlint:unchecked" << "-Werror"
 }
 
-compileKotlin {
-  kotlinOptions {
-    jvmTarget = "1.8"
-  }
-}
-compileTestKotlin {
+compileFunctionalTestKotlin {
   kotlinOptions {
     jvmTarget = "1.8"
   }
@@ -76,6 +71,7 @@ task integration(type: Test, description: 'Runs the integration tests.', group: 
   testClassesDirs = sourceSets.integrationTest.output.classesDirs
   classpath = sourceSets.integrationTest.runtimeClasspath
   useJUnitPlatform()
+  failFast = true
 
   testLogging {
     exceptionFormat = 'full'
@@ -185,8 +181,6 @@ dependencyManagement {
 }
 
 dependencies {
-  integrationTestCompile group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib-jdk8'
-  integrationTestCompile group: 'org.jetbrains.kotlin', name: 'kotlin-reflect'
   functionalTestCompile group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib-jdk8'
   functionalTestCompile group: 'org.jetbrains.kotlin', name: 'kotlin-reflect'
 
