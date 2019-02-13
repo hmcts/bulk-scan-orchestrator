@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.endpoints;
 
 import com.google.common.collect.ImmutableMap;
 import feign.FeignException;
+import feign.Request;
 import feign.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,6 +25,7 @@ import static org.mockito.BDDMockito.never;
 import static org.mockito.BDDMockito.verify;
 import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 public class IdamConfigStatusEndpointTest {
@@ -50,7 +52,7 @@ public class IdamConfigStatusEndpointTest {
         Map<String, Map<String, String>> users = ImmutableMap.of(
             VALID_JURISDICTION, ImmutableMap.of(
                 "username", "username",
-                "password","password"
+                "password", "password"
             ),
             INVALID_JURISDICTION, ImmutableMap.of(
                 "username", "user",
@@ -109,6 +111,7 @@ public class IdamConfigStatusEndpointTest {
         FeignException exception = FeignException
             .errorStatus("method key", Response
                 .builder()
+                .request(mock(Request.class))
                 .body(new byte[0])
                 .headers(Collections.emptyMap())
                 .status(HttpStatus.FORBIDDEN.value())
