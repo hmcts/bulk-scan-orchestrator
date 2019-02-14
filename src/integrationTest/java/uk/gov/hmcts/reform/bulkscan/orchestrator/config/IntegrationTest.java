@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -26,4 +27,5 @@ import java.lang.annotation.Target;
 @AutoConfigureWireMock
 @ActiveProfiles({"integration","nosb"}) // no servicebus queue handler registration
 @ContextConfiguration(initializers = IntegrationTestInitializer.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public @interface IntegrationTest {}
