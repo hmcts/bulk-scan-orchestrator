@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
@@ -18,6 +19,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURIS
 
 @ExtendWith(SpringExtension.class)
 @IntegrationTest
+@AutoConfigureWireMock(port = 0)
 class CaseRetrievalTest {
 
     @Autowired
@@ -35,8 +37,6 @@ class CaseRetrievalTest {
     @DisplayName("Should call to retrieve the case from ccd")
     @Test
     void should_call_to_retrieve_the_case_from_ccd() {
-        server.stop();
-        server.start();
         // given
         CaseRetriever caseRetriever = new CaseRetriever(factory, coreCaseDataApi);
 
