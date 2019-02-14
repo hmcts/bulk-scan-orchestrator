@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadServ
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -33,7 +33,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor
 public class SupplementaryEvidenceTest {
 
     @Autowired
-    private CaseRetriever caseRetriever;
+    private CcdApi ccdApi;
 
     @Autowired
     private CcdCaseCreator ccdCaseCreator;
@@ -96,9 +96,9 @@ public class SupplementaryEvidenceTest {
     private boolean hasCaseBeenUpdatedWithSupplementaryEvidence(
         CaseDetails caseDetails, int excpectedScannedDocuments
     ) {
-        CaseDetails updatedCaseDetails = caseRetriever.retrieve(
-            caseDetails.getJurisdiction(),
-            String.valueOf(caseDetails.getId())
+        CaseDetails updatedCaseDetails = ccdApi.getCaseOptionally(
+            String.valueOf(caseDetails.getId()),
+            caseDetails.getJurisdiction()
         );
         String evidenceHandled = Strings.nullToEmpty(
             (String) updatedCaseDetails.getData().getOrDefault("evidenceHandled", "NO_VALUE")

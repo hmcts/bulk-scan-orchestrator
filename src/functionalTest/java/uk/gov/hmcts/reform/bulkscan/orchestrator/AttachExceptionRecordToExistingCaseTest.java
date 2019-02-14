@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseSearcher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CreateExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -47,7 +47,7 @@ public class AttachExceptionRecordToExistingCaseTest {
     private String testUrl;
 
     @Autowired
-    private CaseRetriever caseRetriever;
+    private CcdApi ccdApi;
 
     @Autowired
     private CcdCaseCreator ccdCaseCreator;
@@ -158,9 +158,9 @@ public class AttachExceptionRecordToExistingCaseTest {
 
     private Boolean isExceptionRecordAttachedToTheCase(CaseDetails caseDetails, int expectedScannedDocsSize) {
 
-        CaseDetails updatedCase = caseRetriever.retrieve(
-            caseDetails.getJurisdiction(),
-            String.valueOf(caseDetails.getId())
+        CaseDetails updatedCase = ccdApi.getCaseOptionally(
+            String.valueOf(caseDetails.getId()),
+            caseDetails.getJurisdiction()
         );
 
         List<ScannedDocument> updatedScannedDocuments = getScannedDocuments(updatedCase);
@@ -173,9 +173,9 @@ public class AttachExceptionRecordToExistingCaseTest {
         CaseDetails exceptionRecord,
         int expectedExceptionRecordsSize
     ) {
-        CaseDetails updatedCase = caseRetriever.retrieve(
-            originalCase.getJurisdiction(),
-            String.valueOf(originalCase.getId())
+        CaseDetails updatedCase = ccdApi.getCaseOptionally(
+            String.valueOf(originalCase.getId()),
+            originalCase.getJurisdiction()
         );
 
         List<ScannedDocument> updatedScannedDocuments = getScannedDocuments(updatedCase);
