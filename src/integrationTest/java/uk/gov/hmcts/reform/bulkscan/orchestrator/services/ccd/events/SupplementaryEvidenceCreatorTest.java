@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.awaitility.Awaitility.await;
@@ -44,7 +45,8 @@ class SupplementaryEvidenceCreatorTest {
     @Test
     void should_call_ccd_to_attach_supplementary_evidence_for_caseworker() {
         // given
-        new WireMock(server.port()).register(get(GET_CASE_URL).willReturn(aResponse().withBody(MOCK_RESPONSE)));
+        WireMock.configureFor(server.port());
+        givenThat(get(GET_CASE_URL).willReturn(aResponse().withBody(MOCK_RESPONSE)));
 
         // when
         messageSender.send(MOCK_MESSAGE);
