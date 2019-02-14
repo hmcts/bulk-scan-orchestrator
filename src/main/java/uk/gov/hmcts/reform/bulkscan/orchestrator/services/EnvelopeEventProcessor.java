@@ -8,7 +8,7 @@ import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisherContainer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IMessageOperations;
@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envel
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.EnvelopeEventProcessor.MessageProcessingResultType.POTENTIALLY_RECOVERABLE_FAILURE;
@@ -31,18 +32,18 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
     private static final Logger log = LoggerFactory.getLogger(EnvelopeEventProcessor.class);
 
-    private final CaseRetriever caseRetriever;
+    private final BiFunction<String, String, CaseDetails> caseRetriever;
     private final EventPublisherContainer eventPublisherContainer;
     private final IProcessedEnvelopeNotifier processedEnvelopeNotifier;
     private final IMessageOperations messageOperations;
 
     public EnvelopeEventProcessor(
-        CaseRetriever caseRetriever,
+        CcdApi ccdApi,
         EventPublisherContainer eventPublisherContainer,
         IProcessedEnvelopeNotifier processedEnvelopeNotifier,
         IMessageOperations messageOperations
     ) {
-        this.caseRetriever = caseRetriever;
+        this.caseRetriever = ccdApi::getCaseOptionally;
         this.eventPublisherContainer = eventPublisherContainer;
         this.processedEnvelopeNotifier = processedEnvelopeNotifier;
         this.messageOperations = messageOperations;
@@ -79,7 +80,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
             EventPublisher eventPublisher = eventPublisherContainer.getPublisher(
                 envelope.classification,
-                getCaseRetriever(envelope)
+                getCase(envelope)
             );
 
             eventPublisher.publish(envelope);
@@ -164,10 +165,10 @@ public class EnvelopeEventProcessor implements IMessageHandler {
         log.error("Error while handling message at stage: " + phase, exception);
     }
 
-    private Supplier<CaseDetails> getCaseRetriever(final Envelope envelope) {
+    private Supplier<CaseDetails> getCase(final Envelope envelope) {
         return () -> Strings.isNullOrEmpty(envelope.caseRef)
             ? null
-            : caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
+            : caseRetriever.apply(envelope.caseRef, envelope.jurisdiction);
     }
 
     private void logMessageParsed(IMessage message, Envelope envelope) {
