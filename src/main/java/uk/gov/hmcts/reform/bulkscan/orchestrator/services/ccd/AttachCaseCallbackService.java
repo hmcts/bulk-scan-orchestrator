@@ -56,7 +56,7 @@ public class AttachCaseCallbackService {
         try {
             doAttachCase(exceptionRecordJurisdiction, caseRef, exceptionDocuments, exceptionRecordReference);
             return success();
-        } catch (CallbackException e) {
+        } catch (CcdApiException e) {
             return createErrorList(e);
         }
     }
@@ -98,7 +98,7 @@ public class AttachCaseCallbackService {
     }
 
     private void throwDuplicateError(String caseRef, Set<String> duplicateIds) {
-        throw new CallbackException(
+        throw new CcdApiException(
             format("Document(s) with control number %s are already attached to case reference: %s",
                 duplicateIds, caseRef),
             true
@@ -115,7 +115,7 @@ public class AttachCaseCallbackService {
     }
 
     @Nonnull
-    private List<String> createErrorList(CallbackException e) {
+    private List<String> createErrorList(CcdApiException e) {
         String message = e.getMessage();
         log.error(message, e);
         return ImmutableList.of(message);

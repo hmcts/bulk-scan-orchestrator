@@ -106,7 +106,7 @@ public class CcdApi {
     public CaseDetails getCaseOptionally(String caseRef, String jurisdiction) {
         try {
             return getCase(caseRef, jurisdiction);
-        } catch (CallbackException exception) {
+        } catch (CcdApiException exception) {
             if (exception.toThrow()) {
                 throw exception;
             } else {
@@ -160,15 +160,15 @@ public class CcdApi {
         );
     }
 
-    private static CallbackException softError(Exception e, String errorFmt, Object arg) {
+    private static CcdApiException softError(Exception e, String errorFmt, Object arg) {
         return error(e, false, errorFmt, arg, null);
     }
 
-    private static CallbackException error(Exception e, String errorFmt, Object arg1, Object arg2) {
+    private static CcdApiException error(Exception e, String errorFmt, Object arg1, Object arg2) {
         return error(e, true, errorFmt, arg1, arg2);
     }
 
-    private static CallbackException error(Exception e, boolean doThrow, String errorFmt, Object arg1, Object arg2) {
-        return new CallbackException(format(errorFmt, arg1, arg2), doThrow, e);
+    private static CcdApiException error(Exception e, boolean doThrow, String errorFmt, Object arg1, Object arg2) {
+        return new CcdApiException(format(errorFmt, arg1, arg2), doThrow, e);
     }
 }
