@@ -1,11 +1,12 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
@@ -19,12 +20,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURIS
 
 @ExtendWith(SpringExtension.class)
 @IntegrationTest
-@AutoConfigureWireMock(port = 0)
 class CaseRetrievalTest {
 
-    @Autowired
-    @Lazy
-    private WireMockServer server;
 
     @Autowired
     @Lazy
@@ -33,6 +30,20 @@ class CaseRetrievalTest {
     @Autowired
     @Lazy
     private CoreCaseDataApi coreCaseDataApi;
+
+    @Autowired
+    @Lazy
+    private WireMockServer wireMockServer;
+
+    @BeforeEach
+    void configureSystemUnderTest() {
+        this.wireMockServer.start();
+    }
+
+    @AfterEach
+    void stopWireMockServer() {
+        this.wireMockServer.stop();
+    }
 
     @DisplayName("Should call to retrieve the case from ccd")
     @Test
@@ -44,6 +55,6 @@ class CaseRetrievalTest {
         caseRetriever.retrieve(JURISDICTION, CASE_REF);
 
         // then
-        server.verify(getRequestedFor(urlEqualTo(GET_CASE_URL)));
+        wireMockServer.verify(getRequestedFor(urlEqualTo(GET_CASE_URL)));
     }
 }
