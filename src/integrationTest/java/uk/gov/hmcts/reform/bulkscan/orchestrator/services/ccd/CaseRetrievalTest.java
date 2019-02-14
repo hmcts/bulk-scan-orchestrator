@@ -35,6 +35,8 @@ class CaseRetrievalTest {
     @DisplayName("Should call to retrieve the case from ccd")
     @Test
     void should_call_to_retrieve_the_case_from_ccd() {
+        server.stop();
+        server.start();
         // given
         CaseRetriever caseRetriever = new CaseRetriever(factory, coreCaseDataApi);
 
