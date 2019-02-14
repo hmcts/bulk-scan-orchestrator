@@ -293,7 +293,28 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem("Could not find case: " + CASE_REF));
+            .body("errors", hasItem(String.format(
+                "Case not found. Ref: %s, jurisdiction: %s",
+                CASE_REF,
+                JURISDICTION
+            )));
+    }
+
+    @DisplayName("Should fail correctly if the case reference is invalid")
+    @Test
+    void should_fail_correctly_if_the_case_reference_is_invalid() {
+        givenThat(ccdGetCaseMapping().willReturn(status(400)));
+
+        given()
+            .body(exceptionRecordCallbackBodyBuilder().build())
+            .post("/callback/{type}", "attach_case")
+            .then()
+            .statusCode(200)
+            .body("errors", hasItem(String.format(
+                "Invalid Case Ref: %s, jurisdiction: %s",
+                CASE_REF,
+                JURISDICTION
+            )));
     }
 
     @DisplayName("Should fail correctly if ccd is down")

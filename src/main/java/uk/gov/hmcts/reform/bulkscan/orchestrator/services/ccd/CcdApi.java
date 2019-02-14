@@ -85,13 +85,9 @@ public class CcdApi {
             return retrieveCase(caseRef, jurisdiction);
         } catch (FeignException exception) {
             if (exception.status() == NOT_FOUND.value()) {
-                log.info("Case not found. Ref: {}, jurisdiction: {}", caseRef, jurisdiction, exception);
-
-                throw softError(exception, "Could not find case: %s", caseRef);
+                throw softError(exception, "Case not found. Ref: %s, jurisdiction: %s", caseRef, jurisdiction);
             } else if (exception.status() == BAD_REQUEST.value()) {
-                log.info("Invalid Case Ref: {}, jurisdiction: {}", caseRef, jurisdiction, exception);
-
-                throw softError(exception, "Invalid case reference: %s", caseRef);
+                throw softError(exception, "Invalid Case Ref: %s, jurisdiction: %s", caseRef, jurisdiction);
             } else {
                 throw error(
                     exception,
@@ -110,6 +106,8 @@ public class CcdApi {
             if (exception.toThrow()) {
                 throw exception;
             } else {
+                log.info(exception.getMessage());
+
                 return null;
             }
         }
@@ -160,15 +158,15 @@ public class CcdApi {
         );
     }
 
-    private static CcdApiException softError(Exception e, String errorFmt, Object arg) {
-        return error(e, false, errorFmt, arg, null);
+    private static CcdApiException softError(Exception e, String errorFmt, Object... args) {
+        return error(e, false, errorFmt, args);
     }
 
-    private static CcdApiException error(Exception e, String errorFmt, Object arg1, Object arg2) {
-        return error(e, true, errorFmt, arg1, arg2);
+    private static CcdApiException error(Exception e, String errorFmt, Object... args) {
+        return error(e, true, errorFmt, args);
     }
 
-    private static CcdApiException error(Exception e, boolean doThrow, String errorFmt, Object arg1, Object arg2) {
-        return new CcdApiException(format(errorFmt, arg1, arg2), doThrow, e);
+    private static CcdApiException error(Exception e, boolean doThrow, String errorFmt, Object... args) {
+        return new CcdApiException(format(errorFmt, args), doThrow, e);
     }
 }
