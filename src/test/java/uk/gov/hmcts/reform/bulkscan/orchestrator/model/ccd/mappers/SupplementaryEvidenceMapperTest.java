@@ -15,6 +15,7 @@ import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
+@SuppressWarnings("checkstyle:LineLength")
 public class SupplementaryEvidenceMapperTest {
 
     private static final SupplementaryEvidenceMapper mapper = new SupplementaryEvidenceMapper();
