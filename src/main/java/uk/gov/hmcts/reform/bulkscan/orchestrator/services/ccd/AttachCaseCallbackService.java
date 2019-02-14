@@ -100,7 +100,8 @@ public class AttachCaseCallbackService {
     private void throwDuplicateError(String caseRef, Set<String> duplicateIds) {
         throw new CallbackException(
             format("Document(s) with control number %s are already attached to case reference: %s",
-                duplicateIds, caseRef)
+                duplicateIds, caseRef),
+            true
         );
     }
 

@@ -1,11 +1,22 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
-class CallbackException extends RuntimeException {
-    CallbackException(String errorMessage, Exception e) {
+public class CallbackException extends RuntimeException {
+
+    private final boolean doThrow;
+
+    CallbackException(String errorMessage, boolean doThrow, Exception e) {
         super(errorMessage, e);
+
+        this.doThrow = doThrow;
     }
 
-    CallbackException(String errorMessage) {
+    CallbackException(String errorMessage, boolean doThrow) {
         super(errorMessage);
+
+        this.doThrow = doThrow;
+    }
+
+    public boolean toThrow() {
+        return doThrow;
     }
 }

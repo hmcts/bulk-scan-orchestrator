@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import feign.FeignException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -12,6 +14,8 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 
 import static java.lang.String.format;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 /**
  * This class is intended to be a wrapper/adaptor/facade for the orchestrator -> CcdApi.
@@ -19,6 +23,9 @@ import static java.lang.String.format;
  */
 @Component
 public class CcdApi {
+
+    private static final Logger log = LoggerFactory.getLogger(CcdApi.class);
+
     private final CoreCaseDataApi feignCcdApi;
     private final CcdAuthenticatorFactory authenticatorFactory;
 
@@ -29,7 +36,20 @@ public class CcdApi {
 
     private CaseDetails retrieveCase(String caseRef, String jurisdiction) {
         CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
-        return feignCcdApi.getCase(authenticator.getUserToken(), authenticator.getServiceToken(), caseRef);
+        CaseDetails caseDetails = feignCcdApi.getCase(
+            authenticator.getUserToken(),
+            authenticator.getServiceToken(),
+            caseRef
+        );
+
+        log.info(
+            "Found case: {}:{}:{}",
+            caseDetails.getJurisdiction(),
+            caseDetails.getCaseTypeId(),
+            caseDetails.getId()
+        );
+
+        return caseDetails;
     }
 
     private StartEventResponse startAttachScannedDocs(String caseRef,
@@ -62,13 +82,35 @@ public class CcdApi {
     @SuppressWarnings("squid:S1135")
     CaseDetails getCase(String caseRef, String jurisdiction) {
         try {
-            //TODO: RPE-823 merge with `CaseRetriever` to a consistent api adaptor
             return retrieveCase(caseRef, jurisdiction);
-        } catch (FeignException e) {
-            if (e.status() == 404) {
-                throw error(e, "Could not find case: %s", caseRef);
+        } catch (FeignException exception) {
+            if (exception.status() == NOT_FOUND.value()) {
+                log.info("Case not found. Ref: {}, jurisdiction: {}", caseRef, jurisdiction, exception);
+
+                throw softError(exception, "Could not find case: %s", caseRef);
+            } else if (exception.status() == BAD_REQUEST.value()) {
+                log.info("Invalid Case Ref: {}, jurisdiction: {}", caseRef, jurisdiction, exception);
+
+                throw softError(exception, "Invalid case reference: %s", caseRef);
             } else {
-                throw error(e, "Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status());
+                throw error(
+                    exception,
+                    "Internal Error: Could not retrieve case: %s Error: %s",
+                    caseRef,
+                    exception.status()
+                );
+            }
+        }
+    }
+
+    public CaseDetails getCaseOptionally(String caseRef, String jurisdiction) {
+        try {
+            return getCase(caseRef, jurisdiction);
+        } catch (CallbackException exception) {
+            if (exception.toThrow()) {
+                throw exception;
+            } else {
+                return null;
             }
         }
     }
@@ -118,12 +160,15 @@ public class CcdApi {
         );
     }
 
-    private static CallbackException error(Exception e, String errorFmt, Object arg) {
-        return error(e, errorFmt, arg, null);
+    private static CallbackException softError(Exception e, String errorFmt, Object arg) {
+        return error(e, false, errorFmt, arg, null);
     }
 
     private static CallbackException error(Exception e, String errorFmt, Object arg1, Object arg2) {
-        return new CallbackException(format(errorFmt, arg1, arg2), e);
+        return error(e, true, errorFmt, arg1, arg2);
     }
 
+    private static CallbackException error(Exception e, boolean doThrow, String errorFmt, Object arg1, Object arg2) {
+        return new CallbackException(format(errorFmt, arg1, arg2), doThrow, e);
+    }
 }
