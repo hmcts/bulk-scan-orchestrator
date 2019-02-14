@@ -3,11 +3,12 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.microsoft.azure.servicebus.Message;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
@@ -26,7 +27,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.GET_C
 
 @ExtendWith(SpringExtension.class)
 @IntegrationTest
-@AutoConfigureWireMock(port = 0)
 class SupplementaryEvidenceCreatorTest {
 
     private static final Message MOCK_MESSAGE = new Message(fileContentAsString(
@@ -41,6 +41,16 @@ class SupplementaryEvidenceCreatorTest {
     @Autowired
     @Lazy
     private MessageSender messageSender;
+
+    @BeforeEach
+    void configureSystemUnderTest() {
+        this.server.start();
+    }
+
+    @AfterEach
+    void stopWireMockServer() {
+        this.server.stop();
+    }
 
     @DisplayName("Should call ccd to attach supplementary evidence for caseworker")
     @Test
