@@ -23,7 +23,7 @@ public class SupplementaryEvidenceMapper {
         Stream<Document> docsToAdd =
             envelopeDocs
                 .stream()
-                .filter(d -> existingDocs.stream().noneMatch(e -> Objects.equals(e.url, d.url)));
+                .filter(d -> existingDocs.stream().noneMatch(e -> areDuplicates(d, e)));
 
         return new SupplementaryEvidence(
             mapDocuments(
@@ -33,5 +33,10 @@ public class SupplementaryEvidenceMapper {
                 ).collect(toList())
             )
         );
+    }
+
+    private boolean areDuplicates(Document d1, Document d2) {
+        return Objects.equals(d1.url, d2.url)
+            || Objects.equals(d1.controlNumber, d2.controlNumber);
     }
 }
