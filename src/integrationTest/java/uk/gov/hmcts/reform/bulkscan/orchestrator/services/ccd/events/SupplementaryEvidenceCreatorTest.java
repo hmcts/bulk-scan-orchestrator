@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.util.MessageSender;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.MessageSender;
 
 import java.util.concurrent.TimeUnit;
 
