@@ -33,7 +33,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.GET_C
 
 @ExtendWith(SpringExtension.class)
 @IntegrationTest
-@AutoConfigureWireMock(port = 0s)
+@AutoConfigureWireMock(port = 0)
 class ExceptionRecordCreatorTest {
 
     private static final String CASE_EVENT_TRIGGER_START_URL = Environment.CASE_EVENT_TRIGGER_START_URL
