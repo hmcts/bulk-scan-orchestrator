@@ -14,7 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.util.MessageSender;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.MessageSender;
 
 import java.util.concurrent.TimeUnit;
 
