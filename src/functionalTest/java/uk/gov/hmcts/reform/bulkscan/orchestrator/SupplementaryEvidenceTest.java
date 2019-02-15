@@ -49,6 +49,7 @@ public class SupplementaryEvidenceTest {
         //given
         String dmUrl = dmUploadService.uploadToDmStore("Evidence2.pdf", "documents/supplementary-evidence.pdf");
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList());
+        assertThat(caseDetails).isNotNull();
 
         // when
         envelopeMessager.sendMessageFromFile(
@@ -78,6 +79,8 @@ public class SupplementaryEvidenceTest {
                 singletonList(
                     new Document("evidence.pdf", "123", "other", null, Instant.now(), dmUrlOriginal)
                 ));
+
+        assertThat(caseDetails).isNotNull();
 
         // when
         envelopeMessager.sendMessageFromFile(

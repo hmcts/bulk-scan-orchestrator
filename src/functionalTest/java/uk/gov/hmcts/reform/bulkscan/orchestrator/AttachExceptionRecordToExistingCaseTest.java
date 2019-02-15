@@ -76,6 +76,7 @@ public class AttachExceptionRecordToExistingCaseTest {
     public void should_attach_exception_record_to_the_existing_case_with_no_evidence() throws Exception {
         //given
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList());
+        assertThat(caseDetails).isNotNull();
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
         // when
@@ -98,6 +99,7 @@ public class AttachExceptionRecordToExistingCaseTest {
             ccdCaseCreator.createCase(singletonList(
                 new Document("certificate1.pdf", "154565768", "other", null, Instant.now(), dmUrl)
             ));
+        assertThat(caseDetails).isNotNull();
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
         // when
