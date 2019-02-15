@@ -77,6 +77,7 @@ public class AttachExceptionRecordToExistingCaseTest {
         //given
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList());
         assertThat(caseDetails).isNotNull();
+        assertThat(caseDetails.getData()).isNotEmpty();
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
         // when
@@ -84,7 +85,6 @@ public class AttachExceptionRecordToExistingCaseTest {
 
         //then
         await("Exception record is attached to the case")
-            .ignoreExceptions()
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
             .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 1));
@@ -100,6 +100,7 @@ public class AttachExceptionRecordToExistingCaseTest {
                 new Document("certificate1.pdf", "154565768", "other", null, Instant.now(), dmUrl)
             ));
         assertThat(caseDetails).isNotNull();
+        assertThat(caseDetails.getData()).isNotEmpty();
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
         // when
@@ -107,7 +108,6 @@ public class AttachExceptionRecordToExistingCaseTest {
 
         //then
         await("Exception record is attached to the case")
-            .ignoreExceptions()
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
             .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 2));
@@ -142,7 +142,6 @@ public class AttachExceptionRecordToExistingCaseTest {
         envelopeMessager.sendMessageFromFile(resourceName, "0000000000000000", poBox, dmUrl);
 
         await("Exception record is created")
-            .ignoreExceptions()
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
             .until(() -> lookUpExceptionRecord(poBox).isPresent());

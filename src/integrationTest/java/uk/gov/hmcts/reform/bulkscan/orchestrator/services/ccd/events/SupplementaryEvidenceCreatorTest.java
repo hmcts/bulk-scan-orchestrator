@@ -57,7 +57,6 @@ class SupplementaryEvidenceCreatorTest {
         await()
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(2, TimeUnit.SECONDS)
-            .ignoreExceptions()
             .until(() -> {
                 server.verify(postRequestedFor(urlPathEqualTo(CASE_EVENT_URL)));
 

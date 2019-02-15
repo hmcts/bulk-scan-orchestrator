@@ -50,6 +50,7 @@ public class SupplementaryEvidenceTest {
         String dmUrl = dmUploadService.uploadToDmStore("Evidence2.pdf", "documents/supplementary-evidence.pdf");
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList());
         assertThat(caseDetails).isNotNull();
+        assertThat(caseDetails.getData()).isNotEmpty();
 
         // when
         envelopeMessager.sendMessageFromFile(
@@ -62,7 +63,6 @@ public class SupplementaryEvidenceTest {
         // then
         assertThat(dmUrl).isNotNull();
         await("Supplementary evidence is attached to the case in ccd")
-            .ignoreExceptions()
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.TWO_SECONDS)
             .until(() -> hasCaseBeenUpdatedWithSupplementaryEvidence(caseDetails, 1));
@@ -81,6 +81,7 @@ public class SupplementaryEvidenceTest {
                 ));
 
         assertThat(caseDetails).isNotNull();
+        assertThat(caseDetails.getData()).isNotEmpty();
 
         // when
         envelopeMessager.sendMessageFromFile(
@@ -92,7 +93,6 @@ public class SupplementaryEvidenceTest {
 
         // then
         await("Supplementary evidence is attached to the case in ccd")
-            .ignoreExceptions()
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.TWO_SECONDS)
             .until(() -> hasCaseBeenUpdatedWithSupplementaryEvidence(caseDetails, 2));

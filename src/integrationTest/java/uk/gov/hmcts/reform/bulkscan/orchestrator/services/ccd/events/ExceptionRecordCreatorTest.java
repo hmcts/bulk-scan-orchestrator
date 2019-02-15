@@ -64,7 +64,6 @@ class ExceptionRecordCreatorTest {
 
         await()
             .atMost(30, TimeUnit.SECONDS)
-            .ignoreExceptions()
             .until(() -> {
                 server.verify(getRequestedFor(urlPathEqualTo(GET_CASE_URL)));
                 server.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
@@ -83,7 +82,6 @@ class ExceptionRecordCreatorTest {
 
         await()
             .atMost(30, TimeUnit.SECONDS)
-            .ignoreExceptions()
             .until(() -> {
                 server.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
 
@@ -98,7 +96,6 @@ class ExceptionRecordCreatorTest {
 
         await()
             .atMost(30, TimeUnit.SECONDS)
-            .ignoreExceptions()
             .until(() -> {
                 server.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
 
@@ -113,7 +110,6 @@ class ExceptionRecordCreatorTest {
 
         await()
             .atMost(30, TimeUnit.SECONDS)
-            .ignoreExceptions()
             .until(() -> {
                 server.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
 
