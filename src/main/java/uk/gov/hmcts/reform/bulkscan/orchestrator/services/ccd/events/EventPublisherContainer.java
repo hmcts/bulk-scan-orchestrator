@@ -39,10 +39,9 @@ public class EventPublisherContainer {
             case SUPPLEMENTARY_EVIDENCE:
                 CaseDetails caseDetails = caseRetrieval.get();
 
-                return caseDetails == null ? exceptionRecordCreator : new DelegatePublisher(
-                    attachDocsPublisher,
-                    caseDetails
-                );
+                return caseDetails == null
+                    ? exceptionRecordCreator
+                    : new DelegatePublisher(attachDocsPublisher, caseDetails);
             case EXCEPTION:
             case NEW_APPLICATION:
                 return exceptionRecordCreator;
