@@ -41,7 +41,7 @@ public class EventPublisherContainer {
 
                 return caseDetails == null
                     ? exceptionRecordCreator
-                    : new DelegatePublisher(attachDocsPublisher, caseDetails);
+                    : new DelegatePublisher(attachDocsPublisher, caseDetails.getCaseTypeId());
             case EXCEPTION:
             case NEW_APPLICATION:
                 return exceptionRecordCreator;

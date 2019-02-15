@@ -2,16 +2,15 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 public class DelegatePublisher implements EventPublisher {
 
     private final EventPublisher publisher;
     private final String caseTypeId;
 
-    DelegatePublisher(@NonNull EventPublisher publisher, @NonNull CaseDetails caseDetails) {
+    DelegatePublisher(@NonNull EventPublisher publisher, @NonNull String caseTypeId) {
         this.publisher = publisher;
-        this.caseTypeId = caseDetails.getCaseTypeId();
+        this.caseTypeId = caseTypeId;
     }
 
     @Override
