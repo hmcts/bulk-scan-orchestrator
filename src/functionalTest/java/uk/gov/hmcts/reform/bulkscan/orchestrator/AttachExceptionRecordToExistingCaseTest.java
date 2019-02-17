@@ -37,6 +37,7 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getScannedDocuments;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator.JURISDICTION;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -78,6 +79,10 @@ public class AttachExceptionRecordToExistingCaseTest {
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList());
         assertThat(caseDetails).isNotNull();
         assertThat(caseDetails.getData()).isNotEmpty();
+        assertThat(caseDetails.getId()).isNotNull();
+        assertThat(caseDetails.getId()).isGreaterThan(0L);
+        assertThat(caseDetails.getJurisdiction()).isEqualTo(JURISDICTION);
+        assertThat(caseRetriever.retrieve(caseDetails.getJurisdiction(), caseDetails.getId().toString())).isNotNull();
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
         // when
@@ -101,6 +106,11 @@ public class AttachExceptionRecordToExistingCaseTest {
             ));
         assertThat(caseDetails).isNotNull();
         assertThat(caseDetails.getData()).isNotEmpty();
+        assertThat(caseDetails.getId()).isNotNull();
+        assertThat(caseDetails.getId()).isGreaterThan(0L);
+        assertThat(caseDetails.getJurisdiction()).isEqualTo(JURISDICTION);
+        assertThat(caseRetriever.retrieve(caseDetails.getJurisdiction(), caseDetails.getId().toString())).isNotNull();
+
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
         // when

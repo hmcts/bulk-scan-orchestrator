@@ -26,10 +26,12 @@ import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getScannedDocuments;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator.JURISDICTION;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @ActiveProfiles("nosb") // no servicebus queue handler registration
+@SuppressWarnings("VariableDeclarationUsageDistance")
 public class SupplementaryEvidenceTest {
 
     @Autowired
@@ -51,6 +53,10 @@ public class SupplementaryEvidenceTest {
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList());
         assertThat(caseDetails).isNotNull();
         assertThat(caseDetails.getData()).isNotEmpty();
+        assertThat(caseDetails.getId()).isNotNull();
+        assertThat(caseDetails.getId()).isGreaterThan(0L);
+        assertThat(caseDetails.getJurisdiction()).isEqualTo(JURISDICTION);
+        assertThat(caseRetriever.retrieve(caseDetails.getJurisdiction(), caseDetails.getId().toString())).isNotNull();
 
         // when
         envelopeMessager.sendMessageFromFile(
@@ -82,6 +88,10 @@ public class SupplementaryEvidenceTest {
 
         assertThat(caseDetails).isNotNull();
         assertThat(caseDetails.getData()).isNotEmpty();
+        assertThat(caseDetails.getId()).isNotNull();
+        assertThat(caseDetails.getId()).isGreaterThan(0L);
+        assertThat(caseDetails.getJurisdiction()).isEqualTo(JURISDICTION);
+        assertThat(caseRetriever.retrieve(caseDetails.getJurisdiction(), caseDetails.getId().toString())).isNotNull();
 
         // when
         envelopeMessager.sendMessageFromFile(
