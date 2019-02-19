@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.endpoints;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ public class IdamConfigStatusEndpointTest {
         JsonNode responseNode = mapper.readTree(response);
 
         assertThat(responseNode.isArray()).isTrue();
-        assertThat(responseNode.elements()).hasSize(1);
+        assertThat(ImmutableList.copyOf(responseNode.elements())).hasSize(1);
 
         JurisdictionConfigurationStatus actual = new JurisdictionConfigurationStatus(
             responseNode.get(0).get("jurisdiction").asText(),
