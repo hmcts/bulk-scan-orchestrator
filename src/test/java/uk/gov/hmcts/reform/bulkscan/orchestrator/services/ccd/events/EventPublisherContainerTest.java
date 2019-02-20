@@ -19,6 +19,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.mode
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.NEW_APPLICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.SUPPLEMENTARY_EVIDENCE;
 
+@SuppressWarnings("checkstyle:LineLength")
 @RunWith(MockitoJUnitRunner.class)
 public class EventPublisherContainerTest {
 
