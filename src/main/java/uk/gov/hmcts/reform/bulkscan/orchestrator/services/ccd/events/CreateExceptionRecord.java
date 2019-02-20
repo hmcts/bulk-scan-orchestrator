@@ -17,7 +17,6 @@ public class CreateExceptionRecord extends AbstractEventPublisher {
         this.mapper = mapper;
     }
 
-    @Override
     public void publish(Envelope envelope) {
         publish(envelope, envelope.jurisdiction + "_" + CASE_TYPE);
     }

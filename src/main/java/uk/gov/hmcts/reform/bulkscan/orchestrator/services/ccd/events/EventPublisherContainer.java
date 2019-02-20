@@ -40,11 +40,11 @@ public class EventPublisherContainer {
                 CaseDetails caseDetails = caseRetrieval.get();
 
                 return caseDetails == null
-                    ? exceptionRecordCreator
-                    : new DelegatePublisher(attachDocsPublisher, caseDetails.getCaseTypeId());
+                    ? envelope -> exceptionRecordCreator.publish(envelope)
+                    : envelope -> attachDocsPublisher.publish(envelope, caseDetails.getCaseTypeId());
             case EXCEPTION:
             case NEW_APPLICATION:
-                return exceptionRecordCreator;
+                return envelope -> exceptionRecordCreator.publish(envelope);
             default:
                 throw new PublisherResolutionException(
                     "Cannot resolve publisher - unrecognised envelope classification: " + envelopeClassification
