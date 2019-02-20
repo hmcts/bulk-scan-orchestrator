@@ -53,7 +53,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
  * <p/>
  * Then include each publisher in {@link EventPublisherContainer}
  */
-abstract class AbstractEventPublisher implements EventPublisher {
+abstract class AbstractEventPublisher {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractEventPublisher.class);
 
@@ -66,7 +66,6 @@ abstract class AbstractEventPublisher implements EventPublisher {
     AbstractEventPublisher() {
     }
 
-    @Override
     public void publish(Envelope envelope, String caseTypeId) {
         String caseRef = envelope.caseRef;
 
