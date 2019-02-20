@@ -16,6 +16,7 @@ import javax.validation.constraints.NotNull;
  *     <li>use resource in {@link this#getPublisher(Classification, Supplier)})}</li>
  * </ul>
  */
+@SuppressWarnings("squid:S1612")
 @Component
 public class EventPublisherContainer {
 
