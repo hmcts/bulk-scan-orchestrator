@@ -18,7 +18,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.DelegatePublisher;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CreateExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -148,7 +148,7 @@ public class AttachExceptionRecordToExistingCaseTest {
     private Optional<CaseDetails> lookUpExceptionRecord(UUID randomPoBox) {
         List<CaseDetails> caseDetailsList = caseSearcher.search(
             SampleData.JURSIDICTION,
-            SampleData.JURSIDICTION + "_" + DelegatePublisher.EXCEPTION_RECORD_CASE_TYPE,
+            SampleData.JURSIDICTION + "_" + CreateExceptionRecord.CASE_TYPE,
             ImmutableMap.of(
                 "case.poBox", randomPoBox.toString()
             )
