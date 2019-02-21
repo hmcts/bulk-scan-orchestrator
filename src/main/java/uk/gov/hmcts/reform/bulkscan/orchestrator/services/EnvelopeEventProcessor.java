@@ -15,16 +15,19 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IMessageOpe
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IProcessedEnvelopeNotifier;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.NotificationSendingException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.InvalidMessageException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.MessageProcessingException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.handler.MessageProcessingResult;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.handler.MessageProcessingResultType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.EnvelopeEventProcessor.MessageProcessingResultType.POTENTIALLY_RECOVERABLE_FAILURE;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.EnvelopeEventProcessor.MessageProcessingResultType.SUCCESS;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.EnvelopeEventProcessor.MessageProcessingResultType.UNRECOVERABLE_FAILURE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser.parse;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.handler.MessageProcessingResultType.POTENTIALLY_RECOVERABLE_FAILURE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.handler.MessageProcessingResultType.SUCCESS;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.handler.MessageProcessingResultType.UNRECOVERABLE_FAILURE;
 
 @Service
 public class EnvelopeEventProcessor implements IMessageHandler {
@@ -190,25 +193,5 @@ public class EnvelopeEventProcessor implements IMessageHandler {
             : baseMessage;
 
         log.error(fullMessage, exception);
-    }
-
-    class MessageProcessingResult {
-        public final MessageProcessingResultType resultType;
-        public final Exception exception;
-
-        public MessageProcessingResult(MessageProcessingResultType resultType) {
-            this(resultType, null);
-        }
-
-        public MessageProcessingResult(MessageProcessingResultType resultType, Exception exception) {
-            this.resultType = resultType;
-            this.exception = exception;
-        }
-    }
-
-    enum MessageProcessingResultType {
-        SUCCESS,
-        UNRECOVERABLE_FAILURE,
-        POTENTIALLY_RECOVERABLE_FAILURE
     }
 }
