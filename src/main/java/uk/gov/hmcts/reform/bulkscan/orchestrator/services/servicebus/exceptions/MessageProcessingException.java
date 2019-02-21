@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions;
 
 public class MessageProcessingException extends RuntimeException {
 
