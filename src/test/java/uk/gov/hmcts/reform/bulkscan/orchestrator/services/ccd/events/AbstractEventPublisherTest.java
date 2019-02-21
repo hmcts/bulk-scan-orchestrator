@@ -34,7 +34,7 @@ public class AbstractEventPublisherTest {
     private static final Envelope ENVELOPE = SampleData.envelope(1);
 
     @InjectMocks
-    private EventPublisher eventPublisher = new AbstractEventPublisher() {
+    private AbstractEventPublisher eventPublisher = new AbstractEventPublisher() {
 
         @Override
         CaseData buildCaseData(StartEventResponse eventResponse, Envelope envelope) {
