@@ -150,13 +150,14 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @BeforeEach
     void before() throws JsonProcessingException {
+        WireMock.reset();
+
         WireMock.configureFor(server.port());
 
         givenThat(ccdStartEvent().willReturn(okJson(MAPPER.writeValueAsString(startEventResponse))));
         givenThat(ccdGetCaseMapping().willReturn(okJson(MAPPER.writeValueAsString(caseDetails))));
         givenThat(ccdSubmitEvent().willReturn(okJson(MAPPER.writeValueAsString(caseDetails))));
 
-        server.resetRequests();
 
         RestAssured.requestSpecification = new RequestSpecBuilder()
             .setPort(applicationPort)

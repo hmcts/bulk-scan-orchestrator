@@ -2,8 +2,12 @@
   "id" : "d28a821f-6438-477d-b8c6-5693d2bf62ed",
   "name" : "oauth2_authorize",
   "request" : {
-    "url" : "/oauth2/authorize?response_type=code&client_id=bsp&redirect_uri=http%3A%2F%2Flocalhost%2Freceiver",
-    "method" : "POST"
+    "url" : "/oauth2/authorize",
+    "method" : "POST",
+    "bodyPatterns" : [{
+      "equalTo" : "response_type=code&redirect_uri=http%3A%2F%2Flocalhost%2Freceiver&client_id=bsp",
+      "caseInsensitive" : false
+    }]
   },
   "response" : {
     "status" : 200,
