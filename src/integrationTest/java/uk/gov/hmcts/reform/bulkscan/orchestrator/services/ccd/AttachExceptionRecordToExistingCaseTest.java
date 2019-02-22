@@ -150,7 +150,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @BeforeEach
     void before() throws JsonProcessingException {
-        WireMock.reset();
+        server.resetRequests();
 
         WireMock.configureFor(server.port());
 

@@ -51,7 +51,7 @@ class ExceptionRecordCreatorTest {
 
     @BeforeEach
     void before() {
-        WireMock.reset();
+        server.resetRequests();
         WireMock.configureFor(server.port());
 
         givenThat(get(GET_CASE_URL).willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())));

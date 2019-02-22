@@ -44,7 +44,7 @@ class SupplementaryEvidenceCreatorTest {
     @DisplayName("Should call ccd to attach supplementary evidence for caseworker")
     @Test
     void should_call_ccd_to_attach_supplementary_evidence_for_caseworker() {
-        WireMock.reset();
+        server.resetRequests();
         // given
         WireMock.configureFor(server.port());
         givenThat(get(GET_CASE_URL).willReturn(aResponse().withBody(MOCK_RESPONSE)));
