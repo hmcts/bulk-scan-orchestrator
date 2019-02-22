@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.handler;
 
 import com.google.common.base.Strings;
 import com.microsoft.azure.servicebus.ExceptionPhase;
@@ -16,8 +16,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IProcessedE
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.NotificationSendingException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.InvalidMessageException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.MessageProcessingException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.handler.MessageProcessingResult;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.handler.MessageProcessingResultType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
