@@ -27,7 +27,10 @@ public class CaseRetriever {
     public CaseDetails retrieve(String jurisdiction, String caseRef) {
         // not including in try catch to fast fail the method
         CcdAuthenticator authenticator = factory.createForJurisdiction(jurisdiction);
+        //Temporarily logging auth tokens
 
+        System.out.println("For jurisdiction " + jurisdiction + " user token {} " + authenticator.getUserToken());
+        System.out.println("For jurisdiction " + jurisdiction + " user token {} " + authenticator.getServiceToken());
         try {
             CaseDetails caseDetails = coreCaseDataApi.getCase(
                 authenticator.getUserToken(),
