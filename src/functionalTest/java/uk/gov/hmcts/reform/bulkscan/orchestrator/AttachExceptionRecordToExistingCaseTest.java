@@ -41,6 +41,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @ActiveProfiles("nosb") // no servicebus queue handler registration
+@SuppressWarnings("squid:S106")
 public class AttachExceptionRecordToExistingCaseTest {
 
     @Value("${test-url}")
