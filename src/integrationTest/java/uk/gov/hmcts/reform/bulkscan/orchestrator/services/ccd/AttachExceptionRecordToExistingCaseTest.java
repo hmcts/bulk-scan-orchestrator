@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.MappingBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
@@ -15,9 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -57,10 +54,6 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @LocalServerPort
     private int applicationPort;
-
-    @Lazy
-    @Autowired
-    private WireMockServer server;
 
     private static final String caseUrl = CASE_SUBMIT_URL + "/" + CASE_REF;
 
@@ -150,10 +143,6 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @BeforeEach
     void before() throws JsonProcessingException {
-        server.resetRequests();
-
-        WireMock.configureFor(server.port());
-
         givenThat(ccdStartEvent().willReturn(okJson(MAPPER.writeValueAsString(startEventResponse))));
         givenThat(ccdGetCaseMapping().willReturn(okJson(MAPPER.writeValueAsString(caseDetails))));
         givenThat(ccdSubmitEvent().willReturn(okJson(MAPPER.writeValueAsString(caseDetails))));
@@ -164,6 +153,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .setContentType(JSON)
             .build();
     }
+
 
     private RequestPatternBuilder submittedScannedRecords() {
         return postRequestedFor(urlEqualTo(submitUrl));

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.microsoft.azure.servicebus.Message;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,7 +7,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -33,7 +31,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.GET_C
 
 @ExtendWith(SpringExtension.class)
 @IntegrationTest
-@AutoConfigureWireMock(port = 0)
 class ExceptionRecordCreatorTest {
 
     private static final String CASE_EVENT_TRIGGER_START_URL = Environment.CASE_EVENT_TRIGGER_START_URL
@@ -43,17 +40,10 @@ class ExceptionRecordCreatorTest {
 
     @Autowired
     @Lazy
-    private WireMockServer server;
-
-    @Autowired
-    @Lazy
     private MessageSender messageSender;
 
     @BeforeEach
     void before() {
-        server.resetRequests();
-        WireMock.configureFor(server.port());
-
         givenThat(get(GET_CASE_URL).willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())));
         givenThat(get(CASE_EVENT_TRIGGER_START_URL).willReturn(aResponse().withBody(
             "{\"case_details\":null,\"event_id\":\"eid\",\"token\":\"etoken\"}"
@@ -69,8 +59,8 @@ class ExceptionRecordCreatorTest {
             .atMost(30, TimeUnit.SECONDS)
             .ignoreExceptions()
             .until(() -> {
-                server.verify(getRequestedFor(urlPathEqualTo(GET_CASE_URL)));
-                server.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
+                WireMock.verify(getRequestedFor(urlPathEqualTo(GET_CASE_URL)));
+                WireMock.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
                 return true;
             });
     }
@@ -88,7 +78,7 @@ class ExceptionRecordCreatorTest {
             .atMost(30, TimeUnit.SECONDS)
             .ignoreExceptions()
             .until(() -> {
-                server.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
+                WireMock.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
 
                 return true;
             });
@@ -103,7 +93,7 @@ class ExceptionRecordCreatorTest {
             .atMost(30, TimeUnit.SECONDS)
             .ignoreExceptions()
             .until(() -> {
-                server.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
+                WireMock.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
 
                 return true;
             });
@@ -118,7 +108,7 @@ class ExceptionRecordCreatorTest {
             .atMost(30, TimeUnit.SECONDS)
             .ignoreExceptions()
             .until(() -> {
-                server.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
+                WireMock.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
 
                 return true;
             });
