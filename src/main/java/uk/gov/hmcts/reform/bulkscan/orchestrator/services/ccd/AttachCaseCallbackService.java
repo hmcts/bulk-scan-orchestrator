@@ -12,11 +12,11 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAScannedRecord;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAnId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseReference;
@@ -28,6 +28,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.i
 
 @Service
 public class AttachCaseCallbackService {
+
     private static final Logger log = LoggerFactory.getLogger(AttachCaseCallbackService.class);
     private final CcdApi ccdApi;
 
@@ -49,10 +50,12 @@ public class AttachCaseCallbackService {
 
     //The code below need to be rewritten to reuse the EventPublisher class
 
-    private List<String> attachCase(String exceptionRecordJurisdiction,
-                                    String caseRef,
-                                    Long exceptionRecordReference,
-                                    List<Map<String, Object>> exceptionDocuments) {
+    private List<String> attachCase(
+        String exceptionRecordJurisdiction,
+        String caseRef,
+        Long exceptionRecordReference,
+        List<Map<String, Object>> exceptionDocuments
+    ) {
         try {
             doAttachCase(exceptionRecordJurisdiction, caseRef, exceptionDocuments, exceptionRecordReference);
             return success();
@@ -61,10 +64,12 @@ public class AttachCaseCallbackService {
         }
     }
 
-    private void doAttachCase(String exceptionRecordJurisdiction,
-                              String caseRef,
-                              List<Map<String, Object>> exceptionDocuments,
-                              Long exceptionRecordReference) {
+    private void doAttachCase(
+        String exceptionRecordJurisdiction,
+        String caseRef,
+        List<Map<String, Object>> exceptionDocuments,
+        Long exceptionRecordReference
+    ) {
         CaseDetails theCase = ccdApi.getCase(caseRef, exceptionRecordJurisdiction);
         List<Map<String, Object>> scannedDocuments = getScannedDocuments(theCase);
 
@@ -79,10 +84,12 @@ public class AttachCaseCallbackService {
 
         StartEventResponse event = ccdApi.startAttachScannedDocs(theCase);
 
-        ccdApi.attachExceptionRecord(theCase,
+        ccdApi.attachExceptionRecord(
+            theCase,
             insertNewRecords(exceptionDocuments, scannedDocuments),
             createEventSummary(theCase, exceptionRecordReference, exceptionDocuments),
-            event);
+            event
+        );
     }
 
     @SuppressWarnings("unchecked")
@@ -94,23 +101,30 @@ public class AttachCaseCallbackService {
             Map<String, Object> document = (Map<String, Object>) doc.get("value");
             document.put("exceptionRecordReference", String.valueOf(exceptionRecordReference));
             return doc;
-        }).collect(Collectors.toList());
+        }).collect(toList());
     }
 
     private void throwDuplicateError(String caseRef, Set<String> duplicateIds) {
         throw new CallbackException(
-            format("Document(s) with control number %s are already attached to case reference: %s",
-                duplicateIds, caseRef)
+            format(
+                "Document(s) with control number %s are already attached to case reference: %s",
+                duplicateIds,
+                caseRef
+            )
         );
     }
 
-    private String createEventSummary(CaseDetails theCase,
-                                      Long exceptionRecordId,
-                                      List<Map<String, Object>> exceptionDocuments) {
-        return format("Attaching exception record(%d) document numbers:%s to case:%d",
+    private String createEventSummary(
+        CaseDetails theCase,
+        Long exceptionRecordId,
+        List<Map<String, Object>> exceptionDocuments
+    ) {
+        return format(
+            "Attaching exception record(%d) document numbers:%s to case:%d",
             exceptionRecordId,
             getDocumentNumbers(exceptionDocuments),
-            theCase.getId());
+            theCase.getId()
+        );
     }
 
     @Nonnull
