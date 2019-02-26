@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.microsoft.azure.servicebus.Message;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,16 +40,10 @@ class ExceptionRecordCreatorTest {
 
     @Autowired
     @Lazy
-    private WireMockServer server;
-
-    @Autowired
-    @Lazy
     private MessageSender messageSender;
 
     @BeforeEach
     void before() {
-        WireMock.configureFor(server.port());
-
         givenThat(get(GET_CASE_URL).willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())));
         givenThat(get(CASE_EVENT_TRIGGER_START_URL).willReturn(aResponse().withBody(
             "{\"case_details\":null,\"event_id\":\"eid\",\"token\":\"etoken\"}"
@@ -66,8 +59,8 @@ class ExceptionRecordCreatorTest {
             .atMost(30, TimeUnit.SECONDS)
             .ignoreExceptions()
             .until(() -> {
-                server.verify(getRequestedFor(urlPathEqualTo(GET_CASE_URL)));
-                server.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
+                WireMock.verify(getRequestedFor(urlPathEqualTo(GET_CASE_URL)));
+                WireMock.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
                 return true;
             });
     }
@@ -85,7 +78,7 @@ class ExceptionRecordCreatorTest {
             .atMost(30, TimeUnit.SECONDS)
             .ignoreExceptions()
             .until(() -> {
-                server.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
+                WireMock.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
 
                 return true;
             });
@@ -100,7 +93,7 @@ class ExceptionRecordCreatorTest {
             .atMost(30, TimeUnit.SECONDS)
             .ignoreExceptions()
             .until(() -> {
-                server.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
+                WireMock.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
 
                 return true;
             });
@@ -115,7 +108,7 @@ class ExceptionRecordCreatorTest {
             .atMost(30, TimeUnit.SECONDS)
             .ignoreExceptions()
             .until(() -> {
-                server.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
+                WireMock.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
 
                 return true;
             });
