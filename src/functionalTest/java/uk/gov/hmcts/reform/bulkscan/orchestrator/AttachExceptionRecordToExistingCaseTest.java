@@ -174,8 +174,6 @@ public class AttachExceptionRecordToExistingCaseTest {
         CaseDetails exceptionRecord,
         int expectedExceptionRecordsSize
     ) {
-        System.out.println("Retrieving case id  " + originalCase.getId() + "for jurisdiction "
-            + originalCase.getJurisdiction());
         CaseDetails updatedCase = caseRetriever.retrieve(
             originalCase.getJurisdiction(),
             String.valueOf(originalCase.getId())
