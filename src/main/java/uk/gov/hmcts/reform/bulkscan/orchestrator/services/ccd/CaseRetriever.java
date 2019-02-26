@@ -24,6 +24,7 @@ public class CaseRetriever {
         this.coreCaseDataApi = coreCaseDataApi;
     }
 
+    @SuppressWarnings("squid:S106")
     public CaseDetails retrieve(String jurisdiction, String caseRef) {
         // not including in try catch to fast fail the method
         CcdAuthenticator authenticator = factory.createForJurisdiction(jurisdiction);

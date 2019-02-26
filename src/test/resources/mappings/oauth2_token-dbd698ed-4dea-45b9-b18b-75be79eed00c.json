@@ -2,8 +2,12 @@
   "id" : "dbd698ed-4dea-45b9-b18b-75be79eed00c",
   "name" : "oauth2_token",
   "request" : {
-    "url" : "/oauth2/token?code=FuKdnrw4NHppHvgq&grant_type=authorization_code&redirect_uri=http%3A%2F%2Flocalhost%2Freceiver&client_id=bsp&client_secret=123456",
-    "method" : "POST"
+    "url" : "/oauth2/token",
+    "method" : "POST",
+    "bodyPatterns" : [ {
+      "equalTo" : "code=FuKdnrw4NHppHvgq&grant_type=authorization_code&redirect_uri=http%3A%2F%2Flocalhost%2Freceiver&client_secret=123456&client_id=bsp",
+      "caseInsensitive" : false
+    } ]
   },
   "response" : {
     "status" : 200,
