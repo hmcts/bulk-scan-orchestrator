@@ -84,10 +84,12 @@ public class AttachCaseCallbackService {
 
         StartEventResponse event = ccdApi.startAttachScannedDocs(theCase);
 
-        ccdApi.attachExceptionRecord(theCase,
+        ccdApi.attachExceptionRecord(
+            theCase,
             insertNewRecords(exceptionDocuments, scannedDocuments),
             createEventSummary(theCase, exceptionRecordReference, exceptionDocuments),
-            event);
+            event
+        );
     }
 
     @SuppressWarnings("unchecked")
