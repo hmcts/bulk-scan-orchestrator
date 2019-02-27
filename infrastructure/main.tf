@@ -65,8 +65,6 @@ locals {
     IDAM_CLIENT_SECRET        = "${data.azurerm_key_vault_secret.idam_client_secret.value}"
     IDAM_CLIENT_REDIRECT_URI  = "${var.idam_client_redirect_uri}"
     CORE_CASE_DATA_API_URL    = "${local.ccdApiUrl}"
-    
-    FORCE_UPDATE_APP_SETTINGS = "true"
   }
 }
 
