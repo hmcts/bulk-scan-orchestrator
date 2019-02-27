@@ -49,25 +49,23 @@ tasks.withType(JavaCompile) {
   options.compilerArgs << "-Xlint:unchecked" << "-Werror"
 }
 
-test {
+tasks.withType(Test) {
   useJUnitPlatform()
+
+  testLogging {
+    exceptionFormat = 'full'
+  }
 }
 
 task functional(type: Test, description: 'Runs the functional tests.', group: 'Verification') {
   testClassesDirs = sourceSets.functionalTest.output.classesDirs
   classpath = sourceSets.functionalTest.runtimeClasspath
-  useJUnitPlatform()
 }
 
 task integration(type: Test, description: 'Runs the integration tests.', group: 'Verification') {
   testClassesDirs = sourceSets.integrationTest.output.classesDirs
   classpath = sourceSets.integrationTest.runtimeClasspath
-  useJUnitPlatform()
   failFast = true
-
-  testLogging {
-    exceptionFormat = 'full'
-  }
 }
 
 task smoke(type: Test) {
