@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,10 +22,6 @@ class CaseRetrievalTest {
 
     @Autowired
     @Lazy
-    private WireMockServer server;
-
-    @Autowired
-    @Lazy
     private CcdAuthenticatorFactory factory;
 
     @Autowired
@@ -42,6 +38,6 @@ class CaseRetrievalTest {
         caseRetriever.retrieve(JURISDICTION, CASE_REF);
 
         // then
-        server.verify(getRequestedFor(urlEqualTo(GET_CASE_URL)));
+        WireMock.verify(getRequestedFor(urlEqualTo(GET_CASE_URL)));
     }
 }
