@@ -38,7 +38,7 @@ public class IdamConfigStatusTest {
                 responseStatus.get("error_description").asText()
             );
 
-            assertThat(status.isCorrect || status.jurisdiction.toUpperCase().equals("BULKSCAN"))
+            assertThat(status.isCorrect)
                 .withFailMessage(
                     "Misconfigured %s jurisdiction, error description: %s. Check the logs for more details",
                     status.jurisdiction,
