@@ -38,6 +38,7 @@ public class IdamConfigStatusTest {
                 responseStatus.get("error_description").asText()
             );
 
+            // TODO BPS-560
             assertThat(status.isCorrect || status.jurisdiction.equalsIgnoreCase("BULKSCAN"))
                 .withFailMessage(
                     "Misconfigured %s jurisdiction, error description: %s. Check the logs for more details",
