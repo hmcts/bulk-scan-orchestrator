@@ -2,13 +2,13 @@ java:
   applicationPort: 8582
   secrets:
     SB_CONN_STRING:
-      secretRef: servicebus-namespace-${SERVICE_NAME}
+      secretRef: servicebus-secret-namespace-${SERVICE_NAME}
       key: connectionString
     ENVELOPES_QUEUE_CONNECTION_STRING:
-      secretRef: servicebus-queue-${SERVICE_NAME}-envelopes
+      secretRef: servicebus-secret-queue-${SERVICE_NAME}-envelopes
       key: connectionString
     PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING:
-      secretRef: servicebus-queue-${SERVICE_NAME}-processed-envelopes
+      secretRef: servicebus-secret-queue-${SERVICE_NAME}-processed-envelopes
       key: connectionString
   environment:
     POSTGRES_USER: hmcts
