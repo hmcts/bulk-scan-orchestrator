@@ -1,0 +1,37 @@
+java:
+  applicationPort: 8582
+  secrets:
+    SB_CONN_STRING:
+      secretRef: servicebus-secret-namespace-${SERVICE_NAME}
+      key: connectionString
+    ENVELOPES_QUEUE_CONNECTION_STRING:
+      secretRef: servicebus-secret-queue-${SERVICE_NAME}-envelopes
+      key: connectionString
+    PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING:
+      secretRef: servicebus-secret-queue-${SERVICE_NAME}-processed-envelopes
+      key: connectionString
+  environment:
+    POSTGRES_USER: hmcts
+    S2S_SECRET: "${S2S_SECRET}"
+    IDAM_CLIENT_SECRET: "${IDAM_CLIENT_SECRET}"
+    IDAM_USER_NAME: "${IDAM_USER_NAME}"
+    IDAM_USER_PASSWORD: "${IDAM_USER_PASSWORD}"
+    IDAM_USERS_BULKSCAN_USERNAME: "${IDAM_USER_NAME}"
+    IDAM_USERS_BULKSCAN_PASSWORD: "${IDAM_USER_PASSWORD}"
+    #ENVELOPES_QUEUE_CONNECTION_STRING: "$(SB_CONN_STRING);EntityPath=envelopes"
+    #PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING: "$(SB_CONN_STRING);EntityPath=processed-envelopes"
+  # Don't modify below here
+  image: ${IMAGE_NAME}
+  ingressHost: ${SERVICE_FQDN}
+
+servicebus:
+  resourceGroup: bulk-scan-aks
+  teamName: "Software Engineering"
+  location: uksouth
+  serviceplan: basic
+  setup:
+    queues:
+      - name: envelopes
+      - name: notifications
+      - name: processed-envelopes
+
