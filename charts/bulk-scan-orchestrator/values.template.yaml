@@ -1,5 +1,7 @@
 java:
   applicationPort: 8582
+  readinessPath: '/health'
+  livenessPath: '/health'
   secrets:
     SB_CONN_STRING:
       secretRef: servicebus-secret-namespace-${SERVICE_NAME}
