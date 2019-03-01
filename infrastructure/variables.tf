@@ -56,5 +56,5 @@ variable "s2s_name" {
 variable "supported_jurisdictions" {
   type = "list"
   description = "Jurisdictions to be supported by Bulk Scan in the given environment. Bulk Scan will only be able to map these ones to IDAM user credentials"
-  default = ["SSCS", "BULKSCAN", "PROBATE", "DIVORCE"]
+  default = ["SSCS", "BULKSCAN", "PROBATE", "DIVORCE", "FINREM"]
 }
