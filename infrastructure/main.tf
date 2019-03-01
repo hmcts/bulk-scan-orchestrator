@@ -29,6 +29,7 @@ locals {
     BULKSCAN = "idam-users-bulkscan"
     DIVORCE = "idam-users-div"
     PROBATE = "idam-users-probate"
+    FINREM = "idam-users-finrem"
   }
 
   all_jurisdictions     = "${keys(local.users)}"
