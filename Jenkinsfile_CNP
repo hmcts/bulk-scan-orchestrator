@@ -50,7 +50,7 @@ withPipeline(type, product, component) {
       def subscription = env.SUBSCRIPTION_NAME
       def aksServiceName = dockerImage.getAksServiceName().toLowerCase()
       def queueSecret = "servicebus-secret-queue-${aksServiceName}-envelopes"
-      def namespace = new TeamNames().getName(product)
+      def namespace = new TeamNames().getNameNormalizedOrThrow(product)
 
       def kubectl = new Kubectl(this, subscription, namespace)
       kubectl.login()
