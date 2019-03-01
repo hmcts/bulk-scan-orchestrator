@@ -11,7 +11,6 @@ java:
       secretRef: servicebus-secret-queue-${SERVICE_NAME}-processed-envelopes
       key: connectionString
   environment:
-    POSTGRES_USER: hmcts
     S2S_SECRET: "${S2S_SECRET}"
     IDAM_CLIENT_SECRET: "${IDAM_CLIENT_SECRET}"
     IDAM_USER_NAME: "${IDAM_USER_NAME}"
