@@ -44,8 +44,6 @@ withPipeline(type, product, component) {
 
       // Envelopes queue connection string is needed by the functional tests client.
       // The following code (as ugly as it looks!) gets it from the k8s cluster
-      def az = { cmd -> return sh(script: "env AZURE_CONFIG_DIR=/opt/jenkins/.azure-${env.SUBSCRIPTION_NAME} az $cmd", returnStdout: true).trim() }
-
       def dockerImage = new DockerImage(product, component, null, env.BRANCH_NAME)
       def subscription = env.SUBSCRIPTION_NAME
       def aksServiceName = dockerImage.getAksServiceName().toLowerCase()
