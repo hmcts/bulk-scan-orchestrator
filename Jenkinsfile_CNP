@@ -56,8 +56,8 @@ withPipeline(type, product, component) {
       kubectl.login()
 
       // Get envelopes queue connection string
-      def queueConnectionStr = kubectl.getSecret(queueSecret, namespace, "{.data.connectionString}")
-      env.ENVELOPES_QUEUE_WRITE_CONN_STRING = "${queueConnectionStr}"
+      def sbNamespace = kubectl.getSecret(queueSecret, namespace, "{.namespaceName}")
+      env.ENVELOPES_QUEUE_WRITE_CONN_STRING = "${sbNamespace};EntityPath=envelopes"
 
     }
   }
