@@ -69,6 +69,7 @@ public class IdamConfigStatusEndpoint {
 
     private JurisdictionConfigurationStatus checkCredentials(String jurisdiction, Credential credential) {
         try {
+            log.warn("U: {}; P: {}", credential.getUsername(), credential.getPassword());
             idamClient.authenticateUser(credential.getUsername(), credential.getPassword());
 
             log.debug("Successful authentication of {} jurisdiction", jurisdiction);
