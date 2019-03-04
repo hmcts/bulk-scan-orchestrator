@@ -39,3 +39,8 @@ idam:
     id: 'bsp'
     secret: 123456
     redirect_uri: http://localhost/receiver
+  users:
+    bulkscan:
+      username: ${bulk-scan.idam-users-bulkscan-username}
+      password: ${bulk-scan.idam-users-bulkscan-password}
+
