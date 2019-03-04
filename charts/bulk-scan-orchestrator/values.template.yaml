@@ -18,6 +18,9 @@ java:
       resourceGroup: bulk-scan
       secrets:
         - idam-client-secret
+    "s2s":
+      resourceGroup: rpe-service-auth-provider
+      secrets:
         - microservicekey-bulk-scan-orchestrator
   # Don't modify below here
   image: ${IMAGE_NAME}
