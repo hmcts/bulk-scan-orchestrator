@@ -126,4 +126,63 @@ public class CcdApi {
         return new CallbackException(format(errorFmt, arg1, arg2), e);
     }
 
+    public CcdAuthenticator authenticateJurisdiction(String jurisdiction) {
+        return authenticatorFactory.createForJurisdiction(jurisdiction);
+    }
+
+    public StartEventResponse startEvent(
+        CcdAuthenticator authenticator,
+        String jurisdiction,
+        String caseTypeId,
+        String caseRef,
+        String eventTypeId
+    ) {
+        return  caseRef == null
+            ? feignCcdApi.startForCaseworker(
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                authenticator.getUserDetails().getId(),
+                jurisdiction,
+                caseTypeId,
+                eventTypeId
+            )
+            : feignCcdApi.startEventForCaseWorker(
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                authenticator.getUserDetails().getId(),
+                jurisdiction,
+                caseTypeId,
+                caseRef,
+                eventTypeId
+            );
+    }
+
+    public CaseDetails submitEvent(
+        CcdAuthenticator authenticator,
+        String jurisdiction,
+        String caseTypeId,
+        String caseRef,
+        CaseDataContent caseDataContent
+    ) {
+        return caseRef == null
+            ? feignCcdApi.submitForCaseworker(
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                authenticator.getUserDetails().getId(),
+                jurisdiction,
+                caseTypeId,
+                true,
+                caseDataContent
+            )
+            : feignCcdApi.submitEventForCaseWorker(
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                authenticator.getUserDetails().getId(),
+                jurisdiction,
+                caseTypeId,
+                caseRef,
+                true,
+                caseDataContent
+            );
+    }
 }
