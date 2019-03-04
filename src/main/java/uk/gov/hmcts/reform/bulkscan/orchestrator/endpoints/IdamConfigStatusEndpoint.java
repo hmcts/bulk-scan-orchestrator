@@ -44,6 +44,7 @@ public class IdamConfigStatusEndpoint {
     public List<JurisdictionConfigurationStatus> jurisdictions() {
         if (env != null) {
             log.warn("US: {}", env.getProperty("IDAM_USERS_BULKSCAN_USERNAME"));
+            log.warn("US.: {}", env.getProperty("idam.users.bulkscan.username"));
             log.warn("us: {}", env.getProperty("bulk-scan.idam-users-bulkscan-username"));
         }
         jurisdictionMapping.getUsers()

@@ -6,6 +6,6 @@ spring:
       paths: /mnt/secrets/bulk-scan,/mnt/secrets/s2s
       aliases:
         bulk-scan.idam-client-secret: IDAM_CLIENT_SECRET
-        bulk-scan.idam-users-bulkscan-username: IDAM_USERS_BULKSCAN_USERNAME
-        bulk-scan.idam-users-bulkscan-password: IDAM_USERS_BULKSCAN_PASSWORD
+        bulk-scan.idam-users-bulkscan-username: idam.users.bulkscan.username
+        bulk-scan.idam-users-bulkscan-password: idam.users.bulkscan.password
         s2s.microservicekey-bulk-scan-orchestrator: S2S_SECRET
