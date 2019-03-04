@@ -3,10 +3,12 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.endpoints;
 import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.actuate.endpoint.annotation.Selector;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.out.JurisdictionConfigurationStatus;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.Credential;
@@ -27,6 +29,9 @@ public class IdamConfigStatusEndpoint {
     private final JurisdictionToUserMapping jurisdictionMapping;
     private final IdamClient idamClient;
 
+    @Autowired
+    private Environment env;
+
     public IdamConfigStatusEndpoint(
         JurisdictionToUserMapping mapping,
         IdamClient idamClient
@@ -37,6 +42,14 @@ public class IdamConfigStatusEndpoint {
 
     @ReadOperation
     public List<JurisdictionConfigurationStatus> jurisdictions() {
+        if (env != null) {
+            log.warn("US: {}", env.getProperty("IDAM_USERS_BULKSCAN_USERNAME"));
+            log.warn("us: {}", env.getProperty("bulk-scan.idam-users-bulkscan-username"));
+        }
+        jurisdictionMapping.getUsers()
+            .entrySet()
+            .forEach(e -> log.warn("EK: {}; EV: {}", e.getKey(), e.getValue()));
+
         return jurisdictionMapping.getUsers()
             .entrySet()
             .stream()
