@@ -16,10 +16,7 @@ java:
         - idam-client-secret
         - idam-users-bulkscan-username
         - idam-users-bulkscan-password
-    "s2s":
-      resourceGroup: rpe-service-auth-provider
-      secrets:
-        - microservicekey-bulk-scan-orchestrator
+        - s2s-secret-for-tests
   # Don't modify below here
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
