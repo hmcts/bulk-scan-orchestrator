@@ -1,0 +1,7 @@
+spring:
+  cloud:
+    propertiesvolume:
+      paths: /mnt/secrets/bulk-scan
+      aliases:
+        bulk-scan.idam-client-secret: IDAM_CLIENT_SECRET
+        bulk-scan.microservicekey-bulk-scan-orchestrator: S2S_SECRET
