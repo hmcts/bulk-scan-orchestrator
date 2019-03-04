@@ -7,8 +7,6 @@ java:
       secretRef: servicebus-secret-namespace-${SERVICE_NAME}
       key: connectionString
   environment:
-    S2S_SECRET: "${S2S_SECRET}"
-    IDAM_CLIENT_SECRET: "${IDAM_CLIENT_SECRET}"
     IDAM_USERS_BULKSCAN_USERNAME: "${IDAM_USER_NAME}"
     IDAM_USERS_BULKSCAN_PASSWORD: "${IDAM_USER_PASSWORD}"
     ENVELOPES_QUEUE_CONNECTION_STRING: "$(SB_CONN_STRING);EntityPath=envelopes"
