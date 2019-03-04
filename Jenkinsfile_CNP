@@ -14,6 +14,8 @@ def channel = '#bsp-build-notices'
 GradleBuilder builder = new GradleBuilder(this, product)
 
 List<LinkedHashMap<String, Object>> secrets = [
+  secret('idam-users-bulkscan-username', 'IDAM_USER_NAME'),
+  secret('idam-users-bulkscan-password', 'IDAM_USER_PASSWORD'),
 ]
 
 static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
