@@ -13,6 +13,9 @@ def component = "orchestrator"
 def channel = '#bsp-build-notices'
 GradleBuilder builder = new GradleBuilder(this, product)
 
+List<LinkedHashMap<String, Object>> secrets = [
+]
+
 static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
   [ $class: 'AzureKeyVaultSecret',
     secretType: 'Secret',
