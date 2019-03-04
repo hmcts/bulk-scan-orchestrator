@@ -1,6 +1,8 @@
 spring:
   cloud:
     propertiesvolume:
+      enabled: true
+      prefixed: true
       paths: /mnt/secrets/bulk-scan,/mnt/secrets/s2s
       aliases:
         bulk-scan.idam-client-secret: IDAM_CLIENT_SECRET
