@@ -45,10 +45,6 @@ public class JurisdictionToUserMapping {
     public Credential getUser(String jurisdiction) {
         log.warn("US: {}", env.getProperty("IDAM_USERS_BULKSCAN_USERNAME"));
         log.warn("us: {}", env.getProperty("bulk-scan.idam-users-bulkscan-username"));
-        log.warn("J: {}; U: {}",
-            jurisdiction,
-            (users.get(jurisdiction.toLowerCase()) != null ? users.get(jurisdiction.toLowerCase()).getUsername() : null)
-        );
         return users.computeIfAbsent(jurisdiction.toLowerCase(), this::throwNotFound);
     }
 
