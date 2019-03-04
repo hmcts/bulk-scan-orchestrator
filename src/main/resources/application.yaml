@@ -41,6 +41,6 @@ idam:
     redirect_uri: http://localhost/receiver
   users:
     bulkscan:
-      username: ${bulk-scan.idam-users-bulkscan-username}
-      password: ${bulk-scan.idam-users-bulkscan-password}
+      username: ${IDAM_USERS_BULKSCAN_USERNAME}
+      password: ${IDAM_USERS_BULKSCAN_PASSWORD}
 
