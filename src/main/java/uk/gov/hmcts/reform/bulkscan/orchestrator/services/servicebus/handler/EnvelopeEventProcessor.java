@@ -62,7 +62,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
             tryFinaliseProcessedMessage(message, result);
 
             completableFuture.complete(null);
-        } catch (Throwable t) {
+        } catch (Exception t) {
             completableFuture.completeExceptionally(t);
         }
         return completableFuture;
@@ -162,7 +162,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
     @Override
     public void notifyException(Throwable exception, ExceptionPhase phase) {
-        log.error("Error while handling message at stage: " + phase, exception);
+        log.error("Error while handling message at stage: {}", phase, exception);
     }
 
     private Supplier<CaseDetails> getCaseRetriever(final Envelope envelope) {
