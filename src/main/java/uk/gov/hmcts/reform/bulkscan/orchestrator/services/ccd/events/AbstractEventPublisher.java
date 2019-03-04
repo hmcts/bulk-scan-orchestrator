@@ -53,10 +53,32 @@ abstract class AbstractEventPublisher {
     }
 
     protected void publish(Envelope envelope, String caseTypeId, String eventTypeId, String eventSummary) {
-        CcdAuthenticator authenticator = ccdApi.authenticateJurisdiction(envelope.jurisdiction);
-        StartEventResponse eventResponse = startEvent(authenticator, envelope, caseTypeId, eventTypeId);
-        CaseDataContent caseDataContent = buildCaseDataContent(eventResponse, envelope, eventTypeId, eventSummary);
-        submitEvent(authenticator, envelope, caseDataContent, caseTypeId, eventTypeId);
+        String caseRef = getCaseRef(envelope);
+        String jurisdiction = envelope.jurisdiction;
+
+        CcdAuthenticator authenticator = ccdApi.authenticateJurisdiction(jurisdiction);
+        StartEventResponse startEventResponse = ccdApi.startEvent(
+            authenticator,
+            jurisdiction,
+            caseTypeId,
+            caseRef,
+            eventTypeId
+        );
+        logEventStart(envelope, eventTypeId, caseRef == null ? "NO_CASE" : caseRef, caseTypeId);
+        CaseDataContent caseDataContent = buildCaseDataContent(
+            startEventResponse,
+            envelope,
+            eventTypeId,
+            eventSummary
+        );
+        CaseDetails submitEventResponse = ccdApi.submitEvent(
+            authenticator,
+            jurisdiction,
+            caseTypeId,
+            caseRef,
+            caseDataContent
+        );
+        logSubmitEvent(envelope, caseTypeId, eventTypeId, submitEventResponse.getId());
     }
 
     // region - execution steps
@@ -65,34 +87,15 @@ abstract class AbstractEventPublisher {
         return envelope.caseRef;
     }
 
-    private StartEventResponse startEvent(
-        CcdAuthenticator authenticator,
-        Envelope envelope,
-        String caseTypeId,
-        String eventTypeId
-    ) {
-        String caseRef = getCaseRef(envelope);
-
-        StartEventResponse response = ccdApi.startEvent(
-            authenticator,
-            envelope.jurisdiction,
-            caseTypeId,
-            caseRef,
-            eventTypeId
-        );
-
-        String caseRefForLog = caseRef == null ? "NO_CASE" : caseRef;
-
+    private void logEventStart(Envelope envelope, String eventTypeId, String caseRef, String caseTypeId) {
         log.info(
             "Started CCD event of type {} for envelope with ID {}, file name {}, case ref {}, case type {}",
             eventTypeId,
             envelope.id,
             envelope.zipFileName,
-            caseRefForLog,
+            caseRef,
             caseTypeId
         );
-
-        return response;
     }
 
     abstract CaseData buildCaseData(StartEventResponse eventResponse, Envelope envelope);
@@ -115,28 +118,14 @@ abstract class AbstractEventPublisher {
             .build();
     }
 
-    private void submitEvent(
-        CcdAuthenticator authenticator,
-        Envelope envelope,
-        CaseDataContent caseDataContent,
-        String caseTypeId,
-        String eventTypeId
-    ) {
-        CaseDetails response = ccdApi.submitEvent(
-            authenticator,
-            envelope.jurisdiction,
-            caseTypeId,
-            getCaseRef(envelope),
-            caseDataContent
-        );
-
+    private void logSubmitEvent(Envelope envelope, String caseTypeId, String eventTypeId, Long submitEventResponseId) {
         log.info(
             "Created CCD case of type {} and event of type {}. Envelope ID: {}, file name: {}, case ID: {}",
             caseTypeId,
             eventTypeId,
             envelope.id,
             envelope.zipFileName,
-            response.getId()
+            submitEventResponseId
         );
     }
 
