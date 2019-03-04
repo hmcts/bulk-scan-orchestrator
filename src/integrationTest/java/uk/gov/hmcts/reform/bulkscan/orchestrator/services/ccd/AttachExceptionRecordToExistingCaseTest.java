@@ -10,6 +10,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
+import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_SUBMIT_URL;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_BULK_SCAN;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_EXCEPTION_RECORD;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURISDICTION;
 
 @ExtendWith(SpringExtension.class)
@@ -86,6 +88,7 @@ class AttachExceptionRecordToExistingCaseTest {
     private static final Map<String, Object> caseData = ImmutableMap.of(
         "scannedDocuments", ImmutableList.of(scannedDocument)
     );
+
     private static final CaseDetails caseDetails = CaseDetails.builder()
         .jurisdiction(JURISDICTION)
         .caseTypeId(CASE_TYPE_BULK_SCAN)
@@ -99,21 +102,20 @@ class AttachExceptionRecordToExistingCaseTest {
             .withHeader("ServiceAuthorization", containing(mockedS2sTokenSig));
     }
 
-    private static final long recordId = 9876L;
+    private static final long EXCEPTION_RECORD_ID = 26409983479785245L;
     private static final String exceptionRecordFileName = "record.pdf";
     private static final String exceptionRecordDocumentNumber = "654321";
     private static final Map<String, Object> scannedRecord = document(
         exceptionRecordFileName,
         exceptionRecordDocumentNumber
     );
-    private static final Map<String, Object> exceptionData = exceptionDataWithDoc(scannedRecord);
 
     private CaseDetails.CaseDetailsBuilder exceptionRecordBuilder() {
         return CaseDetails.builder()
             .jurisdiction(JURISDICTION)
-            .id(recordId)
+            .id(EXCEPTION_RECORD_ID)
             .caseTypeId("ExceptionRecord")
-            .data(exceptionData);
+            .data(exceptionDataWithDoc(scannedRecord, CASE_REF));
     }
 
     private static Map<String, Object> document(String filename, String documentNumber) {
@@ -125,13 +127,6 @@ class AttachExceptionRecordToExistingCaseTest {
                 "someNumber", 3
             ),
             "someString", "someValue"
-        );
-    }
-
-    private static Map<String, Object> exceptionDataWithDoc(Map<String, Object> map) {
-        return ImmutableMap.of(
-            "attachToCaseReference", CASE_REF,
-            "scannedDocuments", ImmutableList.of(map)
         );
     }
 
@@ -147,6 +142,15 @@ class AttachExceptionRecordToExistingCaseTest {
         givenThat(ccdGetCaseMapping().willReturn(okJson(MAPPER.writeValueAsString(caseDetails))));
         givenThat(ccdSubmitEvent().willReturn(okJson(MAPPER.writeValueAsString(caseDetails))));
 
+        givenThat(
+            ccdGetExceptionRecord()
+                .willReturn(
+                    // an exception record not attached to any case
+                    okJson(
+                        MAPPER.writeValueAsString(exceptionRecordDetails(null))
+                    )
+                )
+        );
 
         RestAssured.requestSpecification = new RequestSpecBuilder()
             .setPort(applicationPort)
@@ -201,7 +205,7 @@ class AttachExceptionRecordToExistingCaseTest {
             "$.event.summary",
             WireMock.equalTo(String.format(
                 "Attaching exception record(%d) document numbers:[%s] to case:%s",
-                recordId,
+                EXCEPTION_RECORD_ID,
                 exceptionRecordDocumentNumber,
                 CASE_REF
             ))
@@ -254,13 +258,7 @@ class AttachExceptionRecordToExistingCaseTest {
     @Test
     void should_fail_correctly_if_document_is_duplicate_or_document_is_already_attached() {
         given()
-            .body(exceptionRecordCallbackBodyBuilder()
-                .caseDetails(exceptionRecordBuilder()
-                    .data(exceptionDataWithDoc(scannedDocument))
-                    .build()
-                )
-                .build()
-            )
+            .body(attachToCaseRequest(CASE_REF))
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -314,6 +312,28 @@ class AttachExceptionRecordToExistingCaseTest {
             .body("errors", hasItem("Internal Error: callback or case details were empty"));
     }
 
+    @Test
+    void should_fail_when_exception_record_is_already_attached_to_a_case() throws Exception {
+        givenThat(
+            ccdGetExceptionRecord()
+                .willReturn(
+                    // return an exception record already attached to some case
+                    okJson(
+                        MAPPER.writeValueAsString(
+                            exceptionRecordDetails("1234567890123456")
+                        )
+                    )
+                )
+        );
+
+        given()
+            .body(attachToCaseRequest(CASE_REF))
+            .post("/callback/{type}", "attach_case")
+            .then()
+            .statusCode(200)
+            .body("errors", hasItem("Exception record is already attached to a case"));
+    }
+
     @DisplayName("Should create error if type in incorrect")
     @Test
     void should_create_error_if_type_in_incorrect() {
@@ -324,7 +344,45 @@ class AttachExceptionRecordToExistingCaseTest {
             .statusCode(404);
     }
 
+    private CallbackRequest attachToCaseRequest(String attachToCaseReference) {
+        return exceptionRecordCallbackBodyBuilder()
+            .caseDetails(
+                exceptionRecordBuilder()
+                    .data(exceptionDataWithDoc(scannedDocument, attachToCaseReference))
+                    .build()
+            )
+            .build();
+    }
+
     private void verifyRequestPattern(RequestPatternBuilder builder, String jsonPath, StringValuePattern pattern) {
         verify(builder.withRequestBody(matchingJsonPath(jsonPath, pattern)));
+    }
+
+    private CaseDetails exceptionRecordDetails(String attachToCaseReference) {
+        return CaseDetails.builder()
+            .jurisdiction(JURISDICTION)
+            .caseTypeId(CASE_TYPE_EXCEPTION_RECORD)
+            .id(EXCEPTION_RECORD_ID)
+            .data(exceptionDataWithDoc(scannedRecord, attachToCaseReference))
+            .build();
+    }
+
+    private Map<String, Object> exceptionDataWithDoc(
+        Map<String, Object> scannedDocument,
+        String attachToCaseReference
+    ) {
+        Map<String, Object> exceptionData = Maps.newHashMap("scannedDocuments", ImmutableList.of(scannedDocument));
+
+        if (attachToCaseReference != null) {
+            exceptionData.put("attachToCaseReference", attachToCaseReference);
+        }
+
+        return exceptionData;
+    }
+
+    private MappingBuilder ccdGetExceptionRecord() {
+        return get("/cases/" + EXCEPTION_RECORD_ID)
+            .withHeader(AUTHORIZATION, containing(mockedIdamTokenSig))
+            .withHeader("ServiceAuthorization", containing(mockedS2sTokenSig));
     }
 }

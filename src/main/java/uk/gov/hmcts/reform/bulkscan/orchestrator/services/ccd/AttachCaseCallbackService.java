@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import io.vavr.Value;
 import io.vavr.control.Validation;
+import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.i
 public class AttachCaseCallbackService {
 
     private static final Logger log = LoggerFactory.getLogger(AttachCaseCallbackService.class);
+    private static final String ATTACH_CASE_REFERENCE_FIELD_NAME = "attachToCaseReference";
+
     private final CcdApi ccdApi;
 
     public AttachCaseCallbackService(CcdApi ccdApi) {
@@ -77,6 +80,8 @@ public class AttachCaseCallbackService {
         CaseDetails theCase = ccdApi.getCase(targetCaseRef, exceptionRecordJurisdiction);
         List<Map<String, Object>> targetCaseDocuments = getScannedDocuments(theCase);
 
+        verifyExceptionRecordIsNotAttachedToCase(exceptionRecordJurisdiction, exceptionRecordId);
+
         //This is done so exception record does not change state if there is a document error
         checkForDuplicatesOrElse(
             exceptionRecordDocuments,
@@ -94,6 +99,20 @@ public class AttachCaseCallbackService {
             createEventSummary(theCase, exceptionRecordId, exceptionRecordDocuments),
             event
         );
+    }
+
+    private void verifyExceptionRecordIsNotAttachedToCase(
+        String exceptionRecordJurisdiction,
+        Long exceptionRecordReference
+    ) {
+        CaseDetails fetchedExceptionRecord = ccdApi.getCase(
+            exceptionRecordReference.toString(),
+            exceptionRecordJurisdiction
+        );
+
+        if (isExceptionRecordAttachedToCase(fetchedExceptionRecord)) {
+            throw new CallbackException("Exception record is already attached to a case");
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -129,5 +148,13 @@ public class AttachCaseCallbackService {
             getDocumentNumbers(exceptionDocuments),
             theCase.getId()
         );
+    }
+
+    private boolean isExceptionRecordAttachedToCase(CaseDetails exceptionRecordDetails) {
+        Object attachToCaseReference = exceptionRecordDetails
+            .getData()
+            .get(ATTACH_CASE_REFERENCE_FIELD_NAME);
+
+        return attachToCaseReference != null && Strings.isNotEmpty(attachToCaseReference.toString());
     }
 }
