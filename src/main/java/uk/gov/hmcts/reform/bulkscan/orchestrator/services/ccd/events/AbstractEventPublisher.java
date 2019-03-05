@@ -53,11 +53,17 @@ abstract class AbstractEventPublisher<T> {
     }
 
     protected void publish(T eventSource, String caseTypeId, String eventTypeId, String eventSummary) {
+        // prepare event
         LoggableEvent event = LoggableEvent.getInstance(eventSource);
+
+        // prepare publisher
         String caseRef = getCaseReference(eventSource);
         String jurisdiction = event.getJurisdiction();
 
+        // authenticate
         CcdAuthenticator authenticator = ccdApi.authenticateJurisdiction(jurisdiction);
+
+        // start event
         StartEventResponse startEventResponse = ccdApi.startEvent(
             authenticator,
             jurisdiction,
@@ -66,12 +72,16 @@ abstract class AbstractEventPublisher<T> {
             eventTypeId
         );
         event.logEventStart(eventTypeId, caseRef == null ? "NO_CASE" : caseRef, caseTypeId);
+
+        // build data to send
         CaseDataContent caseDataContent = buildCaseDataContent(
             startEventResponse,
             eventSource,
             eventTypeId,
             eventSummary
         );
+
+        // submit event
         CaseDetails submitEventResponse = ccdApi.submitEvent(
             authenticator,
             jurisdiction,
