@@ -30,7 +30,7 @@ public class AbstractEventPublisherTest {
     private static final Envelope ENVELOPE = SampleData.envelope(1);
 
     @InjectMocks
-    private TestEventPublisher eventPublisher = new TestEventPublisher();
+    private final TestEventPublisher eventPublisher = new TestEventPublisher();
 
     @Mock
     private CoreCaseDataApi ccdApi;
@@ -98,7 +98,7 @@ public class AbstractEventPublisherTest {
         protected static final String EVENT_SUMMARY = "test summary";
 
         @Override
-        CaseData buildCaseData(StartEventResponse eventResponse, Envelope envelope) {
+        protected CaseData buildCaseData(StartEventResponse eventResponse, Envelope envelope) {
             return null;
         }
 
