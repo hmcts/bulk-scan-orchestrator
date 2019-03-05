@@ -3,12 +3,10 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.endpoints;
 import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.actuate.endpoint.annotation.Selector;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.out.JurisdictionConfigurationStatus;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.Credential;
@@ -29,9 +27,6 @@ public class IdamConfigStatusEndpoint {
     private final JurisdictionToUserMapping jurisdictionMapping;
     private final IdamClient idamClient;
 
-    @Autowired
-    private Environment env;
-
     public IdamConfigStatusEndpoint(
         JurisdictionToUserMapping mapping,
         IdamClient idamClient
@@ -42,17 +37,6 @@ public class IdamConfigStatusEndpoint {
 
     @ReadOperation
     public List<JurisdictionConfigurationStatus> jurisdictions() {
-        if (env != null) {
-            log.warn("US: {}", env.getProperty("IDAM_USERS_BULKSCAN_USERNAME"));
-            log.warn("US.: {}", env.getProperty("idam.users.bulkscan.username"));
-            log.warn("us: {}", env.getProperty("bulk-scan.idam-users-bulkscan-username"));
-            log.warn("sec: {}", env.getProperty("S2S_SECRET"));
-            log.warn("is: {}", env.getProperty("IDAM_CLIENT_SECRET"));
-        }
-        jurisdictionMapping.getUsers()
-            .entrySet()
-            .forEach(e -> log.warn("EK: {}; EV: {}; P: {}", e.getKey(), e.getValue(), e.getValue().getPassword()));
-
         return jurisdictionMapping.getUsers()
             .entrySet()
             .stream()
@@ -71,7 +55,6 @@ public class IdamConfigStatusEndpoint {
 
     private JurisdictionConfigurationStatus checkCredentials(String jurisdiction, Credential credential) {
         try {
-            log.warn("U: {}; P: {}", credential.getUsername(), credential.getPassword());
             idamClient.authenticateUser(credential.getUsername(), credential.getPassword());
 
             log.debug("Successful authentication of {} jurisdiction", jurisdiction);
