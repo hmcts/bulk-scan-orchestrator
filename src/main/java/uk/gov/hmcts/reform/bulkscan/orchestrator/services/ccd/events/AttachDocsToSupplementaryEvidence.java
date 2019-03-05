@@ -22,7 +22,7 @@ class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
     }
 
     public void handle(Envelope envelope, CaseDetails existingCase) {
-        log.info("Adding new evidence to case {} from envelop {}", existingCase.getId(), envelope.id);
+        log.info("Adding new evidence to case {} from envelope {}", existingCase.getId(), envelope.id);
 
         if (mapper.getDocsToAdd(getDocuments(existingCase), envelope.documents).isEmpty()) {
             // an alert relies on this message, do not modify it.
