@@ -66,7 +66,7 @@ abstract class AbstractEventPublisher {
     AbstractEventPublisher() {
     }
 
-    public void publish(Envelope envelope, String caseTypeId) {
+    protected void publish(Envelope envelope, String caseTypeId) {
         String caseRef = envelope.caseRef;
 
         logCaseCreationEntry(caseRef);

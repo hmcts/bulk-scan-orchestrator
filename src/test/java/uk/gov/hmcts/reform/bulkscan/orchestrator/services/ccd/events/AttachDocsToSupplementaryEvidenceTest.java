@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.AUTH_DETAILS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.SERVICE_TOKEN;
@@ -63,6 +64,7 @@ public class AttachDocsToSupplementaryEvidenceTest {
 
         StartEventResponse startEventResponse = mock(StartEventResponse.class);
         CaseDetails caseDetails = mock(CaseDetails.class);
+        given(caseDetails.getCaseTypeId()).willReturn(SampleData.BULK_SCANNED_CASE_TYPE);
 
         Map<String, Object> ccdData = new HashMap<>();
         ccdData.put("scannedDocuments", emptyList());
@@ -76,8 +78,10 @@ public class AttachDocsToSupplementaryEvidenceTest {
 
         Envelope envelope = SampleData.envelope(2);
 
+        given(mapper.getDocsToAdd(any(), any())).willReturn(envelope.documents);
+
         // when
-        eventPublisher.publish(envelope, SampleData.BULK_SCANNED_CASE_TYPE);
+        eventPublisher.handle(envelope, caseDetails);
 
         // then
         verify(coreCaseDataApi).startEventForCaseWorker(
@@ -110,4 +114,20 @@ public class AttachDocsToSupplementaryEvidenceTest {
         assertThat(caseDataContent.getEvent().getSummary()).isEqualTo("Attach scanned documents");
     }
 
+    @Test
+    public void should_not_start_an_event_if_envelope_does_not_contain_any_new_documents() {
+        // given
+        CaseDetails existingCase = mock(CaseDetails.class);
+        Envelope envelope = SampleData.envelope(2);
+
+        given(mapper.getDocsToAdd(any(), any()))
+            .willReturn(emptyList()); // no new docs
+
+        // when
+        eventPublisher.handle(envelope, existingCase);
+
+        // then
+        verify(coreCaseDataApi, never())
+            .startEventForCaseWorker(any(), any(), any(), any(), any(), any(), any());
+    }
 }

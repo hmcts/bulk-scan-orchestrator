@@ -51,7 +51,6 @@ public class EventPublisherContainerTest {
     @Test
     public void should_call_AttachDocsToSupplementaryEvidence_for_supplementary_evidence_classification_when_case_exists() {
         // given
-        given(caseDetails.getCaseTypeId()).willReturn("someCaseTypeId");
         given(caseRetriever.retrieve(JURSIDICTION, CASE_REF)).willReturn(caseDetails);
 
         // when
@@ -62,7 +61,7 @@ public class EventPublisherContainerTest {
         publisher.publish(envelope);
 
         // then
-        verify(attachDocsToSupplementaryEvidence).publish(envelope, "someCaseTypeId");
+        verify(attachDocsToSupplementaryEvidence).handle(envelope, caseDetails);
     }
 
     @Test
