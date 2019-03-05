@@ -46,6 +46,8 @@ public class IdamConfigStatusEndpoint {
             log.warn("US: {}", env.getProperty("IDAM_USERS_BULKSCAN_USERNAME"));
             log.warn("US.: {}", env.getProperty("idam.users.bulkscan.username"));
             log.warn("us: {}", env.getProperty("bulk-scan.idam-users-bulkscan-username"));
+            log.warn("sec: {}", env.getProperty("S2S_SECRET"));
+            log.warn("is: {}", env.getProperty("IDAM_CLIENT_SECRET"));
         }
         jurisdictionMapping.getUsers()
             .entrySet()
