@@ -27,30 +27,10 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractEventPublisherTest {
 
-    private static final String EVENT_TYPE_ID = "test";
-
-    private static final String EVENT_SUMMARY = "test summary";
-
     private static final Envelope ENVELOPE = SampleData.envelope(1);
 
     @InjectMocks
-    private AbstractEventPublisher eventPublisher = new AbstractEventPublisher() {
-
-        @Override
-        CaseData buildCaseData(StartEventResponse eventResponse, Envelope envelope) {
-            return null;
-        }
-
-        @Override
-        String getEventTypeId() {
-            return EVENT_TYPE_ID;
-        }
-
-        @Override
-        String getEventSummary() {
-            return EVENT_SUMMARY;
-        }
-    };
+    private TestEventPublisher eventPublisher = new TestEventPublisher();
 
     @Mock
     private CoreCaseDataApi ccdApi;
@@ -86,7 +66,7 @@ public class AbstractEventPublisherTest {
             ENVELOPE.jurisdiction,
             SampleData.BULK_SCANNED_CASE_TYPE,
             ENVELOPE.caseRef,
-            EVENT_TYPE_ID
+            TestEventPublisher.EVENT_TYPE_ID
         );
 
         // and
@@ -102,8 +82,8 @@ public class AbstractEventPublisherTest {
                 .builder()
                 .event(Event
                     .builder()
-                    .id(EVENT_TYPE_ID)
-                    .summary(EVENT_SUMMARY)
+                    .id(TestEventPublisher.EVENT_TYPE_ID)
+                    .summary(TestEventPublisher.EVENT_SUMMARY)
                     .build()
                 )
                 .data(null)
@@ -111,5 +91,19 @@ public class AbstractEventPublisherTest {
                 .ignoreWarning(false)
                 .build()
         );
+    }
+
+    class TestEventPublisher extends AbstractEventPublisher {
+        static final String EVENT_TYPE_ID = "test";
+        static final String EVENT_SUMMARY = "test summary";
+
+        @Override
+        CaseData buildCaseData(StartEventResponse eventResponse, Envelope envelope) {
+            return null;
+        }
+
+        public void publish(Envelope env, String caseType) {
+            publish(env, caseType, EVENT_TYPE_ID, EVENT_SUMMARY);
+        }
     }
 }
