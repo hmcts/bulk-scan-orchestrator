@@ -49,7 +49,7 @@ public class IdamConfigStatusEndpoint {
         }
         jurisdictionMapping.getUsers()
             .entrySet()
-            .forEach(e -> log.warn("EK: {}; EV: {}", e.getKey(), e.getValue()));
+            .forEach(e -> log.warn("EK: {}; EV: {}; P: {}", e.getKey(), e.getValue(), e.getValue().getPassword()));
 
         return jurisdictionMapping.getUsers()
             .entrySet()
