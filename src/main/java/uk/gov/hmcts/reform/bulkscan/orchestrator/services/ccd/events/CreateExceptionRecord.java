@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envel
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 @Component
-public class CreateExceptionRecord extends AbstractEventPublisher {
+public class CreateExceptionRecord extends AbstractEventPublisher<Envelope> {
 
     private static final Logger log = LoggerFactory.getLogger(CreateExceptionRecord.class);
 
@@ -30,17 +30,16 @@ public class CreateExceptionRecord extends AbstractEventPublisher {
 
     /**
      * Exception record does not present any existing case hence the creation of it.
-     *
-     * @param envelope Original envelope
+     * @param eventSource Original envelope
      * @return {@code null} as a case reference
      */
     @Override
-    String getCaseRef(Envelope envelope) {
+    String getCaseReference(Envelope eventSource) {
         return null;
     }
 
     @Override
-    CaseData buildCaseData(StartEventResponse eventResponse, Envelope envelope) {
-        return mapper.mapEnvelope(envelope);
+    CaseData buildCaseData(StartEventResponse eventResponse, Envelope eventSource) {
+        return mapper.mapEnvelope(eventSource);
     }
 }

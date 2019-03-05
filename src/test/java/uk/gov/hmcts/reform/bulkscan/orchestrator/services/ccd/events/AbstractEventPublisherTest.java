@@ -90,9 +90,14 @@ public class AbstractEventPublisherTest {
         );
     }
 
-    protected class TestEventPublisher extends AbstractEventPublisher {
+    protected class TestEventPublisher extends AbstractEventPublisher<Envelope> {
         protected static final String EVENT_TYPE_ID = "test";
         protected static final String EVENT_SUMMARY = "test summary";
+
+        @Override
+        String getCaseReference(Envelope eventSource) {
+            return eventSource.caseRef;
+        }
 
         @Override
         protected CaseData buildCaseData(StartEventResponse eventResponse, Envelope envelope) {

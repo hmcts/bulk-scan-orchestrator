@@ -1,12 +1,9 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
@@ -24,14 +21,19 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
  * Any publisher will have to be implemented as an example:
  * <pre>{@code
  * @Component
- * class PublisherName extends AbstractEventPublisher {
+ * class PublisherName extends AbstractEventPublisher&lt;Envelope&gt; {
  *
  *     PublisherName() {
  *         // any extra autowiring needed
  *     }
  *
  *     @Override
- *     Object mapEnvelopeToCaseDataObject(Envelope envelope) {
+ *     String getCaseReference(Envelope eventSource) {
+ *         return "";
+ *     }
+ *
+ *     @Override
+ *     CaseData buildCaseData(StartEventResponse eventResponse, Envelope eventSource) {
  *         return null; // implement this
  *     }
  * }}</pre>
@@ -42,9 +44,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
  * <p/>
  * Then include each publisher in {@link EventPublisherContainer}
  */
-abstract class AbstractEventPublisher {
-
-    private static final Logger log = LoggerFactory.getLogger(AbstractEventPublisher.class);
+abstract class AbstractEventPublisher<T> {
 
     @Autowired
     private CcdApi ccdApi;
@@ -52,9 +52,10 @@ abstract class AbstractEventPublisher {
     AbstractEventPublisher() {
     }
 
-    protected void publish(Envelope envelope, String caseTypeId, String eventTypeId, String eventSummary) {
-        String caseRef = getCaseRef(envelope);
-        String jurisdiction = envelope.jurisdiction;
+    protected void publish(T eventSource, String caseTypeId, String eventTypeId, String eventSummary) {
+        LoggableEvent event = LoggableEvent.getInstance(eventSource);
+        String caseRef = getCaseReference(eventSource);
+        String jurisdiction = event.getJurisdiction();
 
         CcdAuthenticator authenticator = ccdApi.authenticateJurisdiction(jurisdiction);
         StartEventResponse startEventResponse = ccdApi.startEvent(
@@ -64,10 +65,10 @@ abstract class AbstractEventPublisher {
             caseRef,
             eventTypeId
         );
-        logEventStart(envelope, eventTypeId, caseRef == null ? "NO_CASE" : caseRef, caseTypeId);
+        event.logEventStart(eventTypeId, caseRef == null ? "NO_CASE" : caseRef, caseTypeId);
         CaseDataContent caseDataContent = buildCaseDataContent(
             startEventResponse,
-            envelope,
+            eventSource,
             eventTypeId,
             eventSummary
         );
@@ -78,35 +79,16 @@ abstract class AbstractEventPublisher {
             caseRef,
             caseDataContent
         );
-        logSubmitEvent(envelope, caseTypeId, eventTypeId, submitEventResponse.getId());
+        event.logSubmitEvent(caseTypeId, eventTypeId, submitEventResponse.getId());
     }
 
-    // region - execution steps
-
-    String getCaseRef(Envelope envelope) {
-        return envelope.caseRef;
-    }
-
-    private void logEventStart(Envelope envelope, String eventTypeId, String caseRef, String caseTypeId) {
-        log.info(
-            "Started CCD event of type {} for envelope with ID {}, file name {}, case ref {}, case type {}",
-            eventTypeId,
-            envelope.id,
-            envelope.zipFileName,
-            caseRef,
-            caseTypeId
-        );
-    }
-
-    abstract CaseData buildCaseData(StartEventResponse eventResponse, Envelope envelope);
-
-    CaseDataContent buildCaseDataContent(
+    private CaseDataContent buildCaseDataContent(
         StartEventResponse eventResponse,
-        Envelope envelope,
+        T eventSource,
         String eventTypeId,
         String eventSummary
     ) {
-        CaseData caseDataObject = buildCaseData(eventResponse, envelope);
+        CaseData caseDataObject = buildCaseData(eventResponse, eventSource);
 
         return CaseDataContent.builder()
             .eventToken(eventResponse.getToken())
@@ -118,16 +100,13 @@ abstract class AbstractEventPublisher {
             .build();
     }
 
-    private void logSubmitEvent(Envelope envelope, String caseTypeId, String eventTypeId, Long submitEventResponseId) {
-        log.info(
-            "Created CCD case of type {} and event of type {}. Envelope ID: {}, file name: {}, case ID: {}",
-            caseTypeId,
-            eventTypeId,
-            envelope.id,
-            envelope.zipFileName,
-            submitEventResponseId
-        );
-    }
+    abstract String getCaseReference(T eventSource);
 
-    // end region - execution steps
+    /**
+     * Build case data with help of event source and event start response.
+     * @param eventResponse Response from event start
+     * @param eventSource Event source
+     * @return Case data
+     */
+    abstract CaseData buildCaseData(StartEventResponse eventResponse, T eventSource);
 }

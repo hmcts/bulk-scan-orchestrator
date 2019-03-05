@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getDocuments;
 
 @Component
-class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
+class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher<Envelope> {
 
     private static final Logger log = LoggerFactory.getLogger(AttachDocsToSupplementaryEvidence.class);
 
@@ -35,10 +35,15 @@ class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
     }
 
     @Override
-    CaseData buildCaseData(StartEventResponse eventResponse, Envelope envelope) {
+    String getCaseReference(Envelope eventSource) {
+        return eventSource.caseRef;
+    }
+
+    @Override
+    CaseData buildCaseData(StartEventResponse eventResponse, Envelope eventSource) {
         return mapper.map(
             getDocuments(eventResponse.getCaseDetails()),
-            envelope.documents
+            eventSource.documents
         );
     }
 }
