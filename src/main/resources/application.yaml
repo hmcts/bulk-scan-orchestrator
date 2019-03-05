@@ -39,4 +39,3 @@ idam:
     id: 'bsp'
     secret: 123456
     redirect_uri: http://localhost/receiver
-

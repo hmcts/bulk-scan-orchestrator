@@ -7,16 +7,14 @@ java:
       secretRef: servicebus-secret-namespace-${SERVICE_NAME}
       key: connectionString
   environment:
+    S2S_SECRET: "${S2S_SECRET}"
+    IDAM_CLIENT_SECRET: "${IDAM_CLIENT_SECRET}"
+    IDAM_USER_NAME: "${IDAM_USER_NAME}"
+    IDAM_USER_PASSWORD: "${IDAM_USER_PASSWORD}"
+    IDAM_USERS_BULKSCAN_USERNAME: "${IDAM_USER_NAME}"
+    IDAM_USERS_BULKSCAN_PASSWORD: "${IDAM_USER_PASSWORD}"
     ENVELOPES_QUEUE_CONNECTION_STRING: "$(SB_CONN_STRING);EntityPath=envelopes"
     PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING: "$(SB_CONN_STRING);EntityPath=processed-envelopes"
-  keyVaults:
-    "bulk-scan":
-      resourceGroup: bulk-scan
-      secrets:
-        - idam-client-secret
-        - idam-users-bulkscan-username
-        - idam-users-bulkscan-password
-        - s2s-secret-for-tests
   # Don't modify below here
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
