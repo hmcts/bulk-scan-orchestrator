@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers;
 
 import com.google.common.collect.ImmutableList;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +14,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
 @RequestMapping(path = "/callback", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
@@ -29,12 +27,12 @@ public class CcdCallbackController {
     }
 
     @PostMapping(path = "/attach_case")
-    public ResponseEntity<CallbackResponse> attachToCase(@RequestBody CallbackRequest callback) {
+    public CallbackResponse attachToCase(@RequestBody CallbackRequest callback) {
         if (callback != null && callback.getCaseDetails() != null) {
             List<String> errors = attachCaseCallbackService.process(callback.getCaseDetails());
-            return ok().body(response(errors));
+            return response(errors);
         } else {
-            return ok().body(response(ImmutableList.of("Internal Error: callback or case details were empty")));
+            return response(ImmutableList.of("Internal Error: callback or case details were empty"));
         }
     }
 
