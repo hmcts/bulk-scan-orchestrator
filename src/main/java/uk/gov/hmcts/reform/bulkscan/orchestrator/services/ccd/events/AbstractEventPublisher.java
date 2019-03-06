@@ -57,10 +57,6 @@ abstract class AbstractEventPublisher {
     }
 
     protected void publish(Envelope envelope, String caseTypeId, String eventTypeId, String eventSummary) {
-        String caseRef = envelope.caseRef;
-
-        logCaseCreationEntry(caseRef);
-
         CcdAuthenticator authenticator = authenticateJurisdiction(envelope.jurisdiction);
         StartEventResponse eventResponse = startEvent(authenticator, envelope, caseTypeId, eventTypeId);
         CaseDataContent caseDataContent = buildCaseDataContent(eventResponse, envelope, eventTypeId, eventSummary);
@@ -68,10 +64,6 @@ abstract class AbstractEventPublisher {
     }
 
     // region - execution steps
-
-    private void logCaseCreationEntry(String caseRef) {
-        log.info("Creating {} for case {}", getClass().getSimpleName(), caseRef);
-    }
 
     private CcdAuthenticator authenticateJurisdiction(String jurisdiction) {
         return authenticatorFactory.createForJurisdiction(jurisdiction);
