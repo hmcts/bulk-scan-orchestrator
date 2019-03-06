@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.SupplementaryEvidenceMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getDocuments;
@@ -24,9 +25,13 @@ class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
         this.mapper = mapper;
     }
 
-    public void publish(Envelope envelope, String caseTypeId) {
-        log.info("Attaching supplementary evidence from envelope {} to case {}", envelope.id, existingCase.getId());
-        publish(envelope, caseTypeId, EVENT_TYPE_ID, EVENT_SUMMARY);
+    public void publish(Envelope envelope, CaseDetails existingCase) {
+        if (mapper.getDocsToAdd(getDocuments(existingCase), envelope.documents).isEmpty()) {
+            log.warn("Envelope {} has no new documents. CCD Case {} not updated", envelope.id, existingCase.getId());
+        } else {
+            log.info("Attaching supplementary evidence from envelope {} to case {}", envelope.id, existingCase.getId());
+            publish(envelope, existingCase.getCaseTypeId(), EVENT_TYPE_ID, EVENT_SUMMARY);
+        }
     }
 
     @Override

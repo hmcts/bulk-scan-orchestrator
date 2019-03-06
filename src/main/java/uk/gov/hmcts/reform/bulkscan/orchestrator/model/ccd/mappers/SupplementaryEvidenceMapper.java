@@ -19,20 +19,21 @@ public class SupplementaryEvidenceMapper {
     }
 
     public SupplementaryEvidence map(List<Document> existingDocs, List<Document> envelopeDocs) {
-
-        Stream<Document> docsToAdd =
-            envelopeDocs
-                .stream()
-                .filter(d -> existingDocs.stream().noneMatch(e -> areDuplicates(d, e)));
-
         return new SupplementaryEvidence(
             mapDocuments(
                 Stream.concat(
                     existingDocs.stream(),
-                    docsToAdd
+                    getDocsToAdd(existingDocs, envelopeDocs).stream()
                 ).collect(toList())
             )
         );
+    }
+
+    public List<Document> getDocsToAdd(List<Document> existingDocs, List<Document> newDocs) {
+        return newDocs
+            .stream()
+            .filter(d -> existingDocs.stream().noneMatch(e -> areDuplicates(d, e)))
+            .collect(toList());
     }
 
     private boolean areDuplicates(Document d1, Document d2) {
