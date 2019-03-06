@@ -13,7 +13,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsH
 
 @Component
 class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
-    private static final Logger log = LoggerFactory.getLogger(AbstractEventPublisher.class);
+
+    private static final Logger log = LoggerFactory.getLogger(AttachDocsToSupplementaryEvidence.class);
 
     private final SupplementaryEvidenceMapper mapper;
 
@@ -22,10 +23,7 @@ class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
     }
 
     public void handle(Envelope envelope, CaseDetails existingCase) {
-        log.info("Adding new evidence to case {} from envelope {}", existingCase.getId(), envelope.id);
-
         if (mapper.getDocsToAdd(getDocuments(existingCase), envelope.documents).isEmpty()) {
-            // an alert relies on this message, do not modify it.
             log.warn("Envelope has no new documents. CCD Case not updated");
         } else {
             publish(envelope, existingCase.getCaseTypeId());
