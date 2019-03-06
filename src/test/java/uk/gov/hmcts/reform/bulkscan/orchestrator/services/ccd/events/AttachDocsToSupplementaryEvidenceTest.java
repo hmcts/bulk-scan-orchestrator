@@ -81,7 +81,7 @@ public class AttachDocsToSupplementaryEvidenceTest {
         given(mapper.getDocsToAdd(any(), any())).willReturn(envelope.documents);
 
         // when
-        eventPublisher.handle(envelope, caseDetails);
+        eventPublisher.publish(envelope, caseDetails);
 
         // then
         verify(coreCaseDataApi).startEventForCaseWorker(
@@ -124,7 +124,7 @@ public class AttachDocsToSupplementaryEvidenceTest {
             .willReturn(emptyList()); // no new docs
 
         // when
-        eventPublisher.handle(envelope, existingCase);
+        eventPublisher.publish(envelope, existingCase);
 
         // then
         verify(coreCaseDataApi, never())

@@ -25,7 +25,7 @@ class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
         this.mapper = mapper;
     }
 
-    public void handle(Envelope envelope, CaseDetails existingCase) {
+    public void publish(Envelope envelope, CaseDetails existingCase) {
         if (mapper.getDocsToAdd(getDocuments(existingCase), envelope.documents).isEmpty()) {
             log.warn("Envelope has no new documents. CCD Case not updated");
         } else {

@@ -42,7 +42,7 @@ public class EventPublisherContainer {
 
                 return caseDetails == null
                     ? envelope -> exceptionRecordCreator.publish(envelope)
-                    : envelope -> attachDocsPublisher.handle(envelope, caseDetails);
+                    : envelope -> attachDocsPublisher.publish(envelope, caseDetails);
             case EXCEPTION:
             case NEW_APPLICATION:
                 return envelope -> exceptionRecordCreator.publish(envelope);

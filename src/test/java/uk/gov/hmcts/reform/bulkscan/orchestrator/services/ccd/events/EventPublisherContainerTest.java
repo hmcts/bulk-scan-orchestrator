@@ -61,7 +61,7 @@ public class EventPublisherContainerTest {
         publisher.publish(envelope);
 
         // then
-        verify(attachDocsToSupplementaryEvidence).handle(envelope, caseDetails);
+        verify(attachDocsToSupplementaryEvidence).publish(envelope, caseDetails);
     }
 
     @Test
