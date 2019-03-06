@@ -16,6 +16,9 @@ class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
 
     private static final Logger log = LoggerFactory.getLogger(AttachDocsToSupplementaryEvidence.class);
 
+    public static final String EVENT_TYPE_ID = "attachScannedDocs";
+    public static final String EVENT_SUMMARY = "Attach scanned documents";
+
     private final SupplementaryEvidenceMapper mapper;
 
     AttachDocsToSupplementaryEvidence(SupplementaryEvidenceMapper mapper) {
@@ -26,7 +29,7 @@ class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
         if (mapper.getDocsToAdd(getDocuments(existingCase), envelope.documents).isEmpty()) {
             log.warn("Envelope has no new documents. CCD Case not updated");
         } else {
-            publish(envelope, existingCase.getCaseTypeId());
+            publish(envelope, existingCase.getCaseTypeId(), EVENT_TYPE_ID, EVENT_SUMMARY);
         }
     }
 
@@ -36,15 +39,5 @@ class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
             getDocuments(eventResponse.getCaseDetails()),
             envelope.documents
         );
-    }
-
-    @Override
-    String getEventTypeId() {
-        return "attachScannedDocs";
-    }
-
-    @Override
-    String getEventSummary() {
-        return "Attach scanned documents";
     }
 }
