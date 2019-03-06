@@ -11,10 +11,17 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsH
 @Component
 class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
 
+    public static final String EVENT_TYPE_ID = "attachScannedDocs";
+    public static final String EVENT_SUMMARY = "Attach scanned documents";
+
     private final SupplementaryEvidenceMapper mapper;
 
     AttachDocsToSupplementaryEvidence(SupplementaryEvidenceMapper mapper) {
         this.mapper = mapper;
+    }
+
+    public void publish(Envelope envelope, String caseTypeId) {
+        publish(envelope, caseTypeId, EVENT_TYPE_ID, EVENT_SUMMARY);
     }
 
     @Override
@@ -23,15 +30,5 @@ class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
             getDocuments(eventResponse.getCaseDetails()),
             envelope.documents
         );
-    }
-
-    @Override
-    String getEventTypeId() {
-        return "attachScannedDocs";
-    }
-
-    @Override
-    String getEventSummary() {
-        return "Attach scanned documents";
     }
 }

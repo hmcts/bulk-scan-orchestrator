@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 public class CreateExceptionRecord extends AbstractEventPublisher {
 
     public static final String CASE_TYPE = "ExceptionRecord";
+    public static final String EVENT_TYPE_ID = "createException";
+    public static final String EVENT_SUMMARY = "Create an exception record";
 
     private final ExceptionRecordMapper mapper;
 
@@ -18,7 +20,7 @@ public class CreateExceptionRecord extends AbstractEventPublisher {
     }
 
     public void publish(Envelope envelope) {
-        publish(envelope, envelope.jurisdiction + "_" + CASE_TYPE);
+        publish(envelope, envelope.jurisdiction + "_" + CASE_TYPE, EVENT_TYPE_ID, EVENT_SUMMARY);
     }
 
     /**
@@ -34,15 +36,5 @@ public class CreateExceptionRecord extends AbstractEventPublisher {
     @Override
     CaseData buildCaseData(StartEventResponse eventResponse, Envelope envelope) {
         return mapper.mapEnvelope(envelope);
-    }
-
-    @Override
-    String getEventTypeId() {
-        return "createException";
-    }
-
-    @Override
-    String getEventSummary() {
-        return "Create an exception record";
     }
 }
