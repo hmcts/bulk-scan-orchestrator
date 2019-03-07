@@ -9,11 +9,11 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -22,6 +22,7 @@ import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -33,10 +34,7 @@ public class AbstractEventPublisherTest {
     private final TestEventPublisher eventPublisher = new TestEventPublisher();
 
     @Mock
-    private CoreCaseDataApi ccdApi;
-
-    @Mock
-    private CcdAuthenticatorFactory authenticatorFactory;
+    private CcdApi ccdApi;
 
     @Before
     public void setUp() {
@@ -51,18 +49,20 @@ public class AbstractEventPublisherTest {
             new UserDetails("id", "email", "forename", "surname", Collections.emptyList()),
             () -> "user token"
         );
-        given(authenticatorFactory.createForJurisdiction(ENVELOPE.jurisdiction)).willReturn(authenticator);
-        given(ccdApi.startEventForCaseWorker(any(), any(), any(), any(), any(), any(), any()))
+        CaseDetails caseDetails = mock(CaseDetails.class);
+
+        given(ccdApi.authenticateJurisdiction(ENVELOPE.jurisdiction)).willReturn(authenticator);
+        given(ccdApi.startEvent(any(), any(), any(), any(), any()))
             .willReturn(StartEventResponse.builder().token("event token").build());
+        given(ccdApi.submitEvent(any(), any(), any(), any(), any())).willReturn(caseDetails);
+        given(caseDetails.getId()).willReturn(1L);
 
         // when
         eventPublisher.publish(ENVELOPE, SampleData.BULK_SCANNED_CASE_TYPE);
 
         //then
-        verify(ccdApi).startEventForCaseWorker(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
+        verify(ccdApi).startEvent(
+            authenticator,
             ENVELOPE.jurisdiction,
             SampleData.BULK_SCANNED_CASE_TYPE,
             ENVELOPE.caseRef,
@@ -70,14 +70,11 @@ public class AbstractEventPublisherTest {
         );
 
         // and
-        verify(ccdApi).submitEventForCaseWorker(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
+        verify(ccdApi).submitEvent(
+            authenticator,
             ENVELOPE.jurisdiction,
             SampleData.BULK_SCANNED_CASE_TYPE,
             ENVELOPE.caseRef,
-            true,
             CaseDataContent
                 .builder()
                 .event(Event
