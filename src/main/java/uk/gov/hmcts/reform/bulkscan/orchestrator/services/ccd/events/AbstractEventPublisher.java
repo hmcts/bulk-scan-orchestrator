@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import java.util.Optional;
+
 /**
  * Implementation of strategy.
  * Any strategy is invoking steps as follows:
@@ -86,7 +88,7 @@ abstract class AbstractEventPublisher {
             eventTypeId,
             envelope.id,
             envelope.zipFileName,
-            caseRef == null ? "NO_CASE" : caseRef,
+            Optional.ofNullable(caseRef).orElse("NO_CASE"),
             caseTypeId
         );
 
