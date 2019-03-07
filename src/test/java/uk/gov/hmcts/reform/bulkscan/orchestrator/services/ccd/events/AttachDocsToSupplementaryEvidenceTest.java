@@ -10,9 +10,8 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.SupplementaryEvidenceMapper;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -29,9 +28,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.AUTH_DETAILS;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.SERVICE_TOKEN;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_DETAILS;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_TOKEN;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AttachDocsToSupplementaryEvidenceTest {
@@ -40,10 +36,7 @@ public class AttachDocsToSupplementaryEvidenceTest {
     private static final String EVENT_TYPE_ID = "attachScannedDocs";
 
     @Mock
-    private CcdAuthenticatorFactory authenticatorFactory;
-
-    @Mock
-    private CoreCaseDataApi coreCaseDataApi;
+    private CcdApi ccdApi;
 
     private SupplementaryEvidenceMapper mapper = mock(SupplementaryEvidenceMapper.class);
 
@@ -54,7 +47,7 @@ public class AttachDocsToSupplementaryEvidenceTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        given(authenticatorFactory.createForJurisdiction(any())).willReturn(AUTH_DETAILS);
+        given(ccdApi.authenticateJurisdiction(any())).willReturn(AUTH_DETAILS);
     }
 
     @Test
@@ -73,8 +66,10 @@ public class AttachDocsToSupplementaryEvidenceTest {
         given(startEventResponse.getCaseDetails()).willReturn(caseDetails);
         given(startEventResponse.getCaseDetails().getData()).willReturn(ccdData);
 
-        given(coreCaseDataApi.startEventForCaseWorker(any(), any(), any(), any(), any(), any(), any()))
-            .willReturn(startEventResponse);
+        given(ccdApi.startEvent(any(), any(), any(), any(), any())).willReturn(startEventResponse);
+        given(ccdApi.submitEvent(any(), any(), any(), any(), any())).willReturn(caseDetails);
+
+        given(caseDetails.getId()).willReturn(1L);
 
         Envelope envelope = SampleData.envelope(2);
 
@@ -84,10 +79,8 @@ public class AttachDocsToSupplementaryEvidenceTest {
         eventPublisher.publish(envelope, caseDetails);
 
         // then
-        verify(coreCaseDataApi).startEventForCaseWorker(
-            USER_TOKEN,
-            SERVICE_TOKEN,
-            USER_DETAILS.getId(),
+        verify(ccdApi).startEvent(
+            AUTH_DETAILS,
             envelope.jurisdiction,
             CASE_TYPE_ID,
             envelope.caseRef,
@@ -95,14 +88,11 @@ public class AttachDocsToSupplementaryEvidenceTest {
         );
         ArgumentCaptor<CaseDataContent> caseDataContentCaptor = ArgumentCaptor.forClass(CaseDataContent.class);
 
-        verify(coreCaseDataApi).submitEventForCaseWorker(
-            eq(USER_TOKEN),
-            eq(SERVICE_TOKEN),
-            eq(USER_DETAILS.getId()),
+        verify(ccdApi).submitEvent(
+            eq(AUTH_DETAILS),
             eq(envelope.jurisdiction),
             eq(CASE_TYPE_ID),
             eq(envelope.caseRef),
-            eq(true),
             caseDataContentCaptor.capture()
         );
 
@@ -127,7 +117,6 @@ public class AttachDocsToSupplementaryEvidenceTest {
         eventPublisher.publish(envelope, existingCase);
 
         // then
-        verify(coreCaseDataApi, never())
-            .startEventForCaseWorker(any(), any(), any(), any(), any(), any(), any());
+        verify(ccdApi, never()).startEvent(any(), any(), any(), any(), any());
     }
 }
