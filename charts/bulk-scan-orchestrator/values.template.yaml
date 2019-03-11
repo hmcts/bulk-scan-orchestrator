@@ -11,7 +11,7 @@ java:
     "bulk-scan":
       resourceGroup: bulk-scan
       secrets:
-        - idam-client-secret
+        - idam-client-secre
         - idam-users-bulkscan-username
         - idam-users-bulkscan-password
     "s2s":
