@@ -58,3 +58,15 @@ variable "supported_jurisdictions" {
   description = "Jurisdictions to be supported by Bulk Scan in the given environment. Bulk Scan will only be able to map these ones to IDAM user credentials"
   default = ["SSCS", "BULKSCAN", "PROBATE", "DIVORCE", "FINREM"]
 }
+
+variable "delete_envelopes_dlq_messages_enabled" {
+  default = "false"
+}
+
+variable "delete_envelopes_dlq_messages_cron" {
+  default = "0 0 7 * * *"
+}
+
+variable "delete_envelopes_dlq_messages_ttl" {
+  default = "72h"
+}

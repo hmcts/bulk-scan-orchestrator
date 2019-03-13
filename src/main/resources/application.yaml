@@ -43,3 +43,10 @@ idam:
     bulkscan:
       username: ${IDAM_USERS_BULKSCAN_USERNAME:bulkscan+ccd@gmail.com}
       password: ${IDAM_USERS_BULKSCAN_PASSWORD:Password12}
+
+scheduling:
+  task:
+    delete-envelopes-dlq-messages:
+      enabled: ${DELETE_ENVELOPES_DLQ_MESSAGES_ENABLED:false}
+      cron: ${DELETE_ENVELOPES_DLQ_MESSAGES_CRON}
+      ttl: ${DELETE_ENVELOPES_DLQ_MESSAGES_TTL}
