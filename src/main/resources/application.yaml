@@ -18,10 +18,10 @@ spring:
 azure:
   servicebus:
     envelopes:
-      connection-string: ${ENVELOPES_QUEUE_CONNECTION_STRING:"NO_VALUE_SUPPLIED"}
+      connection-string: ${ENVELOPES_QUEUE_CONNECTION_STRING}
       queue-name: envelopes
     processed-envelopes:
-      connection-string: ${PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING:"NO_VALUE_SUPPLIED"}
+      connection-string: ${PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING}
       queue-name: processed-envelopes
 
 core_case_data:
