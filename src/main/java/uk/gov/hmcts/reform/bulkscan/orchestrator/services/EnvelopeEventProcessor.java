@@ -136,6 +136,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
                     processingResult.exception.getMessage()
                 );
 
+                // log used for alert
                 log.info("Message with ID {} has been dead-lettered", message.getMessageId());
                 break;
             case POTENTIALLY_RECOVERABLE_FAILURE:
@@ -155,6 +156,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
                         "Breached the limit of message delivery count of " + deliveryCount
                     );
 
+                    // log used for alert
                     log.info("Message with ID {} has been dead-lettered", message.getMessageId());
                 }
 
