@@ -19,7 +19,7 @@ import java.util.function.Supplier;
 /**
  * Deletes messages from envelopes Dead letter queue.
  */
-@ConditionalOnProperty(value = "scheduling.task.delete-envelopes-dlq-messages.enabled")
+@ConditionalOnProperty("scheduling.task.delete-envelopes-dlq-messages.enabled")
 public class CleanupEnvelopesDlqTask {
 
     private static final Logger log = LoggerFactory.getLogger(CleanupEnvelopesDlqTask.class);

@@ -9,12 +9,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.ConnectionException;
 
 import java.util.function.Supplier;
 
 @Component
+@Profile("!nosb") // do not register handler for the nosb (test) profile
 public class DlqReceiverProvider implements Supplier<IMessageReceiver> {
 
     private static final Logger log = LoggerFactory.getLogger(DlqReceiverProvider.class);

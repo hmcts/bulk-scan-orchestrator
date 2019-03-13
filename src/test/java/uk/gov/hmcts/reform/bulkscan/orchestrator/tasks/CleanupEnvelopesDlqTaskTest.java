@@ -6,7 +6,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
@@ -42,9 +41,6 @@ public class CleanupEnvelopesDlqTaskTest {
     @Mock
     private Supplier<IMessageReceiver> receiverProvider;
 
-    @Captor
-    ArgumentCaptor<UUID> uuidArgumentCaptor;
-
     private final Duration ttl = Duration.ofSeconds(10);
 
     @Before
@@ -56,12 +52,13 @@ public class CleanupEnvelopesDlqTaskTest {
     public void should_delete_messages_from_dead_letter_queue() throws Exception {
         //given
         UUID uuid = UUID.randomUUID();
-
         given(message.getLockToken()).willReturn(uuid);
         given(message.getBody()).willReturn(SampleData.envelopeJson());
         given(message.getEnqueuedTimeUtc())
             .willReturn(LocalDateTime.now().minus(ttl.plusSeconds(10)).toInstant(ZoneOffset.UTC));
         given(messageReceiver.receive()).willReturn(message).willReturn(null);
+
+        ArgumentCaptor<UUID> uuidArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
 
         //when
         cleanupDlqTask.deleteMessagesInEnvelopesDlq();
