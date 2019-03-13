@@ -61,7 +61,8 @@ public class EnvelopeEventProcessorTest {
             mock(CaseRetriever.class),
             eventPublisherContainer,
             processedEnvelopeNotifier,
-            messageOperations
+            messageOperations,
+            10
         );
 
         when(eventPublisherContainer.getPublisher(any(Classification.class), any()))
@@ -177,6 +178,35 @@ public class EnvelopeEventProcessorTest {
 
         // then the message is not finalised (completed/dead-lettered)
         verifyNoMoreInteractions(messageOperations);
+    }
+
+    @Test
+    public void should_finalize_the_message_when_recoverable_failure_but_delivery_maxed() throws Exception {
+        // given
+        processor = new EnvelopeEventProcessor(
+            mock(CaseRetriever.class),
+            eventPublisherContainer,
+            processedEnvelopeNotifier,
+            messageOperations,
+            5
+        );
+        Exception processingFailureCause = new RuntimeException(
+            "exception of type treated as recoverable"
+        );
+
+        // and an error occurs during message processing
+        willThrow(processingFailureCause).given(eventPublisher).publish(any());
+
+        // when
+        CompletableFuture<Void> result = processor.onMessageAsync(someMessage);
+        result.join();
+
+        // then the message is dead-lettered
+        verify(messageOperations).deadLetter(
+            someMessage.getLockToken(),
+            "Too many deliveries",
+            "Breached the limit of message delivery count of 1"
+        );
     }
 
     @Test
