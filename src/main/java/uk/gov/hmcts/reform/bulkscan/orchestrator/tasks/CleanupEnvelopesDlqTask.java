@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.tasks;
 
-import com.google.gson.Gson;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
@@ -9,14 +8,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.ConnectionException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Map;
 import java.util.function.Supplier;
-
-import static java.nio.charset.Charset.defaultCharset;
 
 /**
  * Deletes messages from envelopes Dead letter queue.
@@ -68,17 +66,16 @@ public class CleanupEnvelopesDlqTask {
     }
 
     private void logMessage(IMessage msg) {
-        Gson gson = new Gson();
-        Map msgContent = gson.fromJson(new String(msg.getBody(), defaultCharset()), Map.class);
+        Envelope envelope = EnvelopeParser.parse(msg.getBody());
 
         log.info(
             "Deleting message. ID: {} Envelope ID: {}, File name: {}, Jurisdiction: {}, Classification: {}, Case: {}",
             msg.getMessageId(),
-            msgContent.get("id"),
-            msgContent.get("zip_file_name"),
-            msgContent.get("jurisdiction"),
-            msgContent.get("classification"),
-            msgContent.get("case_ref")
+            envelope.id,
+            envelope.zipFileName,
+            envelope.jurisdiction,
+            envelope.classification,
+            envelope.caseRef
         );
     }
 
