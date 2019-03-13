@@ -7,6 +7,7 @@ import com.microsoft.azure.servicebus.IMessageHandler;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher;
@@ -38,17 +39,20 @@ public class EnvelopeEventProcessor implements IMessageHandler {
     private final EventPublisherContainer eventPublisherContainer;
     private final IProcessedEnvelopeNotifier processedEnvelopeNotifier;
     private final IMessageOperations messageOperations;
+    private final int maxDeliveryCount;
 
     public EnvelopeEventProcessor(
         CaseRetriever caseRetriever,
         EventPublisherContainer eventPublisherContainer,
         IProcessedEnvelopeNotifier processedEnvelopeNotifier,
-        IMessageOperations messageOperations
+        IMessageOperations messageOperations,
+        @Value("${azure.servicebus.envelopes.max-delivery-count}") int maxDeliveryCount
     ) {
         this.caseRetriever = caseRetriever;
         this.eventPublisherContainer = eventPublisherContainer;
         this.processedEnvelopeNotifier = processedEnvelopeNotifier;
         this.messageOperations = messageOperations;
+        this.maxDeliveryCount = maxDeliveryCount;
     }
 
     @Override
@@ -135,12 +139,25 @@ public class EnvelopeEventProcessor implements IMessageHandler {
                 log.info("Message with ID {} has been dead-lettered", message.getMessageId());
                 break;
             case POTENTIALLY_RECOVERABLE_FAILURE:
-                // do nothing - let the message lock expire
-                log.info(
-                    "Allowing message with ID {} to return to queue (delivery attempt {})",
-                    message.getMessageId(),
-                    message.getDeliveryCount() + 1
-                );
+                int deliveryCount = (int) message.getDeliveryCount() + 1;
+
+                if (deliveryCount < maxDeliveryCount - 5) {
+                    // do nothing - let the message lock expire
+                    log.info(
+                        "Allowing message with ID {} to return to queue (delivery attempt {})",
+                        message.getMessageId(),
+                        deliveryCount
+                    );
+                } else {
+                    messageOperations.deadLetter(
+                        message.getLockToken(),
+                        "Too many deliveries",
+                        "Breached the limit of message delivery count of " + deliveryCount
+                    );
+
+                    log.info("Message with ID {} has been dead-lettered", message.getMessageId());
+                }
+
                 break;
             default:
                 throw new MessageProcessingException(
