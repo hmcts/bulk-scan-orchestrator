@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.logging.AppInsights;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisherContainer;
@@ -40,19 +41,22 @@ public class EnvelopeEventProcessor implements IMessageHandler {
     private final IProcessedEnvelopeNotifier processedEnvelopeNotifier;
     private final IMessageOperations messageOperations;
     private final int maxDeliveryCount;
+    private final AppInsights appInsights;
 
     public EnvelopeEventProcessor(
         CaseRetriever caseRetriever,
         EventPublisherContainer eventPublisherContainer,
         IProcessedEnvelopeNotifier processedEnvelopeNotifier,
         IMessageOperations messageOperations,
-        @Value("${azure.servicebus.envelopes.max-delivery-count}") int maxDeliveryCount
+        @Value("${azure.servicebus.envelopes.max-delivery-count}") int maxDeliveryCount,
+        AppInsights appInsights
     ) {
         this.caseRetriever = caseRetriever;
         this.eventPublisherContainer = eventPublisherContainer;
         this.processedEnvelopeNotifier = processedEnvelopeNotifier;
         this.messageOperations = messageOperations;
         this.maxDeliveryCount = maxDeliveryCount;
+        this.appInsights = appInsights;
     }
 
     @Override
@@ -170,8 +174,9 @@ public class EnvelopeEventProcessor implements IMessageHandler {
     ) throws InterruptedException, ServiceBusException {
         messageOperations.deadLetter(message.getLockToken(), reason, description);
 
-        // log used for alert
         log.info("Message with ID {} has been dead-lettered", message.getMessageId());
+        // track used for alert
+        appInsights.trackDeadLetteredMessage(message, "envelopes", reason, description);
     }
 
     private void logMessageFinaliseError(
