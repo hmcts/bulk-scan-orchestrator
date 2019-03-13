@@ -130,14 +130,12 @@ public class EnvelopeEventProcessor implements IMessageHandler {
                 log.info("Message with ID {} has been completed", message.getMessageId());
                 break;
             case UNRECOVERABLE_FAILURE:
-                messageOperations.deadLetter(
-                    message.getLockToken(),
+                deadLetterTheMessage(
+                    message,
                     "Message processing error",
                     processingResult.exception.getMessage()
                 );
 
-                // log used for alert
-                log.info("Message with ID {} has been dead-lettered", message.getMessageId());
                 break;
             case POTENTIALLY_RECOVERABLE_FAILURE:
                 int deliveryCount = (int) message.getDeliveryCount() + 1;
@@ -150,14 +148,11 @@ public class EnvelopeEventProcessor implements IMessageHandler {
                         deliveryCount
                     );
                 } else {
-                    messageOperations.deadLetter(
-                        message.getLockToken(),
+                    deadLetterTheMessage(
+                        message,
                         "Too many deliveries",
                         "Breached the limit of message delivery count of " + deliveryCount
                     );
-
-                    // log used for alert
-                    log.info("Message with ID {} has been dead-lettered", message.getMessageId());
                 }
 
                 break;
@@ -166,6 +161,17 @@ public class EnvelopeEventProcessor implements IMessageHandler {
                     "Unknown message processing result type: " + processingResult.resultType
                 );
         }
+    }
+
+    private void deadLetterTheMessage(
+        IMessage message,
+        String reason,
+        String description
+    ) throws InterruptedException, ServiceBusException {
+        messageOperations.deadLetter(message.getLockToken(), reason, description);
+
+        // log used for alert
+        log.info("Message with ID {} has been dead-lettered", message.getMessageId());
     }
 
     private void logMessageFinaliseError(
