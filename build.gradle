@@ -66,6 +66,9 @@ task integration(type: Test, description: 'Runs the integration tests.', group: 
   testClassesDirs = sourceSets.integrationTest.output.classesDirs
   classpath = sourceSets.integrationTest.runtimeClasspath
   failFast = true
+
+  // this will go away once java-logging-appinsights is bumped to 5.x.x
+  environment 'APPINSIGHTS_INSTRUMENTATIONKEY', 'test'
 }
 
 task smoke(type: Test) {

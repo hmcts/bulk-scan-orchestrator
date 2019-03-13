@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.microsoft.azure.servicebus.IMessage;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.logging.AppInsights;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisherContainer;
@@ -23,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
@@ -48,6 +51,9 @@ public class EnvelopeEventProcessorTest {
     private MessageOperations messageOperations;
 
     @Mock
+    private AppInsights appInsights;
+
+    @Mock
     EventPublisher eventPublisher;
 
     @Mock
@@ -62,7 +68,8 @@ public class EnvelopeEventProcessorTest {
             eventPublisherContainer,
             processedEnvelopeNotifier,
             messageOperations,
-            10
+            10,
+            appInsights
         );
 
         when(eventPublisherContainer.getPublisher(any(Classification.class), any()))
@@ -115,7 +122,7 @@ public class EnvelopeEventProcessorTest {
 
         // then
         verify(messageOperations).complete(someMessage.getLockToken());
-        verifyNoMoreInteractions(messageOperations);
+        verifyNoMoreInteractions(appInsights, messageOperations);
     }
 
     @Test
@@ -133,7 +140,13 @@ public class EnvelopeEventProcessorTest {
         verify(messageOperations).deadLetter(
             eq(message.getLockToken()),
             eq(DEAD_LETTER_REASON_PROCESSING_ERROR),
-            contains("JsonParseException")
+            contains(JsonParseException.class.getSimpleName())
+        );
+        verify(appInsights).trackDeadLetteredMessage(
+            eq(message),
+            eq("envelopes"),
+            eq(DEAD_LETTER_REASON_PROCESSING_ERROR),
+            startsWith(JsonParseException.class.getCanonicalName())
         );
 
         verifyNoMoreInteractions(messageOperations);
@@ -159,6 +172,12 @@ public class EnvelopeEventProcessorTest {
             eq(DEAD_LETTER_REASON_PROCESSING_ERROR),
             eq(exceptionMessage)
         );
+        verify(appInsights).trackDeadLetteredMessage(
+            someMessage,
+            "envelopes",
+            DEAD_LETTER_REASON_PROCESSING_ERROR,
+            exceptionMessage
+        );
 
         verifyNoMoreInteractions(messageOperations);
     }
@@ -177,7 +196,7 @@ public class EnvelopeEventProcessorTest {
         result.join();
 
         // then the message is not finalised (completed/dead-lettered)
-        verifyNoMoreInteractions(messageOperations);
+        verifyNoMoreInteractions(appInsights, messageOperations);
     }
 
     @Test
@@ -188,7 +207,8 @@ public class EnvelopeEventProcessorTest {
             eventPublisherContainer,
             processedEnvelopeNotifier,
             messageOperations,
-            5
+            5,
+            appInsights
         );
         Exception processingFailureCause = new RuntimeException(
             "exception of type treated as recoverable"
@@ -204,6 +224,12 @@ public class EnvelopeEventProcessorTest {
         // then the message is dead-lettered
         verify(messageOperations).deadLetter(
             someMessage.getLockToken(),
+            "Too many deliveries",
+            "Breached the limit of message delivery count of 1"
+        );
+        verify(appInsights).trackDeadLetteredMessage(
+            someMessage,
+            "envelopes",
             "Too many deliveries",
             "Breached the limit of message delivery count of 1"
         );
