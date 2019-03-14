@@ -12,6 +12,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -57,14 +58,14 @@ public class MessageOperationsTest {
 
         messageOperations.deadLetter(lockToken, reason, description);
 
-        verify(queueClient).deadLetter(lockToken, reason, description);
+        verify(queueClient).deadLetter(eq(lockToken), eq(reason), eq(description), any());
         verifyNoMoreInteractions(queueClient);
     }
 
     @Test
     public void deadLetter_should_throw_exception_when_queue_client_fails() throws Exception {
         ServiceBusException exceptionToThrow = new ServiceBusException(true);
-        willThrow(exceptionToThrow).given(queueClient).deadLetter(any(), any(), any());
+        willThrow(exceptionToThrow).given(queueClient).deadLetter(any(), any(), any(), any());
 
         assertThatThrownBy(() ->
             messageOperations.deadLetter(UUID.randomUUID(), "reason", "description")

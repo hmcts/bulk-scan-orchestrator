@@ -45,7 +45,7 @@ public class EnvelopeMessager {
 
         Message message = new Message(
             UUID.randomUUID().toString(),
-            updateCaseData.toString(),
+            "{\"invalid\":\"message\"}",
             MediaType.APPLICATION_JSON_UTF8_VALUE
         );
 
