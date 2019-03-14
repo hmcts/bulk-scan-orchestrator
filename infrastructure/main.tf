@@ -70,6 +70,7 @@ locals {
     DELETE_ENVELOPES_DLQ_MESSAGES_ENABLED = "${var.delete_envelopes_dlq_messages_enabled}"
     DELETE_ENVELOPES_DLQ_MESSAGES_CRON    = "${var.delete_envelopes_dlq_messages_cron}"
     DELETE_ENVELOPES_DLQ_MESSAGES_TTL     = "${var.delete_envelopes_dlq_messages_ttl}"
+    FORCE_APP_CONFIG_CHANGE               = "true"
   }
 }
 
