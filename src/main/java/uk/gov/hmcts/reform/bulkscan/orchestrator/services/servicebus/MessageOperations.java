@@ -8,10 +8,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.util.UUID;
-
-import static java.time.temporal.ChronoUnit.MINUTES;
 
 @Service
 @Profile("!nosb") // do not register for the nosb (test) profile
@@ -37,7 +34,7 @@ public class MessageOperations implements IMessageOperations {
             lockToken,
             reason,
             description,
-            ImmutableMap.of("TimeToLive", Duration.of(5, MINUTES))
+            ImmutableMap.of("TimeToLive", "PT5M")
         );
     }
 }
