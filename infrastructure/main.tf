@@ -9,7 +9,7 @@ resource "azurerm_resource_group" "rg" {
 }
 
 locals {
-  ase_name            = "${data.terraform_remote_state.core_apps_compute.ase_name[0]}"
+  ase_name            = "core-compute-${var.env}"
   is_preview          = "${(var.env == "preview" || var.env == "spreview")}"
   previewVaultName    = "${var.raw_product}-aat"
   nonPreviewVaultName = "${var.raw_product}-${var.env}"
