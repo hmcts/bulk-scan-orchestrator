@@ -1,12 +1,11 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.tasks;
 
 import com.microsoft.azure.servicebus.IMessageReceiver;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
 
 import java.time.Duration;
@@ -16,7 +15,7 @@ import java.util.function.Supplier;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.verify;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @IntegrationTest
 public class CleanupEnvelopesDlqTaskTest {
 
@@ -25,11 +24,6 @@ public class CleanupEnvelopesDlqTaskTest {
 
     @Value("${scheduling.task.delete-envelopes-dlq-messages.ttl}")
     private Duration ttl;
-
-    @Before
-    public void setUp() {
-        CleanupEnvelopesDlqTask dlqTask = new CleanupEnvelopesDlqTask(dlqReceiverProvider, ttl);
-    }
 
     /**
      * Verifies if the Dlq scheduler task is running for the configured interval.

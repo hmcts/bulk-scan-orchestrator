@@ -25,8 +25,6 @@ import static org.springframework.util.SocketUtils.findAvailableTcpPort;
 @Profile({"integration", "nosb"}) // no servicebus queue handler registration
 class IntegrationTestInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    private IMessageReceiver messageReceiver = mock(IMessageReceiver.class);
-
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
         System.setProperty("wiremock.port", Integer.toString(findAvailableTcpPort()));
@@ -64,11 +62,7 @@ class IntegrationTestInitializer implements ApplicationContextInitializer<Config
 
     @Bean
     public Supplier<IMessageReceiver> dlqReceiverProvider() {
-        return new Supplier<IMessageReceiver>() {
-            @Override
-            public IMessageReceiver get() {
-                return messageReceiver;
-            }
-        };
+        IMessageReceiver messageReceiver = mock(IMessageReceiver.class);
+        return () -> messageReceiver;
     }
 }
