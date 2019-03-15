@@ -183,7 +183,7 @@ public class EnvelopeEventProcessorTest {
     }
 
     @Test
-    public void should_not_finalize_the_message_when_recoverable_failure() throws Exception {
+    public void should_not_finalize_the_message_when_recoverable_failure() {
         Exception processingFailureCause = new RuntimeException(
             "exception of type treated as recoverable"
         );
@@ -243,7 +243,7 @@ public class EnvelopeEventProcessorTest {
     }
 
     @Test
-    public void should_send_message_with_envelope_id_when_processing_successful() throws Exception {
+    public void should_send_message_with_envelope_id_when_processing_successful() {
         // given
         String envelopeId = UUID.randomUUID().toString();
         IMessage message = mock(IMessage.class);
