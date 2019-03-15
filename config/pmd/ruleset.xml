@@ -12,8 +12,6 @@
   </rule>
   <rule ref="category/java/codestyle.xml">
     <exclude name="AtLeastOneConstructor" />
-    <exclude name="CommentDefaultAccessModifier" />
-    <exclude name="DefaultPackage" />
     <exclude name="LocalVariableCouldBeFinal" />
     <exclude name="LongVariable" />
     <exclude name="MethodArgumentCouldBeFinal" />
