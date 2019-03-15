@@ -21,27 +21,29 @@ import static org.mockito.Mockito.verify;
 public class CleanupEnvelopesDlqTaskTest {
 
     @Autowired
-    Supplier<IMessageReceiver> dlqReceiverProvider;
-
-    private CleanupEnvelopesDlqTask dlqTask;
+    private Supplier<IMessageReceiver> dlqReceiverProvider;
 
     @Value("${scheduling.task.delete-envelopes-dlq-messages.ttl}")
     private Duration ttl;
 
     @Before
     public void setUp() {
-        dlqTask = new CleanupEnvelopesDlqTask(dlqReceiverProvider, ttl);
+        CleanupEnvelopesDlqTask dlqTask = new CleanupEnvelopesDlqTask(dlqReceiverProvider, ttl);
     }
 
+    /**
+     * Verifies if the Dlq scheduler task is running for the configured interval.
+     */
     @Test
     public void test_cleanup_dlq_scheduler_reads_dlq_message() {
-        IMessageReceiver iMessageReceiver = dlqReceiverProvider.get();
+        IMessageReceiver messageReceiver = dlqReceiverProvider.get();
+
         await()
             .atMost(15, TimeUnit.SECONDS)
             .ignoreExceptions()
             .until(() -> {
-                verify(iMessageReceiver).receive();
-                verify(iMessageReceiver).close();
+                verify(messageReceiver).receive();
+                verify(messageReceiver).close();
                 return true;
             });
     }

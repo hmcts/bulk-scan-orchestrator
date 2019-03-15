@@ -5,7 +5,6 @@ import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.microsoft.azure.servicebus.IMessageHandler;
 import com.microsoft.azure.servicebus.IMessageReceiver;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -26,7 +25,7 @@ import static org.springframework.util.SocketUtils.findAvailableTcpPort;
 @Profile({"integration", "nosb"}) // no servicebus queue handler registration
 class IntegrationTestInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    private IMessageReceiver messageReceiver = Mockito.mock(IMessageReceiver.class);
+    private IMessageReceiver messageReceiver = mock(IMessageReceiver.class);
 
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
