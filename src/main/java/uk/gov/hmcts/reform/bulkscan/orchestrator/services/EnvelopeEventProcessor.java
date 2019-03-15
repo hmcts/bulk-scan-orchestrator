@@ -144,7 +144,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
             case POTENTIALLY_RECOVERABLE_FAILURE:
                 int deliveryCount = (int) message.getDeliveryCount() + 1;
 
-                if (deliveryCount < maxDeliveryCount - 5) {
+                if (deliveryCount < maxDeliveryCount) {
                     // do nothing - let the message lock expire
                     log.info(
                         "Allowing message with ID {} to return to queue (delivery attempt {})",

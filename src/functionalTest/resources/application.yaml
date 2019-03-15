@@ -5,6 +5,11 @@ spring:
   application:
     name: Bulk Scan Orchestrator Functional Tests
 
+azure:
+  servicebus:
+    envelopes:
+      max-delivery-count: 10
+
 queue:
   envelopes:
     write-connection-string: ${ENVELOPES_QUEUE_WRITE_CONN_STRING}
