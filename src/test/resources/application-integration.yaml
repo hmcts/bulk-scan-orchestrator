@@ -18,5 +18,5 @@ scheduling:
   task:
     delete-envelopes-dlq-messages:
       enabled: true
-      cron: "*/10 * * * * *"
+      cron: "*/1 * * * * *"
       ttl: 10s

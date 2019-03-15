@@ -33,7 +33,7 @@ public class CleanupEnvelopesDlqTaskTest {
         IMessageReceiver messageReceiver = dlqReceiverProvider.get();
 
         await()
-            .atMost(15, TimeUnit.SECONDS)
+            .atMost(5, TimeUnit.SECONDS)
             .ignoreExceptions()
             .until(() -> {
                 verify(messageReceiver).receive();
