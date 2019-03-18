@@ -37,14 +37,16 @@ public class IdamConfigStatusEndpointTest {
         assertThat(responseNode.isArray()).isTrue();
         assertThat(ImmutableList.copyOf(responseNode.elements())).hasSize(1);
 
+        JsonNode statusNode = responseNode.get(0);
+
         JurisdictionConfigurationStatus actual = new JurisdictionConfigurationStatus(
-            responseNode.get(0).get("jurisdiction").asText(),
-            responseNode.get(0).get("is_correct").asBoolean(),
-            responseNode.get(0).get("error_description").isNull() ? null : "must be null - failure"
+            statusNode.get("jurisdiction").asText(),
+            statusNode.get("is_correct").asBoolean(),
+            statusNode.get("error_description").isNull() ? null : statusNode.get("error_description").asText()
         );
 
         assertThat(actual).isEqualToComparingFieldByField(
-            new JurisdictionConfigurationStatus("bulkscan", true)
+            new JurisdictionConfigurationStatus("bulkscan", true, null)
         );
     }
 }

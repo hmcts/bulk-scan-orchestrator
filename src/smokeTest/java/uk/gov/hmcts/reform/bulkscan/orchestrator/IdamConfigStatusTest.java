@@ -6,7 +6,6 @@ import io.restassured.RestAssured;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.TestPropertySource;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.out.JurisdictionConfigurationStatus;
 import uk.gov.hmcts.reform.logging.appinsights.SyntheticHeaders;
 
 import java.io.IOException;
@@ -32,20 +31,17 @@ public class IdamConfigStatusTest {
         ObjectMapper mapper = new ObjectMapper();
 
         mapper.readTree(response).elements().forEachRemaining(responseStatus -> {
-            JurisdictionConfigurationStatus status = new JurisdictionConfigurationStatus(
-                responseStatus.get("jurisdiction").asText(),
-                responseStatus.get("is_correct").asBoolean(),
-                responseStatus.get("error_description").asText()
-            );
+            String jurisdiction = responseStatus.get("jurisdiction").asText();
+            boolean isCorrect = responseStatus.get("is_correct").asBoolean();
+            String errorDescription = responseStatus.get("error_description").asText();
 
-            assertThat(status.isCorrect)
+            assertThat(isCorrect)
                 .withFailMessage(
                     "Misconfigured %s jurisdiction, error description: %s. Check the logs for more details",
-                    status.jurisdiction,
-                    status.errorDescription
+                    jurisdiction,
+                    errorDescription
                 )
                 .isTrue();
-            }
-        );
+        });
     }
 }
