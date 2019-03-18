@@ -41,7 +41,7 @@ public class AuthenticationChecker {
         try {
             return checkSignIn(jurisdiction, jurisdictionMapping.getUser(jurisdiction));
         } catch (NoUserConfiguredException exception) {
-            return new JurisdictionConfigurationStatus(jurisdiction, false, exception.getMessage());
+            return new JurisdictionConfigurationStatus(jurisdiction, false, exception.getMessage(), null);
         }
     }
 
@@ -52,24 +52,24 @@ public class AuthenticationChecker {
             log.debug("Successful authentication of {} jurisdiction", jurisdiction);
 
             return new JurisdictionConfigurationStatus(jurisdiction, true);
-        } catch (FeignException exception) {
+        } catch (FeignException e) {
             log.warn(
                 "An error occurred while authenticating {} jurisdiction with {} username",
                 jurisdiction,
                 credential.getUsername(),
-                exception
+                e
             );
 
-            return new JurisdictionConfigurationStatus(jurisdiction, false, exception.getMessage());
-        } catch (Exception exception) {
+            return new JurisdictionConfigurationStatus(jurisdiction, false, e.getMessage(), e.status());
+        } catch (Exception e) {
             log.error(
                 "An error occurred while authenticating {} jurisdiction with {} username",
                 jurisdiction,
                 credential.getUsername(),
-                exception
+                e
             );
 
-            return new JurisdictionConfigurationStatus(jurisdiction, false, exception.getMessage());
+            return new JurisdictionConfigurationStatus(jurisdiction, false, e.getMessage(), null);
         }
     }
 }
