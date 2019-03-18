@@ -77,6 +77,7 @@ public class AuthenticationCheckerTest {
         assertThat(status.jurisdiction).isEqualTo(SUCCESSFUL_JURISDICTION);
         assertThat(status.isCorrect).isTrue();
         assertThat(status.errorDescription).isNull();
+        assertThat(status.errorResponseStatus).isNull();
     }
 
     @Test
@@ -92,6 +93,7 @@ public class AuthenticationCheckerTest {
 
         assertThat(status.jurisdiction).isEqualTo(LOCKED_ACCOUNT_JURISDICTION);
         assertThat(status.isCorrect).isFalse();
+        assertThat(status.errorResponseStatus).isEqualTo(HttpStatus.LOCKED.value());
         assertThat(status.errorDescription).isEqualTo(exception.getMessage());
     }
 
@@ -106,7 +108,8 @@ public class AuthenticationCheckerTest {
                 new JurisdictionConfigurationStatus(
                     unknownJurisdiction,
                     false,
-                    String.format("No user configured for jurisdiction: %s", unknownJurisdiction)
+                    String.format("No user configured for jurisdiction: %s", unknownJurisdiction),
+                    null
                 )
             );
 
@@ -124,7 +127,8 @@ public class AuthenticationCheckerTest {
             .isEqualToComparingFieldByField(new JurisdictionConfigurationStatus(
                 LOCKED_ACCOUNT_JURISDICTION,
                 false,
-                errorMessage
+                errorMessage,
+                null
             ));
     }
 
@@ -139,10 +143,10 @@ public class AuthenticationCheckerTest {
             .authenticateUser(LOCKED_ACCOUNT_JURISDICTION_USERNAME, LOCKED_ACCOUNT_JURISDICTION_PASSWORD);
 
         assertThat(authenticationChecker.checkSignInForAllJurisdictions())
-            .extracting(status -> tuple(status.jurisdiction, status.isCorrect))
+            .extracting(status -> tuple(status.jurisdiction, status.isCorrect, status.errorResponseStatus))
             .containsExactlyInAnyOrder(
-                tuple(SUCCESSFUL_JURISDICTION, true),
-                tuple(LOCKED_ACCOUNT_JURISDICTION, false)
+                tuple(SUCCESSFUL_JURISDICTION, true, null),
+                tuple(LOCKED_ACCOUNT_JURISDICTION, false, HttpStatus.LOCKED.value())
             )
             .as("Result should contain a correct entry for each configured jurisdiction");
     }

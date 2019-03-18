@@ -42,11 +42,12 @@ public class IdamConfigStatusEndpointTest {
         JurisdictionConfigurationStatus actual = new JurisdictionConfigurationStatus(
             statusNode.get("jurisdiction").asText(),
             statusNode.get("is_correct").asBoolean(),
-            statusNode.get("error_description").isNull() ? null : statusNode.get("error_description").asText()
+            statusNode.get("error_description").isNull() ? null : statusNode.get("error_description").asText(),
+            statusNode.get("error_response_status").isNull() ? null : statusNode.get("error_response_status").asInt()
         );
 
         assertThat(actual).isEqualToComparingFieldByField(
-            new JurisdictionConfigurationStatus("bulkscan", true, null)
+            new JurisdictionConfigurationStatus("bulkscan", true, null, null)
         );
     }
 }
