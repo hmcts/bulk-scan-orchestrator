@@ -225,13 +225,13 @@ public class EnvelopeEventProcessorTest {
         verify(messageOperations).deadLetter(
             someMessage.getLockToken(),
             "Too many deliveries",
-            "Breached the limit of message delivery count of 1"
+            "Reached limit of message delivery count of 1"
         );
         verify(appInsights).trackDeadLetteredMessage(
             someMessage,
             "envelopes",
             "Too many deliveries",
-            "Breached the limit of message delivery count of 1"
+            "Reached limit of message delivery count of 1"
         );
     }
 
