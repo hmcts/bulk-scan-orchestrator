@@ -25,8 +25,7 @@ public class CleanupEnvelopesDlqTaskTest {
     @Test
     public void test_cleanup_dlq_scheduler_reads_dlq_message() {
         await()
-            .atMost(30, TimeUnit.SECONDS)
-            .pollInterval(1, TimeUnit.SECONDS)
+            .atMost(15, TimeUnit.SECONDS)
             .ignoreExceptions()
             .untilAsserted(() -> {
                 verify(cleanupEnvelopesDlqTask, atLeastOnce()).deleteMessagesInEnvelopesDlq();
