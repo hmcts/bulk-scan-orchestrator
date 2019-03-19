@@ -155,7 +155,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
                     deadLetterTheMessage(
                         message,
                         "Too many deliveries",
-                        "Breached the limit of message delivery count of " + deliveryCount
+                        "Reached limit of message delivery count of " + deliveryCount
                     );
                 }
 
