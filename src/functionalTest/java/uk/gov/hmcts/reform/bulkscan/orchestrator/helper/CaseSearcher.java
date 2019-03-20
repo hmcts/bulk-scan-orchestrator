@@ -29,6 +29,7 @@ public class CaseSearcher {
         // not including in try catch to fast fail the method
         CcdAuthenticator authenticator = factory.createForJurisdiction(jurisdiction);
 
+        System.out.println("User Token " + authenticator.getUserToken());
         return coreCaseDataApi.searchForCaseworker(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
