@@ -12,20 +12,25 @@ public class JurisdictionConfigurationStatus {
     @JsonProperty("error_description")
     public final String errorDescription;
 
+    @JsonProperty("error_response_status")
+    public final Integer errorResponseStatus;
+
     public JurisdictionConfigurationStatus(
         String jurisdiction,
         boolean isCorrect,
-        String errorDescription
+        String errorDescription,
+        Integer errorResponseStatus
     ) {
         this.jurisdiction = jurisdiction;
         this.isCorrect = isCorrect;
         this.errorDescription = errorDescription;
+        this.errorResponseStatus = errorResponseStatus;
     }
 
     public JurisdictionConfigurationStatus(
         String jurisdiction,
         boolean isCorrect
     ) {
-        this(jurisdiction, isCorrect, null);
+        this(jurisdiction, isCorrect, null, null);
     }
 }
