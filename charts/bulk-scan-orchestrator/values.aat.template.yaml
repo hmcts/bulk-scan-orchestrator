@@ -2,8 +2,8 @@ java:
   environment:
     S2S_NAME: "bulk_scan_orchestrator"
     S2S_URL: "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
-    IDAM_API_URL: "https://preprod-idamapi.reform.hmcts.net:3511"
-    IDAM_CLIENT_REDIRECT_URI: "https://rpe-bulk-scan-processor-sandbox.service.core-compute-sandbox.internal/oauth2/callback"
+    IDAM_API_URL: "https://idam-api.aat.platform.hmcts.net"
+    IDAM_CLIENT_REDIRECT_URI: "https://bulk-scan-orchestrator-aat.service.core-compute-aat.internal/oauth2/callback"
     CORE_CASE_DATA_API_URL: "http://ccd-data-store-api-aat.service.core-compute-aat.internal"
     DOCUMENT_MANAGEMENT_URL: "http://dm-store-aat.service.core-compute-aat.internal"
     QUEUE_READ_INTERVAL: "30000"
