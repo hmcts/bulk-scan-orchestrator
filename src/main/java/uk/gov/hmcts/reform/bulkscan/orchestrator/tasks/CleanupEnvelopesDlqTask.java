@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.ConnectionException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
@@ -19,6 +20,7 @@ import java.util.function.Supplier;
 /**
  * Deletes messages from envelopes Dead letter queue.
  */
+@Component
 @ConditionalOnProperty("scheduling.task.delete-envelopes-dlq-messages.enabled")
 public class CleanupEnvelopesDlqTask {
 

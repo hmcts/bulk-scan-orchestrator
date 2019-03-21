@@ -13,3 +13,10 @@ idam:
     bulkscan:
       username: bulkscanorchestrator+systemupdate@gmail.com
       password: Password12
+
+scheduling:
+  task:
+    delete-envelopes-dlq-messages:
+      enabled: true
+      cron: "*/1 * * * * *"
+      ttl: 10s

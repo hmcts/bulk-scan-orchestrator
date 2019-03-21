@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.common.Slf4jNotifier;
 import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.microsoft.azure.servicebus.IMessageHandler;
+import com.microsoft.azure.servicebus.IMessageReceiver;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IMessageOpe
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.ProcessedEnvelopeNotifier;
 
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import static org.mockito.Mockito.mock;
 import static org.springframework.util.SocketUtils.findAvailableTcpPort;
@@ -56,5 +58,11 @@ class IntegrationTestInitializer implements ApplicationContextInitializer<Config
     @Bean
     public ProcessedEnvelopeNotifier processedEnvelopeNotifier() {
         return mock(ProcessedEnvelopeNotifier.class);
+    }
+
+    @Bean
+    public Supplier<IMessageReceiver> dlqReceiverProvider() {
+        IMessageReceiver messageReceiver = mock(IMessageReceiver.class);
+        return () -> messageReceiver;
     }
 }
