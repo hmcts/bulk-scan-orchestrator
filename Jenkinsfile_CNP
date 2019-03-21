@@ -39,8 +39,8 @@ withPipeline(type, product, component) {
       env.S2S_URL = 'http://rpe-service-auth-provider-aat.service.core-compute-aat.internal'
       env.DOCUMENT_MANAGEMENT_URL = 'http://dm-store-aat.service.core-compute-aat.internal'
       env.CORE_CASE_DATA_API_URL = 'http://ccd-data-store-api-aat.service.core-compute-aat.internal'
-      env.IDAM_API_URL = 'https://preprod-idamapi.reform.hmcts.net:3511'
-      env.IDAM_CLIENT_REDIRECT_URI = 'https://rpe-bulk-scan-processor-sandbox.service.core-compute-sandbox.internal/oauth2/callback'
+      env.IDAM_API_URL = 'https://idam-api.aat.platform.hmcts.net'
+      env.IDAM_CLIENT_REDIRECT_URI = 'https://bulk-scan-orchestrator-aat.service.core-compute-aat.internal/oauth2/callback'
 
       // Envelopes queue connection string is needed by the functional tests client.
       // The following code (as ugly as it looks!) gets it from the k8s cluster
