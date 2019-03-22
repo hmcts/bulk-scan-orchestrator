@@ -20,3 +20,8 @@ scheduling:
       enabled: true
       cron: "*/1 * * * * *"
       ttl: 10s
+
+azure:
+  servicebus:
+    envelopes:
+      max-delivery-count: 10
