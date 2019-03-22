@@ -142,6 +142,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
                 break;
             case POTENTIALLY_RECOVERABLE_FAILURE:
+                // starts from 0
                 int deliveryCount = (int) message.getDeliveryCount() + 1;
 
                 if (deliveryCount < maxDeliveryCount) {

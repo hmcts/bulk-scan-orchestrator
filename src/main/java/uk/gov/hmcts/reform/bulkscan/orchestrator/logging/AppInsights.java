@@ -25,7 +25,7 @@ public class AppInsights extends AbstractAppInsights {
                 "queue", queue
             ),
             ImmutableMap.of(
-                "deliveryCount", (double) (message.getDeliveryCount() + 1)
+                "deliveryCount", (double) (message.getDeliveryCount() + 1) // starts from 0
             )
         );
     }
