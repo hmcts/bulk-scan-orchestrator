@@ -207,7 +207,7 @@ public class EnvelopeEventProcessorTest {
             eventPublisherContainer,
             processedEnvelopeNotifier,
             messageOperations,
-            1,
+            5,
             appInsights
         );
         Exception processingFailureCause = new RuntimeException(

@@ -70,9 +70,3 @@ variable "delete_envelopes_dlq_messages_cron" {
 variable "delete_envelopes_dlq_messages_ttl" {
   default = "72h"
 }
-
-variable "envelopes_queue_max_delivery_count" {
-  type = "string"
-  default = "10"
-  description = "Application message consumption limit. Will be favoured in case server value is higher"
-}
