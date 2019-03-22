@@ -5,4 +5,4 @@ supported_jurisdictions = ["SSCS", "BULKSCAN", "DIVORCE", "PROBATE"]
 
 delete_envelopes_dlq_messages_enabled = "true"
 delete_envelopes_dlq_messages_cron = "0 0 * * * *"
-delete_envelopes_dlq_messages_ttl = "1h"
+delete_envelopes_dlq_messages_ttl = "5m"
