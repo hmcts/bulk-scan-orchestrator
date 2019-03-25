@@ -31,11 +31,11 @@ public class CleanupDlqMessagesTest {
 
     @Autowired
     @Qualifier("dlqReceiver")
-    Supplier<IMessageReceiver> dlqReceiverProvider;
+    private Supplier<IMessageReceiver> dlqReceiverProvider;
 
     @Autowired
     @Qualifier("envelopesReceiver")
-    Supplier<IMessageReceiver> envelopesReceiverProvider;
+    private Supplier<IMessageReceiver> envelopesReceiverProvider;
 
     @Autowired
     private EnvelopeMessager envelopeMessager;
@@ -87,15 +87,13 @@ public class CleanupDlqMessagesTest {
 
     private boolean verifyDlqMessagesExists() throws ServiceBusException, InterruptedException {
         log.info("Reading messages from envelopes Dead letter queue.");
+
         IMessageReceiver messageReceiver = null;
 
         try {
             messageReceiver = dlqReceiverProvider.get();
-
             IMessage message = messageReceiver.receive();
-            while (message != null) {
-                return true;
-            }
+            return message != null;
         } finally {
             if (messageReceiver != null) {
                 try {
@@ -105,6 +103,5 @@ public class CleanupDlqMessagesTest {
                 }
             }
         }
-        return false;
     }
 }
