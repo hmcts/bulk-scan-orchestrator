@@ -62,7 +62,7 @@ public class CleanupDlqMessagesTest {
 
         // then
         await("Message deleted from envelopes dead letter queue")
-            .atMost(120, TimeUnit.SECONDS)
+            .atMost(4, TimeUnit.MINUTES)
             .pollInterval(Duration.FIVE_SECONDS)
             .until(() -> !verifyDlqMessagesExists());
     }
