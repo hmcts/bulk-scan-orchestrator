@@ -59,9 +59,9 @@ locals {
     S2S_NAME    = "${var.s2s_name}"
     S2S_SECRET  = "${data.azurerm_key_vault_secret.s2s_secret.value}"
 
-    ENVELOPES_QUEUE_CONNECTION_STRING           = "${data.terraform_remote_state.shared_infra.envelopes_queue_primary_listen_connection_string}"
+    ENVELOPES_QUEUE_CONNECTION_STRING           = "${data.azurerm_key_vault_secret.envelopes_queue_listen_conn_str.value}"
     ENVELOPES_QUEUE_MAX_DELIVERY_COUNT          = "${data.terraform_remote_state.shared_infra.envelopes_queue_max_delivery_count - 5}"
-    PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING = "${data.terraform_remote_state.shared_infra.processed_envelopes_queue_primary_send_connection_string}"
+    PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING = "${data.azurerm_key_vault_secret.processed_envelopes_queue_send_conn_str.value}"
 
     IDAM_API_URL              = "${var.idam_api_url}"
     IDAM_CLIENT_SECRET        = "${data.azurerm_key_vault_secret.idam_client_secret.value}"
@@ -117,6 +117,21 @@ data "azurerm_key_vault_secret" "idam_client_secret" {
 data "azurerm_key_vault_secret" "s2s_secret" {
   name = "microservicekey-bulk-scan-orchestrator"
   vault_uri = "${local.s2s_vault_url}"
+}
+
+data "azurerm_key_vault_secret" "envelopes_queue_send_conn_str" {
+  name      = "envelopes-queue-send-connection-string"
+  vault_uri = "${data.azurerm_key_vault.key_vault.vault_uri}"
+}
+
+data "azurerm_key_vault_secret" "envelopes_queue_listen_conn_str" {
+  name      = "envelopes-queue-listen-connection-string"
+  vault_uri = "${data.azurerm_key_vault.key_vault.vault_uri}"
+}
+
+data "azurerm_key_vault_secret" "processed_envelopes_queue_send_conn_str" {
+  name      = "processed-envelopes-queue-send-connection-string"
+  vault_uri = "${data.azurerm_key_vault.key_vault.vault_uri}"
 }
 
 # the s2s secret is copied to app's own vault, so that Jeknins can convert it to an env variable
