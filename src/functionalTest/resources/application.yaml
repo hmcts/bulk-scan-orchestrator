@@ -9,6 +9,12 @@ queue:
   envelopes:
     write-connection-string: ${ENVELOPES_QUEUE_WRITE_CONN_STRING}
 
+# because functional tests load up SpringBootTest
+azure:
+  servicebus:
+    envelopes:
+      max-delivery-count: 10
+
 core_case_data:
   api:
     url: http://localhost:4452

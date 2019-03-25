@@ -20,6 +20,7 @@ azure:
     envelopes:
       connection-string: ${ENVELOPES_QUEUE_CONNECTION_STRING}
       queue-name: envelopes
+      max-delivery-count: ${ENVELOPES_QUEUE_MAX_DELIVERY_COUNT}
     processed-envelopes:
       connection-string: ${PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING}
       queue-name: processed-envelopes
