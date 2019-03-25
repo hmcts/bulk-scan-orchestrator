@@ -7,7 +7,9 @@ import com.microsoft.azure.servicebus.IMessageHandler;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.logging.AppInsights;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisherContainer;
@@ -38,17 +40,23 @@ public class EnvelopeEventProcessor implements IMessageHandler {
     private final EventPublisherContainer eventPublisherContainer;
     private final IProcessedEnvelopeNotifier processedEnvelopeNotifier;
     private final IMessageOperations messageOperations;
+    private final int maxDeliveryCount;
+    private final AppInsights appInsights;
 
     public EnvelopeEventProcessor(
         CaseRetriever caseRetriever,
         EventPublisherContainer eventPublisherContainer,
         IProcessedEnvelopeNotifier processedEnvelopeNotifier,
-        IMessageOperations messageOperations
+        IMessageOperations messageOperations,
+        @Value("${azure.servicebus.envelopes.max-delivery-count}") int maxDeliveryCount,
+        AppInsights appInsights
     ) {
         this.caseRetriever = caseRetriever;
         this.eventPublisherContainer = eventPublisherContainer;
         this.processedEnvelopeNotifier = processedEnvelopeNotifier;
         this.messageOperations = messageOperations;
+        this.maxDeliveryCount = maxDeliveryCount;
+        this.appInsights = appInsights;
     }
 
     @Override
@@ -126,27 +134,50 @@ public class EnvelopeEventProcessor implements IMessageHandler {
                 log.info("Message with ID {} has been completed", message.getMessageId());
                 break;
             case UNRECOVERABLE_FAILURE:
-                messageOperations.deadLetter(
-                    message.getLockToken(),
+                deadLetterTheMessage(
+                    message,
                     "Message processing error",
                     processingResult.exception.getMessage()
                 );
 
-                log.info("Message with ID {} has been dead-lettered", message.getMessageId());
                 break;
             case POTENTIALLY_RECOVERABLE_FAILURE:
-                // do nothing - let the message lock expire
-                log.info(
-                    "Allowing message with ID {} to return to queue (delivery attempt {})",
-                    message.getMessageId(),
-                    message.getDeliveryCount() + 1
-                );
+                // starts from 0
+                int deliveryCount = (int) message.getDeliveryCount() + 1;
+
+                if (deliveryCount < maxDeliveryCount) {
+                    // do nothing - let the message lock expire
+                    log.info(
+                        "Allowing message with ID {} to return to queue (delivery attempt {})",
+                        message.getMessageId(),
+                        deliveryCount
+                    );
+                } else {
+                    deadLetterTheMessage(
+                        message,
+                        "Too many deliveries",
+                        "Reached limit of message delivery count of " + deliveryCount
+                    );
+                }
+
                 break;
             default:
                 throw new MessageProcessingException(
                     "Unknown message processing result type: " + processingResult.resultType
                 );
         }
+    }
+
+    private void deadLetterTheMessage(
+        IMessage message,
+        String reason,
+        String description
+    ) throws InterruptedException, ServiceBusException {
+        messageOperations.deadLetter(message.getLockToken(), reason, description);
+
+        log.info("Message with ID {} has been dead-lettered", message.getMessageId());
+        // track used for alert
+        appInsights.trackDeadLetteredMessage(message, "envelopes", reason, description);
     }
 
     private void logMessageFinaliseError(
