@@ -27,8 +27,6 @@ public class CleanupEnvelopesDlqTaskTest {
         await()
             .atMost(15, TimeUnit.SECONDS)
             .ignoreExceptions()
-            .untilAsserted(() -> {
-                verify(cleanupEnvelopesDlqTask, atLeastOnce()).deleteMessagesInEnvelopesDlq();
-            });
+            .untilAsserted(() -> verify(cleanupEnvelopesDlqTask, atLeastOnce()).deleteMessagesInEnvelopesDlq());
     }
 }

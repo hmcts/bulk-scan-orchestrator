@@ -3,24 +3,24 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.tasks;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.ConnectionException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.function.Supplier;
 
+import static java.nio.charset.Charset.defaultCharset;
+
 /**
  * Deletes messages from envelopes Dead letter queue.
  */
-@Component
 @ConditionalOnProperty("scheduling.task.delete-envelopes-dlq-messages.enabled")
 public class CleanupEnvelopesDlqTask {
 
@@ -53,7 +53,7 @@ public class CleanupEnvelopesDlqTask {
                 }
                 message = messageReceiver.receive();
             }
-
+            log.info("Finished processing messages in envelopes Dead letter queue.");
         } catch (ConnectionException e) {
             log.error("Unable to connect to envelopes dead letter queue", e);
         } finally {
@@ -68,17 +68,22 @@ public class CleanupEnvelopesDlqTask {
     }
 
     private void logMessage(IMessage msg) {
-        Envelope envelope = EnvelopeParser.parse(msg.getBody());
 
-        log.info(
-            "Deleting message. ID: {} Envelope ID: {}, File name: {}, Jurisdiction: {}, Classification: {}, Case: {}",
-            msg.getMessageId(),
-            envelope.id,
-            envelope.zipFileName,
-            envelope.jurisdiction,
-            envelope.classification,
-            envelope.caseRef
-        );
+        try {
+            JSONObject msgContent = new JSONObject(new String(msg.getBody(), defaultCharset()));
+            log.info(
+                "Deleting message. "
+                    + "ID: {} Envelope ID: {}, File name: {}, Jurisdiction: {}, Classification: {}, Case: {}",
+                msg.getMessageId(),
+                msgContent.get("id"),
+                msgContent.get("zip_file_name"),
+                msgContent.get("jurisdiction"),
+                msgContent.get("classification"),
+                msgContent.get("case_ref")
+            );
+        } catch (JSONException e) {
+            log.error("Error occurred while parsing the dlq message with Message Id: {}", msg.getMessageId());
+        }
     }
 
     private boolean canBeDeleted(IMessage message) {
