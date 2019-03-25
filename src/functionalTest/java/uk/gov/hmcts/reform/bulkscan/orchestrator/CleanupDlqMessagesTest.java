@@ -26,8 +26,8 @@ import static org.awaitility.Awaitility.await;
 @SpringBootTest
 @ActiveProfiles("nosb")  // no servicebus queue handler registration
 @Import(FunctionalQueueConfig.class)
-public class DlqMessageReceiverTest {
-    private static final Logger log = LoggerFactory.getLogger(DlqMessageReceiverTest.class);
+public class CleanupDlqMessagesTest {
+    private static final Logger log = LoggerFactory.getLogger(CleanupDlqMessagesTest.class);
 
     @Autowired
     @Qualifier("dlqReceiver")
@@ -43,6 +43,7 @@ public class DlqMessageReceiverTest {
     @Test
     public void testCleanupDlqTask() throws InterruptedException, ServiceBusException, JSONException {
         // given
+        log.info("Send a message to envelopes queue. filename: envelopes/dead-letter-envelope.json");
         envelopeMessager.sendMessageFromFile(
             "envelopes/dead-letter-envelope.json",
             "1234",
@@ -51,14 +52,16 @@ public class DlqMessageReceiverTest {
         );
 
         // when
+        log.info("Dead letter the first message on envelope queue.");
         deadLetterMessage();
-        await("Dlq Messages ")
+
+        await("Message exists in envelopes dead letter queue")
             .atMost(30, TimeUnit.SECONDS)
             .pollInterval(Duration.ONE_SECOND)
             .until(this::verifyDlqMessagesExists);
 
         // then
-        await("Exception record being created")
+        await("Message deleted from envelopes dead letter queue")
             .atMost(120, TimeUnit.SECONDS)
             .pollInterval(Duration.FIVE_SECONDS)
             .until(() -> !verifyDlqMessagesExists());
@@ -70,7 +73,7 @@ public class DlqMessageReceiverTest {
         try {
             IMessage message = envelopesReceiver.receive();
             while (message != null) {
-                log.info("Deadlettering message with Id: {}", message.getMessageId());
+                log.info("Dead lettering message with Id: {}", message.getMessageId());
                 envelopesReceiver.deadLetter(message.getLockToken());
             }
         } finally {

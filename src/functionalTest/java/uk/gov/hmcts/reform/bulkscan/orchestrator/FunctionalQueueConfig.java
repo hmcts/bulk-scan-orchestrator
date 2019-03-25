@@ -23,10 +23,7 @@ public class FunctionalQueueConfig {
     private String queueWriteConnectionString;
 
     @Value("${azure.servicebus.envelopes.connection-string}")
-    String connectionString;
-
-    @Value("${azure.servicebus.envelopes.queue-name}")
-    String queueName;
+    private String connectionString;
 
     @Bean
     QueueClient testWriteClient() throws ServiceBusException, InterruptedException {
@@ -37,11 +34,11 @@ public class FunctionalQueueConfig {
     }
 
     @Bean(name = "dlqReceiver")
-    public Supplier<IMessageReceiver> dlqReceiverProvider() {
+    Supplier<IMessageReceiver> dlqReceiverProvider() {
         return () -> {
             try {
                 return ClientFactory.createMessageReceiverFromConnectionStringBuilder(
-                    new ConnectionStringBuilder(connectionString, StringUtils.join(queueName, "/$deadletterqueue")),
+                    new ConnectionStringBuilder(StringUtils.join(connectionString, "/$deadletterqueue")),
                     ReceiveMode.PEEKLOCK
                 );
             } catch (InterruptedException e) {
@@ -55,20 +52,11 @@ public class FunctionalQueueConfig {
     }
 
     @Bean(name = "envelopesReceiver")
-    public Supplier<IMessageReceiver> envelopesReceiverProvider() {
-        return () -> {
-            try {
-                return ClientFactory.createMessageReceiverFromConnectionStringBuilder(
-                    new ConnectionStringBuilder(connectionString, queueName),
-                    ReceiveMode.PEEKLOCK
-                );
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            } catch (ServiceBusException e) {
-                throw new ConnectionException("Unable to connect to the envelopes queue", e);
-            }
-            return null;
-        };
+    IMessageReceiver envelopesReadClient() throws ServiceBusException, InterruptedException {
+        return ClientFactory.createMessageReceiverFromConnectionString(
+            connectionString,
+            ReceiveMode.PEEKLOCK
+        );
     }
 
     @Bean
@@ -95,6 +83,7 @@ public class FunctionalQueueConfig {
     @Profile("nosb") // apply only when Service Bus should not be used
     IProcessedEnvelopeNotifier testProcessedEnvelopeNotifier() {
         // return implementation that does nothing
-        return envelopeId -> { };
+        return envelopeId -> {
+        };
     }
 }
