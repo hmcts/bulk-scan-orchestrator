@@ -48,9 +48,25 @@ public class CleanupEnvelopesDlqTask {
             IMessage message = messageReceiver.receive();
             while (message != null) {
                 if (canBeDeleted(message)) {
-                    logMessage(message);
-                    messageReceiver.complete(message.getLockToken());
+                    try {
+                        JSONObject msgContent = new JSONObject(new String(message.getBody(), defaultCharset()));
+                        log.info(
+                            "Deleting message. ID: {} "
+                                + "Envelope ID: {}, File name: {}, Jurisdiction: {}, Classification: {}, Case: {}",
+                            message.getMessageId(),
+                            msgContent.get("id"),
+                            msgContent.get("zip_file_name"),
+                            msgContent.get("jurisdiction"),
+                            msgContent.get("classification"),
+                            msgContent.get("case_ref")
+                        );
+                        messageReceiver.complete(message.getLockToken());
+                    } catch (JSONException e) {
+                        log.error("An error occurred while parsing the dlq message with Message Id: {}",
+                            message.getMessageId());
+                    }
                 }
+                // read next message in dlq
                 message = messageReceiver.receive();
             }
             log.info("Finished processing messages in envelopes Dead letter queue.");
@@ -64,25 +80,6 @@ public class CleanupEnvelopesDlqTask {
                     log.error("Error closing dlq connection", e);
                 }
             }
-        }
-    }
-
-    private void logMessage(IMessage msg) {
-
-        try {
-            JSONObject msgContent = new JSONObject(new String(msg.getBody(), defaultCharset()));
-            log.info(
-                "Deleting message. "
-                    + "ID: {} Envelope ID: {}, File name: {}, Jurisdiction: {}, Classification: {}, Case: {}",
-                msg.getMessageId(),
-                msgContent.get("id"),
-                msgContent.get("zip_file_name"),
-                msgContent.get("jurisdiction"),
-                msgContent.get("classification"),
-                msgContent.get("case_ref")
-            );
-        } catch (JSONException e) {
-            log.error("Error occurred while parsing the dlq message with Message Id: {}", msg.getMessageId());
         }
     }
 

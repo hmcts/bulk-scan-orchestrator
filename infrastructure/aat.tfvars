@@ -4,5 +4,5 @@ idam_client_redirect_uri = "https://rpe-bulk-scan-processor-sandbox.service.core
 supported_jurisdictions = ["SSCS", "BULKSCAN", "DIVORCE", "PROBATE"]
 
 delete_envelopes_dlq_messages_enabled = "true"
-delete_envelopes_dlq_messages_cron = "0 0/2 * * * *"
-delete_envelopes_dlq_messages_ttl = "1m"
+delete_envelopes_dlq_messages_cron = "0 0/1 * * * *"
+delete_envelopes_dlq_messages_ttl = "30s"
