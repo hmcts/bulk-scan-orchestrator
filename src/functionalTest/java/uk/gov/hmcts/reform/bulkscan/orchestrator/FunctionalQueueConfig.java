@@ -52,11 +52,20 @@ public class FunctionalQueueConfig {
     }
 
     @Bean(name = "envelopesReceiver")
-    IMessageReceiver envelopesReadClient() throws ServiceBusException, InterruptedException {
-        return ClientFactory.createMessageReceiverFromConnectionString(
-            connectionString,
-            ReceiveMode.PEEKLOCK
-        );
+    public Supplier<IMessageReceiver> envelopesReceiverProvider() {
+        return () -> {
+            try {
+                return ClientFactory.createMessageReceiverFromConnectionStringBuilder(
+                    new ConnectionStringBuilder(connectionString),
+                    ReceiveMode.PEEKLOCK
+                );
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } catch (ServiceBusException e) {
+                throw new ConnectionException("Unable to connect to the envelopes queue", e);
+            }
+            return null;
+        };
     }
 
     @Bean
