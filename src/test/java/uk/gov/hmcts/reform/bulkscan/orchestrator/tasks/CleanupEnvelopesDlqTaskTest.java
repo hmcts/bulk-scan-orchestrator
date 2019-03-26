@@ -3,11 +3,13 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.tasks;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.boot.test.rule.OutputCapture;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.ConnectionException;
 
@@ -40,6 +42,9 @@ public class CleanupEnvelopesDlqTaskTest {
 
     @Mock
     private Supplier<IMessageReceiver> receiverProvider;
+
+    @Rule
+    public OutputCapture capture = new OutputCapture();
 
     private final Duration ttl = Duration.ofSeconds(10);
 
@@ -118,6 +123,30 @@ public class CleanupEnvelopesDlqTaskTest {
 
         //then
         assertThat(exception).isNull();
+    }
+
+    @Test
+    public void should_log_and_skip_invalid_messages() throws Exception {
+        //given
+        given(message.getEnqueuedTimeUtc())
+            .willReturn(LocalDateTime.now().minus(ttl.plusSeconds(10)).toInstant(ZoneOffset.UTC));
+        String messageId = UUID.randomUUID().toString();
+        given(message.getMessageId()).willReturn(messageId);
+        given(message.getBody()).willReturn("```".getBytes()); //invalid message
+        given(messageReceiver.receive()).willReturn(message).willReturn(null);
+
+        //when
+        cleanupDlqTask.deleteMessagesInEnvelopesDlq();
+
+        //then
+        assertThat(capture.toString())
+            .containsPattern(
+                ".+ ERROR \\[.*\\].*"
+                    + CleanupEnvelopesDlqTask.class.getSimpleName()
+                    + " An error occurred while parsing the dlq message with Message Id: " + messageId
+            );
+
+        verify(messageReceiver, never()).complete(any());
     }
 
 }
