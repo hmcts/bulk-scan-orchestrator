@@ -8,13 +8,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.logging.AppInsights;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisherContainer;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CcdUpdater;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.MessageOperations;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.NotificationSendingException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.ProcessedEnvelopeNotifier;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 
 import java.nio.charset.Charset;
 import java.util.UUID;
@@ -29,10 +26,8 @@ import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelopeJson;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.NEW_APPLICATION;
 
@@ -45,16 +40,13 @@ public class EnvelopeEventProcessorTest {
     private IMessage someMessage;
 
     @Mock
-    private EventPublisherContainer eventPublisherContainer;
-
-    @Mock
     private MessageOperations messageOperations;
 
     @Mock
     private AppInsights appInsights;
 
     @Mock
-    EventPublisher eventPublisher;
+    CcdUpdater ccdUpdater;
 
     @Mock
     private ProcessedEnvelopeNotifier processedEnvelopeNotifier;
@@ -64,16 +56,12 @@ public class EnvelopeEventProcessorTest {
     @Before
     public void before() {
         processor = new EnvelopeEventProcessor(
-            mock(CaseRetriever.class),
-            eventPublisherContainer,
+            ccdUpdater,
             processedEnvelopeNotifier,
             messageOperations,
             10,
             appInsights
         );
-
-        when(eventPublisherContainer.getPublisher(any(Classification.class), any()))
-            .thenReturn(eventPublisher);
 
         given(someMessage.getBody()).willReturn(envelopeJson());
         given(someMessage.getLockToken()).willReturn(UUID.randomUUID());
@@ -102,10 +90,9 @@ public class EnvelopeEventProcessorTest {
     }
 
     @Test
-    public void should_return_completed_future_if_exception_is_thrown_while_retrieving_case() {
+    public void should_return_completed_future_if_exception_is_thrown_while_updating_ccd() {
         // given
-        reset(eventPublisherContainer);
-        given(eventPublisherContainer.getPublisher(any(), any())).willThrow(new RuntimeException());
+        willThrow(new RuntimeException()).given(ccdUpdater).updateCcdWithEnvelope(any());
 
         // when
         CompletableFuture<Void> result = processor.onMessageAsync(someMessage);
@@ -189,7 +176,7 @@ public class EnvelopeEventProcessorTest {
         );
 
         // given an error occurs during message processing
-        willThrow(processingFailureCause).given(eventPublisher).publish(any());
+        willThrow(processingFailureCause).given(ccdUpdater).updateCcdWithEnvelope(any());
 
         // when
         CompletableFuture<Void> result = processor.onMessageAsync(someMessage);
@@ -203,8 +190,7 @@ public class EnvelopeEventProcessorTest {
     public void should_finalize_the_message_when_recoverable_failure_but_delivery_maxed() throws Exception {
         // given
         processor = new EnvelopeEventProcessor(
-            mock(CaseRetriever.class),
-            eventPublisherContainer,
+            ccdUpdater,
             processedEnvelopeNotifier,
             messageOperations,
             1,
@@ -215,7 +201,7 @@ public class EnvelopeEventProcessorTest {
         );
 
         // and an error occurs during message processing
-        willThrow(processingFailureCause).given(eventPublisher).publish(any());
+        willThrow(processingFailureCause).given(ccdUpdater).updateCcdWithEnvelope(any());
 
         // when
         CompletableFuture<Void> result = processor.onMessageAsync(someMessage);
@@ -262,7 +248,7 @@ public class EnvelopeEventProcessorTest {
     public void should_not_send_processed_envelope_notification_when_processing_fails() {
         // given
         Exception processingFailureCause = new RuntimeException("test exception");
-        willThrow(processingFailureCause).given(eventPublisher).publish(any());
+        willThrow(processingFailureCause).given(ccdUpdater).updateCcdWithEnvelope(any());
 
         // when
         CompletableFuture<Void> result = processor.onMessageAsync(someMessage);

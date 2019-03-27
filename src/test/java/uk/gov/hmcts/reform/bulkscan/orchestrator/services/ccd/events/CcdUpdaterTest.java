@@ -15,13 +15,14 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.JURSIDICTION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.NEW_APPLICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.SUPPLEMENTARY_EVIDENCE;
 
 @SuppressWarnings("checkstyle:LineLength")
 @RunWith(MockitoJUnitRunner.class)
-public class EventPublisherContainerTest {
+public class CcdUpdaterTest {
 
     @Mock
     private AttachDocsToSupplementaryEvidence attachDocsToSupplementaryEvidence;
@@ -33,18 +34,16 @@ public class EventPublisherContainerTest {
     private CaseRetriever caseRetriever;
 
     @Mock
-    private Envelope envelope;
-
-    @Mock
     private CaseDetails caseDetails;
 
-    private EventPublisherContainer eventPublisherContainer;
+    private CcdUpdater ccdUpdater;
 
     @Before
     public void setUp() {
-        eventPublisherContainer = new EventPublisherContainer(
+        ccdUpdater = new CcdUpdater(
             attachDocsToSupplementaryEvidence,
-            createExceptionRecord
+            createExceptionRecord,
+            caseRetriever
         );
     }
 
@@ -52,13 +51,10 @@ public class EventPublisherContainerTest {
     public void should_call_AttachDocsToSupplementaryEvidence_for_supplementary_evidence_classification_when_case_exists() {
         // given
         given(caseRetriever.retrieve(JURSIDICTION, CASE_REF)).willReturn(caseDetails);
+        Envelope envelope = envelope(SUPPLEMENTARY_EVIDENCE, JURSIDICTION, CASE_REF);
 
         // when
-        EventPublisher publisher = eventPublisherContainer.getPublisher(
-            SUPPLEMENTARY_EVIDENCE,
-            () -> caseRetriever.retrieve(JURSIDICTION, CASE_REF)
-        );
-        publisher.publish(envelope);
+        ccdUpdater.updateCcdWithEnvelope(envelope);
 
         // then
         verify(attachDocsToSupplementaryEvidence).publish(envelope, caseDetails);
@@ -68,13 +64,10 @@ public class EventPublisherContainerTest {
     public void should_call_CreateExceptionRecord_for_supplementary_evidence_classification_when_case_does_not_exist() {
         // given
         given(caseRetriever.retrieve(JURSIDICTION, CASE_REF)).willReturn(null); // case not found
+        Envelope envelope = envelope(SUPPLEMENTARY_EVIDENCE, JURSIDICTION, CASE_REF);
 
         // when
-        EventPublisher publisher = eventPublisherContainer.getPublisher(
-            SUPPLEMENTARY_EVIDENCE,
-            () -> caseRetriever.retrieve(JURSIDICTION, CASE_REF)
-        );
-        publisher.publish(envelope);
+        ccdUpdater.updateCcdWithEnvelope(envelope);
 
         // then
         verify(this.createExceptionRecord).publish(envelope);
@@ -82,33 +75,27 @@ public class EventPublisherContainerTest {
 
     @Test
     public void should_call_CreateExceptionRecord_for_exception_classification() {
+        // given
+        Envelope envelope = envelope(EXCEPTION, JURSIDICTION, CASE_REF);
+
         // when
-        EventPublisher eventPublisher = eventPublisherContainer.getPublisher(
-            EXCEPTION,
-            () -> caseRetriever.retrieve(JURSIDICTION, CASE_REF)
-        );
-        eventPublisher.publish(envelope);
+        ccdUpdater.updateCcdWithEnvelope(envelope);
 
         // then
         verify(this.createExceptionRecord).publish(envelope);
-
-        // and
         verify(caseRetriever, never()).retrieve(JURSIDICTION, CASE_REF);
     }
 
     @Test
     public void should_call_CreateExceptionRecord_for_new_application_classification() {
+        // given
+        Envelope envelope = envelope(NEW_APPLICATION, JURSIDICTION, CASE_REF);
+
         // when
-        EventPublisher eventPublisher = eventPublisherContainer.getPublisher(
-            NEW_APPLICATION,
-            () -> caseRetriever.retrieve(JURSIDICTION, CASE_REF)
-        );
-        eventPublisher.publish(envelope);
+        ccdUpdater.updateCcdWithEnvelope(envelope);
 
         // then
         verify(this.createExceptionRecord).publish(envelope);
-
-        // and
         verify(caseRetriever, never()).retrieve(any(), any());
     }
 
