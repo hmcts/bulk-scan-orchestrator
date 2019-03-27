@@ -194,7 +194,6 @@ dependencies {
   
   compile group: 'com.microsoft.azure', name: 'azure-servicebus', version: '1.2.8'
   compile group: 'io.vavr', name: 'vavr', version: '0.10.0'
-  compile group: 'org.json', name: 'json', version: '20180813'
 
   annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
 
