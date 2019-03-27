@@ -1,8 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
 
-import com.microsoft.azure.servicebus.ExceptionPhase;
 import com.microsoft.azure.servicebus.IMessage;
-import com.microsoft.azure.servicebus.IMessageHandler;
+import com.microsoft.azure.servicebus.IMessageReceiver;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.logging.AppInsights;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EnvelopeHandler;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IMessageOperations;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IProcessedEnvelopeNotifier;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.NotificationSendingException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.InvalidMessageException;
@@ -19,34 +17,33 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.handler.Mes
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.handler.MessageProcessingResultType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
-import java.util.concurrent.CompletableFuture;
-
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser.parse;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.handler.MessageProcessingResultType.POTENTIALLY_RECOVERABLE_FAILURE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.handler.MessageProcessingResultType.SUCCESS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.handler.MessageProcessingResultType.UNRECOVERABLE_FAILURE;
 
 @Service
-public class EnvelopeEventProcessor implements IMessageHandler {
+// TODO: change name to EnvelopeMessageProcessor
+public class EnvelopeEventProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(EnvelopeEventProcessor.class);
 
     private final EnvelopeHandler envelopeHandler;
     private final IProcessedEnvelopeNotifier processedEnvelopeNotifier;
-    private final IMessageOperations messageOperations;
+    private final IMessageReceiver messageReceiver;
     private final int maxDeliveryCount;
     private final AppInsights appInsights;
 
     public EnvelopeEventProcessor(
         EnvelopeHandler envelopeHandler,
         IProcessedEnvelopeNotifier processedEnvelopeNotifier,
-        IMessageOperations messageOperations,
+        IMessageReceiver messageReceiver,
         @Value("${azure.servicebus.envelopes.max-delivery-count}") int maxDeliveryCount,
         AppInsights appInsights
     ) {
         this.envelopeHandler = envelopeHandler;
         this.processedEnvelopeNotifier = processedEnvelopeNotifier;
-        this.messageOperations = messageOperations;
+        this.messageReceiver = messageReceiver;
         this.maxDeliveryCount = maxDeliveryCount;
         this.appInsights = appInsights;
     }
@@ -57,27 +54,14 @@ public class EnvelopeEventProcessor implements IMessageHandler {
      * @return false if there was no message to process. Otherwise true.
      */
     public boolean processNextMessage() throws ServiceBusException, InterruptedException {
-        // TODO: implement
-        return false;
-    }
+        IMessage message = messageReceiver.receive();
 
-    @Override
-    public CompletableFuture<Void> onMessageAsync(IMessage message) {
-        /*
-         * NOTE: this is done here instead of offloading to the forkJoin pool "CompletableFuture.runAsync()"
-         * because we probably should think about a threading model before doing this.
-         * Maybe consider using Netflix's RxJava too (much simpler than CompletableFuture).
-         */
-        CompletableFuture<Void> completableFuture = new CompletableFuture<>();
-        try {
+        if (message != null) {
             MessageProcessingResult result = process(message);
             tryFinaliseProcessedMessage(message, result);
-
-            completableFuture.complete(null);
-        } catch (Throwable t) {
-            completableFuture.completeExceptionally(t);
         }
-        return completableFuture;
+
+        return message != null;
     }
 
     private MessageProcessingResult process(IMessage message) {
@@ -125,7 +109,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
         switch (processingResult.resultType) {
             case SUCCESS:
-                messageOperations.complete(message.getLockToken());
+                messageReceiver.complete(message.getLockToken());
                 log.info("Message with ID {} has been completed", message.getMessageId());
                 break;
             case UNRECOVERABLE_FAILURE:
@@ -168,7 +152,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
         String reason,
         String description
     ) throws InterruptedException, ServiceBusException {
-        messageOperations.deadLetter(message.getLockToken(), reason, description);
+        messageReceiver.deadLetter(message.getLockToken(), reason, description);
 
         log.info("Message with ID {} has been dead-lettered", message.getMessageId());
         // track used for alert
@@ -186,11 +170,6 @@ public class EnvelopeEventProcessor implements IMessageHandler {
             processingResultType,
             ex
         );
-    }
-
-    @Override
-    public void notifyException(Throwable exception, ExceptionPhase phase) {
-        log.error("Error while handling message at stage: " + phase, exception);
     }
 
     private void logMessageParsed(IMessage message, Envelope envelope) {

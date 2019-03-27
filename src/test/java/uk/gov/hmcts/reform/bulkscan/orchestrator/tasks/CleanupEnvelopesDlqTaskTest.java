@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.util.TimeZone;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -63,7 +63,7 @@ class CleanupEnvelopesDlqTaskTest {
         given(message.getLockToken()).willReturn(uuid);
         given(message.getBody()).willReturn(SampleData.envelopeJson());
         given(message.getEnqueuedTimeUtc())
-            .willReturn(LocalDateTime.now().minus(ttl.plusSeconds(10)).toInstant(ZoneOffset.UTC));
+            .willReturn(LocalDateTime.now().minus(ttl.plusSeconds(10)).toInstant(UTC));
         given(messageReceiver.receive()).willReturn(message).willReturn(null);
 
         ArgumentCaptor<UUID> uuidArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
@@ -86,7 +86,7 @@ class CleanupEnvelopesDlqTaskTest {
         throws Exception {
         //given
         given(message.getEnqueuedTimeUtc())
-            .willReturn(LocalDateTime.now().minus(ttl.minusSeconds(5)).toInstant(ZoneOffset.UTC));
+            .willReturn(LocalDateTime.now().minus(ttl.minusSeconds(5)).toInstant(UTC));
         given(messageReceiver.receive()).willReturn(message).willReturn(null);
 
         //when
