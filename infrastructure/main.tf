@@ -60,7 +60,10 @@ locals {
     S2S_SECRET  = "${data.azurerm_key_vault_secret.s2s_secret.value}"
 
     ENVELOPES_QUEUE_CONNECTION_STRING           = "${data.azurerm_key_vault_secret.envelopes_queue_listen_conn_str.value}"
-    ENVELOPES_QUEUE_MAX_DELIVERY_COUNT          = "${data.terraform_remote_state.shared_infra.envelopes_queue_max_delivery_count - 5}"
+
+    // max delivery count for application is smaller than the actual queue setting,
+    // because we want to make sure it's the app that dead-letters the message
+    ENVELOPES_QUEUE_MAX_DELIVERY_COUNT          = "${data.azurerm_key_vault_secret.envelopes_queue_max_delivery_count.value - 5}"
     PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING = "${data.azurerm_key_vault_secret.processed_envelopes_queue_send_conn_str.value}"
 
     IDAM_API_URL              = "${var.idam_api_url}"
@@ -126,6 +129,11 @@ data "azurerm_key_vault_secret" "envelopes_queue_send_conn_str" {
 
 data "azurerm_key_vault_secret" "envelopes_queue_listen_conn_str" {
   name      = "envelopes-queue-listen-connection-string"
+  vault_uri = "${data.azurerm_key_vault.key_vault.vault_uri}"
+}
+
+data "azurerm_key_vault_secret" "envelopes_queue_max_delivery_count" {
+  name      = "envelopes-queue-max-delivery-count"
   vault_uri = "${data.azurerm_key_vault.key_vault.vault_uri}"
 }
 
