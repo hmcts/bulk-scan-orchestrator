@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.ConnectionException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.InvalidMessageException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
 import java.time.Duration;
@@ -68,17 +69,24 @@ public class CleanupEnvelopesDlqTask {
     }
 
     private void logMessage(IMessage msg) {
-        Envelope envelope = EnvelopeParser.parse(msg.getBody());
+        try {
+            Envelope envelope = EnvelopeParser.parse(msg.getBody());
 
-        log.info(
-            "Deleting message. ID: {} Envelope ID: {}, File name: {}, Jurisdiction: {}, Classification: {}, Case: {}",
-            msg.getMessageId(),
-            envelope.id,
-            envelope.zipFileName,
-            envelope.jurisdiction,
-            envelope.classification,
-            envelope.caseRef
-        );
+            log.info(
+                "Deleting message ID: {}, Envelope ID: {}, File name: {}, Jurisdiction: {},"
+                    + " Classification: {}, Case: {}",
+                msg.getMessageId(),
+                envelope.id,
+                envelope.zipFileName,
+                envelope.jurisdiction,
+                envelope.classification,
+                envelope.caseRef
+            );
+        } catch (InvalidMessageException e) {
+            // Not logging the exception as it prints the sensitive information from the envelope
+            log.error("An error occurred while parsing the dlq message with Message Id: {}",
+                msg.getMessageId());
+        }
     }
 
     private boolean canBeDeleted(IMessage message) {
