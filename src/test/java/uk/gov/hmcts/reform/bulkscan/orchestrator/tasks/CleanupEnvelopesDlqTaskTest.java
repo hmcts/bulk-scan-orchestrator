@@ -69,10 +69,10 @@ public class CleanupEnvelopesDlqTaskTest {
         cleanupDlqTask.deleteMessagesInEnvelopesDlq();
 
         //then
-        verify(messageReceiver).complete(uuidArgumentCaptor.capture());
+        verify(messageReceiver).completeAsync(uuidArgumentCaptor.capture());
         assertThat(uuidArgumentCaptor.getValue()).isEqualTo(uuid);
 
-        verify(messageReceiver, times(1)).complete(any());
+        verify(messageReceiver, times(1)).completeAsync(any());
         verify(messageReceiver, times(2)).receive();
         verify(messageReceiver, times(1)).close();
         verifyNoMoreInteractions(messageReceiver);
@@ -91,7 +91,7 @@ public class CleanupEnvelopesDlqTaskTest {
 
         //then
         verify(messageReceiver, times(2)).receive();
-        verify(messageReceiver, never()).complete(any());
+        verify(messageReceiver, never()).completeAsync(any());
         verify(messageReceiver, times(1)).close();
         verifyNoMoreInteractions(messageReceiver);
     }
@@ -106,7 +106,7 @@ public class CleanupEnvelopesDlqTaskTest {
 
         //then
         verify(messageReceiver, times(1)).receive();
-        verify(messageReceiver, never()).complete(any());
+        verify(messageReceiver, never()).completeAsync(any());
         verify(messageReceiver, times(1)).close();
         verifyNoMoreInteractions(messageReceiver);
     }
@@ -126,7 +126,7 @@ public class CleanupEnvelopesDlqTaskTest {
     }
 
     @Test
-    public void should_log_and_skip_invalid_messages() throws Exception {
+    public void should_log_messageId_for_invalid_messages() throws Exception {
         //given
         given(message.getEnqueuedTimeUtc())
             .willReturn(LocalDateTime.now().minus(ttl.plusSeconds(10)).toInstant(ZoneOffset.UTC));
@@ -145,8 +145,6 @@ public class CleanupEnvelopesDlqTaskTest {
                     + CleanupEnvelopesDlqTask.class.getSimpleName()
                     + " An error occurred while parsing the dlq message with Message Id: " + messageId
             );
-
-        verify(messageReceiver, never()).complete(any());
     }
 
 }

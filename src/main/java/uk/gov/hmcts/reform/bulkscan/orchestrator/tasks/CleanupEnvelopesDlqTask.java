@@ -49,7 +49,8 @@ public class CleanupEnvelopesDlqTask {
             IMessage message = messageReceiver.receive();
             while (message != null) {
                 if (canBeDeleted(message)) {
-                    deleteMessage(messageReceiver, message);
+                    logMessage(message);
+                    messageReceiver.completeAsync(message.getLockToken());
                 }
                 message = messageReceiver.receive();
             }
@@ -66,25 +67,23 @@ public class CleanupEnvelopesDlqTask {
         }
     }
 
-    private void deleteMessage(IMessageReceiver messageReceiver, IMessage message)
-        throws ServiceBusException, InterruptedException {
+    private void logMessage(IMessage msg) {
         try {
-            Envelope envelope = EnvelopeParser.parse(message.getBody());
+            Envelope envelope = EnvelopeParser.parse(msg.getBody());
 
             log.info(
                 "Deleting message ID: {}, Envelope ID: {}, File name: {}, Jurisdiction: {},"
                     + " Classification: {}, Case: {}",
-                message.getMessageId(),
+                msg.getMessageId(),
                 envelope.id,
                 envelope.zipFileName,
                 envelope.jurisdiction,
                 envelope.classification,
                 envelope.caseRef
             );
-            messageReceiver.complete(message.getLockToken());
         } catch (InvalidMessageException e) {
             log.error("An error occurred while parsing the dlq message with Message Id: {}",
-                message.getMessageId());
+                msg.getMessageId());
         }
     }
 
