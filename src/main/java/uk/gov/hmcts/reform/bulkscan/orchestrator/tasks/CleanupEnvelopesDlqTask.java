@@ -50,10 +50,11 @@ public class CleanupEnvelopesDlqTask {
             while (message != null) {
                 if (canBeDeleted(message)) {
                     logMessage(message);
-                    messageReceiver.completeAsync(message.getLockToken());
+                    messageReceiver.complete(message.getLockToken());
                 }
                 message = messageReceiver.receive();
             }
+
         } catch (ConnectionException e) {
             log.error("Unable to connect to envelopes dead letter queue", e);
         } finally {

@@ -3,13 +3,11 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.tasks;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.boot.test.rule.OutputCapture;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.ConnectionException;
 
@@ -43,9 +41,6 @@ public class CleanupEnvelopesDlqTaskTest {
     @Mock
     private Supplier<IMessageReceiver> receiverProvider;
 
-    @Rule
-    public OutputCapture capture = new OutputCapture();
-
     private final Duration ttl = Duration.ofSeconds(10);
 
     @Before
@@ -69,10 +64,10 @@ public class CleanupEnvelopesDlqTaskTest {
         cleanupDlqTask.deleteMessagesInEnvelopesDlq();
 
         //then
-        verify(messageReceiver).completeAsync(uuidArgumentCaptor.capture());
+        verify(messageReceiver).complete(uuidArgumentCaptor.capture());
         assertThat(uuidArgumentCaptor.getValue()).isEqualTo(uuid);
 
-        verify(messageReceiver, times(1)).completeAsync(any());
+        verify(messageReceiver, times(1)).complete(any());
         verify(messageReceiver, times(2)).receive();
         verify(messageReceiver, times(1)).close();
         verifyNoMoreInteractions(messageReceiver);
@@ -91,7 +86,7 @@ public class CleanupEnvelopesDlqTaskTest {
 
         //then
         verify(messageReceiver, times(2)).receive();
-        verify(messageReceiver, never()).completeAsync(any());
+        verify(messageReceiver, never()).complete(any());
         verify(messageReceiver, times(1)).close();
         verifyNoMoreInteractions(messageReceiver);
     }
@@ -106,7 +101,7 @@ public class CleanupEnvelopesDlqTaskTest {
 
         //then
         verify(messageReceiver, times(1)).receive();
-        verify(messageReceiver, never()).completeAsync(any());
+        verify(messageReceiver, never()).complete(any());
         verify(messageReceiver, times(1)).close();
         verifyNoMoreInteractions(messageReceiver);
     }
@@ -123,28 +118,6 @@ public class CleanupEnvelopesDlqTaskTest {
 
         //then
         assertThat(exception).isNull();
-    }
-
-    @Test
-    public void should_log_messageId_for_invalid_messages() throws Exception {
-        //given
-        given(message.getEnqueuedTimeUtc())
-            .willReturn(LocalDateTime.now().minus(ttl.plusSeconds(10)).toInstant(ZoneOffset.UTC));
-        String messageId = UUID.randomUUID().toString();
-        given(message.getMessageId()).willReturn(messageId);
-        given(message.getBody()).willReturn("```".getBytes()); //invalid message
-        given(messageReceiver.receive()).willReturn(message).willReturn(null);
-
-        //when
-        cleanupDlqTask.deleteMessagesInEnvelopesDlq();
-
-        //then
-        assertThat(capture.toString())
-            .containsPattern(
-                ".+ ERROR \\[.*\\].*"
-                    + CleanupEnvelopesDlqTask.class.getSimpleName()
-                    + " An error occurred while parsing the dlq message with Message Id: " + messageId
-            );
     }
 
 }
