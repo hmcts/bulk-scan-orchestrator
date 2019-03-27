@@ -8,7 +8,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.logging.AppInsights;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CcdUpdater;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EnvelopeHandler;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.MessageOperations;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.NotificationSendingException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.ProcessedEnvelopeNotifier;
@@ -46,7 +46,7 @@ public class EnvelopeEventProcessorTest {
     private AppInsights appInsights;
 
     @Mock
-    CcdUpdater ccdUpdater;
+    EnvelopeHandler envelopeHandler;
 
     @Mock
     private ProcessedEnvelopeNotifier processedEnvelopeNotifier;
@@ -56,7 +56,7 @@ public class EnvelopeEventProcessorTest {
     @Before
     public void before() {
         processor = new EnvelopeEventProcessor(
-            ccdUpdater,
+            envelopeHandler,
             processedEnvelopeNotifier,
             messageOperations,
             10,
@@ -92,7 +92,7 @@ public class EnvelopeEventProcessorTest {
     @Test
     public void should_return_completed_future_if_exception_is_thrown_while_updating_ccd() {
         // given
-        willThrow(new RuntimeException()).given(ccdUpdater).updateCcdWithEnvelope(any());
+        willThrow(new RuntimeException()).given(envelopeHandler).handleEnvelope(any());
 
         // when
         CompletableFuture<Void> result = processor.onMessageAsync(someMessage);
@@ -176,7 +176,7 @@ public class EnvelopeEventProcessorTest {
         );
 
         // given an error occurs during message processing
-        willThrow(processingFailureCause).given(ccdUpdater).updateCcdWithEnvelope(any());
+        willThrow(processingFailureCause).given(envelopeHandler).handleEnvelope(any());
 
         // when
         CompletableFuture<Void> result = processor.onMessageAsync(someMessage);
@@ -190,7 +190,7 @@ public class EnvelopeEventProcessorTest {
     public void should_finalize_the_message_when_recoverable_failure_but_delivery_maxed() throws Exception {
         // given
         processor = new EnvelopeEventProcessor(
-            ccdUpdater,
+            envelopeHandler,
             processedEnvelopeNotifier,
             messageOperations,
             1,
@@ -201,7 +201,7 @@ public class EnvelopeEventProcessorTest {
         );
 
         // and an error occurs during message processing
-        willThrow(processingFailureCause).given(ccdUpdater).updateCcdWithEnvelope(any());
+        willThrow(processingFailureCause).given(envelopeHandler).handleEnvelope(any());
 
         // when
         CompletableFuture<Void> result = processor.onMessageAsync(someMessage);
@@ -248,7 +248,7 @@ public class EnvelopeEventProcessorTest {
     public void should_not_send_processed_envelope_notification_when_processing_fails() {
         // given
         Exception processingFailureCause = new RuntimeException("test exception");
-        willThrow(processingFailureCause).given(ccdUpdater).updateCcdWithEnvelope(any());
+        willThrow(processingFailureCause).given(envelopeHandler).handleEnvelope(any());
 
         // when
         CompletableFuture<Void> result = processor.onMessageAsync(someMessage);

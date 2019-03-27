@@ -22,7 +22,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.mode
 
 @SuppressWarnings("checkstyle:LineLength")
 @RunWith(MockitoJUnitRunner.class)
-public class CcdUpdaterTest {
+public class EnvelopeHandlerTest {
 
     @Mock
     private AttachDocsToSupplementaryEvidence attachDocsToSupplementaryEvidence;
@@ -36,11 +36,11 @@ public class CcdUpdaterTest {
     @Mock
     private CaseDetails caseDetails;
 
-    private CcdUpdater ccdUpdater;
+    private EnvelopeHandler envelopeHandler;
 
     @Before
     public void setUp() {
-        ccdUpdater = new CcdUpdater(
+        envelopeHandler = new EnvelopeHandler(
             attachDocsToSupplementaryEvidence,
             createExceptionRecord,
             caseRetriever
@@ -54,7 +54,7 @@ public class CcdUpdaterTest {
         Envelope envelope = envelope(SUPPLEMENTARY_EVIDENCE, JURSIDICTION, CASE_REF);
 
         // when
-        ccdUpdater.updateCcdWithEnvelope(envelope);
+        envelopeHandler.handleEnvelope(envelope);
 
         // then
         verify(attachDocsToSupplementaryEvidence).publish(envelope, caseDetails);
@@ -67,7 +67,7 @@ public class CcdUpdaterTest {
         Envelope envelope = envelope(SUPPLEMENTARY_EVIDENCE, JURSIDICTION, CASE_REF);
 
         // when
-        ccdUpdater.updateCcdWithEnvelope(envelope);
+        envelopeHandler.handleEnvelope(envelope);
 
         // then
         verify(this.createExceptionRecord).publish(envelope);
@@ -79,7 +79,7 @@ public class CcdUpdaterTest {
         Envelope envelope = envelope(EXCEPTION, JURSIDICTION, CASE_REF);
 
         // when
-        ccdUpdater.updateCcdWithEnvelope(envelope);
+        envelopeHandler.handleEnvelope(envelope);
 
         // then
         verify(this.createExceptionRecord).publish(envelope);
@@ -92,7 +92,7 @@ public class CcdUpdaterTest {
         Envelope envelope = envelope(NEW_APPLICATION, JURSIDICTION, CASE_REF);
 
         // when
-        ccdUpdater.updateCcdWithEnvelope(envelope);
+        envelopeHandler.handleEnvelope(envelope);
 
         // then
         verify(this.createExceptionRecord).publish(envelope);

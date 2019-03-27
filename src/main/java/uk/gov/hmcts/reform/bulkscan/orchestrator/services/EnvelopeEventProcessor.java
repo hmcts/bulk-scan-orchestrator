@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.logging.AppInsights;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CcdUpdater;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EnvelopeHandler;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IMessageOperations;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IProcessedEnvelopeNotifier;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.NotificationSendingException;
@@ -31,20 +31,20 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
     private static final Logger log = LoggerFactory.getLogger(EnvelopeEventProcessor.class);
 
-    private final CcdUpdater ccdUpdater;
+    private final EnvelopeHandler envelopeHandler;
     private final IProcessedEnvelopeNotifier processedEnvelopeNotifier;
     private final IMessageOperations messageOperations;
     private final int maxDeliveryCount;
     private final AppInsights appInsights;
 
     public EnvelopeEventProcessor(
-        CcdUpdater ccdUpdater,
+        EnvelopeHandler envelopeHandler,
         IProcessedEnvelopeNotifier processedEnvelopeNotifier,
         IMessageOperations messageOperations,
         @Value("${azure.servicebus.envelopes.max-delivery-count}") int maxDeliveryCount,
         AppInsights appInsights
     ) {
-        this.ccdUpdater = ccdUpdater;
+        this.envelopeHandler = envelopeHandler;
         this.processedEnvelopeNotifier = processedEnvelopeNotifier;
         this.messageOperations = messageOperations;
         this.maxDeliveryCount = maxDeliveryCount;
@@ -78,7 +78,7 @@ public class EnvelopeEventProcessor implements IMessageHandler {
         try {
             envelope = parse(message.getBody());
             logMessageParsed(message, envelope);
-            ccdUpdater.updateCcdWithEnvelope(envelope);
+            envelopeHandler.handleEnvelope(envelope);
             processedEnvelopeNotifier.notify(envelope.id);
             log.info("Processed message with ID {}. File name: {}", message.getMessageId(), envelope.zipFileName);
             return new MessageProcessingResult(SUCCESS);

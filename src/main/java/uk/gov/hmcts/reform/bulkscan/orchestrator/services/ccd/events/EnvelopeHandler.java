@@ -7,13 +7,13 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envel
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 @Service
-public class CcdUpdater {
+public class EnvelopeHandler {
 
     private final AttachDocsToSupplementaryEvidence attachDocsPublisher;
     private final CreateExceptionRecord exceptionRecordCreator;
     private final CaseRetriever caseRetriever;
 
-    public CcdUpdater(
+    public EnvelopeHandler(
         AttachDocsToSupplementaryEvidence attachDocsPublisher,
         CreateExceptionRecord exceptionRecordCreator,
         CaseRetriever caseRetriever
@@ -23,7 +23,7 @@ public class CcdUpdater {
         this.caseRetriever = caseRetriever;
     }
 
-    public void updateCcdWithEnvelope(Envelope envelope) {
+    public void handleEnvelope(Envelope envelope) {
         switch (envelope.classification) {
             case SUPPLEMENTARY_EVIDENCE:
                 CaseDetails caseDetails = Strings.isNullOrEmpty(envelope.caseRef)
