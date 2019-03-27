@@ -83,6 +83,7 @@ public class CleanupEnvelopesDlqTask {
                 envelope.caseRef
             );
         } catch (InvalidMessageException e) {
+            // Not logging the InvalidMessageException as it prints the sensitive information from the envelope
             log.error("An error occurred while parsing the dlq message with Message Id: {}",
                 msg.getMessageId());
         }
