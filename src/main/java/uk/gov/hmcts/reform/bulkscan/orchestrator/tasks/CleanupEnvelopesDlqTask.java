@@ -51,10 +51,12 @@ public class CleanupEnvelopesDlqTask {
                 if (canBeDeleted(message)) {
                     logMessage(message);
                     messageReceiver.complete(message.getLockToken());
+                    log.info("Deleted message from envelopes dlq. messageId: {}", message.getMessageId());
                 }
                 message = messageReceiver.receive();
             }
 
+            log.info("Finished processing messages in envelopes dead letter queue.");
         } catch (ConnectionException e) {
             log.error("Unable to connect to envelopes dead letter queue", e);
         } finally {
@@ -73,7 +75,7 @@ public class CleanupEnvelopesDlqTask {
             Envelope envelope = EnvelopeParser.parse(msg.getBody());
 
             log.info(
-                "Deleting message ID: {}, Envelope ID: {}, File name: {}, Jurisdiction: {},"
+                "Deleting messageId: {}, Envelope ID: {}, File name: {}, Jurisdiction: {},"
                     + " Classification: {}, Case: {}",
                 msg.getMessageId(),
                 envelope.id,
@@ -84,7 +86,7 @@ public class CleanupEnvelopesDlqTask {
             );
         } catch (InvalidMessageException e) {
             // Not logging the exception as it prints the sensitive information from the envelope
-            log.error("An error occurred while parsing the dlq message with Message Id: {}",
+            log.error("An error occurred while parsing the dlq message with messageId: {}",
                 msg.getMessageId());
         }
     }
