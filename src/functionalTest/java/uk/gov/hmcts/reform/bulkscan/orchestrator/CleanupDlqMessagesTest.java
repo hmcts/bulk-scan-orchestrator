@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
-import org.awaitility.Duration;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,8 +41,9 @@ public class CleanupDlqMessagesTest {
 
     @Test
     public void testCleanupDlqTask() throws InterruptedException, ServiceBusException, JSONException {
-        // given
+        // when
         log.info("Send a message to envelopes queue. filename: envelopes/dead-letter-envelope.json");
+        // invalid message, which will be sent to dead letter queue
         envelopeMessager.sendMessageFromFile(
             "envelopes/dead-letter-envelope.json",
             "1234",
@@ -51,38 +51,12 @@ public class CleanupDlqMessagesTest {
             null
         );
 
-        // when
-        log.info("Dead letter the first message on envelope queue.");
-        deadLetterMessage();
-
-        await("Message exists in envelopes dead letter queue")
-            .atMost(30, TimeUnit.SECONDS)
-            .pollInterval(Duration.ONE_SECOND)
-            .until(this::verifyDlqMessagesExists);
-
         // then
         await("Message deleted from envelopes dead letter queue")
             .atMost(4, TimeUnit.MINUTES)
-            .pollInterval(Duration.FIVE_SECONDS)
+            .pollDelay(60, TimeUnit.SECONDS)
+            .pollInterval(15, TimeUnit.SECONDS)
             .until(() -> !verifyDlqMessagesExists());
-    }
-
-    private void deadLetterMessage() throws ServiceBusException, InterruptedException {
-        IMessageReceiver envelopesReceiver = envelopesReceiverProvider.get();
-
-        try {
-            IMessage message = envelopesReceiver.receive();
-            while (message != null) {
-                log.info("Dead lettering message with Id: {}", message.getMessageId());
-                envelopesReceiver.deadLetter(message.getLockToken());
-            }
-        } finally {
-            try {
-                envelopesReceiver.close();
-            } catch (ServiceBusException e) {
-                log.error("Error closing dlq connection", e);
-            }
-        }
     }
 
     private boolean verifyDlqMessagesExists() throws ServiceBusException, InterruptedException {
