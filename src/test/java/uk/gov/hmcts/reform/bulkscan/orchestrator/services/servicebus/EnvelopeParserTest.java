@@ -5,6 +5,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.InvalidMessageException;
@@ -15,7 +16,9 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.OcrDa
 
 import java.time.Instant;
 import java.util.List;
+import java.util.TimeZone;
 
+import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -26,6 +29,11 @@ public class EnvelopeParserTest {
 
     private Envelope envelope;
     private Instant scannedAt = Instant.now();
+
+    @BeforeClass
+    public static void init() {
+        TimeZone.setDefault(TimeZone.getTimeZone(UTC));
+    }
 
     @Before
     public void setUp() {
