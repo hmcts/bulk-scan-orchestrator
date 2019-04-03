@@ -83,6 +83,7 @@ public class SampleData {
                 .put("case_ref", caseRef)
                 .put("po_box", PO_BOX)
                 .put("jurisdiction", JURSIDICTION)
+                .put("container", JURSIDICTION.toLowerCase())
                 .put("zip_file_name", "zip-file-test.zip")
                 .put("delivery_date", toIso8601(Instant.now()))
                 .put("opening_date", toIso8601(Instant.now()))
@@ -130,6 +131,7 @@ public class SampleData {
             CASE_REF,
             PO_BOX,
             JURSIDICTION,
+            JURSIDICTION.toLowerCase(),
             "zip-file-test.zip",
             Instant.now(),
             Instant.now(),
@@ -145,6 +147,7 @@ public class SampleData {
             CASE_REF,
             PO_BOX,
             JURSIDICTION,
+            JURSIDICTION.toLowerCase(),
             "zip-file-test.zip",
             Instant.now(),
             Instant.now(),

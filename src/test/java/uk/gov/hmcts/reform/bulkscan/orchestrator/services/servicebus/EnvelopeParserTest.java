@@ -42,6 +42,7 @@ public class EnvelopeParserTest {
             "case_ref_number",
             "po_box",
             "jurisdiction",
+            "container",
             "zip-file-test.zip",
             Instant.now(),
             Instant.now(),
@@ -81,6 +82,7 @@ public class EnvelopeParserTest {
                 .put("case_ref", envelope.caseRef)
                 .put("po_box", envelope.poBox)
                 .put("jurisdiction", envelope.jurisdiction)
+                .put("container", envelope.container)
                 .put("zip_file_name", envelope.zipFileName)
                 .put("delivery_date", envelope.deliveryDate)
                 .put("opening_date", envelope.openingDate)
@@ -137,6 +139,7 @@ public class EnvelopeParserTest {
                 .put("case_ref", envelope.caseRef)
                 .put("po_box", envelope.poBox)
                 .put("jurisdiction", envelope.jurisdiction)
+                .put("container", envelope.container)
                 .put("zip_file_name", envelope.zipFileName)
                 .put("delivery_date", envelope.deliveryDate)
                 .put("opening_date", envelope.openingDate)
@@ -208,6 +211,7 @@ public class EnvelopeParserTest {
 
         // then
         assertThat(anEnvelope.jurisdiction).isEqualTo("BULKSCAN");
+        assertThat(anEnvelope.container).isEqualTo("container");
 
     }
 
@@ -221,6 +225,7 @@ public class EnvelopeParserTest {
 
         // then
         assertThat(anEnvelope.jurisdiction).isEqualTo("BULKSCAN");
+        assertThat(anEnvelope.container).isEqualTo("bulkscan");
 
     }
 
