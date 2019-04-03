@@ -295,10 +295,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem(String.format(
-                "Internal Error: Could not retrieve case: %s Error: 500",
-                CASE_REF
-            )));
+            .body("errors", hasItem(AttachCaseCallbackService.INTERNAL_ERROR_MSG));
     }
 
     @DisplayName("Should fail with the correct error when no case details is supplied")
