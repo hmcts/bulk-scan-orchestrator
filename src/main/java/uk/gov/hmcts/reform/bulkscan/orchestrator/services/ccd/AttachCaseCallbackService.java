@@ -28,6 +28,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.i
 @Service
 public class AttachCaseCallbackService {
 
+    public static final String INTERNAL_ERROR_MSG = "An error occurred";
+
     private static final Logger log = LoggerFactory.getLogger(AttachCaseCallbackService.class);
     private static final String ATTACH_CASE_REFERENCE_FIELD_NAME = "attachToCaseReference";
 
@@ -65,9 +67,12 @@ public class AttachCaseCallbackService {
         try {
             doAttachCase(exceptionRecordJurisdiction, targetCaseRef, exceptionRecordDocuments, exceptionRecordId);
             return emptyList();
+        } catch (AlreadyAttachedToCaseException | DuplicateDocsException exc) {
+            log.warn(exc.getMessage(), exc);
+            return singletonList(exc.getMessage());
         } catch (CallbackException e) {
             log.error(e.getMessage(), e);
-            return singletonList(e.getMessage());
+            return singletonList(INTERNAL_ERROR_MSG);
         }
     }
 
@@ -111,7 +116,7 @@ public class AttachCaseCallbackService {
         );
 
         if (isExceptionRecordAttachedToCase(fetchedExceptionRecord)) {
-            throw new CallbackException("Exception record is already attached to a case");
+            throw new AlreadyAttachedToCaseException("Exception record is already attached to a case");
         }
     }
 
@@ -128,7 +133,7 @@ public class AttachCaseCallbackService {
     }
 
     private void throwDuplicateError(String caseRef, Set<String> duplicateIds) {
-        throw new CallbackException(
+        throw new DuplicateDocsException(
             String.format(
                 "Document(s) with control number %s are already attached to case reference: %s",
                 duplicateIds,
