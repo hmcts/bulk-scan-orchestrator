@@ -300,7 +300,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem(AttachCaseCallbackService.INTERNAL_ERROR_MSG));
+            .body("errors", hasItem("Internal Error: callback or case details were empty"));
     }
 
     @Test
