@@ -67,7 +67,7 @@ public class AttachCaseCallbackService {
         try {
             doAttachCase(exceptionRecordJurisdiction, targetCaseRef, exceptionRecordDocuments, exceptionRecordId);
             return emptyList();
-        } catch (AlreadyAttachedToCaseException | DuplicateDocsException exc) {
+        } catch (AlreadyAttachedToCaseException | DuplicateDocsException | CaseNotFoundException exc) {
             log.warn(exc.getMessage(), exc);
             return singletonList(exc.getMessage());
         } catch (CallbackException e) {

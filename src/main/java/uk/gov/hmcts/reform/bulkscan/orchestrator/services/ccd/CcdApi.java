@@ -68,7 +68,7 @@ public class CcdApi {
             return retrieveCase(caseRef, jurisdiction);
         } catch (FeignException e) {
             if (e.status() == 404) {
-                throw new CallbackException(format("Could not find case: %s", caseRef), e);
+                throw new CaseNotFoundException("Could not find case: " + caseRef, e);
             } else {
                 throw new CallbackException(
                     format("Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status()),
