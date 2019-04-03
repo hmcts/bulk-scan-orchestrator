@@ -16,6 +16,10 @@ output "ENVELOPES_QUEUE_WRITE_CONN_STRING" {
   value = "${data.terraform_remote_state.shared_infra.queue_primary_send_connection_string}"
 }
 
+output "ENVELOPES_QUEUE_MAX_DELIVERY_COUNT" {
+  value = "${data.terraform_remote_state.shared_infra.envelopes_queue_max_delivery_count - 5}"
+}
+
 output "core_case_data_api_url" {
   value = "${local.ccdApiUrl}"
 }
