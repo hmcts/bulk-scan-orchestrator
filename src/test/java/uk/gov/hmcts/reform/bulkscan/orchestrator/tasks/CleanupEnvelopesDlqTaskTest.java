@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.tasks;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -14,9 +15,11 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+import static java.time.ZoneOffset.UTC;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,6 +45,11 @@ public class CleanupEnvelopesDlqTaskTest {
     private Supplier<IMessageReceiver> receiverProvider;
 
     private final Duration ttl = Duration.ofSeconds(10);
+
+    @BeforeClass
+    public static void init() {
+        TimeZone.setDefault(TimeZone.getTimeZone(UTC));
+    }
 
     @Before
     public void setUp() {

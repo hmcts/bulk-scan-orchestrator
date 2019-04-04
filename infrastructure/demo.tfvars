@@ -1,2 +1,3 @@
-idam_api_url = "https://preprod-idamapi.reform.hmcts.net:3511"
-idam_client_redirect_uri = "https://rpe-bulk-scan-processor-sandbox.service.core-compute-sandbox.internal/oauth2/callback"
+idam_api_url = "https://idam-api.demo.platform.hmcts.net"
+idam_client_redirect_uri = "https://bulk-scan-orchestrator-demo.service.core-compute-demo.internal/oauth2/callback"
+supported_jurisdictions = ["SSCS", "BULKSCAN", "DIVORCE", "PROBATE"]

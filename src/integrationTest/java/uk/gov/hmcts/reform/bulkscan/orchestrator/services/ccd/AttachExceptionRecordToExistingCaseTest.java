@@ -232,10 +232,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem(String.format(
-                "Internal Error: submitting attach file event failed case: %s Error: 500",
-                CASE_REF
-            )));
+            .body("errors", hasItem(AttachCaseCallbackService.INTERNAL_ERROR_MSG));
     }
 
     @DisplayName("Should fail with the correct error when start event api call fails")
@@ -248,10 +245,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem(String.format(
-                "Internal Error: start event call failed case: %s Error: 404",
-                CASE_REF
-            )));
+            .body("errors", hasItem(AttachCaseCallbackService.INTERNAL_ERROR_MSG));
     }
 
     @DisplayName("Should fail correctly if document is duplicate or document is already attached")
@@ -295,10 +289,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem(String.format(
-                "Internal Error: Could not retrieve case: %s Error: 500",
-                CASE_REF
-            )));
+            .body("errors", hasItem(AttachCaseCallbackService.INTERNAL_ERROR_MSG));
     }
 
     @DisplayName("Should fail with the correct error when no case details is supplied")

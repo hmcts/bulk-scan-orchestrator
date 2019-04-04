@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
 
-import com.google.common.base.Strings;
 import com.microsoft.azure.servicebus.ExceptionPhase;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageHandler;
@@ -10,9 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.logging.AppInsights;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisher;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EventPublisherContainer;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EnvelopeHandler;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IMessageOperations;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IProcessedEnvelopeNotifier;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.NotificationSendingException;
@@ -21,10 +18,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.handler.MessageProcessingResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.handler.MessageProcessingResultType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser.parse;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.handler.MessageProcessingResultType.POTENTIALLY_RECOVERABLE_FAILURE;
@@ -36,23 +31,20 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
     private static final Logger log = LoggerFactory.getLogger(EnvelopeEventProcessor.class);
 
-    private final CaseRetriever caseRetriever;
-    private final EventPublisherContainer eventPublisherContainer;
+    private final EnvelopeHandler envelopeHandler;
     private final IProcessedEnvelopeNotifier processedEnvelopeNotifier;
     private final IMessageOperations messageOperations;
     private final int maxDeliveryCount;
     private final AppInsights appInsights;
 
     public EnvelopeEventProcessor(
-        CaseRetriever caseRetriever,
-        EventPublisherContainer eventPublisherContainer,
+        EnvelopeHandler envelopeHandler,
         IProcessedEnvelopeNotifier processedEnvelopeNotifier,
         IMessageOperations messageOperations,
         @Value("${azure.servicebus.envelopes.max-delivery-count}") int maxDeliveryCount,
         AppInsights appInsights
     ) {
-        this.caseRetriever = caseRetriever;
-        this.eventPublisherContainer = eventPublisherContainer;
+        this.envelopeHandler = envelopeHandler;
         this.processedEnvelopeNotifier = processedEnvelopeNotifier;
         this.messageOperations = messageOperations;
         this.maxDeliveryCount = maxDeliveryCount;
@@ -85,15 +77,8 @@ public class EnvelopeEventProcessor implements IMessageHandler {
 
         try {
             envelope = parse(message.getBody());
-
             logMessageParsed(message, envelope);
-
-            EventPublisher eventPublisher = eventPublisherContainer.getPublisher(
-                envelope.classification,
-                getCaseRetriever(envelope)
-            );
-
-            eventPublisher.publish(envelope);
+            envelopeHandler.handleEnvelope(envelope);
             processedEnvelopeNotifier.notify(envelope.id);
             log.info("Processed message with ID {}. File name: {}", message.getMessageId(), envelope.zipFileName);
             return new MessageProcessingResult(SUCCESS);
@@ -196,12 +181,6 @@ public class EnvelopeEventProcessor implements IMessageHandler {
     @Override
     public void notifyException(Throwable exception, ExceptionPhase phase) {
         log.error("Error while handling message at stage: " + phase, exception);
-    }
-
-    private Supplier<CaseDetails> getCaseRetriever(final Envelope envelope) {
-        return () -> Strings.isNullOrEmpty(envelope.caseRef)
-            ? null
-            : caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
     }
 
     private void logMessageParsed(IMessage message, Envelope envelope) {
