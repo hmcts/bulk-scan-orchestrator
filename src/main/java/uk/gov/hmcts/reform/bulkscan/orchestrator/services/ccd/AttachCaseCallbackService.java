@@ -115,8 +115,10 @@ public class AttachCaseCallbackService {
             exceptionRecordJurisdiction
         );
 
-        if (isExceptionRecordAttachedToCase(fetchedExceptionRecord)) {
-            throw new AlreadyAttachedToCaseException("Exception record is already attached to a case");
+        Object attachToCaseRef = fetchedExceptionRecord.getData().get(ATTACH_CASE_REFERENCE_FIELD_NAME);
+
+        if (attachToCaseRef != null && Strings.isNotEmpty(attachToCaseRef.toString())) {
+            throw new AlreadyAttachedToCaseException("Exception record is already attached to case " + attachToCaseRef);
         }
     }
 
@@ -155,11 +157,4 @@ public class AttachCaseCallbackService {
         );
     }
 
-    private boolean isExceptionRecordAttachedToCase(CaseDetails exceptionRecordDetails) {
-        Object attachToCaseReference = exceptionRecordDetails
-            .getData()
-            .get(ATTACH_CASE_REFERENCE_FIELD_NAME);
-
-        return attachToCaseReference != null && Strings.isNotEmpty(attachToCaseReference.toString());
-    }
 }
