@@ -51,3 +51,15 @@ scheduling:
       enabled: ${DELETE_ENVELOPES_DLQ_MESSAGES_ENABLED:false}
       cron: ${DELETE_ENVELOPES_DLQ_MESSAGES_CRON}
       ttl: ${DELETE_ENVELOPES_DLQ_MESSAGES_TTL}
+
+hystrix:
+  command:
+    default:
+      execution.timeout.enabled: false
+      fallback.enabled: true
+      circuitBreaker.enabled: true
+    check-no-account-locked:
+      circuitBreaker:
+        requestVolumeThreshold: 1
+        sleepWindowInMilliseconds: 4200000 # suspend processing for 70 minutes when an account is locked
+        errorThresholdPercentage: 1

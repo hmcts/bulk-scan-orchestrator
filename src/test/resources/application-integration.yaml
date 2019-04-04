@@ -25,3 +25,18 @@ azure:
   servicebus:
     envelopes:
       max-delivery-count: 10
+
+hystrix:
+  command:
+    default:
+      execution.timeout.enabled: false
+      fallback.enabled: true
+      circuitBreaker.enabled: true
+      metrics.rollingStats:
+        timeInMilliseconds: 500
+        numBuckets: 5
+    check-no-account-locked:
+      circuitBreaker:
+        requestVolumeThreshold: 1
+        sleepWindowInMilliseconds: 100000
+        errorThresholdPercentage: 1
