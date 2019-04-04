@@ -13,6 +13,7 @@ public class Envelope {
     public final String caseRef;
     public final String poBox;
     public final String jurisdiction;
+    public final String container;
     public final String zipFileName;
     public final Instant deliveryDate;
     public final Instant openingDate;
@@ -25,6 +26,7 @@ public class Envelope {
         @JsonProperty(value = "case_ref", required = true) String caseRef,
         @JsonProperty(value = "po_box", required = true) String poBox,
         @JsonProperty(value = "jurisdiction", required = true) String jurisdiction,
+        @JsonProperty(value = "container", required = true) String container,
         @JsonProperty(value = "zip_file_name", required = true) String zipFileName,
         @JsonProperty(value = "delivery_date", required = true) Instant deliveryDate,
         @JsonProperty(value = "opening_date", required = true) Instant openingDate,
@@ -36,6 +38,7 @@ public class Envelope {
         this.caseRef = caseRef;
         this.poBox = poBox;
         this.jurisdiction = jurisdiction;
+        this.container = container;
         this.zipFileName = zipFileName;
         this.deliveryDate = deliveryDate;
         this.openingDate = openingDate;

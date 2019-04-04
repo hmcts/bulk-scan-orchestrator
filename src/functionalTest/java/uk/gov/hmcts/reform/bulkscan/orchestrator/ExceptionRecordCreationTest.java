@@ -123,7 +123,7 @@ public class ExceptionRecordCreationTest {
     private List<CaseDetails> findCasesByPoBox(UUID poBox) {
         return caseSearcher.search(
             SampleData.JURSIDICTION,
-            SampleData.JURSIDICTION + "_" + CreateExceptionRecord.CASE_TYPE,
+            SampleData.CONTAINER.toUpperCase() + "_" + CreateExceptionRecord.CASE_TYPE,
             ImmutableMap.of(
                 "case.poBox", poBox.toString()
             )
