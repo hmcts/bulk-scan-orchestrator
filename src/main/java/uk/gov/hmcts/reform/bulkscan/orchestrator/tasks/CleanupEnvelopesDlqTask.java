@@ -96,7 +96,15 @@ public class CleanupEnvelopesDlqTask {
     private boolean canBeCompleted(IMessage message) {
         Instant createdTime = message.getEnqueuedTimeUtc();
         Instant cutoff = Instant.now().minus(this.ttl);
+        boolean canBeCompleted = createdTime.isBefore(cutoff);
 
-        return createdTime.isBefore(cutoff);
+        log.info(
+            "MessageId: {} Enqueued Time: {} ttl: {} can be completed? {}",
+            message.getMessageId(),
+            createdTime,
+            this.ttl,
+            canBeCompleted);
+
+        return canBeCompleted;
     }
 }
