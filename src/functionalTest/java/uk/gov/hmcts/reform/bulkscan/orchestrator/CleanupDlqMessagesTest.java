@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
-import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
@@ -40,21 +39,24 @@ public class CleanupDlqMessagesTest {
     private EnvelopeMessager envelopeMessager;
 
     @Test
-    public void testCleanupDlqTask() throws InterruptedException, ServiceBusException, JSONException {
+    public void testCleanupDlqTask() throws Exception {
         // when
-        log.info("Send a message to envelopes queue. filename: envelopes/dead-letter-envelope.json");
+        log.info("Send invalid messages to envelopes queue. filename: envelopes/dead-letter-envelope.json");
+
         // invalid message, which will be sent to dead letter queue
-        envelopeMessager.sendMessageFromFile(
-            "envelopes/dead-letter-envelope.json",
-            "1234",
-            null,
-            null
-        );
+        for (int i = 0; i < 10; i++) {
+            envelopeMessager.sendMessageFromFile(
+                "envelopes/dead-letter-envelope.json",
+                "1234",
+                null,
+                null
+            );
+        }
 
         // then
         await("Message deleted from envelopes dead letter queue")
             .atMost(4, TimeUnit.MINUTES)
-            .pollDelay(60, TimeUnit.SECONDS)
+            .pollDelay(120, TimeUnit.SECONDS)
             .pollInterval(15, TimeUnit.SECONDS)
             .until(() -> !verifyDlqMessagesExists());
     }
