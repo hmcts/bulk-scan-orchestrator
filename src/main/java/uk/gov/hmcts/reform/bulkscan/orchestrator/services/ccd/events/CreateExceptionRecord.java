@@ -25,7 +25,7 @@ public class CreateExceptionRecord extends AbstractEventPublisher {
 
     public void publish(Envelope envelope) {
         log.info("Creating exception record for envelope {}", envelope.id);
-        publish(envelope, envelope.jurisdiction + "_" + CASE_TYPE, EVENT_TYPE_ID, EVENT_SUMMARY);
+        publish(envelope, envelope.container.toUpperCase() + "_" + CASE_TYPE, EVENT_TYPE_ID, EVENT_SUMMARY);
     }
 
     /**
