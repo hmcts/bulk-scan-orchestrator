@@ -53,7 +53,7 @@ public class CleanupEnvelopesDlqTask {
                     logMessage(message);
                     messageReceiver.complete(message.getLockToken());
                     deleted++;
-                    log.info("Deleted message from envelopes dlq. messageId: {}", message.getMessageId());
+                    log.info("Completed message from envelopes dlq. messageId: {}", message.getMessageId());
                 }
                 message = messageReceiver.receive();
             }
@@ -77,7 +77,7 @@ public class CleanupEnvelopesDlqTask {
             Envelope envelope = EnvelopeParser.parse(msg.getBody());
 
             log.info(
-                "Deleting messageId: {}, Envelope ID: {}, File name: {}, Jurisdiction: {},"
+                "Completing dlq message. messageId: {}, Envelope ID: {}, File name: {}, Jurisdiction: {},"
                     + " Classification: {}, Case: {}",
                 msg.getMessageId(),
                 envelope.id,
