@@ -305,13 +305,14 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @Test
     void should_fail_when_exception_record_is_already_attached_to_a_case() throws Exception {
+        String caseRef = "1234567890123456";
         givenThat(
             ccdGetExceptionRecord()
                 .willReturn(
                     // return an exception record already attached to some case
                     okJson(
                         MAPPER.writeValueAsString(
-                            exceptionRecordDetails("1234567890123456")
+                            exceptionRecordDetails(caseRef)
                         )
                     )
                 )
@@ -322,7 +323,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem("Exception record is already attached to a case"));
+            .body("errors", hasItem("Exception record is already attached to case " + caseRef));
     }
 
     @DisplayName("Should create error if type in incorrect")
