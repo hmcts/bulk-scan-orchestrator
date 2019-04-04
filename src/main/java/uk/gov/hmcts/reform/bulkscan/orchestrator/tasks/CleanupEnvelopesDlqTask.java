@@ -46,19 +46,19 @@ public class CleanupEnvelopesDlqTask {
         try {
             messageReceiver = dlqReceiverProvider.get();
 
-            int deleted = 0;
+            int completedCount = 0;
             IMessage message = messageReceiver.receive();
             while (message != null) {
-                if (canBeDeleted(message)) {
+                if (canBeCompleted(message)) {
                     logMessage(message);
                     messageReceiver.complete(message.getLockToken());
-                    deleted++;
+                    completedCount++;
                     log.info("Completed message from envelopes dlq. messageId: {}", message.getMessageId());
                 }
                 message = messageReceiver.receive();
             }
 
-            log.info("Finished processing messages in envelopes dlq. Deleted {} messages", deleted);
+            log.info("Finished processing messages in envelopes dlq. Completed {} messages", completedCount);
         } catch (ConnectionException e) {
             log.error("Unable to connect to envelopes dead letter queue", e);
         } finally {
@@ -93,7 +93,7 @@ public class CleanupEnvelopesDlqTask {
         }
     }
 
-    private boolean canBeDeleted(IMessage message) {
+    private boolean canBeCompleted(IMessage message) {
         Instant createdTime = message.getEnqueuedTimeUtc();
         Instant cutoff = Instant.now().minus(this.ttl);
 
