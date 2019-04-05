@@ -53,7 +53,13 @@ public class CleanupEnvelopesDlqTask {
                     logMessage(message);
                     messageReceiver.complete(message.getLockToken());
                     completedCount++;
-                    log.info("Completed message from envelopes dlq. messageId: {}", message.getMessageId());
+                    log.info(
+                        "Completed message from envelopes dlq. messageId: {} Current time: {}",
+                        message.getMessageId(),
+                        Instant.now()
+                    );
+                } else {
+                    messageReceiver.abandon(message.getLockToken());
                 }
                 message = messageReceiver.receive();
             }
@@ -99,11 +105,13 @@ public class CleanupEnvelopesDlqTask {
         boolean canBeCompleted = createdTime.isBefore(cutoff);
 
         log.info(
-            "MessageId: {} Enqueued Time: {} ttl: {} can be completed? {}",
+            "MessageId: {} Enqueued Time: {} ttl: {} can be completed? {} Current time: {}",
             message.getMessageId(),
             createdTime,
             this.ttl,
-            canBeCompleted);
+            canBeCompleted,
+            Instant.now()
+        );
 
         return canBeCompleted;
     }
