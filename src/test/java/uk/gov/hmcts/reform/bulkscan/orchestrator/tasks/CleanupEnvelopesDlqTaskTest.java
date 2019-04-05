@@ -82,7 +82,7 @@ public class CleanupEnvelopesDlqTaskTest {
     }
 
     @Test
-    public void should_not_delete_messages_from_dead_letter_queue_when_the_ttl_is_less_than_duration()
+    public void should_call_abandon_message_when_the_ttl_is_less_than_duration()
         throws Exception {
         //given
         given(message.getEnqueuedTimeUtc())
@@ -95,6 +95,7 @@ public class CleanupEnvelopesDlqTaskTest {
         //then
         verify(messageReceiver, times(2)).receive();
         verify(messageReceiver, never()).complete(any());
+        verify(messageReceiver, times(1)).abandon(any());
         verify(messageReceiver, times(1)).close();
         verifyNoMoreInteractions(messageReceiver);
     }
@@ -110,6 +111,7 @@ public class CleanupEnvelopesDlqTaskTest {
         //then
         verify(messageReceiver, times(1)).receive();
         verify(messageReceiver, never()).complete(any());
+        verify(messageReceiver, never()).abandon(any());
         verify(messageReceiver, times(1)).close();
         verifyNoMoreInteractions(messageReceiver);
     }
