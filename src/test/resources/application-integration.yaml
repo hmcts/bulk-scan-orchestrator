@@ -40,3 +40,7 @@ hystrix:
         requestVolumeThreshold: 1
         sleepWindowInMilliseconds: 100000
         errorThresholdPercentage: 1
+
+task:
+  check-no-account-locked:
+    check-validity-duration: PT0S

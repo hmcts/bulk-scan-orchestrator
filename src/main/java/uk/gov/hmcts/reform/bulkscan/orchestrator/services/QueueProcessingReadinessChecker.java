@@ -23,13 +23,16 @@ public class QueueProcessingReadinessChecker {
     private static final Logger log = LoggerFactory.getLogger(QueueProcessingReadinessChecker.class);
 
     private final AuthenticationChecker authenticationChecker;
+
+    // this is for how long the service will assume no accounts are locked in IDAM before it checks again
     private final Duration noAccountLockedCheckValidityDuration;
 
+    // the date by which the service can assume no accounts are locked in IDAM before having to check again
     private LocalDateTime noAccountLockedCheckExpiry = LocalDateTime.now();
 
     public QueueProcessingReadinessChecker(
         AuthenticationChecker authenticationChecker,
-        @Value("${task.check-no-account-locked.check-validity-duration:PT0S}")
+        @Value("${task.check-no-account-locked.check-validity-duration}")
             Duration noAccountLockedCheckValidityDuration
     ) {
         this.authenticationChecker = authenticationChecker;
@@ -55,15 +58,16 @@ public class QueueProcessingReadinessChecker {
             if (hasNoAccountLockedCheckExpired()) {
                 assertNoAccountIsLockedInIdam();
             }
+
+            return true;
         } catch (AccountLockedException e) {
             // let hystrix open the circuit
             throw e;
         } catch (Exception e) {
             // just log the exception, but don't let it block queue processing
             log.error("Failed to check if jurisdictions' accounts are locked in IDAM.", e);
+            return true;
         }
-
-        return true;
     }
 
     private void assertNoAccountIsLockedInIdam() throws AccountLockedException {

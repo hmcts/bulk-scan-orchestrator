@@ -63,3 +63,7 @@ hystrix:
         requestVolumeThreshold: 1
         sleepWindowInMilliseconds: 4200000 # suspend processing for 70 minutes when an account is locked
         errorThresholdPercentage: 1
+
+task:
+  check-no-account-locked:
+    check-validity-duration: PT5M # only ensure this often that no account is locked in IDAM
