@@ -2,13 +2,13 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.tasks;
 
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.ConnectionException;
 
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CleanupEnvelopesDlqTaskTest {
 
     private CleanupEnvelopesDlqTask cleanupDlqTask;
@@ -46,12 +46,12 @@ public class CleanupEnvelopesDlqTaskTest {
 
     private final Duration ttl = Duration.ofSeconds(10);
 
-    @BeforeClass
+    @BeforeAll
     public static void init() {
         TimeZone.setDefault(TimeZone.getTimeZone(UTC));
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         cleanupDlqTask = new CleanupEnvelopesDlqTask(() -> messageReceiver, ttl);
     }

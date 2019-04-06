@@ -4,9 +4,9 @@ import com.google.common.collect.ImmutableList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.InvalidMessageException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
@@ -30,12 +30,12 @@ public class EnvelopeParserTest {
     private Envelope envelope;
     private Instant scannedAt = Instant.now();
 
-    @BeforeClass
+    @BeforeAll
     public static void init() {
         TimeZone.setDefault(TimeZone.getTimeZone(UTC));
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.envelope = new Envelope(
             "975b339d-4531-4e32-8ebe-a7bc4650f33a",

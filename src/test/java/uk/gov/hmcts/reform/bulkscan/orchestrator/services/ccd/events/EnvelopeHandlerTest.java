@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -21,7 +21,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.mode
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.SUPPLEMENTARY_EVIDENCE;
 
 @SuppressWarnings("checkstyle:LineLength")
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class EnvelopeHandlerTest {
 
     @Mock
@@ -38,7 +38,7 @@ public class EnvelopeHandlerTest {
 
     private EnvelopeHandler envelopeHandler;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         envelopeHandler = new EnvelopeHandler(
             attachDocsToSupplementaryEvidence,

@@ -1,13 +1,13 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.SupplementaryEvidenceMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
@@ -29,7 +29,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.AUTH_DETAILS;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AttachDocsToSupplementaryEvidenceTest {
 
     private static final String CASE_TYPE_ID = "Bulk_Scanned";
@@ -43,16 +43,17 @@ public class AttachDocsToSupplementaryEvidenceTest {
     @InjectMocks
     private AttachDocsToSupplementaryEvidence eventPublisher = new AttachDocsToSupplementaryEvidence(mapper);
 
-    @Before
+    @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-
-        given(ccdApi.authenticateJurisdiction(any())).willReturn(AUTH_DETAILS);
     }
 
     @Test
     public void createSupplementaryEvidence_starts_and_submits_event() {
         // given
+        given(ccdApi.authenticateJurisdiction(any())).willReturn(AUTH_DETAILS);
+
+        // and
         String eventToken = "token123";
 
         StartEventResponse startEventResponse = mock(StartEventResponse.class);

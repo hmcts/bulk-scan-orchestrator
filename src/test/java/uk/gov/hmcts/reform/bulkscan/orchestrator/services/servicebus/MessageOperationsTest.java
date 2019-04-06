@@ -2,11 +2,11 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus;
 
 import com.microsoft.azure.servicebus.QueueClient;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
 
@@ -16,7 +16,7 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class MessageOperationsTest {
 
     @Mock
@@ -24,7 +24,7 @@ public class MessageOperationsTest {
 
     private MessageOperations messageOperations;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         messageOperations = new MessageOperations(queueClient);
     }
