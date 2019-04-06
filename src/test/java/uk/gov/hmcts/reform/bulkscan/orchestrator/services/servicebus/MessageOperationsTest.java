@@ -2,11 +2,11 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus;
 
 import com.microsoft.azure.servicebus.QueueClient;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
 
@@ -16,21 +16,21 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-@RunWith(MockitoJUnitRunner.class)
-public class MessageOperationsTest {
+@ExtendWith(MockitoExtension.class)
+class MessageOperationsTest {
 
     @Mock
     private QueueClient queueClient;
 
     private MessageOperations messageOperations;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         messageOperations = new MessageOperations(queueClient);
     }
 
     @Test
-    public void complete_should_call_queue_client() throws Exception {
+    void complete_should_call_queue_client() throws Exception {
         UUID lockToken = UUID.randomUUID();
 
         messageOperations.complete(lockToken);
@@ -40,7 +40,7 @@ public class MessageOperationsTest {
     }
 
     @Test
-    public void complete_should_throw_exception_when_queue_client_fails() throws Exception {
+    void complete_should_throw_exception_when_queue_client_fails() throws Exception {
         ServiceBusException exceptionToThrow = new ServiceBusException(true);
         willThrow(exceptionToThrow).given(queueClient).complete(any());
 
@@ -50,7 +50,7 @@ public class MessageOperationsTest {
     }
 
     @Test
-    public void deadLetter_should_call_queue_client() throws Exception {
+    void deadLetter_should_call_queue_client() throws Exception {
         UUID lockToken = UUID.randomUUID();
         String reason = "reason1";
         String description = "description1";
@@ -62,7 +62,7 @@ public class MessageOperationsTest {
     }
 
     @Test
-    public void deadLetter_should_throw_exception_when_queue_client_fails() throws Exception {
+    void deadLetter_should_throw_exception_when_queue_client_fails() throws Exception {
         ServiceBusException exceptionToThrow = new ServiceBusException(true);
         willThrow(exceptionToThrow).given(queueClient).deadLetter(any(), any(), any());
 

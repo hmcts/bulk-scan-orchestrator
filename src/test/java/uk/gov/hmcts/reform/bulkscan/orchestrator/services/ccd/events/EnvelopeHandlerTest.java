@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -20,9 +20,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.mode
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.NEW_APPLICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.SUPPLEMENTARY_EVIDENCE;
 
-@SuppressWarnings("checkstyle:LineLength")
-@RunWith(MockitoJUnitRunner.class)
-public class EnvelopeHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class EnvelopeHandlerTest {
 
     @Mock
     private AttachDocsToSupplementaryEvidence attachDocsToSupplementaryEvidence;
@@ -38,8 +37,8 @@ public class EnvelopeHandlerTest {
 
     private EnvelopeHandler envelopeHandler;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         envelopeHandler = new EnvelopeHandler(
             attachDocsToSupplementaryEvidence,
             createExceptionRecord,
@@ -48,7 +47,7 @@ public class EnvelopeHandlerTest {
     }
 
     @Test
-    public void should_call_AttachDocsToSupplementaryEvidence_for_supplementary_evidence_classification_when_case_exists() {
+    void should_call_AttachDocsToSupplementaryEvidence_for_supplementary_evidence_classification_when_case_exists() {
         // given
         given(caseRetriever.retrieve(JURSIDICTION, CASE_REF)).willReturn(caseDetails);
         Envelope envelope = envelope(SUPPLEMENTARY_EVIDENCE, JURSIDICTION, CASE_REF);
@@ -61,7 +60,7 @@ public class EnvelopeHandlerTest {
     }
 
     @Test
-    public void should_call_CreateExceptionRecord_for_supplementary_evidence_classification_when_case_does_not_exist() {
+    void should_call_CreateExceptionRecord_for_supplementary_evidence_classification_when_case_does_not_exist() {
         // given
         given(caseRetriever.retrieve(JURSIDICTION, CASE_REF)).willReturn(null); // case not found
         Envelope envelope = envelope(SUPPLEMENTARY_EVIDENCE, JURSIDICTION, CASE_REF);
@@ -74,7 +73,7 @@ public class EnvelopeHandlerTest {
     }
 
     @Test
-    public void should_call_CreateExceptionRecord_for_exception_classification() {
+    void should_call_CreateExceptionRecord_for_exception_classification() {
         // given
         Envelope envelope = envelope(EXCEPTION, JURSIDICTION, CASE_REF);
 
@@ -87,7 +86,7 @@ public class EnvelopeHandlerTest {
     }
 
     @Test
-    public void should_call_CreateExceptionRecord_for_new_application_classification() {
+    void should_call_CreateExceptionRecord_for_new_application_classification() {
         // given
         Envelope envelope = envelope(NEW_APPLICATION, JURSIDICTION, CASE_REF);
 

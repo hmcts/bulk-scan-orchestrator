@@ -2,13 +2,13 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.tasks;
 
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.ConnectionException;
 
@@ -30,8 +30,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CleanupEnvelopesDlqTaskTest {
+@ExtendWith(MockitoExtension.class)
+class CleanupEnvelopesDlqTaskTest {
 
     private CleanupEnvelopesDlqTask cleanupDlqTask;
 
@@ -46,18 +46,18 @@ public class CleanupEnvelopesDlqTaskTest {
 
     private final Duration ttl = Duration.ofSeconds(10);
 
-    @BeforeClass
-    public static void init() {
+    @BeforeAll
+    static void init() {
         TimeZone.setDefault(TimeZone.getTimeZone(UTC));
     }
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         cleanupDlqTask = new CleanupEnvelopesDlqTask(() -> messageReceiver, ttl);
     }
 
     @Test
-    public void should_delete_messages_from_dead_letter_queue() throws Exception {
+    void should_delete_messages_from_dead_letter_queue() throws Exception {
         //given
         UUID uuid = UUID.randomUUID();
         given(message.getLockToken()).willReturn(uuid);
@@ -82,7 +82,7 @@ public class CleanupEnvelopesDlqTaskTest {
     }
 
     @Test
-    public void should_call_abandon_message_when_the_ttl_is_less_than_duration()
+    void should_call_abandon_message_when_the_ttl_is_less_than_duration()
         throws Exception {
         //given
         given(message.getEnqueuedTimeUtc())
@@ -101,7 +101,7 @@ public class CleanupEnvelopesDlqTaskTest {
     }
 
     @Test
-    public void should_not_call_complete_when_no_messages_exists_in_dead_letter_queue() throws Exception {
+    void should_not_call_complete_when_no_messages_exists_in_dead_letter_queue() throws Exception {
         //given
         given(messageReceiver.receive()).willReturn(null);
 
@@ -117,7 +117,7 @@ public class CleanupEnvelopesDlqTaskTest {
     }
 
     @Test
-    public void should_not_process_messages_when_connection_exception_is_thrown() {
+    void should_not_process_messages_when_connection_exception_is_thrown() {
         //given
         cleanupDlqTask = new CleanupEnvelopesDlqTask(receiverProvider, Duration.ZERO);
 

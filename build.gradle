@@ -57,6 +57,10 @@ tasks.withType(Test) {
   }
 }
 
+test {
+  failFast = true
+}
+
 task functional(type: Test, description: 'Runs the functional tests.', group: 'Verification') {
   testClassesDirs = sourceSets.functionalTest.output.classesDirs
   classpath = sourceSets.functionalTest.runtimeClasspath
