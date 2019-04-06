@@ -27,7 +27,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor
 
 @SpringBootTest
 @ActiveProfiles("nosb") // no servicebus queue handler registration
-public class SupplementaryEvidenceTest {
+class SupplementaryEvidenceTest {
 
     @Autowired
     private CaseRetriever caseRetriever;
@@ -42,7 +42,7 @@ public class SupplementaryEvidenceTest {
     private DocumentManagementUploadService dmUploadService;
 
     @Test
-    public void should_attach_supplementary_evidence_to_the_case_with_no_evidence_docs() throws Exception {
+    void should_attach_supplementary_evidence_to_the_case_with_no_evidence_docs() throws Exception {
         //given
         String dmUrl = dmUploadService.uploadToDmStore("Evidence2.pdf", "documents/supplementary-evidence.pdf");
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList());
@@ -64,7 +64,7 @@ public class SupplementaryEvidenceTest {
     }
 
     @Test
-    public void should_attach_supplementary_evidence_to_the_case_with_existing_evidence_docs() throws Exception {
+    void should_attach_supplementary_evidence_to_the_case_with_existing_evidence_docs() throws Exception {
         //given
         String dmUrlOriginal = dmUploadService.uploadToDmStore("original.pdf", "documents/supplementary-evidence.pdf");
         String dmUrlNew = dmUploadService.uploadToDmStore("new.pdf", "documents/supplementary-evidence.pdf");

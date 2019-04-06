@@ -38,7 +38,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor
 
 @SpringBootTest
 @ActiveProfiles("nosb") // no servicebus queue handler registration
-public class AttachExceptionRecordToExistingCaseTest {
+class AttachExceptionRecordToExistingCaseTest {
 
     @Value("${test-url}")
     private String testUrl;
@@ -61,7 +61,7 @@ public class AttachExceptionRecordToExistingCaseTest {
     private String dmUrl;
 
     @BeforeEach
-    public void setup() throws Exception {
+    void setup() throws Exception {
 
         dmUrl = dmUploadService.uploadToDmStore(
             "Certificate.pdf",
@@ -70,7 +70,7 @@ public class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-    public void should_attach_exception_record_to_the_existing_case_with_no_evidence() throws Exception {
+    void should_attach_exception_record_to_the_existing_case_with_no_evidence() throws Exception {
         //given
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList());
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
@@ -88,7 +88,7 @@ public class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-    public void should_attach_exception_record_to_the_existing_case_with_evidence_documents() throws Exception {
+    void should_attach_exception_record_to_the_existing_case_with_evidence_documents() throws Exception {
         //given
         CaseDetails caseDetails =
             ccdCaseCreator.createCase(singletonList(

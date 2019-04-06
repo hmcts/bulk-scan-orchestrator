@@ -25,7 +25,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor
 
 @SpringBootTest
 @ActiveProfiles("nosb")  // no servicebus queue handler registration
-public class ExceptionRecordCreationTest {
+class ExceptionRecordCreationTest {
 
     @Autowired
     private CaseSearcher caseSearcher;
@@ -39,7 +39,7 @@ public class ExceptionRecordCreationTest {
     private String dmUrl;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
 
         dmUrl = dmUploadService.uploadToDmStore(
             "Certificate.pdf",
@@ -49,7 +49,7 @@ public class ExceptionRecordCreationTest {
 
     @DisplayName("Should create ExceptionRecord when provided/requested supplementary evidence is not present")
     @Test
-    public void create_exception_record_from_supplementary_evidence() throws Exception {
+    void create_exception_record_from_supplementary_evidence() throws Exception {
         // given
         UUID randomPoBox = UUID.randomUUID();
 
@@ -70,7 +70,7 @@ public class ExceptionRecordCreationTest {
 
     @DisplayName("Should create ExceptionRecord when classification is NEW_APPLICATION")
     @Test
-    public void should_create_exception_record_for_new_application() throws Exception {
+    void should_create_exception_record_for_new_application() throws Exception {
         // given
         UUID randomPoBox = UUID.randomUUID();
 
@@ -98,7 +98,7 @@ public class ExceptionRecordCreationTest {
 
     @DisplayName("Should create ExceptionRecord when provided/requested case reference is invalid")
     @Test
-    public void create_exception_record_for_invalid_case_reference() throws Exception {
+    void create_exception_record_for_invalid_case_reference() throws Exception {
         // given
         UUID randomPoBox = UUID.randomUUID();
 
