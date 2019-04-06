@@ -13,13 +13,13 @@ import java.io.IOException;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @TestPropertySource("classpath:application.conf")
-public class IdamConfigStatusTest {
+class IdamConfigStatusTest {
 
     private static final String TEST_URL = ConfigFactory.load().getString("test-url");
 
     @DisplayName("Each configured jurisdiction should have valid credentials")
     @Test
-    public void each_jurisdiction_should_have_valid_credentials() throws IOException {
+    void each_jurisdiction_should_have_valid_credentials() throws IOException {
         byte[] response = RestAssured
             .given()
             .relaxedHTTPSValidation()
