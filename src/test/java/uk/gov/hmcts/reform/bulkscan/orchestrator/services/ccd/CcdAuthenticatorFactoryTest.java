@@ -22,7 +22,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_NAME;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_TOKEN;
 
 @ExtendWith(MockitoExtension.class)
-public class CcdAuthenticatorFactoryTest {
+class CcdAuthenticatorFactoryTest {
+
     @Mock
     private AuthTokenGenerator tokenGenerator;
     @Mock
@@ -33,12 +34,12 @@ public class CcdAuthenticatorFactoryTest {
     private CcdAuthenticatorFactory service;
 
     @BeforeEach
-    public void before() {
+    void before() {
         service = new CcdAuthenticatorFactory(tokenGenerator, idamClient, users);
     }
 
     @Test
-    public void should_sucessfully_return_authInfo() {
+    void should_sucessfully_return_authInfo() {
         given(users.getUser(eq(JURSIDICTION))).willReturn(USER_CREDS);
         given(tokenGenerator.generate()).willReturn(SERVICE_TOKEN);
         given(idamClient.authenticateUser(eq(USER_NAME), eq(PASSWORD))).willReturn(USER_TOKEN);

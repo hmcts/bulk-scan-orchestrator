@@ -25,18 +25,18 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.Assertions.tuple;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.DatetimeHelper.toIso8601;
 
-public class EnvelopeParserTest {
+class EnvelopeParserTest {
 
     private Envelope envelope;
     private Instant scannedAt = Instant.now();
 
     @BeforeAll
-    public static void init() {
+    static void init() {
         TimeZone.setDefault(TimeZone.getTimeZone(UTC));
     }
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         this.envelope = new Envelope(
             "975b339d-4531-4e32-8ebe-a7bc4650f33a",
             "case_ref_number",
@@ -74,7 +74,7 @@ public class EnvelopeParserTest {
     }
 
     @Test
-    public void should_parse_valid_json() throws Exception {
+    void should_parse_valid_json() throws Exception {
         // given
         String json =
             new JSONObject()
@@ -131,7 +131,7 @@ public class EnvelopeParserTest {
     }
 
     @Test
-    public void should_ignore_unrecognised_fields_in_json() throws Exception {
+    void should_ignore_unrecognised_fields_in_json() throws Exception {
         // given
         String json =
             new JSONObject()
@@ -160,7 +160,7 @@ public class EnvelopeParserTest {
     }
 
     @Test
-    public void should_throw_an_exception_if_json_is_not_a_valid_envelope() throws Exception {
+    void should_throw_an_exception_if_json_is_not_a_valid_envelope() throws Exception {
         String json =
             new JSONObject()
                 .put("hello", "world")
@@ -174,7 +174,7 @@ public class EnvelopeParserTest {
     }
 
     @Test
-    public void should_throw_an_exception_if_invalid_json_is_passed() {
+    void should_throw_an_exception_if_invalid_json_is_passed() {
 
         String json = "gibberish";
 
@@ -186,7 +186,7 @@ public class EnvelopeParserTest {
     }
 
     @Test
-    public void should_throw_an_exception_if_json_envelope_has_fields_missing() throws Exception {
+    void should_throw_an_exception_if_json_envelope_has_fields_missing() throws Exception {
         // given
         String jsonEnvelopeWithoutId =
             new JSONObject()
@@ -202,7 +202,7 @@ public class EnvelopeParserTest {
     }
 
     @Test
-    public void can_parse_example_json() {
+    void can_parse_example_json() {
         // given
         byte[] bytes = SampleData.exampleJsonAsBytes();
 
@@ -216,7 +216,7 @@ public class EnvelopeParserTest {
     }
 
     @Test
-    public void can_parse_sampleData_json() {
+    void can_parse_sampleData_json() {
         // given
         byte[] json = SampleData.envelopeJson();
 

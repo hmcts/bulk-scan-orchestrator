@@ -32,7 +32,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelopeJson;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.NEW_APPLICATION;
 
 @ExtendWith(MockitoExtension.class)
-public class EnvelopeEventProcessorTest {
+class EnvelopeEventProcessorTest {
 
     private static final String DEAD_LETTER_REASON_PROCESSING_ERROR = "Message processing error";
 
@@ -54,7 +54,7 @@ public class EnvelopeEventProcessorTest {
     private EnvelopeEventProcessor processor;
 
     @BeforeEach
-    public void before() {
+    void before() {
         processor = new EnvelopeEventProcessor(
             envelopeHandler,
             processedEnvelopeNotifier,
@@ -65,7 +65,7 @@ public class EnvelopeEventProcessorTest {
     }
 
     @Test
-    public void should_return_completed_future_if_everything_went_fine() {
+    void should_return_completed_future_if_everything_went_fine() {
         // given
         given(someMessage.getBody()).willReturn(envelopeJson());
         given(someMessage.getLockToken()).willReturn(UUID.randomUUID());
@@ -79,7 +79,7 @@ public class EnvelopeEventProcessorTest {
     }
 
     @Test
-    public void should_return_completed_future_if_queue_message_contains_invalid_envelope() {
+    void should_return_completed_future_if_queue_message_contains_invalid_envelope() {
         // given
         given(someMessage.getBody()).willReturn(envelopeJson());
         given(someMessage.getLockToken()).willReturn(UUID.randomUUID());
@@ -93,7 +93,7 @@ public class EnvelopeEventProcessorTest {
     }
 
     @Test
-    public void should_return_completed_future_if_exception_is_thrown_while_updating_ccd() {
+    void should_return_completed_future_if_exception_is_thrown_while_updating_ccd() {
         // when
         CompletableFuture<Void> result = processor.onMessageAsync(someMessage);
 
@@ -102,7 +102,7 @@ public class EnvelopeEventProcessorTest {
     }
 
     @Test
-    public void should_complete_the_message_when_processing_is_successful() throws Exception {
+    void should_complete_the_message_when_processing_is_successful() throws Exception {
         // given
         given(someMessage.getBody()).willReturn(envelopeJson());
         given(someMessage.getLockToken()).willReturn(UUID.randomUUID());
@@ -117,7 +117,7 @@ public class EnvelopeEventProcessorTest {
     }
 
     @Test
-    public void should_dead_letter_the_message_when_unrecoverable_failure() throws Exception {
+    void should_dead_letter_the_message_when_unrecoverable_failure() throws Exception {
         // given
         IMessage message = mock(IMessage.class);
         given(message.getBody()).willReturn("invalid body".getBytes(Charset.defaultCharset()));
@@ -144,7 +144,7 @@ public class EnvelopeEventProcessorTest {
     }
 
     @Test
-    public void should_dead_letter_the_message_when_notification_sending_fails() throws Exception {
+    void should_dead_letter_the_message_when_notification_sending_fails() throws Exception {
         // given
         given(someMessage.getBody()).willReturn(envelopeJson());
         given(someMessage.getLockToken()).willReturn(UUID.randomUUID());
@@ -178,7 +178,7 @@ public class EnvelopeEventProcessorTest {
     }
 
     @Test
-    public void should_not_finalize_the_message_when_recoverable_failure() {
+    void should_not_finalize_the_message_when_recoverable_failure() {
         // given
         given(someMessage.getBody()).willReturn(envelopeJson());
 
@@ -198,7 +198,7 @@ public class EnvelopeEventProcessorTest {
     }
 
     @Test
-    public void should_finalize_the_message_when_recoverable_failure_but_delivery_maxed() throws Exception {
+    void should_finalize_the_message_when_recoverable_failure_but_delivery_maxed() throws Exception {
         // given
         given(someMessage.getBody()).willReturn(envelopeJson());
         given(someMessage.getLockToken()).willReturn(UUID.randomUUID());
@@ -237,14 +237,14 @@ public class EnvelopeEventProcessorTest {
     }
 
     @Test
-    public void notify_exception_should_not_throw_exception() {
+    void notify_exception_should_not_throw_exception() {
         assertThatCode(() ->
             processor.notifyException(null, null)
         ).doesNotThrowAnyException();
     }
 
     @Test
-    public void should_send_message_with_envelope_id_when_processing_successful() {
+    void should_send_message_with_envelope_id_when_processing_successful() {
         // given
         String envelopeId = UUID.randomUUID().toString();
         IMessage message = mock(IMessage.class);
@@ -260,7 +260,7 @@ public class EnvelopeEventProcessorTest {
     }
 
     @Test
-    public void should_not_send_processed_envelope_notification_when_processing_fails() {
+    void should_not_send_processed_envelope_notification_when_processing_fails() {
         // given
         given(someMessage.getBody()).willReturn(envelopeJson());
 

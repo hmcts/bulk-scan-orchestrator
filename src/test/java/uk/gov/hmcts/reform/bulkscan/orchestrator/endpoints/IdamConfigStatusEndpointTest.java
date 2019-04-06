@@ -17,7 +17,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-public class IdamConfigStatusEndpointTest {
+class IdamConfigStatusEndpointTest {
 
     @Mock
     private AuthenticationChecker authenticationChecker;
@@ -25,12 +25,12 @@ public class IdamConfigStatusEndpointTest {
     private IdamConfigStatusEndpoint endpoint;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         endpoint = new IdamConfigStatusEndpoint(authenticationChecker);
     }
 
     @Test
-    public void jurisdiction_should_call_authenticator_to_get_result() {
+    void jurisdiction_should_call_authenticator_to_get_result() {
         // given
         String jurisdiction = "jurisdiction1";
         JurisdictionConfigurationStatus expectedStatus = mock(JurisdictionConfigurationStatus.class);
@@ -45,7 +45,7 @@ public class IdamConfigStatusEndpointTest {
     }
 
     @Test
-    public void jurisdictions_should_call_authenticator_to_get_result() {
+    void jurisdictions_should_call_authenticator_to_get_result() {
         // given
         List<JurisdictionConfigurationStatus> expectedStatuses =
             Arrays.asList(mock(JurisdictionConfigurationStatus.class));

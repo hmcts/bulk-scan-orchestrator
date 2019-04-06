@@ -22,7 +22,7 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-public class ProcessedEnvelopeNotifierTest {
+class ProcessedEnvelopeNotifierTest {
 
     private ProcessedEnvelopeNotifier notifier;
 
@@ -30,12 +30,12 @@ public class ProcessedEnvelopeNotifierTest {
     private QueueClient queueClient;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         notifier = new ProcessedEnvelopeNotifier(queueClient, new ObjectMapper());
     }
 
     @Test
-    public void notify_should_send_message_with_right_content() throws Exception {
+    void notify_should_send_message_with_right_content() throws Exception {
         // given
         String envelopeId = UUID.randomUUID().toString();
 
@@ -56,7 +56,7 @@ public class ProcessedEnvelopeNotifierTest {
     }
 
     @Test
-    public void notify_should_throw_exception_when_queue_client_fails() throws Exception {
+    void notify_should_throw_exception_when_queue_client_fails() throws Exception {
         ServiceBusException exceptionToThrow = new ServiceBusException(true, "test exception");
         willThrow(exceptionToThrow).given(queueClient).send(any());
 

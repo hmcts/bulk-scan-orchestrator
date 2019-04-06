@@ -26,7 +26,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-public class AbstractEventPublisherTest {
+class AbstractEventPublisherTest {
 
     private static final Envelope ENVELOPE = SampleData.envelope(1);
 
@@ -37,12 +37,12 @@ public class AbstractEventPublisherTest {
     private CcdApi ccdApi;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    public void should_successfully_call_start_and_submit_event_calls() {
+    void should_successfully_call_start_and_submit_event_calls() {
         // given
         CcdAuthenticator authenticator = new CcdAuthenticator(
             () -> "token",
@@ -91,15 +91,15 @@ public class AbstractEventPublisherTest {
     }
 
     protected class TestEventPublisher extends AbstractEventPublisher {
-        protected static final String EVENT_TYPE_ID = "test";
-        protected static final String EVENT_SUMMARY = "test summary";
+        static final String EVENT_TYPE_ID = "test";
+        static final String EVENT_SUMMARY = "test summary";
 
         @Override
         protected CaseData buildCaseData(StartEventResponse eventResponse, Envelope envelope) {
             return null;
         }
 
-        public void publish(Envelope env, String caseType) {
+        void publish(Envelope env, String caseType) {
             publish(env, caseType, EVENT_TYPE_ID, EVENT_SUMMARY);
         }
     }

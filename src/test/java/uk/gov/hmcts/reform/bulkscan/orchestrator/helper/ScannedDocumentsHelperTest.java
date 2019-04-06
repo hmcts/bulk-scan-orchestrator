@@ -12,10 +12,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.fileContentAsBytes;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.objectMapper;
 
-public class ScannedDocumentsHelperTest {
+class ScannedDocumentsHelperTest {
 
     @Test
-    public void getDocuments_should_extract_all_documents() throws Exception {
+    void getDocuments_should_extract_all_documents() throws Exception {
         CaseDetails caseDetails = getCaseDetails("case-data/multiple-scanned-docs.json");
 
         List<Document> documents = ScannedDocumentsHelper.getDocuments(caseDetails);
@@ -26,7 +26,7 @@ public class ScannedDocumentsHelperTest {
     }
 
     @Test
-    public void getDocuments_should_return_empty_collection_when_scannedDocuments_are_missing()
+    void getDocuments_should_return_empty_collection_when_scannedDocuments_are_missing()
         throws Exception {
         CaseDetails caseDetails = getCaseDetails("case-data/missing-scanned-documents.json");
 
@@ -36,7 +36,7 @@ public class ScannedDocumentsHelperTest {
     }
 
     @Test
-    public void getDocuments_should_map_document_properties_correctly() throws Exception {
+    void getDocuments_should_map_document_properties_correctly() throws Exception {
         CaseDetails caseDetails = getCaseDetails("case-data/single-scanned-doc.json");
 
         List<Document> documents = ScannedDocumentsHelper.getDocuments(caseDetails);
@@ -57,7 +57,7 @@ public class ScannedDocumentsHelperTest {
     }
 
     @Test
-    public void should_handle_null_fields_in_document() throws Exception {
+    void should_handle_null_fields_in_document() throws Exception {
         // given
         CaseDetails caseDetails = getCaseDetails("case-data/null-fields-in-doc.json");
 
@@ -73,7 +73,7 @@ public class ScannedDocumentsHelperTest {
     }
 
     @Test
-    public void should_handle_null_document() throws Exception {
+    void should_handle_null_document() throws Exception {
         // given
         CaseDetails caseDetails = getCaseDetails("case-data/null-doc.json");
 

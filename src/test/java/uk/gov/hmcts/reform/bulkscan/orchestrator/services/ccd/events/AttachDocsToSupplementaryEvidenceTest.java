@@ -30,7 +30,7 @@ import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.AUTH_DETAILS;
 
 @ExtendWith(MockitoExtension.class)
-public class AttachDocsToSupplementaryEvidenceTest {
+class AttachDocsToSupplementaryEvidenceTest {
 
     private static final String CASE_TYPE_ID = "Bulk_Scanned";
     private static final String EVENT_TYPE_ID = "attachScannedDocs";
@@ -44,12 +44,12 @@ public class AttachDocsToSupplementaryEvidenceTest {
     private AttachDocsToSupplementaryEvidence eventPublisher = new AttachDocsToSupplementaryEvidence(mapper);
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    public void createSupplementaryEvidence_starts_and_submits_event() {
+    void createSupplementaryEvidence_starts_and_submits_event() {
         // given
         given(ccdApi.authenticateJurisdiction(any())).willReturn(AUTH_DETAILS);
 
@@ -106,7 +106,7 @@ public class AttachDocsToSupplementaryEvidenceTest {
     }
 
     @Test
-    public void should_not_start_an_event_if_envelope_does_not_contain_any_new_documents() {
+    void should_not_start_an_event_if_envelope_does_not_contain_any_new_documents() {
         // given
         CaseDetails existingCase = mock(CaseDetails.class);
         Envelope envelope = SampleData.envelope(2);

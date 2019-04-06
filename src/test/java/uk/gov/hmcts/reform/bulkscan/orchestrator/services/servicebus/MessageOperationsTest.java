@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
-public class MessageOperationsTest {
+class MessageOperationsTest {
 
     @Mock
     private QueueClient queueClient;
@@ -25,12 +25,12 @@ public class MessageOperationsTest {
     private MessageOperations messageOperations;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         messageOperations = new MessageOperations(queueClient);
     }
 
     @Test
-    public void complete_should_call_queue_client() throws Exception {
+    void complete_should_call_queue_client() throws Exception {
         UUID lockToken = UUID.randomUUID();
 
         messageOperations.complete(lockToken);
@@ -40,7 +40,7 @@ public class MessageOperationsTest {
     }
 
     @Test
-    public void complete_should_throw_exception_when_queue_client_fails() throws Exception {
+    void complete_should_throw_exception_when_queue_client_fails() throws Exception {
         ServiceBusException exceptionToThrow = new ServiceBusException(true);
         willThrow(exceptionToThrow).given(queueClient).complete(any());
 
@@ -50,7 +50,7 @@ public class MessageOperationsTest {
     }
 
     @Test
-    public void deadLetter_should_call_queue_client() throws Exception {
+    void deadLetter_should_call_queue_client() throws Exception {
         UUID lockToken = UUID.randomUUID();
         String reason = "reason1";
         String description = "description1";
@@ -62,7 +62,7 @@ public class MessageOperationsTest {
     }
 
     @Test
-    public void deadLetter_should_throw_exception_when_queue_client_fails() throws Exception {
+    void deadLetter_should_throw_exception_when_queue_client_fails() throws Exception {
         ServiceBusException exceptionToThrow = new ServiceBusException(true);
         willThrow(exceptionToThrow).given(queueClient).deadLetter(any(), any(), any());
 
