@@ -1,9 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.tasks;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
 
 import java.util.concurrent.TimeUnit;
@@ -12,7 +10,6 @@ import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
-@ExtendWith(SpringExtension.class)
 @IntegrationTest
 public class CleanupEnvelopesDlqTaskTest {
 
