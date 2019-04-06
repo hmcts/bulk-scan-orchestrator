@@ -2,6 +2,13 @@
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
 
   <suppress>
+    <notes><![CDATA[Shadowed dependency from AppInsights]]></notes>
+    <gav regex="true">^io\.netty:netty-tcnative-boringssl-static:2\.0\.17\.Final$</gav>
+    <cve>CVE-2014-3488</cve>
+    <cve>CVE-2015-2156</cve>
+  </suppress>
+
+  <suppress>
     <notes><![CDATA[
       Newer version not available.
     ]]></notes>
