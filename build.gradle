@@ -135,6 +135,10 @@ dependencyCheck {
   // range of 0-10 fails the build, anything greater and it doesn't fail the build
   failBuildOnCVSS = System.getProperty('dependencyCheck.failBuild') == 'true' ? 0 : 11
   suppressionFile = 'config/owasp/suppressions.xml'
+  analyzers {
+    // Disable scanning of .NET related binaries
+    assemblyEnabled = false
+  }
 }
 
 repositories {
@@ -169,7 +173,7 @@ dependencyManagement {
       entry 'spring-security-rsa'
     }
     // align with jupiter version
-    dependencySet(group: 'org.mockito', version: '2.25.0') {
+    dependencySet(group: 'org.mockito', version: '2.26.0') {
       entry 'mockito-core'
     }
   }
@@ -203,7 +207,7 @@ dependencies {
   testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: versions.junit
   testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: versions.junit
   testCompile group: 'org.junit.vintage', name: 'junit-vintage-engine', version: versions.junit
-  testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: '2.25.1'
+  testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: '2.26.0'
   testCompile group: 'org.assertj', name: 'assertj-core', version: '3.12.2'
   testCompile group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '2.1.1.RELEASE'
   testCompile group: 'org.awaitility', name: 'awaitility', version: '3.1.6'
