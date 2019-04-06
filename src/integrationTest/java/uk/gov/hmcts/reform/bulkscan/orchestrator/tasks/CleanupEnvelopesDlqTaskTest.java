@@ -11,7 +11,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
 @IntegrationTest
-public class CleanupEnvelopesDlqTaskTest {
+class CleanupEnvelopesDlqTaskTest {
 
     @SpyBean
     private CleanupEnvelopesDlqTask cleanupEnvelopesDlqTask;
@@ -20,7 +20,7 @@ public class CleanupEnvelopesDlqTaskTest {
      * Verifies if the Dlq scheduler task is running for the configured interval.
      */
     @Test
-    public void test_cleanup_dlq_scheduler_reads_dlq_message() {
+    void test_cleanup_dlq_scheduler_reads_dlq_message() {
         await()
             .atMost(15, TimeUnit.SECONDS)
             .ignoreExceptions()
