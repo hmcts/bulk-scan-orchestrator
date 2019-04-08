@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.out.JurisdictionConfigurationStatus;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.AccountLockedException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.AuthenticationChecker;
@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class QueueProcessingReadinessCheckerTest {
 
     @Mock
@@ -25,7 +25,7 @@ public class QueueProcessingReadinessCheckerTest {
 
     private QueueProcessingReadinessChecker processingReadinessChecker;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         processingReadinessChecker =
             new QueueProcessingReadinessChecker(authenticationChecker, Duration.ofMinutes(1));
