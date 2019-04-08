@@ -156,10 +156,11 @@ repositories {
 // it is important to specify logback classic and core packages explicitly as libraries like spring boot
 // enforces it's own (older) version which is not recommended.
 def versions = [
-  reformLogging   : '5.0.1',
-  springBoot      : springBoot.class.package.implementationVersion,
-  springfoxSwagger: '2.9.2',
-  junit           : '5.3.2'
+  reformLogging     : '5.0.1',
+  springBoot        : springBoot.class.package.implementationVersion,
+  springHystrix     : '2.1.1.RELEASE',
+  springfoxSwagger  : '2.9.2',
+  junit             : '5.3.2'
 ]
 
 dependencyManagement {
@@ -188,6 +189,7 @@ dependencies {
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: versions.springBoot
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: versions.springBoot
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-json', version: versions.springBoot
+  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: versions.springHystrix
 
   compile group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
   compile group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
@@ -199,7 +201,7 @@ dependencies {
   compile group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: '4.6.2'
   compile group: 'uk.gov.hmcts.reform', name: 'health-spring-boot-starter', version:'0.0.3'
   compile group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version:'0.0.4'
-  
+
   compile group: 'com.microsoft.azure', name: 'azure-servicebus', version: '1.2.8'
   compile group: 'io.vavr', name: 'vavr', version: '0.10.0'
 

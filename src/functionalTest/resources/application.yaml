@@ -37,3 +37,7 @@ idam:
 
 document_management.url: http://dm-store:4460
 test-url: ${TEST_URL:http://localhost:8582}
+
+task:
+  check-no-account-locked:
+    check-validity-duration: PT5M
