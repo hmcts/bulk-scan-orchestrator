@@ -57,6 +57,7 @@ public class QueueProcessingReadinessChecker {
         try {
             if (hasNoAccountLockedCheckExpired()) {
                 assertNoAccountIsLockedInIdam();
+                updateNoAccountLockedCheckExpiry();
             }
 
             return true;
@@ -73,9 +74,7 @@ public class QueueProcessingReadinessChecker {
     private void assertNoAccountIsLockedInIdam() throws AccountLockedException {
         List<String> jurisdictionsWithLockedAccounts = getJurisdictionsWithLockedAccounts();
 
-        if (jurisdictionsWithLockedAccounts.isEmpty()) {
-            updateNoAccountLockedCheckExpiry();
-        } else {
+        if (!jurisdictionsWithLockedAccounts.isEmpty()) {
             String errorMessage = String.format(
                 "Some jurisdictions' accounts are locked in IDAM. "
                     + "This will pause queue processing. Jurisdictions with locked accounts: [%s]",
