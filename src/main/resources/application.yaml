@@ -61,7 +61,9 @@ hystrix:
     check-no-account-locked:
       circuitBreaker:
         requestVolumeThreshold: 1
-        sleepWindowInMilliseconds: 4200000 # suspend processing for 70 minutes when an account is locked
+        # suspend processing for 120 minutes when an account is locked - this will give us one hour
+        # to apply necessary changes and redeploy (IDAM keeps the lock for one hour of inactivity)
+        sleepWindowInMilliseconds: 7200000
         errorThresholdPercentage: 1
 
 task:
