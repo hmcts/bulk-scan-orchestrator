@@ -51,6 +51,16 @@ public class EnvelopeEventProcessor implements IMessageHandler {
         this.appInsights = appInsights;
     }
 
+    /**
+     * Reads and processes next message from the queue.
+     *
+     * @return false if there was no message to process. Otherwise true.
+     */
+    public boolean processNextMessage() throws ServiceBusException, InterruptedException {
+        // TODO: implement
+        return false;
+    }
+
     @Override
     public CompletableFuture<Void> onMessageAsync(IMessage message) {
         /*

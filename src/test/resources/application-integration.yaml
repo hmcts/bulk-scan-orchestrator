@@ -20,6 +20,8 @@ scheduling:
       enabled: true
       cron: "*/1 * * * * *"
       ttl: 10s
+    consume-envelopes-queue:
+      enabled: false
 
 azure:
   servicebus:
