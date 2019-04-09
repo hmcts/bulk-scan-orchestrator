@@ -65,7 +65,9 @@ public class AttachCaseCallbackService {
         List<Map<String, Object>> exceptionRecordDocuments
     ) {
         try {
+            log.info("Attaching exception record {} to case {}", exceptionRecordId, targetCaseRef);
             doAttachCase(exceptionRecordJurisdiction, targetCaseRef, exceptionRecordDocuments, exceptionRecordId);
+            log.info("Successfully attached exception record {} to case {}", exceptionRecordId, targetCaseRef);
             return emptyList();
         } catch (AlreadyAttachedToCaseException | DuplicateDocsException | CaseNotFoundException exc) {
             log.warn(exc.getMessage(), exc);
