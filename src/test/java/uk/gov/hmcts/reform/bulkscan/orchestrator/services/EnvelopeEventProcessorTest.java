@@ -8,7 +8,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.logging.AppInsights;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EnvelopeHandler;
@@ -55,8 +54,6 @@ class EnvelopeEventProcessorTest {
 
     @BeforeEach
     void before() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         processor = new EnvelopeEventProcessor(
             envelopeHandler,
             processedEnvelopeNotifier,
