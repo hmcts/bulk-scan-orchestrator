@@ -67,7 +67,7 @@ class EnvelopeEventProcessorTest {
     }
 
     @Test
-    void should_return_true_when_there_is_a_message_to_process() throws Exception {
+    public void should_return_true_when_there_is_a_message_to_process() throws Exception {
         // given
         willReturn(getValidMessage()).given(messageReceiver).receive();
 
@@ -79,7 +79,7 @@ class EnvelopeEventProcessorTest {
     }
 
     @Test
-    void should_return_false_when_there_is_no_message_to_process() throws Exception {
+    public void should_return_false_when_there_is_no_message_to_process() throws Exception {
         // given
         given(messageReceiver.receive()).willReturn(null);
 
@@ -91,7 +91,7 @@ class EnvelopeEventProcessorTest {
     }
 
     @Test
-    void should_not_throw_exception_when_queue_message_is_invalid() throws Exception {
+    public void should_not_throw_exception_when_queue_message_is_invalid() throws Exception {
         IMessage invalidMessage = mock(IMessage.class);
         given(invalidMessage.getBody()).willReturn("foo".getBytes());
         given(messageReceiver.receive()).willReturn(invalidMessage);
@@ -100,7 +100,7 @@ class EnvelopeEventProcessorTest {
     }
 
     @Test
-    void should_not_throw_exception_when_updating_ccd_fails() throws Exception {
+    public void should_not_throw_exception_when_updating_ccd_fails() throws Exception {
         // given
         willReturn(getValidMessage()).given(messageReceiver).receive();
 
@@ -111,7 +111,7 @@ class EnvelopeEventProcessorTest {
     }
 
     @Test
-    void should_complete_the_message_when_processing_is_successful() throws Exception {
+    public void should_complete_the_message_when_processing_is_successful() throws Exception {
         // given
         IMessage validMessage = getValidMessage();
         given(messageReceiver.receive()).willReturn(validMessage);
@@ -126,7 +126,7 @@ class EnvelopeEventProcessorTest {
     }
 
     @Test
-    void should_dead_letter_the_message_when_unrecoverable_failure() throws Exception {
+    public void should_dead_letter_the_message_when_unrecoverable_failure() throws Exception {
         // given
         IMessage message = mock(IMessage.class);
         given(message.getBody()).willReturn("invalid body".getBytes(Charset.defaultCharset()));
@@ -155,7 +155,7 @@ class EnvelopeEventProcessorTest {
     }
 
     @Test
-    void should_dead_letter_the_message_when_notification_sending_fails() throws Exception {
+    public void should_dead_letter_the_message_when_notification_sending_fails() throws Exception {
         // given
         String exceptionMessage = "test exception";
         willThrow(new NotificationSendingException(exceptionMessage, null))
@@ -189,7 +189,7 @@ class EnvelopeEventProcessorTest {
     }
 
     @Test
-    void should_not_finalize_the_message_when_recoverable_failure() throws Exception {
+    public void should_not_finalize_the_message_when_recoverable_failure() throws Exception {
         willReturn(getValidMessage()).given(messageReceiver).receive();
 
         Exception processingFailureCause = new RuntimeException(
@@ -208,7 +208,7 @@ class EnvelopeEventProcessorTest {
     }
 
     @Test
-    void should_finalize_the_message_when_recoverable_failure_but_delivery_maxed() throws Exception {
+    public void should_finalize_the_message_when_recoverable_failure_but_delivery_maxed() throws Exception {
         // given
         IMessage validMessage = getValidMessage();
         given(messageReceiver.receive()).willReturn(validMessage);
@@ -245,7 +245,7 @@ class EnvelopeEventProcessorTest {
     }
 
     @Test
-    void should_send_message_with_envelope_id_when_processing_successful() throws Exception {
+    public void should_send_message_with_envelope_id_when_processing_successful() throws Exception {
         // given
         String envelopeId = UUID.randomUUID().toString();
         IMessage message = mock(IMessage.class);
@@ -261,7 +261,7 @@ class EnvelopeEventProcessorTest {
     }
 
     @Test
-    void should_not_send_processed_envelope_notification_when_processing_fails() throws Exception {
+    public void should_not_send_processed_envelope_notification_when_processing_fails() throws Exception {
         // given
         willReturn(getValidMessage()).given(messageReceiver).receive();
 
@@ -277,7 +277,7 @@ class EnvelopeEventProcessorTest {
     }
 
     @Test
-    void should_throw_exception_when_message_receiver_fails() throws Exception {
+    public void should_throw_exception_when_message_receiver_fails() throws Exception {
         ServiceBusException receiverException = new ServiceBusException(true);
         willThrow(receiverException).given(messageReceiver).receive();
 
