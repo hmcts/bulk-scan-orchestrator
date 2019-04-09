@@ -34,7 +34,7 @@ public class FunctionalQueueConfig {
 
     @Bean
     @Profile("nosb") // apply only when Service Bus should not be used
-    IMessageReceiver testMessageReceiver() {
+    public IMessageReceiver testMessageReceiver() {
         return mock(IMessageReceiver.class);
     }
 }
