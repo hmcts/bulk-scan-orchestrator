@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -69,7 +68,7 @@ class CleanupEnvelopesDlqTaskTest {
             .willReturn(
                 ImmutableMap.of(
                     "deadLetteredAt",
-                    LocalDateTime.now().minus(ttl.plusSeconds(10)).toInstant(ZoneOffset.UTC).toString()
+                    LocalDateTime.now().minus(ttl.plusSeconds(10)).toInstant(UTC).toString()
                 )
             );
         given(messageReceiver.receive()).willReturn(message).willReturn(null);
@@ -92,7 +91,7 @@ class CleanupEnvelopesDlqTaskTest {
         given(message.getProperties()).willReturn(Collections.emptyMap());
         given(message.getProperties().get("deadLetteredAt")).willReturn(null);
         given(message.getEnqueuedTimeUtc())
-            .willReturn(LocalDateTime.now().minus(ttl.plusSeconds(10)).toInstant(ZoneOffset.UTC));
+            .willReturn(LocalDateTime.now().minus(ttl.plusSeconds(10)).toInstant(UTC));
         given(messageReceiver.receive()).willReturn(message).willReturn(null);
 
         ArgumentCaptor<UUID> uuidArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
@@ -112,7 +111,7 @@ class CleanupEnvelopesDlqTaskTest {
             .willReturn(
                 ImmutableMap.of(
                     "deadLetteredAt",
-                    LocalDateTime.now().minus(ttl.minusSeconds(5)).toInstant(ZoneOffset.UTC).toString()
+                    LocalDateTime.now().minus(ttl.minusSeconds(5)).toInstant(UTC).toString()
                 )
             );
         given(messageReceiver.receive()).willReturn(message).willReturn(null);
