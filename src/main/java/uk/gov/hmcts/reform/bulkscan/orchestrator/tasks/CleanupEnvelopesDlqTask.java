@@ -18,6 +18,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.function.Supplier;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 /**
  * Deletes messages from envelopes Dead letter queue.
  */
@@ -100,14 +102,19 @@ public class CleanupEnvelopesDlqTask {
     }
 
     private boolean canBeCompleted(IMessage message) {
-        Instant createdTime = message.getEnqueuedTimeUtc();
         Instant cutoff = Instant.now().minus(this.ttl);
-        boolean canBeCompleted = createdTime.isBefore(cutoff);
+        boolean canBeCompleted;
+
+        if (message.getProperties() != null && isNotEmpty(message.getProperties().get("deadLetteredAt"))) {
+            canBeCompleted = Instant.parse(message.getProperties().get("deadLetteredAt")).isBefore(cutoff);
+        } else {
+            canBeCompleted = message.getEnqueuedTimeUtc().isBefore(cutoff);
+        }
 
         log.info(
             "MessageId: {} Enqueued Time: {} ttl: {} can be completed? {} Current time: {}",
             message.getMessageId(),
-            createdTime,
+            message.getEnqueuedTimeUtc(),
             this.ttl,
             canBeCompleted,
             Instant.now()

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus;
 
+import com.google.common.collect.ImmutableMap;
 import com.microsoft.azure.servicebus.QueueClient;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Service
@@ -29,6 +31,8 @@ public class MessageOperations implements IMessageOperations {
         String reason,
         String description
     ) throws InterruptedException, ServiceBusException {
-        queueClient.deadLetter(lockToken, reason, description);
+        queueClient.deadLetter(
+            lockToken, reason, description, ImmutableMap.of("deadLetteredAt", Instant.now().toString())
+        );
     }
 }

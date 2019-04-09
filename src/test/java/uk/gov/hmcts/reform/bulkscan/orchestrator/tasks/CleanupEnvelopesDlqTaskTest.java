@@ -1,7 +1,9 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.tasks;
 
+import com.google.common.collect.ImmutableMap;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
+import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +17,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Collections;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -62,6 +65,32 @@ class CleanupEnvelopesDlqTaskTest {
         UUID uuid = UUID.randomUUID();
         given(message.getLockToken()).willReturn(uuid);
         given(message.getBody()).willReturn(SampleData.envelopeJson());
+        given(message.getProperties())
+            .willReturn(
+                ImmutableMap.of(
+                    "deadLetteredAt",
+                    LocalDateTime.now().minus(ttl.plusSeconds(10)).toInstant(ZoneOffset.UTC).toString()
+                )
+            );
+        given(messageReceiver.receive()).willReturn(message).willReturn(null);
+
+        ArgumentCaptor<UUID> uuidArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
+
+        //when
+        cleanupDlqTask.deleteMessagesInEnvelopesDlq();
+
+        //then
+        verifyDlqMessageDeletionInteractions(uuid, uuidArgumentCaptor);
+    }
+
+    @Test
+    void should_delete_messages_from_dead_letter_queue_when_deadLetteredTime_is_not_set() throws Exception {
+        //given
+        UUID uuid = UUID.randomUUID();
+        given(message.getLockToken()).willReturn(uuid);
+        given(message.getBody()).willReturn(SampleData.envelopeJson());
+        given(message.getProperties()).willReturn(Collections.emptyMap());
+        given(message.getProperties().get("deadLetteredAt")).willReturn(null);
         given(message.getEnqueuedTimeUtc())
             .willReturn(LocalDateTime.now().minus(ttl.plusSeconds(10)).toInstant(ZoneOffset.UTC));
         given(messageReceiver.receive()).willReturn(message).willReturn(null);
@@ -72,21 +101,20 @@ class CleanupEnvelopesDlqTaskTest {
         cleanupDlqTask.deleteMessagesInEnvelopesDlq();
 
         //then
-        verify(messageReceiver).complete(uuidArgumentCaptor.capture());
-        assertThat(uuidArgumentCaptor.getValue()).isEqualTo(uuid);
-
-        verify(messageReceiver, times(1)).complete(any());
-        verify(messageReceiver, times(2)).receive();
-        verify(messageReceiver, times(1)).close();
-        verifyNoMoreInteractions(messageReceiver);
+        verifyDlqMessageDeletionInteractions(uuid, uuidArgumentCaptor);
     }
 
     @Test
     void should_call_abandon_message_when_the_ttl_is_less_than_duration()
         throws Exception {
         //given
-        given(message.getEnqueuedTimeUtc())
-            .willReturn(LocalDateTime.now().minus(ttl.minusSeconds(5)).toInstant(ZoneOffset.UTC));
+        given(message.getProperties())
+            .willReturn(
+                ImmutableMap.of(
+                    "deadLetteredAt",
+                    LocalDateTime.now().minus(ttl.minusSeconds(5)).toInstant(ZoneOffset.UTC).toString()
+                )
+            );
         given(messageReceiver.receive()).willReturn(message).willReturn(null);
 
         //when
@@ -128,6 +156,17 @@ class CleanupEnvelopesDlqTaskTest {
 
         //then
         assertThat(exception).isNull();
+    }
+
+    private void verifyDlqMessageDeletionInteractions(UUID uuid, ArgumentCaptor<UUID> uuidArgumentCaptor)
+        throws InterruptedException, ServiceBusException {
+        verify(messageReceiver).complete(uuidArgumentCaptor.capture());
+        assertThat(uuidArgumentCaptor.getValue()).isEqualTo(uuid);
+
+        verify(messageReceiver, times(1)).complete(any());
+        verify(messageReceiver, times(2)).receive();
+        verify(messageReceiver, times(1)).close();
+        verifyNoMoreInteractions(messageReceiver);
     }
 
 }
