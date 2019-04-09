@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.TimeZone;
-import java.util.TimeZone;
 import java.util.UUID;
 import java.util.function.Supplier;
 
