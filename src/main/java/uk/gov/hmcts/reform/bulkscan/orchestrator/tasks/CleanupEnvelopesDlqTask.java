@@ -16,7 +16,11 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envel
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import java.util.function.Supplier;
+
+import static org.apache.commons.collections4.MapUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * Deletes messages from envelopes Dead letter queue.
@@ -100,19 +104,21 @@ public class CleanupEnvelopesDlqTask {
     }
 
     private boolean canBeCompleted(IMessage message) {
-        Instant createdTime = message.getEnqueuedTimeUtc();
         Instant cutoff = Instant.now().minus(this.ttl);
-        boolean canBeCompleted = createdTime.isBefore(cutoff);
+        Map<String, String> messageProperties = message.getProperties();
 
-        log.info(
-            "MessageId: {} Enqueued Time: {} ttl: {} can be completed? {} Current time: {}",
-            message.getMessageId(),
-            createdTime,
-            this.ttl,
-            canBeCompleted,
-            Instant.now()
-        );
+        if (isNotEmpty(messageProperties) && isNotEmpty(messageProperties.get("deadLetteredAt"))) {
+            Instant deadLetteredAt = Instant.parse(messageProperties.get("deadLetteredAt"));
 
-        return canBeCompleted;
+            log.info(
+                "MessageId: {} Dead lettered time: {} ttl: {} Current time: {}",
+                message.getMessageId(),
+                deadLetteredAt,
+                this.ttl,
+                Instant.now()
+            );
+            return deadLetteredAt.isBefore(cutoff);
+        }
+        return false;
     }
 }
