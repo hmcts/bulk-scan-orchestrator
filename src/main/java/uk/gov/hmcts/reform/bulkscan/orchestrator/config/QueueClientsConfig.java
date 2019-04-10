@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
 
+import com.microsoft.azure.servicebus.ClientFactory;
+import com.microsoft.azure.servicebus.IMessageReceiver;
 import com.microsoft.azure.servicebus.QueueClient;
 import com.microsoft.azure.servicebus.ReceiveMode;
 import com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder;
@@ -14,11 +16,13 @@ import org.springframework.context.annotation.Profile;
 public class QueueClientsConfig {
 
     @Bean("envelopes")
-    public QueueClient envelopesQueueClient(
-        @Value("${azure.servicebus.envelopes.connection-string}") String connectionString,
-        @Value("${azure.servicebus.envelopes.queue-name}") String queueName
+    public IMessageReceiver envelopesMessageReceiver(
+        @Value("${azure.servicebus.envelopes.connection-string}") String connectionString
     ) throws InterruptedException, ServiceBusException {
-        return createQueueClient(connectionString, queueName);
+        return ClientFactory.createMessageReceiverFromConnectionString(
+            connectionString,
+            ReceiveMode.PEEKLOCK
+        );
     }
 
     @Bean("processed-envelopes")
@@ -26,13 +30,6 @@ public class QueueClientsConfig {
         @Value("${azure.servicebus.processed-envelopes.connection-string}") String connectionString,
         @Value("${azure.servicebus.processed-envelopes.queue-name}") String queueName
     ) throws InterruptedException, ServiceBusException {
-        return createQueueClient(connectionString, queueName);
-    }
-
-    private QueueClient createQueueClient(
-        String connectionString,
-        String queueName
-    ) throws ServiceBusException, InterruptedException {
         return new QueueClient(
             new ConnectionStringBuilder(connectionString, queueName),
             ReceiveMode.PEEKLOCK
