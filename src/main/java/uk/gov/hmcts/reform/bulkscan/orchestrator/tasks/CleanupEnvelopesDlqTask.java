@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envel
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import static org.apache.commons.collections4.MapUtils.isNotEmpty;
@@ -104,9 +105,10 @@ public class CleanupEnvelopesDlqTask {
 
     private boolean canBeCompleted(IMessage message) {
         Instant cutoff = Instant.now().minus(this.ttl);
+        Map<String, String> messageProperties = message.getProperties();
 
-        if (isNotEmpty(message.getProperties()) && isNotEmpty(message.getProperties().get("deadLetteredAt"))) {
-            Instant deadLetteredAt = Instant.parse(message.getProperties().get("deadLetteredAt"));
+        if (isNotEmpty(messageProperties) && isNotEmpty(messageProperties.get("deadLetteredAt"))) {
+            Instant deadLetteredAt = Instant.parse(messageProperties.get("deadLetteredAt"));
 
             log.info(
                 "MessageId: {} Dead lettered time: {} ttl: {} Current time: {}",
