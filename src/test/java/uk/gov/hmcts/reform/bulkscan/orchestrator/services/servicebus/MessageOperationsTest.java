@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus;
 import com.microsoft.azure.servicebus.QueueClient;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -51,7 +50,6 @@ class MessageOperationsTest {
     }
 
     @Test
-    @Disabled
     void deadLetter_should_call_queue_client() throws Exception {
         UUID lockToken = UUID.randomUUID();
         String reason = "reason1";
@@ -59,14 +57,14 @@ class MessageOperationsTest {
 
         messageOperations.deadLetter(lockToken, reason, description);
 
-        verify(queueClient).deadLetter(lockToken, reason, description, any());
+        verify(queueClient).deadLetter(lockToken, reason, description);
         verifyNoMoreInteractions(queueClient);
     }
 
     @Test
     void deadLetter_should_throw_exception_when_queue_client_fails() throws Exception {
         ServiceBusException exceptionToThrow = new ServiceBusException(true);
-        willThrow(exceptionToThrow).given(queueClient).deadLetter(any(), any(), any(), any());
+        willThrow(exceptionToThrow).given(queueClient).deadLetter(any(), any(), any());
 
         assertThatThrownBy(() ->
             messageOperations.deadLetter(UUID.randomUUID(), "reason", "description")
