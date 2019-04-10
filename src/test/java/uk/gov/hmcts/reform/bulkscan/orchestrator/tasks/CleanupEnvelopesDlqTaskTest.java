@@ -48,17 +48,17 @@ class CleanupEnvelopesDlqTaskTest {
     private final Duration ttl = Duration.ofSeconds(10);
 
     @BeforeAll
-    /* default */ static void init() {
+    static void init() {
         TimeZone.setDefault(TimeZone.getTimeZone(UTC));
     }
 
     @BeforeEach
-    /* default */ void setUp() {
+    void setUp() {
         cleanupDlqTask = new CleanupEnvelopesDlqTask(() -> messageReceiver, ttl);
     }
 
     @Test
-    /* default */ void should_delete_messages_from_dead_letter_queue() throws Exception {
+    void should_delete_messages_from_dlq() throws Exception {
         //given
         UUID uuid = UUID.randomUUID();
         given(message.getLockToken()).willReturn(uuid);
@@ -88,7 +88,7 @@ class CleanupEnvelopesDlqTaskTest {
     }
 
     @Test
-    /* default */ void should_not_delete_messages_from_dead_letter_queue_when_deadLetteredTime_is_not_set()
+    void should_not_delete_messages_from_dlq_when_deadLetteredTime_is_not_set()
         throws Exception {
         //given
         UUID uuid = UUID.randomUUID();
@@ -112,7 +112,7 @@ class CleanupEnvelopesDlqTaskTest {
     }
 
     @Test
-    /* default */ void should_call_abandon_message_when_the_ttl_is_less_than_duration() throws Exception {
+    void should_call_abandon_message_when_the_ttl_is_less_than_duration() throws Exception {
         //given
         given(message.getProperties())
             .willReturn(
@@ -135,7 +135,7 @@ class CleanupEnvelopesDlqTaskTest {
     }
 
     @Test
-    /* default */ void should_not_call_complete_when_no_messages_exists_in_dead_letter_queue() throws Exception {
+    void should_not_complete_when_no_message_exists_in_dlq() throws Exception {
         //given
         given(messageReceiver.receive()).willReturn(null);
 
@@ -151,7 +151,7 @@ class CleanupEnvelopesDlqTaskTest {
     }
 
     @Test
-    /* default */ void should_not_process_messages_when_connection_exception_is_thrown() {
+    void should_not_process_messages_when_exception_is_thrown() {
         //given
         cleanupDlqTask = new CleanupEnvelopesDlqTask(receiverProvider, Duration.ZERO);
 
