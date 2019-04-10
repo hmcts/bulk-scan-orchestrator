@@ -88,7 +88,8 @@ class CleanupEnvelopesDlqTaskTest {
     }
 
     @Test
-    /* default */ void should_not_delete_messages_from_dead_letter_queue_when_deadLetteredTime_is_not_set() throws Exception {
+    /* default */ void should_not_delete_messages_from_dead_letter_queue_when_deadLetteredTime_is_not_set()
+        throws Exception {
         //given
         UUID uuid = UUID.randomUUID();
         given(message.getLockToken()).willReturn(uuid);
@@ -111,8 +112,7 @@ class CleanupEnvelopesDlqTaskTest {
     }
 
     @Test
-    /* default */ void should_call_abandon_message_when_the_ttl_is_less_than_duration()
-        throws Exception {
+    /* default */ void should_call_abandon_message_when_the_ttl_is_less_than_duration() throws Exception {
         //given
         given(message.getProperties())
             .willReturn(
