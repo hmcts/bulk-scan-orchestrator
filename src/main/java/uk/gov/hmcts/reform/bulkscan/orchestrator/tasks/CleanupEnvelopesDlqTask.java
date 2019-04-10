@@ -107,18 +107,19 @@ public class CleanupEnvelopesDlqTask {
         boolean canBeCompleted = false;
 
         if (isNotEmpty(message.getProperties()) && isNotEmpty(message.getProperties().get("deadLetteredAt"))) {
-            canBeCompleted = Instant.parse(message.getProperties().get("deadLetteredAt")).isBefore(cutoff);
+            Instant deadLetteredAt = Instant.parse(message.getProperties().get("deadLetteredAt"));
+            canBeCompleted = deadLetteredAt.isBefore(cutoff);
+
+            log.info(
+                "MessageId: {} Dead lettered time: {} ttl: {} can be completed? {} Current time: {}",
+                message.getMessageId(),
+                deadLetteredAt,
+                this.ttl,
+                canBeCompleted,
+                Instant.now()
+            );
+
         }
-
-        log.info(
-            "MessageId: {} Dead lettered time: {} ttl: {} can be completed? {} Current time: {}",
-            message.getMessageId(),
-            canBeCompleted ? message.getProperties().get("deadLetteredAt") : null,
-            this.ttl,
-            canBeCompleted,
-            Instant.now()
-        );
-
         return canBeCompleted;
     }
 }
