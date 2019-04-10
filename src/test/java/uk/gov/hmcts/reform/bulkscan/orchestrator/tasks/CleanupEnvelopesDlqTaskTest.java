@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.tasks;
 import com.google.common.collect.ImmutableMap;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
-import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -79,19 +78,22 @@ class CleanupEnvelopesDlqTaskTest {
         cleanupDlqTask.deleteMessagesInEnvelopesDlq();
 
         //then
-        verifyDlqMessageDeletionInteractions(uuid, uuidArgumentCaptor);
+        verify(messageReceiver).complete(uuidArgumentCaptor.capture());
+        assertThat(uuidArgumentCaptor.getValue()).isEqualTo(uuid);
+
+        verify(messageReceiver, times(1)).complete(any());
+        verify(messageReceiver, times(2)).receive();
+        verify(messageReceiver, times(1)).close();
+        verifyNoMoreInteractions(messageReceiver);
     }
 
     @Test
-    void should_delete_messages_from_dead_letter_queue_when_deadLetteredTime_is_not_set() throws Exception {
+    void should_not_delete_messages_from_dead_letter_queue_when_deadLetteredTime_is_not_set() throws Exception {
         //given
         UUID uuid = UUID.randomUUID();
         given(message.getLockToken()).willReturn(uuid);
-        given(message.getBody()).willReturn(SampleData.envelopeJson());
         given(message.getProperties()).willReturn(Collections.emptyMap());
         given(message.getProperties().get("deadLetteredAt")).willReturn(null);
-        given(message.getEnqueuedTimeUtc())
-            .willReturn(LocalDateTime.now().minus(ttl.plusSeconds(10)).toInstant(UTC));
         given(messageReceiver.receive()).willReturn(message).willReturn(null);
 
         ArgumentCaptor<UUID> uuidArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
@@ -100,7 +102,12 @@ class CleanupEnvelopesDlqTaskTest {
         cleanupDlqTask.deleteMessagesInEnvelopesDlq();
 
         //then
-        verifyDlqMessageDeletionInteractions(uuid, uuidArgumentCaptor);
+        verify(messageReceiver, times(2)).receive();
+        verify(messageReceiver).abandon(uuidArgumentCaptor.capture());
+        assertThat(uuidArgumentCaptor.getValue()).isEqualTo(uuid);
+        verify(messageReceiver, never()).complete(any());
+        verify(messageReceiver, times(1)).close();
+        verifyNoMoreInteractions(messageReceiver);
     }
 
     @Test
@@ -155,17 +162,6 @@ class CleanupEnvelopesDlqTaskTest {
 
         //then
         assertThat(exception).isNull();
-    }
-
-    private void verifyDlqMessageDeletionInteractions(UUID uuid, ArgumentCaptor<UUID> uuidArgumentCaptor)
-        throws InterruptedException, ServiceBusException {
-        verify(messageReceiver).complete(uuidArgumentCaptor.capture());
-        assertThat(uuidArgumentCaptor.getValue()).isEqualTo(uuid);
-
-        verify(messageReceiver, times(1)).complete(any());
-        verify(messageReceiver, times(2)).receive();
-        verify(messageReceiver, times(1)).close();
-        verifyNoMoreInteractions(messageReceiver);
     }
 
 }

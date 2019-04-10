@@ -139,7 +139,8 @@ class EnvelopeEventProcessorTest {
         verify(messageReceiver).deadLetter(
             eq(message.getLockToken()),
             eq(DEAD_LETTER_REASON_PROCESSING_ERROR),
-            contains(JsonParseException.class.getSimpleName())
+            contains(JsonParseException.class.getSimpleName()),
+            any()
         );
         verify(appInsights).trackDeadLetteredMessage(
             eq(message),
@@ -172,7 +173,8 @@ class EnvelopeEventProcessorTest {
         verify(messageReceiver).deadLetter(
             eq(validMessage.getLockToken()),
             eq(DEAD_LETTER_REASON_PROCESSING_ERROR),
-            eq(exceptionMessage)
+            eq(exceptionMessage),
+            any()
         );
 
         verify(appInsights).trackDeadLetteredMessage(
@@ -229,9 +231,10 @@ class EnvelopeEventProcessorTest {
 
         // then the message is dead-lettered
         verify(messageReceiver).deadLetter(
-            validMessage.getLockToken(),
-            "Too many deliveries",
-            "Reached limit of message delivery count of 1"
+            eq(validMessage.getLockToken()),
+            eq("Too many deliveries"),
+            eq("Reached limit of message delivery count of 1"),
+            any()
         );
         verify(appInsights).trackDeadLetteredMessage(
             validMessage,

@@ -18,6 +18,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.function.Supplier;
 
+import static org.apache.commons.collections4.MapUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
@@ -103,18 +104,16 @@ public class CleanupEnvelopesDlqTask {
 
     private boolean canBeCompleted(IMessage message) {
         Instant cutoff = Instant.now().minus(this.ttl);
-        boolean canBeCompleted;
+        boolean canBeCompleted = false;
 
-        if (message.getProperties() != null && isNotEmpty(message.getProperties().get("deadLetteredAt"))) {
+        if (isNotEmpty(message.getProperties()) && isNotEmpty(message.getProperties().get("deadLetteredAt"))) {
             canBeCompleted = Instant.parse(message.getProperties().get("deadLetteredAt")).isBefore(cutoff);
-        } else {
-            canBeCompleted = message.getEnqueuedTimeUtc().isBefore(cutoff);
         }
 
         log.info(
-            "MessageId: {} Enqueued Time: {} ttl: {} can be completed? {} Current time: {}",
+            "MessageId: {} Dead lettered time: {} ttl: {} can be completed? {} Current time: {}",
             message.getMessageId(),
-            message.getEnqueuedTimeUtc(),
+            canBeCompleted ? message.getProperties().get("deadLetteredAt") : null,
             this.ttl,
             canBeCompleted,
             Instant.now()

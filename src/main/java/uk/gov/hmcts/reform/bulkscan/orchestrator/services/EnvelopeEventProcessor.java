@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
 
+import com.google.common.collect.ImmutableMap;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
@@ -16,6 +17,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.handler.MessageProcessingResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.handler.MessageProcessingResultType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
+
+import java.time.Instant;
 
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser.parse;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.handler.MessageProcessingResultType.POTENTIALLY_RECOVERABLE_FAILURE;
@@ -152,7 +155,12 @@ public class EnvelopeEventProcessor {
         String reason,
         String description
     ) throws InterruptedException, ServiceBusException {
-        messageReceiver.deadLetter(message.getLockToken(), reason, description);
+        messageReceiver.deadLetter(
+            message.getLockToken(),
+            reason,
+            description,
+            ImmutableMap.of("deadLetteredAt", Instant.now().toString())
+        );
 
         log.info("Message with ID {} has been dead-lettered", message.getMessageId());
         // track used for alert
