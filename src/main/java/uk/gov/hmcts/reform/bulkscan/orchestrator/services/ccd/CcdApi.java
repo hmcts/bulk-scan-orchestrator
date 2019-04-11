@@ -54,7 +54,9 @@ public class CcdApi {
             CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(theCase.getJurisdiction());
             return startAttachScannedDocs(caseRef, authenticator, theCase.getJurisdiction(), theCase.getCaseTypeId());
         } catch (FeignException e) {
-            throw error(e, "Internal Error: start event call failed case: %s Error: %s", caseRef, e.status());
+            throw new CallbackException(
+                format("Internal Error: start event call failed case: %s Error: %s", caseRef, e.status()), e
+            );
         }
     }
 
@@ -66,9 +68,12 @@ public class CcdApi {
             return retrieveCase(caseRef, jurisdiction);
         } catch (FeignException e) {
             if (e.status() == 404) {
-                throw error(e, "Could not find case: %s", caseRef);
+                throw new CaseNotFoundException("Could not find case: " + caseRef, e);
             } else {
-                throw error(e, "Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status());
+                throw new CallbackException(
+                    format("Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status()),
+                    e
+                );
             }
         }
     }
@@ -90,8 +95,10 @@ public class CcdApi {
                 caseTypeId,
                 Event.builder().summary(eventSummary).id(event.getEventId()).build());
         } catch (FeignException e) {
-            throw error(e, "Internal Error: submitting attach file event failed case: %s Error: %s",
-                caseRef, e.status());
+            throw new CallbackException(
+                format("Internal Error: submitting attach file event failed case: %s Error: %s", caseRef, e.status()),
+                e
+            );
         }
     }
 
@@ -116,14 +123,6 @@ public class CcdApi {
                 .eventToken(eventToken)
                 .build()
         );
-    }
-
-    private static CallbackException error(Exception e, String errorFmt, Object arg) {
-        return error(e, errorFmt, arg, null);
-    }
-
-    private static CallbackException error(Exception e, String errorFmt, Object arg1, Object arg2) {
-        return new CallbackException(format(errorFmt, arg1, arg2), e);
     }
 
     public CcdAuthenticator authenticateJurisdiction(String jurisdiction) {

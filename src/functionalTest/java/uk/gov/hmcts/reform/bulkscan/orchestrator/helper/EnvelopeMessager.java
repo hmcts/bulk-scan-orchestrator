@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.FunctionalQueueConfig;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Service
@@ -48,9 +49,14 @@ public class EnvelopeMessager {
             updateCaseData.toString(),
             MediaType.APPLICATION_JSON_UTF8_VALUE
         );
-
-        logger.info("Sending message to queue for the Case ID {} for updating the case", caseRef);
         client.send(message);
+
+        logger.info(
+            "Sent message to queue for the Case ID {} for updating the case. MessageId: {} Current time: {}",
+            caseRef,
+            message.getMessageId(),
+            Instant.now()
+        );
     }
 
 }

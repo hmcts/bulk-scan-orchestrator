@@ -22,8 +22,8 @@ class CaseReferenceValidator {
 
     private Optional<Validation<String, String>> validateCaseRef(Object caseRef) {
         Optional<Validation<String, String>> valid = Optional.of(caseRef)
-            .filter(aRef -> aRef instanceof String)
-            .map(aRef -> ((String) aRef).replaceAll("[^0-9]", ""))
+            .filter(ref -> ref instanceof String)
+            .map(ref -> ((String) ref).replaceAll("[^0-9]", ""))
             .map(Strings::emptyToNull)
             .map(Validation::valid);
         //This is done because java 8 does not have "Optional<T> orElse( Optional<T>)"

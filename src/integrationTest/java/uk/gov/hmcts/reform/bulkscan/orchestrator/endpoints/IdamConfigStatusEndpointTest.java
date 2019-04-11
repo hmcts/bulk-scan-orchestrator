@@ -16,14 +16,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 @IntegrationTest
 @AutoConfigureMockMvc
-public class IdamConfigStatusEndpointTest {
+class IdamConfigStatusEndpointTest {
 
     @Autowired
     private MockMvc mvc;
 
     @DisplayName("Should have BULKSCAN dummy jurisdiction configured properly")
     @Test
-    public void should_have_bulkscan_configured_properly() throws Exception {
+    void should_have_bulkscan_configured_properly() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
 
         byte[] response = mvc

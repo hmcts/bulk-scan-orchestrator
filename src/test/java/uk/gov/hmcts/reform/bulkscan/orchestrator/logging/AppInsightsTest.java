@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.logging;
 
 import com.google.common.collect.ImmutableMap;
 import com.microsoft.applicationinsights.TelemetryClient;
-import com.microsoft.applicationinsights.telemetry.TelemetryContext;
 import com.microsoft.azure.servicebus.IMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,10 +25,6 @@ class AppInsightsTest {
 
     @BeforeEach
     void setUp() {
-        TelemetryContext telemetryContext = new TelemetryContext();
-        telemetryContext.setInstrumentationKey("test");
-        when(telemetryClient.getContext()).thenReturn(telemetryContext);
-
         appInsights = new AppInsights(telemetryClient);
     }
 

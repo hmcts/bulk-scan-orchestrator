@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.servicebus.Message;
 import com.microsoft.azure.servicebus.QueueClient;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
@@ -21,21 +21,21 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ProcessedEnvelopeNotifierTest {
+@ExtendWith(MockitoExtension.class)
+class ProcessedEnvelopeNotifierTest {
 
     private ProcessedEnvelopeNotifier notifier;
 
     @Mock
     private QueueClient queueClient;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         notifier = new ProcessedEnvelopeNotifier(queueClient, new ObjectMapper());
     }
 
     @Test
-    public void notify_should_send_message_with_right_content() throws Exception {
+    void notify_should_send_message_with_right_content() throws Exception {
         // given
         String envelopeId = UUID.randomUUID().toString();
 
@@ -56,7 +56,7 @@ public class ProcessedEnvelopeNotifierTest {
     }
 
     @Test
-    public void notify_should_throw_exception_when_queue_client_fails() throws Exception {
+    void notify_should_throw_exception_when_queue_client_fails() throws Exception {
         ServiceBusException exceptionToThrow = new ServiceBusException(true, "test exception");
         willThrow(exceptionToThrow).given(queueClient).send(any());
 

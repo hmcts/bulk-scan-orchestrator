@@ -4,11 +4,11 @@ import com.google.common.collect.ImmutableMap;
 import feign.FeignException;
 import feign.Request;
 import feign.Response;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.out.JurisdictionConfigurationStatus;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
@@ -26,8 +26,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AuthenticationCheckerTest {
+@ExtendWith(MockitoExtension.class)
+class AuthenticationCheckerTest {
 
     private static final String SUCCESSFUL_JURISDICTION = "jurisdiction";
     private static final String SUCCESSFUL_JURISDICTION_USERNAME = "username1";
@@ -53,8 +53,8 @@ public class AuthenticationCheckerTest {
 
     private AuthenticationChecker authenticationChecker;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         JurisdictionToUserMapping mapping = new JurisdictionToUserMapping();
         mapping.setUsers(USERS);
 
@@ -62,7 +62,7 @@ public class AuthenticationCheckerTest {
     }
 
     @Test
-    public void checkSignInForJurisdiction_should_return_success_for_successfully_authenticated_jurisdiction() {
+    void checkSignInForJurisdiction_should_return_success_for_successfully_authenticated_jurisdiction() {
         willReturn("token")
             .given(idamClient)
             .authenticateUser(
@@ -81,7 +81,7 @@ public class AuthenticationCheckerTest {
     }
 
     @Test
-    public void checkSignInForJurisdiction_should_return_failure_for_unsuccessfully_authenticated_jurisdiction() {
+    void checkSignInForJurisdiction_should_return_failure_for_unsuccessfully_authenticated_jurisdiction() {
         FeignException exception = createFeignException(HttpStatus.LOCKED.value());
 
         willThrow(exception)
@@ -98,7 +98,7 @@ public class AuthenticationCheckerTest {
     }
 
     @Test
-    public void checkSignInForJurisdiction_should_return_failure_for_jurisdiction_missing_in_config() {
+    void checkSignInForJurisdiction_should_return_failure_for_jurisdiction_missing_in_config() {
         String unknownJurisdiction = "unknown";
 
         assertThat(
@@ -117,7 +117,7 @@ public class AuthenticationCheckerTest {
     }
 
     @Test
-    public void checkSignInForJurisdiction_should_return_failure_when_idam_call_fails() {
+    void checkSignInForJurisdiction_should_return_failure_when_idam_call_fails() {
         String errorMessage = "test exception";
         RuntimeException exception = new RuntimeException(errorMessage);
 
@@ -133,7 +133,7 @@ public class AuthenticationCheckerTest {
     }
 
     @Test
-    public void checkSignInForAllJurisdictions_should_return_statuses_of_all_jurisdictions() {
+    void checkSignInForAllJurisdictions_should_return_statuses_of_all_jurisdictions() {
         willReturn("token")
             .given(idamClient)
             .authenticateUser(SUCCESSFUL_JURISDICTION_USERNAME, SUCCESSFUL_JURISDICTION_PASSWORD);
