@@ -8,6 +8,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.ExceptionReco
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 @Component
 public class CreateExceptionRecord extends AbstractEventPublisher {
 
@@ -25,7 +27,8 @@ public class CreateExceptionRecord extends AbstractEventPublisher {
 
     public void publish(Envelope envelope) {
         log.info("Creating exception record for envelope {}", envelope.id);
-        publish(envelope, envelope.container.toUpperCase() + "_" + CASE_TYPE, EVENT_TYPE_ID, EVENT_SUMMARY);
+        String caseTypeId = isEmpty(envelope.container) ? envelope.jurisdiction : envelope.container.toUpperCase();
+        publish(envelope, caseTypeId + "_" + CASE_TYPE, EVENT_TYPE_ID, EVENT_SUMMARY);
     }
 
     /**

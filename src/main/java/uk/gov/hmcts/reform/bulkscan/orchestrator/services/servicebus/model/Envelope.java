@@ -26,7 +26,7 @@ public class Envelope {
         @JsonProperty(value = "case_ref", required = true) String caseRef,
         @JsonProperty(value = "po_box", required = true) String poBox,
         @JsonProperty(value = "jurisdiction", required = true) String jurisdiction,
-        @JsonProperty(value = "container") String container,
+        @JsonProperty("container") String container,
         @JsonProperty(value = "zip_file_name", required = true) String zipFileName,
         @JsonProperty(value = "delivery_date", required = true) Instant deliveryDate,
         @JsonProperty(value = "opening_date", required = true) Instant openingDate,

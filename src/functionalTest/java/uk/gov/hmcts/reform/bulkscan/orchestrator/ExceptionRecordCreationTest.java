@@ -68,6 +68,29 @@ class ExceptionRecordCreationTest {
             .until(() -> findCasesByPoBox(randomPoBox).size() == 1);
     }
 
+    //TODO: remove temporary test and related test json file
+    @DisplayName("Should create ExceptionRecord case type with jurisdiction value when container is not present")
+    @Test
+    void create_exception_record_case_type_with_jurisdiction() throws Exception {
+        // given
+        UUID randomPoBox = UUID.randomUUID();
+
+        // when
+        envelopeMessager.sendMessageFromFile(
+            "envelopes/exception-record-case-type-envelope.json",
+            "0000000000000000",
+            randomPoBox,
+            dmUrl
+        );
+
+        // then
+        String caseTypeId = SampleData.JURSIDICTION + "_" + CreateExceptionRecord.CASE_TYPE;
+        await("Exception record being created")
+            .atMost(60, TimeUnit.SECONDS)
+            .pollInterval(Duration.FIVE_SECONDS)
+            .until(() -> findCasesByPoBoxAndCaseTypeId(randomPoBox, caseTypeId).size() == 1);
+    }
+
     @DisplayName("Should create ExceptionRecord when classification is NEW_APPLICATION")
     @Test
     void should_create_exception_record_for_new_application() throws Exception {
@@ -121,6 +144,16 @@ class ExceptionRecordCreationTest {
         return caseSearcher.search(
             SampleData.JURSIDICTION,
             SampleData.CONTAINER.toUpperCase() + "_" + CreateExceptionRecord.CASE_TYPE,
+            ImmutableMap.of(
+                "case.poBox", poBox.toString()
+            )
+        );
+    }
+
+    private List<CaseDetails> findCasesByPoBoxAndCaseTypeId(UUID poBox, String caseTypeId) {
+        return caseSearcher.search(
+            SampleData.JURSIDICTION,
+            caseTypeId,
             ImmutableMap.of(
                 "case.poBox", poBox.toString()
             )
