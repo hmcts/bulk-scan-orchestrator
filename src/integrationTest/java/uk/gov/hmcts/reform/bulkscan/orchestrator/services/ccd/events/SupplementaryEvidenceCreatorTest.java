@@ -1,14 +1,14 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.microsoft.azure.servicebus.IMessageReceiver;
 import com.microsoft.azure.servicebus.Message;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.MessageSender;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.EnvelopeEventProcessor;
 
 import java.util.concurrent.TimeUnit;
 
@@ -18,11 +18,11 @@ import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.BDDMockito.given;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.fileContentAsString;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_EVENT_URL;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.GET_CASE_URL;
 
-@ExtendWith(SpringExtension.class)
 @IntegrationTest
 class SupplementaryEvidenceCreatorTest {
 
@@ -31,18 +31,22 @@ class SupplementaryEvidenceCreatorTest {
     ));
     private static final String MOCK_RESPONSE = fileContentAsString("ccd/response/sample-case.json");
 
+    @SpyBean
+    private IMessageReceiver messageReceiver;
+
     @Autowired
-    private MessageSender messageSender;
+    private EnvelopeEventProcessor envelopeEventProcessor;
 
 
     @DisplayName("Should call ccd to attach supplementary evidence for caseworker")
     @Test
-    void should_call_ccd_to_attach_supplementary_evidence_for_caseworker() {
+    void should_call_ccd_to_attach_supplementary_evidence_for_caseworker() throws Exception {
         // given
         givenThat(get(GET_CASE_URL).willReturn(aResponse().withBody(MOCK_RESPONSE)));
+        given(messageReceiver.receive()).willReturn(MOCK_MESSAGE).willReturn(null);
 
         // when
-        messageSender.send(MOCK_MESSAGE);
+        envelopeEventProcessor.processNextMessage();
 
         // then
         await()

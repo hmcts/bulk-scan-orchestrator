@@ -16,7 +16,11 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envel
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import java.util.function.Supplier;
+
+import static org.apache.commons.collections4.MapUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * Deletes messages from envelopes Dead letter queue.
@@ -46,15 +50,25 @@ public class CleanupEnvelopesDlqTask {
         try {
             messageReceiver = dlqReceiverProvider.get();
 
+            int completedCount = 0;
             IMessage message = messageReceiver.receive();
             while (message != null) {
-                if (canBeDeleted(message)) {
+                if (canBeCompleted(message)) {
                     logMessage(message);
                     messageReceiver.complete(message.getLockToken());
+                    completedCount++;
+                    log.info(
+                        "Completed message from envelopes dlq. messageId: {} Current time: {}",
+                        message.getMessageId(),
+                        Instant.now()
+                    );
+                } else {
+                    messageReceiver.abandon(message.getLockToken());
                 }
                 message = messageReceiver.receive();
             }
 
+            log.info("Finished processing messages in envelopes dlq. Completed {} messages", completedCount);
         } catch (ConnectionException e) {
             log.error("Unable to connect to envelopes dead letter queue", e);
         } finally {
@@ -73,7 +87,7 @@ public class CleanupEnvelopesDlqTask {
             Envelope envelope = EnvelopeParser.parse(msg.getBody());
 
             log.info(
-                "Deleting message ID: {}, Envelope ID: {}, File name: {}, Jurisdiction: {},"
+                "Completing dlq message. messageId: {}, Envelope ID: {}, File name: {}, Jurisdiction: {},"
                     + " Classification: {}, Case: {}",
                 msg.getMessageId(),
                 envelope.id,
@@ -84,15 +98,27 @@ public class CleanupEnvelopesDlqTask {
             );
         } catch (InvalidMessageException e) {
             // Not logging the exception as it prints the sensitive information from the envelope
-            log.error("An error occurred while parsing the dlq message with Message Id: {}",
+            log.error("An error occurred while parsing the dlq message with messageId: {}",
                 msg.getMessageId());
         }
     }
 
-    private boolean canBeDeleted(IMessage message) {
-        Instant createdTime = message.getEnqueuedTimeUtc();
+    private boolean canBeCompleted(IMessage message) {
         Instant cutoff = Instant.now().minus(this.ttl);
+        Map<String, String> messageProperties = message.getProperties();
 
-        return createdTime.isBefore(cutoff);
+        if (isNotEmpty(messageProperties) && isNotEmpty(messageProperties.get("deadLetteredAt"))) {
+            Instant deadLetteredAt = Instant.parse(messageProperties.get("deadLetteredAt"));
+
+            log.info(
+                "MessageId: {} Dead lettered time: {} ttl: {} Current time: {}",
+                message.getMessageId(),
+                deadLetteredAt,
+                this.ttl,
+                Instant.now()
+            );
+            return deadLetteredAt.isBefore(cutoff);
+        }
+        return false;
     }
 }

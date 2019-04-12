@@ -51,3 +51,21 @@ scheduling:
       enabled: ${DELETE_ENVELOPES_DLQ_MESSAGES_ENABLED:false}
       cron: ${DELETE_ENVELOPES_DLQ_MESSAGES_CRON}
       ttl: ${DELETE_ENVELOPES_DLQ_MESSAGES_TTL}
+
+hystrix:
+  command:
+    default:
+      execution.timeout.enabled: false
+      fallback.enabled: true
+      circuitBreaker.enabled: true
+    check-no-account-locked:
+      circuitBreaker:
+        requestVolumeThreshold: 1
+        # suspend processing for 120 minutes when an account is locked - this will give us one hour
+        # to apply necessary changes and redeploy (IDAM keeps the lock for one hour of inactivity)
+        sleepWindowInMilliseconds: 7200000
+        errorThresholdPercentage: 1
+
+task:
+  check-no-account-locked:
+    check-validity-duration: PT5M # only ensure this often that no account is locked in IDAM

@@ -4,8 +4,9 @@ import com.google.common.collect.ImmutableList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.InvalidMessageException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
@@ -15,25 +16,33 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.OcrDa
 
 import java.time.Instant;
 import java.util.List;
+import java.util.TimeZone;
 
+import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.Assertions.tuple;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.DatetimeHelper.toIso8601;
 
-public class EnvelopeParserTest {
+class EnvelopeParserTest {
 
     private Envelope envelope;
     private Instant scannedAt = Instant.now();
 
-    @Before
-    public void setUp() {
+    @BeforeAll
+    static void init() {
+        TimeZone.setDefault(TimeZone.getTimeZone(UTC));
+    }
+
+    @BeforeEach
+    void setUp() {
         this.envelope = new Envelope(
             "975b339d-4531-4e32-8ebe-a7bc4650f33a",
             "case_ref_number",
             "po_box",
             "jurisdiction",
+            "container",
             "zip-file-test.zip",
             Instant.now(),
             Instant.now(),
@@ -65,7 +74,7 @@ public class EnvelopeParserTest {
     }
 
     @Test
-    public void should_parse_valid_json() throws Exception {
+    void should_parse_valid_json() throws Exception {
         // given
         String json =
             new JSONObject()
@@ -73,6 +82,7 @@ public class EnvelopeParserTest {
                 .put("case_ref", envelope.caseRef)
                 .put("po_box", envelope.poBox)
                 .put("jurisdiction", envelope.jurisdiction)
+                .put("container", envelope.container)
                 .put("zip_file_name", envelope.zipFileName)
                 .put("delivery_date", envelope.deliveryDate)
                 .put("opening_date", envelope.openingDate)
@@ -121,7 +131,7 @@ public class EnvelopeParserTest {
     }
 
     @Test
-    public void should_ignore_unrecognised_fields_in_json() throws Exception {
+    void should_ignore_unrecognised_fields_in_json() throws Exception {
         // given
         String json =
             new JSONObject()
@@ -129,6 +139,7 @@ public class EnvelopeParserTest {
                 .put("case_ref", envelope.caseRef)
                 .put("po_box", envelope.poBox)
                 .put("jurisdiction", envelope.jurisdiction)
+                .put("container", envelope.container)
                 .put("zip_file_name", envelope.zipFileName)
                 .put("delivery_date", envelope.deliveryDate)
                 .put("opening_date", envelope.openingDate)
@@ -149,7 +160,7 @@ public class EnvelopeParserTest {
     }
 
     @Test
-    public void should_throw_an_exception_if_json_is_not_a_valid_envelope() throws Exception {
+    void should_throw_an_exception_if_json_is_not_a_valid_envelope() throws Exception {
         String json =
             new JSONObject()
                 .put("hello", "world")
@@ -163,7 +174,7 @@ public class EnvelopeParserTest {
     }
 
     @Test
-    public void should_throw_an_exception_if_invalid_json_is_passed() {
+    void should_throw_an_exception_if_invalid_json_is_passed() {
 
         String json = "gibberish";
 
@@ -175,7 +186,7 @@ public class EnvelopeParserTest {
     }
 
     @Test
-    public void should_throw_an_exception_if_json_envelope_has_fields_missing() throws Exception {
+    void should_throw_an_exception_if_json_envelope_has_fields_missing() throws Exception {
         // given
         String jsonEnvelopeWithoutId =
             new JSONObject()
@@ -191,7 +202,7 @@ public class EnvelopeParserTest {
     }
 
     @Test
-    public void can_parse_example_json() {
+    void can_parse_example_json() {
         // given
         byte[] bytes = SampleData.exampleJsonAsBytes();
 
@@ -200,11 +211,12 @@ public class EnvelopeParserTest {
 
         // then
         assertThat(anEnvelope.jurisdiction).isEqualTo("BULKSCAN");
+        assertThat(anEnvelope.container).isEqualTo("container");
 
     }
 
     @Test
-    public void can_parse_sampleData_json() {
+    void can_parse_sampleData_json() {
         // given
         byte[] json = SampleData.envelopeJson();
 
@@ -213,6 +225,7 @@ public class EnvelopeParserTest {
 
         // then
         assertThat(anEnvelope.jurisdiction).isEqualTo("BULKSCAN");
+        assertThat(anEnvelope.container).isEqualTo("bulkscan");
 
     }
 

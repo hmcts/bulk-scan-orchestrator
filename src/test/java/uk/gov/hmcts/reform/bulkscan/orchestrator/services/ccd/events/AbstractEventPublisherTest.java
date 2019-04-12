@@ -1,12 +1,12 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
@@ -25,8 +25,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AbstractEventPublisherTest {
+@ExtendWith(MockitoExtension.class)
+class AbstractEventPublisherTest {
 
     private static final Envelope ENVELOPE = SampleData.envelope(1);
 
@@ -36,13 +36,13 @@ public class AbstractEventPublisherTest {
     @Mock
     private CcdApi ccdApi;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    public void should_successfully_call_start_and_submit_event_calls() {
+    void should_successfully_call_start_and_submit_event_calls() {
         // given
         CcdAuthenticator authenticator = new CcdAuthenticator(
             () -> "token",
@@ -91,15 +91,15 @@ public class AbstractEventPublisherTest {
     }
 
     protected class TestEventPublisher extends AbstractEventPublisher {
-        protected static final String EVENT_TYPE_ID = "test";
-        protected static final String EVENT_SUMMARY = "test summary";
+        static final String EVENT_TYPE_ID = "test";
+        static final String EVENT_SUMMARY = "test summary";
 
         @Override
         protected CaseData buildCaseData(StartEventResponse eventResponse, Envelope envelope) {
             return null;
         }
 
-        public void publish(Envelope env, String caseType) {
+        void publish(Envelope env, String caseType) {
             publish(env, caseType, EVENT_TYPE_ID, EVENT_SUMMARY);
         }
     }

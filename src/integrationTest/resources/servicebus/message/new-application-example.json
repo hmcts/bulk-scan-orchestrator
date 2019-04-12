@@ -3,6 +3,7 @@
   "case_ref": null,
   "po_box": "BULKSCAN PO BOX",
   "jurisdiction": "BULKSCAN",
+  "container": "bulkscan",
   "classification": "NEW_APPLICATION",
   "zip_file_name": "zip-file-test.zip",
   "delivery_date": "2018-01-01T12:34:56.123Z",

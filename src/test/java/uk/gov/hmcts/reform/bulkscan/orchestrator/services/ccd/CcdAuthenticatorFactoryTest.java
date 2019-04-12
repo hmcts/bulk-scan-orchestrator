@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.JurisdictionToUserMapping;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
@@ -21,9 +21,9 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_ID;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_NAME;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_TOKEN;
 
+@ExtendWith(MockitoExtension.class)
+class CcdAuthenticatorFactoryTest {
 
-@RunWith(MockitoJUnitRunner.class)
-public class CcdAuthenticatorFactoryTest {
     @Mock
     private AuthTokenGenerator tokenGenerator;
     @Mock
@@ -33,13 +33,13 @@ public class CcdAuthenticatorFactoryTest {
 
     private CcdAuthenticatorFactory service;
 
-    @Before
-    public void before() {
+    @BeforeEach
+    void before() {
         service = new CcdAuthenticatorFactory(tokenGenerator, idamClient, users);
     }
 
     @Test
-    public void should_sucessfully_return_authInfo() {
+    void should_sucessfully_return_authInfo() {
         given(users.getUser(eq(JURSIDICTION))).willReturn(USER_CREDS);
         given(tokenGenerator.generate()).willReturn(SERVICE_TOKEN);
         given(idamClient.authenticateUser(eq(USER_NAME), eq(PASSWORD))).willReturn(USER_TOKEN);

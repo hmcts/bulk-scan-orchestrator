@@ -4,19 +4,20 @@ import com.google.common.collect.ImmutableMap;
 import com.microsoft.applicationinsights.TelemetryClient;
 import com.microsoft.azure.servicebus.IMessage;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.logging.appinsights.AbstractAppInsights;
 
 @Component
-public class AppInsights extends AbstractAppInsights {
+public class AppInsights {
 
     static final String DEAD_LETTER_EVENT = "DeadLetter";
 
-    public AppInsights(TelemetryClient client) {
-        super(client);
+    private final TelemetryClient telemetryClient;
+
+    public AppInsights(TelemetryClient telemetryClient) {
+        this.telemetryClient = telemetryClient;
     }
 
     public void trackDeadLetteredMessage(IMessage message, String queue, String reason, String description) {
-        telemetry.trackEvent(
+        telemetryClient.trackEvent(
             DEAD_LETTER_EVENT,
             ImmutableMap.of(
                 "reason", reason,

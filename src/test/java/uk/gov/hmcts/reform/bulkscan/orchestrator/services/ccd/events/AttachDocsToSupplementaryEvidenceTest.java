@@ -1,13 +1,13 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.SupplementaryEvidenceMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
@@ -29,8 +29,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.AUTH_DETAILS;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AttachDocsToSupplementaryEvidenceTest {
+@ExtendWith(MockitoExtension.class)
+class AttachDocsToSupplementaryEvidenceTest {
 
     private static final String CASE_TYPE_ID = "Bulk_Scanned";
     private static final String EVENT_TYPE_ID = "attachScannedDocs";
@@ -43,16 +43,17 @@ public class AttachDocsToSupplementaryEvidenceTest {
     @InjectMocks
     private AttachDocsToSupplementaryEvidence eventPublisher = new AttachDocsToSupplementaryEvidence(mapper);
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         MockitoAnnotations.initMocks(this);
-
-        given(ccdApi.authenticateJurisdiction(any())).willReturn(AUTH_DETAILS);
     }
 
     @Test
-    public void createSupplementaryEvidence_starts_and_submits_event() {
+    void createSupplementaryEvidence_starts_and_submits_event() {
         // given
+        given(ccdApi.authenticateJurisdiction(any())).willReturn(AUTH_DETAILS);
+
+        // and
         String eventToken = "token123";
 
         StartEventResponse startEventResponse = mock(StartEventResponse.class);
@@ -105,7 +106,7 @@ public class AttachDocsToSupplementaryEvidenceTest {
     }
 
     @Test
-    public void should_not_start_an_event_if_envelope_does_not_contain_any_new_documents() {
+    void should_not_start_an_event_if_envelope_does_not_contain_any_new_documents() {
         // given
         CaseDetails existingCase = mock(CaseDetails.class);
         Envelope envelope = SampleData.envelope(2);

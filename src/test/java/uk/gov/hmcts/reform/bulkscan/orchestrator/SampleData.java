@@ -37,6 +37,7 @@ public class SampleData {
     public static final String CASE_REF = "ABC123";
     public static final String ENVELOPE_ID = "eb9c3598-35fc-424e-b05a-902ee9f11d56";
     public static final String JURSIDICTION = "BULKSCAN";
+    public static final String CONTAINER = "bulkscan";
     public static final String PO_BOX = "BULKSCAN_PO_BOX";
     public static final long CASE_ID = 23L;
     public static final String EXAMPLE_JSON_FILE = "envelopes/example.json";
@@ -83,6 +84,7 @@ public class SampleData {
                 .put("case_ref", caseRef)
                 .put("po_box", PO_BOX)
                 .put("jurisdiction", JURSIDICTION)
+                .put("container", CONTAINER)
                 .put("zip_file_name", "zip-file-test.zip")
                 .put("delivery_date", toIso8601(Instant.now()))
                 .put("opening_date", toIso8601(Instant.now()))
@@ -130,12 +132,29 @@ public class SampleData {
             CASE_REF,
             PO_BOX,
             JURSIDICTION,
+            CONTAINER,
             "zip-file-test.zip",
             Instant.now(),
             Instant.now(),
             Classification.NEW_APPLICATION,
             documents(numberOfDocuments),
             ocrData
+        );
+    }
+
+    public static Envelope envelope(Classification classification, String jurisdiction, String caseRef) {
+        return new Envelope(
+            ENVELOPE_ID,
+            CASE_REF,
+            PO_BOX,
+            JURSIDICTION,
+            CONTAINER,
+            "zip-file-test.zip",
+            Instant.now(),
+            Instant.now(),
+            classification,
+            documents(1),
+            ImmutableList.of(new OcrDataField("fieldName1", "value1"))
         );
     }
 

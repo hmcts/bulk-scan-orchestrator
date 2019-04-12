@@ -14,9 +14,7 @@ import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -48,7 +46,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_EXCEPTION_RECORD;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURISDICTION;
 
-@ExtendWith(SpringExtension.class)
 @IntegrationTest
 class AttachExceptionRecordToExistingCaseTest {
 
@@ -232,10 +229,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem(String.format(
-                "Internal Error: submitting attach file event failed case: %s Error: 500",
-                CASE_REF
-            )));
+            .body("errors", hasItem(AttachCaseCallbackService.INTERNAL_ERROR_MSG));
     }
 
     @DisplayName("Should fail with the correct error when start event api call fails")
@@ -248,10 +242,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem(String.format(
-                "Internal Error: start event call failed case: %s Error: 404",
-                CASE_REF
-            )));
+            .body("errors", hasItem(AttachCaseCallbackService.INTERNAL_ERROR_MSG));
     }
 
     @DisplayName("Should fail correctly if document is duplicate or document is already attached")
@@ -295,10 +286,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem(String.format(
-                "Internal Error: Could not retrieve case: %s Error: 500",
-                CASE_REF
-            )));
+            .body("errors", hasItem(AttachCaseCallbackService.INTERNAL_ERROR_MSG));
     }
 
     @DisplayName("Should fail with the correct error when no case details is supplied")
@@ -314,13 +302,14 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @Test
     void should_fail_when_exception_record_is_already_attached_to_a_case() throws Exception {
+        String caseRef = "1234567890123456";
         givenThat(
             ccdGetExceptionRecord()
                 .willReturn(
                     // return an exception record already attached to some case
                     okJson(
                         MAPPER.writeValueAsString(
-                            exceptionRecordDetails("1234567890123456")
+                            exceptionRecordDetails(caseRef)
                         )
                     )
                 )
@@ -331,7 +320,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem("Exception record is already attached to a case"));
+            .body("errors", hasItem("Exception record is already attached to case " + caseRef));
     }
 
     @DisplayName("Should create error if type in incorrect")

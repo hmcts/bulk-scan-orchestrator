@@ -5,7 +5,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
  */
 public final class Environment {
 
-    public static final String USER_ID = "640";
+    private static final String USER_ID = "640";
     public static final String JURISDICTION = "BULKSCAN";
     public static final String CASE_TYPE_BULK_SCAN = "Bulk_Scanned";
     public static final String CASE_TYPE_EXCEPTION_RECORD = "BULKSCAN_ExceptionRecord";
