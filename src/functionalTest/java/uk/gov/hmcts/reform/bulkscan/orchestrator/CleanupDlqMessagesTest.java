@@ -32,10 +32,6 @@ public class CleanupDlqMessagesTest {
     private Supplier<IMessageReceiver> dlqReceiverProvider;
 
     @Autowired
-    @Qualifier("envelopesReceiver")
-    private Supplier<IMessageReceiver> envelopesReceiverProvider;
-
-    @Autowired
     private EnvelopeMessager envelopeMessager;
 
     @Test
@@ -54,14 +50,14 @@ public class CleanupDlqMessagesTest {
         }
 
         // then
-        await("Message deleted from envelopes dead letter queue")
+        await("Dead lettered messages are completed from envelopes dlq.")
             .atMost(4, TimeUnit.MINUTES)
             .pollDelay(120, TimeUnit.SECONDS)
             .pollInterval(15, TimeUnit.SECONDS)
-            .until(() -> !verifyDlqMessagesExists());
+            .until(() -> verifyEnvelopesDlqIsEmpty());
     }
 
-    private boolean verifyDlqMessagesExists() throws ServiceBusException, InterruptedException {
+    private boolean verifyEnvelopesDlqIsEmpty() throws ServiceBusException, InterruptedException {
         log.info("Reading messages from envelopes Dead letter queue.");
 
         IMessageReceiver messageReceiver = null;

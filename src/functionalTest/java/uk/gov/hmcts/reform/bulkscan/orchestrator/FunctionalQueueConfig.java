@@ -26,7 +26,7 @@ public class FunctionalQueueConfig {
     private String queueReadConnectionString;
 
     @Bean
-    QueueClient testWriteClient() throws ServiceBusException, InterruptedException {
+    public QueueClient testWriteClient() throws ServiceBusException, InterruptedException {
         return new QueueClient(
             new ConnectionStringBuilder(queueWriteConnectionString),
             ReceiveMode.PEEKLOCK
@@ -34,7 +34,7 @@ public class FunctionalQueueConfig {
     }
 
     @Bean(name = "dlqReceiver")
-    Supplier<IMessageReceiver> dlqReceiverProvider() {
+    public Supplier<IMessageReceiver> dlqReceiverProvider() {
         return () -> {
             try {
                 return ClientFactory.createMessageReceiverFromConnectionStringBuilder(
@@ -49,23 +49,6 @@ public class FunctionalQueueConfig {
             return null;
         };
 
-    }
-
-    @Bean(name = "envelopesReceiver")
-    public Supplier<IMessageReceiver> envelopesReceiverProvider() {
-        return () -> {
-            try {
-                return ClientFactory.createMessageReceiverFromConnectionStringBuilder(
-                    new ConnectionStringBuilder(queueReadConnectionString),
-                    ReceiveMode.PEEKLOCK
-                );
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            } catch (ServiceBusException e) {
-                throw new ConnectionException("Unable to connect to the envelopes queue", e);
-            }
-            return null;
-        };
     }
 
     @Bean
