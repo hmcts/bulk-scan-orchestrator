@@ -221,7 +221,7 @@ dependencies {
   testCompile group: 'org.awaitility', name: 'awaitility', version: '3.1.6'
   testCompile group: 'io.rest-assured', name: 'rest-assured', version: '3.3.0'
 
-  functionalTestCompile group: 'uk.gov.hmcts.reform', name: 'document-management-client', version: '4.0.2'
+  functionalTestCompile group: 'uk.gov.hmcts.reform', name: 'document-management-client', version: '5.0.0'
 
   integrationTestCompile sourceSets.main.runtimeClasspath
   integrationTestCompile sourceSets.test.runtimeClasspath
