@@ -94,7 +94,7 @@ class AuthenticationCheckerTest {
         assertThat(status.jurisdiction).isEqualTo(LOCKED_ACCOUNT_JURISDICTION);
         assertThat(status.isCorrect).isFalse();
         assertThat(status.errorResponseStatus).isEqualTo(HttpStatus.LOCKED.value());
-        assertThat(status.errorDescription).isEqualTo(exception.getMessage());
+        assertThat(status.errorDescription).isEqualTo(exception.contentUTF8());
     }
 
     @Test
@@ -156,7 +156,7 @@ class AuthenticationCheckerTest {
             .errorStatus("method1", Response
                 .builder()
                 .request(mock(Request.class))
-                .body(new byte[0])
+                .body("Error response from IDAM".getBytes())
                 .headers(Collections.emptyMap())
                 .status(httpStatus)
                 .build()

@@ -60,7 +60,7 @@ public class AuthenticationChecker {
                 e
             );
 
-            return new JurisdictionConfigurationStatus(jurisdiction, false, e.getMessage(), e.status());
+            return new JurisdictionConfigurationStatus(jurisdiction, false, e.contentUTF8(), e.status());
         } catch (Exception e) {
             log.error(
                 "An error occurred while authenticating {} jurisdiction with {} username",
