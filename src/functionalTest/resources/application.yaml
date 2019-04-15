@@ -8,7 +8,6 @@ spring:
 queue:
   envelopes:
     write-connection-string: ${ENVELOPES_QUEUE_WRITE_CONN_STRING}
-    read-connection-string: ${ENVELOPES_QUEUE_READ_CONN_STRING}
 
 # because functional tests load up SpringBootTest
 azure:
