@@ -13,7 +13,7 @@ output "vaultUri" {
 // region: settings for functional tests
 
 output "ENVELOPES_QUEUE_WRITE_CONN_STRING" {
-  value = "${data.terraform_remote_state.shared_infra.queue_primary_send_connection_string}"
+  value = "${data.azurerm_key_vault_secret.envelopes_queue_send_conn_str.value}"
 }
 
 output "core_case_data_api_url" {
