@@ -22,6 +22,9 @@ public class FunctionalQueueConfig {
     @Value("${queue.envelopes.write-connection-string}")
     private String queueWriteConnectionString;
 
+    @Value("${queue.envelopes.read-connection-string}")
+    private String queueReadConnectionString;
+
     @Bean
     public QueueClient testWriteClient() throws ServiceBusException, InterruptedException {
         return new QueueClient(
@@ -35,7 +38,7 @@ public class FunctionalQueueConfig {
         return () -> {
             try {
                 return ClientFactory.createMessageReceiverFromConnectionStringBuilder(
-                    new ConnectionStringBuilder(StringUtils.join(queueWriteConnectionString, "/$deadletterqueue")),
+                    new ConnectionStringBuilder(StringUtils.join(queueReadConnectionString, "/$deadletterqueue")),
                     ReceiveMode.PEEKLOCK
                 );
             } catch (InterruptedException e) {
