@@ -1,22 +1,26 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.tasks;
 
+import com.google.common.collect.ImmutableMap;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.ConnectionException;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.util.Collections;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+import static java.time.ZoneOffset.UTC;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,8 +31,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CleanupEnvelopesDlqTaskTest {
+@ExtendWith(MockitoExtension.class)
+class CleanupEnvelopesDlqTaskTest {
 
     private CleanupEnvelopesDlqTask cleanupDlqTask;
 
@@ -43,19 +47,29 @@ public class CleanupEnvelopesDlqTaskTest {
 
     private final Duration ttl = Duration.ofSeconds(10);
 
-    @Before
-    public void setUp() {
+    @BeforeAll
+    static void init() {
+        TimeZone.setDefault(TimeZone.getTimeZone(UTC));
+    }
+
+    @BeforeEach
+    void setUp() {
         cleanupDlqTask = new CleanupEnvelopesDlqTask(() -> messageReceiver, ttl);
     }
 
     @Test
-    public void should_delete_messages_from_dead_letter_queue() throws Exception {
+    void should_delete_messages_from_dlq() throws Exception {
         //given
         UUID uuid = UUID.randomUUID();
         given(message.getLockToken()).willReturn(uuid);
         given(message.getBody()).willReturn(SampleData.envelopeJson());
-        given(message.getEnqueuedTimeUtc())
-            .willReturn(LocalDateTime.now().minus(ttl.plusSeconds(10)).toInstant(ZoneOffset.UTC));
+        given(message.getProperties())
+            .willReturn(
+                ImmutableMap.of(
+                    "deadLetteredAt",
+                    LocalDateTime.now().minus(ttl.plusSeconds(10)).toInstant(UTC).toString()
+                )
+            );
         given(messageReceiver.receive()).willReturn(message).willReturn(null);
 
         ArgumentCaptor<UUID> uuidArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
@@ -74,11 +88,39 @@ public class CleanupEnvelopesDlqTaskTest {
     }
 
     @Test
-    public void should_not_delete_messages_from_dead_letter_queue_when_the_ttl_is_less_than_duration()
+    void should_not_delete_messages_from_dlq_when_deadLetteredTime_is_not_set()
         throws Exception {
         //given
-        given(message.getEnqueuedTimeUtc())
-            .willReturn(LocalDateTime.now().minus(ttl.minusSeconds(5)).toInstant(ZoneOffset.UTC));
+        UUID uuid = UUID.randomUUID();
+        given(message.getLockToken()).willReturn(uuid);
+        given(message.getProperties()).willReturn(Collections.emptyMap());
+        given(message.getProperties().get("deadLetteredAt")).willReturn(null);
+        given(messageReceiver.receive()).willReturn(message).willReturn(null);
+
+        ArgumentCaptor<UUID> uuidArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
+
+        //when
+        cleanupDlqTask.deleteMessagesInEnvelopesDlq();
+
+        //then
+        verify(messageReceiver, times(2)).receive();
+        verify(messageReceiver).abandon(uuidArgumentCaptor.capture());
+        assertThat(uuidArgumentCaptor.getValue()).isEqualTo(uuid);
+        verify(messageReceiver, never()).complete(any());
+        verify(messageReceiver, times(1)).close();
+        verifyNoMoreInteractions(messageReceiver);
+    }
+
+    @Test
+    void should_call_abandon_message_when_the_ttl_is_less_than_duration() throws Exception {
+        //given
+        given(message.getProperties())
+            .willReturn(
+                ImmutableMap.of(
+                    "deadLetteredAt",
+                    LocalDateTime.now().minus(ttl.minusSeconds(5)).toInstant(UTC).toString()
+                )
+            );
         given(messageReceiver.receive()).willReturn(message).willReturn(null);
 
         //when
@@ -87,12 +129,13 @@ public class CleanupEnvelopesDlqTaskTest {
         //then
         verify(messageReceiver, times(2)).receive();
         verify(messageReceiver, never()).complete(any());
+        verify(messageReceiver, times(1)).abandon(any());
         verify(messageReceiver, times(1)).close();
         verifyNoMoreInteractions(messageReceiver);
     }
 
     @Test
-    public void should_not_call_complete_when_no_messages_exists_in_dead_letter_queue() throws Exception {
+    void should_not_complete_when_no_message_exists_in_dlq() throws Exception {
         //given
         given(messageReceiver.receive()).willReturn(null);
 
@@ -102,12 +145,13 @@ public class CleanupEnvelopesDlqTaskTest {
         //then
         verify(messageReceiver, times(1)).receive();
         verify(messageReceiver, never()).complete(any());
+        verify(messageReceiver, never()).abandon(any());
         verify(messageReceiver, times(1)).close();
         verifyNoMoreInteractions(messageReceiver);
     }
 
     @Test
-    public void should_not_process_messages_when_connection_exception_is_thrown() {
+    void should_not_process_messages_when_exception_is_thrown() {
         //given
         cleanupDlqTask = new CleanupEnvelopesDlqTask(receiverProvider, Duration.ZERO);
 

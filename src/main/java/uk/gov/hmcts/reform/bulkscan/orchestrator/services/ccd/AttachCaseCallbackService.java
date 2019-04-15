@@ -28,6 +28,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.i
 @Service
 public class AttachCaseCallbackService {
 
+    public static final String INTERNAL_ERROR_MSG = "An error occurred";
+
     private static final Logger log = LoggerFactory.getLogger(AttachCaseCallbackService.class);
     private static final String ATTACH_CASE_REFERENCE_FIELD_NAME = "attachToCaseReference";
 
@@ -63,11 +65,16 @@ public class AttachCaseCallbackService {
         List<Map<String, Object>> exceptionRecordDocuments
     ) {
         try {
+            log.info("Attaching exception record {} to case {}", exceptionRecordId, targetCaseRef);
             doAttachCase(exceptionRecordJurisdiction, targetCaseRef, exceptionRecordDocuments, exceptionRecordId);
+            log.info("Successfully attached exception record {} to case {}", exceptionRecordId, targetCaseRef);
             return emptyList();
+        } catch (AlreadyAttachedToCaseException | DuplicateDocsException | CaseNotFoundException exc) {
+            log.warn(exc.getMessage(), exc);
+            return singletonList(exc.getMessage());
         } catch (CallbackException e) {
             log.error(e.getMessage(), e);
-            return singletonList(e.getMessage());
+            return singletonList(INTERNAL_ERROR_MSG);
         }
     }
 
@@ -110,8 +117,10 @@ public class AttachCaseCallbackService {
             exceptionRecordJurisdiction
         );
 
-        if (isExceptionRecordAttachedToCase(fetchedExceptionRecord)) {
-            throw new CallbackException("Exception record is already attached to a case");
+        Object attachToCaseRef = fetchedExceptionRecord.getData().get(ATTACH_CASE_REFERENCE_FIELD_NAME);
+
+        if (attachToCaseRef != null && Strings.isNotEmpty(attachToCaseRef.toString())) {
+            throw new AlreadyAttachedToCaseException("Exception record is already attached to case " + attachToCaseRef);
         }
     }
 
@@ -128,7 +137,7 @@ public class AttachCaseCallbackService {
     }
 
     private void throwDuplicateError(String caseRef, Set<String> duplicateIds) {
-        throw new CallbackException(
+        throw new DuplicateDocsException(
             String.format(
                 "Document(s) with control number %s are already attached to case reference: %s",
                 duplicateIds,
@@ -150,11 +159,4 @@ public class AttachCaseCallbackService {
         );
     }
 
-    private boolean isExceptionRecordAttachedToCase(CaseDetails exceptionRecordDetails) {
-        Object attachToCaseReference = exceptionRecordDetails
-            .getData()
-            .get(ATTACH_CASE_REFERENCE_FIELD_NAME);
-
-        return attachToCaseReference != null && Strings.isNotEmpty(attachToCaseReference.toString());
-    }
 }

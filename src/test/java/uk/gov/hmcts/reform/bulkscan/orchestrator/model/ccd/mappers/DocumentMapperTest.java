@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
@@ -11,10 +11,10 @@ import java.time.ZonedDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DocumentMapperTest {
+class DocumentMapperTest {
 
     @Test
-    public void should_map_document_properly() {
+    void should_map_document_properly() {
         // given
         Document doc = new Document(
             "name.zip",
@@ -44,7 +44,7 @@ public class DocumentMapperTest {
     }
 
     @Test
-    public void should_map_null_document_properly() {
+    void should_map_null_document_properly() {
         // given
         Document doc = null;
 
@@ -56,7 +56,7 @@ public class DocumentMapperTest {
     }
 
     @Test
-    public void should_map_null_scanned_date() {
+    void should_map_null_scanned_date() {
         // given
         Document doc = new Document("name.zip", "123", "type", "subtype", null, "https://localthost/files/1");
 

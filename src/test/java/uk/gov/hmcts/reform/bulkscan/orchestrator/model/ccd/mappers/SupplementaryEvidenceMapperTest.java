@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.SupplementaryEvidence;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 
@@ -16,12 +16,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
 @SuppressWarnings("checkstyle:LineLength")
-public class SupplementaryEvidenceMapperTest {
+class SupplementaryEvidenceMapperTest {
 
     private static final SupplementaryEvidenceMapper mapper = new SupplementaryEvidenceMapper();
 
     @Test
-    public void maps_all_fields_correctly() {
+    void maps_all_fields_correctly() {
         // given
         List<Document> existingDocs =
             asList(
@@ -60,7 +60,7 @@ public class SupplementaryEvidenceMapperTest {
     }
 
     @Test
-    public void should_not_add_document_from_envelope_if_document_with_the_same_url_is_already_present_in_case() {
+    void should_not_add_document_from_envelope_if_document_with_the_same_url_is_already_present_in_case() {
         // given
         List<Document> existingDocs =
             asList(
@@ -92,7 +92,7 @@ public class SupplementaryEvidenceMapperTest {
     }
 
     @Test
-    public void should_not_add_document_from_envelope_if_document_with_the_same_control_number_is_already_present_in_case() {
+    void should_not_add_document_from_envelope_if_document_with_the_same_control_number_is_already_present_in_case() {
         // given
         List<Document> existingDocs =
             asList(
@@ -121,7 +121,7 @@ public class SupplementaryEvidenceMapperTest {
     }
 
     @Test
-    public void handles_empty_document_list() {
+    void handles_empty_document_list() {
         // given
         List<Document> existingDocuments = emptyList();
         List<Document> envelopeDocuments = emptyList();

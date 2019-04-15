@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdKeyValue;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ExceptionRecord;
@@ -18,12 +18,12 @@ import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 
-public class ExceptionRecordMapperTest {
+class ExceptionRecordMapperTest {
 
     private final ExceptionRecordMapper mapper = new ExceptionRecordMapper();
 
     @Test
-    public void mapEnvelope_maps_all_fields_correctly() {
+    void mapEnvelope_maps_all_fields_correctly() {
         // given
         Envelope envelope = envelope(2);
 
@@ -55,14 +55,14 @@ public class ExceptionRecordMapperTest {
     }
 
     @Test
-    public void mapEnvelope_handles_null_ocr_data() {
+    void mapEnvelope_handles_null_ocr_data() {
         Envelope envelope = envelope(2, null);
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
         assertThat(exceptionRecord.ocrData).isNull();
     }
 
     @Test
-    public void mapEnvelope_maps_subtype_values_in_documents() {
+    void mapEnvelope_maps_subtype_values_in_documents() {
         // given
         Envelope envelope = envelope(2, null);
 

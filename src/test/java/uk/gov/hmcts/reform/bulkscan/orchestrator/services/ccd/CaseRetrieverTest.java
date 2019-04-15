@@ -3,10 +3,10 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 import feign.FeignException;
 import feign.Request;
 import feign.Response;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -25,8 +25,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.SERVICE_TOKEN
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.THE_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_TOKEN;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CaseRetrieverTest {
+@ExtendWith(MockitoExtension.class)
+class CaseRetrieverTest {
     @Mock
     private CoreCaseDataApi dataApi;
     @Mock
@@ -35,7 +35,7 @@ public class CaseRetrieverTest {
     private CaseRetriever retriever;
 
     @Test
-    public void should_retrieve_case_successfully() {
+    void should_retrieve_case_successfully() {
         retriever = new CaseRetriever(authenticator, dataApi);
 
         given(dataApi.getCase(USER_TOKEN, SERVICE_TOKEN, CASE_REF))
@@ -47,7 +47,7 @@ public class CaseRetrieverTest {
     }
 
     @Test
-    public void should_return_null_for_when_the_case_is_not_found() {
+    void should_return_null_for_when_the_case_is_not_found() {
         retriever = new CaseRetriever(authenticator, dataApi);
         FeignException exception = FeignException.errorStatus(
             "methodKey",
@@ -71,7 +71,7 @@ public class CaseRetrieverTest {
 
 
     @Test
-    public void should_return_null_for_when_the_case_ref_is_not_valid() {
+    void should_return_null_for_when_the_case_ref_is_not_valid() {
         retriever = new CaseRetriever(authenticator, dataApi);
         FeignException exception = FeignException.errorStatus(
             "methodKey",
@@ -94,7 +94,7 @@ public class CaseRetrieverTest {
     }
 
     @Test
-    public void should_throw_exception_when_api_response_is_other_than_not_found_feign_exception() {
+    void should_throw_exception_when_api_response_is_other_than_not_found_feign_exception() {
         retriever = new CaseRetriever(authenticator, dataApi);
         FeignException exception = FeignException.errorStatus(
             "methodKey",
