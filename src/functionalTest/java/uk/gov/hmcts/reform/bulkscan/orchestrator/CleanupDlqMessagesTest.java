@@ -25,7 +25,7 @@ import static org.awaitility.Awaitility.await;
 @ActiveProfiles("nosb")  // no servicebus queue handler registration
 @Import(FunctionalQueueConfig.class)
 public class CleanupDlqMessagesTest {
-    private static final Logger log = LoggerFactory.getLogger(CleanupDlqMessagesTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CleanupDlqMessagesTest.class);
 
     @Autowired
     @Qualifier("dlqReceiver")
@@ -37,7 +37,7 @@ public class CleanupDlqMessagesTest {
     @Test
     public void testCleanupDlqTask() throws Exception {
         // when
-        log.info("Send invalid messages to envelopes queue. filename: envelopes/dead-letter-envelope.json");
+        LOG.info("Send invalid messages to envelopes queue. filename: envelopes/dead-letter-envelope.json");
 
         // invalid message, which will be sent to dead letter queue
         for (int i = 0; i < 10; i++) {
@@ -54,11 +54,11 @@ public class CleanupDlqMessagesTest {
             .atMost(4, TimeUnit.MINUTES)
             .pollDelay(120, TimeUnit.SECONDS)
             .pollInterval(15, TimeUnit.SECONDS)
-            .until(() -> verifyEnvelopesDlqIsEmpty());
+            .until(() -> verifyDlqIsEmpty());
     }
 
-    private boolean verifyEnvelopesDlqIsEmpty() throws ServiceBusException, InterruptedException {
-        log.info("Reading messages from envelopes Dead letter queue.");
+    private boolean verifyDlqIsEmpty() throws ServiceBusException, InterruptedException {
+        LOG.info("Reading messages from envelopes Dead letter queue.");
 
         IMessageReceiver messageReceiver = null;
         IMessage message = null;
@@ -75,7 +75,7 @@ public class CleanupDlqMessagesTest {
                     }
                     messageReceiver.close();
                 } catch (ServiceBusException e) {
-                    log.error("Error closing dlq connection", e);
+                    LOG.error("Error closing dlq connection", e);
                 }
             }
         }
