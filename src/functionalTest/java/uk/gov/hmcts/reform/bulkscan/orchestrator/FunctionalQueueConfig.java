@@ -22,7 +22,7 @@ public class FunctionalQueueConfig {
     @Value("${queue.envelopes.write-connection-string}")
     private String queueWriteConnectionString;
 
-    @Value("${azure.servicebus.envelopes.connection-string}")
+    @Value("${queue.envelopes.read-connection-string}")
     private String queueReadConnectionString;
 
     @Bean
