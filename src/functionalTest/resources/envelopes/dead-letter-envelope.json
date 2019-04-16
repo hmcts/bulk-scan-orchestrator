@@ -1,0 +1,19 @@
+{
+  "case_ref": "1234",
+  "po_box": "BULKSCAN PO BOX",
+  "jurisdiction": "BULKSCAN",
+  "classification": "SUPPLEMENTARY_EVIDENCE",
+  "zip_file_name": "zip-file-test-dlq.zip",
+  "delivery_date": "1970-01-01T00:00:00.000Z",
+  "opening_date": "1970-01-01T00:00:00.000Z",
+  "documents": [
+    {
+      "file_name": "certificate2.pdf",
+      "control_number": "1545657689",
+      "type": "other",
+      "subtype": null,
+      "scanned_at": "2018-01-01T11:20:00.000Z",
+      "url": "http://dm-store:4460/documents/ee69aee8-1a33-40dd-9af9-d90da1b104babc"
+    }
+  ]
+}

@@ -16,6 +16,10 @@ output "ENVELOPES_QUEUE_WRITE_CONN_STRING" {
   value = "${data.azurerm_key_vault_secret.envelopes_queue_send_conn_str.value}"
 }
 
+output "ENVELOPES_QUEUE_READ_CONN_STRING" {
+  value = "${data.azurerm_key_vault_secret.envelopes_queue_listen_conn_str.value}"
+}
+
 output "core_case_data_api_url" {
   value = "${local.ccdApiUrl}"
 }
