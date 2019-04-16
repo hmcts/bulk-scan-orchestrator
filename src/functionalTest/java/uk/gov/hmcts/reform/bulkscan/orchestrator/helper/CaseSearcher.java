@@ -41,12 +41,10 @@ public class CaseSearcher {
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
             caseTypeId,
-            "{ \"query\": { \"match_all\": {} }, \"size\": 50}"
-        //String.format(
-        //    "{ \"query\":{ \"bool\":{ \"filter\":{ \"term\":{ \"data.poBox\":\"%s\"}}}}}",
-        //    searchCriteria.get("case.poBox")
-        //)
+            "{ \"query\":{ \"bool\":{ \"filter\":{ \"term\":{ \"data.poBox\":\"TESTPO\"}}}}}"
         );
+
+        //    "{ \"query\": { \"match_all\": {} }, \"size\": 50}"
 
         int elasticSearchResultCount = searchResult.getCases().size();
 
