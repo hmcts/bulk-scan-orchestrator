@@ -8,3 +8,6 @@ java:
     CORE_CASE_DATA_API_URL: "http://ccd-data-store-api-aat.service.core-compute-aat.internal"
     DOCUMENT_MANAGEMENT_URL: "http://dm-store-aat.service.core-compute-aat.internal"
     QUEUE_READ_INTERVAL: "30000"
+    DELETE_ENVELOPES_DLQ_MESSAGES_ENABLED: "true"
+    DELETE_ENVELOPES_DLQ_MESSAGES_CRON: "0 * * * * *"
+    DELETE_ENVELOPES_DLQ_MESSAGES_TTL: "10s"
