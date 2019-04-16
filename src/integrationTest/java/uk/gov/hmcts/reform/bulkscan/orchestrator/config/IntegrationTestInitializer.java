@@ -12,8 +12,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.ProcessedEnvelopeNotifier;
 
-import java.util.function.Supplier;
-
 import static org.mockito.Mockito.mock;
 import static org.springframework.util.SocketUtils.findAvailableTcpPort;
 
@@ -34,12 +32,6 @@ class IntegrationTestInitializer implements ApplicationContextInitializer<Config
     @Bean
     public ProcessedEnvelopeNotifier processedEnvelopeNotifier() {
         return mock(ProcessedEnvelopeNotifier.class);
-    }
-
-    @Bean
-    public Supplier<IMessageReceiver> dlqReceiverProvider() {
-        IMessageReceiver messageReceiver = mock(IMessageReceiver.class);
-        return () -> messageReceiver;
     }
 
     @Bean
