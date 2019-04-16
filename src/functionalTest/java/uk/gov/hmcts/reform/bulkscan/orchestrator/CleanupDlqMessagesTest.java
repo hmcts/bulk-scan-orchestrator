@@ -37,9 +37,8 @@ public class CleanupDlqMessagesTest {
     @Test
     public void testCleanupDlqTask() throws Exception {
         // when
-        LOG.info("Send invalid messages to envelopes queue. filename: envelopes/dead-letter-envelope.json");
-
-        // invalid message, which will be sent to dead letter queue
+        // Sending more than 1 invalid message so that we can make sure the dlq messages are completed
+        // even when the dlq task acquires lock on some messages
         for (int i = 0; i < 10; i++) {
             envelopeMessager.sendMessageFromFile(
                 "envelopes/dead-letter-envelope.json",
