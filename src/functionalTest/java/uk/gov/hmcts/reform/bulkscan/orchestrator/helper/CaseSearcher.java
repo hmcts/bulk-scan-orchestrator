@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 
+import com.google.common.collect.ImmutableMap;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
@@ -48,6 +49,8 @@ public class CaseSearcher {
         );
 
         int elasticSearchResultCount = searchResult.getCases().size();
+
+        assertThat(searchResult.getCases().get(0).getData()).isEqualTo(ImmutableMap.of());
 
         List<CaseDetails> result = coreCaseDataApi.searchForCaseworker(
             authenticator.getUserToken(),
