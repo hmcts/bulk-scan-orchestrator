@@ -69,10 +69,12 @@ public class AttachCaseCallbackService {
             doAttachCase(exceptionRecordJurisdiction, targetCaseRef, exceptionRecordDocuments, exceptionRecordId);
             log.info("Successfully attached exception record {} to case {}", exceptionRecordId, targetCaseRef);
             return emptyList();
+
         } catch (AlreadyAttachedToCaseException | DuplicateDocsException | CaseNotFoundException exc) {
             log.warn(exc.getMessage(), exc);
             return singletonList(exc.getMessage());
-        } catch (CallbackException e) {
+
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
             return singletonList(INTERNAL_ERROR_MSG);
         }
