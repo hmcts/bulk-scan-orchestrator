@@ -40,11 +40,10 @@ public class DlqReceiverProvider implements Supplier<IMessageReceiver> {
                 ReceiveMode.PEEKLOCK
             );
         } catch (InterruptedException e) {
-            log.error("Unable to connect to the dlq", e);
             Thread.currentThread().interrupt();
+            throw new ConnectionException("Unable to connect to the dlq", e);
         } catch (ServiceBusException e) {
             throw new ConnectionException("Unable to connect to the dlq", e);
         }
-        return null;
     }
 }
