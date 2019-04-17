@@ -178,7 +178,7 @@ dependencyManagement {
       entry 'spring-security-rsa'
     }
     // align with jupiter version
-    dependencySet(group: 'org.mockito', version: '2.26.0') {
+    dependencySet(group: 'org.mockito', version: '2.27.0') {
       entry 'mockito-core'
     }
     // CVE-2019-0232 - command line injections on windows
