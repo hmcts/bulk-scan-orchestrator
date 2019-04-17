@@ -67,7 +67,7 @@ public class CcdApi {
             //TODO: RPE-823 merge with `CaseRetriever` to a consistent api adaptor
             return retrieveCase(caseRef, jurisdiction);
         } catch (FeignException e) {
-            if (e.status() == 404) {
+            if (e.status() == 404 || e.status() == 400) { // unfortunately CCD uses both...
                 throw new CaseNotFoundException("Could not find case: " + caseRef, e);
             } else {
                 throw new CallbackException(
