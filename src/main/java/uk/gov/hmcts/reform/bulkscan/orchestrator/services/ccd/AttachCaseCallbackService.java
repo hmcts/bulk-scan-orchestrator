@@ -70,7 +70,11 @@ public class AttachCaseCallbackService {
             log.info("Successfully attached exception record {} to case {}", exceptionRecordId, targetCaseRef);
             return emptyList();
 
-        } catch (AlreadyAttachedToCaseException | DuplicateDocsException | CaseNotFoundException exc) {
+        } catch (AlreadyAttachedToCaseException
+            | DuplicateDocsException
+            | CaseNotFoundException
+            | InvalidCaseIdException exc
+        ) {
             log.warn(exc.getMessage(), exc);
             return singletonList(exc.getMessage());
 

@@ -67,10 +67,10 @@ public class CcdApi {
             //TODO: RPE-823 merge with `CaseRetriever` to a consistent api adaptor
             return retrieveCase(caseRef, jurisdiction);
         } catch (FeignException e) {
-            if (e.status() == 404) {
-                throw new CaseNotFoundException("Could not find case: " + caseRef, e);
-            } else {
-                throw new CallbackException(
+            switch (e.status()) {
+                case 404: throw new CaseNotFoundException("Could not find case: " + caseRef, e);
+                case 400: throw new InvalidCaseIdException("Invalid case ID: " + caseRef, e);
+                default: throw new CallbackException(
                     format("Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status()),
                     e
                 );
