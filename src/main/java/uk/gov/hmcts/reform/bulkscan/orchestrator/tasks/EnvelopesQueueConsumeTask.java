@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.EnvelopeEventProcessor;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.QueueProcessingReadinessChecker;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.AccountLockedException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.LogInAttemptRejectedException;
 
 @Service
 @ConditionalOnProperty(value = "scheduling.task.consume-envelopes-queue.enabled", matchIfMissing = true)
@@ -40,8 +40,8 @@ public class EnvelopesQueueConsumeTask {
         }
     }
 
-    private boolean isReadyForConsumingMessages() throws AccountLockedException {
+    private boolean isReadyForConsumingMessages() throws LogInAttemptRejectedException {
         // TODO: add S2S and IDAM health checks
-        return processingReadinessChecker.isNoAccountLockedInIdam();
+        return processingReadinessChecker.isNoLogInAttemptRejectedByIdam();
     }
 }

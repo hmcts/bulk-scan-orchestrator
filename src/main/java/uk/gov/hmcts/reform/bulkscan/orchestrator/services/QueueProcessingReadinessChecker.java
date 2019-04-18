@@ -5,63 +5,58 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.AccountLockedException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.AuthenticationChecker;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.LogInAttemptRejectedException;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 import static java.util.stream.Collectors.toList;
-import static org.springframework.http.HttpStatus.LOCKED;
 
 @Service
 public class QueueProcessingReadinessChecker {
 
-    private static final String CHECK_ACCOUNT_NOT_LOCKED_COMMAND_KEY = "check-no-account-locked";
+    private static final String LOG_IN_CHECK_COMMAND_KEY = "check-jurisdiction-log-in";
     private static final Logger log = LoggerFactory.getLogger(QueueProcessingReadinessChecker.class);
 
     private final AuthenticationChecker authenticationChecker;
 
-    // this is for how long the service will assume no accounts are locked in IDAM before it checks again
-    private final Duration noAccountLockedCheckValidityDuration;
+    // this is for how long the service will assume no log-in attempts are rejected by IDAM before checking again
+    private final Duration logInCheckValidityDuration;
 
-    // the date by which the service can assume no accounts are locked in IDAM before having to check again
-    private LocalDateTime noAccountLockedCheckExpiry = LocalDateTime.now();
+    // the date by which the service can assume no log-in attempts are rejected by IDAM before having to check again
+    private LocalDateTime logInCheckExpiry = LocalDateTime.now();
 
     public QueueProcessingReadinessChecker(
         AuthenticationChecker authenticationChecker,
-        @Value("${task.check-no-account-locked.check-validity-duration}")
-            Duration noAccountLockedCheckValidityDuration
+        @Value("${task.check-jurisdiction-log-in.check-validity-duration}")
+            Duration logInCheckValidityDuration
     ) {
         this.authenticationChecker = authenticationChecker;
-        this.noAccountLockedCheckValidityDuration = noAccountLockedCheckValidityDuration;
+        this.logInCheckValidityDuration = logInCheckValidityDuration;
     }
 
     /**
-     * Checks if no jurisdiction-specific account is locked in IDAM.
-     * <p>
-     * When an account is locked in IDAM, the processing of the queue must be paused,
-     * in order to let the account get unlocked (through inactivity).
-     * </p>
+     * Checks if no log-in attempt for any jurisdiction-specific account is rejected by IDAM.
      *
-     * @return true if no account is locked in IDAM. Otherwise, throws AccountLockedException in order to
+     * @return true if IDAM doesn't reject any login attempt.
+     *         Otherwise, throws LoginAttemptRejectedException in order to
      *         open the circuit and let Hystrix manage the problem.
      */
     @HystrixCommand(
-        commandKey = CHECK_ACCOUNT_NOT_LOCKED_COMMAND_KEY,
-        fallbackMethod = "isNoAccountLockedInIdamFallback"
+        commandKey = LOG_IN_CHECK_COMMAND_KEY,
+        fallbackMethod = "isNoLogInAttemptRejectedByIdamFallback"
     )
-    public boolean isNoAccountLockedInIdam() throws AccountLockedException {
+    public boolean isNoLogInAttemptRejectedByIdam() throws LogInAttemptRejectedException {
         try {
-            if (hasNoAccountLockedCheckExpired()) {
-                assertNoAccountIsLockedInIdam();
-                updateNoAccountLockedCheckExpiry();
+            if (hasLogInCheckExpired()) {
+                assertNoJurisdictionFailsToLogIn();
+                updateLogInCheckExpiry();
             }
 
             return true;
-        } catch (AccountLockedException e) {
+        } catch (LogInAttemptRejectedException e) {
             // let hystrix open the circuit
             throw e;
         } catch (Exception e) {
@@ -71,43 +66,44 @@ public class QueueProcessingReadinessChecker {
         }
     }
 
-    private void assertNoAccountIsLockedInIdam() throws AccountLockedException {
-        List<String> jurisdictionsWithLockedAccounts = getJurisdictionsWithLockedAccounts();
+    private void assertNoJurisdictionFailsToLogIn() throws LogInAttemptRejectedException {
+        List<String> jurisdictionsFailingToLogIn = getJurisdictionsFailingToLogIn();
 
-        if (!jurisdictionsWithLockedAccounts.isEmpty()) {
+        if (!jurisdictionsFailingToLogIn.isEmpty()) {
             String errorMessage = String.format(
-                "Some jurisdictions' accounts are locked in IDAM. "
-                    + "This will pause queue processing. Jurisdictions with locked accounts: [%s]",
-                String.join(",", jurisdictionsWithLockedAccounts)
+                "Login attempts for some jurisdictions' accounts are rejected by IDAM. "
+                    + "This will pause queue processing. Jurisdictions: [%s]",
+                String.join(",", jurisdictionsFailingToLogIn)
             );
 
             log.error(errorMessage);
 
             // open the circuit
-            throw new AccountLockedException(errorMessage);
+            throw new LogInAttemptRejectedException(errorMessage);
         }
     }
 
-    public boolean isNoAccountLockedInIdamFallback() {
-        log.warn("Executing fallback method for {} command", CHECK_ACCOUNT_NOT_LOCKED_COMMAND_KEY);
+    public boolean isNoLogInAttemptRejectedByIdamFallback() {
+        log.warn("Executing fallback method for {} command", LOG_IN_CHECK_COMMAND_KEY);
         return false;
     }
 
-    private List<String> getJurisdictionsWithLockedAccounts() {
+    private List<String> getJurisdictionsFailingToLogIn() {
         return authenticationChecker
             .checkSignInForAllJurisdictions()
             .stream()
-            .filter(status -> Objects.equals(status.errorResponseStatus, LOCKED.value()))
+            // any 4xx error is a rejection
+            .filter(status -> status.errorResponseStatus != null && status.errorResponseStatus / 100 == 4)
             .map(status -> status.jurisdiction)
             .collect(toList());
     }
 
-    private boolean hasNoAccountLockedCheckExpired() {
-        return !LocalDateTime.now().isBefore(noAccountLockedCheckExpiry);
+    private boolean hasLogInCheckExpired() {
+        return !LocalDateTime.now().isBefore(logInCheckExpiry);
     }
 
-    private void updateNoAccountLockedCheckExpiry() {
-        this.noAccountLockedCheckExpiry =
-            LocalDateTime.now().plus(noAccountLockedCheckValidityDuration);
+    private void updateLogInCheckExpiry() {
+        this.logInCheckExpiry =
+            LocalDateTime.now().plus(logInCheckValidityDuration);
     }
 }

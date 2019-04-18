@@ -6,8 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.out.JurisdictionConfigurationStatus;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.AccountLockedException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.AuthenticationChecker;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.LogInAttemptRejectedException;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -32,39 +32,40 @@ public class QueueProcessingReadinessCheckerTest {
     }
 
     @Test
-    public void isNoAccountLockedInIdam_returns_true_when_no_account_is_locked() throws Exception {
+    public void isNoLogInAttemptRejectedByIdam_returns_true_when_no_account_status_has_4xx_response() throws Exception {
         List<JurisdictionConfigurationStatus> noAccountLockedStatus = Arrays.asList(
             new JurisdictionConfigurationStatus("jurisdiction1", true, null, 200),
-            new JurisdictionConfigurationStatus("jurisdiction2", false, "forbidden", 403)
+            new JurisdictionConfigurationStatus("jurisdiction2", false, "serverError", 500)
         );
 
         given(authenticationChecker.checkSignInForAllJurisdictions()).willReturn(noAccountLockedStatus);
 
-        assertThat(processingReadinessChecker.isNoAccountLockedInIdam()).isTrue();
+        assertThat(processingReadinessChecker.isNoLogInAttemptRejectedByIdam()).isTrue();
     }
 
     @Test
-    public void isNoAccountLockedInIdam_throws_exception_when_an_account_is_locked() {
+    public void isNoLogInAttemptRejectedByIdam_throws_exception_when_an_account_is_locked() {
         List<JurisdictionConfigurationStatus> oneAccountLockedStatus = Arrays.asList(
             new JurisdictionConfigurationStatus("jurisdiction1", true, null, 200),
             new JurisdictionConfigurationStatus("jurisdiction2", false, "forbidden", 403),
-            new JurisdictionConfigurationStatus("jurisdiction3", false, "locked", 423)
+            new JurisdictionConfigurationStatus("jurisdiction3", false, "locked", 423),
+            new JurisdictionConfigurationStatus("jurisdiction4", false, "serverError", 500)
         );
 
         given(authenticationChecker.checkSignInForAllJurisdictions()).willReturn(oneAccountLockedStatus);
 
-        String expectedErrorMessage = "Some jurisdictions' accounts are locked in IDAM. "
-            + "This will pause queue processing. Jurisdictions with locked accounts: [jurisdiction3]";
+        String expectedErrorMessage = "Login attempts for some jurisdictions' accounts are rejected by IDAM. "
+            + "This will pause queue processing. Jurisdictions: [jurisdiction2,jurisdiction3]";
 
-        assertThatThrownBy(() -> processingReadinessChecker.isNoAccountLockedInIdam())
-            .isInstanceOf(AccountLockedException.class)
+        assertThatThrownBy(() -> processingReadinessChecker.isNoLogInAttemptRejectedByIdam())
+            .isInstanceOf(LogInAttemptRejectedException.class)
             .hasMessage(expectedErrorMessage);
     }
 
     @Test
-    public void isNoAccountLockedInIdamFallback_returns_false() {
+    public void isNoLogInAttemptRejectedByIdamFallback_returns_false() {
         assertThat(
-            processingReadinessChecker.isNoAccountLockedInIdamFallback()
+            processingReadinessChecker.isNoLogInAttemptRejectedByIdamFallback()
         ).isFalse();
     }
 
