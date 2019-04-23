@@ -37,12 +37,12 @@ hystrix:
       metrics.rollingStats:
         timeInMilliseconds: 500
         numBuckets: 5
-    check-no-account-locked:
+    check-jurisdiction-log-in:
       circuitBreaker:
         requestVolumeThreshold: 1
         sleepWindowInMilliseconds: 100000
         errorThresholdPercentage: 1
 
 task:
-  check-no-account-locked:
+  check-jurisdiction-log-in:
     check-validity-duration: PT0S

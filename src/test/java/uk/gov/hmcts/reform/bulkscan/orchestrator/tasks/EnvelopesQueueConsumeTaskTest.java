@@ -8,7 +8,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.EnvelopeEventProcessor;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.QueueProcessingReadinessChecker;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.AccountLockedException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.LogInAttemptRejectedException;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
@@ -28,13 +28,13 @@ public class EnvelopesQueueConsumeTaskTest {
     private EnvelopesQueueConsumeTask queueConsumeTask;
 
     @BeforeEach
-    public void setUp() throws AccountLockedException {
+    public void setUp() throws LogInAttemptRejectedException {
         queueConsumeTask = new EnvelopesQueueConsumeTask(
             envelopeEventProcessor,
             processingReadinessChecker
         );
 
-        given(processingReadinessChecker.isNoAccountLockedInIdam()).willReturn(true);
+        given(processingReadinessChecker.isNoLogInAttemptRejectedByIdam()).willReturn(true);
     }
 
     @Test
@@ -47,19 +47,19 @@ public class EnvelopesQueueConsumeTaskTest {
 
         // then
         verify(envelopeEventProcessor, times(4)).processNextMessage();
-        verify(processingReadinessChecker, times(4)).isNoAccountLockedInIdam();
+        verify(processingReadinessChecker, times(4)).isNoLogInAttemptRejectedByIdam();
     }
 
     @Test
     public void consumeMessages_does_not_process_when_account_locked_in_idam() throws Exception {
         // given
-        given(processingReadinessChecker.isNoAccountLockedInIdam()).willReturn(false);
+        given(processingReadinessChecker.isNoLogInAttemptRejectedByIdam()).willReturn(false);
 
         // when
         queueConsumeTask.consumeMessages();
 
         // then
-        verify(processingReadinessChecker, times(1)).isNoAccountLockedInIdam();
+        verify(processingReadinessChecker, times(1)).isNoLogInAttemptRejectedByIdam();
         verify(envelopeEventProcessor, never()).processNextMessage();
     }
 
@@ -73,6 +73,6 @@ public class EnvelopesQueueConsumeTaskTest {
 
         // then
         verify(envelopeEventProcessor, times(1)).processNextMessage();
-        verify(processingReadinessChecker, times(1)).isNoAccountLockedInIdam();
+        verify(processingReadinessChecker, times(1)).isNoLogInAttemptRejectedByIdam();
     }
 }

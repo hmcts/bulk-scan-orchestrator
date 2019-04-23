@@ -22,13 +22,13 @@ import static org.mockito.Mockito.verify;
 @IntegrationTest
 public class QueueProcessingReadinessCheckerTest {
 
-    private static final List<JurisdictionConfigurationStatus> STATUS_WITHOUT_ANY_LOCKED_ACCOUNT =
+    private static final List<JurisdictionConfigurationStatus> STATUS_WITHOUT_REJECTIONS =
         ImmutableList.of(
             new JurisdictionConfigurationStatus(
                 "jurisdiction1",
                 false,
-                "forbidden",
-                HttpStatus.FORBIDDEN.value()
+                "serverError",
+                HttpStatus.INTERNAL_SERVER_ERROR.value()
             ),
             new JurisdictionConfigurationStatus(
                 "jurisdiction2",
@@ -36,7 +36,7 @@ public class QueueProcessingReadinessCheckerTest {
             )
         );
 
-    private static final List<JurisdictionConfigurationStatus> STATUS_WITH_LOCKED_ACCOUNT =
+    private static final List<JurisdictionConfigurationStatus> STATUS_WITH_REJECTION =
         ImmutableList.of(
             new JurisdictionConfigurationStatus(
                 "jurisdiction1",
@@ -53,35 +53,35 @@ public class QueueProcessingReadinessCheckerTest {
     private QueueProcessingReadinessChecker queueProcessingReadinessChecker;
 
     @Test
-    public void should_start_returning_false_when_account_gets_locked() throws Exception {
+    public void should_start_returning_false_when_idam_rejects_log_in_attempt() throws Exception {
         given(authenticationChecker.checkSignInForAllJurisdictions())
-            .willReturn(STATUS_WITHOUT_ANY_LOCKED_ACCOUNT)
-            .willReturn(STATUS_WITH_LOCKED_ACCOUNT)
-            .willReturn(STATUS_WITHOUT_ANY_LOCKED_ACCOUNT);
+            .willReturn(STATUS_WITHOUT_REJECTIONS)
+            .willReturn(STATUS_WITH_REJECTION)
+            .willReturn(STATUS_WITHOUT_REJECTIONS);
 
-        assertThat(queueProcessingReadinessChecker.isNoAccountLockedInIdam()).isTrue();
-        assertThat(queueProcessingReadinessChecker.isNoAccountLockedInIdam()).isFalse();
+        assertThat(queueProcessingReadinessChecker.isNoLogInAttemptRejectedByIdam()).isTrue();
+        assertThat(queueProcessingReadinessChecker.isNoLogInAttemptRejectedByIdam()).isFalse();
 
         // give hystrix enough time to conclude that it needs to open the circuit (based on stats)
         Thread.sleep(500);
 
-        // even though authenticationChecker should return 'not locked' results from now on,
+        // even though authenticationChecker should return successful results from now on,
         // the circuit should remain open
-        assertThat(queueProcessingReadinessChecker.isNoAccountLockedInIdam()).isFalse();
-        assertThat(queueProcessingReadinessChecker.isNoAccountLockedInIdam()).isFalse();
+        assertThat(queueProcessingReadinessChecker.isNoLogInAttemptRejectedByIdam()).isFalse();
+        assertThat(queueProcessingReadinessChecker.isNoLogInAttemptRejectedByIdam()).isFalse();
 
         verify(authenticationChecker, times(2)).checkSignInForAllJurisdictions();
     }
 
     @Test
-    public void should_keep_returning_true_when_no_account_is_locked() throws Exception {
+    public void should_keep_returning_true_when_idam_accepts_login_attempts() throws Exception {
         given(authenticationChecker.checkSignInForAllJurisdictions())
-            .willReturn(STATUS_WITHOUT_ANY_LOCKED_ACCOUNT);
+            .willReturn(STATUS_WITHOUT_REJECTIONS);
 
         int numberOfChecks = 10;
 
         for (int i = 0; i < numberOfChecks; i++) {
-            assertThat(queueProcessingReadinessChecker.isNoAccountLockedInIdam()).isTrue();
+            assertThat(queueProcessingReadinessChecker.isNoLogInAttemptRejectedByIdam()).isTrue();
         }
 
         verify(authenticationChecker, times(numberOfChecks)).checkSignInForAllJurisdictions();
