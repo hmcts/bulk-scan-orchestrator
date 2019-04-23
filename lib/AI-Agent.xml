@@ -5,5 +5,11 @@
         <BuiltIn enabled="true">
             <HTTP enabled="true"/>
         </BuiltIn>
+        <Class name="com.microsoft.azure.servicebus.IMessageReceiver">
+          <Method name="receive"/>
+        </Class>
+        <Class name="com.microsoft.azure.servicebus.QueueClient">
+          <Method name="send"/>
+        </Class>
     </Instrumentation>
 </ApplicationInsightsAgent>
