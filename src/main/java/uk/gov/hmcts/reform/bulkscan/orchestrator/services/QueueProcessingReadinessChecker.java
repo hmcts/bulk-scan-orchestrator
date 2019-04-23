@@ -92,8 +92,7 @@ public class QueueProcessingReadinessChecker {
         return authenticationChecker
             .checkSignInForAllJurisdictions()
             .stream()
-            // any 4xx error is a rejection
-            .filter(status -> status.errorResponseStatus != null && status.errorResponseStatus / 100 == 4)
+            .filter(status -> status.isClientError())
             .map(status -> status.jurisdiction)
             .collect(toList());
     }
