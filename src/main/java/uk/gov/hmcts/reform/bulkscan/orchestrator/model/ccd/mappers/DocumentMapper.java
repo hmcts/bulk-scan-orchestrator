@@ -21,16 +21,17 @@ public class DocumentMapper {
     public static List<CcdCollectionElement<ScannedDocument>> mapDocuments(
         List<Document> documents,
         String dmApiUrl,
-        String contextPath
+        String contextPath,
+        Instant deliveryDate
     ) {
         return documents
             .stream()
-            .map(document -> mapDocument(document, dmApiUrl, contextPath))
+            .map(document -> mapDocument(document, dmApiUrl, contextPath, deliveryDate))
             .map(CcdCollectionElement::new)
             .collect(Collectors.toList());
     }
 
-    public static ScannedDocument mapDocument(Document document, String dmApiUrl, String contextPath) {
+    public static ScannedDocument mapDocument(Document document, String dmApiUrl, String contextPath, Instant deliveryDate) {
         if (document == null) {
             return null;
         } else {

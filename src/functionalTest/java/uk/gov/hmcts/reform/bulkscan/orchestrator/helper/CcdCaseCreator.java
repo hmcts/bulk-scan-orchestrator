@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,19 +45,19 @@ public class CcdCaseCreator {
         this.supplementaryEvidenceMapper = supplementaryEvidenceMapper;
     }
 
-    public CaseDetails createCase(List<Document> documents) {
-        String legacyId = "legacy-id-" + (long)(Math.random() * 100_000_000d);
-        return createCase(legacyId, documents);
+    public CaseDetails createCase(List<Document> documents, Instant deliveryDate) {
+        String legacyId = "legacy-id-" + (long) (Math.random() * 100_000_000d);
+        return createCase(legacyId, documents, deliveryDate);
     }
 
-    public CaseDetails createCase(String legacyId, List<Document> documents) {
+    public CaseDetails createCase(String legacyId, List<Document> documents, Instant deliveryDate) {
         log.info("Creating new case");
         CcdAuthenticator authenticator = ccdAuthenticatorFactory.createForJurisdiction(JURISDICTION);
 
         StartEventResponse startEventResponse = startEventForCreateCase(authenticator);
         log.info("Started {} event for creating a new case", startEventResponse.getEventId());
 
-        CaseDataContent caseDataContent = prepareCaseData(startEventResponse, documents, legacyId);
+        CaseDataContent caseDataContent = prepareCaseData(startEventResponse, documents, legacyId, deliveryDate);
 
         CaseDetails caseDetails = submitNewCase(authenticator, caseDataContent);
         log.info("Submitted {} event for creating a new case", startEventResponse.getEventId());
@@ -67,10 +68,11 @@ public class CcdCaseCreator {
     private CaseDataContent prepareCaseData(
         StartEventResponse startEventResponse,
         List<Document> documents,
-        String legacyId
+        String legacyId,
+        Instant deliveryDate
     ) {
         SupplementaryEvidence supplementaryEvidence =
-            supplementaryEvidenceMapper.map(emptyList(), documents);
+            supplementaryEvidenceMapper.map(emptyList(), documents, deliveryDate);
 
         Map<String, Object> eventData = new HashMap<>();
         eventData.put("evidenceHandled", supplementaryEvidence.evidenceHandled);

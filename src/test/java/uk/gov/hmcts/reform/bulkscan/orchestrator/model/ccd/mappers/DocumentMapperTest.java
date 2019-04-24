@@ -17,6 +17,7 @@ class DocumentMapperTest {
     @Test
     void should_map_document_properly() {
         // given
+        Instant deliveryDate = Instant.now();
         Document doc = new Document(
             "name.zip",
             "123",
@@ -28,7 +29,7 @@ class DocumentMapperTest {
         );
 
         // when
-        ScannedDocument result = DocumentMapper.mapDocument(doc, "https://localhost", "files");
+        ScannedDocument result = DocumentMapper.mapDocument(doc, "https://localhost", "files", deliveryDate);
 
         // then
         assertThat(result)
@@ -52,7 +53,7 @@ class DocumentMapperTest {
         Document doc = null;
 
         // when
-        ScannedDocument result = DocumentMapper.mapDocument(doc, "https://localhost", "files");
+        ScannedDocument result = DocumentMapper.mapDocument(doc, "https://localhost", "files", Instant.now());
 
         // then
         assertThat(result).isNull();
@@ -64,7 +65,7 @@ class DocumentMapperTest {
         Document doc = new Document("name.zip", "123", "type", "subtype", null, "uuid1", Instant.now());
 
         // when
-        ScannedDocument result = DocumentMapper.mapDocument(doc, "https://localhost", "files");
+        ScannedDocument result = DocumentMapper.mapDocument(doc, "https://localhost", "files", Instant.now());
 
         // then
         assertThat(result.scannedDate).isNull();

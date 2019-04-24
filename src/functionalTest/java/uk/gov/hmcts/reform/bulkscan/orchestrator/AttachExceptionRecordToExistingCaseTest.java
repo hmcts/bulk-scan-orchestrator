@@ -85,7 +85,7 @@ class AttachExceptionRecordToExistingCaseTest {
     @Test
     public void should_attach_exception_record_to_the_existing_case_with_no_evidence() throws Exception {
         //given
-        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList());
+        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
         // when
@@ -104,9 +104,12 @@ class AttachExceptionRecordToExistingCaseTest {
     public void should_attach_exception_record_to_the_existing_case_with_evidence_documents() throws Exception {
         //given
         CaseDetails caseDetails =
-            ccdCaseCreator.createCase(singletonList(
-                new Document("certificate1.pdf", "154565768", "other", null, Instant.now(), documentUuid)
-            ));
+            ccdCaseCreator.createCase(
+                singletonList(
+                    new Document("certificate1.pdf", "154565768", "other", null, Instant.now(), documentUuid, Instant.now())
+                ),
+                Instant.now()
+            );
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
         // when
@@ -141,14 +144,14 @@ class AttachExceptionRecordToExistingCaseTest {
      * reference type - CCD ID, external ID or no type provided.
      *
      * @param searchCaseReferenceType Specifies how the exception record should reference the case.
-     *      Possible values can be found in
-     *      @see uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes
-     *      and correspond to ReferenceType list in exception record definition.
-     *      If null, case is referenced the old way - via attachToCaseReference field
+     *                                Possible values can be found in
+     * @see uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes
+     * and correspond to ReferenceType list in exception record definition.
+     * If null, case is referenced the old way - via attachToCaseReference field
      */
     private void verifyExceptionRecordAttachesToCase(String searchCaseReferenceType) throws Exception {
         //given
-        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList());
+        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
 
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
@@ -168,10 +171,10 @@ class AttachExceptionRecordToExistingCaseTest {
      * Hits the services callback endpoint with a request to attach exception record to a case.
      *
      * @param searchCaseReferenceType Specifies how the exception record should reference the case.
-     *      Possible values can be found in
-     *      @see uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes
-     *      and correspond to ReferenceType list in exception record definition.
-     *      If null, case is referenced the old way - via attachToCaseReference field
+     *                                Possible values can be found in
+     * @see uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes
+     * and correspond to ReferenceType list in exception record definition.
+     * If null, case is referenced the old way - via attachToCaseReference field
      */
     private void invokeCallbackEndpoint(
         CaseDetails targetCaseDetails,

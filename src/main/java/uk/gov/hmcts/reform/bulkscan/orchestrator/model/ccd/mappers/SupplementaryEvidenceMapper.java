@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.SupplementaryEvidence;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -26,7 +27,7 @@ public class SupplementaryEvidenceMapper {
         this.contextPath = contextPath;
     }
 
-    public SupplementaryEvidence map(List<Document> existingDocs, List<Document> envelopeDocs) {
+    public SupplementaryEvidence map(List<Document> existingDocs, List<Document> envelopeDocs, Instant deliveryDate) {
         return new SupplementaryEvidence(
             mapDocuments(
                 Stream.concat(
@@ -34,7 +35,8 @@ public class SupplementaryEvidenceMapper {
                     getDocsToAdd(existingDocs, envelopeDocs).stream()
                 ).collect(toList()),
                 documentManagementUrl,
-                contextPath
+                contextPath,
+            deliveryDate
             )
         );
     }

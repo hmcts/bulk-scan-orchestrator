@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.tuple;
 class SupplementaryEvidenceMapperTest {
 
     private static final SupplementaryEvidenceMapper mapper = new SupplementaryEvidenceMapper("http://localhost", "files");
+    Instant deliveryDate = Instant.now();
 
     @Test
     void maps_all_fields_correctly() {
@@ -36,7 +37,7 @@ class SupplementaryEvidenceMapperTest {
             );
 
         // when
-        SupplementaryEvidence result = mapper.map(existingDocs, envelopeDocs);
+        SupplementaryEvidence result = mapper.map(existingDocs, envelopeDocs, deliveryDate);
 
         // then
         assertThat(result.evidenceHandled).isEqualTo("No");
@@ -76,7 +77,7 @@ class SupplementaryEvidenceMapperTest {
             );
 
         // when
-        SupplementaryEvidence result = mapper.map(existingDocs, envelopeDocs);
+        SupplementaryEvidence result = mapper.map(existingDocs, envelopeDocs, deliveryDate);
 
         // then
         assertThat(result.evidenceHandled).isEqualTo("No");
@@ -108,7 +109,7 @@ class SupplementaryEvidenceMapperTest {
             );
 
         // when
-        SupplementaryEvidence result = mapper.map(existingDocs, envelopeDocs);
+        SupplementaryEvidence result = mapper.map(existingDocs, envelopeDocs, deliveryDate);
 
         // then
         assertThat(result.scannedDocuments).hasSize(3); // only one doc should be added
@@ -128,7 +129,7 @@ class SupplementaryEvidenceMapperTest {
         List<Document> envelopeDocuments = emptyList();
 
         // when
-        SupplementaryEvidence result = mapper.map(existingDocuments, envelopeDocuments);
+        SupplementaryEvidence result = mapper.map(existingDocuments, envelopeDocuments, deliveryDate);
 
         // then
         assertThat(result.scannedDocuments).isEmpty();
