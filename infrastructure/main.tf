@@ -30,6 +30,7 @@ locals {
     DIVORCE = "idam-users-div"
     PROBATE = "idam-users-probate"
     FINREM = "idam-users-finrem"
+    CMC = "idam-users-cmc"
   }
 
   all_jurisdictions     = "${keys(local.users)}"
