@@ -19,7 +19,6 @@ import static org.assertj.core.api.Assertions.tuple;
 class SupplementaryEvidenceMapperTest {
 
     private static final SupplementaryEvidenceMapper mapper = new SupplementaryEvidenceMapper();
-    Instant deliveryDate = Instant.now();
 
     @Test
     void maps_all_fields_correctly() {
@@ -35,6 +34,7 @@ class SupplementaryEvidenceMapperTest {
                 new Document("x.pdf", "xxx", "type_x", "subtype_x", now().plusSeconds(3), "http://localhost/x.pdf"),
                 new Document("y.pdf", "yyy", "type_y", "subtype_y", now().plusSeconds(4), "http://localhost/y.pdf")
             );
+        Instant deliveryDate = now();
 
         // when
         SupplementaryEvidence result = mapper.map(existingDocs, envelopeDocs, deliveryDate);
@@ -77,7 +77,7 @@ class SupplementaryEvidenceMapperTest {
             );
 
         // when
-        SupplementaryEvidence result = mapper.map(existingDocs, envelopeDocs, deliveryDate);
+        SupplementaryEvidence result = mapper.map(existingDocs, envelopeDocs, now());
 
         // then
         assertThat(result.evidenceHandled).isEqualTo("No");
@@ -109,7 +109,7 @@ class SupplementaryEvidenceMapperTest {
             );
 
         // when
-        SupplementaryEvidence result = mapper.map(existingDocs, envelopeDocs, deliveryDate);
+        SupplementaryEvidence result = mapper.map(existingDocs, envelopeDocs, now());
 
         // then
         assertThat(result.scannedDocuments).hasSize(3); // only one doc should be added
@@ -129,7 +129,7 @@ class SupplementaryEvidenceMapperTest {
         List<Document> envelopeDocuments = emptyList();
 
         // when
-        SupplementaryEvidence result = mapper.map(existingDocuments, envelopeDocuments, deliveryDate);
+        SupplementaryEvidence result = mapper.map(existingDocuments, envelopeDocuments, now());
 
         // then
         assertThat(result.scannedDocuments).isEmpty();

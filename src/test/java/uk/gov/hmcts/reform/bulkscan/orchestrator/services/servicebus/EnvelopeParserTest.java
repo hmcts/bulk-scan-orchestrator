@@ -29,7 +29,6 @@ class EnvelopeParserTest {
 
     private Envelope envelope;
     private Instant scannedAt = Instant.now();
-    private Instant deliveryDate = Instant.now();
 
     @BeforeAll
     static void init() {
