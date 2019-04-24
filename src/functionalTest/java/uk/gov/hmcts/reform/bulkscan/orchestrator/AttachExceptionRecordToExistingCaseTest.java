@@ -37,7 +37,8 @@ import static org.awaitility.Awaitility.await;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getScannedDocuments;
 
 @SpringBootTest
-@ActiveProfiles("nosb") // no servicebus queue handler registration
+@ActiveProfiles("nosb")
+    // no servicebus queue handler registration
 class AttachExceptionRecordToExistingCaseTest {
 
     @Value("${test-url}")
@@ -72,7 +73,7 @@ class AttachExceptionRecordToExistingCaseTest {
     @Test
     void should_attach_exception_record_to_the_existing_case_with_no_evidence() throws Exception {
         //given
-        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList());
+        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
         // when
@@ -91,9 +92,10 @@ class AttachExceptionRecordToExistingCaseTest {
     void should_attach_exception_record_to_the_existing_case_with_evidence_documents() throws Exception {
         //given
         CaseDetails caseDetails =
-            ccdCaseCreator.createCase(singletonList(
-                new Document("certificate1.pdf", "154565768", "other", null, Instant.now(), dmUrl, Instant.now())
-            ));
+            ccdCaseCreator.createCase(
+                singletonList(new Document("certificate1.pdf", "154565768", "other", null, Instant.now(), dmUrl)),
+                Instant.now()
+            );
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
         // when

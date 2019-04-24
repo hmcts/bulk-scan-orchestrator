@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import java.time.Instant;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
@@ -40,14 +41,14 @@ public class CcdCaseCreator {
         this.coreCaseDataApi = coreCaseDataApi;
     }
 
-    public CaseDetails createCase(List<Document> documents) {
+    public CaseDetails createCase(List<Document> documents, Instant deliveryDate) {
         log.info("Creating new case");
         CcdAuthenticator authenticator = ccdAuthenticatorFactory.createForJurisdiction(JURISDICTION);
 
         StartEventResponse startEventResponse = startEventForCreateCase(authenticator);
         log.info("Started {} event for creating a new case", startEventResponse.getEventId());
 
-        CaseDataContent caseDataContent = prepareCaseData(startEventResponse, documents);
+        CaseDataContent caseDataContent = prepareCaseData(startEventResponse, documents, deliveryDate);
 
         CaseDetails caseDetails = submitNewCase(authenticator, caseDataContent);
         log.info("Submitted {} event for creating a new case", startEventResponse.getEventId());
@@ -55,7 +56,11 @@ public class CcdCaseCreator {
         return caseDetails;
     }
 
-    private CaseDataContent prepareCaseData(StartEventResponse startEventResponse, List<Document> documents) {
+    private CaseDataContent prepareCaseData(
+        StartEventResponse startEventResponse,
+        List<Document> documents,
+        Instant deliveryDate
+    ) {
         return CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
             .event(Event.builder()
@@ -63,7 +68,7 @@ public class CcdCaseCreator {
                 .summary("create new case")
                 .description("create new case for tests")
                 .build())
-            .data(supplementaryEvidenceMapper.map(emptyList(), documents))
+            .data(supplementaryEvidenceMapper.map(emptyList(), documents, deliveryDate))
             .build();
     }
 

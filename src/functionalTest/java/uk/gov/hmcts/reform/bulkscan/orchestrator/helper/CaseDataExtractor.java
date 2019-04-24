@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Docum
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -30,7 +31,7 @@ public class CaseDataExtractor {
 
     public static List<ScannedDocument> getScannedDocuments(Envelope envelope) {
         List<Document> documents = envelope.documents;
-        return documents.stream().map(CaseDataExtractor::mapDocument).collect(toList());
+        return documents.stream().map(document -> mapDocument(document, envelope.deliveryDate)).collect(toList());
     }
 
     @SuppressWarnings("unchecked")
@@ -53,7 +54,7 @@ public class CaseDataExtractor {
         }
     }
 
-    private static ScannedDocument mapDocument(Document document) {
+    private static ScannedDocument mapDocument(Document document, Instant deliveryDate) {
         return new ScannedDocument(
             document.fileName,
             document.controlNumber,
@@ -61,7 +62,7 @@ public class CaseDataExtractor {
             document.subtype,
             ZonedDateTime.ofInstant(document.scannedAt, ZoneId.systemDefault()).toLocalDateTime(),
             new CcdDocument(String.valueOf(document.url)),
-            ZonedDateTime.ofInstant(document.deliveryDate, ZoneId.systemDefault()).toLocalDateTime(),
+            ZonedDateTime.ofInstant(deliveryDate, ZoneId.systemDefault()).toLocalDateTime(),
             null
         );
     }

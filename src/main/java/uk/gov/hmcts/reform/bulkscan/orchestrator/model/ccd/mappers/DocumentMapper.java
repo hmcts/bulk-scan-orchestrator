@@ -18,15 +18,17 @@ public class DocumentMapper {
         // util class
     }
 
-    public static List<CcdCollectionElement<ScannedDocument>> mapDocuments(List<Document> documents) {
+    public static List<CcdCollectionElement<ScannedDocument>> mapDocuments(
+        List<Document> documents, Instant deliveryDate
+    ) {
         return documents
             .stream()
-            .map(DocumentMapper::mapDocument)
+            .map(document -> mapDocument(document, deliveryDate))
             .map(CcdCollectionElement::new)
             .collect(Collectors.toList());
     }
 
-    public static ScannedDocument mapDocument(Document document) {
+    public static ScannedDocument mapDocument(Document document, Instant deliveryDate) {
         if (document == null) {
             return null;
         } else {
@@ -37,7 +39,7 @@ public class DocumentMapper {
                 document.subtype,
                 getLocalDateTime(document.scannedAt),
                 new CcdDocument(document.url),
-                getLocalDateTime(document.deliveryDate),
+                getLocalDateTime(deliveryDate),
                 null
             );
         }

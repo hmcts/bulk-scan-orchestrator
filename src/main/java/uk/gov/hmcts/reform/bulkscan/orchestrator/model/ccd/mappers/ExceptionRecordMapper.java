@@ -27,7 +27,7 @@ public class ExceptionRecordMapper {
             envelope.jurisdiction,
             getLocalDateTime(envelope.deliveryDate),
             getLocalDateTime(envelope.openingDate),
-            mapDocuments(envelope.documents),
+            mapDocuments(envelope.documents, envelope.deliveryDate),
             mapOcrData(envelope.ocrData)
         );
     }

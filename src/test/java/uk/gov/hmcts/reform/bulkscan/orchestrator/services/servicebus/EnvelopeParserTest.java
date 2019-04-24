@@ -55,8 +55,7 @@ class EnvelopeParserTest {
                     "doc1_type",
                     "doc1_subtype",
                     scannedAt,
-                    "doc1_url",
-                    deliveryDate
+                    "doc1_url"
                 ),
                 new Document(
                     "doc2_file_name",
@@ -64,8 +63,7 @@ class EnvelopeParserTest {
                     "doc2_type",
                     null,
                     scannedAt,
-                    "doc2_url",
-                    deliveryDate
+                    "doc2_url"
                 )
             ),
             ImmutableList.of(
@@ -111,8 +109,7 @@ class EnvelopeParserTest {
                     doc.type,
                     doc.subtype,
                     doc.scannedAt,
-                    doc.url,
-                    doc.deliveryDate)
+                    doc.url)
             )
             .containsOnly(
                 tuple(
@@ -121,8 +118,7 @@ class EnvelopeParserTest {
                     "doc1_type",
                     "doc1_subtype",
                     scannedAt,
-                    "doc1_url",
-                    deliveryDate
+                    "doc1_url"
                 ),
                 tuple(
                     "doc2_file_name",
@@ -130,8 +126,7 @@ class EnvelopeParserTest {
                     "doc2_type",
                     null,
                     scannedAt,
-                    "doc2_url",
-                    deliveryDate
+                    "doc2_url"
                 )
             );
     }
@@ -242,8 +237,7 @@ class EnvelopeParserTest {
             .put("type", doc.type)
             .put("subtype", doc.subtype)
             .put("scanned_at", toIso8601(doc.scannedAt))
-            .put("url", doc.url)
-            .put("delivery_date", toIso8601(doc.deliveryDate));
+            .put("url", doc.url);
     }
 
     private JSONArray toOcrJson(List<OcrDataField> ocrDataFields) throws JSONException {

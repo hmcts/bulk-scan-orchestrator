@@ -45,7 +45,7 @@ class SupplementaryEvidenceTest {
     void should_attach_supplementary_evidence_to_the_case_with_no_evidence_docs() throws Exception {
         //given
         String dmUrl = dmUploadService.uploadToDmStore("Evidence2.pdf", "documents/supplementary-evidence.pdf");
-        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList());
+        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
 
         // when
         envelopeMessager.sendMessageFromFile(
@@ -72,8 +72,9 @@ class SupplementaryEvidenceTest {
         CaseDetails caseDetails =
             ccdCaseCreator.createCase(
                 singletonList(
-                    new Document("evidence.pdf", "123", "other", null, Instant.now(), dmUrlOriginal, Instant.now())
-                ));
+                    new Document("evidence.pdf", "123", "other", null, Instant.now(), dmUrlOriginal)
+                ),
+                Instant.now());
 
         // when
         envelopeMessager.sendMessageFromFile(

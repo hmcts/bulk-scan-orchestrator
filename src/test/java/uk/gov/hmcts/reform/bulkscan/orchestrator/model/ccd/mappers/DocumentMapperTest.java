@@ -17,18 +17,18 @@ class DocumentMapperTest {
     @Test
     void should_map_document_properly() {
         // given
+        Instant deliveryDate = Instant.now();
         Document doc = new Document(
             "name.zip",
             "123",
             "type",
             "subtype",
             Instant.now(),
-            "https://localthost/files/1",
-            Instant.now()
+            "https://localthost/files/1"
         );
 
         // when
-        ScannedDocument result = DocumentMapper.mapDocument(doc);
+        ScannedDocument result = DocumentMapper.mapDocument(doc, deliveryDate);
 
         // then
         assertThat(result)
@@ -40,7 +40,7 @@ class DocumentMapperTest {
                     doc.subtype,
                     toLocalDateTime(doc.scannedAt),
                     new CcdDocument(doc.url),
-                    toLocalDateTime(doc.deliveryDate),
+                    toLocalDateTime(deliveryDate),
                     null // this should always be null;
                 )
             );
@@ -52,7 +52,7 @@ class DocumentMapperTest {
         Document doc = null;
 
         // when
-        ScannedDocument result = DocumentMapper.mapDocument(doc);
+        ScannedDocument result = DocumentMapper.mapDocument(doc, Instant.now());
 
         // then
         assertThat(result).isNull();
@@ -62,10 +62,10 @@ class DocumentMapperTest {
     void should_map_null_scanned_date() {
         // given
         Document doc = new Document(
-            "name.zip", "123", "type", "subtype", null, "https://localthost/files/1", Instant.now());
+            "name.zip", "123", "type", "subtype", null, "https://localthost/files/1");
 
         // when
-        ScannedDocument result = DocumentMapper.mapDocument(doc);
+        ScannedDocument result = DocumentMapper.mapDocument(doc, Instant.now());
 
         // then
         assertThat(result.scannedDate).isNull();

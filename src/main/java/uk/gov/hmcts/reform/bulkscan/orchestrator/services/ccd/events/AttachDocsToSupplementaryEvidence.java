@@ -38,7 +38,8 @@ class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
     CaseData buildCaseData(StartEventResponse eventResponse, Envelope envelope) {
         return mapper.map(
             getDocuments(eventResponse.getCaseDetails()),
-            envelope.documents
+            envelope.documents,
+            envelope.deliveryDate
         );
     }
 }
