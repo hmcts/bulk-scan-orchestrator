@@ -173,7 +173,8 @@ public class SampleData {
                     String.format("type_%s", index),
                     String.format("subtype_%s", index),
                     ZonedDateTime.parse("2018-10-01T00:00:00Z").plus(index, DAYS).toInstant(),
-                    String.format("uuid%s", index)
+                    String.format("uuid%s", index),
+                    ZonedDateTime.parse("2018-10-01T00:00:00Z").minus(index, DAYS).toInstant()
                 )
             ).limit(numberOfDocuments)
             .collect(Collectors.toList());
