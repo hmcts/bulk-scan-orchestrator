@@ -66,15 +66,15 @@ class SupplementaryEvidenceMapperTest {
         // given
         List<Document> existingDocs =
             asList(
-                new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "uuida", now().minusSeconds(10),
-                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "uuidb", now().minusSeconds(10)
+                new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "uuida", now().minusSeconds(10)),
+                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "uuidb", now().minusSeconds(10))
             );
 
         List<Document> envelopeDocs =
             asList(
-                new Document("a1.pdf", "aaa1", "type_a1", "subtype_a1", now().plusSeconds(3), "uuida", now().minusSeconds(10), // same url!
+                new Document("a1.pdf", "aaa1", "type_a1", "subtype_a1", now().plusSeconds(3), "uuida", now().minusSeconds(10)), // same url!
                 new Document("b.pdf", "bbb1", "type_b", "subtype_b", now().plusSeconds(4), "uuidxxxxx", now().minusSeconds(10)
-            );
+            ));
 
         // when
         SupplementaryEvidence result = mapper.map(existingDocs, envelopeDocs, deliveryDate);

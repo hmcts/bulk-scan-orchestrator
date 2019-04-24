@@ -102,7 +102,7 @@ class SupplementaryEvidenceTest {
         //given
         String dmUrl = dmUploadService.uploadToDmStore("Evidence2.pdf", "documents/supplementary-evidence.pdf");
         assertThat(dmUrl).isNotNull();
-        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList());
+        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
         String legacyId = (String) caseDetails.getData().get("legacyId");
         assertThat(legacyId).isNotEmpty();
 
