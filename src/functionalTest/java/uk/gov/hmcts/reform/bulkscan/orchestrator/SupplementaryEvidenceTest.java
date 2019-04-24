@@ -72,7 +72,7 @@ class SupplementaryEvidenceTest {
         CaseDetails caseDetails =
             ccdCaseCreator.createCase(
                 singletonList(
-                    new Document("evidence.pdf", "123", "other", null, Instant.now(), dmUrlOriginal)
+                    new Document("evidence.pdf", "123", "other", null, Instant.now(), dmUrlOriginal, Instant.now())
                 ));
 
         // when

@@ -17,6 +17,7 @@ public class ScannedDocument {
     public final String subtype;
     public final String exceptionReference;
     public final LocalDateTime scannedDate;
+    public final LocalDateTime deliveryDate;
     public final CcdDocument url;
 
     public ScannedDocument(
@@ -26,6 +27,7 @@ public class ScannedDocument {
         @JsonProperty("subtype") String subtype,
         @JsonProperty("scannedDate") LocalDateTime scannedDate,
         @JsonProperty("url") CcdDocument url,
+        @JsonProperty("deliveryDate") LocalDateTime deliveryDate,
         @JsonProperty("exceptionRecordReference") String exceptionReference
     ) {
         this.fileName = fileName;
@@ -34,6 +36,7 @@ public class ScannedDocument {
         this.subtype = subtype;
         this.scannedDate = scannedDate;
         this.url = url;
+        this.deliveryDate = deliveryDate;
         this.exceptionReference = exceptionReference;
     }
 
@@ -51,11 +54,12 @@ public class ScannedDocument {
             && Objects.equals(type, that.type)
             && Objects.equals(subtype, that.subtype)
             && Objects.equals(scannedDate, that.scannedDate)
-            && Objects.equals(url, that.url);
+            && Objects.equals(url, that.url)
+            && Objects.equals(deliveryDate, that.deliveryDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fileName, controlNumber, type, scannedDate, url);
+        return Objects.hash(fileName, controlNumber, type, scannedDate, url, deliveryDate);
     }
 }

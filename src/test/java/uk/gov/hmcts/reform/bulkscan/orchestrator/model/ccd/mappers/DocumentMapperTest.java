@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
@@ -22,7 +23,8 @@ class DocumentMapperTest {
             "type",
             "subtype",
             Instant.now(),
-            "https://localthost/files/1"
+            "https://localthost/files/1",
+            Instant.now()
         );
 
         // when
@@ -36,8 +38,9 @@ class DocumentMapperTest {
                     doc.controlNumber,
                     doc.type,
                     doc.subtype,
-                    ZonedDateTime.ofInstant(doc.scannedAt, ZoneId.systemDefault()).toLocalDateTime(),
+                    toLocalDateTime(doc.scannedAt),
                     new CcdDocument(doc.url),
+                    toLocalDateTime(doc.deliveryDate),
                     null // this should always be null;
                 )
             );
@@ -58,12 +61,17 @@ class DocumentMapperTest {
     @Test
     void should_map_null_scanned_date() {
         // given
-        Document doc = new Document("name.zip", "123", "type", "subtype", null, "https://localthost/files/1");
+        Document doc = new Document(
+            "name.zip", "123", "type", "subtype", null, "https://localthost/files/1", Instant.now());
 
         // when
         ScannedDocument result = DocumentMapper.mapDocument(doc);
 
         // then
         assertThat(result.scannedDate).isNull();
+    }
+
+    private LocalDateTime toLocalDateTime(Instant instant) {
+        return ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDateTime();
     }
 }

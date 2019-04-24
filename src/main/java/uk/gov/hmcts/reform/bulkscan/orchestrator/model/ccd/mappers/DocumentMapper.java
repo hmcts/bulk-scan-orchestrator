@@ -37,6 +37,7 @@ public class DocumentMapper {
                 document.subtype,
                 getLocalDateTime(document.scannedAt),
                 new CcdDocument(document.url),
+                getLocalDateTime(document.deliveryDate),
                 null
             );
         }

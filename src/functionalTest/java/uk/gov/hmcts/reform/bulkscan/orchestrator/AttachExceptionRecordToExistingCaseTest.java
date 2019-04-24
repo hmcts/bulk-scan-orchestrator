@@ -92,7 +92,7 @@ class AttachExceptionRecordToExistingCaseTest {
         //given
         CaseDetails caseDetails =
             ccdCaseCreator.createCase(singletonList(
-                new Document("certificate1.pdf", "154565768", "other", null, Instant.now(), dmUrl)
+                new Document("certificate1.pdf", "154565768", "other", null, Instant.now(), dmUrl, Instant.now())
             ));
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
