@@ -54,12 +54,11 @@ public class ScannedDocument {
             && Objects.equals(type, that.type)
             && Objects.equals(subtype, that.subtype)
             && Objects.equals(scannedDate, that.scannedDate)
-            && Objects.equals(url, that.url)
-            && Objects.equals(deliveryDate, that.deliveryDate);
+            && Objects.equals(url, that.url);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fileName, controlNumber, type, scannedDate, url, deliveryDate);
+        return Objects.hash(fileName, controlNumber, type, scannedDate, url);
     }
 }
