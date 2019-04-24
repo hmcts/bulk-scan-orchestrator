@@ -75,11 +75,23 @@ public class AttachCaseCallbackService {
             | CaseNotFoundException
             | InvalidCaseIdException exc
         ) {
-            log.warn(exc.getMessage(), exc);
+            log.warn(
+                "Validation error when attaching ER {} in {} to case {}",
+                exceptionRecordId,
+                exceptionRecordJurisdiction,
+                targetCaseRef,
+                exc
+            );
             return singletonList(exc.getMessage());
 
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
+        } catch (Exception exc) {
+            log.error(
+                "Error attaching ER {} in {} to case {}",
+                exceptionRecordId,
+                exceptionRecordJurisdiction,
+                targetCaseRef,
+                exc
+            );
             return singletonList(INTERNAL_ERROR_MSG);
         }
     }
