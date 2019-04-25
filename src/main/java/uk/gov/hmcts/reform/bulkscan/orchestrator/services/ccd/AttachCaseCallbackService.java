@@ -70,12 +70,28 @@ public class AttachCaseCallbackService {
             log.info("Successfully attached exception record {} to case {}", exceptionRecordId, targetCaseRef);
             return emptyList();
 
-        } catch (AlreadyAttachedToCaseException | DuplicateDocsException | CaseNotFoundException exc) {
-            log.warn(exc.getMessage(), exc);
+        } catch (AlreadyAttachedToCaseException
+            | DuplicateDocsException
+            | CaseNotFoundException
+            | InvalidCaseIdException exc
+        ) {
+            log.warn(
+                "Validation error when attaching ER {} in {} to case {}",
+                exceptionRecordId,
+                exceptionRecordJurisdiction,
+                targetCaseRef,
+                exc
+            );
             return singletonList(exc.getMessage());
 
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
+        } catch (Exception exc) {
+            log.error(
+                "Error attaching ER {} in {} to case {}",
+                exceptionRecordId,
+                exceptionRecordJurisdiction,
+                targetCaseRef,
+                exc
+            );
             return singletonList(INTERNAL_ERROR_MSG);
         }
     }

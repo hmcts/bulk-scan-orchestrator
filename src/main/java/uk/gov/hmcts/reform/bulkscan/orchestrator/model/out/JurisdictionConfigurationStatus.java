@@ -33,4 +33,10 @@ public class JurisdictionConfigurationStatus {
     ) {
         this(jurisdiction, isCorrect, null, null);
     }
+
+    public boolean isClientError() {
+        return errorResponseStatus != null
+            && errorResponseStatus >= 400
+            && errorResponseStatus < 500;
+    }
 }

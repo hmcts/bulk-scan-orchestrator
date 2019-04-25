@@ -43,10 +43,10 @@ public class FunctionalQueueConfig {
                 );
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
+                throw new ConnectionException("Unable to connect to the dlq", e);
             } catch (ServiceBusException e) {
                 throw new ConnectionException("Unable to connect to the dlq", e);
             }
-            return null;
         };
 
     }

@@ -30,6 +30,7 @@ locals {
     DIVORCE = "idam-users-div"
     PROBATE = "idam-users-probate"
     FINREM = "idam-users-finrem"
+    CMC = "idam-users-cmc"
   }
 
   all_jurisdictions     = "${keys(local.users)}"
@@ -93,6 +94,7 @@ module "bulk-scan-orchestrator" {
   asp_name                        = "${var.product}-${var.env}"
   asp_rg                          = "${var.product}-${var.env}"
   instance_size                   = "${local.sku_size}"
+  java_container_version          = "9.0"
 
   app_settings = "${merge(local.core_app_settings, local.users_usernames_settings, local.users_passwords_settings)}"
 }

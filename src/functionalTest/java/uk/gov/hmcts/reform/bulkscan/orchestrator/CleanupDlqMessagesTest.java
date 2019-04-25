@@ -65,7 +65,7 @@ public class CleanupDlqMessagesTest {
         try {
             messageReceiver = dlqReceiverProvider.get();
             message = messageReceiver.receive();
-            return message != null;
+            return message == null;
         } finally {
             if (messageReceiver != null) {
                 try {
