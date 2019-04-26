@@ -39,18 +39,18 @@ public class CaseSearcher {
 
         sleepUninterruptibly(5, TimeUnit.SECONDS);
 
-        LocalDate before = LocalDate.now();
+        //LocalDate before = LocalDate.now();
         SearchResult searchResult = coreCaseDataApi.searchCases(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
             "Bulk_Scanned",
-            "{ \"query\": { \"match_all\": {} }, \"size\": 10, \"_source\": [\"jurisdiction\", \"data.firstName\"]}"
+            "{ \"query\": { \"match_all\": {} }, \"size\": 10, \"_source\": [\"id\", \"data.firstName\"]}"
         );
-        LocalDate after = LocalDate.now();
+        //LocalDate after = LocalDate.now();
 
-        long millisTaken = Duration.between(before, after).toMillis();
-
-        assertThat(millisTaken).isEqualTo(123);
+        //        long millisTaken = Duration.between(before, after).toMillis();
+        //
+        //        assertThat(millisTaken).isEqualTo(123);
 
         //    "{ \"query\":{ \"match\":{ \"data.poBox\":\"TESTPO\"}}}"
 
