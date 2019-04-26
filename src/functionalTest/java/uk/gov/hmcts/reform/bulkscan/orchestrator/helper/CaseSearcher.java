@@ -40,8 +40,8 @@ public class CaseSearcher {
         SearchResult searchResult = coreCaseDataApi.searchCases(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
-            "BULKSCAN_ExceptionRecord,Bulk_Scanned",
-            "{ \"query\": { \"match_all\": {} }, \"size\": 1}"
+            "Bulk_Scanned",
+            "{ \"query\": { \"match_all\": {} }, \"size\": 1, \"_source\": [\"jurisdiction\", \"data.firstName\"]}"
         );
 
         //    "{ \"query\":{ \"match\":{ \"data.poBox\":\"TESTPO\"}}}"
