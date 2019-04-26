@@ -41,12 +41,16 @@ public class CaseSearcher {
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
             caseTypeId,
-            "{ \"query\":{ \"term\":{ \"data.poBox\":\"TESTPO\"}}}"
+            "{ \"query\": { \"match_all\": {} }, \"size\": 1}"
         );
+
+        //    "{ \"query\":{ \"match\":{ \"data.poBox\":\"TESTPO\"}}}"
 
         //    "{ \"query\": { \"match_all\": {} }, \"size\": 50}"
 
         int elasticSearchResultCount = searchResult.getCases().size();
+
+        assertThat(elasticSearchResultCount).isEqualTo(-1);
 
         assertThat(searchResult.getCases().get(0).getData()).isEqualTo(ImmutableMap.of());
 
