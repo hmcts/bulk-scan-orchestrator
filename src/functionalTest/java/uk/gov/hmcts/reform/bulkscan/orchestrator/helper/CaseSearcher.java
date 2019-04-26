@@ -8,6 +8,9 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -37,17 +40,20 @@ public class CaseSearcher {
 
         sleepUninterruptibly(5, TimeUnit.SECONDS);
 
-        //LocalDate before = LocalDate.now();
+        Instant before = Instant.now();
         SearchResult searchResult = coreCaseDataApi.searchCases(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
             "Bulk_Scanned,BULKSCAN_ExceptionRecord",
-            "{ \"query\": { \"match_all\": {} }, \"size\": 5}"
+            "{ \"size\": 10, \"query\":{ \"match\":{ \"data.poBox\":\"TESTPO\"}}}"
         );
-        //LocalDate after = LocalDate.now();
+        Instant after = Instant.now();
 
         //        long millisTaken = Duration.between(before, after).toMillis();
         //
+
+        long millisTaken = Duration.between(before, after).toMillis();
+        System.out.println("Search millis taken: " + millisTaken);
         //        assertThat(millisTaken).isEqualTo(123);
 
         //    "{ \"query\":{ \"match\":{ \"data.poBox\":\"TESTPO\"}}}"
@@ -56,9 +62,7 @@ public class CaseSearcher {
 
         int elasticSearchResultCount = searchResult.getCases().size();
 
-        assertThat(searchResult.getCases().get(0).getData()).isEqualTo(ImmutableMap.of());
-        assertThat(searchResult.getCases().get(5).getData()).isEqualTo(ImmutableMap.of());
-        assertThat(searchResult.getCases().get(0).getId()).isEqualTo(-1);
+        assertThat(searchResult.getCases().get(0)).isEqualTo(3);
 
         List<CaseDetails> result = coreCaseDataApi.searchForCaseworker(
             authenticator.getUserToken(),
