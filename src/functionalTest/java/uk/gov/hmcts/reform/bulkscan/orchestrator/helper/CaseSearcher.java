@@ -41,7 +41,7 @@ public class CaseSearcher {
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
             "Bulk_Scanned",
-            "{ \"query\": { \"match_all\": {} }, \"size\": 1, \"_source\": [\"jurisdiction\", \"data.firstName\"]}"
+            "{ \"query\": { \"match_all\": {} }, \"size\": 10, \"_source\": [\"jurisdiction\", \"data.firstName\"]}"
         );
 
         //    "{ \"query\":{ \"match\":{ \"data.poBox\":\"TESTPO\"}}}"
