@@ -40,7 +40,7 @@ public class CaseSearcher {
         SearchResult searchResult = coreCaseDataApi.searchCases(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
-            caseTypeId,
+            "BULKSCAN_ExceptionRecord,Bulk_Scanned",
             "{ \"query\": { \"match_all\": {} }, \"size\": 1}"
         );
 
