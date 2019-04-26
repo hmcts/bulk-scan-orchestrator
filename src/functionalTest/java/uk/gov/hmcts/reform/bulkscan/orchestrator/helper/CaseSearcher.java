@@ -42,7 +42,7 @@ public class CaseSearcher {
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
             "Bulk_Scanned,BULKSCAN_ExceptionRecord",
-            "{ \"query\": { \"match_all\": {} }, \"size\": 10, \"_source\": [\"id\"]}"
+            "{ \"_source\": [\"id\"], \"query\": { \"match_all\": {} }, \"size\": 5}"
         );
         //LocalDate after = LocalDate.now();
 
@@ -57,6 +57,8 @@ public class CaseSearcher {
         int elasticSearchResultCount = searchResult.getCases().size();
 
         assertThat(searchResult.getCases().get(0).getData()).isEqualTo(ImmutableMap.of());
+        assertThat(searchResult.getCases().get(1).getData()).isEqualTo(ImmutableMap.of());
+        assertThat(searchResult.getCases().get(0).getId()).isEqualTo(-1);
 
         List<CaseDetails> result = coreCaseDataApi.searchForCaseworker(
             authenticator.getUserToken(),
