@@ -42,7 +42,7 @@ public class CaseSearcher {
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
             "Bulk_Scanned,BULKSCAN_ExceptionRecord",
-            "{ \"_source\": [\"id\"], \"query\": { \"match_all\": {} }, \"size\": 5}"
+            "{ \"query\": { \"match_all\": {} }, \"size\": 5}"
         );
         //LocalDate after = LocalDate.now();
 
