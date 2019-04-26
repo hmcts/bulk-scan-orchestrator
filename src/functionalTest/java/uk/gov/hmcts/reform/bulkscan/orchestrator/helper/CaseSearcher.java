@@ -50,8 +50,6 @@ public class CaseSearcher {
 
         int elasticSearchResultCount = searchResult.getCases().size();
 
-        assertThat(searchResult.getTotal()).isEqualTo(-1);
-
         assertThat(searchResult.getCases().get(0).getData()).isEqualTo(ImmutableMap.of());
 
         List<CaseDetails> result = coreCaseDataApi.searchForCaseworker(
