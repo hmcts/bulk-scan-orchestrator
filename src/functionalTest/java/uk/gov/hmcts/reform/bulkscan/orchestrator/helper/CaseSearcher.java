@@ -60,7 +60,7 @@ public class CaseSearcher {
 
         int elasticSearchResultCount = searchResult.getCases().size();
 
-        assertThat(searchResult.getCases().get(0)).isEqualTo(3);
+        assertThat(searchResult.getCases().get(0).toString()).isEqualTo(3);
 
         List<CaseDetails> result = coreCaseDataApi.searchForCaseworker(
             authenticator.getUserToken(),
