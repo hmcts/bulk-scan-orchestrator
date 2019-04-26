@@ -41,7 +41,7 @@ public class CaseSearcher {
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
             caseTypeId,
-            "{ \"query\":{ \"bool\":{ \"filter\":{ \"term\":{ \"poBox\":\"TESTPO\"}}}}}"
+            "{ \"query\":{ \"bool\":{ \"filter\":{ \"term\":{ \"data.TextField\":\"TESTPO\"}}}}}"
         );
 
         //    "{ \"query\": { \"match_all\": {} }, \"size\": 50}"
