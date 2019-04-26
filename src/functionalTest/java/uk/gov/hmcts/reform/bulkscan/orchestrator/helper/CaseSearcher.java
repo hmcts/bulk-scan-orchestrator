@@ -8,6 +8,8 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 
+import java.time.Duration;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -37,12 +39,18 @@ public class CaseSearcher {
 
         sleepUninterruptibly(5, TimeUnit.SECONDS);
 
+        LocalDate before = LocalDate.now();
         SearchResult searchResult = coreCaseDataApi.searchCases(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
             "Bulk_Scanned",
             "{ \"query\": { \"match_all\": {} }, \"size\": 10, \"_source\": [\"jurisdiction\", \"data.firstName\"]}"
         );
+        LocalDate after = LocalDate.now();
+
+        long millisTaken = Duration.between(before, after).toMillis();
+
+        assertThat(millisTaken).isEqualTo(123);
 
         //    "{ \"query\":{ \"match\":{ \"data.poBox\":\"TESTPO\"}}}"
 
