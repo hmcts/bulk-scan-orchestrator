@@ -43,8 +43,8 @@ public class CaseSearcher {
         SearchResult searchResult = coreCaseDataApi.searchCases(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
-            "Bulk_Scanned",
-            "{ \"query\": { \"match_all\": {} }, \"size\": 10, \"_source\": [\"id\", \"data.firstName\"]}"
+            "Bulk_Scanned,BULKSCAN_ExceptionRecord",
+            "{ \"query\": { \"match_all\": {} }, \"size\": 10}"
         );
         //LocalDate after = LocalDate.now();
 
