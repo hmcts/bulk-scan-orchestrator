@@ -30,11 +30,10 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 }
 
 withPipeline(type, product, component) {
-  before('smoketest:aks') {
+  before('smoketest:preview') {
     withAksClient('nonprod') {
 
       // Vars needed for AKS testing
-      env.RESOURCE_GROUP = 'bulk-scan-aks'
       env.S2S_NAME = 'bulk_scan_orchestrator'
       env.S2S_URL = 'http://rpe-service-auth-provider-aat.service.core-compute-aat.internal'
       env.DOCUMENT_MANAGEMENT_URL = 'http://dm-store-aat.service.core-compute-aat.internal'
