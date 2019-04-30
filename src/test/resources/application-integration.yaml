@@ -17,9 +17,7 @@ idam:
 scheduling:
   task:
     delete-envelopes-dlq-messages:
-      enabled: true
-      cron: "*/1 * * * * *"
-      ttl: 10s
+      enabled: false
     consume-envelopes-queue:
       enabled: false
 
