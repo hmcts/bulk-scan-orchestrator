@@ -67,6 +67,7 @@ public class EnvelopeEventProcessor {
         return message != null;
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod") // for sonarqube complaining about deprecated things being used
     private MessageProcessingResult process(IMessage message) {
         log.info("Started processing message with ID {}", message.getMessageId());
 
