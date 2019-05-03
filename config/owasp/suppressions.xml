@@ -61,6 +61,7 @@
     <cve>CVE-2018-12536</cve>
     <cve>CVE-2019-10241</cve>
     <cve>CVE-2019-10246</cve>
+    <cve>CVE-2019-10247</cve>
     <!-- shaded jackson dependency. nothing to do here. please review on next release -->
     <cpe>cpe:/a:fasterxml:jackson-databind</cpe>
   </suppress>
