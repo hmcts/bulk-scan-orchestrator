@@ -107,6 +107,13 @@ jacocoTestReport {
     html.destination file("${buildDir}/reports/jacoco/html")
     xml.destination file("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
   }
+  afterEvaluate {
+    getClassDirectories().from = getClassDirectories().files.collect {
+      fileTree(dir: it, exclude: [
+        'uk/gov/hmcts/reform/bulkscan/orchestrator/config/**'
+      ])
+    }
+  }
 }
 
 project.tasks['sonarqube'].dependsOn test, integration
