@@ -249,7 +249,9 @@ dependencies {
 mainClassName = 'uk.gov.hmcts.reform.bulkscan.orchestrator.Application'
 
 bootJar {
-  archiveName = 'bulk-scan-orchestrator.jar'
+  getArchiveFileName().set(provider {
+    'bulk-scan-orchestrator.jar'
+  })
 
   manifest {
     attributes('Implementation-Version': project.version.toString())
