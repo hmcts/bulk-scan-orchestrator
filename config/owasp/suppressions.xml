@@ -35,7 +35,7 @@
     <notes><![CDATA[
       used in the integration tests.
     ]]></notes>
-    <filePath regex="true">^.*groovy.*-2\.5\.6\.jar$</filePath>
+    <cpe regex="true">^a:apache:groovy:2\.5\.7$</cpe>
     <cve>CVE-2016-6497</cve>
   </suppress>
 
