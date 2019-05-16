@@ -188,12 +188,6 @@ dependencyManagement {
     dependencySet(group: 'org.mockito', version: '2.27.0') {
       entry 'mockito-core'
     }
-    // CVE-2019-0232 - command line injections on windows
-    dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.19') {
-      entry 'tomcat-embed-core'
-      entry 'tomcat-embed-el'
-      entry 'tomcat-embed-websocket'
-    }
   }
 }
 
