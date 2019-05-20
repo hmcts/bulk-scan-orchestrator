@@ -54,8 +54,8 @@ class EnvelopeParserTest {
                     "doc1_type",
                     "doc1_subtype",
                     scannedAt,
-                    "doc1_url",
-                    "doc1_uuid"
+                    "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcba",
+                    "0fa1ab60-f836-43aa-8c65-b07cc9bebcba"
                 ),
                 new Document(
                     "doc2_file_name",
@@ -63,8 +63,8 @@ class EnvelopeParserTest {
                     "doc2_type",
                     null,
                     scannedAt,
-                    "doc2_url",
-                    "doc2_uuid"
+                    "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcbb",
+                    "0fa1ab60-f836-43aa-8c65-b07cc9bebcbb"
                 )
             ),
             ImmutableList.of(
@@ -120,8 +120,8 @@ class EnvelopeParserTest {
                     "doc1_type",
                     "doc1_subtype",
                     scannedAt,
-                    "doc1_url",
-                    "doc1_uuid"
+                    "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcba",
+                    "0fa1ab60-f836-43aa-8c65-b07cc9bebcba"
                 ),
                 tuple(
                     "doc2_file_name",
@@ -129,8 +129,8 @@ class EnvelopeParserTest {
                     "doc2_type",
                     null,
                     scannedAt,
-                    "doc2_url",
-                    "doc2_uuid"
+                    "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcbb",
+                    "0fa1ab60-f836-43aa-8c65-b07cc9bebcbb"
                 )
             );
     }
@@ -196,7 +196,10 @@ class EnvelopeParserTest {
         String jsonEnvelopeWithoutId =
             new JSONObject()
                 .put("jurisdiction", "world")
-                .put("doc_urls", new JSONArray(asList("a", "b")))
+                .put("doc_urls",
+                    new JSONArray(asList(
+                        "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcbb",
+                        "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcbb")))
                 .toString();
 
         // when
