@@ -34,10 +34,10 @@ public class ServiceConfigProvider {
     public ServiceConfigItem getConfig(String service) {
         ServiceConfigItem configItem = servicesByName.get(service);
 
-        if (configItem != null) {
-            return configItem;
-        } else {
+        if (configItem == null) {
             throw new ServiceNotConfiguredException(String.format("Service %s is not configured", service));
+        } else {
+            return configItem;
         }
     }
 
