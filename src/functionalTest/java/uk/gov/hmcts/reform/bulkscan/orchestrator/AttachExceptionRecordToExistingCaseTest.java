@@ -61,7 +61,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
     private String dmUrl;
 
-    private String dmUuid;
+    private String documentUuid;
 
     @BeforeEach
     void setup() throws Exception {
@@ -70,7 +70,7 @@ class AttachExceptionRecordToExistingCaseTest {
             "Certificate.pdf",
             "documents/supplementary-evidence.pdf"
         );
-        dmUuid = StringUtils.substringAfterLast(dmUrl, "/");
+        documentUuid = StringUtils.substringAfterLast(dmUrl, "/");
     }
 
     @Test
@@ -96,7 +96,7 @@ class AttachExceptionRecordToExistingCaseTest {
         //given
         CaseDetails caseDetails =
             ccdCaseCreator.createCase(singletonList(
-                new Document("certificate1.pdf", "154565768", "other", null, Instant.now(), dmUrl, dmUuid)
+                new Document("certificate1.pdf", "154565768", "other", null, Instant.now(), dmUrl, documentUuid)
             ));
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
