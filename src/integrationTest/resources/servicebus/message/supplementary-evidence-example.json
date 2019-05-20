@@ -16,7 +16,7 @@
       "subtype": "testSubtype",
       "scanned_at": "2018-01-01T12:34:56.123Z",
       "url": "http://test-url",
-      "url": "docUuid123"
+      "uuid": "docUuid123"
     }
   ]
 }
