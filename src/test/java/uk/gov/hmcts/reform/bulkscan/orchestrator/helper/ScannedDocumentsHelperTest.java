@@ -50,7 +50,7 @@ class ScannedDocumentsHelperTest {
             "Other",
             null,
             Instant.parse("2018-12-01T12:34:56.123Z"),
-            "https://doc-url-1.example.com",
+            "https://doc-url-1.example.com/docuuid123",
             "docuuid123"
         );
 

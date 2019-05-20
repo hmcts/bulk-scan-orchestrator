@@ -61,7 +61,6 @@ public class CaseDataExtractor {
             document.subtype,
             ZonedDateTime.ofInstant(document.scannedAt, ZoneId.systemDefault()).toLocalDateTime(),
             new CcdDocument(String.valueOf(document.url)),
-            document.uuid,
             null
         );
     }

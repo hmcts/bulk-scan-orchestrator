@@ -53,14 +53,13 @@ class SupplementaryEvidenceMapperTest {
                     ccdDoc.value.type,
                     ccdDoc.value.subtype,
                     ccdDoc.value.scannedDate,
-                    ccdDoc.value.url.documentUrl,
-                    ccdDoc.value.uuid
+                    ccdDoc.value.url.documentUrl
                 ))
             .containsExactly(
-                tuple("a.pdf", "aaa", "type_a", "subtype_a", toLocalDateTime(existingDocs.get(0).scannedAt), "http://localhost/a.pdf", "uuida"),
-                tuple("b.pdf", "bbb", "type_b", "subtype_b", toLocalDateTime(existingDocs.get(1).scannedAt), "http://localhost/b.pdf", "uuidb"),
-                tuple("x.pdf", "xxx", "type_x", "subtype_x", toLocalDateTime(envelopeDocs.get(0).scannedAt), "http://localhost/x.pdf", "uuidx"),
-                tuple("y.pdf", "yyy", "type_y", "subtype_y", toLocalDateTime(envelopeDocs.get(1).scannedAt), "http://localhost/y.pdf", "uuidy")
+                tuple("a.pdf", "aaa", "type_a", "subtype_a", toLocalDateTime(existingDocs.get(0).scannedAt), "http://localhost/a.pdf"),
+                tuple("b.pdf", "bbb", "type_b", "subtype_b", toLocalDateTime(existingDocs.get(1).scannedAt), "http://localhost/b.pdf"),
+                tuple("x.pdf", "xxx", "type_x", "subtype_x", toLocalDateTime(envelopeDocs.get(0).scannedAt), "http://localhost/x.pdf"),
+                tuple("y.pdf", "yyy", "type_y", "subtype_y", toLocalDateTime(envelopeDocs.get(1).scannedAt), "http://localhost/y.pdf")
             );
     }
 

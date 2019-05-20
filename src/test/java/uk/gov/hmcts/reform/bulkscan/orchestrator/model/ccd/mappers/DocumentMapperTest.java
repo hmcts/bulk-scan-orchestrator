@@ -39,7 +39,6 @@ class DocumentMapperTest {
                     doc.subtype,
                     ZonedDateTime.ofInstant(doc.scannedAt, ZoneId.systemDefault()).toLocalDateTime(),
                     new CcdDocument(doc.url),
-                    "doc_uuid",
                     null // this should always be null;
                 )
             );
