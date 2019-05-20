@@ -44,3 +44,11 @@ hystrix:
 task:
   check-jurisdiction-log-in:
     check-validity-duration: PT0S
+
+service-config:
+  services:
+    - service: bulkscan # service name corresponds to the name of the container in Blob Storage
+      jurisdiction: BULKSCAN
+      case-type-ids:
+        - Bulk_Scanned
+        - BULKSCAN_ExceptionRecord
