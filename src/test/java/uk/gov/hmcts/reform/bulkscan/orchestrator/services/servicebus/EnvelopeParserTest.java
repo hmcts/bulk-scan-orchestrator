@@ -54,8 +54,8 @@ class EnvelopeParserTest {
                     "doc1_type",
                     "doc1_subtype",
                     scannedAt,
-                    "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcba",
-                    "0fa1ab60-f836-43aa-8c65-b07cc9bebcba"
+                    "https://example.gov.uk/294a9d32-69bc-4e36-a080-e43cae39e7c8",
+                    "294a9d32-69bc-4e36-a080-e43cae39e7c8"
                 ),
                 new Document(
                     "doc2_file_name",
@@ -120,8 +120,8 @@ class EnvelopeParserTest {
                     "doc1_type",
                     "doc1_subtype",
                     scannedAt,
-                    "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcba",
-                    "0fa1ab60-f836-43aa-8c65-b07cc9bebcba"
+                    "https://example.gov.uk/294a9d32-69bc-4e36-a080-e43cae39e7c8",
+                    "294a9d32-69bc-4e36-a080-e43cae39e7c8"
                 ),
                 tuple(
                     "doc2_file_name",
@@ -198,8 +198,8 @@ class EnvelopeParserTest {
                 .put("jurisdiction", "world")
                 .put("doc_urls",
                     new JSONArray(asList(
-                        "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcbb",
-                        "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcbb")))
+                        "https://example.gov.uk/b1fe9994-fee4-45eb-bfd0-497f442d87ff",
+                        "https://example.gov.uk/863c495e-d05b-4376-9951-ea489360db6f")))
                 .toString();
 
         // when
