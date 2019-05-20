@@ -25,14 +25,18 @@ class SupplementaryEvidenceMapperTest {
         // given
         List<Document> existingDocs =
             asList(
-                new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "http://localhost/a.pdf"),
-                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "http://localhost/b.pdf")
+                new Document(
+                    "a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "http://localhost/a.pdf", "uuida"
+                ),
+                new Document(
+                    "b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "http://localhost/b.pdf", "uuidb"
+                )
             );
 
         List<Document> envelopeDocs =
             asList(
-                new Document("x.pdf", "xxx", "type_x", "subtype_x", now().plusSeconds(3), "http://localhost/x.pdf"),
-                new Document("y.pdf", "yyy", "type_y", "subtype_y", now().plusSeconds(4), "http://localhost/y.pdf")
+                new Document("x.pdf", "xxx", "type_x", "subtype_x", now().plusSeconds(3), "http://localhost/x.pdf", "uuidx"),
+                new Document("y.pdf", "yyy", "type_y", "subtype_y", now().plusSeconds(4), "http://localhost/y.pdf", "uuidy")
             );
 
         // when
@@ -49,13 +53,14 @@ class SupplementaryEvidenceMapperTest {
                     ccdDoc.value.type,
                     ccdDoc.value.subtype,
                     ccdDoc.value.scannedDate,
-                    ccdDoc.value.url.documentUrl
+                    ccdDoc.value.url.documentUrl,
+                    ccdDoc.value.uuid
                 ))
             .containsExactly(
-                tuple("a.pdf", "aaa", "type_a", "subtype_a", toLocalDateTime(existingDocs.get(0).scannedAt), "http://localhost/a.pdf"),
-                tuple("b.pdf", "bbb", "type_b", "subtype_b", toLocalDateTime(existingDocs.get(1).scannedAt), "http://localhost/b.pdf"),
-                tuple("x.pdf", "xxx", "type_x", "subtype_x", toLocalDateTime(envelopeDocs.get(0).scannedAt), "http://localhost/x.pdf"),
-                tuple("y.pdf", "yyy", "type_y", "subtype_y", toLocalDateTime(envelopeDocs.get(1).scannedAt), "http://localhost/y.pdf")
+                tuple("a.pdf", "aaa", "type_a", "subtype_a", toLocalDateTime(existingDocs.get(0).scannedAt), "http://localhost/a.pdf", "uuida"),
+                tuple("b.pdf", "bbb", "type_b", "subtype_b", toLocalDateTime(existingDocs.get(1).scannedAt), "http://localhost/b.pdf", "uuidb"),
+                tuple("x.pdf", "xxx", "type_x", "subtype_x", toLocalDateTime(envelopeDocs.get(0).scannedAt), "http://localhost/x.pdf", "uuidx"),
+                tuple("y.pdf", "yyy", "type_y", "subtype_y", toLocalDateTime(envelopeDocs.get(1).scannedAt), "http://localhost/y.pdf", "uuidy")
             );
     }
 
@@ -64,14 +69,20 @@ class SupplementaryEvidenceMapperTest {
         // given
         List<Document> existingDocs =
             asList(
-                new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "http://localhost/a.pdf"),
-                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "http://localhost/b.pdf")
+                new Document(
+                    "a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "http://localhost/a.pdf", "a.pdf"),
+                new Document(
+                    "b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "http://localhost/b.pdf", "b.pdf")
             );
 
         List<Document> envelopeDocs =
             asList(
-                new Document("a1.pdf", "aaa1", "type_a1", "subtype_a1", now().plusSeconds(3), "http://localhost/a.pdf"), // same url!
-                new Document("b.pdf", "bbb1", "type_b", "subtype_b", now().plusSeconds(4), "http://localhost/xxxxx.pdf")
+                new Document(
+                    "a1.pdf", "aaa1", "type_a1", "subtype_a1", now().plusSeconds(3), "http://localhost/a.pdf", "uuida"
+                ), // same url!
+                new Document(
+                    "b.pdf", "bbb1", "type_b", "subtype_b", now().plusSeconds(4), "http://localhost/xxxxx.pdf", "uuidxxxxx"
+                )
             );
 
         // when
@@ -96,14 +107,14 @@ class SupplementaryEvidenceMapperTest {
         // given
         List<Document> existingDocs =
             asList(
-                new Document("a.pdf", "AAA", "type_a", "subtype_a", now().plusSeconds(1), "http://localhost/a.pdf"),
-                new Document("b.pdf", "BBB", "type_b", "subtype_b", now().plusSeconds(2), "http://localhost/b.pdf")
+                new Document("a.pdf", "AAA", "type_a", "subtype_a", now().plusSeconds(1), "http://localhost/a.pdf", "a.pdf"),
+                new Document("b.pdf", "BBB", "type_b", "subtype_b", now().plusSeconds(2), "http://localhost/b.pdf", "b.pdf")
             );
 
         List<Document> envelopeDocs =
             asList(
-                new Document("c.pdf", "AAA", "type_c", "subtype_c", now().plusSeconds(3), "http://localhost/c.pdf"), // same control number!
-                new Document("d.pdf", "DDD", "type_d", "subtype_d", now().plusSeconds(4), "http://localhost/d.pdf")
+                new Document("c.pdf", "AAA", "type_c", "subtype_c", now().plusSeconds(3), "http://localhost/c.pdf", "c.pdf"), // same control number!
+                new Document("d.pdf", "DDD", "type_d", "subtype_d", now().plusSeconds(4), "http://localhost/d.pdf", "d.pdf")
             );
 
         // when

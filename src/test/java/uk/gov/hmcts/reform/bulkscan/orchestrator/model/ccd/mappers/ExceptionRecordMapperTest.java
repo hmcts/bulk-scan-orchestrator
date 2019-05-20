@@ -100,7 +100,8 @@ class ExceptionRecordMapperTest {
                     scannedDocument.type,
                     scannedDocument.subtype,
                     scannedDocument.scannedDate.atZone(ZoneId.systemDefault()).toInstant(),
-                    scannedDocument.url.documentUrl
+                    scannedDocument.url.documentUrl,
+                    scannedDocument.uuid
                 )
             ).collect(toList());
     }

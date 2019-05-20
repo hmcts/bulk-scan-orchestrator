@@ -22,7 +22,8 @@ class DocumentMapperTest {
             "type",
             "subtype",
             Instant.now(),
-            "https://localthost/files/1"
+            "https://localthost/files/1",
+            "doc_uuid"
         );
 
         // when
@@ -38,6 +39,7 @@ class DocumentMapperTest {
                     doc.subtype,
                     ZonedDateTime.ofInstant(doc.scannedAt, ZoneId.systemDefault()).toLocalDateTime(),
                     new CcdDocument(doc.url),
+                    "doc_uuid",
                     null // this should always be null;
                 )
             );
@@ -58,7 +60,7 @@ class DocumentMapperTest {
     @Test
     void should_map_null_scanned_date() {
         // given
-        Document doc = new Document("name.zip", "123", "type", "subtype", null, "https://localthost/files/1");
+        Document doc = new Document("name.zip", "123", "type", "subtype", null, "https://localthost/files/1", "doc_uuid1");
 
         // when
         ScannedDocument result = DocumentMapper.mapDocument(doc);
