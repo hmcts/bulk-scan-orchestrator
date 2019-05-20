@@ -46,7 +46,7 @@ idam:
       password: ${IDAM_USERS_BULKSCAN_PASSWORD:Password12}
 
 service-config:
-  # Services and all their case type IDs.
+  # Services and all their case type IDs, excluding exception records.
   # These mappings are used by Bulk Scan to determine which case type IDs to search across
   # when looking for a case by its legacy ID. Those CTIDs that are not present here, will
   # not be included in the search.
@@ -55,32 +55,26 @@ service-config:
       jurisdiction: BULKSCAN
       case-type-ids:
         - Bulk_Scanned
-        - BULKSCAN_ExceptionRecord
 
     - service: sscs
       jurisdiction: SSCS
-      case-type-ids:
-        - SSCS_ExceptionRecord
+      case-type-ids: []
 
     - service: probate
       jurisdiction: PROBATE
-      case-type-ids:
-        - PROBATE_ExceptionRecord
+      case-type-ids: []
 
     - service: divorce
       jurisdiction: DIVORCE
-      case-type-ids:
-        - DIVORCE_ExceptionRecord
+      case-type-ids: []
 
     - service: finrem
       jurisdiction: DIVORCE
-      case-type-ids:
-        - FINREM_ExceptionRecord
+      case-type-ids: []
 
     - service: cmc
       jurisdiction: CMC
-      case-type-ids:
-        - CMC_ExceptionRecord
+      case-type-ids: []
 
 scheduling:
   task:

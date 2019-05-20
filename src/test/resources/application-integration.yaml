@@ -51,4 +51,3 @@ service-config:
       jurisdiction: BULKSCAN
       case-type-ids:
         - Bulk_Scanned
-        - BULKSCAN_ExceptionRecord
