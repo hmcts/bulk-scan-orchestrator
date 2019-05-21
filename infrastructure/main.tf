@@ -71,6 +71,7 @@ locals {
     IDAM_CLIENT_SECRET        = "${data.azurerm_key_vault_secret.idam_client_secret.value}"
     IDAM_CLIENT_REDIRECT_URI  = "${var.idam_client_redirect_uri}"
     CORE_CASE_DATA_API_URL    = "${local.ccdApiUrl}"
+    DOCUMENT_MANAGEMENT_URL   = "${local.dm_store_api_url}"
 
     DELETE_ENVELOPES_DLQ_MESSAGES_ENABLED = "${var.delete_envelopes_dlq_messages_enabled}"
     DELETE_ENVELOPES_DLQ_MESSAGES_CRON    = "${var.delete_envelopes_dlq_messages_cron}"
