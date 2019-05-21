@@ -42,3 +42,10 @@ test-url: ${TEST_URL:http://localhost:8582}
 task:
   check-jurisdiction-log-in:
     check-validity-duration: PT5M
+
+service-config:
+  services:
+    - service: bulkscan
+      jurisdiction: BULKSCAN
+      case-type-ids:
+        - Bulk_Scanned
