@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 import com.microsoft.azure.servicebus.Message;
 import com.microsoft.azure.servicebus.QueueClient;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,6 +44,7 @@ public class EnvelopeMessager {
         JSONArray documents = (JSONArray) updateCaseData.get("documents");
         JSONObject document = (JSONObject) documents.get(0);
         document.put("url", documentUrl);
+        document.put("uuid", StringUtils.substringAfterLast(documentUrl, "/")); //extract uuid from document url
 
         Message message = new Message(
             UUID.randomUUID().toString(),
