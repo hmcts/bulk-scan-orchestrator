@@ -1,19 +1,17 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfiguration;
 
-import java.util.List;
 import java.util.Map;
-import javax.validation.constraints.NotEmpty;
 
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 
 @Service
-@EnableConfigurationProperties(ServiceConfigProvider.ServiceConfiguration.class)
+@EnableConfigurationProperties(ServiceConfiguration.class)
 public class ServiceConfigProvider {
 
     private final Map<String, ServiceConfigItem> servicesByName;
@@ -41,18 +39,4 @@ public class ServiceConfigProvider {
         }
     }
 
-    @ConfigurationProperties(prefix = "service-config")
-    @Validated
-    public static class ServiceConfiguration {
-        @NotEmpty
-        private List<ServiceConfigItem> services;
-
-        public void setServices(List<ServiceConfigItem> services) {
-            this.services = services;
-        }
-
-        public List<ServiceConfigItem> getServices() {
-            return services;
-        }
-    }
 }

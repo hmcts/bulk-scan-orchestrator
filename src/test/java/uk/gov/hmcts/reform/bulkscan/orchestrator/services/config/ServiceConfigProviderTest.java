@@ -1,7 +1,8 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.config;
 
 import org.junit.jupiter.api.Test;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigProvider.ServiceConfiguration;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfiguration;
 
 import java.util.Arrays;
 import java.util.List;

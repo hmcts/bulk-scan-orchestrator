@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.config;
 
 public class ServiceNotConfiguredException extends RuntimeException {
 
