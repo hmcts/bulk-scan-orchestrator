@@ -25,14 +25,14 @@ class SupplementaryEvidenceMapperTest {
         // given
         List<Document> existingDocs =
             asList(
-                new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcba", "0fa1ab60-f836-43aa-8c65-b07cc9bebcba"),
-                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcbb", "0fa1ab60-f836-43aa-8c65-b07cc9bebcbb")
+                new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "http://localhost/uuida", "uuida"),
+                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "http://localhost/uuidb", "uuidb")
             );
 
         List<Document> envelopeDocs =
             asList(
-                new Document("x.pdf", "xxx", "type_x", "subtype_x", now().plusSeconds(3), "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcbx", "0fa1ab60-f836-43aa-8c65-b07cc9bebcbx"),
-                new Document("y.pdf", "yyy", "type_y", "subtype_y", now().plusSeconds(4), "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcby", "0fa1ab60-f836-43aa-8c65-b07cc9bebcby")
+                new Document("x.pdf", "xxx", "type_x", "subtype_x", now().plusSeconds(3), "http://localhost/uuidx", "uuidx"),
+                new Document("y.pdf", "yyy", "type_y", "subtype_y", now().plusSeconds(4), "http://localhost/uuidy", "uuidy")
             );
 
         // when
@@ -52,10 +52,10 @@ class SupplementaryEvidenceMapperTest {
                     ccdDoc.value.url.documentUrl
                 ))
             .containsExactly(
-                tuple("a.pdf", "aaa", "type_a", "subtype_a", toLocalDateTime(existingDocs.get(0).scannedAt), "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcba"),
-                tuple("b.pdf", "bbb", "type_b", "subtype_b", toLocalDateTime(existingDocs.get(1).scannedAt), "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcbb"),
-                tuple("x.pdf", "xxx", "type_x", "subtype_x", toLocalDateTime(envelopeDocs.get(0).scannedAt), "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcbx"),
-                tuple("y.pdf", "yyy", "type_y", "subtype_y", toLocalDateTime(envelopeDocs.get(1).scannedAt), "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcby")
+                tuple("a.pdf", "aaa", "type_a", "subtype_a", toLocalDateTime(existingDocs.get(0).scannedAt), "http://localhost/uuida"),
+                tuple("b.pdf", "bbb", "type_b", "subtype_b", toLocalDateTime(existingDocs.get(1).scannedAt), "http://localhost/uuidb"),
+                tuple("x.pdf", "xxx", "type_x", "subtype_x", toLocalDateTime(envelopeDocs.get(0).scannedAt), "http://localhost/uuidx"),
+                tuple("y.pdf", "yyy", "type_y", "subtype_y", toLocalDateTime(envelopeDocs.get(1).scannedAt), "http://localhost/uuidy")
             );
     }
 
@@ -64,14 +64,14 @@ class SupplementaryEvidenceMapperTest {
         // given
         List<Document> existingDocs =
             asList(
-                new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcaa", "0fa1ab60-f836-43aa-8c65-b07cc9bebcaa"),
-                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "https://example.gov.uk/5a76f366-38a1-45e5-a424-f1658f258968", "5a76f366-38a1-45e5-a424-f1658f258968")
+                new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "http://localhost/uuida", "uuida"),
+                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "http://localhost/uuidb", "uuidb")
             );
 
         List<Document> envelopeDocs =
             asList(
-                new Document("a1.pdf", "aaa1", "type_a1", "subtype_a1", now().plusSeconds(3), "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcaa", "0fa1ab60-f836-43aa-8c65-b07cc9bebcaa"), // same url!
-                new Document("b.pdf", "bbb1", "type_b", "subtype_b", now().plusSeconds(4), "http://example.gov.uk/16abb504-a837-48c6-8b8a-07557230eecd", "16abb504-a837-48c6-8b8a-07557230eecd")
+                new Document("a1.pdf", "aaa1", "type_a1", "subtype_a1", now().plusSeconds(3), "http://localhost/uuida", "uuida"), // same url!
+                new Document("b.pdf", "bbb1", "type_b", "subtype_b", now().plusSeconds(4), "http://localhost/uuidxxxxx", "uuidxxxxx")
             );
 
         // when
@@ -85,9 +85,9 @@ class SupplementaryEvidenceMapperTest {
                 tuple(ccdDoc.value.fileName, ccdDoc.value.url.documentUrl)
             )
             .containsExactly(
-                tuple("a.pdf", "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcaa"),
-                tuple("b.pdf", "https://example.gov.uk/5a76f366-38a1-45e5-a424-f1658f258968"),
-                tuple("b.pdf", "http://example.gov.uk/16abb504-a837-48c6-8b8a-07557230eecd")
+                tuple("a.pdf", "http://localhost/uuida"),
+                tuple("b.pdf", "http://localhost/uuidb"),
+                tuple("b.pdf", "http://localhost/uuidxxxxx")
             );
     }
 
@@ -96,14 +96,14 @@ class SupplementaryEvidenceMapperTest {
         // given
         List<Document> existingDocs =
             asList(
-                new Document("a.pdf", "AAA", "type_a", "subtype_a", now().plusSeconds(1), "https://example.gov.uk/eb2b0c2e-83ff-4f6e-9b2c-ac57b3b0358b", "eb2b0c2e-83ff-4f6e-9b2c-ac57b3b0358b"),
-                new Document("b.pdf", "BBB", "type_b", "subtype_b", now().plusSeconds(2), "https://example.gov.uk/f8a5f699-3816-4298-9365-ecb5b634c8f6", "f8a5f699-3816-4298-9365-ecb5b634c8f6")
+                new Document("a.pdf", "AAA", "type_a", "subtype_a", now().plusSeconds(1), "http://localhost/uuida", "uuida"),
+                new Document("b.pdf", "BBB", "type_b", "subtype_b", now().plusSeconds(2), "http://localhost/uuidb", "uuidb")
             );
 
         List<Document> envelopeDocs =
             asList(
-                new Document("c.pdf", "AAA", "type_c", "subtype_c", now().plusSeconds(3), "https://example.gov.uk/adee023f-edf7-4e4c-bf36-d73da1ab48b5", "adee023f-edf7-4e4c-bf36-d73da1ab48b5"), // same control number!
-                new Document("d.pdf", "DDD", "type_d", "subtype_d", now().plusSeconds(4), "https://example.gov.uk/863c495e-d05b-4376-9951-ea489360db6f", "863c495e-d05b-4376-9951-ea489360db6f")
+                new Document("c.pdf", "AAA", "type_c", "subtype_c", now().plusSeconds(3), "http://localhost/uuidc", "uuidc"), // same control number!
+                new Document("d.pdf", "DDD", "type_d", "subtype_d", now().plusSeconds(4), "http://localhost/uuidd", "uuidd")
             );
 
         // when

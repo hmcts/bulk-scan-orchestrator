@@ -54,8 +54,8 @@ class EnvelopeParserTest {
                     "doc1_type",
                     "doc1_subtype",
                     scannedAt,
-                    "https://example.gov.uk/294a9d32-69bc-4e36-a080-e43cae39e7c8",
-                    "294a9d32-69bc-4e36-a080-e43cae39e7c8"
+                    "http://localhost/doc1uuid",
+                    "doc1uuid"
                 ),
                 new Document(
                     "doc2_file_name",
@@ -63,8 +63,8 @@ class EnvelopeParserTest {
                     "doc2_type",
                     null,
                     scannedAt,
-                    "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcbb",
-                    "0fa1ab60-f836-43aa-8c65-b07cc9bebcbb"
+                    "http://localhost/doc2uuid",
+                    "doc2uuid"
                 )
             ),
             ImmutableList.of(
@@ -120,8 +120,8 @@ class EnvelopeParserTest {
                     "doc1_type",
                     "doc1_subtype",
                     scannedAt,
-                    "https://example.gov.uk/294a9d32-69bc-4e36-a080-e43cae39e7c8",
-                    "294a9d32-69bc-4e36-a080-e43cae39e7c8"
+                    "http://localhost/doc1uuid",
+                    "doc1uuid"
                 ),
                 tuple(
                     "doc2_file_name",
@@ -129,8 +129,8 @@ class EnvelopeParserTest {
                     "doc2_type",
                     null,
                     scannedAt,
-                    "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcbb",
-                    "0fa1ab60-f836-43aa-8c65-b07cc9bebcbb"
+                    "http://localhost/doc2uuid",
+                    "doc2uuid"
                 )
             );
     }
@@ -197,9 +197,7 @@ class EnvelopeParserTest {
             new JSONObject()
                 .put("jurisdiction", "world")
                 .put("doc_urls",
-                    new JSONArray(asList(
-                        "https://example.gov.uk/b1fe9994-fee4-45eb-bfd0-497f442d87ff",
-                        "https://example.gov.uk/863c495e-d05b-4376-9951-ea489360db6f")))
+                    new JSONArray(asList("http://localhost/doc1uuid", "http://localhost/doc2uuid")))
                 .toString();
 
         // when

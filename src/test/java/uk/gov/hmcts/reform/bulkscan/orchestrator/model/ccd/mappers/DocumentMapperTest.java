@@ -22,8 +22,8 @@ class DocumentMapperTest {
             "type",
             "subtype",
             Instant.now(),
-            "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcba",
-            "0fa1ab60-f836-43aa-8c65-b07cc9bebcba"
+            "https://localthost/files/uuid1",
+            "uuid1"
         );
 
         // when
@@ -59,7 +59,7 @@ class DocumentMapperTest {
     @Test
     void should_map_null_scanned_date() {
         // given
-        Document doc = new Document("name.zip", "123", "type", "subtype", null, "https://example.gov.uk/0fa1ab60-f836-43aa-8c65-b07cc9bebcbe", "0fa1ab60-f836-43aa-8c65-b07cc9bebcbe");
+        Document doc = new Document("name.zip", "123", "type", "subtype", null, "https://localthost/files/uuid1", "uuid1");
 
         // when
         ScannedDocument result = DocumentMapper.mapDocument(doc);
