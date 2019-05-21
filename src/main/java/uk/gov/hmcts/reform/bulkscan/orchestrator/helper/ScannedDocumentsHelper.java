@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -57,7 +58,8 @@ public class ScannedDocumentsHelper {
                 doc.type,
                 doc.subtype,
                 doc.scannedDate == null ? null : doc.scannedDate.atZone(ZoneId.systemDefault()).toInstant(),
-                doc.url == null ? null : doc.url.documentUrl
+                doc.url == null ? null : doc.url.documentUrl,
+                doc.url == null ? null : StringUtils.substringAfterLast(doc.url.documentUrl, "/")
             );
         }
     }

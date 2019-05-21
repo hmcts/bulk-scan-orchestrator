@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdKeyValue;
@@ -100,7 +101,8 @@ class ExceptionRecordMapperTest {
                     scannedDocument.type,
                     scannedDocument.subtype,
                     scannedDocument.scannedDate.atZone(ZoneId.systemDefault()).toInstant(),
-                    scannedDocument.url.documentUrl
+                    scannedDocument.url.documentUrl,
+                    StringUtils.substringAfterLast(scannedDocument.url.documentUrl, "/")
                 )
             ).collect(toList());
     }

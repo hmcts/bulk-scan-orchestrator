@@ -54,7 +54,8 @@ class EnvelopeParserTest {
                     "doc1_type",
                     "doc1_subtype",
                     scannedAt,
-                    "doc1_url"
+                    "http://localhost/doc1uuid",
+                    "doc1uuid"
                 ),
                 new Document(
                     "doc2_file_name",
@@ -62,7 +63,8 @@ class EnvelopeParserTest {
                     "doc2_type",
                     null,
                     scannedAt,
-                    "doc2_url"
+                    "http://localhost/doc2uuid",
+                    "doc2uuid"
                 )
             ),
             ImmutableList.of(
@@ -108,7 +110,8 @@ class EnvelopeParserTest {
                     doc.type,
                     doc.subtype,
                     doc.scannedAt,
-                    doc.url)
+                    doc.url,
+                    doc.uuid)
             )
             .containsOnly(
                 tuple(
@@ -117,7 +120,8 @@ class EnvelopeParserTest {
                     "doc1_type",
                     "doc1_subtype",
                     scannedAt,
-                    "doc1_url"
+                    "http://localhost/doc1uuid",
+                    "doc1uuid"
                 ),
                 tuple(
                     "doc2_file_name",
@@ -125,7 +129,8 @@ class EnvelopeParserTest {
                     "doc2_type",
                     null,
                     scannedAt,
-                    "doc2_url"
+                    "http://localhost/doc2uuid",
+                    "doc2uuid"
                 )
             );
     }
@@ -191,7 +196,8 @@ class EnvelopeParserTest {
         String jsonEnvelopeWithoutId =
             new JSONObject()
                 .put("jurisdiction", "world")
-                .put("doc_urls", new JSONArray(asList("a", "b")))
+                .put("doc_urls",
+                    new JSONArray(asList("http://localhost/doc1uuid", "http://localhost/doc2uuid")))
                 .toString();
 
         // when
@@ -236,7 +242,8 @@ class EnvelopeParserTest {
             .put("type", doc.type)
             .put("subtype", doc.subtype)
             .put("scanned_at", toIso8601(doc.scannedAt))
-            .put("url", doc.url);
+            .put("url", doc.url)
+            .put("uuid", doc.uuid);
     }
 
     private JSONArray toOcrJson(List<OcrDataField> ocrDataFields) throws JSONException {
