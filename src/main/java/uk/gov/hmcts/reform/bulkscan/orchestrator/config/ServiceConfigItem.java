@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
 
 import java.util.List;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 public class ServiceConfigItem {
@@ -9,7 +8,7 @@ public class ServiceConfigItem {
     private String service;
     @NotNull
     private String jurisdiction;
-    @NotEmpty
+
     private List<String> caseTypeIds;
 
     public String getService() {
