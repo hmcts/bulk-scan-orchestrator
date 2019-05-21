@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.tuple;
 @SuppressWarnings("checkstyle:LineLength")
 class SupplementaryEvidenceMapperTest {
 
-    private static final SupplementaryEvidenceMapper mapper = new SupplementaryEvidenceMapper();
+    private static final SupplementaryEvidenceMapper mapper = new SupplementaryEvidenceMapper("http://localhost");
 
     @Test
     void maps_all_fields_correctly() {

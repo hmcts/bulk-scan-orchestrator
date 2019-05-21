@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 
 import com.google.common.collect.ImmutableMap;
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
@@ -28,9 +29,9 @@ public class CaseDataExtractor {
         return data.stream().map(ScannedDocumentsHelper::createScannedDocumentWithCcdData).collect(toList());
     }
 
-    public static List<ScannedDocument> getScannedDocuments(Envelope envelope) {
+    public static List<ScannedDocument> getScannedDocuments(Envelope envelope, String dmUrl) {
         List<Document> documents = envelope.documents;
-        return documents.stream().map(CaseDataExtractor::mapDocument).collect(toList());
+        return documents.stream().map((Document document) -> mapDocument(document, dmUrl)).collect(toList());
     }
 
     @SuppressWarnings("unchecked")
@@ -53,14 +54,14 @@ public class CaseDataExtractor {
         }
     }
 
-    private static ScannedDocument mapDocument(Document document) {
+    private static ScannedDocument mapDocument(Document document, String dmUrl) {
         return new ScannedDocument(
             document.fileName,
             document.controlNumber,
             document.type,
             document.subtype,
             ZonedDateTime.ofInstant(document.scannedAt, ZoneId.systemDefault()).toLocalDateTime(),
-            new CcdDocument(String.valueOf(document.url)),
+            new CcdDocument(StringUtils.join(dmUrl, "/", document.uuid)),
             null
         );
     }

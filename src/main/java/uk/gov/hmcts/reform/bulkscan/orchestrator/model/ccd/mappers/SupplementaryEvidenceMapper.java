@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.SupplementaryEvidence;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
@@ -14,8 +15,12 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.Docume
 @Component
 public class SupplementaryEvidenceMapper {
 
-    public SupplementaryEvidenceMapper() {
-        // empty mapper construct
+    private String documentManagementApiUrl;
+
+    public SupplementaryEvidenceMapper(
+        @Value("${document_management.documents.url}") final String documentManagementApiUrl
+    ) {
+        this.documentManagementApiUrl = documentManagementApiUrl;
     }
 
     public SupplementaryEvidence map(List<Document> existingDocs, List<Document> envelopeDocs) {
@@ -24,7 +29,8 @@ public class SupplementaryEvidenceMapper {
                 Stream.concat(
                     existingDocs.stream(),
                     getDocsToAdd(existingDocs, envelopeDocs).stream()
-                ).collect(toList())
+                ).collect(toList()),
+                documentManagementApiUrl
             )
         );
     }
@@ -37,7 +43,7 @@ public class SupplementaryEvidenceMapper {
     }
 
     private boolean areDuplicates(Document d1, Document d2) {
-        return Objects.equals(d1.url, d2.url)
+        return Objects.equals(d1.uuid, d2.uuid)
             || Objects.equals(d1.controlNumber, d2.controlNumber);
     }
 }

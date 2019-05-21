@@ -44,6 +44,9 @@ class AttachExceptionRecordToExistingCaseTest {
     @Value("${test-url}")
     private String testUrl;
 
+    @Value("${document_management.documents.url}")
+    private String documentManagementUrl;
+
     @Autowired
     private CaseRetriever caseRetriever;
 

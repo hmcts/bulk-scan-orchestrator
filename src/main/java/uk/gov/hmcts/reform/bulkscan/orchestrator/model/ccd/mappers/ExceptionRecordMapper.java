@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdKeyValue;
@@ -16,8 +17,10 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.Docume
 @Component
 public class ExceptionRecordMapper {
 
-    public ExceptionRecordMapper() {
-        // empty mapper construct
+    private String documentManagementApiUrl;
+
+    public ExceptionRecordMapper(@Value("${document_management.url}") final String documentManagementApiUrl) {
+        this.documentManagementApiUrl = documentManagementApiUrl;
     }
 
     public ExceptionRecord mapEnvelope(Envelope envelope) {
@@ -27,7 +30,7 @@ public class ExceptionRecordMapper {
             envelope.jurisdiction,
             getLocalDateTime(envelope.deliveryDate),
             getLocalDateTime(envelope.openingDate),
-            mapDocuments(envelope.documents),
+            mapDocuments(envelope.documents, documentManagementApiUrl),
             mapOcrData(envelope.ocrData)
         );
     }
