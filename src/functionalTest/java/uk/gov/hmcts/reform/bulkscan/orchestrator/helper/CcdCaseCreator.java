@@ -31,7 +31,7 @@ public class CcdCaseCreator {
     private final CoreCaseDataApi coreCaseDataApi;
 
     @Autowired
-    private SupplementaryEvidenceMapper supplementaryEvidenceMapper;
+    private final SupplementaryEvidenceMapper supplementaryEvidenceMapper;
 
     public CcdCaseCreator(
         CcdAuthenticatorFactory ccdAuthenticatorFactory,

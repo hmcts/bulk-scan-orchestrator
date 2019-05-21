@@ -15,7 +15,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.Docume
 @Component
 public class SupplementaryEvidenceMapper {
 
-    private String documentManagementApiUrl;
+    private final String documentManagementApiUrl;
 
     public SupplementaryEvidenceMapper(
         @Value("${document_management.documents.url}") final String documentManagementApiUrl

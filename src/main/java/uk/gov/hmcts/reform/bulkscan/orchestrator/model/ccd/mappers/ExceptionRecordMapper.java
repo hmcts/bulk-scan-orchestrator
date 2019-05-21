@@ -17,9 +17,9 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.Docume
 @Component
 public class ExceptionRecordMapper {
 
-    private String documentManagementApiUrl;
+    private final String documentManagementApiUrl;
 
-    public ExceptionRecordMapper(@Value("${document_management.url}") final String documentManagementApiUrl) {
+    public ExceptionRecordMapper(@Value("${document_management.documents.url}") final String documentManagementApiUrl) {
         this.documentManagementApiUrl = documentManagementApiUrl;
     }
 
