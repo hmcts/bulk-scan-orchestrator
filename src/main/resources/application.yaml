@@ -45,6 +45,37 @@ idam:
       username: ${IDAM_USERS_BULKSCAN_USERNAME:bulkscan+ccd@gmail.com}
       password: ${IDAM_USERS_BULKSCAN_PASSWORD:Password12}
 
+service-config:
+  # Services and all their case type IDs, excluding exception records.
+  # These mappings are used by Bulk Scan to determine which case type IDs to search across
+  # when looking for a case by its legacy ID. Those CTIDs that are not present here, will
+  # not be included in the search.
+  services:
+    - service: bulkscan # service name corresponds to the name of the container in Blob Storage
+      jurisdiction: BULKSCAN
+      case-type-ids:
+        - Bulk_Scanned
+
+    - service: sscs
+      jurisdiction: SSCS
+      case-type-ids: []
+
+    - service: probate
+      jurisdiction: PROBATE
+      case-type-ids: []
+
+    - service: divorce
+      jurisdiction: DIVORCE
+      case-type-ids: []
+
+    - service: finrem
+      jurisdiction: DIVORCE
+      case-type-ids: []
+
+    - service: cmc
+      jurisdiction: CMC
+      case-type-ids: []
+
 scheduling:
   task:
     delete-envelopes-dlq-messages:
