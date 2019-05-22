@@ -21,7 +21,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 
 class ExceptionRecordMapperTest {
 
-    private final ExceptionRecordMapper mapper = new ExceptionRecordMapper("https://example.gov.uk");
+    private final ExceptionRecordMapper mapper = new ExceptionRecordMapper("https://example.gov.uk", "files");
 
     @Test
     void mapEnvelope_maps_all_fields_correctly() {

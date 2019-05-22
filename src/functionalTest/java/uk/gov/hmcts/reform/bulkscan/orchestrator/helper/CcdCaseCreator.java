@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.SupplementaryEvidenceMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
@@ -30,7 +29,6 @@ public class CcdCaseCreator {
     private final CcdAuthenticatorFactory ccdAuthenticatorFactory;
     private final CoreCaseDataApi coreCaseDataApi;
 
-    @Autowired
     private final SupplementaryEvidenceMapper supplementaryEvidenceMapper;
 
     public CcdCaseCreator(

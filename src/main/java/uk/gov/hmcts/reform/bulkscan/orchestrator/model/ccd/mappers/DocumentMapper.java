@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
-import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
@@ -19,15 +18,19 @@ public class DocumentMapper {
         // util class
     }
 
-    public static List<CcdCollectionElement<ScannedDocument>> mapDocuments(List<Document> documents, String dmApiUrl) {
+    public static List<CcdCollectionElement<ScannedDocument>> mapDocuments(
+        List<Document> documents,
+        String dmApiUrl,
+        String contextPath
+    ) {
         return documents
             .stream()
-            .map((Document document) -> mapDocument(document, dmApiUrl))
+            .map(document -> mapDocument(document, dmApiUrl, contextPath))
             .map(CcdCollectionElement::new)
             .collect(Collectors.toList());
     }
 
-    public static ScannedDocument mapDocument(Document document, String dmApiUrl) {
+    public static ScannedDocument mapDocument(Document document, String dmApiUrl, String contextPath) {
         if (document == null) {
             return null;
         } else {
@@ -37,7 +40,7 @@ public class DocumentMapper {
                 document.type,
                 document.subtype,
                 getLocalDateTime(document.scannedAt),
-                new CcdDocument(StringUtils.join(dmApiUrl, "/", document.uuid)),
+                new CcdDocument(String.join("/", dmApiUrl, contextPath, document.uuid)),
                 null
             );
         }

@@ -38,8 +38,8 @@ idam:
 
 document_management:
   url: http://dm-store:4460
-  documents:
-    url: http://dm-store:4460/documents
+  context-path: documents
+
 test-url: ${TEST_URL:http://localhost:8582}
 
 task:

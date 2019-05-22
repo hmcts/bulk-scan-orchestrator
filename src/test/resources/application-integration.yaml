@@ -5,8 +5,8 @@ core_case_data:
   api:
     url: *wiremock
 document_management:
-  documents:
     url: *wiremock
+    context-path: documents
 idam:
   s2s-auth:
     url: *wiremock

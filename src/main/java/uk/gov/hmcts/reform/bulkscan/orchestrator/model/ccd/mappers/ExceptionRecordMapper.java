@@ -18,9 +18,14 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.Docume
 public class ExceptionRecordMapper {
 
     private final String documentManagementUrl;
+    private final String contextPath;
 
-    public ExceptionRecordMapper(@Value("${document_management.documents.url}") final String documentManagementUrl) {
+    public ExceptionRecordMapper(
+        @Value("${document_management.url}") final String documentManagementUrl,
+        @Value("${document_management.context-path}") final String contextPath
+    ) {
         this.documentManagementUrl = documentManagementUrl;
+        this.contextPath = contextPath;
     }
 
     public ExceptionRecord mapEnvelope(Envelope envelope) {
@@ -30,7 +35,7 @@ public class ExceptionRecordMapper {
             envelope.jurisdiction,
             getLocalDateTime(envelope.deliveryDate),
             getLocalDateTime(envelope.openingDate),
-            mapDocuments(envelope.documents, documentManagementUrl),
+            mapDocuments(envelope.documents, documentManagementUrl, contextPath),
             mapOcrData(envelope.ocrData)
         );
     }

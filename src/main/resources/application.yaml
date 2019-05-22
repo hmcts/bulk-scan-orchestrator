@@ -30,8 +30,8 @@ core_case_data:
     url: 'http://localhost:4452'
 
 document_management:
-  documents:
-    url: ${DOCUMENT_MANAGEMENT_URL:http://localhost:4460}/documents
+    url: ${DOCUMENT_MANAGEMENT_URL:http://localhost:4460}
+    context-path: documents
 
 idam:
   s2s-auth:

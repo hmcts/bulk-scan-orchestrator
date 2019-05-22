@@ -16,11 +16,14 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.Docume
 public class SupplementaryEvidenceMapper {
 
     private final String documentManagementUrl;
+    private final String contextPath;
 
     public SupplementaryEvidenceMapper(
-        @Value("${document_management.documents.url}") final String documentManagementUrl
+        @Value("${document_management.url}") final String documentManagementUrl,
+        @Value("${document_management.context-path}") final String contextPath
     ) {
         this.documentManagementUrl = documentManagementUrl;
+        this.contextPath = contextPath;
     }
 
     public SupplementaryEvidence map(List<Document> existingDocs, List<Document> envelopeDocs) {
@@ -30,7 +33,8 @@ public class SupplementaryEvidenceMapper {
                     existingDocs.stream(),
                     getDocsToAdd(existingDocs, envelopeDocs).stream()
                 ).collect(toList()),
-                documentManagementUrl
+                documentManagementUrl,
+                contextPath
             )
         );
     }

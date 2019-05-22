@@ -27,7 +27,7 @@ class DocumentMapperTest {
         );
 
         // when
-        ScannedDocument result = DocumentMapper.mapDocument(doc, "https://localhost/files");
+        ScannedDocument result = DocumentMapper.mapDocument(doc, "https://localhost", "files");
 
         // then
         assertThat(result)
@@ -50,7 +50,7 @@ class DocumentMapperTest {
         Document doc = null;
 
         // when
-        ScannedDocument result = DocumentMapper.mapDocument(doc, "https://localhost/files");
+        ScannedDocument result = DocumentMapper.mapDocument(doc, "https://localhost", "files");
 
         // then
         assertThat(result).isNull();
@@ -62,7 +62,7 @@ class DocumentMapperTest {
         Document doc = new Document("name.zip", "123", "type", "subtype", null, "https://localhost/files/uuid1", "uuid1");
 
         // when
-        ScannedDocument result = DocumentMapper.mapDocument(doc, "https://localhost/files");
+        ScannedDocument result = DocumentMapper.mapDocument(doc, "https://localhost", "files");
 
         // then
         assertThat(result.scannedDate).isNull();
