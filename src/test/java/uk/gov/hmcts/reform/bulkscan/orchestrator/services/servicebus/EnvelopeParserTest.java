@@ -54,7 +54,6 @@ class EnvelopeParserTest {
                     "doc1_type",
                     "doc1_subtype",
                     scannedAt,
-                    "http://localhost/doc1uuid",
                     "doc1uuid"
                 ),
                 new Document(
@@ -63,7 +62,6 @@ class EnvelopeParserTest {
                     "doc2_type",
                     null,
                     scannedAt,
-                    "http://localhost/doc2uuid",
                     "doc2uuid"
                 )
             ),
@@ -110,7 +108,6 @@ class EnvelopeParserTest {
                     doc.type,
                     doc.subtype,
                     doc.scannedAt,
-                    doc.url,
                     doc.uuid)
             )
             .containsOnly(
@@ -120,7 +117,6 @@ class EnvelopeParserTest {
                     "doc1_type",
                     "doc1_subtype",
                     scannedAt,
-                    "http://localhost/doc1uuid",
                     "doc1uuid"
                 ),
                 tuple(
@@ -129,7 +125,6 @@ class EnvelopeParserTest {
                     "doc2_type",
                     null,
                     scannedAt,
-                    "http://localhost/doc2uuid",
                     "doc2uuid"
                 )
             );
@@ -196,8 +191,7 @@ class EnvelopeParserTest {
         String jsonEnvelopeWithoutId =
             new JSONObject()
                 .put("jurisdiction", "world")
-                .put("doc_urls",
-                    new JSONArray(asList("http://localhost/doc1uuid", "http://localhost/doc2uuid")))
+                .put("doc_uuids", new JSONArray(asList("doc1uuid", "doc2uuid")))
                 .toString();
 
         // when
@@ -242,7 +236,6 @@ class EnvelopeParserTest {
             .put("type", doc.type)
             .put("subtype", doc.subtype)
             .put("scanned_at", toIso8601(doc.scannedAt))
-            .put("url", doc.url)
             .put("uuid", doc.uuid);
     }
 

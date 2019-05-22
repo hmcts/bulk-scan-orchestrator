@@ -101,7 +101,6 @@ class ExceptionRecordMapperTest {
                     scannedDocument.type,
                     scannedDocument.subtype,
                     scannedDocument.scannedDate.atZone(ZoneId.systemDefault()).toInstant(),
-                    scannedDocument.url.documentUrl,
                     StringUtils.substringAfterLast(scannedDocument.url.documentUrl, "/")
                 )
             ).collect(toList());

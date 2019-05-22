@@ -58,7 +58,6 @@ public class ScannedDocumentsHelper {
                 doc.type,
                 doc.subtype,
                 doc.scannedDate == null ? null : doc.scannedDate.atZone(ZoneId.systemDefault()).toInstant(),
-                doc.url == null ? null : doc.url.documentUrl,
                 doc.url == null ? null : StringUtils.substringAfterLast(doc.url.documentUrl, "/")
             );
         }

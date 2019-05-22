@@ -25,14 +25,14 @@ class SupplementaryEvidenceMapperTest {
         // given
         List<Document> existingDocs =
             asList(
-                new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "http://localhost/files/uuida", "uuida"),
-                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "http://localhost/files/uuidb", "uuidb")
+                new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "uuida"),
+                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "uuidb")
             );
 
         List<Document> envelopeDocs =
             asList(
-                new Document("x.pdf", "xxx", "type_x", "subtype_x", now().plusSeconds(3), "http://localhost/files/uuidx", "uuidx"),
-                new Document("y.pdf", "yyy", "type_y", "subtype_y", now().plusSeconds(4), "http://localhost/files/uuidy", "uuidy")
+                new Document("x.pdf", "xxx", "type_x", "subtype_x", now().plusSeconds(3), "uuidx"),
+                new Document("y.pdf", "yyy", "type_y", "subtype_y", now().plusSeconds(4), "uuidy")
             );
 
         // when
@@ -64,14 +64,14 @@ class SupplementaryEvidenceMapperTest {
         // given
         List<Document> existingDocs =
             asList(
-                new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "http://localhost/files/uuida", "uuida"),
-                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "http://localhost/files/uuidb", "uuidb")
+                new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "uuida"),
+                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "uuidb")
             );
 
         List<Document> envelopeDocs =
             asList(
-                new Document("a1.pdf", "aaa1", "type_a1", "subtype_a1", now().plusSeconds(3), "http://localhost/files/uuida", "uuida"), // same url!
-                new Document("b.pdf", "bbb1", "type_b", "subtype_b", now().plusSeconds(4), "http://localhost/files/uuidxxxxx", "uuidxxxxx")
+                new Document("a1.pdf", "aaa1", "type_a1", "subtype_a1", now().plusSeconds(3), "uuida"), // same url!
+                new Document("b.pdf", "bbb1", "type_b", "subtype_b", now().plusSeconds(4), "uuidxxxxx")
             );
 
         // when
@@ -96,14 +96,14 @@ class SupplementaryEvidenceMapperTest {
         // given
         List<Document> existingDocs =
             asList(
-                new Document("a.pdf", "AAA", "type_a", "subtype_a", now().plusSeconds(1), "http://localhost/files/uuida", "uuida"),
-                new Document("b.pdf", "BBB", "type_b", "subtype_b", now().plusSeconds(2), "http://localhost/files/uuidb", "uuidb")
+                new Document("a.pdf", "AAA", "type_a", "subtype_a", now().plusSeconds(1), "uuida"),
+                new Document("b.pdf", "BBB", "type_b", "subtype_b", now().plusSeconds(2), "uuidb")
             );
 
         List<Document> envelopeDocs =
             asList(
-                new Document("c.pdf", "AAA", "type_c", "subtype_c", now().plusSeconds(3), "http://localhost/files/uuidc", "uuidc"), // same control number!
-                new Document("d.pdf", "DDD", "type_d", "subtype_d", now().plusSeconds(4), "http://localhost/files/uuidd", "uuidd")
+                new Document("c.pdf", "AAA", "type_c", "subtype_c", now().plusSeconds(3), "uuidc"), // same control number!
+                new Document("d.pdf", "DDD", "type_d", "subtype_d", now().plusSeconds(4), "uuidd")
             );
 
         // when
