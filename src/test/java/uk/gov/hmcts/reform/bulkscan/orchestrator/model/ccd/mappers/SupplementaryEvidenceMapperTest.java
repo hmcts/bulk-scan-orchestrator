@@ -18,21 +18,21 @@ import static org.assertj.core.api.Assertions.tuple;
 @SuppressWarnings("checkstyle:LineLength")
 class SupplementaryEvidenceMapperTest {
 
-    private static final SupplementaryEvidenceMapper mapper = new SupplementaryEvidenceMapper();
+    private static final SupplementaryEvidenceMapper mapper = new SupplementaryEvidenceMapper("http://localhost", "files");
 
     @Test
     void maps_all_fields_correctly() {
         // given
         List<Document> existingDocs =
             asList(
-                new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "http://localhost/uuida", "uuida"),
-                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "http://localhost/uuidb", "uuidb")
+                new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "http://localhost/files/uuida", "uuida"),
+                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "http://localhost/files/uuidb", "uuidb")
             );
 
         List<Document> envelopeDocs =
             asList(
-                new Document("x.pdf", "xxx", "type_x", "subtype_x", now().plusSeconds(3), "http://localhost/uuidx", "uuidx"),
-                new Document("y.pdf", "yyy", "type_y", "subtype_y", now().plusSeconds(4), "http://localhost/uuidy", "uuidy")
+                new Document("x.pdf", "xxx", "type_x", "subtype_x", now().plusSeconds(3), "http://localhost/files/uuidx", "uuidx"),
+                new Document("y.pdf", "yyy", "type_y", "subtype_y", now().plusSeconds(4), "http://localhost/files/uuidy", "uuidy")
             );
 
         // when
@@ -52,10 +52,10 @@ class SupplementaryEvidenceMapperTest {
                     ccdDoc.value.url.documentUrl
                 ))
             .containsExactly(
-                tuple("a.pdf", "aaa", "type_a", "subtype_a", toLocalDateTime(existingDocs.get(0).scannedAt), "http://localhost/uuida"),
-                tuple("b.pdf", "bbb", "type_b", "subtype_b", toLocalDateTime(existingDocs.get(1).scannedAt), "http://localhost/uuidb"),
-                tuple("x.pdf", "xxx", "type_x", "subtype_x", toLocalDateTime(envelopeDocs.get(0).scannedAt), "http://localhost/uuidx"),
-                tuple("y.pdf", "yyy", "type_y", "subtype_y", toLocalDateTime(envelopeDocs.get(1).scannedAt), "http://localhost/uuidy")
+                tuple("a.pdf", "aaa", "type_a", "subtype_a", toLocalDateTime(existingDocs.get(0).scannedAt), "http://localhost/files/uuida"),
+                tuple("b.pdf", "bbb", "type_b", "subtype_b", toLocalDateTime(existingDocs.get(1).scannedAt), "http://localhost/files/uuidb"),
+                tuple("x.pdf", "xxx", "type_x", "subtype_x", toLocalDateTime(envelopeDocs.get(0).scannedAt), "http://localhost/files/uuidx"),
+                tuple("y.pdf", "yyy", "type_y", "subtype_y", toLocalDateTime(envelopeDocs.get(1).scannedAt), "http://localhost/files/uuidy")
             );
     }
 
@@ -64,14 +64,14 @@ class SupplementaryEvidenceMapperTest {
         // given
         List<Document> existingDocs =
             asList(
-                new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "http://localhost/uuida", "uuida"),
-                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "http://localhost/uuidb", "uuidb")
+                new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "http://localhost/files/uuida", "uuida"),
+                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "http://localhost/files/uuidb", "uuidb")
             );
 
         List<Document> envelopeDocs =
             asList(
-                new Document("a1.pdf", "aaa1", "type_a1", "subtype_a1", now().plusSeconds(3), "http://localhost/uuida", "uuida"), // same url!
-                new Document("b.pdf", "bbb1", "type_b", "subtype_b", now().plusSeconds(4), "http://localhost/uuidxxxxx", "uuidxxxxx")
+                new Document("a1.pdf", "aaa1", "type_a1", "subtype_a1", now().plusSeconds(3), "http://localhost/files/uuida", "uuida"), // same url!
+                new Document("b.pdf", "bbb1", "type_b", "subtype_b", now().plusSeconds(4), "http://localhost/files/uuidxxxxx", "uuidxxxxx")
             );
 
         // when
@@ -85,9 +85,9 @@ class SupplementaryEvidenceMapperTest {
                 tuple(ccdDoc.value.fileName, ccdDoc.value.url.documentUrl)
             )
             .containsExactly(
-                tuple("a.pdf", "http://localhost/uuida"),
-                tuple("b.pdf", "http://localhost/uuidb"),
-                tuple("b.pdf", "http://localhost/uuidxxxxx")
+                tuple("a.pdf", "http://localhost/files/uuida"),
+                tuple("b.pdf", "http://localhost/files/uuidb"),
+                tuple("b.pdf", "http://localhost/files/uuidxxxxx")
             );
     }
 
@@ -96,14 +96,14 @@ class SupplementaryEvidenceMapperTest {
         // given
         List<Document> existingDocs =
             asList(
-                new Document("a.pdf", "AAA", "type_a", "subtype_a", now().plusSeconds(1), "http://localhost/uuida", "uuida"),
-                new Document("b.pdf", "BBB", "type_b", "subtype_b", now().plusSeconds(2), "http://localhost/uuidb", "uuidb")
+                new Document("a.pdf", "AAA", "type_a", "subtype_a", now().plusSeconds(1), "http://localhost/files/uuida", "uuida"),
+                new Document("b.pdf", "BBB", "type_b", "subtype_b", now().plusSeconds(2), "http://localhost/files/uuidb", "uuidb")
             );
 
         List<Document> envelopeDocs =
             asList(
-                new Document("c.pdf", "AAA", "type_c", "subtype_c", now().plusSeconds(3), "http://localhost/uuidc", "uuidc"), // same control number!
-                new Document("d.pdf", "DDD", "type_d", "subtype_d", now().plusSeconds(4), "http://localhost/uuidd", "uuidd")
+                new Document("c.pdf", "AAA", "type_c", "subtype_c", now().plusSeconds(3), "http://localhost/files/uuidc", "uuidc"), // same control number!
+                new Document("d.pdf", "DDD", "type_d", "subtype_d", now().plusSeconds(4), "http://localhost/files/uuidd", "uuidd")
             );
 
         // when

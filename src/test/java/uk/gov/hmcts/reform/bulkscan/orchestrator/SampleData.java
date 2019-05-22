@@ -168,7 +168,7 @@ public class SampleData {
                     String.format("type_%s", index),
                     String.format("subtype_%s", index),
                     ZonedDateTime.parse("2018-10-01T00:00:00Z").plus(index, DAYS).toInstant(),
-                    String.format("https://example.gov.uk/uuid%s", index),
+                    String.format("https://example.gov.uk/files/uuid%s", index),
                     String.format("uuid%s", index)
                 )
             ).limit(numberOfDocuments)

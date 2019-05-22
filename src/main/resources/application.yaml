@@ -30,7 +30,7 @@ core_case_data:
     url: 'http://localhost:4452'
 
 document_management:
-  url: http://localhost:4460
+  url: ${DOCUMENT_MANAGEMENT_URL:http://localhost:4460}
   context-path: documents
 
 idam:
