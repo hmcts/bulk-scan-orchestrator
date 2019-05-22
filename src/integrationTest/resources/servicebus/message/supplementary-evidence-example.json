@@ -15,7 +15,6 @@
       "type": "other",
       "subtype": "testSubtype",
       "scanned_at": "2018-01-01T12:34:56.123Z",
-      "url": "http://dm-store:4460/documents/ee69aee8-1a33-40dd-9af9-d90da1b104babc",
       "uuid": "ee69aee8-1a33-40dd-9af9-d90da1b104babc"
     }
   ]

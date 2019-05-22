@@ -74,7 +74,7 @@ class SupplementaryEvidenceTest {
         CaseDetails caseDetails =
             ccdCaseCreator.createCase(
                 singletonList(
-                    new Document("evidence.pdf", "123", "other", null, Instant.now(), dmUrlOriginal, documentUuid)));
+                    new Document("evidence.pdf", "123", "other", null, Instant.now(), documentUuid)));
 
         // when
         envelopeMessager.sendMessageFromFile(
