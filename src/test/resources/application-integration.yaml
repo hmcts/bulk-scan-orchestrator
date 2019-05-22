@@ -4,6 +4,9 @@ wiremock:
 core_case_data:
   api:
     url: *wiremock
+document_management:
+  url: *wiremock
+  context-path: documents
 idam:
   s2s-auth:
     url: *wiremock

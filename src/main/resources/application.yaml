@@ -29,6 +29,10 @@ core_case_data:
   api:
     url: 'http://localhost:4452'
 
+document_management:
+  url: http://dm-store:4460
+  context-path: documents
+
 idam:
   s2s-auth:
     url:    ${S2S_URL:http://localhost:4552}
