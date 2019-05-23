@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
-import io.vavr.Value;
+import com.google.common.collect.ImmutableMap;
+import io.vavr.collection.Seq;
+import io.vavr.control.Either;
 import io.vavr.control.Validation;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
@@ -13,17 +15,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static java.util.Collections.emptyList;
+import static io.vavr.control.Validation.valid;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAScannedRecord;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAnId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAttachToCaseReference;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJurisdiction;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasSearchCaseReference;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasSearchCaseReferenceType;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.checkForDuplicatesOrElse;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.getDocumentNumbers;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.getScannedDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.insertNewRecords;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.CCD_CASE_REFERENCE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.EXTERNAL_CASE_REFERENCE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.ATTACH_TO_CASE_REFERENCE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SCANNED_DOCUMENTS;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SEARCH_CASE_REFERENCE_TYPE;
 
 @Service
 public class AttachCaseCallbackService {
@@ -44,86 +55,179 @@ public class AttachCaseCallbackService {
      *
      * @return List of errors
      */
-    public List<String> process(CaseDetails exceptionRecord) {
+    public Either<List<String>, Map<String, Object>> process(CaseDetails exceptionRecord) {
+        boolean useSearchCaseReference = isSearchCaseReferenceTypePresent(exceptionRecord);
+
+        return getValidation(exceptionRecord, useSearchCaseReference)
+            .map(this::tryAttachToCase)
+            .getOrElseGet(errors -> Either.left(errors.toJavaList()));
+    }
+
+    private Validation<Seq<String>, AttachToCaseEventData> getValidation(
+        CaseDetails exceptionRecord,
+        boolean useSearchCaseReference
+    ) {
+        Validation<String, String> caseReferenceTypeValidation = useSearchCaseReference
+            ? hasSearchCaseReferenceType(exceptionRecord)
+            : valid(CCD_CASE_REFERENCE);
+
+        Validation<String, String> caseReferenceValidation = useSearchCaseReference
+            ? hasSearchCaseReference(exceptionRecord)
+            : hasAttachToCaseReference(exceptionRecord);
+
         return Validation
             .combine(
                 hasJurisdiction(exceptionRecord),
-                hasAttachToCaseReference(exceptionRecord),
+                hasServiceNameInCaseTypeId(exceptionRecord),
+                caseReferenceTypeValidation,
+                caseReferenceValidation,
                 hasAnId(exceptionRecord),
                 hasAScannedRecord(exceptionRecord)
             )
-            .ap(this::attachToCase)
-            .getOrElseGet(Value::toJavaList);
+            .ap(AttachToCaseEventData::new);
     }
 
     //The code below need to be rewritten to reuse the EventPublisher class
 
-    private List<String> attachToCase(
-        String exceptionRecordJurisdiction,
-        String targetCaseRef,
-        Long exceptionRecordId,
-        List<Map<String, Object>> exceptionRecordDocuments
+    private Either<List<String>, Map<String, Object>> tryAttachToCase(
+        AttachToCaseEventData event
     ) {
         try {
-            log.info("Attaching exception record {} to case {}", exceptionRecordId, targetCaseRef);
-            doAttachCase(exceptionRecordJurisdiction, targetCaseRef, exceptionRecordDocuments, exceptionRecordId);
-            log.info("Successfully attached exception record {} to case {}", exceptionRecordId, targetCaseRef);
-            return emptyList();
+            log.info(
+                "Attaching exception record '{}' to a case by reference type '{}' and reference '{}'",
+                event.exceptionRecordId,
+                event.targetCaseRefType,
+                event.targetCaseRef
+            );
+
+            Map<String, Object> result = attachToCase(event);
+            log.info(
+                "Successfully attached exception record {} to case {}",
+                event.exceptionRecordId,
+                event.targetCaseRef
+            );
+            return Either.right(result);
 
         } catch (AlreadyAttachedToCaseException
             | DuplicateDocsException
             | CaseNotFoundException
+            | MultipleCasesFoundException
             | InvalidCaseIdException exc
         ) {
             log.warn(
                 "Validation error when attaching ER {} in {} to case {}",
-                exceptionRecordId,
-                exceptionRecordJurisdiction,
-                targetCaseRef,
+                event.exceptionRecordId,
+                event.exceptionRecordJurisdiction,
+                event.targetCaseRef,
                 exc
             );
-            return singletonList(exc.getMessage());
+            return Either.left(singletonList(exc.getMessage()));
 
         } catch (Exception exc) {
             log.error(
                 "Error attaching ER {} in {} to case {}",
-                exceptionRecordId,
-                exceptionRecordJurisdiction,
-                targetCaseRef,
+                event.exceptionRecordId,
+                event.exceptionRecordJurisdiction,
+                event.targetCaseRef,
                 exc
             );
-            return singletonList(INTERNAL_ERROR_MSG);
+            return Either.left(singletonList(INTERNAL_ERROR_MSG));
         }
     }
 
-    private void doAttachCase(
+    private Map<String, Object> attachToCase(AttachToCaseEventData event) {
+        String targetCaseCcdId;
+
+        if (EXTERNAL_CASE_REFERENCE.equals(event.targetCaseRefType)) {
+            targetCaseCcdId = attachCaseByLegacyId(event);
+        } else {
+            attachCaseByCcdId(
+                event.exceptionRecordJurisdiction,
+                event.targetCaseRef,
+                event.exceptionRecordDocuments,
+                event.exceptionRecordId
+            );
+
+            targetCaseCcdId = event.targetCaseRef;
+        }
+
+        return ImmutableMap.of(ATTACH_TO_CASE_REFERENCE, targetCaseCcdId);
+    }
+
+    private String attachCaseByLegacyId(AttachToCaseEventData event) {
+        log.info(
+            "Attaching exception record '{}' to a case by legacy ID '{}'",
+            event.exceptionRecordId,
+            event.targetCaseRef
+        );
+
+        List<Long> targetCaseCcdIds = ccdApi.getCaseRefsByLegacyId(event.targetCaseRef, event.service);
+
+        if (targetCaseCcdIds.size() == 1) {
+            String targetCaseCcdId = targetCaseCcdIds.get(0).toString();
+
+            log.info("Found case with CCD ID '{}' for legacy ID '{}'", targetCaseCcdId, event.targetCaseRef);
+
+            attachCaseByCcdId(
+                event.exceptionRecordJurisdiction,
+                targetCaseCcdId,
+                event.exceptionRecordDocuments,
+                event.exceptionRecordId
+            );
+
+            return targetCaseCcdId;
+        } else if (targetCaseCcdIds.isEmpty()) {
+            throw new CaseNotFoundException(
+                String.format("No case found for legacy case reference %s", event.targetCaseRef)
+            );
+        } else {
+            throw new MultipleCasesFoundException(
+                String.format(
+                    "Multiple cases (%s) found for the given legacy case reference: %s",
+                    targetCaseCcdIds.stream().map(String::valueOf).collect(joining(", ")),
+                    event.targetCaseRef
+                )
+            );
+        }
+    }
+
+    private void attachCaseByCcdId(
         String exceptionRecordJurisdiction,
-        String targetCaseRef,
+        String targetCaseCcdRef,
         List<Map<String, Object>> exceptionRecordDocuments,
         Long exceptionRecordId
     ) {
-        CaseDetails theCase = ccdApi.getCase(targetCaseRef, exceptionRecordJurisdiction);
+        log.info("Attaching exception record '{}' to a case by CCD ID '{}'", exceptionRecordId, targetCaseCcdRef);
+
+        CaseDetails theCase = ccdApi.getCase(targetCaseCcdRef, exceptionRecordJurisdiction);
         List<Map<String, Object>> targetCaseDocuments = getScannedDocuments(theCase);
 
+        // TODO: move this line to the top
         verifyExceptionRecordIsNotAttachedToCase(exceptionRecordJurisdiction, exceptionRecordId);
 
         //This is done so exception record does not change state if there is a document error
         checkForDuplicatesOrElse(
             exceptionRecordDocuments,
             targetCaseDocuments,
-            ids -> throwDuplicateError(targetCaseRef, ids)
+            ids -> throwDuplicateError(targetCaseCcdRef, ids)
         );
 
         attachExceptionRecordReference(exceptionRecordDocuments, exceptionRecordId);
 
         StartEventResponse event = ccdApi.startAttachScannedDocs(theCase);
 
+        Map<String, Object> changedCaseData = ImmutableMap.of(
+            SCANNED_DOCUMENTS, insertNewRecords(exceptionRecordDocuments, targetCaseDocuments)
+        );
+
         ccdApi.attachExceptionRecord(
             theCase,
-            insertNewRecords(exceptionRecordDocuments, targetCaseDocuments),
+            changedCaseData,
             createEventSummary(theCase, exceptionRecordId, exceptionRecordDocuments),
             event
         );
+
+        log.info("Attached exception record '{}' to case with CCD ID '{}'", exceptionRecordId, targetCaseCcdRef);
     }
 
     private void verifyExceptionRecordIsNotAttachedToCase(
@@ -177,4 +281,33 @@ public class AttachCaseCallbackService {
         );
     }
 
+    private boolean isSearchCaseReferenceTypePresent(CaseDetails exceptionRecord) {
+        return exceptionRecord.getData() != null
+            && exceptionRecord.getData().get(SEARCH_CASE_REFERENCE_TYPE) != null;
+    }
+
+    static class AttachToCaseEventData {
+        public final String exceptionRecordJurisdiction;
+        public final String service;
+        public final String targetCaseRef;
+        public final String targetCaseRefType;
+        public final Long exceptionRecordId;
+        public final List<Map<String, Object>> exceptionRecordDocuments;
+
+        public AttachToCaseEventData(
+            String exceptionRecordJurisdiction,
+            String service,
+            String targetCaseRefType,
+            String targetCaseRef,
+            Long exceptionRecordId,
+            List<Map<String, Object>> exceptionRecordDocuments
+        ) {
+            this.exceptionRecordJurisdiction = exceptionRecordJurisdiction;
+            this.service = service;
+            this.targetCaseRefType = targetCaseRefType;
+            this.targetCaseRef = targetCaseRef;
+            this.exceptionRecordId = exceptionRecordId;
+            this.exceptionRecordDocuments = exceptionRecordDocuments;
+        }
+    }
 }

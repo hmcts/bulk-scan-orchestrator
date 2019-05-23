@@ -14,7 +14,6 @@ import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -142,7 +141,6 @@ class AttachExceptionRecordToExistingCaseTest {
         verifyRequestedAttachingToCase();
     }
 
-    @Disabled("Attaching by search case reference not supported yet - BPS-584")
     @Test
     public void should_callback_with_correct_information_when_attaching_by_ccd_search_case_reference() {
         given()
@@ -165,7 +163,6 @@ class AttachExceptionRecordToExistingCaseTest {
         verifyRequestedAttachingToCase();
     }
 
-    @Disabled("Legacy ID not supported yet - BPS-584")
     @Test
     public void should_callback_with_correct_information_when_attaching_by_legacy_id() throws Exception {
         String legacyId = "legacy-id-123";
@@ -257,7 +254,6 @@ class AttachExceptionRecordToExistingCaseTest {
             .body(ERRORS_FIELD, hasItem("Could not find case: " + CASE_REF));
     }
 
-    @Disabled("Search case reference not supported yet - BPS-584")
     @Test
     public void should_fail_when_case_referenced_by_ccd_search_case_reference_does_not_exist() {
         String nonExistingCaseRef = CASE_REF;
@@ -278,7 +274,6 @@ class AttachExceptionRecordToExistingCaseTest {
             .body(ERRORS_FIELD, hasItem("Could not find case: " + nonExistingCaseRef));
     }
 
-    @Disabled("Legacy ID not supported yet - BPS-584")
     @Test
     public void should_fail_when_there_is_no_case_with_given_legacy_id() throws Exception {
         String nonExistingLegacyId = "non-existing-id-123";
@@ -305,7 +300,6 @@ class AttachExceptionRecordToExistingCaseTest {
             .body(ERRORS_FIELD, hasItem("No case found for legacy case reference " + nonExistingLegacyId));
     }
 
-    @Disabled("Legacy ID not supported yet - BPS-584")
     @Test
     public void should_fail_when_there_are_multiple_cases_with_given_legacy_id() throws Exception {
         String legacyId = "legacy-id-123";
@@ -348,7 +342,6 @@ class AttachExceptionRecordToExistingCaseTest {
             .body(ERRORS_FIELD, hasItem("Invalid case ID: " + CASE_REF));
     }
 
-    @Disabled("No validation of case type ID yet - BPS-584")
     @Test
     public void should_fail_when_exception_record_case_type_id_is_invalid() {
         given()
@@ -366,7 +359,6 @@ class AttachExceptionRecordToExistingCaseTest {
             .body(ERRORS_FIELD, hasItem("Case type ID (invalid-case-type) has invalid format"));
     }
 
-    @Disabled("Search case reference type not supported - BPS-584")
     @Test
     public void should_fail_when_search_case_reference_type_is_invalid() {
         given()
@@ -383,7 +375,6 @@ class AttachExceptionRecordToExistingCaseTest {
             .body(ERRORS_FIELD, hasItem("Invalid case reference type supplied: invalid-reference-type"));
     }
 
-    @Disabled("Search case reference not supported yet - BPS-584")
     @Test
     public void should_fail_when_search_case_reference_is_invalid() {
         given()
@@ -593,7 +584,7 @@ class AttachExceptionRecordToExistingCaseTest {
                 .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
                 .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(MOCKED_S2S_TOKEN_SIG))
                 .withRequestBody(
-                    matchingJsonPath("$.query.term", containing(legacyId))
+                    matchingJsonPath("$.query.match_phrase", containing(legacyId))
                 )
                 .willReturn(responseBuilder)
         );
