@@ -4,6 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.AbstractMap;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import static java.util.Map.Entry;
@@ -27,7 +28,7 @@ public class JurisdictionToUserMapping {
     }
 
     private Entry<String, Credential> createEntry(Entry<String, Map<String, String>> entry) {
-        String key = entry.getKey().toLowerCase();
+        String key = entry.getKey().toLowerCase(Locale.getDefault());
         Credential cred = new Credential(entry.getValue().get("username"), entry.getValue().get("password"));
 
         return new AbstractMap.SimpleEntry<>(key, cred);
