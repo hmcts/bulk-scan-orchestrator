@@ -80,8 +80,11 @@ final class CallbackValidations {
             .filter(caseTypeId -> caseTypeId != null)
             .map(caseTypeId -> {
                 if (caseTypeId.endsWith(CASE_TYPE_ID_SUFFIX)) {
-                    int serviceNameLength = caseTypeId.length() - CASE_TYPE_ID_SUFFIX.length();
-                    String serviceName = caseTypeId.substring(0, serviceNameLength).toLowerCase(Locale.getDefault());
+                    String serviceName =
+                        caseTypeId
+                            .replace(CASE_TYPE_ID_SUFFIX, "")
+                            .toLowerCase(Locale.getDefault());
+
                     if (!serviceName.isEmpty()) {
                         return Validation.<String, String>valid(serviceName);
                     }
