@@ -1,8 +1,10 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.google.common.collect.ImmutableList;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
+import com.microsoft.azure.servicebus.MessageBody;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -90,7 +92,8 @@ class EnvelopeEventProcessorTest {
     @Test
     public void should_not_throw_exception_when_queue_message_is_invalid() throws Exception {
         IMessage invalidMessage = mock(IMessage.class);
-        given(invalidMessage.getBody()).willReturn("foo".getBytes());
+        given(invalidMessage.getMessageBody())
+            .willReturn(MessageBody.fromBinaryData(ImmutableList.of("foo".getBytes())));
         given(messageReceiver.receive()).willReturn(invalidMessage);
 
         assertThat(processor.processNextMessage()).isTrue();
@@ -126,7 +129,9 @@ class EnvelopeEventProcessorTest {
     public void should_dead_letter_the_message_when_unrecoverable_failure() throws Exception {
         // given
         IMessage message = mock(IMessage.class);
-        given(message.getBody()).willReturn("invalid body".getBytes(Charset.defaultCharset()));
+        given(message.getMessageBody()).willReturn(
+            MessageBody.fromBinaryData(ImmutableList.of("invalid body".getBytes(Charset.defaultCharset())))
+        );
         given(message.getLockToken()).willReturn(UUID.randomUUID());
         given(messageReceiver.receive()).willReturn(message);
 
@@ -249,7 +254,9 @@ class EnvelopeEventProcessorTest {
         // given
         String envelopeId = UUID.randomUUID().toString();
         IMessage message = mock(IMessage.class);
-        given(message.getBody()).willReturn(envelopeJson(NEW_APPLICATION, "caseRef123", envelopeId));
+        given(message.getMessageBody()).willReturn(
+            MessageBody.fromBinaryData(ImmutableList.of(envelopeJson(NEW_APPLICATION, "caseRef123", envelopeId)))
+        );
         given(message.getLockToken()).willReturn(UUID.randomUUID());
         given(messageReceiver.receive()).willReturn(message);
 
@@ -287,7 +294,8 @@ class EnvelopeEventProcessorTest {
 
     private IMessage getValidMessage() {
         IMessage message = mock(IMessage.class);
-        given(message.getBody()).willReturn(envelopeJson());
+        given(message.getMessageBody())
+            .willReturn(MessageBody.fromBinaryData(ImmutableList.of(envelopeJson())));
         return message;
     }
 }
