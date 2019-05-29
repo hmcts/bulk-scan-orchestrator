@@ -34,17 +34,20 @@ public class EnvelopesQueueConsumeTask {
             while (queueMayHaveMessages && isReadyForConsumingMessages()) {
                 queueMayHaveMessages = envelopeEventProcessor.processNextMessage();
             }
-        } catch (Exception e) {
-            log.error("An error occurred when running the 'consume messages' task", e);
-
-            if (e instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
-            }
+        } catch (InterruptedException exception) {
+            logTaskError(exception);
+            Thread.currentThread().interrupt();
+        } catch (Exception exception) {
+            logTaskError(exception);
         }
     }
 
     private boolean isReadyForConsumingMessages() throws LogInAttemptRejectedException {
         // TODO: add S2S and IDAM health checks
         return processingReadinessChecker.isNoLogInAttemptRejectedByIdam();
+    }
+
+    private void logTaskError(Exception exception) {
+        log.error("An error occurred when running the 'consume messages' task", exception);
     }
 }
