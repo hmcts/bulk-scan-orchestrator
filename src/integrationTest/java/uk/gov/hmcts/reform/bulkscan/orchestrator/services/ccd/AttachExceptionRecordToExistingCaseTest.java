@@ -62,19 +62,7 @@ class AttachExceptionRecordToExistingCaseTest {
     private static final String MOCKED_S2S_TOKEN_SIG =
         "X1-LdZAd5YgGFP16-dQrpqEICqRmcu1zL_zeCLyUqMjb5DVx7xoU-r8yXHfgd4tmmjGqbsBz_kLqgu8yruSbtg";
 
-    private MappingBuilder ccdStartEvent() {
-        return get(START_EVENT_URL)
-            .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
-            .withHeader("ServiceAuthorization", containing(MOCKED_S2S_TOKEN_SIG));
-    }
-
     private static final String SUBMIT_URL = CASE_URL + "/events?ignore-warning=true";
-
-    private MappingBuilder ccdSubmitEvent() {
-        return post(SUBMIT_URL)
-            .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
-            .withHeader("ServiceAuthorization", containing(MOCKED_S2S_TOKEN_SIG));
-    }
 
     private static final String EVENT_ID = "someID";
     private static final String EVENT_TOKEN = "theToken";
@@ -93,41 +81,16 @@ class AttachExceptionRecordToExistingCaseTest {
         .data(CASE_DATA)
         .build();
 
-    private MappingBuilder ccdGetCaseMapping() {
-        return get("/cases/" + CASE_REF)
-            .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
-            .withHeader("ServiceAuthorization", containing(MOCKED_S2S_TOKEN_SIG));
-    }
-
     private static final long EXCEPTION_RECORD_ID = 26409983479785245L;
-    private static final String exceptionRecordFileName = "record.pdf";
-    private static final String exceptionRecordDocumentNumber = "654321";
-    private static final Map<String, Object> scannedRecord = document(
-        exceptionRecordFileName,
-        exceptionRecordDocumentNumber
+    private static final String EXCEPTION_RECORD_FILENAME = "record.pdf";
+    private static final String EXCEPTION_RECORD_DOCUMENT_NUMBER = "654321";
+
+    private static final Map<String, Object> SCANNED_RECORD = document(
+        EXCEPTION_RECORD_FILENAME,
+        EXCEPTION_RECORD_DOCUMENT_NUMBER
     );
 
-    private CaseDetails.CaseDetailsBuilder exceptionRecordBuilder() {
-        return CaseDetails.builder()
-            .jurisdiction(JURISDICTION)
-            .id(EXCEPTION_RECORD_ID)
-            .caseTypeId("ExceptionRecord")
-            .data(exceptionDataWithDoc(scannedRecord, CASE_REF));
-    }
-
-    private static Map<String, Object> document(String filename, String documentNumber) {
-        return ImmutableMap.of(
-            "fileName", filename,
-            "id", UUID.randomUUID().toString(),
-            "value", ImmutableMap.of(
-                "controlNumber", documentNumber,
-                "someNumber", 3
-            ),
-            "someString", "someValue"
-        );
-    }
-
-    private StartEventResponse startEventResponse = StartEventResponse
+    private static final StartEventResponse START_EVENT_RESPONSE = StartEventResponse
         .builder()
         .eventId(EVENT_ID)
         .token(EVENT_TOKEN)
@@ -135,7 +98,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @BeforeEach
     void before() throws JsonProcessingException {
-        givenThat(ccdStartEvent().willReturn(okJson(MAPPER.writeValueAsString(startEventResponse))));
+        givenThat(ccdStartEvent().willReturn(okJson(MAPPER.writeValueAsString(START_EVENT_RESPONSE))));
         givenThat(ccdGetCaseMapping().willReturn(okJson(MAPPER.writeValueAsString(CASE_DETAILS))));
         givenThat(ccdSubmitEvent().willReturn(okJson(MAPPER.writeValueAsString(CASE_DETAILS))));
 
@@ -153,22 +116,6 @@ class AttachExceptionRecordToExistingCaseTest {
             .setPort(applicationPort)
             .setContentType(JSON)
             .build();
-    }
-
-
-    private RequestPatternBuilder submittedScannedRecords() {
-        return postRequestedFor(urlEqualTo(SUBMIT_URL));
-    }
-
-    private RequestPatternBuilder startEventRequest() {
-        return getRequestedFor(urlEqualTo(START_EVENT_URL));
-    }
-
-    private CallbackRequest.CallbackRequestBuilder exceptionRecordCallbackBodyBuilder() {
-        return CallbackRequest
-            .builder()
-            .caseDetails(exceptionRecordBuilder().build())
-            .eventId("attachToExistingCase");
     }
 
     @DisplayName("Should successfully callback with correct information")
@@ -195,7 +142,7 @@ class AttachExceptionRecordToExistingCaseTest {
         verifyRequestPattern(
             submittedScannedRecords(),
             "$.data.scannedDocuments[1].fileName",
-            WireMock.equalTo(exceptionRecordFileName)
+            WireMock.equalTo(EXCEPTION_RECORD_FILENAME)
         );
         verifyRequestPattern(
             submittedScannedRecords(),
@@ -203,7 +150,7 @@ class AttachExceptionRecordToExistingCaseTest {
             WireMock.equalTo(String.format(
                 "Attaching exception record(%d) document numbers:[%s] to case:%s",
                 EXCEPTION_RECORD_ID,
-                exceptionRecordDocumentNumber,
+                EXCEPTION_RECORD_DOCUMENT_NUMBER,
                 CASE_REF
             ))
         );
@@ -364,7 +311,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .jurisdiction(JURISDICTION)
             .caseTypeId(CASE_TYPE_EXCEPTION_RECORD)
             .id(EXCEPTION_RECORD_ID)
-            .data(exceptionDataWithDoc(scannedRecord, attachToCaseReference))
+            .data(exceptionDataWithDoc(SCANNED_RECORD, attachToCaseReference))
             .build();
     }
 
@@ -385,5 +332,58 @@ class AttachExceptionRecordToExistingCaseTest {
         return get("/cases/" + EXCEPTION_RECORD_ID)
             .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
             .withHeader("ServiceAuthorization", containing(MOCKED_S2S_TOKEN_SIG));
+    }
+
+    private MappingBuilder ccdGetCaseMapping() {
+        return get("/cases/" + CASE_REF)
+            .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
+            .withHeader("ServiceAuthorization", containing(MOCKED_S2S_TOKEN_SIG));
+    }
+
+    private CaseDetails.CaseDetailsBuilder exceptionRecordBuilder() {
+        return CaseDetails.builder()
+            .jurisdiction(JURISDICTION)
+            .id(EXCEPTION_RECORD_ID)
+            .caseTypeId("ExceptionRecord")
+            .data(exceptionDataWithDoc(SCANNED_RECORD, CASE_REF));
+    }
+
+    private MappingBuilder ccdSubmitEvent() {
+        return post(SUBMIT_URL)
+            .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
+            .withHeader("ServiceAuthorization", containing(MOCKED_S2S_TOKEN_SIG));
+    }
+
+    private MappingBuilder ccdStartEvent() {
+        return get(START_EVENT_URL)
+            .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
+            .withHeader("ServiceAuthorization", containing(MOCKED_S2S_TOKEN_SIG));
+    }
+
+    private RequestPatternBuilder submittedScannedRecords() {
+        return postRequestedFor(urlEqualTo(SUBMIT_URL));
+    }
+
+    private RequestPatternBuilder startEventRequest() {
+        return getRequestedFor(urlEqualTo(START_EVENT_URL));
+    }
+
+    private CallbackRequest.CallbackRequestBuilder exceptionRecordCallbackBodyBuilder() {
+        return CallbackRequest
+            .builder()
+            .caseDetails(exceptionRecordBuilder().build())
+            .eventId("attachToExistingCase");
+    }
+
+    private static Map<String, Object> document(String filename, String documentNumber) {
+        return ImmutableMap.of(
+            "fileName", filename,
+            "id", UUID.randomUUID().toString(),
+            "value", ImmutableMap.of(
+                "controlNumber", documentNumber,
+                "someNumber", 3
+            ),
+            "someString", "someValue"
+        );
     }
 }
