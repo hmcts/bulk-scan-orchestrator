@@ -54,49 +54,49 @@ class AttachExceptionRecordToExistingCaseTest {
     @LocalServerPort
     private int applicationPort;
 
-    private static final String caseUrl = CASE_SUBMIT_URL + "/" + CASE_REF;
+    private static final String CASE_URL = CASE_SUBMIT_URL + "/" + CASE_REF;
 
-    private static final String startEventUrl = caseUrl + "/event-triggers/attachScannedDocs/token";
+    private static final String START_EVENT_URL = CASE_URL + "/event-triggers/attachScannedDocs/token";
     // see WireMock mapping json files
-    private static final String mockedIdamTokenSig = "q6hDG0Z1Qbinwtl8TgeDrAVV0LlCTRtbQqBYoMjd03k";
-    private static final String mockedS2sTokenSig =
+    private static final String MOCKED_IDAM_TOKEN_SIG = "q6hDG0Z1Qbinwtl8TgeDrAVV0LlCTRtbQqBYoMjd03k";
+    private static final String MOCKED_S2S_TOKEN_SIG =
         "X1-LdZAd5YgGFP16-dQrpqEICqRmcu1zL_zeCLyUqMjb5DVx7xoU-r8yXHfgd4tmmjGqbsBz_kLqgu8yruSbtg";
 
     private MappingBuilder ccdStartEvent() {
-        return get(startEventUrl)
-            .withHeader(AUTHORIZATION, containing(mockedIdamTokenSig))
-            .withHeader("ServiceAuthorization", containing(mockedS2sTokenSig));
+        return get(START_EVENT_URL)
+            .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
+            .withHeader("ServiceAuthorization", containing(MOCKED_S2S_TOKEN_SIG));
     }
 
-    private static final String submitUrl = caseUrl + "/events?ignore-warning=true";
+    private static final String SUBMIT_URL = CASE_URL + "/events?ignore-warning=true";
 
     private MappingBuilder ccdSubmitEvent() {
-        return post(submitUrl)
-            .withHeader(AUTHORIZATION, containing(mockedIdamTokenSig))
-            .withHeader("ServiceAuthorization", containing(mockedS2sTokenSig));
+        return post(SUBMIT_URL)
+            .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
+            .withHeader("ServiceAuthorization", containing(MOCKED_S2S_TOKEN_SIG));
     }
 
-    private static final String eventId = "someID";
-    private static final String eventToken = "theToken";
+    private static final String EVENT_ID = "someID";
+    private static final String EVENT_TOKEN = "theToken";
 
-    private static final String filename = "document.pdf";
-    private static final String documentNumber = "123456";
-    private static final Map<String, Object> scannedDocument = document(filename, documentNumber);
-    private static final Map<String, Object> caseData = ImmutableMap.of(
-        "scannedDocuments", ImmutableList.of(scannedDocument)
+    private static final String DOCUMENT_FILENAME = "document.pdf";
+    private static final String DOCUMENT_NUMBER = "123456";
+    private static final Map<String, Object> SCANNED_DOCUMENT = document(DOCUMENT_FILENAME, DOCUMENT_NUMBER);
+    private static final Map<String, Object> CASE_DATA = ImmutableMap.of(
+        "scannedDocuments", ImmutableList.of(SCANNED_DOCUMENT)
     );
 
-    private static final CaseDetails caseDetails = CaseDetails.builder()
+    private static final CaseDetails CASE_DETAILS = CaseDetails.builder()
         .jurisdiction(JURISDICTION)
         .caseTypeId(CASE_TYPE_BULK_SCAN)
         .id(Long.parseLong(CASE_REF))
-        .data(caseData)
+        .data(CASE_DATA)
         .build();
 
     private MappingBuilder ccdGetCaseMapping() {
         return get("/cases/" + CASE_REF)
-            .withHeader(AUTHORIZATION, containing(mockedIdamTokenSig))
-            .withHeader("ServiceAuthorization", containing(mockedS2sTokenSig));
+            .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
+            .withHeader("ServiceAuthorization", containing(MOCKED_S2S_TOKEN_SIG));
     }
 
     private static final long EXCEPTION_RECORD_ID = 26409983479785245L;
@@ -129,15 +129,15 @@ class AttachExceptionRecordToExistingCaseTest {
 
     private StartEventResponse startEventResponse = StartEventResponse
         .builder()
-        .eventId(eventId)
-        .token(eventToken)
+        .eventId(EVENT_ID)
+        .token(EVENT_TOKEN)
         .build();
 
     @BeforeEach
     void before() throws JsonProcessingException {
         givenThat(ccdStartEvent().willReturn(okJson(MAPPER.writeValueAsString(startEventResponse))));
-        givenThat(ccdGetCaseMapping().willReturn(okJson(MAPPER.writeValueAsString(caseDetails))));
-        givenThat(ccdSubmitEvent().willReturn(okJson(MAPPER.writeValueAsString(caseDetails))));
+        givenThat(ccdGetCaseMapping().willReturn(okJson(MAPPER.writeValueAsString(CASE_DETAILS))));
+        givenThat(ccdSubmitEvent().willReturn(okJson(MAPPER.writeValueAsString(CASE_DETAILS))));
 
         givenThat(
             ccdGetExceptionRecord()
@@ -157,11 +157,11 @@ class AttachExceptionRecordToExistingCaseTest {
 
 
     private RequestPatternBuilder submittedScannedRecords() {
-        return postRequestedFor(urlEqualTo(submitUrl));
+        return postRequestedFor(urlEqualTo(SUBMIT_URL));
     }
 
     private RequestPatternBuilder startEventRequest() {
-        return getRequestedFor(urlEqualTo(startEventUrl));
+        return getRequestedFor(urlEqualTo(START_EVENT_URL));
     }
 
     private CallbackRequest.CallbackRequestBuilder exceptionRecordCallbackBodyBuilder() {
@@ -190,7 +190,7 @@ class AttachExceptionRecordToExistingCaseTest {
         verifyRequestPattern(
             submittedScannedRecords(),
             "$.data.scannedDocuments[0].fileName",
-            WireMock.equalTo(filename)
+            WireMock.equalTo(DOCUMENT_FILENAME)
         );
         verifyRequestPattern(
             submittedScannedRecords(),
@@ -210,12 +210,12 @@ class AttachExceptionRecordToExistingCaseTest {
         verifyRequestPattern(
             submittedScannedRecords(),
             "$.event.id",
-            WireMock.equalTo(eventId)
+            WireMock.equalTo(EVENT_ID)
         );
         verifyRequestPattern(
             submittedScannedRecords(),
             "$.event_token",
-            WireMock.equalTo(eventToken)
+            WireMock.equalTo(EVENT_TOKEN)
         );
     }
 
@@ -255,7 +255,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .statusCode(200)
             .body("errors", hasItem(String.format(
                 "Document(s) with control number [%s] are already attached to case reference: %s",
-                documentNumber,
+                DOCUMENT_NUMBER,
                 CASE_REF
             )));
 
@@ -349,7 +349,7 @@ class AttachExceptionRecordToExistingCaseTest {
         return exceptionRecordCallbackBodyBuilder()
             .caseDetails(
                 exceptionRecordBuilder()
-                    .data(exceptionDataWithDoc(scannedDocument, attachToCaseReference))
+                    .data(exceptionDataWithDoc(SCANNED_DOCUMENT, attachToCaseReference))
                     .build()
             )
             .build();
@@ -383,7 +383,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
     private MappingBuilder ccdGetExceptionRecord() {
         return get("/cases/" + EXCEPTION_RECORD_ID)
-            .withHeader(AUTHORIZATION, containing(mockedIdamTokenSig))
-            .withHeader("ServiceAuthorization", containing(mockedS2sTokenSig));
+            .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
+            .withHeader("ServiceAuthorization", containing(MOCKED_S2S_TOKEN_SIG));
     }
 }
