@@ -141,7 +141,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @Disabled("Attaching by search case reference not supported yet - BPS-584")
     @Test
-    public void should_callback_with_correct_information_when_attaching_by_ccd_search_case_reference() throws Exception {
+    public void should_callback_with_correct_information_when_attaching_by_ccd_search_case_reference() {
         given()
             .body(
                 exceptionRecordCallbackBodyBuilder(
