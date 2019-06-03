@@ -72,9 +72,10 @@ class AttachExceptionRecordToExistingCaseTest {
 
     private static final String DOCUMENT_FILENAME = "document.pdf";
     private static final String DOCUMENT_NUMBER = "123456";
-    private static final Map<String, Object> SCANNED_DOCUMENT = document(DOCUMENT_FILENAME, DOCUMENT_NUMBER);
+    private static final Map<String, Object> EXISTING_DOC = document(DOCUMENT_FILENAME, DOCUMENT_NUMBER);
+
     private static final Map<String, Object> CASE_DATA = ImmutableMap.of(
-        "scannedDocuments", ImmutableList.of(SCANNED_DOCUMENT)
+        "scannedDocuments", ImmutableList.of(EXISTING_DOC)
     );
 
     private static final CaseDetails CASE_DETAILS = CaseDetails.builder()
@@ -84,12 +85,11 @@ class AttachExceptionRecordToExistingCaseTest {
         .data(CASE_DATA)
         .build();
 
-
     private static final long EXCEPTION_RECORD_ID = 26409983479785245L;
     private static final String EXCEPTION_RECORD_FILENAME = "record.pdf";
     private static final String EXCEPTION_RECORD_DOCUMENT_NUMBER = "654321";
 
-    private static final Map<String, Object> SCANNED_RECORD = document(
+    private static final Map<String, Object> EXCEPTION_RECORD_DOC = document(
         EXCEPTION_RECORD_FILENAME,
         EXCEPTION_RECORD_DOCUMENT_NUMBER
     );
@@ -116,9 +116,7 @@ class AttachExceptionRecordToExistingCaseTest {
             String.valueOf(EXCEPTION_RECORD_ID),
             // an exception record not attached to any case
             okJson(
-                MAPPER.writeValueAsString(
-                    exceptionRecordBuilder(null).build()
-                )
+                MAPPER.writeValueAsString(exceptionRecord(null))
             )
         );
 
@@ -132,7 +130,7 @@ class AttachExceptionRecordToExistingCaseTest {
     @Test
     public void should_callback_with_correct_information_when_attaching_by_attachToCaseReference() {
         given()
-            .body(exceptionRecordCallbackBodyBuilder().build())
+            .body(exceptionRecordCallbackRequest())
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -149,13 +147,12 @@ class AttachExceptionRecordToExistingCaseTest {
     public void should_callback_with_correct_information_when_attaching_by_ccd_search_case_reference() {
         given()
             .body(
-                exceptionRecordCallbackBodyBuilder(
+                exceptionRecordCallbackRequest(
                     null,
                     CASE_REFERENCE_TYPE_CCD,
                     CASE_REF,
                     CASE_TYPE_EXCEPTION_RECORD
                 )
-                    .build()
             )
             .post("/callback/{type}", "attach_case")
             .then()
@@ -185,12 +182,12 @@ class AttachExceptionRecordToExistingCaseTest {
 
         given()
             .body(
-                exceptionRecordCallbackBodyBuilder(
+                exceptionRecordCallbackRequest(
                     null,
                     CASE_REFERENCE_TYPE_EXTERNAL,
                     legacyId,
                     CASE_TYPE_EXCEPTION_RECORD
-                ).build()
+                )
             )
             .post("/callback/{type}", "attach_case")
             .then()
@@ -209,7 +206,7 @@ class AttachExceptionRecordToExistingCaseTest {
         givenThat(ccdSubmitEvent().willReturn(status(500)));
 
         given()
-            .body(exceptionRecordCallbackBodyBuilder().build())
+            .body(exceptionRecordCallbackRequest())
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -222,7 +219,7 @@ class AttachExceptionRecordToExistingCaseTest {
         givenThat(ccdStartEvent().willReturn(status(404)));
 
         given()
-            .body(exceptionRecordCallbackBodyBuilder().build())
+            .body(exceptionRecordCallbackRequest())
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -233,7 +230,7 @@ class AttachExceptionRecordToExistingCaseTest {
     @Test
     public void should_fail_correctly_if_document_is_duplicate_or_document_is_already_attached() {
         given()
-            .body(attachToCaseRequest(CASE_REF))
+            .body(attachToCaseRequest(CASE_REF, null, null, EXISTING_DOC))
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -253,7 +250,7 @@ class AttachExceptionRecordToExistingCaseTest {
         mockCaseSearchByCcdId(CASE_REF, status(404));
 
         given()
-            .body(exceptionRecordCallbackBodyBuilder().build())
+            .body(exceptionRecordCallbackRequest())
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -268,13 +265,12 @@ class AttachExceptionRecordToExistingCaseTest {
 
         given()
             .body(
-                exceptionRecordCallbackBodyBuilder(
+                exceptionRecordCallbackRequest(
                     null,
                     CASE_REFERENCE_TYPE_CCD,
                     nonExistingCaseRef,
                     CASE_TYPE_EXCEPTION_RECORD
                 )
-                    .build()
             )
             .post("/callback/{type}", "attach_case")
             .then()
@@ -296,13 +292,12 @@ class AttachExceptionRecordToExistingCaseTest {
 
         given()
             .body(
-                exceptionRecordCallbackBodyBuilder(
+                exceptionRecordCallbackRequest(
                     null,
                     CASE_REFERENCE_TYPE_EXTERNAL,
                     nonExistingLegacyId,
                     CASE_TYPE_EXCEPTION_RECORD
                 )
-                    .build()
             )
             .post("/callback/{type}", "attach_case")
             .then()
@@ -328,13 +323,12 @@ class AttachExceptionRecordToExistingCaseTest {
 
         given()
             .body(
-                exceptionRecordCallbackBodyBuilder(
+                exceptionRecordCallbackRequest(
                     null,
                     CASE_REFERENCE_TYPE_EXTERNAL,
                     legacyId,
                     CASE_TYPE_EXCEPTION_RECORD
                 )
-                    .build()
             )
             .post("/callback/{type}", "attach_case")
             .then()
@@ -347,7 +341,7 @@ class AttachExceptionRecordToExistingCaseTest {
         mockCaseSearchByCcdId(CASE_REF, status(400));
 
         given()
-            .body(exceptionRecordCallbackBodyBuilder().build())
+            .body(exceptionRecordCallbackRequest())
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -359,13 +353,12 @@ class AttachExceptionRecordToExistingCaseTest {
     public void should_fail_when_exception_record_case_type_id_is_invalid() {
         given()
             .body(
-                exceptionRecordCallbackBodyBuilder(
+                exceptionRecordCallbackRequest(
                     CASE_REF,
                     null,
                     null,
                     "invalid-case-type"
                 )
-                    .build()
             )
             .post("/callback/{type}", "attach_case")
             .then()
@@ -378,12 +371,11 @@ class AttachExceptionRecordToExistingCaseTest {
     public void should_fail_when_search_case_reference_type_is_invalid() {
         given()
             .body(
-                exceptionRecordCallbackBodyBuilder(
+                exceptionRecordCallbackRequest(
                     null, "invalid-reference-type",
                     "search-case-reference",
                     CASE_TYPE_EXCEPTION_RECORD
                 )
-                    .build()
             )
             .post("/callback/{type}", "attach_case")
             .then()
@@ -396,13 +388,12 @@ class AttachExceptionRecordToExistingCaseTest {
     public void should_fail_when_search_case_reference_is_invalid() {
         given()
             .body(
-                exceptionRecordCallbackBodyBuilder(
+                exceptionRecordCallbackRequest(
                     null,
                     CASE_REFERENCE_TYPE_CCD,
                     "invalid-ccd-reference",
                     CASE_TYPE_EXCEPTION_RECORD
                 )
-                    .build()
             )
             .post("/callback/{type}", "attach_case")
             .then()
@@ -416,7 +407,7 @@ class AttachExceptionRecordToExistingCaseTest {
         mockCaseSearchByCcdId(CASE_REF, status(500));
 
         given()
-            .body(exceptionRecordCallbackBodyBuilder().build())
+            .body(exceptionRecordCallbackRequest())
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -426,8 +417,11 @@ class AttachExceptionRecordToExistingCaseTest {
     @DisplayName("Should fail with the correct error when no case details is supplied")
     @Test
     public void should_fail_with_the_correct_error_when_no_case_details_is_supplied() {
+        CallbackRequest callbackRequest = exceptionRecordCallbackRequest();
+        callbackRequest.setCaseDetails(null);
+
         given()
-            .body(exceptionRecordCallbackBodyBuilder().caseDetails(null).build())
+            .body(callbackRequest)
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -442,14 +436,12 @@ class AttachExceptionRecordToExistingCaseTest {
             String.valueOf(EXCEPTION_RECORD_ID),
             // return an exception record already attached to some case
             okJson(
-                MAPPER.writeValueAsString(
-                    exceptionRecordBuilder(caseRef).build()
-                )
+                MAPPER.writeValueAsString(exceptionRecord(caseRef))
             )
         );
 
         given()
-            .body(attachToCaseRequest(CASE_REF, null, null))
+            .body(attachToCaseRequest(CASE_REF))
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -460,36 +452,29 @@ class AttachExceptionRecordToExistingCaseTest {
     @Test
     public void should_create_error_if_type_in_incorrect() {
         given()
-            .body(exceptionRecordCallbackBodyBuilder().build())
+            .body(exceptionRecordCallbackRequest())
             .post("/callback/{type}", "someType")
             .then()
             .statusCode(404);
     }
 
     private CallbackRequest attachToCaseRequest(String attachToCaseReference) {
-        return attachToCaseRequest(attachToCaseReference, null, null);
+        return attachToCaseRequest(attachToCaseReference, null, null, EXCEPTION_RECORD_DOC);
     }
 
     private CallbackRequest attachToCaseRequest(
         String attachToCaseReference,
         String searchCaseReferenceType,
-        String searchCaseReference
+        String searchCaseReference,
+        Map<String, Object> document
     ) {
-        CaseDetails exceptionRecord =
-            exceptionRecordBuilder(CASE_REF)
-                .data(
-                    exceptionDataWithDoc(
-                        SCANNED_DOCUMENT,
-                        attachToCaseReference,
-                        searchCaseReferenceType,
-                        searchCaseReference
-                    )
-                )
-                .build();
-
-        return exceptionRecordCallbackBodyBuilder()
-            .caseDetails(exceptionRecord)
-            .build();
+        return exceptionRecordCallbackRequest(
+            attachToCaseReference,
+            searchCaseReferenceType,
+            searchCaseReference,
+            CASE_TYPE_EXCEPTION_RECORD,
+            document
+        );
     }
 
     private void verifyRequestPattern(RequestPatternBuilder builder, String jsonPath, StringValuePattern pattern) {
@@ -559,15 +544,22 @@ class AttachExceptionRecordToExistingCaseTest {
         );
     }
 
-    private CaseDetails.CaseDetailsBuilder exceptionRecordBuilder(String attachToCaseReference) {
-        return exceptionRecordBuilder(attachToCaseReference, null, null, CASE_TYPE_EXCEPTION_RECORD);
+    private CaseDetails exceptionRecord(String attachToCaseReference) {
+        return exceptionRecord(
+            attachToCaseReference,
+            null,
+            null,
+            CASE_TYPE_EXCEPTION_RECORD,
+            EXCEPTION_RECORD_DOC
+        );
     }
 
-    private CaseDetails.CaseDetailsBuilder exceptionRecordBuilder(
+    private CaseDetails exceptionRecord(
         String attachToCaseReference,
         String searchCaseReferenceType,
         String searchCaseReference,
-        String caseTypeId
+        String caseTypeId,
+        Map<String, Object> document
     ) {
         return CaseDetails.builder()
             .jurisdiction(JURISDICTION)
@@ -575,12 +567,12 @@ class AttachExceptionRecordToExistingCaseTest {
             .caseTypeId(caseTypeId)
             .data(
                 exceptionDataWithDoc(
-                    SCANNED_RECORD,
+                    document,
                     attachToCaseReference,
                     searchCaseReferenceType,
                     searchCaseReference
                 )
-            );
+            ).build();
     }
 
     private void mockCaseSearchByCcdId(String ccdId, ResponseDefinitionBuilder responseBuilder) {
@@ -627,28 +619,51 @@ class AttachExceptionRecordToExistingCaseTest {
         return getRequestedFor(urlEqualTo(START_EVENT_URL));
     }
 
-    private CallbackRequest.CallbackRequestBuilder exceptionRecordCallbackBodyBuilder() {
-        return exceptionRecordCallbackBodyBuilder(CASE_REF, null, null, CASE_TYPE_EXCEPTION_RECORD);
+    private CallbackRequest exceptionRecordCallbackRequest() {
+        return exceptionRecordCallbackRequest(
+            CASE_REF,
+            null,
+            null,
+            CASE_TYPE_EXCEPTION_RECORD,
+            EXCEPTION_RECORD_DOC
+        );
     }
 
-    private CallbackRequest.CallbackRequestBuilder exceptionRecordCallbackBodyBuilder(
+    private CallbackRequest exceptionRecordCallbackRequest(
         String attachToCaseReference,
         String searchCaseReferenceType,
         String searchCaseReference,
         String caseTypeId
     ) {
+        return exceptionRecordCallbackRequest(
+            attachToCaseReference,
+            searchCaseReferenceType,
+            searchCaseReference,
+            caseTypeId,
+            EXCEPTION_RECORD_DOC
+        );
+    }
+
+    private CallbackRequest exceptionRecordCallbackRequest(
+        String attachToCaseReference,
+        String searchCaseReferenceType,
+        String searchCaseReference,
+        String caseTypeId,
+        Map<String, Object> document
+    ) {
         return CallbackRequest
             .builder()
             .caseDetails(
-                exceptionRecordBuilder(
+                exceptionRecord(
                     attachToCaseReference,
                     searchCaseReferenceType,
                     searchCaseReference,
-                    caseTypeId
+                    caseTypeId,
+                    document
                 )
-                    .build()
             )
-            .eventId("attachToExistingCase");
+            .eventId("attachToExistingCase")
+            .build();
     }
 
     private static Map<String, Object> document(String filename, String documentNumber) {
