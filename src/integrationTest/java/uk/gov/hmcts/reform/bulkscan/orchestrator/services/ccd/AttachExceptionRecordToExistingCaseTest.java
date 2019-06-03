@@ -112,7 +112,7 @@ class AttachExceptionRecordToExistingCaseTest {
         mockCaseSearchByCcdId(CASE_REF, okJson(MAPPER.writeValueAsString(CASE_DETAILS)));
         givenThat(ccdSubmitEvent().willReturn(okJson(MAPPER.writeValueAsString(CASE_DETAILS))));
 
-        mockCcdExceptionRecordSearch(
+        mockCaseSearchByCcdId(
             String.valueOf(EXCEPTION_RECORD_ID),
             // an exception record not attached to any case
             okJson(
@@ -438,7 +438,7 @@ class AttachExceptionRecordToExistingCaseTest {
     public void should_fail_when_exception_record_is_already_attached_to_a_case() throws Exception {
         String caseRef = "1234567890123456";
 
-        mockCcdExceptionRecordSearch(
+        mockCaseSearchByCcdId(
             String.valueOf(EXCEPTION_RECORD_ID),
             // return an exception record already attached to some case
             okJson(
@@ -581,18 +581,6 @@ class AttachExceptionRecordToExistingCaseTest {
                     searchCaseReference
                 )
             );
-    }
-
-    private void mockCcdExceptionRecordSearch(
-        String exceptionRecordCcdId,
-        ResponseDefinitionBuilder responseBuilder
-    ) {
-        givenThat(
-            get("/cases/" + exceptionRecordCcdId)
-                .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
-                .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(MOCKED_S2S_TOKEN_SIG))
-                .willReturn(responseBuilder)
-        );
     }
 
     private void mockCaseSearchByCcdId(String ccdId, ResponseDefinitionBuilder responseBuilder) {
