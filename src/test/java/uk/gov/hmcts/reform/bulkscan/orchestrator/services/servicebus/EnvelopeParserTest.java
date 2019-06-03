@@ -23,7 +23,6 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.Assertions.tuple;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.DatetimeHelper.toIso8601;
 
 class EnvelopeParserTest {
 
@@ -235,7 +234,7 @@ class EnvelopeParserTest {
             .put("control_number", doc.controlNumber)
             .put("type", doc.type)
             .put("subtype", doc.subtype)
-            .put("scanned_at", toIso8601(doc.scannedAt))
+            .put("scanned_at", doc.scannedAt)
             .put("uuid", doc.uuid);
     }
 
