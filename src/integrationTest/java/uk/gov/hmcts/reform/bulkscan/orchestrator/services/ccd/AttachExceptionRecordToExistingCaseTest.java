@@ -43,7 +43,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_SUBMIT_URL;
@@ -101,6 +100,9 @@ class AttachExceptionRecordToExistingCaseTest {
         .token(EVENT_TOKEN)
         .build();
 
+    public static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
+    public static final String ERRORS_FIELD = "errors";
+
     @LocalServerPort
     private int applicationPort;
 
@@ -134,7 +136,10 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors.size()", equalTo(0));
+            .extract()
+            .jsonPath()
+            .getList(ERRORS_FIELD)
+            .isEmpty();
 
         verifyRequestedAttachingToCase();
     }
@@ -157,7 +162,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .statusCode(200)
             .extract()
             .jsonPath()
-            .getList("errors")
+            .getList(ERRORS_FIELD)
             .isEmpty();
 
         verifyRequestedAttachingToCase();
@@ -192,7 +197,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .statusCode(200)
             .extract()
             .jsonPath()
-            .getList("errors")
+            .getList(ERRORS_FIELD)
             .isEmpty();
 
         verifyRequestedAttachingToCase();
@@ -208,7 +213,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem(AttachCaseCallbackService.INTERNAL_ERROR_MSG));
+            .body(ERRORS_FIELD, hasItem(AttachCaseCallbackService.INTERNAL_ERROR_MSG));
     }
 
     @DisplayName("Should fail with the correct error when start event api call fails")
@@ -221,7 +226,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem(AttachCaseCallbackService.INTERNAL_ERROR_MSG));
+            .body(ERRORS_FIELD, hasItem(AttachCaseCallbackService.INTERNAL_ERROR_MSG));
     }
 
     @DisplayName("Should fail correctly if document is duplicate or document is already attached")
@@ -232,7 +237,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem(String.format(
+            .body(ERRORS_FIELD, hasItem(String.format(
                 "Document(s) with control number [%s] are already attached to case reference: %s",
                 DOCUMENT_NUMBER,
                 CASE_REF
@@ -252,7 +257,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem("Could not find case: " + CASE_REF));
+            .body(ERRORS_FIELD, hasItem("Could not find case: " + CASE_REF));
     }
 
     @Disabled("Search case reference not supported yet - BPS-584")
@@ -274,7 +279,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem("Could not find case: " + nonExistingCaseRef));
+            .body(ERRORS_FIELD, hasItem("Could not find case: " + nonExistingCaseRef));
     }
 
     @Disabled("Legacy ID not supported yet - BPS-584")
@@ -302,7 +307,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem("No case found for legacy case reference " + nonExistingLegacyId));
+            .body(ERRORS_FIELD, hasItem("No case found for legacy case reference " + nonExistingLegacyId));
     }
 
     @Disabled("Legacy ID not supported yet - BPS-584")
@@ -334,7 +339,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem(expectedErrorMessage));
+            .body(ERRORS_FIELD, hasItem(expectedErrorMessage));
     }
 
     @Test
@@ -346,7 +351,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem("Invalid case ID: " + CASE_REF));
+            .body(ERRORS_FIELD, hasItem("Invalid case ID: " + CASE_REF));
     }
 
     @Disabled("No validation of case type ID yet - BPS-584")
@@ -365,7 +370,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem("Case type ID (invalid-case-type) has invalid format"));
+            .body(ERRORS_FIELD, hasItem("Case type ID (invalid-case-type) has invalid format"));
     }
 
     @Disabled("Search case reference type not supported - BPS-584")
@@ -383,7 +388,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem("Invalid case reference type supplied: invalid-reference-type"));
+            .body(ERRORS_FIELD, hasItem("Invalid case reference type supplied: invalid-reference-type"));
     }
 
     @Disabled("Search case reference not supported yet - BPS-584")
@@ -402,7 +407,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem("Invalid case reference: 'invalid-ccd-reference'"));
+            .body(ERRORS_FIELD, hasItem("Invalid case reference: 'invalid-ccd-reference'"));
     }
 
     @DisplayName("Should fail correctly if ccd is down")
@@ -415,7 +420,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem(AttachCaseCallbackService.INTERNAL_ERROR_MSG));
+            .body(ERRORS_FIELD, hasItem(AttachCaseCallbackService.INTERNAL_ERROR_MSG));
     }
 
     @DisplayName("Should fail with the correct error when no case details is supplied")
@@ -426,7 +431,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem("Internal Error: callback or case details were empty"));
+            .body(ERRORS_FIELD, hasItem("Internal Error: callback or case details were empty"));
     }
 
     @Test
@@ -448,7 +453,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body("errors", hasItem("Exception record is already attached to case " + caseRef));
+            .body(ERRORS_FIELD, hasItem("Exception record is already attached to case " + caseRef));
     }
 
     @DisplayName("Should create error if type in incorrect")
@@ -585,7 +590,7 @@ class AttachExceptionRecordToExistingCaseTest {
         givenThat(
             get("/cases/" + exceptionRecordCcdId)
                 .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
-                .withHeader("ServiceAuthorization", containing(MOCKED_S2S_TOKEN_SIG))
+                .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(MOCKED_S2S_TOKEN_SIG))
                 .willReturn(responseBuilder)
         );
     }
@@ -594,7 +599,7 @@ class AttachExceptionRecordToExistingCaseTest {
         givenThat(
             get("/cases/" + ccdId)
                 .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
-                .withHeader("ServiceAuthorization", containing(MOCKED_S2S_TOKEN_SIG))
+                .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(MOCKED_S2S_TOKEN_SIG))
                 .willReturn(responseBuilder)
         );
     }
@@ -606,12 +611,9 @@ class AttachExceptionRecordToExistingCaseTest {
         givenThat(
             post("/searchCases?ctid=" + CASE_TYPE_BULK_SCAN)
                 .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
-                .withHeader("ServiceAuthorization", containing(MOCKED_S2S_TOKEN_SIG))
+                .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(MOCKED_S2S_TOKEN_SIG))
                 .withRequestBody(
-                    matchingJsonPath(
-                        "$.query.term",
-                        WireMock.containing(legacyId)
-                    )
+                    matchingJsonPath("$.query.term", containing(legacyId))
                 )
                 .willReturn(responseBuilder)
         );
@@ -620,13 +622,13 @@ class AttachExceptionRecordToExistingCaseTest {
     private MappingBuilder ccdSubmitEvent() {
         return post(SUBMIT_URL)
             .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
-            .withHeader("ServiceAuthorization", containing(MOCKED_S2S_TOKEN_SIG));
+            .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(MOCKED_S2S_TOKEN_SIG));
     }
 
     private MappingBuilder ccdStartEvent() {
         return get(START_EVENT_URL)
             .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
-            .withHeader("ServiceAuthorization", containing(MOCKED_S2S_TOKEN_SIG));
+            .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(MOCKED_S2S_TOKEN_SIG));
     }
 
     private RequestPatternBuilder submittedScannedRecords() {
