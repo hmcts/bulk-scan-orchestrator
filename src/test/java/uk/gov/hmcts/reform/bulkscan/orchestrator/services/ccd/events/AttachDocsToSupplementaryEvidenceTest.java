@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.SupplementaryEvidenceMapper;
@@ -37,13 +36,14 @@ class AttachDocsToSupplementaryEvidenceTest {
     @Mock
     private CcdApi ccdApi;
 
-    private SupplementaryEvidenceMapper mapper = mock(SupplementaryEvidenceMapper.class);
+    @Mock
+    private SupplementaryEvidenceMapper mapper;
 
-    private AttachDocsToSupplementaryEvidence eventPublisher = new AttachDocsToSupplementaryEvidence(mapper, ccdApi);
+    private AttachDocsToSupplementaryEvidence eventPublisher;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
+        this.eventPublisher = new AttachDocsToSupplementaryEvidence(mapper, ccdApi);
     }
 
     @Test
