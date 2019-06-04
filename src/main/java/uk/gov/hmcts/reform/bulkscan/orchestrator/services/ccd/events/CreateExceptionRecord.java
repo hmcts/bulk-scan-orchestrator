@@ -56,11 +56,11 @@ public class CreateExceptionRecord extends AbstractEventPublisher {
         );
 
         log.info(
-            "Created Exception Record. Envelope ID: {}, file name: {}, case ID: {}",
+            "Created Exception Record. Envelope ID: {}, file name: {}, case ID: {}, case type: {}",
             envelope.id,
             envelope.zipFileName,
-            caseDetails.getId()
+            caseDetails.getId(),
+            caseTypeId
         );
-
     }
 }
