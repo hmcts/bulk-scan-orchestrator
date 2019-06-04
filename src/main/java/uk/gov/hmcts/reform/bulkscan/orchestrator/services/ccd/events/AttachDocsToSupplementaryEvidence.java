@@ -5,8 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.SupplementaryEvidenceMapper;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getDocuments;
@@ -30,11 +33,40 @@ class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
             log.warn("Envelope {} has no new documents. CCD Case {} not updated", envelope.id, existingCase.getId());
         } else {
             log.info("Attaching supplementary evidence from envelope {} to case {}", envelope.id, existingCase.getId());
-            publish(envelope, existingCase.getCaseTypeId(), EVENT_TYPE_ID, EVENT_SUMMARY);
+
+            CcdAuthenticator authenticator = ccdApi.authenticateJurisdiction(envelope.jurisdiction);
+
+            StartEventResponse startEventResponse = ccdApi.startEvent(
+                authenticator,
+                envelope.jurisdiction,
+                existingCase.getCaseTypeId(),
+                envelope.caseRef,
+                EVENT_TYPE_ID
+            );
+
+            ccdApi.submitEvent(
+                authenticator,
+                envelope.jurisdiction,
+                existingCase.getCaseTypeId(),
+                null,
+                CaseDataContent.builder()
+                    .eventToken(startEventResponse.getToken())
+                    .event(Event.builder()
+                        .id(EVENT_TYPE_ID)
+                        .summary(EVENT_SUMMARY)
+                        .build())
+                    .data(buildCaseData(startEventResponse, envelope))
+                    .build()
+            );
+
+            log.info(
+                "Attached documents from envelope to case. Case ID: {}, envelope ID: {}",
+                existingCase.getId(),
+                envelope.id
+            );
         }
     }
 
-    @Override
     CaseData buildCaseData(StartEventResponse eventResponse, Envelope envelope) {
         return mapper.map(
             getDocuments(eventResponse.getCaseDetails()),
