@@ -26,7 +26,7 @@ public class CreateExceptionRecord {
     private final ExceptionRecordMapper mapper;
     private final CcdApi ccdApi;
 
-    CreateExceptionRecord(
+    public CreateExceptionRecord(
         ExceptionRecordMapper mapper,
         CcdApi ccdApi
     ) {
