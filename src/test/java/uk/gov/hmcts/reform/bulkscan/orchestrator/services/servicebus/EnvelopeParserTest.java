@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envel
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.OcrDataField;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -23,11 +24,12 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.Assertions.tuple;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.DatetimeHelper.toIso8601;
 
 class EnvelopeParserTest {
 
     private Envelope envelope;
-    private Instant scannedAt = Instant.now();
+    private Instant scannedAt = ZonedDateTime.parse("2018-10-01T00:00:00.100Z").toInstant();
 
     @BeforeAll
     static void init() {
@@ -234,7 +236,7 @@ class EnvelopeParserTest {
             .put("control_number", doc.controlNumber)
             .put("type", doc.type)
             .put("subtype", doc.subtype)
-            .put("scanned_at", doc.scannedAt)
+            .put("scanned_at", toIso8601(doc.scannedAt))
             .put("uuid", doc.uuid);
     }
 
