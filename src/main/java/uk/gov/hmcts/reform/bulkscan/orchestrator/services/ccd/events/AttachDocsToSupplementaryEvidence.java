@@ -36,7 +36,7 @@ class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
 
             CcdAuthenticator authenticator = ccdApi.authenticateJurisdiction(envelope.jurisdiction);
 
-            StartEventResponse startEventResponse = ccdApi.startEvent(
+            StartEventResponse startEventResp = ccdApi.startEvent(
                 authenticator,
                 envelope.jurisdiction,
                 existingCase.getCaseTypeId(),
@@ -49,14 +49,7 @@ class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
                 envelope.jurisdiction,
                 existingCase.getCaseTypeId(),
                 envelope.caseRef,
-                CaseDataContent.builder()
-                    .eventToken(startEventResponse.getToken())
-                    .event(Event.builder()
-                        .id(EVENT_TYPE_ID)
-                        .summary(EVENT_SUMMARY)
-                        .build())
-                    .data(buildCaseData(startEventResponse, envelope))
-                    .build()
+                buildCaseDataContent(envelope, startEventResp)
             );
 
             log.info(
@@ -67,10 +60,18 @@ class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
         }
     }
 
-    private CaseData buildCaseData(StartEventResponse eventResponse, Envelope envelope) {
-        return mapper.map(
-            getDocuments(eventResponse.getCaseDetails()),
+    private CaseDataContent buildCaseDataContent(Envelope envelope, StartEventResponse startEventResponse) {
+        CaseData caseData = mapper.map(
+            getDocuments(startEventResponse.getCaseDetails()),
             envelope.documents
         );
+        return CaseDataContent.builder()
+            .eventToken(startEventResponse.getToken())
+            .event(Event.builder()
+                .id(EVENT_TYPE_ID)
+                .summary(EVENT_SUMMARY)
+                .build())
+            .data(caseData)
+            .build();
     }
 }

@@ -45,14 +45,7 @@ public class CreateExceptionRecord extends AbstractEventPublisher {
             envelope.jurisdiction,
             caseTypeId,
             null,
-            CaseDataContent.builder()
-                .eventToken(startEventResponse.getToken())
-                .event(Event.builder()
-                    .id(EVENT_TYPE_ID)
-                    .summary(EVENT_SUMMARY)
-                    .build())
-                .data(mapper.mapEnvelope(envelope))
-                .build()
+            buildCaseDataContent(envelope, startEventResponse.getToken())
         );
 
         log.info(
@@ -62,5 +55,16 @@ public class CreateExceptionRecord extends AbstractEventPublisher {
             caseDetails.getId(),
             caseTypeId
         );
+    }
+
+    private CaseDataContent buildCaseDataContent(Envelope envelope, String startEventResponseToken) {
+        return CaseDataContent.builder()
+            .eventToken(startEventResponseToken)
+            .event(Event.builder()
+                .id(EVENT_TYPE_ID)
+                .summary(EVENT_SUMMARY)
+                .build())
+            .data(mapper.mapEnvelope(envelope))
+            .build();
     }
 }
