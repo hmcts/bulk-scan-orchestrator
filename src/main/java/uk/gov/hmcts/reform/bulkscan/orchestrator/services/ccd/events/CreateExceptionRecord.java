@@ -11,6 +11,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import java.util.Locale;
+
 @Component
 public class CreateExceptionRecord extends AbstractEventPublisher {
 
@@ -30,7 +32,7 @@ public class CreateExceptionRecord extends AbstractEventPublisher {
         log.info("Creating exception record for envelope {}", envelope.id);
 
         CcdAuthenticator authenticator = ccdApi.authenticateJurisdiction(envelope.jurisdiction);
-        String caseTypeId = envelope.container.toUpperCase() + "_" + CASE_TYPE;
+        String caseTypeId = envelope.container.toUpperCase(Locale.getDefault()) + "_" + CASE_TYPE;
 
         StartEventResponse startEventResponse = ccdApi.startEvent(
             authenticator,
@@ -39,6 +41,8 @@ public class CreateExceptionRecord extends AbstractEventPublisher {
             null,
             EVENT_TYPE_ID
         );
+
+        log.info("Started event for envelope ID: {}. File name: {}", envelope.id, envelope.zipFileName);
 
         CaseDetails caseDetails = ccdApi.submitEvent(
             authenticator,

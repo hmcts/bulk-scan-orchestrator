@@ -44,6 +44,13 @@ class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
                 EVENT_TYPE_ID
             );
 
+            log.info(
+                "Started event in CCD for envelope ID: {}. File name: {}. Case ref: {}",
+                envelope.id,
+                envelope.zipFileName,
+                envelope.caseRef
+            );
+
             ccdApi.submitEvent(
                 authenticator,
                 envelope.jurisdiction,
