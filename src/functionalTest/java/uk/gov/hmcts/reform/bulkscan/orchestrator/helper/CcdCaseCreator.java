@@ -45,7 +45,7 @@ public class CcdCaseCreator {
     }
 
     public CaseDetails createCase(List<Document> documents) {
-        String legacyId = "legacy-id-" + (long)(Math.random() * 1000_000d);
+        String legacyId = "legacy-id-" + (long)(Math.random() * 100_000_000d);
         return createCase(legacyId, documents);
     }
 

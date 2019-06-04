@@ -12,10 +12,10 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Collections.emptyList;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
@@ -36,7 +36,13 @@ public class CcdCallbackController {
                 attachCaseCallbackService.process(callback.getCaseDetails());
 
             return result
-                .map(r -> AboutToStartOrSubmitCallbackResponse.builder().data(r).errors(new ArrayList<>()).build())
+                .map(modifiedFields ->
+                    AboutToStartOrSubmitCallbackResponse
+                        .builder()
+                        .data(modifiedFields)
+                        .errors(emptyList())
+                        .build()
+                )
                 .getOrElseGet(errors -> errorResponse(errors));
         } else {
             return errorResponse(ImmutableList.of("Internal Error: callback or case details were empty"));

@@ -93,7 +93,7 @@ public class CcdApi {
         }
     }
 
-    List<Long> getCaseRefsByLegacyId(String legacyId, String service) {
+    public List<Long> getCaseRefsByLegacyId(String legacyId, String service) {
         ServiceConfigItem serviceConfig = serviceConfigProvider.getConfig(service);
         String jurisdiction = serviceConfig.getJurisdiction();
         String caseTypeIdsStr = String.join(",", serviceConfig.getCaseTypeIds());
@@ -103,7 +103,7 @@ public class CcdApi {
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
             caseTypeIdsStr,
-            String.format(SEARCH_BY_LEGACY_ID_QUERY_FORMAT, legacyId)
+            format(SEARCH_BY_LEGACY_ID_QUERY_FORMAT, legacyId)
         );
 
         return searchResult

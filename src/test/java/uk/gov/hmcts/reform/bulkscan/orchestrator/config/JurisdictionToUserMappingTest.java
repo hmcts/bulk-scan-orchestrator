@@ -30,7 +30,6 @@ class JurisdictionToUserMappingTest {
     void should_parse_up_the_properties_into_map() {
         Credential creds = mapping.getUser("SSCS");
         assertThat(creds.getPassword()).isEqualTo("password");
-        // TODO: change this email to one that surely doesn't exist
         assertThat(creds.getUsername()).isEqualTo("user@gmail.com");
     }
 

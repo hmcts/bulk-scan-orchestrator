@@ -83,7 +83,7 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-    void should_attach_exception_record_to_the_existing_case_with_no_evidence() throws Exception {
+    public void should_attach_exception_record_to_the_existing_case_with_no_evidence() throws Exception {
         //given
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList());
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
@@ -101,7 +101,7 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-    void should_attach_exception_record_to_the_existing_case_with_evidence_documents() throws Exception {
+    public void should_attach_exception_record_to_the_existing_case_with_evidence_documents() throws Exception {
         //given
         CaseDetails caseDetails =
             ccdCaseCreator.createCase(singletonList(
@@ -122,27 +122,35 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-    void should_attach_exception_record_to_case_by_legacy_id() throws Exception {
+    public void should_attach_exception_record_to_case_by_legacy_id() throws Exception {
         verifyExceptionRecordAttachesToCase(EXTERNAL_CASE_REFERENCE);
     }
 
     @Test
-    void should_attach_exception_record_to_case_by_ccd_search_case_reference() throws Exception {
+    public void should_attach_exception_record_to_case_by_ccd_search_case_reference() throws Exception {
         verifyExceptionRecordAttachesToCase(CCD_CASE_REFERENCE);
     }
 
     @Test
-    void should_attach_exception_record_to_case_by_attach_to_case_reference() throws Exception {
+    public void should_attach_exception_record_to_case_by_attach_to_case_reference() throws Exception {
         verifyExceptionRecordAttachesToCase(null);
     }
 
+    /**
+     * Checks if the service allows for attaching an exception record to a case using given
+     * reference type - CCD ID, external ID or no type provided.
+     *
+     * @param searchCaseReferenceType Specified how the exception record should reference the case.
+     *      Possible values can be found in
+     *      @see uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes
+     *      and correspond to ReferenceType list in exception record definition.
+     *      If null, case is referenced the old way - via attachToCaseReference field
+     */
     private void verifyExceptionRecordAttachesToCase(String searchCaseReferenceType) throws Exception {
         //given
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList());
 
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
-
-        Thread.sleep(5000);
 
         // when
         invokeCallbackEndpoint(caseDetails, exceptionRecord, searchCaseReferenceType);

@@ -33,7 +33,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.i
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.CCD_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.EXTERNAL_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.ATTACH_TO_CASE_REFERENCE;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SCANNED_DOCUMENTS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SEARCH_CASE_REFERENCE_TYPE;
 
 @Service
@@ -42,7 +41,6 @@ public class AttachCaseCallbackService {
     public static final String INTERNAL_ERROR_MSG = "An error occurred";
 
     private static final Logger log = LoggerFactory.getLogger(AttachCaseCallbackService.class);
-    private static final String ATTACH_CASE_REFERENCE_FIELD_NAME = "attachToCaseReference";
 
     private final CcdApi ccdApi;
 
@@ -53,7 +51,8 @@ public class AttachCaseCallbackService {
     /**
      * Attaches exception record to a case.
      *
-     * @return List of errors
+     * @return Either a map of fields the should be modified in CCD, when processing was successful,
+     *         or the list of errors, in case of errors
      */
     public Either<List<String>, Map<String, Object>> process(CaseDetails exceptionRecord) {
         boolean useSearchCaseReference = isSearchCaseReferenceTypePresent(exceptionRecord);
@@ -155,18 +154,17 @@ public class AttachCaseCallbackService {
     }
 
     private String attachCaseByLegacyId(AttachToCaseEventData event) {
-        log.info(
-            "Attaching exception record '{}' to a case by legacy ID '{}'",
-            event.exceptionRecordId,
-            event.targetCaseRef
-        );
-
         List<Long> targetCaseCcdIds = ccdApi.getCaseRefsByLegacyId(event.targetCaseRef, event.service);
 
         if (targetCaseCcdIds.size() == 1) {
             String targetCaseCcdId = targetCaseCcdIds.get(0).toString();
 
-            log.info("Found case with CCD ID '{}' for legacy ID '{}'", targetCaseCcdId, event.targetCaseRef);
+            log.info(
+                "Found case with CCD ID '{}' for legacy ID '{}' (attaching exception record '{}')",
+                targetCaseCcdId,
+                event.targetCaseRef,
+                event.exceptionRecordId
+            );
 
             attachCaseByCcdId(
                 event.exceptionRecordJurisdiction,
@@ -202,7 +200,6 @@ public class AttachCaseCallbackService {
         CaseDetails theCase = ccdApi.getCase(targetCaseCcdRef, exceptionRecordJurisdiction);
         List<Map<String, Object>> targetCaseDocuments = getScannedDocuments(theCase);
 
-        // TODO: move this line to the top
         verifyExceptionRecordIsNotAttachedToCase(exceptionRecordJurisdiction, exceptionRecordId);
 
         //This is done so exception record does not change state if there is a document error
@@ -216,13 +213,9 @@ public class AttachCaseCallbackService {
 
         StartEventResponse event = ccdApi.startAttachScannedDocs(theCase);
 
-        Map<String, Object> changedCaseData = ImmutableMap.of(
-            SCANNED_DOCUMENTS, insertNewRecords(exceptionRecordDocuments, targetCaseDocuments)
-        );
-
         ccdApi.attachExceptionRecord(
             theCase,
-            changedCaseData,
+            insertNewRecords(exceptionRecordDocuments, targetCaseDocuments),
             createEventSummary(theCase, exceptionRecordId, exceptionRecordDocuments),
             event
         );
@@ -239,7 +232,7 @@ public class AttachCaseCallbackService {
             exceptionRecordJurisdiction
         );
 
-        Object attachToCaseRef = fetchedExceptionRecord.getData().get(ATTACH_CASE_REFERENCE_FIELD_NAME);
+        Object attachToCaseRef = fetchedExceptionRecord.getData().get(ATTACH_TO_CASE_REFERENCE);
 
         if (attachToCaseRef != null && Strings.isNotEmpty(attachToCaseRef.toString())) {
             throw new AlreadyAttachedToCaseException("Exception record is already attached to case " + attachToCaseRef);
@@ -286,7 +279,10 @@ public class AttachCaseCallbackService {
             && exceptionRecord.getData().get(SEARCH_CASE_REFERENCE_TYPE) != null;
     }
 
-    static class AttachToCaseEventData {
+    /**
+     * Information received in the callback call for the attach event.
+     */
+    private static class AttachToCaseEventData {
         public final String exceptionRecordJurisdiction;
         public final String service;
         public final String targetCaseRef;
