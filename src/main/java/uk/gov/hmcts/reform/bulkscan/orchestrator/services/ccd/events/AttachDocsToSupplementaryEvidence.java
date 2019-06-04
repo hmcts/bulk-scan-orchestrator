@@ -48,7 +48,7 @@ class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
                 authenticator,
                 envelope.jurisdiction,
                 existingCase.getCaseTypeId(),
-                null,
+                envelope.caseRef,
                 CaseDataContent.builder()
                     .eventToken(startEventResponse.getToken())
                     .event(Event.builder()
@@ -67,7 +67,7 @@ class AttachDocsToSupplementaryEvidence extends AbstractEventPublisher {
         }
     }
 
-    CaseData buildCaseData(StartEventResponse eventResponse, Envelope envelope) {
+    private CaseData buildCaseData(StartEventResponse eventResponse, Envelope envelope) {
         return mapper.map(
             getDocuments(eventResponse.getCaseDetails()),
             envelope.documents
