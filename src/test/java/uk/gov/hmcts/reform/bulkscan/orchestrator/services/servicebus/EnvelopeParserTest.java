@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envel
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.OcrDataField;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -28,7 +29,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.DatetimeHelper.toIso8601
 class EnvelopeParserTest {
 
     private Envelope envelope;
-    private Instant scannedAt = Instant.now();
+    private Instant scannedAt = ZonedDateTime.parse("2018-10-01T00:00:00.100Z").toInstant();
 
     @BeforeAll
     static void init() {
