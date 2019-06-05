@@ -140,7 +140,7 @@ class AttachExceptionRecordToExistingCaseTest {
      * Checks if the service allows for attaching an exception record to a case using given
      * reference type - CCD ID, external ID or no type provided.
      *
-     * @param searchCaseReferenceType Specified how the exception record should reference the case.
+     * @param searchCaseReferenceType Specifies how the exception record should reference the case.
      *      Possible values can be found in
      *      @see uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes
      *      and correspond to ReferenceType list in exception record definition.
@@ -164,6 +164,15 @@ class AttachExceptionRecordToExistingCaseTest {
         verifyExistingCaseIsUpdatedWithExceptionRecordData(caseDetails, exceptionRecord, 1);
     }
 
+    /**
+     * Hits the services callback endpoint with a request to attach exception record to a case
+     *
+     * @param searchCaseReferenceType Specifies how the exception record should reference the case.
+     *      Possible values can be found in
+     *      @see uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes
+     *      and correspond to ReferenceType list in exception record definition.
+     *      If null, case is referenced the old way - via attachToCaseReference field
+     */
     private void invokeCallbackEndpoint(
         CaseDetails targetCaseDetails,
         CaseDetails exceptionRecord,
