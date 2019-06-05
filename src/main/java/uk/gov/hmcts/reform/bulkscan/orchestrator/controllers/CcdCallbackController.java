@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers;
 
 import com.google.common.collect.ImmutableList;
+import io.vavr.control.Either;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,7 +13,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 
 import java.util.List;
+import java.util.Map;
 
+import static java.util.Collections.emptyList;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
@@ -29,14 +32,24 @@ public class CcdCallbackController {
     @PostMapping(path = "/attach_case")
     public CallbackResponse attachToCase(@RequestBody CallbackRequest callback) {
         if (callback != null && callback.getCaseDetails() != null) {
-            List<String> errors = attachCaseCallbackService.process(callback.getCaseDetails());
-            return response(errors);
+            Either<List<String>, Map<String, Object>> result =
+                attachCaseCallbackService.process(callback.getCaseDetails());
+
+            return result
+                .map(modifiedFields ->
+                    AboutToStartOrSubmitCallbackResponse
+                        .builder()
+                        .data(modifiedFields)
+                        .errors(emptyList())
+                        .build()
+                )
+                .getOrElseGet(errors -> errorResponse(errors));
         } else {
-            return response(ImmutableList.of("Internal Error: callback or case details were empty"));
+            return errorResponse(ImmutableList.of("Internal Error: callback or case details were empty"));
         }
     }
 
-    private AboutToStartOrSubmitCallbackResponse response(List<String> errors) {
+    private AboutToStartOrSubmitCallbackResponse errorResponse(List<String> errors) {
         return AboutToStartOrSubmitCallbackResponse.builder().errors(errors).build();
     }
 }
