@@ -219,7 +219,7 @@ class AttachExceptionRecordToExistingCaseTest {
         } else {
             exceptionRecordData.put("searchCaseReferenceType", searchCaseReferenceType);
 
-            String searchCaseReference = EXTERNAL_CASE_REFERENCE.equals(searchCaseReferenceType)
+            String searchCaseReference = searchCaseReferenceType.equals(EXTERNAL_CASE_REFERENCE)
                 ? (String) targetCaseDetails.getData().get("legacyId")
                 : targetCaseDetails.getId().toString();
 
