@@ -165,7 +165,7 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     /**
-     * Hits the services callback endpoint with a request to attach exception record to a case
+     * Hits the services callback endpoint with a request to attach exception record to a case.
      *
      * @param searchCaseReferenceType Specifies how the exception record should reference the case.
      *      Possible values can be found in
