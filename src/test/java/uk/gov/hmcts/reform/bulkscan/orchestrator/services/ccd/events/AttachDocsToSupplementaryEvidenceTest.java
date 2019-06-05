@@ -39,15 +39,15 @@ class AttachDocsToSupplementaryEvidenceTest {
     @Mock
     private SupplementaryEvidenceMapper mapper;
 
-    private AttachDocsToSupplementaryEvidence eventPublisher;
+    private AttachDocsToSupplementaryEvidence attacher;
 
     @BeforeEach
     void setUp() {
-        this.eventPublisher = new AttachDocsToSupplementaryEvidence(mapper, ccdApi);
+        this.attacher = new AttachDocsToSupplementaryEvidence(mapper, ccdApi);
     }
 
     @Test
-    void createSupplementaryEvidence_starts_and_submits_event() {
+    void should_start_and_submit_event_for_valid_envelope() {
         // given
         given(ccdApi.authenticateJurisdiction(any())).willReturn(AUTH_DETAILS);
 
@@ -75,7 +75,7 @@ class AttachDocsToSupplementaryEvidenceTest {
         given(mapper.getDocsToAdd(any(), any())).willReturn(envelope.documents);
 
         // when
-        eventPublisher.publish(envelope, caseDetails);
+        attacher.attach(envelope, caseDetails);
 
         // then
         verify(ccdApi).startEvent(
@@ -113,7 +113,7 @@ class AttachDocsToSupplementaryEvidenceTest {
             .willReturn(emptyList()); // no new docs
 
         // when
-        eventPublisher.publish(envelope, existingCase);
+        attacher.attach(envelope, existingCase);
 
         // then
         verify(ccdApi, never()).startEvent(any(), any(), any(), any(), any());
