@@ -104,6 +104,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
     private static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
     private static final String RESPONSE_FIELD_ERRORS = "errors";
+    private static final String RESPONSE_FIELD_WARNINGS = "warnings";
     private static final String RESPONSE_FIELD_DATA = "data";
 
     @LocalServerPort
@@ -536,7 +537,8 @@ class AttachExceptionRecordToExistingCaseTest {
     private void verifySuccessResponseWithAttachToCaseReference(ValidatableResponse response) {
         JsonPath responseJson = response.extract().jsonPath();
 
-        assertThat(responseJson.getList(RESPONSE_FIELD_ERRORS)).isEmpty();
+        assertThat(responseJson.getList(RESPONSE_FIELD_ERRORS)).isNullOrEmpty();
+        assertThat(responseJson.getList(RESPONSE_FIELD_WARNINGS)).isNullOrEmpty();
 
         Map<String, Object> responseData = responseJson.getMap(RESPONSE_FIELD_DATA);
         assertThat(responseData).isNotNull();
