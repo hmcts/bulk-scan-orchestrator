@@ -2,16 +2,21 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import feign.FeignException;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
+import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 
 /**
  * This class is intended to be a wrapper/adaptor/facade for the orchestrator -> CcdApi.
@@ -19,12 +24,22 @@ import static java.lang.String.format;
  */
 @Component
 public class CcdApi {
+
+    public static final String SEARCH_BY_LEGACY_ID_QUERY_FORMAT =
+        "{\"query\": { \"match_phrase\" : { \"alias.previousServiceCaseReference\" : \"%s\" }}}";
+
     private final CoreCaseDataApi feignCcdApi;
     private final CcdAuthenticatorFactory authenticatorFactory;
+    private final ServiceConfigProvider serviceConfigProvider;
 
-    public CcdApi(CoreCaseDataApi feignCcdApi, CcdAuthenticatorFactory authenticator) {
+    public CcdApi(
+        CoreCaseDataApi feignCcdApi,
+        CcdAuthenticatorFactory authenticator,
+        ServiceConfigProvider serviceConfigProvider
+    ) {
         this.feignCcdApi = feignCcdApi;
         this.authenticatorFactory = authenticator;
+        this.serviceConfigProvider = serviceConfigProvider;
     }
 
     private CaseDetails retrieveCase(String caseRef, String jurisdiction) {
@@ -76,6 +91,26 @@ public class CcdApi {
                 );
             }
         }
+    }
+
+    public List<Long> getCaseRefsByLegacyId(String legacyId, String service) {
+        ServiceConfigItem serviceConfig = serviceConfigProvider.getConfig(service);
+        String jurisdiction = serviceConfig.getJurisdiction();
+        String caseTypeIdsStr = String.join(",", serviceConfig.getCaseTypeIds());
+        CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
+
+        SearchResult searchResult = feignCcdApi.searchCases(
+            authenticator.getUserToken(),
+            authenticator.getServiceToken(),
+            caseTypeIdsStr,
+            format(SEARCH_BY_LEGACY_ID_QUERY_FORMAT, legacyId)
+        );
+
+        return searchResult
+            .getCases()
+            .stream()
+            .map(CaseDetails::getId)
+            .collect(toList());
     }
 
     void attachExceptionRecord(CaseDetails theCase,

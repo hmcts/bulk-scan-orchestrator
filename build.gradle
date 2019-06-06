@@ -241,7 +241,7 @@ dependencies {
 
   functionalTestCompile sourceSets.main.runtimeClasspath
   functionalTestCompile sourceSets.test.runtimeClasspath
-  functionalTestCompile group: 'uk.gov.hmcts.reform', name: 'document-management-client', version: '4.0.2'
+  functionalTestCompile group: 'uk.gov.hmcts.reform', name: 'document-management-client', version: '6.0.0'
 
   functionalTestImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: versions.junit
 
