@@ -34,7 +34,10 @@ public class CreateExceptionRecord {
         this.ccdApi = ccdApi;
     }
 
-    public void publish(Envelope envelope) {
+    /**
+     * Creates an Exception Record from given envelope.
+     */
+    public void createFrom(Envelope envelope) {
         log.info("Creating exception record for envelope {}", envelope.id);
 
         CcdAuthenticator authenticator = ccdApi.authenticateJurisdiction(envelope.jurisdiction);
