@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers;
 
 import com.google.common.collect.ImmutableList;
-import io.vavr.control.Either;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,21 +31,18 @@ public class CcdCallbackController {
     @PostMapping(path = "/attach_case")
     public CallbackResponse attachToCase(@RequestBody CallbackRequest callback) {
         if (callback != null && callback.getCaseDetails() != null) {
-            Either<List<String>, Map<String, Object>> result =
-                attachCaseCallbackService.process(callback.getCaseDetails());
 
-            return result
-                .map(modifiedFields ->
-                    AboutToStartOrSubmitCallbackResponse
-                        .builder()
-                        .data(modifiedFields)
-                        .errors(emptyList())
-                        .build()
-                )
+            return attachCaseCallbackService
+                .process(callback.getCaseDetails())
+                .map(modifiedFields -> okResponse(modifiedFields))
                 .getOrElseGet(errors -> errorResponse(errors));
         } else {
             return errorResponse(ImmutableList.of("Internal Error: callback or case details were empty"));
         }
+    }
+
+    private AboutToStartOrSubmitCallbackResponse okResponse(Map<String, Object> modifiedFields) {
+        return AboutToStartOrSubmitCallbackResponse.builder().data(modifiedFields).errors(emptyList()).build();
     }
 
     private AboutToStartOrSubmitCallbackResponse errorResponse(List<String> errors) {
