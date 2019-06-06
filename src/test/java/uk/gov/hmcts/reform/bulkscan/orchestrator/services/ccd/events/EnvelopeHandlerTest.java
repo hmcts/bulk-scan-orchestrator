@@ -56,7 +56,7 @@ class EnvelopeHandlerTest {
         envelopeHandler.handleEnvelope(envelope);
 
         // then
-        verify(attachDocsToSupplementaryEvidence).publish(envelope, caseDetails);
+        verify(attachDocsToSupplementaryEvidence).attach(envelope, caseDetails);
     }
 
     @Test
@@ -69,7 +69,7 @@ class EnvelopeHandlerTest {
         envelopeHandler.handleEnvelope(envelope);
 
         // then
-        verify(this.createExceptionRecord).publish(envelope);
+        verify(this.createExceptionRecord).createFrom(envelope);
     }
 
     @Test
@@ -81,7 +81,7 @@ class EnvelopeHandlerTest {
         envelopeHandler.handleEnvelope(envelope);
 
         // then
-        verify(this.createExceptionRecord).publish(envelope);
+        verify(this.createExceptionRecord).createFrom(envelope);
         verify(caseRetriever, never()).retrieve(JURSIDICTION, CASE_REF);
     }
 
@@ -94,7 +94,7 @@ class EnvelopeHandlerTest {
         envelopeHandler.handleEnvelope(envelope);
 
         // then
-        verify(this.createExceptionRecord).publish(envelope);
+        verify(this.createExceptionRecord).createFrom(envelope);
         verify(caseRetriever, never()).retrieve(any(), any());
     }
 

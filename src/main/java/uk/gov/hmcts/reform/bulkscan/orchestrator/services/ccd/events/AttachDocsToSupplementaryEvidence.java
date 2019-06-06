@@ -34,7 +34,10 @@ class AttachDocsToSupplementaryEvidence {
         this.ccdApi = ccdApi;
     }
 
-    public void publish(Envelope envelope, CaseDetails existingCase) {
+    /**
+     * Attaches documents from given envelope to existing case.
+     */
+    public void attach(Envelope envelope, CaseDetails existingCase) {
         if (mapper.getDocsToAdd(getDocuments(existingCase), envelope.documents).isEmpty()) {
             log.warn("Envelope {} has no new documents. CCD Case {} not updated", envelope.id, existingCase.getId());
         } else {

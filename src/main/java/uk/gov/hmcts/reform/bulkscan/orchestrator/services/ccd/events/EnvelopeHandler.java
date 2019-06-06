@@ -9,16 +9,16 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 @Service
 public class EnvelopeHandler {
 
-    private final AttachDocsToSupplementaryEvidence attachDocsPublisher;
+    private final AttachDocsToSupplementaryEvidence evidenceAttacher;
     private final CreateExceptionRecord exceptionRecordCreator;
     private final CaseRetriever caseRetriever;
 
     public EnvelopeHandler(
-        AttachDocsToSupplementaryEvidence attachDocsPublisher,
+        AttachDocsToSupplementaryEvidence evidenceAttacher,
         CreateExceptionRecord exceptionRecordCreator,
         CaseRetriever caseRetriever
     ) {
-        this.attachDocsPublisher = attachDocsPublisher;
+        this.evidenceAttacher = evidenceAttacher;
         this.exceptionRecordCreator = exceptionRecordCreator;
         this.caseRetriever = caseRetriever;
     }
@@ -31,15 +31,15 @@ public class EnvelopeHandler {
                     : caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
 
                 if (caseDetails == null) {
-                    exceptionRecordCreator.publish(envelope);
+                    exceptionRecordCreator.createFrom(envelope);
                 } else {
-                    attachDocsPublisher.publish(envelope, caseDetails);
+                    evidenceAttacher.attach(envelope, caseDetails);
                 }
 
                 break;
             case EXCEPTION:
             case NEW_APPLICATION:
-                exceptionRecordCreator.publish(envelope);
+                exceptionRecordCreator.createFrom(envelope);
                 break;
             default:
                 throw new UnknownClassificationException(
