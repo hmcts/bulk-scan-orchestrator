@@ -11,6 +11,7 @@ public class Envelope {
 
     public final String id;
     public final String caseRef;
+    public final String previousServiceCaseRef;
     public final String poBox;
     public final String jurisdiction;
     public final String container;
@@ -24,6 +25,7 @@ public class Envelope {
     public Envelope(
         @JsonProperty(value = "id", required = true) String id,
         @JsonProperty(value = "case_ref", required = true) String caseRef,
+        @JsonProperty("previous_service_case_ref") String previousServiceCaseRef,
         @JsonProperty(value = "po_box", required = true) String poBox,
         @JsonProperty(value = "jurisdiction", required = true) String jurisdiction,
         @JsonProperty(value = "container", required = true) String container,
@@ -36,6 +38,7 @@ public class Envelope {
     ) {
         this.id = id;
         this.caseRef = caseRef;
+        this.previousServiceCaseRef = previousServiceCaseRef;
         this.poBox = poBox;
         this.jurisdiction = jurisdiction;
         this.container = container;
