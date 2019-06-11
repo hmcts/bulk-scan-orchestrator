@@ -31,7 +31,10 @@ public class CaseDataExtractor {
 
     public static List<ScannedDocument> getScannedDocuments(Envelope envelope, String dmUrl, String contextPath) {
         List<Document> documents = envelope.documents;
-        return documents.stream().map(document -> mapDocument(document, dmUrl, contextPath, envelope.deliveryDate)).collect(toList());
+        return documents
+            .stream()
+            .map(document -> mapDocument(document, dmUrl, contextPath, envelope.deliveryDate))
+            .collect(toList());
     }
 
     @SuppressWarnings("unchecked")
@@ -54,7 +57,12 @@ public class CaseDataExtractor {
         }
     }
 
-    private static ScannedDocument mapDocument(Document document, String dmUrl, String contextPath, Instant deliveryDate) {
+    private static ScannedDocument mapDocument(
+        Document document,
+        String dmUrl,
+        String contextPath,
+        Instant deliveryDate
+    ) {
         return new ScannedDocument(
             document.fileName,
             document.controlNumber,
