@@ -31,7 +31,12 @@ public class DocumentMapper {
             .collect(Collectors.toList());
     }
 
-    public static ScannedDocument mapDocument(Document document, String dmApiUrl, String contextPath, Instant deliveryDate) {
+    public static ScannedDocument mapDocument(
+        Document document,
+        String dmApiUrl,
+        String contextPath,
+        Instant deliveryDate
+    ) {
         if (document == null) {
             return null;
         } else {
