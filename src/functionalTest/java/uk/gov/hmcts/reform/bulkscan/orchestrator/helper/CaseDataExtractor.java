@@ -29,9 +29,9 @@ public class CaseDataExtractor {
         return data.stream().map(ScannedDocumentsHelper::createScannedDocumentWithCcdData).collect(toList());
     }
 
-    public static List<ScannedDocument> getScannedDocuments(Envelope envelope) {
+    public static List<ScannedDocument> getScannedDocuments(Envelope envelope, String dmUrl, String contextPath) {
         List<Document> documents = envelope.documents;
-        return documents.stream().map(document -> mapDocument(document, envelope.deliveryDate)).collect(toList());
+        return documents.stream().map(document -> mapDocument(document, dmUrl, contextPath, envelope.deliveryDate)).collect(toList());
     }
 
     @SuppressWarnings("unchecked")
@@ -54,14 +54,14 @@ public class CaseDataExtractor {
         }
     }
 
-    private static ScannedDocument mapDocument(Document document, Instant deliveryDate) {
+    private static ScannedDocument mapDocument(Document document, String dmUrl, String contextPath, Instant deliveryDate) {
         return new ScannedDocument(
             document.fileName,
             document.controlNumber,
             document.type,
             document.subtype,
             ZonedDateTime.ofInstant(document.scannedAt, ZoneId.systemDefault()).toLocalDateTime(),
-            new CcdDocument(String.valueOf(document.url)),
+            new CcdDocument(String.join("/", dmUrl, contextPath, document.uuid)),
             ZonedDateTime.ofInstant(deliveryDate, ZoneId.systemDefault()).toLocalDateTime(),
             null
         );

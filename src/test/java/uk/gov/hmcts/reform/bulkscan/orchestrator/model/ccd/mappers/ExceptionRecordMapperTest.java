@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdKeyValue;
@@ -20,7 +21,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 
 class ExceptionRecordMapperTest {
 
-    private final ExceptionRecordMapper mapper = new ExceptionRecordMapper();
+    private final ExceptionRecordMapper mapper = new ExceptionRecordMapper("https://example.gov.uk", "files");
 
     @Test
     void mapEnvelope_maps_all_fields_correctly() {
@@ -100,8 +101,8 @@ class ExceptionRecordMapperTest {
                     scannedDocument.type,
                     scannedDocument.subtype,
                     scannedDocument.scannedDate.atZone(ZoneId.systemDefault()).toInstant(),
-                    scannedDocument.url.documentUrl
-                    )
+                    StringUtils.substringAfterLast(scannedDocument.url.documentUrl, "/")
+                )
             ).collect(toList());
     }
 }

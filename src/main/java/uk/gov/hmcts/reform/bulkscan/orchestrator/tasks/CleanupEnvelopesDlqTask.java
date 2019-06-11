@@ -82,6 +82,7 @@ public class CleanupEnvelopesDlqTask {
         }
     }
 
+    @SuppressWarnings("squid:CallToDeprecatedMethod") // for sonarqube complaining about deprecated things being used
     private void logMessage(IMessage msg) {
         try {
             Envelope envelope = EnvelopeParser.parse(msg.getBody());

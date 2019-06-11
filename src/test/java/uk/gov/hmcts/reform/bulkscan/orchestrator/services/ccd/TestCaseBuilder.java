@@ -18,10 +18,32 @@ class TestCaseBuilder {
         return builder.apply(CaseDetails.builder()).build();
     }
 
-    static CaseDetails caseWithReference(Object caseReference) {
+    static CaseDetails caseWithAttachReference(Object caseReference) {
         Map<String, Object> data = new HashMap<>();
         data.put("attachToCaseReference", caseReference);
         return createCaseWith(b -> b.data(data));
+    }
+
+    static CaseDetails caseWithSearchCaseReferenceType(Object searchCaseReferenceType) {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("searchCaseReferenceType", searchCaseReferenceType);
+        return createCaseWith(b -> b.data(caseData));
+    }
+
+    static CaseDetails caseWithCcdSearchCaseReference(Object searchCaseReference) {
+        return caseWithSearchCaseReference("ccdCaseReference", searchCaseReference);
+    }
+
+    static CaseDetails caseWithExternalSearchCaseReference(Object searchCaseReference) {
+        return caseWithSearchCaseReference("externalCaseReference", searchCaseReference);
+    }
+
+    static CaseDetails caseWithSearchCaseReference(Object searchCaseReferenceType, Object searchCaseReference) {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("searchCaseReference", searchCaseReference);
+        caseData.put("searchCaseReferenceType", searchCaseReferenceType);
+
+        return createCaseWith(b -> b.data(caseData));
     }
 
     static CaseDetails caseWithDocument(List<Map<String, Object>> caseReference) {

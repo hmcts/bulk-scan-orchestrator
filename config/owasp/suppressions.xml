@@ -17,6 +17,15 @@
   </suppress>
 
   <suppress>
+    <notes><![CDATA[Nested dependency of adal4j. Microsoft needs to update strong relation of this library in ServiceBus]]></notes>
+    <gav regex="true">^org\.apache\.sling:org\.apache\.sling\.javax\.activation:0\.1\.0$</gav>
+    <cve>CVE-2013-4390</cve>
+    <cve>CVE-2016-0956</cve>
+    <cve>CVE-2016-5394</cve>
+    <cve>CVE-2016-6798</cve>
+  </suppress>
+
+  <suppress>
     <notes><![CDATA[No fix is available]]></notes>
     <gav regex="true">^org\.springframework\.security:spring-security-rsa:1\.0\.8\.RELEASE$</gav>
     <cve>CVE-2011-2731</cve>
@@ -35,7 +44,7 @@
     <notes><![CDATA[
       used in the integration tests.
     ]]></notes>
-    <filePath regex="true">^.*groovy.*-2\.5\.6\.jar$</filePath>
+    <cpe regex="true">^a:apache:groovy:2\.5\.7$</cpe>
     <cve>CVE-2016-6497</cve>
   </suppress>
 
@@ -61,6 +70,7 @@
     <cve>CVE-2018-12536</cve>
     <cve>CVE-2019-10241</cve>
     <cve>CVE-2019-10246</cve>
+    <cve>CVE-2019-10247</cve>
     <!-- shaded jackson dependency. nothing to do here. please review on next release -->
     <cpe>cpe:/a:fasterxml:jackson-databind</cpe>
   </suppress>

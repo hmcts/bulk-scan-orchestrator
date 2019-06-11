@@ -24,11 +24,11 @@ class DocumentMapperTest {
             "type",
             "subtype",
             Instant.now(),
-            "https://localthost/files/1"
+            "uuid1"
         );
 
         // when
-        ScannedDocument result = DocumentMapper.mapDocument(doc, deliveryDate);
+        ScannedDocument result = DocumentMapper.mapDocument(doc, "https://localhost", "files", deliveryDate);
 
         // then
         assertThat(result)
@@ -38,9 +38,9 @@ class DocumentMapperTest {
                     doc.controlNumber,
                     doc.type,
                     doc.subtype,
-                    toLocalDateTime(doc.scannedAt),
-                    new CcdDocument(doc.url),
-                    toLocalDateTime(deliveryDate),
+                    ZonedDateTime.ofInstant(doc.scannedAt, ZoneId.systemDefault()).toLocalDateTime(),
+                    new CcdDocument("https://localhost/files/" + doc.uuid),
+                    ZonedDateTime.ofInstant(deliveryDate, ZoneId.systemDefault()).toLocalDateTime(),
                     null // this should always be null;
                 )
             );
@@ -52,7 +52,7 @@ class DocumentMapperTest {
         Document doc = null;
 
         // when
-        ScannedDocument result = DocumentMapper.mapDocument(doc, Instant.now());
+        ScannedDocument result = DocumentMapper.mapDocument(doc, "https://localhost", "files", Instant.now());
 
         // then
         assertThat(result).isNull();
@@ -61,11 +61,10 @@ class DocumentMapperTest {
     @Test
     void should_map_null_scanned_date() {
         // given
-        Document doc = new Document(
-            "name.zip", "123", "type", "subtype", null, "https://localthost/files/1");
+        Document doc = new Document("name.zip", "123", "type", "subtype", null, "uuid1");
 
         // when
-        ScannedDocument result = DocumentMapper.mapDocument(doc, Instant.now());
+        ScannedDocument result = DocumentMapper.mapDocument(doc, "https://localhost", "files", Instant.now());
 
         // then
         assertThat(result.scannedDate).isNull();

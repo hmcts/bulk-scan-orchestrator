@@ -9,6 +9,9 @@
   <rule ref="category/java/bestpractices.xml">
     <exclude name="GuardLogStatement" />
     <exclude name="JUnitTestContainsTooManyAsserts" />
+
+    <!-- Some tests don't use assertions explicitly, but through RestAssured, for example -->
+    <exclude name="JUnitTestsShouldIncludeAssert" />
   </rule>
   <rule ref="category/java/codestyle.xml">
     <exclude name="AtLeastOneConstructor" />

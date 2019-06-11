@@ -30,15 +30,16 @@ public class CcdCaseCreator {
     private final CcdAuthenticatorFactory ccdAuthenticatorFactory;
     private final CoreCaseDataApi coreCaseDataApi;
 
-    private final SupplementaryEvidenceMapper supplementaryEvidenceMapper =
-        new SupplementaryEvidenceMapper();
+    private final SupplementaryEvidenceMapper supplementaryEvidenceMapper;
 
     public CcdCaseCreator(
         CcdAuthenticatorFactory ccdAuthenticatorFactory,
-        CoreCaseDataApi coreCaseDataApi
+        CoreCaseDataApi coreCaseDataApi,
+        SupplementaryEvidenceMapper supplementaryEvidenceMapper
     ) {
         this.ccdAuthenticatorFactory = ccdAuthenticatorFactory;
         this.coreCaseDataApi = coreCaseDataApi;
+        this.supplementaryEvidenceMapper = supplementaryEvidenceMapper;
     }
 
     public CaseDetails createCase(List<Document> documents, Instant deliveryDate) {

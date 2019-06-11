@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import com.google.common.collect.ImmutableMap;
 import io.restassured.RestAssured;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,12 @@ class AttachExceptionRecordToExistingCaseTest {
     @Value("${test-url}")
     private String testUrl;
 
+    @Value("${document_management.url}")
+    private String documentManagementUrl;
+
+    @Value("${document_management.context-path}")
+    private String dmContextPath;
+
     @Autowired
     private CaseRetriever caseRetriever;
 
@@ -60,6 +67,8 @@ class AttachExceptionRecordToExistingCaseTest {
 
     private String dmUrl;
 
+    private String documentUuid;
+
     @BeforeEach
     void setup() throws Exception {
 
@@ -67,6 +76,7 @@ class AttachExceptionRecordToExistingCaseTest {
             "Certificate.pdf",
             "documents/supplementary-evidence.pdf"
         );
+        documentUuid = StringUtils.substringAfterLast(dmUrl, "/");
     }
 
     @Test
@@ -92,7 +102,7 @@ class AttachExceptionRecordToExistingCaseTest {
         //given
         CaseDetails caseDetails =
             ccdCaseCreator.createCase(
-                singletonList(new Document("certificate1.pdf", "154565768", "other", null, Instant.now(), dmUrl)),
+                singletonList(new Document("certificate1.pdf", "154565768", "other", null, Instant.now(), documentUuid)),
                 Instant.now()
             );
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");

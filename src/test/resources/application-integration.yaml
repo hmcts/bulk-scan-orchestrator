@@ -4,6 +4,9 @@ wiremock:
 core_case_data:
   api:
     url: *wiremock
+document_management:
+  url: *wiremock
+  context-path: documents
 idam:
   s2s-auth:
     url: *wiremock
@@ -44,3 +47,10 @@ hystrix:
 task:
   check-jurisdiction-log-in:
     check-validity-duration: PT0S
+
+service-config:
+  services:
+    - service: bulkscan # service name corresponds to the name of the container in Blob Storage
+      jurisdiction: BULKSCAN
+      case-type-ids:
+        - Bulk_Scanned

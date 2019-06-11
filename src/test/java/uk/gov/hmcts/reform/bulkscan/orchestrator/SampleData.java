@@ -96,7 +96,8 @@ public class SampleData {
                         .put("type", "doc_type")
                         .put("subtype", "doc_subtype")
                         .put("scanned_at", toIso8601(Instant.EPOCH))
-                        .put("url", "https://example.gov.uk/123")
+                        .put("url", "https://example.gov.uk/uuid123")
+                        .put("uuid", "uuid123")
                     )
                 )
                 .toString().getBytes();
@@ -167,7 +168,7 @@ public class SampleData {
                     String.format("type_%s", index),
                     String.format("subtype_%s", index),
                     ZonedDateTime.parse("2018-10-01T00:00:00Z").plus(index, DAYS).toInstant(),
-                    String.format("https://example.gov.uk/%s", index)
+                    String.format("uuid%s", index)
                 )
             ).limit(numberOfDocuments)
             .collect(Collectors.toList());

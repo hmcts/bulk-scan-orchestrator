@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.awaitility.Duration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,12 +68,13 @@ class SupplementaryEvidenceTest {
     void should_attach_supplementary_evidence_to_the_case_with_existing_evidence_docs() throws Exception {
         //given
         String dmUrlOriginal = dmUploadService.uploadToDmStore("original.pdf", "documents/supplementary-evidence.pdf");
+        String documentUuid = StringUtils.substringAfterLast(dmUrlOriginal, "/");
         String dmUrlNew = dmUploadService.uploadToDmStore("new.pdf", "documents/supplementary-evidence.pdf");
 
         CaseDetails caseDetails =
             ccdCaseCreator.createCase(
                 singletonList(
-                    new Document("evidence.pdf", "123", "other", null, Instant.now(), dmUrlOriginal)
+                    new Document("evidence.pdf", "123", "other", null, Instant.now(), documentUuid)
                 ),
                 Instant.now());
 
