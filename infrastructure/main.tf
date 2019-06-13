@@ -52,8 +52,8 @@ locals {
                                     data.azurerm_key_vault_secret.idam_users_passwords.*.value
                                 )}"
 
-  s2s_url           = "http://rpe-service-auth-provider-${local.local_env}.service.core-compute-${local.local_env}.internal"
-  s2s_vault_url     = "https://s2s-${local.local_env}.vault.azure.net/"
+  s2s_rg  = "rpe-service-auth-provider-${local.local_env}"
+  s2s_url = "http://${local.s2s_rg}.service.core-compute-${local.local_env}.internal"
 
   core_app_settings = {
     S2S_URL     = "${local.s2s_url}"
@@ -105,6 +105,11 @@ data "azurerm_key_vault" "key_vault" {
   resource_group_name = "${local.vaultName}"
 }
 
+data "azurerm_key_vault" "s2s_key_vault" {
+  name                = "s2s-${local.local_env}"
+  resource_group_name = "${local.s2s_rg}"
+}
+
 data "azurerm_key_vault_secret" "idam_users_usernames" {
   count        = "${length(local.users_secret_names)}"
   key_vault_id = "${data.azurerm_key_vault.key_vault.id}"
@@ -123,8 +128,8 @@ data "azurerm_key_vault_secret" "idam_client_secret" {
 }
 
 data "azurerm_key_vault_secret" "s2s_secret" {
+  key_vault_id = "${data.azurerm_key_vault.s2s_key_vault.id}"
   name      = "microservicekey-bulk-scan-orchestrator"
-  vault_uri = "${local.s2s_vault_url}"
 }
 
 data "azurerm_key_vault_secret" "envelopes_queue_send_conn_str" {
