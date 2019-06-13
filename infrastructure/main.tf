@@ -106,50 +106,50 @@ data "azurerm_key_vault" "key_vault" {
 }
 
 data "azurerm_key_vault_secret" "idam_users_usernames" {
-  name      = "${local.users_secret_names[count.index]}-username"
-  vault_uri = "${data.azurerm_key_vault.key_vault.vault_uri}"
-  count     = "${length(local.users_secret_names)}"
+  count        = "${length(local.users_secret_names)}"
+  key_vault_id = "${data.azurerm_key_vault.key_vault.id}"
+  name         = "${local.users_secret_names[count.index]}-username"
 }
 
 data "azurerm_key_vault_secret" "idam_users_passwords" {
-  name      = "${local.users_secret_names[count.index]}-password"
-  vault_uri = "${data.azurerm_key_vault.key_vault.vault_uri}"
-  count     = "${length(local.users_secret_names)}"
+  count        = "${length(local.users_secret_names)}"
+  key_vault_id = "${data.azurerm_key_vault.key_vault.id}"
+  name         = "${local.users_secret_names[count.index]}-password"
 }
 
 data "azurerm_key_vault_secret" "idam_client_secret" {
-  name      = "idam-client-secret"
-  vault_uri = "${data.azurerm_key_vault.key_vault.vault_uri}"
+  key_vault_id = "${data.azurerm_key_vault.key_vault.id}"
+  name         = "idam-client-secret"
 }
 
 data "azurerm_key_vault_secret" "s2s_secret" {
-  name = "microservicekey-bulk-scan-orchestrator"
+  name      = "microservicekey-bulk-scan-orchestrator"
   vault_uri = "${local.s2s_vault_url}"
 }
 
 data "azurerm_key_vault_secret" "envelopes_queue_send_conn_str" {
-  name      = "envelopes-queue-send-connection-string"
-  vault_uri = "${data.azurerm_key_vault.key_vault.vault_uri}"
+  key_vault_id = "${data.azurerm_key_vault.key_vault.id}"
+  name         = "envelopes-queue-send-connection-string"
 }
 
 data "azurerm_key_vault_secret" "envelopes_queue_listen_conn_str" {
-  name      = "envelopes-queue-listen-connection-string"
-  vault_uri = "${data.azurerm_key_vault.key_vault.vault_uri}"
+  key_vault_id = "${data.azurerm_key_vault.key_vault.id}"
+  name         = "envelopes-queue-listen-connection-string"
 }
 
 data "azurerm_key_vault_secret" "envelopes_queue_max_delivery_count" {
-  name      = "envelopes-queue-max-delivery-count"
-  vault_uri = "${data.azurerm_key_vault.key_vault.vault_uri}"
+  key_vault_id = "${data.azurerm_key_vault.key_vault.id}"
+  name         = "envelopes-queue-max-delivery-count"
 }
 
 data "azurerm_key_vault_secret" "processed_envelopes_queue_send_conn_str" {
-  name      = "processed-envelopes-queue-send-connection-string"
-  vault_uri = "${data.azurerm_key_vault.key_vault.vault_uri}"
+  key_vault_id = "${data.azurerm_key_vault.key_vault.id}"
+  name         = "processed-envelopes-queue-send-connection-string"
 }
 
 # the s2s secret is copied to app's own vault, so that Jeknins can convert it to an env variable
 resource "azurerm_key_vault_secret" "s2s_secret_for_tests" {
-  name  = "s2s-secret-for-tests"
-  value = "${data.azurerm_key_vault_secret.s2s_secret.value}"
-  vault_uri = "${data.azurerm_key_vault.key_vault.vault_uri}"
+  key_vault_id = "${data.azurerm_key_vault.key_vault.id}"
+  name         = "s2s-secret-for-tests"
+  value        = "${data.azurerm_key_vault_secret.s2s_secret.value}"
 }
