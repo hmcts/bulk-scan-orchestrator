@@ -5,11 +5,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import javax.annotation.Nonnull;
 
 import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
@@ -100,5 +100,19 @@ final class CallbackValidations {
     @Nonnull
     static Validation<String, List<Map<String, Object>>> hasAScannedRecord(CaseDetails theCase) {
         return scannedDocumentValidator.validate(theCase);
+    }
+
+    @Nonnull
+    static Validation<String, String> hasIdamToken(String idamToken) {
+        return idamToken != null
+            ? valid(idamToken)
+            : invalid("Callback has no user token received in the header");
+    }
+
+    @Nonnull
+    static Validation<String, String> hasUserId(String userId) {
+        return userId != null
+            ? valid(userId)
+            : invalid("Callback has no user id received in the header");
     }
 }

@@ -2,10 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers;
 
 import com.google.common.collect.ImmutableList;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.AttachCaseCallbackService;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -29,11 +26,16 @@ public class CcdCallbackController {
     }
 
     @PostMapping(path = "/attach_case")
-    public CallbackResponse attachToCase(@RequestBody CallbackRequest callback) {
+
+    public CallbackResponse attachToCase(
+        @RequestBody CallbackRequest callback,
+        @RequestHeader(value = "Authorization") String idamToken,
+        @RequestHeader(value = "user-id") String userId
+    ) {
         if (callback != null && callback.getCaseDetails() != null) {
 
             return attachCaseCallbackService
-                .process(callback.getCaseDetails())
+                .process(callback.getCaseDetails(), idamToken, userId)
                 .map(modifiedFields -> okResponse(modifiedFields))
                 .getOrElseGet(errors -> errorResponse(errors));
         } else {

@@ -5,15 +5,11 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.Event;
-import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
-import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.ccd.client.model.*;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nonnull;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
@@ -48,13 +44,15 @@ public class CcdApi {
     }
 
     private StartEventResponse startAttachScannedDocs(String caseRef,
-                                                      CcdAuthenticator authenticator,
+                                                      String serviceToken,
+                                                      String idamToken,
+                                                      String userId,
                                                       String jurisdiction,
                                                       String caseTypeId) {
         return feignCcdApi.startEventForCaseWorker(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
+            idamToken,
+            serviceToken,
+            userId,
             jurisdiction,
             caseTypeId,
             caseRef,
@@ -63,11 +61,19 @@ public class CcdApi {
     }
 
     @Nonnull
-    StartEventResponse startAttachScannedDocs(CaseDetails theCase) {
+    StartEventResponse startAttachScannedDocs(CaseDetails theCase, String idamToken, String userId) {
         String caseRef = String.valueOf(theCase.getId());
         try {
+            //TODO We don't need to login here as we just need the service token
             CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(theCase.getJurisdiction());
-            return startAttachScannedDocs(caseRef, authenticator, theCase.getJurisdiction(), theCase.getCaseTypeId());
+            return startAttachScannedDocs(
+                caseRef,
+                authenticator.getServiceToken(),
+                idamToken,
+                userId,
+                theCase.getJurisdiction(),
+                theCase.getCaseTypeId()
+            );
         } catch (FeignException e) {
             throw new CallbackException(
                 format("Internal Error: start event call failed case: %s Error: %s", caseRef, e.status()), e
@@ -83,12 +89,15 @@ public class CcdApi {
             return retrieveCase(caseRef, jurisdiction);
         } catch (FeignException e) {
             switch (e.status()) {
-                case 404: throw new CaseNotFoundException("Could not find case: " + caseRef, e);
-                case 400: throw new InvalidCaseIdException("Invalid case ID: " + caseRef, e);
-                default: throw new CallbackException(
-                    format("Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status()),
-                    e
-                );
+                case 404:
+                    throw new CaseNotFoundException("Could not find case: " + caseRef, e);
+                case 400:
+                    throw new InvalidCaseIdException("Invalid case ID: " + caseRef, e);
+                default:
+                    throw new CallbackException(
+                        format("Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status()),
+                        e
+                    );
             }
         }
     }
@@ -114,6 +123,8 @@ public class CcdApi {
     }
 
     void attachExceptionRecord(CaseDetails theCase,
+                               String idamToken,
+                               String userId,
                                Map<String, Object> data,
                                String eventSummary,
                                StartEventResponse event) {
@@ -121,9 +132,12 @@ public class CcdApi {
         String jurisdiction = theCase.getJurisdiction();
         String caseTypeId = theCase.getCaseTypeId();
         try {
+            //TODO We don't need to login here as we just need the service token
             CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
             attachCall(caseRef,
-                authenticator,
+                authenticator.getServiceToken(),
+                idamToken,
+                userId,
                 data,
                 event.getToken(),
                 jurisdiction,
@@ -138,16 +152,18 @@ public class CcdApi {
     }
 
     private void attachCall(String caseRef,
-                            CcdAuthenticator authenticator,
+                            String serviceToken,
+                            String idamToken,
+                            String userId,
                             Map<String, Object> data,
                             String eventToken,
                             String jurisdiction,
                             String caseTypeId,
                             Event eventInfo) {
         feignCcdApi.submitEventForCaseWorker(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
+            idamToken,
+            serviceToken,
+            userId,
             jurisdiction,
             caseTypeId,
             caseRef,
@@ -171,24 +187,24 @@ public class CcdApi {
         String caseRef,
         String eventTypeId
     ) {
-        return  caseRef == null
+        return caseRef == null
             ? feignCcdApi.startForCaseworker(
-                authenticator.getUserToken(),
-                authenticator.getServiceToken(),
-                authenticator.getUserDetails().getId(),
-                jurisdiction,
-                caseTypeId,
-                eventTypeId
-            )
+            authenticator.getUserToken(),
+            authenticator.getServiceToken(),
+            authenticator.getUserDetails().getId(),
+            jurisdiction,
+            caseTypeId,
+            eventTypeId
+        )
             : feignCcdApi.startEventForCaseWorker(
-                authenticator.getUserToken(),
-                authenticator.getServiceToken(),
-                authenticator.getUserDetails().getId(),
-                jurisdiction,
-                caseTypeId,
-                caseRef,
-                eventTypeId
-            );
+            authenticator.getUserToken(),
+            authenticator.getServiceToken(),
+            authenticator.getUserDetails().getId(),
+            jurisdiction,
+            caseTypeId,
+            caseRef,
+            eventTypeId
+        );
     }
 
     public CaseDetails submitEvent(
@@ -200,23 +216,23 @@ public class CcdApi {
     ) {
         return caseRef == null
             ? feignCcdApi.submitForCaseworker(
-                authenticator.getUserToken(),
-                authenticator.getServiceToken(),
-                authenticator.getUserDetails().getId(),
-                jurisdiction,
-                caseTypeId,
-                true,
-                caseDataContent
-            )
+            authenticator.getUserToken(),
+            authenticator.getServiceToken(),
+            authenticator.getUserDetails().getId(),
+            jurisdiction,
+            caseTypeId,
+            true,
+            caseDataContent
+        )
             : feignCcdApi.submitEventForCaseWorker(
-                authenticator.getUserToken(),
-                authenticator.getServiceToken(),
-                authenticator.getUserDetails().getId(),
-                jurisdiction,
-                caseTypeId,
-                caseRef,
-                true,
-                caseDataContent
-            );
+            authenticator.getUserToken(),
+            authenticator.getServiceToken(),
+            authenticator.getUserDetails().getId(),
+            jurisdiction,
+            caseTypeId,
+            caseRef,
+            true,
+            caseDataContent
+        );
     }
 }
