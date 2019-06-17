@@ -12,11 +12,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadService;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseSearcher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CreateExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -34,6 +36,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getScannedDocuments;
@@ -41,7 +44,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.EXTERNAL_CASE_REFERENCE;
 
 @SpringBootTest
-@ActiveProfiles("nosb") // no servicebus queue handler registration
+@ActiveProfiles("nosb")
+    // no servicebus queue handler registration
 class AttachExceptionRecordToExistingCaseTest {
 
     @Value("${test-url}")
@@ -67,6 +71,9 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @Autowired
     private DocumentManagementUploadService dmUploadService;
+
+    @Autowired
+    private AuthTokenGenerator authTokenGenerator;
 
     private String dmUrl;
 
@@ -141,10 +148,10 @@ class AttachExceptionRecordToExistingCaseTest {
      * reference type - CCD ID, external ID or no type provided.
      *
      * @param searchCaseReferenceType Specifies how the exception record should reference the case.
-     *      Possible values can be found in
-     *      @see uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes
-     *      and correspond to ReferenceType list in exception record definition.
-     *      If null, case is referenced the old way - via attachToCaseReference field
+     *                                Possible values can be found in
+     * @see uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes
+     * and correspond to ReferenceType list in exception record definition.
+     * If null, case is referenced the old way - via attachToCaseReference field
      */
     private void verifyExceptionRecordAttachesToCase(String searchCaseReferenceType) throws Exception {
         //given
@@ -168,10 +175,10 @@ class AttachExceptionRecordToExistingCaseTest {
      * Hits the services callback endpoint with a request to attach exception record to a case.
      *
      * @param searchCaseReferenceType Specifies how the exception record should reference the case.
-     *      Possible values can be found in
-     *      @see uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes
-     *      and correspond to ReferenceType list in exception record definition.
-     *      If null, case is referenced the old way - via attachToCaseReference field
+     *                                Possible values can be found in
+     * @see uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes
+     * and correspond to ReferenceType list in exception record definition.
+     * If null, case is referenced the old way - via attachToCaseReference field
      */
     private void invokeCallbackEndpoint(
         CaseDetails targetCaseDetails,
@@ -193,12 +200,16 @@ class AttachExceptionRecordToExistingCaseTest {
             .caseDetails(exceptionRecordWithSearchFields)
             .build();
 
+        CcdAuthenticator ccdAuthenticator = authTokenGenerator.getAuthTokenFor("BULKSCAN");
+
         RestAssured
             .given()
             .relaxedHTTPSValidation()
             .baseUri(testUrl)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .header(SyntheticHeaders.SYNTHETIC_TEST_SOURCE, "Bulk Scan Orchestrator Functional test")
+            .header(AUTHORIZATION, ccdAuthenticator.getUserToken())
+            .header("user-id", ccdAuthenticator.getUserDetails().getId())
             .body(callbackRequest)
             .when()
             .post("/callback/attach_case")
@@ -206,7 +217,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .getList("errors")
             .isEmpty();
     }
-
+    
     private Map<String, Object> exceptionRecordDataWithSearchFields(
         CaseDetails targetCaseDetails,
         CaseDetails exceptionRecord,
