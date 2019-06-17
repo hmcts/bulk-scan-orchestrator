@@ -12,7 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadService;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.AuthTokenGenerator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.AuthenticationHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseSearcher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
@@ -72,7 +72,7 @@ class AttachExceptionRecordToExistingCaseTest {
     private DocumentManagementUploadService dmUploadService;
 
     @Autowired
-    private AuthTokenGenerator authTokenGenerator;
+    private AuthenticationHelper authenticationHelper;
 
     private String dmUrl;
 
@@ -199,7 +199,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .caseDetails(exceptionRecordWithSearchFields)
             .build();
 
-        CcdAuthenticator ccdAuthenticator = authTokenGenerator.getAuthTokenFor("BULKSCAN");
+        CcdAuthenticator ccdAuthenticator = authenticationHelper.getAuthTokenFor("BULKSCAN");
 
         RestAssured
             .given()

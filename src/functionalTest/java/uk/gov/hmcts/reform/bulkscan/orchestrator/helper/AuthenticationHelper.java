@@ -5,11 +5,11 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
 
 @Service
-public class AuthTokenGenerator {
+public class AuthenticationHelper {
 
     private final CcdAuthenticatorFactory ccdAuthenticatorFactory;
 
-    public AuthTokenGenerator(CcdAuthenticatorFactory ccdAuthenticatorFactory) {
+    public AuthenticationHelper(CcdAuthenticatorFactory ccdAuthenticatorFactory) {
         this.ccdAuthenticatorFactory = ccdAuthenticatorFactory;
     }
 
