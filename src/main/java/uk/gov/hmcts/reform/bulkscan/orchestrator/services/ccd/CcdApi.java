@@ -94,15 +94,12 @@ public class CcdApi {
             return retrieveCase(caseRef, jurisdiction);
         } catch (FeignException e) {
             switch (e.status()) {
-                case 404:
-                    throw new CaseNotFoundException("Could not find case: " + caseRef, e);
-                case 400:
-                    throw new InvalidCaseIdException("Invalid case ID: " + caseRef, e);
-                default:
-                    throw new CallbackException(
-                        format("Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status()),
-                        e
-                    );
+                case 404: throw new CaseNotFoundException("Could not find case: " + caseRef, e);
+                case 400: throw new InvalidCaseIdException("Invalid case ID: " + caseRef, e);
+                default: throw new CallbackException(
+                    format("Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status()),
+                    e
+                );
             }
         }
     }

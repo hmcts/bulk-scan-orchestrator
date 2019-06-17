@@ -106,7 +106,7 @@ final class CallbackValidations {
     static Validation<String, String> hasIdamToken(String idamToken) {
         return idamToken != null
             ? valid(idamToken)
-            : invalid("Callback has no user token received in the header");
+            : invalid("Callback has no Idam token received in the header");
     }
 
     @Nonnull
