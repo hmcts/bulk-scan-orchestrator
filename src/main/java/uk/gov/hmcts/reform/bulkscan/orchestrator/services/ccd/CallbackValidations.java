@@ -5,11 +5,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import javax.annotation.Nonnull;
 
 import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;

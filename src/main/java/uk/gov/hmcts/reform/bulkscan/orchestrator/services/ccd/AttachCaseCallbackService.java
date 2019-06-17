@@ -54,7 +54,7 @@ public class AttachCaseCallbackService {
      * Attaches exception record to a case.
      *
      * @return Either a map of fields that should be modified in CCD when processing was successful,
-     * or the list of errors, in case of errors
+     *         or the list of errors, in case of errors
      */
     public Either<List<String>, Map<String, Object>> process(
         CaseDetails exceptionRecord,
@@ -102,7 +102,7 @@ public class AttachCaseCallbackService {
      * Attaches exception record to a case.
      *
      * @return Either a map of fields that should be modified in CCD when processing was successful,
-     * or the list of errors, in case of errors
+     *         or the list of errors, in case of errors
      */
     private Either<List<String>, Map<String, Object>> tryAttachToCase(
         AttachToCaseEventData event

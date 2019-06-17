@@ -11,9 +11,9 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nonnull;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.toList;
  * This class is intended to be a wrapper/adaptor/facade for the orchestrator -> CcdApi.
  * In theory this should make the calls to ccd both easier to manage and quicker to refactor.
  */
+
 @Component
 public class CcdApi {
 
