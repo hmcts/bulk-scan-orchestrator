@@ -41,6 +41,7 @@ class EnvelopeParserTest {
         this.envelope = new Envelope(
             "975b339d-4531-4e32-8ebe-a7bc4650f33a",
             "case_ref_number",
+            "case_legacy_id",
             "po_box",
             "jurisdiction",
             "container",
@@ -81,6 +82,7 @@ class EnvelopeParserTest {
             new JSONObject()
                 .put("id", envelope.id)
                 .put("case_ref", envelope.caseRef)
+                .put("previous_service_case_ref", envelope.legacyCaseRef)
                 .put("po_box", envelope.poBox)
                 .put("jurisdiction", envelope.jurisdiction)
                 .put("container", envelope.container)
@@ -138,6 +140,7 @@ class EnvelopeParserTest {
             new JSONObject()
                 .put("id", envelope.id)
                 .put("case_ref", envelope.caseRef)
+                .put("previous_service_case_ref", envelope.legacyCaseRef)
                 .put("po_box", envelope.poBox)
                 .put("jurisdiction", envelope.jurisdiction)
                 .put("container", envelope.container)
