@@ -323,7 +323,9 @@ public class AttachCaseCallbackService {
             String targetCaseRef,
             Long exceptionRecordId,
             List<Map<String, Object>> exceptionRecordDocuments,
-            String idamToken, String userId) {
+            String idamToken,
+            String userId
+        ) {
             this.exceptionRecordJurisdiction = exceptionRecordJurisdiction;
             this.service = service;
             this.targetCaseRefType = targetCaseRefType;
