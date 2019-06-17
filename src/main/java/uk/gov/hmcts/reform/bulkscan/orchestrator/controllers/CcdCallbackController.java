@@ -32,16 +32,16 @@ public class CcdCallbackController {
     @PostMapping(path = "/attach_case")
 
     public CallbackResponse attachToCase(
-            @RequestBody CallbackRequest callback,
-            @RequestHeader(value = "Authorization") String idamToken,
-            @RequestHeader(value = "user-id") String userId
+        @RequestBody CallbackRequest callback,
+        @RequestHeader(value = "Authorization") String idamToken,
+        @RequestHeader(value = "user-id") String userId
     ) {
         if (callback != null && callback.getCaseDetails() != null) {
 
             return attachCaseCallbackService
-                    .process(callback.getCaseDetails(), idamToken, userId)
-                    .map(modifiedFields -> okResponse(modifiedFields))
-                    .getOrElseGet(errors -> errorResponse(errors));
+                .process(callback.getCaseDetails(), idamToken, userId)
+                .map(modifiedFields -> okResponse(modifiedFields))
+                .getOrElseGet(errors -> errorResponse(errors));
         } else {
             return errorResponse(ImmutableList.of("Internal Error: callback or case details were empty"));
         }
