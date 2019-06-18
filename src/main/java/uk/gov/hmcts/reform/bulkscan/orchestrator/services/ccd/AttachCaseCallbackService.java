@@ -22,10 +22,12 @@ import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAScannedRecord;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAnId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAttachToCaseReference;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasIdamToken;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJurisdiction;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasSearchCaseReference;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasSearchCaseReferenceType;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasUserId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.checkForDuplicatesOrElse;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.getDocumentNumbers;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.getScannedDocuments;
@@ -54,17 +56,23 @@ public class AttachCaseCallbackService {
      * @return Either a map of fields that should be modified in CCD when processing was successful,
      *         or the list of errors, in case of errors
      */
-    public Either<List<String>, Map<String, Object>> process(CaseDetails exceptionRecord) {
+    public Either<List<String>, Map<String, Object>> process(
+        CaseDetails exceptionRecord,
+        String requesterIdamToken,
+        String requesterUserId
+    ) {
         boolean useSearchCaseReference = isSearchCaseReferenceTypePresent(exceptionRecord);
 
-        return getValidation(exceptionRecord, useSearchCaseReference)
+        return getValidation(exceptionRecord, useSearchCaseReference, requesterIdamToken, requesterUserId)
             .map(this::tryAttachToCase)
             .getOrElseGet(errors -> Either.left(errors.toJavaList()));
     }
 
     private Validation<Seq<String>, AttachToCaseEventData> getValidation(
         CaseDetails exceptionRecord,
-        boolean useSearchCaseReference
+        boolean useSearchCaseReference,
+        String requesterIdamToken,
+        String requesterUserId
     ) {
         Validation<String, String> caseReferenceTypeValidation = useSearchCaseReference
             ? hasSearchCaseReferenceType(exceptionRecord)
@@ -81,7 +89,9 @@ public class AttachCaseCallbackService {
                 caseReferenceTypeValidation,
                 caseReferenceValidation,
                 hasAnId(exceptionRecord),
-                hasAScannedRecord(exceptionRecord)
+                hasAScannedRecord(exceptionRecord),
+                hasIdamToken(requesterIdamToken),
+                hasUserId(requesterUserId)
             )
             .ap(AttachToCaseEventData::new);
     }
@@ -150,7 +160,9 @@ public class AttachCaseCallbackService {
                 event.exceptionRecordJurisdiction,
                 event.targetCaseRef,
                 event.exceptionRecordDocuments,
-                event.exceptionRecordId
+                event.exceptionRecordId,
+                event.idamToken,
+                event.userId
             );
 
             targetCaseCcdId = event.targetCaseRef;
@@ -176,7 +188,9 @@ public class AttachCaseCallbackService {
                 event.exceptionRecordJurisdiction,
                 targetCaseCcdId,
                 event.exceptionRecordDocuments,
-                event.exceptionRecordId
+                event.exceptionRecordId,
+                event.idamToken,
+                event.userId
             );
 
             return targetCaseCcdId;
@@ -199,7 +213,9 @@ public class AttachCaseCallbackService {
         String exceptionRecordJurisdiction,
         String targetCaseCcdRef,
         List<Map<String, Object>> exceptionRecordDocuments,
-        Long exceptionRecordId
+        Long exceptionRecordId,
+        String idamToken,
+        String userId
     ) {
         log.info("Attaching exception record '{}' to a case by CCD ID '{}'", exceptionRecordId, targetCaseCcdRef);
 
@@ -217,10 +233,12 @@ public class AttachCaseCallbackService {
 
         attachExceptionRecordReference(exceptionRecordDocuments, exceptionRecordId);
 
-        StartEventResponse event = ccdApi.startAttachScannedDocs(theCase);
+        StartEventResponse event = ccdApi.startAttachScannedDocs(theCase, idamToken, userId);
 
         ccdApi.attachExceptionRecord(
             theCase,
+            idamToken,
+            userId,
             insertNewRecords(exceptionRecordDocuments, targetCaseDocuments),
             createEventSummary(theCase, exceptionRecordId, exceptionRecordDocuments),
             event
@@ -295,6 +313,8 @@ public class AttachCaseCallbackService {
         public final String targetCaseRefType;
         public final Long exceptionRecordId;
         public final List<Map<String, Object>> exceptionRecordDocuments;
+        public final String idamToken;
+        public final String userId;
 
         public AttachToCaseEventData(
             String exceptionRecordJurisdiction,
@@ -302,7 +322,9 @@ public class AttachCaseCallbackService {
             String targetCaseRefType,
             String targetCaseRef,
             Long exceptionRecordId,
-            List<Map<String, Object>> exceptionRecordDocuments
+            List<Map<String, Object>> exceptionRecordDocuments,
+            String idamToken,
+            String userId
         ) {
             this.exceptionRecordJurisdiction = exceptionRecordJurisdiction;
             this.service = service;
@@ -310,6 +332,8 @@ public class AttachCaseCallbackService {
             this.targetCaseRef = targetCaseRef;
             this.exceptionRecordId = exceptionRecordId;
             this.exceptionRecordDocuments = exceptionRecordDocuments;
+            this.idamToken = idamToken;
+            this.userId = userId;
         }
     }
 }
