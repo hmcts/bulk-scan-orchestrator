@@ -189,7 +189,7 @@ public class CcdApi {
         String caseRef,
         String eventTypeId
     ) {
-        return caseRef == null
+        return  caseRef == null
             ? feignCcdApi.startForCaseworker(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
