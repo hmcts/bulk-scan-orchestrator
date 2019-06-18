@@ -11,14 +11,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.CcdCallbackController;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadService;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.AuthenticationHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseSearcher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CreateExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -72,7 +73,7 @@ class AttachExceptionRecordToExistingCaseTest {
     private DocumentManagementUploadService dmUploadService;
 
     @Autowired
-    private AuthenticationHelper authenticationHelper;
+    private CcdAuthenticatorFactory ccdAuthenticatorFactory;
 
     private String dmUrl;
 
@@ -199,7 +200,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .caseDetails(exceptionRecordWithSearchFields)
             .build();
 
-        CcdAuthenticator ccdAuthenticator = authenticationHelper.getAuthTokenFor("BULKSCAN");
+        CcdAuthenticator ccdAuthenticator = ccdAuthenticatorFactory.createForJurisdiction("BULKSCAN");
 
         RestAssured
             .given()
@@ -208,7 +209,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .header(SyntheticHeaders.SYNTHETIC_TEST_SOURCE, "Bulk Scan Orchestrator Functional test")
             .header(AUTHORIZATION, ccdAuthenticator.getUserToken())
-            .header("user-id", ccdAuthenticator.getUserDetails().getId())
+            .header(CcdCallbackController.USER_ID, ccdAuthenticator.getUserDetails().getId())
             .body(callbackRequest)
             .when()
             .post("/callback/attach_case")

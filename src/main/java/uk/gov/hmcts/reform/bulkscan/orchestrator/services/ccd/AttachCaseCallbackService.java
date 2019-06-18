@@ -58,12 +58,12 @@ public class AttachCaseCallbackService {
      */
     public Either<List<String>, Map<String, Object>> process(
         CaseDetails exceptionRecord,
-        String idamToken,
-        String userId
+        String requesterIdamToken,
+        String requesterUserId
     ) {
         boolean useSearchCaseReference = isSearchCaseReferenceTypePresent(exceptionRecord);
 
-        return getValidation(exceptionRecord, useSearchCaseReference, idamToken, userId)
+        return getValidation(exceptionRecord, useSearchCaseReference, requesterIdamToken, requesterUserId)
             .map(this::tryAttachToCase)
             .getOrElseGet(errors -> Either.left(errors.toJavaList()));
     }
@@ -71,8 +71,8 @@ public class AttachCaseCallbackService {
     private Validation<Seq<String>, AttachToCaseEventData> getValidation(
         CaseDetails exceptionRecord,
         boolean useSearchCaseReference,
-        String idamToken,
-        String userId
+        String requesterIdamToken,
+        String requesterUserId
     ) {
         Validation<String, String> caseReferenceTypeValidation = useSearchCaseReference
             ? hasSearchCaseReferenceType(exceptionRecord)
@@ -90,8 +90,8 @@ public class AttachCaseCallbackService {
                 caseReferenceValidation,
                 hasAnId(exceptionRecord),
                 hasAScannedRecord(exceptionRecord),
-                hasIdamToken(idamToken),
-                hasUserId(userId)
+                hasIdamToken(requesterIdamToken),
+                hasUserId(requesterUserId)
             )
             .ap(AttachToCaseEventData::new);
     }

@@ -51,6 +51,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_BULK_SCAN;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_EXCEPTION_RECORD;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURISDICTION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.CcdCallbackController.USER_ID;
 
 @IntegrationTest
 class AttachExceptionRecordToExistingCaseTest {
@@ -67,7 +68,6 @@ class AttachExceptionRecordToExistingCaseTest {
     private static final String MOCKED_S2S_TOKEN_SIG =
         "X1-LdZAd5YgGFP16-dQrpqEICqRmcu1zL_zeCLyUqMjb5DVx7xoU-r8yXHfgd4tmmjGqbsBz_kLqgu8yruSbtg";
     private static final String MOCKED_USER_ID = "640";
-    private static final String USER_ID = "user-id";
     private static final String SUBMIT_URL = CASE_URL + "/events?ignore-warning=true";
 
     private static final String EVENT_ID = "someID";

@@ -24,6 +24,8 @@ public class CcdCallbackController {
 
     private final AttachCaseCallbackService attachCaseCallbackService;
 
+    public static final String USER_ID = "user-id";
+
     @Autowired
     public CcdCallbackController(AttachCaseCallbackService attachCaseCallbackService) {
         this.attachCaseCallbackService = attachCaseCallbackService;
@@ -33,8 +35,8 @@ public class CcdCallbackController {
 
     public CallbackResponse attachToCase(
         @RequestBody CallbackRequest callback,
-        @RequestHeader(value = "Authorization") String idamToken,
-        @RequestHeader(value = "user-id") String userId
+        @RequestHeader(value = "Authorization", required = false) String idamToken,
+        @RequestHeader(value = USER_ID, required = false) String userId
     ) {
         if (callback != null && callback.getCaseDetails() != null) {
 
