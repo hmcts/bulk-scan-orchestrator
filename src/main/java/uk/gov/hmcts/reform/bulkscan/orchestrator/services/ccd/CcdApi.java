@@ -94,12 +94,15 @@ public class CcdApi {
             return retrieveCase(caseRef, jurisdiction);
         } catch (FeignException e) {
             switch (e.status()) {
-                case 404: throw new CaseNotFoundException("Could not find case: " + caseRef, e);
-                case 400: throw new InvalidCaseIdException("Invalid case ID: " + caseRef, e);
-                default: throw new CallbackException(
-                    format("Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status()),
-                    e
-                );
+                case 404:
+                    throw new CaseNotFoundException("Could not find case: " + caseRef, e);
+                case 400:
+                    throw new InvalidCaseIdException("Invalid case ID: " + caseRef, e);
+                default:
+                    throw new CallbackException(
+                        format("Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status()),
+                        e
+                    );
             }
         }
     }
@@ -182,7 +185,7 @@ public class CcdApi {
         return authenticatorFactory.createForJurisdiction(jurisdiction);
     }
 
-    public StartEventResponse startEvent(
+     public StartEventResponse startEvent(
         CcdAuthenticator authenticator,
         String jurisdiction,
         String caseTypeId,
@@ -191,22 +194,22 @@ public class CcdApi {
     ) {
         return  caseRef == null
             ? feignCcdApi.startForCaseworker(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
-            jurisdiction,
-            caseTypeId,
-            eventTypeId
-        )
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                authenticator.getUserDetails().getId(),
+                jurisdiction,
+                caseTypeId,
+                eventTypeId
+            )
             : feignCcdApi.startEventForCaseWorker(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
-            jurisdiction,
-            caseTypeId,
-            caseRef,
-            eventTypeId
-        );
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                authenticator.getUserDetails().getId(),
+                jurisdiction,
+                caseTypeId,
+                caseRef,
+                eventTypeId
+            );
     }
 
     public CaseDetails submitEvent(
@@ -218,23 +221,23 @@ public class CcdApi {
     ) {
         return caseRef == null
             ? feignCcdApi.submitForCaseworker(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
-            jurisdiction,
-            caseTypeId,
-            true,
-            caseDataContent
-        )
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                authenticator.getUserDetails().getId(),
+                jurisdiction,
+                caseTypeId,
+                true,
+                caseDataContent
+            )
             : feignCcdApi.submitEventForCaseWorker(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
-            jurisdiction,
-            caseTypeId,
-            caseRef,
-            true,
-            caseDataContent
-        );
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                authenticator.getUserDetails().getId(),
+                jurisdiction,
+                caseTypeId,
+                caseRef,
+                true,
+                caseDataContent
+            );
     }
 }
