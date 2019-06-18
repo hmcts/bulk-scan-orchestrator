@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.2.xsd">
 
   <suppress>
     <notes><![CDATA[Shadowed dependency from AppInsights]]></notes>
@@ -57,22 +57,51 @@
   <!-- this is for the TEST jar wiremock-standalone -->
   <suppress>
     <notes><![CDATA[
+       file name: spring-cloud-contract-wiremock-2.0.2.jar.
+       This is only used for TESTING purposes.
+   ]]></notes>
+    <filePath regex="true">.*spring-cloud-contract-wiremock-2\.0\.2\.RELEASE\.jar</filePath>
+    <cpe>cpe:/a:wiremock:wiremock:2.0.2.release</cpe>
+  </suppress>
+
+  <suppress>
+    <notes><![CDATA[
        file name: wiremock-standalone-2..0.jar.
        This is only used for TESTING purposes.
    ]]></notes>
     <filePath regex="true">.*wiremock-standalone-.*\.jar.*</filePath>
+    <cpe>cpe:/a:eclipse:jetty</cpe>
+    <cpe>cpe:/a:jetty:jetty</cpe>
+    <cpe>cpe:/a:google:guava</cpe>
+    <cpe>cpe:/a:fasterxml:jackson</cpe>
+    <!-- Following are separately enlisted as there is no way suppress `pkg:..` signature -->
+    <!-- guava -->
+    <cve>CVE-2018-10237</cve>
+    <!-- jackson-databind -->
+    <cve>CVE-2018-5968</cve>
+    <cve>CVE-2018-7489</cve>
+    <cve>CVE-2018-12022</cve>
+    <cve>CVE-2018-12023</cve>
+    <cve>CVE-2018-14718</cve>
+    <cve>CVE-2018-14719</cve>
+    <cve>CVE-2018-14720</cve>
+    <cve>CVE-2018-14721</cve>
+    <cve>CVE-2018-19360</cve>
+    <cve>CVE-2018-19361</cve>
+    <cve>CVE-2018-19362</cve>
+    <cve>CVE-2018-1000873</cve>
+    <cve>CVE-2019-12086</cve>
+    <!-- jetty -->
     <cve>CVE-2017-7656</cve>
     <cve>CVE-2017-7657</cve>
     <cve>CVE-2017-7658</cve>
     <cve>CVE-2017-9735</cve>
-    <cve>CVE-2018-10237</cve>
-    <cve>CVE-2018-1000873</cve>
     <cve>CVE-2018-12536</cve>
     <cve>CVE-2019-10241</cve>
-    <cve>CVE-2019-10246</cve>
     <cve>CVE-2019-10247</cve>
-    <!-- shaded jackson dependency. nothing to do here. please review on next release -->
-    <cpe>cpe:/a:fasterxml:jackson-databind</cpe>
+    <!-- jquery -->
+    <cve>CVE-2012-6708</cve>
+    <cve>CVE-2015-9251</cve>
+    <cve>CVE-2019-11358</cve>
   </suppress>
-
 </suppressions>
