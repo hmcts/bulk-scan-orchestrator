@@ -50,7 +50,7 @@ class ProcessedEnvelopeNotifierTest {
         assertThat(message.getMessageId()).isEqualTo(envelopeId);
         assertThat(message.getContentType()).isEqualTo("application/json");
 
-        String messageBodyJson = new String(message.getBody());
+        String messageBodyJson = new String(MessageBodyRetriever.getBinaryData(message.getMessageBody()));
         String expectedMessageBodyJson = String.format("{\"id\":\"%s\"}", envelopeId);
         JSONAssert.assertEquals(expectedMessageBodyJson, messageBodyJson, JSONCompareMode.LENIENT);
     }

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.logging.AppInsights;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EnvelopeHandler;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IProcessedEnvelopeNotifier;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.MessageBodyRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.NotificationSendingException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.InvalidMessageException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.MessageProcessingException;
@@ -67,14 +68,13 @@ public class EnvelopeEventProcessor {
         return message != null;
     }
 
-    @SuppressWarnings("squid:CallToDeprecatedMethod") // for sonarqube complaining about deprecated things being used
     private MessageProcessingResult process(IMessage message) {
         log.info("Started processing message with ID {}", message.getMessageId());
 
         Envelope envelope = null;
 
         try {
-            envelope = parse(message.getBody());
+            envelope = parse(MessageBodyRetriever.getBinaryData(message.getMessageBody()));
             logMessageParsed(message, envelope);
             envelopeHandler.handleEnvelope(envelope);
             processedEnvelopeNotifier.notify(envelope.id);

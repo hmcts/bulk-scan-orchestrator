@@ -1,8 +1,10 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.tasks;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
+import com.microsoft.azure.servicebus.MessageBody;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,7 +64,8 @@ class CleanupEnvelopesDlqTaskTest {
         //given
         UUID uuid = UUID.randomUUID();
         given(message.getLockToken()).willReturn(uuid);
-        given(message.getBody()).willReturn(SampleData.envelopeJson());
+        given(message.getMessageBody())
+            .willReturn(MessageBody.fromBinaryData(ImmutableList.of(SampleData.envelopeJson())));
         given(message.getProperties())
             .willReturn(
                 ImmutableMap.of(

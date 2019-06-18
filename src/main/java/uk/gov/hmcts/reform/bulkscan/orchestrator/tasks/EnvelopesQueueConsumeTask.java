@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.tasks;
 
-import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -28,20 +27,27 @@ public class EnvelopesQueueConsumeTask {
     }
 
     @Scheduled(fixedDelay = 1000)
-    public void consumeMessages() throws ServiceBusException, InterruptedException {
+    public void consumeMessages() {
         try {
             boolean queueMayHaveMessages = true;
 
             while (queueMayHaveMessages && isReadyForConsumingMessages()) {
                 queueMayHaveMessages = envelopeEventProcessor.processNextMessage();
             }
-        } catch (Exception e) {
-            log.error("An error occurred when running the 'consume messages' task", e);
+        } catch (InterruptedException exception) {
+            logTaskError(exception);
+            Thread.currentThread().interrupt();
+        } catch (Exception exception) {
+            logTaskError(exception);
         }
     }
 
     private boolean isReadyForConsumingMessages() throws LogInAttemptRejectedException {
         // TODO: add S2S and IDAM health checks
         return processingReadinessChecker.isNoLogInAttemptRejectedByIdam();
+    }
+
+    private void logTaskError(Exception exception) {
+        log.error("An error occurred when running the 'consume messages' task", exception);
     }
 }
