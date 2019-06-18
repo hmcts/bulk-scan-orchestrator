@@ -185,7 +185,7 @@ public class CcdApi {
         return authenticatorFactory.createForJurisdiction(jurisdiction);
     }
 
-     public StartEventResponse startEvent(
+    public StartEventResponse startEvent(
         CcdAuthenticator authenticator,
         String jurisdiction,
         String caseTypeId,
