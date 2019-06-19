@@ -1,15 +1,19 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.fileContentAsString;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.GET_CASE_URL;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURISDICTION;
@@ -18,21 +22,30 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURIS
 class CaseRetrievalTest {
 
     @Autowired
-    @Lazy
-    private CcdAuthenticatorFactory factory;
+    private CcdAuthenticatorFactory authenticatorFactory;
 
     @Autowired
-    @Lazy
     private CoreCaseDataApi coreCaseDataApi;
 
-    @DisplayName("Should call to retrieve the case from ccd")
+    @Autowired
+    private ServiceConfigProvider serviceConfigProvider;
+
+    private CcdApi ccdApi;
+
+    @BeforeEach
+    public void setUp() {
+        ccdApi = new CcdApi(coreCaseDataApi, authenticatorFactory, serviceConfigProvider);
+    }
+
     @Test
-    void should_call_to_retrieve_the_case_from_ccd() {
+    public void getCase_should_call_ccd_to_retrieve_the_case_by_ccd_id() {
         // given
-        CaseRetriever caseRetriever = new CaseRetriever(factory, coreCaseDataApi);
+        givenThat(get(GET_CASE_URL).willReturn(aResponse().withBody(
+            fileContentAsString("ccd/response/sample-case.json")
+        )));
 
         // when
-        caseRetriever.retrieve(JURISDICTION, CASE_REF);
+        ccdApi.getCase(CASE_REF, JURISDICTION);
 
         // then
         WireMock.verify(getRequestedFor(urlEqualTo(GET_CASE_URL)));

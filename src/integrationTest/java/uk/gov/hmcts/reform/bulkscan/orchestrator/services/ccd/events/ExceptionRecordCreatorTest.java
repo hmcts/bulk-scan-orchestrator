@@ -19,12 +19,14 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.BDDMockito.given;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.fileContentAsString;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_SEARCH_URL;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_BULK_SCAN;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_EXCEPTION_RECORD;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.GET_CASE_URL;
@@ -46,9 +48,14 @@ class ExceptionRecordCreatorTest {
     @BeforeEach
     void before() {
         givenThat(get(GET_CASE_URL).willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())));
+
         givenThat(get(CASE_EVENT_TRIGGER_START_URL).willReturn(aResponse().withBody(
             "{\"case_details\":null,\"event_id\":\"eid\",\"token\":\"etoken\"}"
         )));
+
+        givenThat(post(CASE_SEARCH_URL).willReturn(
+            aResponse().withBody("{\"total\": 0,\"cases\": []}")
+        ));
     }
 
     @DisplayName("Should create exception record for supplementary evidence when case record is not found")

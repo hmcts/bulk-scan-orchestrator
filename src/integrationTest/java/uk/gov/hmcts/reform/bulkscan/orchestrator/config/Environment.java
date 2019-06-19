@@ -23,6 +23,7 @@ public final class Environment {
         CASE_REF
     );
     public static final String GET_CASE_URL = "/cases/" + CASE_REF;
+    public static final String CASE_SEARCH_URL = "/searchCases?ctid=" + CASE_TYPE_BULK_SCAN;
     public static final String CASE_EVENT_URL = CASE_URL + "/events";
     public static final String CASE_SUBMIT_URL = CASE_TYPE_URL + "/cases";
     public static final String CASE_EVENT_TRIGGER_START_URL = CASE_TYPE_URL + "/event-triggers/createException/token";
