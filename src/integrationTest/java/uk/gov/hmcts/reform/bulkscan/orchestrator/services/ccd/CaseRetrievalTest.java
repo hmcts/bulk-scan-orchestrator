@@ -12,14 +12,19 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.fileContentAsString;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_SEARCH_URL;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.GET_CASE_URL;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURISDICTION;
 
 @IntegrationTest
 class CaseRetrievalTest {
+
+    private static final String TEST_SERVICE_NAME = "bulkscan";
 
     @Autowired
     private CcdAuthenticatorFactory authenticatorFactory;
@@ -49,5 +54,19 @@ class CaseRetrievalTest {
 
         // then
         WireMock.verify(getRequestedFor(urlEqualTo(GET_CASE_URL)));
+    }
+
+    @Test
+    public void getCaseRefsByLegacyId_should_call_ccd_to_retrieve_ccd_ids_by_legacy_id() {
+        // given
+        givenThat(post(CASE_SEARCH_URL).willReturn(aResponse().withBody(
+            fileContentAsString("ccd/response/search-by-legacy-id/result-empty.json")
+        )));
+
+        // when
+        ccdApi.getCaseRefsByLegacyId("legacy-id-123", TEST_SERVICE_NAME);
+
+        // then
+        WireMock.verify(postRequestedFor(urlEqualTo(CASE_SEARCH_URL)));
     }
 }
