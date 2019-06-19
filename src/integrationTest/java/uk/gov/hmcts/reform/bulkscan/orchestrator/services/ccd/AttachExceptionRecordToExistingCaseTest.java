@@ -51,7 +51,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_BULK_SCAN;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_EXCEPTION_RECORD;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURISDICTION;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.CcdCallbackController.USER_ID;
 
 @IntegrationTest
 class AttachExceptionRecordToExistingCaseTest {
@@ -67,7 +66,7 @@ class AttachExceptionRecordToExistingCaseTest {
     private static final String MOCKED_IDAM_TOKEN_SIG = "q6hDG0Z1Qbinwtl8TgeDrAVV0LlCTRtbQqBYoMjd03k";
     private static final String MOCKED_S2S_TOKEN_SIG =
         "X1-LdZAd5YgGFP16-dQrpqEICqRmcu1zL_zeCLyUqMjb5DVx7xoU-r8yXHfgd4tmmjGqbsBz_kLqgu8yruSbtg";
-    private static final String MOCKED_USER_ID = "640";
+
     private static final String SUBMIT_URL = CASE_URL + "/events?ignore-warning=true";
 
     private static final String EVENT_ID = "someID";
@@ -137,20 +136,12 @@ class AttachExceptionRecordToExistingCaseTest {
         ValidatableResponse response =
             given()
                 .body(exceptionRecordCallbackRequest(CASE_REF))
-                .headers(userHeaders())
                 .post("/callback/{type}", "attach_case")
                 .then()
                 .statusCode(200);
 
         verifySuccessResponseWithAttachToCaseReference(response);
         verifyRequestedAttachingToCase();
-    }
-
-    private ImmutableMap<String, String> userHeaders() {
-        return ImmutableMap.of(
-            AUTHORIZATION, MOCKED_IDAM_TOKEN_SIG,
-            USER_ID, MOCKED_USER_ID
-        );
     }
 
     @Test
@@ -165,7 +156,6 @@ class AttachExceptionRecordToExistingCaseTest {
                         CASE_TYPE_EXCEPTION_RECORD
                     )
                 )
-                .headers(userHeaders())
                 .post("/callback/{type}", "attach_case")
                 .then()
                 .statusCode(200);
@@ -198,7 +188,6 @@ class AttachExceptionRecordToExistingCaseTest {
                         CASE_TYPE_EXCEPTION_RECORD
                     )
                 )
-                .headers(userHeaders())
                 .post("/callback/{type}", "attach_case")
                 .then()
                 .statusCode(200);
@@ -214,7 +203,6 @@ class AttachExceptionRecordToExistingCaseTest {
 
         given()
             .body(exceptionRecordCallbackRequest())
-            .headers(userHeaders())
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -228,7 +216,6 @@ class AttachExceptionRecordToExistingCaseTest {
 
         given()
             .body(exceptionRecordCallbackRequest())
-            .headers(userHeaders())
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -240,7 +227,6 @@ class AttachExceptionRecordToExistingCaseTest {
     public void should_fail_correctly_if_document_is_duplicate_or_document_is_already_attached() {
         given()
             .body(attachToCaseRequest(CASE_REF, null, null, EXISTING_DOC))
-            .headers(userHeaders())
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -261,7 +247,6 @@ class AttachExceptionRecordToExistingCaseTest {
 
         given()
             .body(exceptionRecordCallbackRequest())
-            .headers(userHeaders())
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -282,7 +267,6 @@ class AttachExceptionRecordToExistingCaseTest {
                     CASE_TYPE_EXCEPTION_RECORD
                 )
             )
-            .headers(userHeaders())
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -308,7 +292,8 @@ class AttachExceptionRecordToExistingCaseTest {
                     nonExistingLegacyId,
                     CASE_TYPE_EXCEPTION_RECORD
                 )
-            ).headers(userHeaders()).post("/callback/{type}", "attach_case")
+            )
+            .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
             .body(RESPONSE_FIELD_ERRORS, hasItem("No case found for legacy case reference " + nonExistingLegacyId));
@@ -337,7 +322,7 @@ class AttachExceptionRecordToExistingCaseTest {
                     legacyId,
                     CASE_TYPE_EXCEPTION_RECORD
                 )
-            ).headers(userHeaders())
+            )
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -350,7 +335,6 @@ class AttachExceptionRecordToExistingCaseTest {
 
         given()
             .body(exceptionRecordCallbackRequest())
-            .headers(userHeaders())
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -367,7 +351,8 @@ class AttachExceptionRecordToExistingCaseTest {
                     null,
                     "invalid-case-type"
                 )
-            ).headers(userHeaders()).post("/callback/{type}", "attach_case")
+            )
+            .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
             .body(RESPONSE_FIELD_ERRORS, hasItem("Case type ID (invalid-case-type) has invalid format"));
@@ -382,7 +367,7 @@ class AttachExceptionRecordToExistingCaseTest {
                     "search-case-reference",
                     CASE_TYPE_EXCEPTION_RECORD
                 )
-            ).headers(userHeaders())
+            )
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -399,7 +384,7 @@ class AttachExceptionRecordToExistingCaseTest {
                     "invalid-ccd-reference",
                     CASE_TYPE_EXCEPTION_RECORD
                 )
-            ).headers(userHeaders())
+            )
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -413,7 +398,6 @@ class AttachExceptionRecordToExistingCaseTest {
 
         given()
             .body(exceptionRecordCallbackRequest(CASE_REF))
-            .headers(userHeaders())
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -428,7 +412,6 @@ class AttachExceptionRecordToExistingCaseTest {
 
         given()
             .body(callbackRequest)
-            .headers(userHeaders())
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -449,7 +432,6 @@ class AttachExceptionRecordToExistingCaseTest {
 
         given()
             .body(attachToCaseRequest(CASE_REF))
-            .headers(userHeaders())
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
@@ -461,7 +443,6 @@ class AttachExceptionRecordToExistingCaseTest {
     public void should_create_error_if_type_in_incorrect() {
         given()
             .body(exceptionRecordCallbackRequest())
-            .headers(userHeaders())
             .post("/callback/{type}", "someType")
             .then()
             .statusCode(404);
