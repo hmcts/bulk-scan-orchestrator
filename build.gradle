@@ -5,7 +5,7 @@ plugins {
   id 'jacoco'
   id 'io.spring.dependency-management' version '1.0.8.RELEASE'
   id 'org.owasp.dependencycheck' version '5.0.0'
-  id 'org.springframework.boot' version '2.1.5.RELEASE'
+  id 'org.springframework.boot' version '2.1.6.RELEASE'
   id 'com.github.ben-manes.versions' version '0.21.0'
   id 'org.sonarqube' version '2.7.1'
 }
@@ -189,12 +189,6 @@ dependencyManagement {
     // align with jupiter version
     dependencySet(group: 'org.mockito', version: '2.28.2') {
       entry 'mockito-core'
-    }
-    // solves CVE-2019-12086
-    // remove once spring manager incorporates this changes
-    dependencySet(group: 'com.fasterxml.jackson.core', version: '2.9.9') {
-      entry 'jackson-core'
-      entry 'jackson-databind'
     }
   }
 }
