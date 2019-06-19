@@ -190,12 +190,6 @@ dependencyManagement {
     dependencySet(group: 'org.mockito', version: '2.28.2') {
       entry 'mockito-core'
     }
-    // solves CVE-2019-12086
-    // remove once spring manager incorporates this changes
-    dependencySet(group: 'com.fasterxml.jackson.core', version: '2.9.9') {
-      entry 'jackson-core'
-      entry 'jackson-databind'
-    }
   }
 }
 
