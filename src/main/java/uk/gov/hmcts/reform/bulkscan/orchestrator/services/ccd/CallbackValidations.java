@@ -101,18 +101,4 @@ final class CallbackValidations {
     static Validation<String, List<Map<String, Object>>> hasAScannedRecord(CaseDetails theCase) {
         return scannedDocumentValidator.validate(theCase);
     }
-
-    @Nonnull
-    static Validation<String, String> hasIdamToken(String idamToken) {
-        return idamToken != null
-            ? valid(idamToken)
-            : invalid("Callback has no Idam token received in the header");
-    }
-
-    @Nonnull
-    static Validation<String, String> hasUserId(String userId) {
-        return userId != null
-            ? valid(userId)
-            : invalid("Callback has no user id received in the header");
-    }
 }
