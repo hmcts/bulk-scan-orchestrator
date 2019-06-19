@@ -115,8 +115,6 @@ public class CaseFinder {
             return Optional.of(ccdApi.getCase(ccdCaseRef, jurisdiction));
         } catch (CaseNotFoundException e) {
             return Optional.empty();
-        } catch (Exception e) {
-            throw e;
         }
     }
 }
