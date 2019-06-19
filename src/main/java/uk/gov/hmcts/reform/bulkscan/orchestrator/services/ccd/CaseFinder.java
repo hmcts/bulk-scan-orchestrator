@@ -101,7 +101,7 @@ public class CaseFinder {
                 "Case was found by legacy ID, but subsequent read from CCD couldn't find it. "
                     + "Legacy ID: '{}', CCD ID: '{}', Envelope ID: '{}'";
 
-            log.warn(
+            log.error(
                 messageFormat,
                 legacyCaseRef,
                 ccdCaseRef,
