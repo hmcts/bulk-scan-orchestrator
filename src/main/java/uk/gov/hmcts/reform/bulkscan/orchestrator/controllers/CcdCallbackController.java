@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.AttachCaseCallbackService;
@@ -24,24 +23,17 @@ public class CcdCallbackController {
 
     private final AttachCaseCallbackService attachCaseCallbackService;
 
-    public static final String USER_ID = "user-id";
-
     @Autowired
     public CcdCallbackController(AttachCaseCallbackService attachCaseCallbackService) {
         this.attachCaseCallbackService = attachCaseCallbackService;
     }
 
     @PostMapping(path = "/attach_case")
-
-    public CallbackResponse attachToCase(
-        @RequestBody CallbackRequest callback,
-        @RequestHeader(value = "Authorization", required = false) String idamToken,
-        @RequestHeader(value = USER_ID, required = false) String userId
-    ) {
+    public CallbackResponse attachToCase(@RequestBody CallbackRequest callback) {
         if (callback != null && callback.getCaseDetails() != null) {
 
             return attachCaseCallbackService
-                .process(callback.getCaseDetails(), idamToken, userId)
+                .process(callback.getCaseDetails())
                 .map(modifiedFields -> okResponse(modifiedFields))
                 .getOrElseGet(errors -> errorResponse(errors));
         } else {
