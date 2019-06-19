@@ -80,7 +80,7 @@ public class CcdApi {
                 theCase.getCaseTypeId()
             );
         } catch (FeignException e) {
-            throw new CallbackException(
+            throw new CcdCallException(
                 format("Internal Error: start event call failed case: %s Error: %s", caseRef, e.status()), e
             );
         }
@@ -99,7 +99,7 @@ public class CcdApi {
                 case 400:
                     throw new InvalidCaseIdException("Invalid case ID: " + caseRef, e);
                 default:
-                    throw new CallbackException(
+                    throw new CcdCallException(
                         format("Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status()),
                         e
                     );
@@ -149,7 +149,7 @@ public class CcdApi {
                 caseTypeId,
                 Event.builder().summary(eventSummary).id(event.getEventId()).build());
         } catch (FeignException e) {
-            throw new CallbackException(
+            throw new CcdCallException(
                 format("Internal Error: submitting attach file event failed case: %s Error: %s", caseRef, e.status()),
                 e
             );
