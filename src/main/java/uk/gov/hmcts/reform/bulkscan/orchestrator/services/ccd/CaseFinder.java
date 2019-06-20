@@ -114,6 +114,10 @@ public class CaseFinder {
         try {
             return Optional.of(ccdApi.getCase(ccdCaseRef, jurisdiction));
         } catch (CaseNotFoundException e) {
+            log.info("Case wasn't found by CCD ID {}", ccdCaseRef);
+            return Optional.empty();
+        } catch (InvalidCaseIdException e) {
+            log.warn("Case wasn't found by CCD ID {} because the ID is invalid", e);
             return Optional.empty();
         }
     }
