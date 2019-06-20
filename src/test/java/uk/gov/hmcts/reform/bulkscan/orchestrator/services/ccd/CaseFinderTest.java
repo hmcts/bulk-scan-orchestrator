@@ -125,6 +125,28 @@ public class CaseFinderTest {
     }
 
     @Test
+    public void should_search_case_by_legacy_id_when_ccd_id_is_rejected_by_ccd() {
+        // given
+        given(ccdApi.getCase(CASE_REF, JURISDICTION)).willThrow(
+            new InvalidCaseIdException("Invalid case ID", null)
+        );
+
+        given(ccdApi.getCaseRefsByLegacyId(LEGACY_CASE_REF, SERVICE))
+            .willReturn(emptyList());
+
+        // when
+        caseFinder.findCase(
+            envelope(CASE_REF, LEGACY_CASE_REF)
+        );
+
+        // then
+        InOrder inOrder = inOrder(ccdApi);
+        inOrder.verify(ccdApi).getCase(CASE_REF, JURISDICTION);
+        inOrder.verify(ccdApi).getCaseRefsByLegacyId(LEGACY_CASE_REF, SERVICE);
+        inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
     public void should_return_empty_when_legacy_id_search_has_no_results() {
         given(ccdApi.getCaseRefsByLegacyId(LEGACY_CASE_REF, SERVICE))
             .willReturn(emptyList());
