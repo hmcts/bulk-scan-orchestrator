@@ -57,7 +57,7 @@ class AttachDocsToSupplementaryEvidence {
                 "Started event in CCD for envelope ID: {}. File name: {}. Case ref: {}",
                 envelope.id,
                 envelope.zipFileName,
-                existingCase.getId().toString()
+                existingCase.getId()
             );
 
             ccdApi.submitEvent(
