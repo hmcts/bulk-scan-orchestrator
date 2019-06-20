@@ -18,6 +18,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CreateExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
