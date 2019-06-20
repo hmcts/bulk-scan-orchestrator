@@ -99,8 +99,10 @@ class SupplementaryEvidenceTest {
     public void should_be_able_to_attach_supplementary_evidence_to_case_by_legacy_id() throws Exception {
         //given
         String dmUrl = dmUploadService.uploadToDmStore("Evidence2.pdf", "documents/supplementary-evidence.pdf");
+        assertThat(dmUrl).isNotNull();
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList());
         String legacyId = (String) caseDetails.getData().get("legacyId");
+        assertThat(legacyId).isNotEmpty();
 
         await("The new case can be found by legacy ID")
             .atMost(30, TimeUnit.SECONDS)
@@ -117,7 +119,6 @@ class SupplementaryEvidenceTest {
         );
 
         // then
-        assertThat(dmUrl).isNotNull();
         await("Supplementary evidence is attached to the case in ccd")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.TWO_SECONDS)
