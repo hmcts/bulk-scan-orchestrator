@@ -117,7 +117,7 @@ public class CaseFinder {
             log.info("Case wasn't found by CCD ID {}", ccdCaseRef);
             return Optional.empty();
         } catch (InvalidCaseIdException e) {
-            log.warn("Case wasn't found by CCD ID {} because the ID is invalid", e);
+            log.warn("Case wasn't found by CCD ID {} because the ID is invalid", ccdCaseRef, e);
             return Optional.empty();
         }
     }
