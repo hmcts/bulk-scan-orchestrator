@@ -24,7 +24,7 @@ public class Envelope {
 
     public Envelope(
         @JsonProperty(value = "id", required = true) String id,
-        @JsonProperty(value = "case_ref", required = true) String caseRef,
+        @JsonProperty("case_ref") String caseRef,
         @JsonProperty("previous_service_case_ref") String legacyCaseRef,
         @JsonProperty(value = "po_box", required = true) String poBox,
         @JsonProperty(value = "jurisdiction", required = true) String jurisdiction,

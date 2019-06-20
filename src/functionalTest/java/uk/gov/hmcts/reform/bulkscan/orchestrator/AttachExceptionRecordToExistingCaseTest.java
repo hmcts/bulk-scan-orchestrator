@@ -17,9 +17,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseSearcher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CreateExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -58,7 +56,7 @@ class AttachExceptionRecordToExistingCaseTest {
     private String dmContextPath;
 
     @Autowired
-    private CaseRetriever caseRetriever;
+    private CcdApi ccdApi;
 
     @Autowired
     private CcdCaseCreator ccdCaseCreator;
@@ -243,7 +241,7 @@ class AttachExceptionRecordToExistingCaseTest {
     private CaseDetails createExceptionRecord(String resourceName) throws Exception {
         UUID poBox = UUID.randomUUID();
 
-        envelopeMessager.sendMessageFromFile(resourceName, "0000000000000000", poBox, dmUrl);
+        envelopeMessager.sendMessageFromFile(resourceName, "0000000000000000", null, poBox, dmUrl);
 
         await("Exception record is created")
             .atMost(60, TimeUnit.SECONDS)
@@ -266,9 +264,9 @@ class AttachExceptionRecordToExistingCaseTest {
 
     private Boolean isExceptionRecordAttachedToTheCase(CaseDetails caseDetails, int expectedScannedDocsSize) {
 
-        CaseDetails updatedCase = caseRetriever.retrieve(
-            caseDetails.getJurisdiction(),
-            String.valueOf(caseDetails.getId())
+        CaseDetails updatedCase = ccdApi.getCase(
+            String.valueOf(caseDetails.getId()),
+            caseDetails.getJurisdiction()
         );
 
         List<ScannedDocument> updatedScannedDocuments = getScannedDocuments(updatedCase);
@@ -281,9 +279,9 @@ class AttachExceptionRecordToExistingCaseTest {
         CaseDetails exceptionRecord,
         int expectedExceptionRecordsSize
     ) {
-        CaseDetails updatedCase = caseRetriever.retrieve(
-            originalCase.getJurisdiction(),
-            String.valueOf(originalCase.getId())
+        CaseDetails updatedCase = ccdApi.getCase(
+            String.valueOf(originalCase.getId()),
+            originalCase.getJurisdiction()
         );
 
         List<ScannedDocument> updatedScannedDocuments = getScannedDocuments(updatedCase);
