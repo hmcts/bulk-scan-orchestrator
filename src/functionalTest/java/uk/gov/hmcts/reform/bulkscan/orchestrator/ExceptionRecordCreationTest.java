@@ -57,6 +57,7 @@ class ExceptionRecordCreationTest {
         envelopeMessager.sendMessageFromFile(
             "envelopes/supplementary-evidence-envelope.json",
             "0000000000000000",
+            null,
             randomPoBox,
             dmUrl
         );
@@ -78,6 +79,7 @@ class ExceptionRecordCreationTest {
         envelopeMessager.sendMessageFromFile(
             "envelopes/new-envelope-with-evidence.json",
             "0000000000000000",
+            null,
             randomPoBox,
             dmUrl
         );
@@ -106,6 +108,7 @@ class ExceptionRecordCreationTest {
         envelopeMessager.sendMessageFromFile(
             "envelopes/supplementary-evidence-envelope.json",
             "1234",
+            null,
             randomPoBox,
             dmUrl
         );

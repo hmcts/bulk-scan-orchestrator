@@ -31,11 +31,13 @@ public class EnvelopeMessager {
     public void sendMessageFromFile(
         String jsonFileName,
         String caseRef,
+        String legacyCaseRef,
         UUID poBox,
         String documentUrl
     ) throws JSONException, InterruptedException, ServiceBusException {
         JSONObject updateCaseData = new JSONObject(SampleData.fileContentAsString(jsonFileName));
         updateCaseData.put("case_ref", caseRef);
+        updateCaseData.put("previous_service_case_ref", legacyCaseRef);
 
         if (poBox != null) {
             updateCaseData.put("po_box", poBox);

@@ -76,10 +76,8 @@ public class CcdApi {
     }
 
     @Nonnull
-    @SuppressWarnings("squid:S1135")
-    CaseDetails getCase(String caseRef, String jurisdiction) {
+    public CaseDetails getCase(String caseRef, String jurisdiction) {
         try {
-            //TODO: RPE-823 merge with `CaseRetriever` to a consistent api adaptor
             return retrieveCase(caseRef, jurisdiction);
         } catch (FeignException e) {
             switch (e.status()) {
@@ -91,7 +89,7 @@ public class CcdApi {
                     throw new CcdCallException(
                         format("Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status()),
                         e
-                    );
+                );
             }
         }
     }

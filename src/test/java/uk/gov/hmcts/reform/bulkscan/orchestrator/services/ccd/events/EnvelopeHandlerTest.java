@@ -5,9 +5,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseFinder;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -30,7 +32,7 @@ class EnvelopeHandlerTest {
     private CreateExceptionRecord createExceptionRecord;
 
     @Mock
-    private CaseRetriever caseRetriever;
+    private CaseFinder caseFinder;
 
     @Mock
     private CaseDetails caseDetails;
@@ -42,15 +44,15 @@ class EnvelopeHandlerTest {
         envelopeHandler = new EnvelopeHandler(
             attachDocsToSupplementaryEvidence,
             createExceptionRecord,
-            caseRetriever
+            caseFinder
         );
     }
 
     @Test
     void should_call_AttachDocsToSupplementaryEvidence_for_supplementary_evidence_classification_when_case_exists() {
         // given
-        given(caseRetriever.retrieve(JURSIDICTION, CASE_REF)).willReturn(caseDetails);
         Envelope envelope = envelope(SUPPLEMENTARY_EVIDENCE, JURSIDICTION, CASE_REF);
+        given(caseFinder.findCase(envelope)).willReturn(Optional.of(caseDetails));
 
         // when
         envelopeHandler.handleEnvelope(envelope);
@@ -62,8 +64,8 @@ class EnvelopeHandlerTest {
     @Test
     void should_call_CreateExceptionRecord_for_supplementary_evidence_classification_when_case_does_not_exist() {
         // given
-        given(caseRetriever.retrieve(JURSIDICTION, CASE_REF)).willReturn(null); // case not found
         Envelope envelope = envelope(SUPPLEMENTARY_EVIDENCE, JURSIDICTION, CASE_REF);
+        given(caseFinder.findCase(envelope)).willReturn(Optional.empty()); // case not found
 
         // when
         envelopeHandler.handleEnvelope(envelope);
@@ -82,7 +84,7 @@ class EnvelopeHandlerTest {
 
         // then
         verify(this.createExceptionRecord).createFrom(envelope);
-        verify(caseRetriever, never()).retrieve(JURSIDICTION, CASE_REF);
+        verify(caseFinder, never()).findCase(any());
     }
 
     @Test
@@ -95,7 +97,7 @@ class EnvelopeHandlerTest {
 
         // then
         verify(this.createExceptionRecord).createFrom(envelope);
-        verify(caseRetriever, never()).retrieve(any(), any());
+        verify(caseFinder, never()).findCase(any());
     }
 
 }
