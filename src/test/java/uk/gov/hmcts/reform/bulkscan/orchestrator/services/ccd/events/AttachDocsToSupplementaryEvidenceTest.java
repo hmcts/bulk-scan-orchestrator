@@ -68,7 +68,8 @@ class AttachDocsToSupplementaryEvidenceTest {
         given(ccdApi.startEvent(any(), any(), any(), any(), any())).willReturn(startEventResponse);
         given(ccdApi.submitEvent(any(), any(), any(), any(), any())).willReturn(caseDetails);
 
-        given(caseDetails.getId()).willReturn(1L);
+        Long caseId = 123456L;
+        given(caseDetails.getId()).willReturn(caseId);
 
         Envelope envelope = SampleData.envelope(2);
 
@@ -82,7 +83,7 @@ class AttachDocsToSupplementaryEvidenceTest {
             AUTH_DETAILS,
             envelope.jurisdiction,
             CASE_TYPE_ID,
-            envelope.caseRef,
+            caseId.toString(),
             EVENT_TYPE_ID
         );
         ArgumentCaptor<CaseDataContent> caseDataContentCaptor = ArgumentCaptor.forClass(CaseDataContent.class);
@@ -91,7 +92,7 @@ class AttachDocsToSupplementaryEvidenceTest {
             eq(AUTH_DETAILS),
             eq(envelope.jurisdiction),
             eq(CASE_TYPE_ID),
-            eq(envelope.caseRef),
+            eq(caseId.toString()),
             caseDataContentCaptor.capture()
         );
 

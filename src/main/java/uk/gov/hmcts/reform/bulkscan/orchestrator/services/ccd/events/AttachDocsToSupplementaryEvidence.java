@@ -49,7 +49,7 @@ class AttachDocsToSupplementaryEvidence {
                 authenticator,
                 envelope.jurisdiction,
                 existingCase.getCaseTypeId(),
-                envelope.caseRef,
+                existingCase.getId().toString(),
                 EVENT_TYPE_ID
             );
 
@@ -57,14 +57,14 @@ class AttachDocsToSupplementaryEvidence {
                 "Started event in CCD for envelope ID: {}. File name: {}. Case ref: {}",
                 envelope.id,
                 envelope.zipFileName,
-                envelope.caseRef
+                existingCase.getId().toString()
             );
 
             ccdApi.submitEvent(
                 authenticator,
                 envelope.jurisdiction,
                 existingCase.getCaseTypeId(),
-                envelope.caseRef,
+                existingCase.getId().toString(),
                 buildCaseDataContent(envelope, startEventResp)
             );
 
