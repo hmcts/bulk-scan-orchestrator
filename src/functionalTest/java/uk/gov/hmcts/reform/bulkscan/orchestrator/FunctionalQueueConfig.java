@@ -48,7 +48,6 @@ public class FunctionalQueueConfig {
                 throw new ConnectionException("Unable to connect to the dlq", e);
             }
         };
-
     }
 
     @Bean
