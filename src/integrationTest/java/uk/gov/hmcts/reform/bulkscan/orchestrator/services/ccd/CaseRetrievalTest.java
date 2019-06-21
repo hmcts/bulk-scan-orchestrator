@@ -4,7 +4,9 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 
@@ -15,6 +17,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static java.util.Collections.emptyList;
+import static org.mockito.BDDMockito.willReturn;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.fileContentAsString;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_SEARCH_URL;
@@ -32,7 +36,7 @@ class CaseRetrievalTest {
     @Autowired
     private CoreCaseDataApi coreCaseDataApi;
 
-    @Autowired
+    @SpyBean
     private ServiceConfigProvider serviceConfigProvider;
 
     private CcdApi ccdApi;
@@ -68,5 +72,22 @@ class CaseRetrievalTest {
 
         // then
         WireMock.verify(postRequestedFor(urlEqualTo(CASE_SEARCH_URL)));
+    }
+
+    @Test
+    public void getCaseRefsByLegacyId_should_not_call_ccd_when_no_case_type_configured() {
+        // given
+        ServiceConfigItem serviceConfig = new ServiceConfigItem();
+        serviceConfig.setCaseTypeIds(emptyList());
+        serviceConfig.setService(TEST_SERVICE_NAME);
+        serviceConfig.setJurisdiction(JURISDICTION);
+
+        willReturn(serviceConfig).given(serviceConfigProvider).getConfig(TEST_SERVICE_NAME);
+
+        // when
+        ccdApi.getCaseRefsByLegacyId("legacy-id-123", TEST_SERVICE_NAME);
+
+        // then
+        WireMock.verify(0, postRequestedFor(urlEqualTo(CASE_SEARCH_URL)));
     }
 }
