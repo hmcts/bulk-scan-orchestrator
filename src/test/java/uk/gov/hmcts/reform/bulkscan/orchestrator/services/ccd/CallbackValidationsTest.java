@@ -28,6 +28,8 @@ class CallbackValidationsTest {
 
     public static final String NO_CASE_TYPE_ID_SUPPLIED_ERROR = "No case type ID supplied";
     public static final String NO_CASE_REFERENCE_TYPE_SUPPLIED_ERROR = "No case reference type supplied";
+    public static final String NO_IDAM_TOKEN_RECEIVED_ERROR = "Callback has no Idam token received in the header";
+    public static final String NO_USER_ID_RECEIVED_ERROR = "Callback has no user id received in the header";
 
     private static Object[][] attachToCaseReferenceTestParams() {
         String noReferenceSupplied = "No case reference supplied";
@@ -187,11 +189,80 @@ class CallbackValidationsTest {
         );
     }
 
+    private static Object[][] idamTokenTestParams() {
+        return new Object[][]{
+            {"null idam token", null, false, NO_IDAM_TOKEN_RECEIVED_ERROR},
+            {"valid idam token", "valid token", true, "valid token"}
+        };
+    }
+
+    @ParameterizedTest(name = "{0}: valid:{2} error/value:{3}")
+    @MethodSource("idamTokenTestParams")
+    @DisplayName("Should have idam token in the request")
+    void idamTokenInTheRequestTest(
+        String caseDescription,
+        String input,
+        boolean valid,
+        String expectedValueOrError
+    ) {
+        checkRequestedUserValidation(
+            input,
+            valid,
+            expectedValueOrError,
+            CallbackValidations::hasIdamToken,
+            expectedValueOrError
+        );
+    }
+
+    private static Object[][] userIdTestParams() {
+        return new Object[][]{
+            {"null user id", null, false, NO_USER_ID_RECEIVED_ERROR},
+            {"valid user id", "valid user id", true, "valid user id"}
+        };
+    }
+
+    @ParameterizedTest(name = "{0}: valid:{2} error/value:{3}")
+    @MethodSource("userIdTestParams")
+    @DisplayName("Should have user id in the request")
+    void userIdInTheRequestTest(
+        String caseDescription,
+        String input,
+        boolean valid,
+        String expectedValueOrError
+    ) {
+        checkRequestedUserValidation(
+            input,
+            valid,
+            expectedValueOrError,
+            CallbackValidations::hasUserId,
+            expectedValueOrError
+        );
+    }
+
     private <T> void checkValidation(CaseDetails input,
                                      boolean valid,
                                      T realValue,
                                      Function<CaseDetails, Validation<String, T>> validationMethod,
                                      String errorString) {
+        Validation<String, T> validation = validationMethod.apply(input);
+        if (valid) {
+            assertSoftly(softly -> {
+                softly.assertThat(validation.isValid()).isTrue();
+                softly.assertThat(validation.get()).isEqualTo(realValue);
+            });
+        } else {
+            assertSoftly(softly -> {
+                softly.assertThat(validation.isValid()).isFalse();
+                softly.assertThat(validation.getError()).isEqualTo(errorString);
+            });
+        }
+    }
+
+    private <T> void checkRequestedUserValidation(String input,
+                                         boolean valid,
+                                         T realValue,
+                                         Function<String, Validation<String, T>> validationMethod,
+                                         String errorString) {
         Validation<String, T> validation = validationMethod.apply(input);
         if (valid) {
             assertSoftly(softly -> {
