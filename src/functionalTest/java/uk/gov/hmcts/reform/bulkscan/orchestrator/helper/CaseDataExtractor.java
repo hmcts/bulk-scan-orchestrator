@@ -70,7 +70,7 @@ public class CaseDataExtractor {
             document.subtype,
             ZonedDateTime.ofInstant(document.scannedAt, ZoneId.systemDefault()).toLocalDateTime(),
             new CcdDocument(String.join("/", dmUrl, contextPath, document.uuid)),
-            ZonedDateTime.ofInstant(document.deliveryDate, ZoneId.systemDefault()).toLocalDateTime(),
+            ZonedDateTime.ofInstant(deliveryDate, ZoneId.systemDefault()).toLocalDateTime(),
             null
         );
     }

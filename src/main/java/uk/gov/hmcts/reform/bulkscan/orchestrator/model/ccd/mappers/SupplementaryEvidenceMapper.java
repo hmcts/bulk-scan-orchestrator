@@ -36,7 +36,7 @@ public class SupplementaryEvidenceMapper {
                 ).collect(toList()),
                 documentManagementUrl,
                 contextPath,
-            deliveryDate
+                deliveryDate
             )
         );
     }
