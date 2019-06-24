@@ -243,27 +243,27 @@ class CallbackValidationsTest {
                                      boolean valid,
                                      T realValue,
                                      Function<CaseDetails, Validation<String, T>> validationMethod,
-                                     String errorString) {
+                                     String errorString
+    ) {
         Validation<String, T> validation = validationMethod.apply(input);
-        if (valid) {
-            assertSoftly(softly -> {
-                softly.assertThat(validation.isValid()).isTrue();
-                softly.assertThat(validation.get()).isEqualTo(realValue);
-            });
-        } else {
-            assertSoftly(softly -> {
-                softly.assertThat(validation.isValid()).isFalse();
-                softly.assertThat(validation.getError()).isEqualTo(errorString);
-            });
-        }
+        assertValidationResult(valid, realValue, errorString, validation);
     }
 
     private <T> void checkRequestedUserValidation(String input,
-                                         boolean valid,
-                                         T realValue,
-                                         Function<String, Validation<String, T>> validationMethod,
-                                         String errorString) {
+                                                  boolean valid,
+                                                  T realValue,
+                                                  Function<String, Validation<String, T>> validationMethod,
+                                                  String errorString
+    ) {
         Validation<String, T> validation = validationMethod.apply(input);
+        assertValidationResult(valid, realValue, errorString, validation);
+    }
+
+    private <T> void assertValidationResult(boolean valid,
+                                            T realValue,
+                                            String errorString,
+                                            Validation<String, T> validation
+    ) {
         if (valid) {
             assertSoftly(softly -> {
                 softly.assertThat(validation.isValid()).isTrue();
