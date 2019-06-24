@@ -12,7 +12,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 
 import java.util.List;
+import java.util.Map;
 
+import static java.util.Collections.emptyList;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
@@ -29,14 +31,21 @@ public class CcdCallbackController {
     @PostMapping(path = "/attach_case")
     public CallbackResponse attachToCase(@RequestBody CallbackRequest callback) {
         if (callback != null && callback.getCaseDetails() != null) {
-            List<String> errors = attachCaseCallbackService.process(callback.getCaseDetails());
-            return response(errors);
+
+            return attachCaseCallbackService
+                .process(callback.getCaseDetails())
+                .map(modifiedFields -> okResponse(modifiedFields))
+                .getOrElseGet(errors -> errorResponse(errors));
         } else {
-            return response(ImmutableList.of("Internal Error: callback or case details were empty"));
+            return errorResponse(ImmutableList.of("Internal Error: callback or case details were empty"));
         }
     }
 
-    private AboutToStartOrSubmitCallbackResponse response(List<String> errors) {
+    private AboutToStartOrSubmitCallbackResponse okResponse(Map<String, Object> modifiedFields) {
+        return AboutToStartOrSubmitCallbackResponse.builder().data(modifiedFields).errors(emptyList()).build();
+    }
+
+    private AboutToStartOrSubmitCallbackResponse errorResponse(List<String> errors) {
         return AboutToStartOrSubmitCallbackResponse.builder().errors(errors).build();
     }
 }

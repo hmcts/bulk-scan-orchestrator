@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 @Import(JurisdictionToUserMapping.class)
 @EnableConfigurationProperties
 @TestPropertySource(properties = {
-    "idam.users.sscs.username=user@gmail.com",
+    "idam.users.sscs.username=user@example.com",
     "idam.users.sscs.password=password"
 })
 class JurisdictionToUserMappingTest {
@@ -30,7 +30,7 @@ class JurisdictionToUserMappingTest {
     void should_parse_up_the_properties_into_map() {
         Credential creds = mapping.getUser("SSCS");
         assertThat(creds.getPassword()).isEqualTo("password");
-        assertThat(creds.getUsername()).isEqualTo("user@gmail.com");
+        assertThat(creds.getUsername()).isEqualTo("user@example.com");
     }
 
     @Test

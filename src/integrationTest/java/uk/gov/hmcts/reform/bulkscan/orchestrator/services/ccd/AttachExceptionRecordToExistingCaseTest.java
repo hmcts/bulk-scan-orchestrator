@@ -12,9 +12,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.path.json.JsonPath;
+import io.restassured.response.ValidatableResponse;
 import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -43,6 +44,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_SUBMIT_URL;
@@ -100,8 +102,10 @@ class AttachExceptionRecordToExistingCaseTest {
         .token(EVENT_TOKEN)
         .build();
 
-    public static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
-    public static final String ERRORS_FIELD = "errors";
+    private static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
+    private static final String RESPONSE_FIELD_ERRORS = "errors";
+    private static final String RESPONSE_FIELD_WARNINGS = "warnings";
+    private static final String RESPONSE_FIELD_DATA = "data";
 
     @LocalServerPort
     private int applicationPort;
@@ -129,43 +133,37 @@ class AttachExceptionRecordToExistingCaseTest {
     @DisplayName("Should successfully callback with correct information")
     @Test
     public void should_callback_with_correct_information_when_attaching_by_attachToCaseReference() {
-        given()
-            .body(exceptionRecordCallbackRequest())
-            .post("/callback/{type}", "attach_case")
-            .then()
-            .statusCode(200)
-            .extract()
-            .jsonPath()
-            .getList(ERRORS_FIELD)
-            .isEmpty();
+        ValidatableResponse response =
+            given()
+                .body(exceptionRecordCallbackRequest(CASE_REF))
+                .post("/callback/{type}", "attach_case")
+                .then()
+                .statusCode(200);
 
+        verifySuccessResponseWithAttachToCaseReference(response);
         verifyRequestedAttachingToCase();
     }
 
-    @Disabled("Attaching by search case reference not supported yet - BPS-584")
     @Test
     public void should_callback_with_correct_information_when_attaching_by_ccd_search_case_reference() {
-        given()
-            .body(
-                exceptionRecordCallbackRequest(
-                    null,
-                    CASE_REFERENCE_TYPE_CCD,
-                    CASE_REF,
-                    CASE_TYPE_EXCEPTION_RECORD
+        ValidatableResponse response =
+            given()
+                .body(
+                    exceptionRecordCallbackRequest(
+                        null,
+                        CASE_REFERENCE_TYPE_CCD,
+                        CASE_REF,
+                        CASE_TYPE_EXCEPTION_RECORD
+                    )
                 )
-            )
-            .post("/callback/{type}", "attach_case")
-            .then()
-            .statusCode(200)
-            .extract()
-            .jsonPath()
-            .getList(ERRORS_FIELD)
-            .isEmpty();
+                .post("/callback/{type}", "attach_case")
+                .then()
+                .statusCode(200);
 
+        verifySuccessResponseWithAttachToCaseReference(response);
         verifyRequestedAttachingToCase();
     }
 
-    @Disabled("Legacy ID not supported yet - BPS-584")
     @Test
     public void should_callback_with_correct_information_when_attaching_by_legacy_id() throws Exception {
         String legacyId = "legacy-id-123";
@@ -180,23 +178,21 @@ class AttachExceptionRecordToExistingCaseTest {
             )
         );
 
-        given()
-            .body(
-                exceptionRecordCallbackRequest(
-                    null,
-                    CASE_REFERENCE_TYPE_EXTERNAL,
-                    legacyId,
-                    CASE_TYPE_EXCEPTION_RECORD
+        ValidatableResponse response =
+            given()
+                .body(
+                    exceptionRecordCallbackRequest(
+                        null,
+                        CASE_REFERENCE_TYPE_EXTERNAL,
+                        legacyId,
+                        CASE_TYPE_EXCEPTION_RECORD
+                    )
                 )
-            )
-            .post("/callback/{type}", "attach_case")
-            .then()
-            .statusCode(200)
-            .extract()
-            .jsonPath()
-            .getList(ERRORS_FIELD)
-            .isEmpty();
+                .post("/callback/{type}", "attach_case")
+                .then()
+                .statusCode(200);
 
+        verifySuccessResponseWithAttachToCaseReference(response);
         verifyRequestedAttachingToCase();
     }
 
@@ -210,7 +206,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body(ERRORS_FIELD, hasItem(AttachCaseCallbackService.INTERNAL_ERROR_MSG));
+            .body(RESPONSE_FIELD_ERRORS, hasItem(AttachCaseCallbackService.INTERNAL_ERROR_MSG));
     }
 
     @DisplayName("Should fail with the correct error when start event api call fails")
@@ -223,7 +219,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body(ERRORS_FIELD, hasItem(AttachCaseCallbackService.INTERNAL_ERROR_MSG));
+            .body(RESPONSE_FIELD_ERRORS, hasItem(AttachCaseCallbackService.INTERNAL_ERROR_MSG));
     }
 
     @DisplayName("Should fail correctly if document is duplicate or document is already attached")
@@ -234,7 +230,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body(ERRORS_FIELD, hasItem(String.format(
+            .body(RESPONSE_FIELD_ERRORS, hasItem(String.format(
                 "Document(s) with control number [%s] are already attached to case reference: %s",
                 DOCUMENT_NUMBER,
                 CASE_REF
@@ -254,10 +250,9 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body(ERRORS_FIELD, hasItem("Could not find case: " + CASE_REF));
+            .body(RESPONSE_FIELD_ERRORS, hasItem("Could not find case: " + CASE_REF));
     }
 
-    @Disabled("Search case reference not supported yet - BPS-584")
     @Test
     public void should_fail_when_case_referenced_by_ccd_search_case_reference_does_not_exist() {
         String nonExistingCaseRef = CASE_REF;
@@ -275,10 +270,9 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body(ERRORS_FIELD, hasItem("Could not find case: " + nonExistingCaseRef));
+            .body(RESPONSE_FIELD_ERRORS, hasItem("Could not find case: " + nonExistingCaseRef));
     }
 
-    @Disabled("Legacy ID not supported yet - BPS-584")
     @Test
     public void should_fail_when_there_is_no_case_with_given_legacy_id() throws Exception {
         String nonExistingLegacyId = "non-existing-id-123";
@@ -302,10 +296,9 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body(ERRORS_FIELD, hasItem("No case found for legacy case reference " + nonExistingLegacyId));
+            .body(RESPONSE_FIELD_ERRORS, hasItem("No case found for legacy case reference " + nonExistingLegacyId));
     }
 
-    @Disabled("Legacy ID not supported yet - BPS-584")
     @Test
     public void should_fail_when_there_are_multiple_cases_with_given_legacy_id() throws Exception {
         String legacyId = "legacy-id-123";
@@ -333,7 +326,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body(ERRORS_FIELD, hasItem(expectedErrorMessage));
+            .body(RESPONSE_FIELD_ERRORS, hasItem(expectedErrorMessage));
     }
 
     @Test
@@ -345,10 +338,9 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body(ERRORS_FIELD, hasItem("Invalid case ID: " + CASE_REF));
+            .body(RESPONSE_FIELD_ERRORS, hasItem("Invalid case ID: " + CASE_REF));
     }
 
-    @Disabled("No validation of case type ID yet - BPS-584")
     @Test
     public void should_fail_when_exception_record_case_type_id_is_invalid() {
         given()
@@ -363,10 +355,9 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body(ERRORS_FIELD, hasItem("Case type ID (invalid-case-type) has invalid format"));
+            .body(RESPONSE_FIELD_ERRORS, hasItem("Case type ID (invalid-case-type) has invalid format"));
     }
 
-    @Disabled("Search case reference type not supported - BPS-584")
     @Test
     public void should_fail_when_search_case_reference_type_is_invalid() {
         given()
@@ -380,10 +371,9 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body(ERRORS_FIELD, hasItem("Invalid case reference type supplied: invalid-reference-type"));
+            .body(RESPONSE_FIELD_ERRORS, hasItem("Invalid case reference type supplied: invalid-reference-type"));
     }
 
-    @Disabled("Search case reference not supported yet - BPS-584")
     @Test
     public void should_fail_when_search_case_reference_is_invalid() {
         given()
@@ -398,7 +388,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body(ERRORS_FIELD, hasItem("Invalid case reference: 'invalid-ccd-reference'"));
+            .body(RESPONSE_FIELD_ERRORS, hasItem("Invalid case reference: 'invalid-ccd-reference'"));
     }
 
     @DisplayName("Should fail correctly if ccd is down")
@@ -407,11 +397,11 @@ class AttachExceptionRecordToExistingCaseTest {
         mockCaseSearchByCcdId(CASE_REF, status(500));
 
         given()
-            .body(exceptionRecordCallbackRequest())
+            .body(exceptionRecordCallbackRequest(CASE_REF))
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body(ERRORS_FIELD, hasItem(AttachCaseCallbackService.INTERNAL_ERROR_MSG));
+            .body(RESPONSE_FIELD_ERRORS, hasItem(AttachCaseCallbackService.INTERNAL_ERROR_MSG));
     }
 
     @DisplayName("Should fail with the correct error when no case details is supplied")
@@ -425,7 +415,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body(ERRORS_FIELD, hasItem("Internal Error: callback or case details were empty"));
+            .body(RESPONSE_FIELD_ERRORS, hasItem("Internal Error: callback or case details were empty"));
     }
 
     @Test
@@ -445,7 +435,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "attach_case")
             .then()
             .statusCode(200)
-            .body(ERRORS_FIELD, hasItem("Exception record is already attached to case " + caseRef));
+            .body(RESPONSE_FIELD_ERRORS, hasItem("Exception record is already attached to case " + caseRef));
     }
 
     @DisplayName("Should create error if type in incorrect")
@@ -544,6 +534,17 @@ class AttachExceptionRecordToExistingCaseTest {
         );
     }
 
+    private void verifySuccessResponseWithAttachToCaseReference(ValidatableResponse response) {
+        JsonPath responseJson = response.extract().jsonPath();
+
+        assertThat(responseJson.getList(RESPONSE_FIELD_ERRORS)).isNullOrEmpty();
+        assertThat(responseJson.getList(RESPONSE_FIELD_WARNINGS)).isNullOrEmpty();
+
+        Map<String, Object> responseData = responseJson.getMap(RESPONSE_FIELD_DATA);
+        assertThat(responseData).isNotNull();
+        assertThat(responseData.get("attachToCaseReference")).isEqualTo(CASE_REF);
+    }
+
     private CaseDetails exceptionRecord(String attachToCaseReference) {
         return exceptionRecord(
             attachToCaseReference,
@@ -593,7 +594,7 @@ class AttachExceptionRecordToExistingCaseTest {
                 .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
                 .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(MOCKED_S2S_TOKEN_SIG))
                 .withRequestBody(
-                    matchingJsonPath("$.query.term", containing(legacyId))
+                    matchingJsonPath("$.query.match_phrase", containing(legacyId))
                 )
                 .willReturn(responseBuilder)
         );
@@ -620,8 +621,12 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     private CallbackRequest exceptionRecordCallbackRequest() {
+        return exceptionRecordCallbackRequest(CASE_REF);
+    }
+
+    private CallbackRequest exceptionRecordCallbackRequest(String caseReference) {
         return exceptionRecordCallbackRequest(
-            CASE_REF,
+            caseReference,
             null,
             null,
             CASE_TYPE_EXCEPTION_RECORD,
@@ -704,6 +709,6 @@ class AttachExceptionRecordToExistingCaseTest {
             Charset.defaultCharset()
         );
 
-        return String.format(formatString, (Object[])formatArgs);
+        return String.format(formatString, (Object[]) formatArgs);
     }
 }

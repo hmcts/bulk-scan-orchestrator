@@ -3,13 +3,19 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.ExceptionRecordMapper;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import java.util.Locale;
+
 @Component
-public class CreateExceptionRecord extends AbstractEventPublisher {
+public class CreateExceptionRecord {
 
     private static final Logger log = LoggerFactory.getLogger(CreateExceptionRecord.class);
 
@@ -18,29 +24,60 @@ public class CreateExceptionRecord extends AbstractEventPublisher {
     public static final String EVENT_SUMMARY = "Create an exception record";
 
     private final ExceptionRecordMapper mapper;
+    private final CcdApi ccdApi;
 
-    CreateExceptionRecord(ExceptionRecordMapper mapper) {
+    public CreateExceptionRecord(
+        ExceptionRecordMapper mapper,
+        CcdApi ccdApi
+    ) {
         this.mapper = mapper;
-    }
-
-    public void publish(Envelope envelope) {
-        log.info("Creating exception record for envelope {}", envelope.id);
-        publish(envelope, envelope.container.toUpperCase() + "_" + CASE_TYPE, EVENT_TYPE_ID, EVENT_SUMMARY);
+        this.ccdApi = ccdApi;
     }
 
     /**
-     * Exception record does not present any existing case hence the creation of it.
-     *
-     * @param envelope Original envelope
-     * @return {@code null} as a case reference
+     * Creates an Exception Record from given envelope.
      */
-    @Override
-    String getCaseRef(Envelope envelope) {
-        return null;
+    public void createFrom(Envelope envelope) {
+        log.info("Creating exception record for envelope {}", envelope.id);
+
+        CcdAuthenticator authenticator = ccdApi.authenticateJurisdiction(envelope.jurisdiction);
+        String caseTypeId = envelope.container.toUpperCase(Locale.getDefault()) + "_" + CASE_TYPE;
+
+        StartEventResponse startEventResponse = ccdApi.startEvent(
+            authenticator,
+            envelope.jurisdiction,
+            caseTypeId,
+            null,
+            EVENT_TYPE_ID
+        );
+
+        log.info("Started event for envelope ID: {}. File name: {}", envelope.id, envelope.zipFileName);
+
+        CaseDetails caseDetails = ccdApi.submitEvent(
+            authenticator,
+            envelope.jurisdiction,
+            caseTypeId,
+            null,
+            buildCaseDataContent(envelope, startEventResponse.getToken())
+        );
+
+        log.info(
+            "Created Exception Record. Envelope ID: {}, file name: {}, case ID: {}, case type: {}",
+            envelope.id,
+            envelope.zipFileName,
+            caseDetails.getId(),
+            caseTypeId
+        );
     }
 
-    @Override
-    CaseData buildCaseData(StartEventResponse eventResponse, Envelope envelope) {
-        return mapper.mapEnvelope(envelope);
+    private CaseDataContent buildCaseDataContent(Envelope envelope, String startEventResponseToken) {
+        return CaseDataContent.builder()
+            .eventToken(startEventResponseToken)
+            .event(Event.builder()
+                .id(EVENT_TYPE_ID)
+                .summary(EVENT_SUMMARY)
+                .build())
+            .data(mapper.mapEnvelope(envelope))
+            .build();
     }
 }

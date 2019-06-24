@@ -78,7 +78,8 @@ service-config:
 
     - service: cmc
       jurisdiction: CMC
-      case-type-ids: []
+      case-type-ids:
+        - MoneyClaimCase
 
 scheduling:
   task:

@@ -35,6 +35,7 @@ public class SampleData {
     public static final String PASSWORD = "PASSWORD";
     public static final String USER_ID = "USER_ID";
     public static final String CASE_REF = "ABC123";
+    public static final String CASE_LEGACY_ID = "LEGACY-ID-123";
     public static final String ENVELOPE_ID = "eb9c3598-35fc-424e-b05a-902ee9f11d56";
     public static final String JURSIDICTION = "BULKSCAN";
     public static final String CONTAINER = "bulkscan";
@@ -46,10 +47,11 @@ public class SampleData {
     public static final UserDetails USER_DETAILS = new UserDetails(USER_ID,
         null, null, null, emptyList());
     public static final Credential USER_CREDS = new Credential(USER_NAME, PASSWORD);
-    public static final CcdAuthenticator AUTH_DETAILS = CcdAuthenticator.from(
+    public static final CcdAuthenticator AUTH_DETAILS = new CcdAuthenticator(
         () -> SERVICE_TOKEN,
         USER_DETAILS,
-        () -> USER_TOKEN);
+        () -> USER_TOKEN
+    );
 
     public static final CaseDetails THE_CASE = CaseDetails.builder()
         .id(CASE_ID)
@@ -82,6 +84,7 @@ public class SampleData {
             return new JSONObject()
                 .put("id", envelopeId)
                 .put("case_ref", caseRef)
+                .put("previous_service_case_ref", CASE_LEGACY_ID)
                 .put("po_box", PO_BOX)
                 .put("jurisdiction", JURSIDICTION)
                 .put("container", CONTAINER)
@@ -131,6 +134,7 @@ public class SampleData {
         return new Envelope(
             ENVELOPE_ID,
             CASE_REF,
+            CASE_LEGACY_ID,
             PO_BOX,
             JURSIDICTION,
             CONTAINER,
@@ -147,6 +151,7 @@ public class SampleData {
         return new Envelope(
             ENVELOPE_ID,
             CASE_REF,
+            CASE_LEGACY_ID,
             PO_BOX,
             JURSIDICTION,
             CONTAINER,

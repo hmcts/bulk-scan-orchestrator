@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.MessageBodyRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.ConnectionException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.InvalidMessageException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
@@ -82,10 +83,11 @@ public class CleanupEnvelopesDlqTask {
         }
     }
 
-    @SuppressWarnings("squid:CallToDeprecatedMethod") // for sonarqube complaining about deprecated things being used
     private void logMessage(IMessage msg) {
         try {
-            Envelope envelope = EnvelopeParser.parse(msg.getBody());
+            Envelope envelope = EnvelopeParser.parse(
+                MessageBodyRetriever.getBinaryData(msg.getMessageBody())
+            );
 
             log.info(
                 "Completing dlq message. messageId: {}, Envelope ID: {}, File name: {}, Jurisdiction: {},"

@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envel
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.OcrDataField;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -28,7 +29,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.DatetimeHelper.toIso8601
 class EnvelopeParserTest {
 
     private Envelope envelope;
-    private Instant scannedAt = Instant.now();
+    private Instant scannedAt = ZonedDateTime.parse("2018-10-01T00:00:00.100Z").toInstant();
 
     @BeforeAll
     static void init() {
@@ -40,6 +41,7 @@ class EnvelopeParserTest {
         this.envelope = new Envelope(
             "975b339d-4531-4e32-8ebe-a7bc4650f33a",
             "case_ref_number",
+            "case_legacy_id",
             "po_box",
             "jurisdiction",
             "container",
@@ -80,6 +82,7 @@ class EnvelopeParserTest {
             new JSONObject()
                 .put("id", envelope.id)
                 .put("case_ref", envelope.caseRef)
+                .put("previous_service_case_ref", envelope.legacyCaseRef)
                 .put("po_box", envelope.poBox)
                 .put("jurisdiction", envelope.jurisdiction)
                 .put("container", envelope.container)
@@ -137,6 +140,7 @@ class EnvelopeParserTest {
             new JSONObject()
                 .put("id", envelope.id)
                 .put("case_ref", envelope.caseRef)
+                .put("previous_service_case_ref", envelope.legacyCaseRef)
                 .put("po_box", envelope.poBox)
                 .put("jurisdiction", envelope.jurisdiction)
                 .put("container", envelope.container)

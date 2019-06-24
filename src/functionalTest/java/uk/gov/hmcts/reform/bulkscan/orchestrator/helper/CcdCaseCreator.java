@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.SupplementaryEvidence;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.SupplementaryEvidenceMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
@@ -14,7 +15,9 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Collections.emptyList;
 
@@ -43,13 +46,18 @@ public class CcdCaseCreator {
     }
 
     public CaseDetails createCase(List<Document> documents, Instant deliveryDate) {
+        String legacyId = "legacy-id-" + (long) (Math.random() * 100_000_000d);
+        return createCase(legacyId, documents, deliveryDate);
+    }
+
+    public CaseDetails createCase(String legacyId, List<Document> documents, Instant deliveryDate) {
         log.info("Creating new case");
         CcdAuthenticator authenticator = ccdAuthenticatorFactory.createForJurisdiction(JURISDICTION);
 
         StartEventResponse startEventResponse = startEventForCreateCase(authenticator);
         log.info("Started {} event for creating a new case", startEventResponse.getEventId());
 
-        CaseDataContent caseDataContent = prepareCaseData(startEventResponse, documents, deliveryDate);
+        CaseDataContent caseDataContent = prepareCaseData(startEventResponse, documents, legacyId, deliveryDate);
 
         CaseDetails caseDetails = submitNewCase(authenticator, caseDataContent);
         log.info("Submitted {} event for creating a new case", startEventResponse.getEventId());
@@ -60,8 +68,20 @@ public class CcdCaseCreator {
     private CaseDataContent prepareCaseData(
         StartEventResponse startEventResponse,
         List<Document> documents,
+        String legacyId,
         Instant deliveryDate
     ) {
+        SupplementaryEvidence supplementaryEvidence =
+            supplementaryEvidenceMapper.map(emptyList(), documents, deliveryDate);
+
+        Map<String, Object> eventData = new HashMap<>();
+        eventData.put("evidenceHandled", supplementaryEvidence.evidenceHandled);
+        eventData.put("scannedDocuments", supplementaryEvidence.scannedDocuments);
+
+        if (legacyId != null) {
+            eventData.put("legacyId", legacyId);
+        }
+
         return CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
             .event(Event.builder()
@@ -69,7 +89,7 @@ public class CcdCaseCreator {
                 .summary("create new case")
                 .description("create new case for tests")
                 .build())
-            .data(supplementaryEvidenceMapper.map(emptyList(), documents, deliveryDate))
+            .data(eventData)
             .build();
     }
 

@@ -75,4 +75,18 @@ public class EnvelopesQueueConsumeTaskTest {
         verify(envelopeEventProcessor, times(1)).processNextMessage();
         verify(processingReadinessChecker, times(1)).isNoLogInAttemptRejectedByIdam();
     }
+
+    @Test
+    public void consumeMessages_stops_processing_when_envelope_processor_throws_interrupted_exception()
+        throws Exception {
+        // given
+        willThrow(new InterruptedException()).given(envelopeEventProcessor).processNextMessage();
+
+        // when
+        queueConsumeTask.consumeMessages();
+
+        // then
+        verify(envelopeEventProcessor, times(1)).processNextMessage();
+        verify(processingReadinessChecker, times(1)).isNoLogInAttemptRejectedByIdam();
+    }
 }

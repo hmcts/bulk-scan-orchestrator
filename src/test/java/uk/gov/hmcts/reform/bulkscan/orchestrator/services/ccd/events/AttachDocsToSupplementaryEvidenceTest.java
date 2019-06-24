@@ -4,9 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.SupplementaryEvidenceMapper;
@@ -38,18 +36,18 @@ class AttachDocsToSupplementaryEvidenceTest {
     @Mock
     private CcdApi ccdApi;
 
-    private SupplementaryEvidenceMapper mapper = mock(SupplementaryEvidenceMapper.class);
+    @Mock
+    private SupplementaryEvidenceMapper mapper;
 
-    @InjectMocks
-    private AttachDocsToSupplementaryEvidence eventPublisher = new AttachDocsToSupplementaryEvidence(mapper);
+    private AttachDocsToSupplementaryEvidence attacher;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
+        this.attacher = new AttachDocsToSupplementaryEvidence(mapper, ccdApi);
     }
 
     @Test
-    void createSupplementaryEvidence_starts_and_submits_event() {
+    void should_start_and_submit_event_for_valid_envelope() {
         // given
         given(ccdApi.authenticateJurisdiction(any())).willReturn(AUTH_DETAILS);
 
@@ -70,21 +68,22 @@ class AttachDocsToSupplementaryEvidenceTest {
         given(ccdApi.startEvent(any(), any(), any(), any(), any())).willReturn(startEventResponse);
         given(ccdApi.submitEvent(any(), any(), any(), any(), any())).willReturn(caseDetails);
 
-        given(caseDetails.getId()).willReturn(1L);
+        String caseId = "1539007368674134";
+        given(caseDetails.getId()).willReturn(Long.parseLong(caseId));
 
         Envelope envelope = SampleData.envelope(2);
 
         given(mapper.getDocsToAdd(any(), any())).willReturn(envelope.documents);
 
         // when
-        eventPublisher.publish(envelope, caseDetails);
+        attacher.attach(envelope, caseDetails);
 
         // then
         verify(ccdApi).startEvent(
             AUTH_DETAILS,
             envelope.jurisdiction,
             CASE_TYPE_ID,
-            envelope.caseRef,
+            caseId,
             EVENT_TYPE_ID
         );
         ArgumentCaptor<CaseDataContent> caseDataContentCaptor = ArgumentCaptor.forClass(CaseDataContent.class);
@@ -93,7 +92,7 @@ class AttachDocsToSupplementaryEvidenceTest {
             eq(AUTH_DETAILS),
             eq(envelope.jurisdiction),
             eq(CASE_TYPE_ID),
-            eq(envelope.caseRef),
+            eq(caseId),
             caseDataContentCaptor.capture()
         );
 
@@ -115,7 +114,7 @@ class AttachDocsToSupplementaryEvidenceTest {
             .willReturn(emptyList()); // no new docs
 
         // when
-        eventPublisher.publish(envelope, existingCase);
+        attacher.attach(envelope, existingCase);
 
         // then
         verify(ccdApi, never()).startEvent(any(), any(), any(), any(), any());

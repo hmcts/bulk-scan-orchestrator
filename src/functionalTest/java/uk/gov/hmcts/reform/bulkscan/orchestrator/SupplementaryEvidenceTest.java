@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadServ
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -30,8 +30,10 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor
 @ActiveProfiles("nosb") // no servicebus queue handler registration
 class SupplementaryEvidenceTest {
 
+    private static final String TEST_SERVICE_NAME = "bulkscan";
+
     @Autowired
-    private CaseRetriever caseRetriever;
+    private CcdApi ccdApi;
 
     @Autowired
     private CcdCaseCreator ccdCaseCreator;
@@ -43,7 +45,7 @@ class SupplementaryEvidenceTest {
     private DocumentManagementUploadService dmUploadService;
 
     @Test
-    void should_attach_supplementary_evidence_to_the_case_with_no_evidence_docs() throws Exception {
+    public void should_attach_supplementary_evidence_to_the_case_with_no_evidence_docs() throws Exception {
         //given
         String dmUrl = dmUploadService.uploadToDmStore("Evidence2.pdf", "documents/supplementary-evidence.pdf");
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
@@ -52,6 +54,7 @@ class SupplementaryEvidenceTest {
         envelopeMessager.sendMessageFromFile(
             "envelopes/supplementary-evidence-envelope.json",
             String.valueOf(caseDetails.getId()),
+            null,
             randomUUID(),
             dmUrl
         );
@@ -65,7 +68,7 @@ class SupplementaryEvidenceTest {
     }
 
     @Test
-    void should_attach_supplementary_evidence_to_the_case_with_existing_evidence_docs() throws Exception {
+    public void should_attach_supplementary_evidence_to_the_case_with_existing_evidence_docs() throws Exception {
         //given
         String dmUrlOriginal = dmUploadService.uploadToDmStore("original.pdf", "documents/supplementary-evidence.pdf");
         String documentUuid = StringUtils.substringAfterLast(dmUrlOriginal, "/");
@@ -82,6 +85,7 @@ class SupplementaryEvidenceTest {
         envelopeMessager.sendMessageFromFile(
             "envelopes/supplementary-evidence-envelope.json",
             String.valueOf(caseDetails.getId()),
+            null,
             randomUUID(),
             dmUrlNew
         );
@@ -93,12 +97,42 @@ class SupplementaryEvidenceTest {
             .until(() -> hasCaseBeenUpdatedWithSupplementaryEvidence(caseDetails, 2));
     }
 
+    @Test
+    public void should_be_able_to_attach_supplementary_evidence_to_case_by_legacy_id() throws Exception {
+        //given
+        String dmUrl = dmUploadService.uploadToDmStore("Evidence2.pdf", "documents/supplementary-evidence.pdf");
+        assertThat(dmUrl).isNotNull();
+        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList());
+        String legacyId = (String) caseDetails.getData().get("legacyId");
+        assertThat(legacyId).isNotEmpty();
+
+        await("The new case can be found by legacy ID")
+            .atMost(30, TimeUnit.SECONDS)
+            .pollInterval(Duration.ONE_SECOND)
+            .until(() -> !ccdApi.getCaseRefsByLegacyId(legacyId, TEST_SERVICE_NAME).isEmpty());
+
+        // when
+        envelopeMessager.sendMessageFromFile(
+            "envelopes/supplementary-evidence-with-legacy-id.json",
+            null,
+            legacyId,
+            randomUUID(),
+            dmUrl
+        );
+
+        // then
+        await("Supplementary evidence is attached to the case in ccd")
+            .atMost(60, TimeUnit.SECONDS)
+            .pollInterval(Duration.TWO_SECONDS)
+            .until(() -> hasCaseBeenUpdatedWithSupplementaryEvidence(caseDetails, 1));
+    }
+
     private boolean hasCaseBeenUpdatedWithSupplementaryEvidence(
         CaseDetails caseDetails, int excpectedScannedDocuments
     ) {
-        CaseDetails updatedCaseDetails = caseRetriever.retrieve(
-            caseDetails.getJurisdiction(),
-            String.valueOf(caseDetails.getId())
+        CaseDetails updatedCaseDetails = ccdApi.getCase(
+            String.valueOf(caseDetails.getId()),
+            caseDetails.getJurisdiction()
         );
         String evidenceHandled = Strings.nullToEmpty(
             (String) updatedCaseDetails.getData().getOrDefault("evidenceHandled", "NO_VALUE")

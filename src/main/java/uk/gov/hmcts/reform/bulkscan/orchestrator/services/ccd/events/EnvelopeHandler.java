@@ -1,45 +1,44 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
-import com.google.common.base.Strings;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseRetriever;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseFinder;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+
+import java.util.Optional;
 
 @Service
 public class EnvelopeHandler {
 
-    private final AttachDocsToSupplementaryEvidence attachDocsPublisher;
+    private final AttachDocsToSupplementaryEvidence evidenceAttacher;
     private final CreateExceptionRecord exceptionRecordCreator;
-    private final CaseRetriever caseRetriever;
+    private final CaseFinder caseFinder;
 
     public EnvelopeHandler(
-        AttachDocsToSupplementaryEvidence attachDocsPublisher,
+        AttachDocsToSupplementaryEvidence evidenceAttacher,
         CreateExceptionRecord exceptionRecordCreator,
-        CaseRetriever caseRetriever
+        CaseFinder caseFinder
     ) {
-        this.attachDocsPublisher = attachDocsPublisher;
+        this.evidenceAttacher = evidenceAttacher;
         this.exceptionRecordCreator = exceptionRecordCreator;
-        this.caseRetriever = caseRetriever;
+        this.caseFinder = caseFinder;
     }
 
     public void handleEnvelope(Envelope envelope) {
         switch (envelope.classification) {
             case SUPPLEMENTARY_EVIDENCE:
-                CaseDetails caseDetails = Strings.isNullOrEmpty(envelope.caseRef)
-                    ? null
-                    : caseRetriever.retrieve(envelope.jurisdiction, envelope.caseRef);
+                Optional<CaseDetails> caseDetails = caseFinder.findCase(envelope);
 
-                if (caseDetails == null) {
-                    exceptionRecordCreator.publish(envelope);
+                if (caseDetails.isPresent()) {
+                    evidenceAttacher.attach(envelope, caseDetails.get());
                 } else {
-                    attachDocsPublisher.publish(envelope, caseDetails);
+                    exceptionRecordCreator.createFrom(envelope);
                 }
 
                 break;
             case EXCEPTION:
             case NEW_APPLICATION:
-                exceptionRecordCreator.publish(envelope);
+                exceptionRecordCreator.createFrom(envelope);
                 break;
             default:
                 throw new UnknownClassificationException(
