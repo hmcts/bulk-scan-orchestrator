@@ -79,7 +79,8 @@ class AttachDocsToSupplementaryEvidence {
     private CaseDataContent buildCaseDataContent(Envelope envelope, StartEventResponse startEventResponse) {
         CaseData caseData = mapper.map(
             getDocuments(startEventResponse.getCaseDetails()),
-            envelope.documents
+            envelope.documents,
+            envelope.deliveryDate
         );
         return CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())

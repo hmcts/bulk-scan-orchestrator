@@ -85,7 +85,7 @@ class AttachExceptionRecordToExistingCaseTest {
     @Test
     public void should_attach_exception_record_to_the_existing_case_with_no_evidence() throws Exception {
         //given
-        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList());
+        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
         // when
@@ -104,9 +104,13 @@ class AttachExceptionRecordToExistingCaseTest {
     public void should_attach_exception_record_to_the_existing_case_with_evidence_documents() throws Exception {
         //given
         CaseDetails caseDetails =
-            ccdCaseCreator.createCase(singletonList(
-                new Document("certificate1.pdf", "154565768", "other", null, Instant.now(), documentUuid)
-            ));
+            ccdCaseCreator.createCase(
+                singletonList(
+                    new Document(
+                        "certificate1.pdf", "154565768", "other", null, Instant.now(), documentUuid, Instant.now()
+                    )),
+                Instant.now()
+            );
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
         // when
@@ -148,7 +152,7 @@ class AttachExceptionRecordToExistingCaseTest {
      */
     private void verifyExceptionRecordAttachesToCase(String searchCaseReferenceType) throws Exception {
         //given
-        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList());
+        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
 
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
