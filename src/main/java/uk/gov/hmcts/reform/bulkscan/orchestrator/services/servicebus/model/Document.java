@@ -14,6 +14,7 @@ public class Document {
     public final String subtype;
     public final Instant scannedAt;
     public final String uuid;
+    public final Instant deliveryDate;
 
     // region constructor
     public Document(
@@ -22,7 +23,8 @@ public class Document {
         @JsonProperty(value = "type", required = true) String type,
         @JsonProperty(value = "subtype") String subtype,
         @JsonProperty(value = "scanned_at", required = true) Instant scannedAt,
-        @JsonProperty(value = "uuid", required = true) String uuid
+        @JsonProperty(value = "uuid", required = true) String uuid,
+        @JsonProperty(value = "delivery_date") Instant deliveryDate
     ) {
         this.fileName = fileName;
         this.controlNumber = controlNumber;
@@ -30,6 +32,7 @@ public class Document {
         this.subtype = subtype;
         this.scannedAt = scannedAt;
         this.uuid = uuid;
+        this.deliveryDate = deliveryDate;
     }
     // endregion
 }

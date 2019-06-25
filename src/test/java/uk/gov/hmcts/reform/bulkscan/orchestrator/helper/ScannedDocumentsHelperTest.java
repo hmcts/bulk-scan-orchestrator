@@ -50,7 +50,8 @@ class ScannedDocumentsHelperTest {
             "Other",
             null,
             Instant.parse("2018-12-01T12:34:56.123Z"),
-            "863c495e-d05b-4376-9951-ea489360db6f"
+            "863c495e-d05b-4376-9951-ea489360db6f",
+            Instant.parse("2018-12-02T12:30:56.123Z")
         );
 
         assertThat(document).isEqualToComparingFieldByField(expectedDocument);
@@ -68,7 +69,7 @@ class ScannedDocumentsHelperTest {
         assertThat(documents).hasSize(1);
         assertThat(documents.get(0))
             .isEqualToComparingFieldByField(
-                new Document(null, null, null, null, null, null)
+                new Document(null, null, null, null, null, null, null)
             );
     }
 

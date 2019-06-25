@@ -48,7 +48,7 @@ class SupplementaryEvidenceTest {
     public void should_attach_supplementary_evidence_to_the_case_with_no_evidence_docs() throws Exception {
         //given
         String dmUrl = dmUploadService.uploadToDmStore("Evidence2.pdf", "documents/supplementary-evidence.pdf");
-        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList());
+        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
 
         // when
         envelopeMessager.sendMessageFromFile(
@@ -77,7 +77,9 @@ class SupplementaryEvidenceTest {
         CaseDetails caseDetails =
             ccdCaseCreator.createCase(
                 singletonList(
-                    new Document("evidence.pdf", "123", "other", null, Instant.now(), documentUuid)));
+                    new Document("evidence.pdf", "123", "other", null, Instant.now(), documentUuid, Instant.now())
+                ),
+                Instant.now());
 
         // when
         envelopeMessager.sendMessageFromFile(
@@ -100,7 +102,7 @@ class SupplementaryEvidenceTest {
         //given
         String dmUrl = dmUploadService.uploadToDmStore("Evidence2.pdf", "documents/supplementary-evidence.pdf");
         assertThat(dmUrl).isNotNull();
-        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList());
+        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
         String legacyId = (String) caseDetails.getData().get("legacyId");
         assertThat(legacyId).isNotEmpty();
 

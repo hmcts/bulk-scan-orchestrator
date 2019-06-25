@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import feign.FeignException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
@@ -16,6 +18,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -25,6 +28,8 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class CcdApi {
+
+    public static final Logger log = LoggerFactory.getLogger(CcdApi.class);
 
     public static final String SEARCH_BY_LEGACY_ID_QUERY_FORMAT =
         "{\"query\": { \"match_phrase\" : { \"alias.previousServiceCaseReference\" : \"%s\" }}}";
@@ -100,29 +105,40 @@ public class CcdApi {
                     throw new CcdCallException(
                         format("Internal Error: Could not retrieve case: %s Error: %s", caseRef, e.status()),
                         e
-                );
+                    );
             }
         }
     }
 
     public List<Long> getCaseRefsByLegacyId(String legacyId, String service) {
         ServiceConfigItem serviceConfig = serviceConfigProvider.getConfig(service);
-        String jurisdiction = serviceConfig.getJurisdiction();
-        String caseTypeIdsStr = String.join(",", serviceConfig.getCaseTypeIds());
-        CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
 
-        SearchResult searchResult = feignCcdApi.searchCases(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            caseTypeIdsStr,
-            format(SEARCH_BY_LEGACY_ID_QUERY_FORMAT, legacyId)
-        );
+        if (serviceConfig.getCaseTypeIds().isEmpty()) {
+            log.info(
+                "Skipping case search by legacy ID ({}) for service {} because it has no case type ID configured",
+                legacyId,
+                service
+            );
 
-        return searchResult
-            .getCases()
-            .stream()
-            .map(CaseDetails::getId)
-            .collect(toList());
+            return emptyList();
+        } else {
+            String jurisdiction = serviceConfig.getJurisdiction();
+            String caseTypeIdsStr = String.join(",", serviceConfig.getCaseTypeIds());
+            CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
+
+            SearchResult searchResult = feignCcdApi.searchCases(
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                caseTypeIdsStr,
+                format(SEARCH_BY_LEGACY_ID_QUERY_FORMAT, legacyId)
+            );
+
+            return searchResult
+                .getCases()
+                .stream()
+                .map(CaseDetails::getId)
+                .collect(toList());
+        }
     }
 
     void attachExceptionRecord(CaseDetails theCase,

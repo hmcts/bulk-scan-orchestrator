@@ -30,6 +30,7 @@ class EnvelopeParserTest {
 
     private Envelope envelope;
     private Instant scannedAt = ZonedDateTime.parse("2018-10-01T00:00:00.100Z").toInstant();
+    private Instant deliveryDate = ZonedDateTime.parse("2018-10-01T00:00:00.100Z").toInstant();
 
     @BeforeAll
     static void init() {
@@ -56,7 +57,8 @@ class EnvelopeParserTest {
                     "doc1_type",
                     "doc1_subtype",
                     scannedAt,
-                    "doc1uuid"
+                    "doc1uuid",
+                    deliveryDate
                 ),
                 new Document(
                     "doc2_file_name",
@@ -64,7 +66,8 @@ class EnvelopeParserTest {
                     "doc2_type",
                     null,
                     scannedAt,
-                    "doc2uuid"
+                    "doc2uuid",
+                    deliveryDate
                 )
             ),
             ImmutableList.of(
@@ -111,7 +114,8 @@ class EnvelopeParserTest {
                     doc.type,
                     doc.subtype,
                     doc.scannedAt,
-                    doc.uuid)
+                    doc.uuid,
+                    doc.deliveryDate)
             )
             .containsOnly(
                 tuple(
@@ -120,7 +124,8 @@ class EnvelopeParserTest {
                     "doc1_type",
                     "doc1_subtype",
                     scannedAt,
-                    "doc1uuid"
+                    "doc1uuid",
+                    deliveryDate
                 ),
                 tuple(
                     "doc2_file_name",
@@ -128,7 +133,8 @@ class EnvelopeParserTest {
                     "doc2_type",
                     null,
                     scannedAt,
-                    "doc2uuid"
+                    "doc2uuid",
+                    deliveryDate
                 )
             );
     }
@@ -240,7 +246,8 @@ class EnvelopeParserTest {
             .put("type", doc.type)
             .put("subtype", doc.subtype)
             .put("scanned_at", toIso8601(doc.scannedAt))
-            .put("uuid", doc.uuid);
+            .put("uuid", doc.uuid)
+            .put("delivery_date", toIso8601(doc.deliveryDate));
     }
 
     private JSONArray toOcrJson(List<OcrDataField> ocrDataFields) throws JSONException {
