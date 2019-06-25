@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.ProcessedEnvelope;
 
+import java.time.Instant;
+
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 /**
@@ -39,7 +41,9 @@ public class ProcessedEnvelopeNotifier implements IProcessedEnvelopeNotifier {
                 objectMapper.writeValueAsString(new ProcessedEnvelope(envelopeId));
 
             IMessage message = new Message(envelopeId, messageBody, APPLICATION_JSON.toString());
-            queueClient.send(message);
+
+            // TODO: change back to `queueClient.send(message)` when BPS-694 is implemented
+            queueClient.scheduleMessage(message, Instant.now().plusSeconds(10));
 
             log.info("Sent message to processed envelopes queue. Envelope ID: {}", envelopeId);
         } catch (Exception ex) {
