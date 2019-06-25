@@ -96,7 +96,7 @@ class AttachDocsToSupplementaryEvidenceTest {
             caseDataContentCaptor.capture()
         );
 
-        verify(mapper).map(emptyList(), envelope.documents);
+        verify(mapper).map(emptyList(), envelope.documents, envelope.deliveryDate);
 
         CaseDataContent caseDataContent = caseDataContentCaptor.getValue();
         assertThat(caseDataContent.getEventToken()).isEqualTo(eventToken);

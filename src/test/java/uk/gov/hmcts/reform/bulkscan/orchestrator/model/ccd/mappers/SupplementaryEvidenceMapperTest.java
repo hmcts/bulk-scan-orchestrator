@@ -19,24 +19,25 @@ import static org.assertj.core.api.Assertions.tuple;
 class SupplementaryEvidenceMapperTest {
 
     private static final SupplementaryEvidenceMapper mapper = new SupplementaryEvidenceMapper("http://localhost", "files");
+    Instant deliveryDate = Instant.now();
 
     @Test
     void maps_all_fields_correctly() {
         // given
         List<Document> existingDocs =
             asList(
-                new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "uuida"),
-                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "uuidb")
+                new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "uuida", now().minusSeconds(10)),
+                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "uuidb", now().minusSeconds(10))
             );
 
         List<Document> envelopeDocs =
             asList(
-                new Document("x.pdf", "xxx", "type_x", "subtype_x", now().plusSeconds(3), "uuidx"),
-                new Document("y.pdf", "yyy", "type_y", "subtype_y", now().plusSeconds(4), "uuidy")
+                new Document("x.pdf", "xxx", "type_x", "subtype_x", now().plusSeconds(3), "uuidx", now().minusSeconds(10)),
+                new Document("y.pdf", "yyy", "type_y", "subtype_y", now().plusSeconds(4), "uuidy", now().minusSeconds(10))
             );
 
         // when
-        SupplementaryEvidence result = mapper.map(existingDocs, envelopeDocs);
+        SupplementaryEvidence result = mapper.map(existingDocs, envelopeDocs, deliveryDate);
 
         // then
         assertThat(result.evidenceHandled).isEqualTo("No");
@@ -49,13 +50,14 @@ class SupplementaryEvidenceMapperTest {
                     ccdDoc.value.type,
                     ccdDoc.value.subtype,
                     ccdDoc.value.scannedDate,
-                    ccdDoc.value.url.documentUrl
+                    ccdDoc.value.url.documentUrl,
+                    ccdDoc.value.deliveryDate
                 ))
             .containsExactly(
-                tuple("a.pdf", "aaa", "type_a", "subtype_a", toLocalDateTime(existingDocs.get(0).scannedAt), "http://localhost/files/uuida"),
-                tuple("b.pdf", "bbb", "type_b", "subtype_b", toLocalDateTime(existingDocs.get(1).scannedAt), "http://localhost/files/uuidb"),
-                tuple("x.pdf", "xxx", "type_x", "subtype_x", toLocalDateTime(envelopeDocs.get(0).scannedAt), "http://localhost/files/uuidx"),
-                tuple("y.pdf", "yyy", "type_y", "subtype_y", toLocalDateTime(envelopeDocs.get(1).scannedAt), "http://localhost/files/uuidy")
+                tuple("a.pdf", "aaa", "type_a", "subtype_a", toLocalDateTime(existingDocs.get(0).scannedAt), "http://localhost/files/uuida", toLocalDateTime(existingDocs.get(0).deliveryDate)),
+                tuple("b.pdf", "bbb", "type_b", "subtype_b", toLocalDateTime(existingDocs.get(1).scannedAt), "http://localhost/files/uuidb", toLocalDateTime(existingDocs.get(1).deliveryDate)),
+                tuple("x.pdf", "xxx", "type_x", "subtype_x", toLocalDateTime(envelopeDocs.get(0).scannedAt), "http://localhost/files/uuidx", toLocalDateTime(envelopeDocs.get(0).deliveryDate)),
+                tuple("y.pdf", "yyy", "type_y", "subtype_y", toLocalDateTime(envelopeDocs.get(1).scannedAt), "http://localhost/files/uuidy", toLocalDateTime(envelopeDocs.get(1).deliveryDate))
             );
     }
 
@@ -64,18 +66,18 @@ class SupplementaryEvidenceMapperTest {
         // given
         List<Document> existingDocs =
             asList(
-                new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "uuida"),
-                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "uuidb")
+                new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "uuida", now().minusSeconds(10)),
+                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "uuidb", now().minusSeconds(10))
             );
 
         List<Document> envelopeDocs =
             asList(
-                new Document("a1.pdf", "aaa1", "type_a1", "subtype_a1", now().plusSeconds(3), "uuida"), // same url!
-                new Document("b.pdf", "bbb1", "type_b", "subtype_b", now().plusSeconds(4), "uuidxxxxx")
-            );
+                new Document("a1.pdf", "aaa1", "type_a1", "subtype_a1", now().plusSeconds(3), "uuida", now().minusSeconds(10)), // same url!
+                new Document("b.pdf", "bbb1", "type_b", "subtype_b", now().plusSeconds(4), "uuidxxxxx", now().minusSeconds(10)
+            ));
 
         // when
-        SupplementaryEvidence result = mapper.map(existingDocs, envelopeDocs);
+        SupplementaryEvidence result = mapper.map(existingDocs, envelopeDocs, deliveryDate);
 
         // then
         assertThat(result.evidenceHandled).isEqualTo("No");
@@ -96,18 +98,18 @@ class SupplementaryEvidenceMapperTest {
         // given
         List<Document> existingDocs =
             asList(
-                new Document("a.pdf", "AAA", "type_a", "subtype_a", now().plusSeconds(1), "uuida"),
-                new Document("b.pdf", "BBB", "type_b", "subtype_b", now().plusSeconds(2), "uuidb")
+                new Document("a.pdf", "AAA", "type_a", "subtype_a", now().plusSeconds(1), "uuida", now().minusSeconds(10)),
+                new Document("b.pdf", "BBB", "type_b", "subtype_b", now().plusSeconds(2), "uuidb", now().minusSeconds(10))
             );
 
         List<Document> envelopeDocs =
             asList(
-                new Document("c.pdf", "AAA", "type_c", "subtype_c", now().plusSeconds(3), "uuidc"), // same control number!
-                new Document("d.pdf", "DDD", "type_d", "subtype_d", now().plusSeconds(4), "uuidd")
+                new Document("c.pdf", "AAA", "type_c", "subtype_c", now().plusSeconds(3), "uuidc", now().minusSeconds(10)), // same control number!
+                new Document("d.pdf", "DDD", "type_d", "subtype_d", now().plusSeconds(4), "uuidd", now().minusSeconds(10))
             );
 
         // when
-        SupplementaryEvidence result = mapper.map(existingDocs, envelopeDocs);
+        SupplementaryEvidence result = mapper.map(existingDocs, envelopeDocs, deliveryDate);
 
         // then
         assertThat(result.scannedDocuments).hasSize(3); // only one doc should be added
@@ -127,7 +129,7 @@ class SupplementaryEvidenceMapperTest {
         List<Document> envelopeDocuments = emptyList();
 
         // when
-        SupplementaryEvidence result = mapper.map(existingDocuments, envelopeDocuments);
+        SupplementaryEvidence result = mapper.map(existingDocuments, envelopeDocuments, deliveryDate);
 
         // then
         assertThat(result.scannedDocuments).isEmpty();

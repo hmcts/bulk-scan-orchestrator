@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
@@ -16,17 +17,19 @@ class DocumentMapperTest {
     @Test
     void should_map_document_properly() {
         // given
+        Instant deliveryDate = Instant.now();
         Document doc = new Document(
             "name.zip",
             "123",
             "type",
             "subtype",
             Instant.now(),
-            "uuid1"
+            "uuid1",
+            Instant.now()
         );
 
         // when
-        ScannedDocument result = DocumentMapper.mapDocument(doc, "https://localhost", "files");
+        ScannedDocument result = DocumentMapper.mapDocument(doc, "https://localhost", "files", deliveryDate);
 
         // then
         assertThat(result)
@@ -36,8 +39,9 @@ class DocumentMapperTest {
                     doc.controlNumber,
                     doc.type,
                     doc.subtype,
-                    ZonedDateTime.ofInstant(doc.scannedAt, ZoneId.systemDefault()).toLocalDateTime(),
+                    toLocalDateTime(doc.scannedAt),
                     new CcdDocument("https://localhost/files/" + doc.uuid),
+                    toLocalDateTime(doc.deliveryDate),
                     null // this should always be null;
                 )
             );
@@ -49,7 +53,7 @@ class DocumentMapperTest {
         Document doc = null;
 
         // when
-        ScannedDocument result = DocumentMapper.mapDocument(doc, "https://localhost", "files");
+        ScannedDocument result = DocumentMapper.mapDocument(doc, "https://localhost", "files", Instant.now());
 
         // then
         assertThat(result).isNull();
@@ -58,12 +62,16 @@ class DocumentMapperTest {
     @Test
     void should_map_null_scanned_date() {
         // given
-        Document doc = new Document("name.zip", "123", "type", "subtype", null, "uuid1");
+        Document doc = new Document("name.zip", "123", "type", "subtype", null, "uuid1", Instant.now());
 
         // when
-        ScannedDocument result = DocumentMapper.mapDocument(doc, "https://localhost", "files");
+        ScannedDocument result = DocumentMapper.mapDocument(doc, "https://localhost", "files", Instant.now());
 
         // then
         assertThat(result.scannedDate).isNull();
+    }
+
+    private LocalDateTime toLocalDateTime(Instant instant) {
+        return ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDateTime();
     }
 }

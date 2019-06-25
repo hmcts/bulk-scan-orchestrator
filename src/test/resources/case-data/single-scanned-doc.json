@@ -11,7 +11,8 @@
           "url": {
             "document_url": "https://doc-url-1.example.com/863c495e-d05b-4376-9951-ea489360db6f"
           },
-          "uuid": "863c495e-d05b-4376-9951-ea489360db6f"
+          "uuid": "863c495e-d05b-4376-9951-ea489360db6f",
+          "deliveryDate": "2018-12-02T12:30:56.123Z"
         }
       }
     ]
