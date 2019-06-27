@@ -60,7 +60,9 @@ public class AuthenticationChecker {
                 e
             );
 
-            return new JurisdictionConfigurationStatus(jurisdiction, false, e.contentUTF8(), e.status());
+            // temp fix until new version of idam-client is released
+            String desc = e.content() != null ? e.contentUTF8() : e.getMessage();
+            return new JurisdictionConfigurationStatus(jurisdiction, false, desc, e.status());
         } catch (Exception e) {
             log.error(
                 "An error occurred while authenticating {} jurisdiction with {} username",
