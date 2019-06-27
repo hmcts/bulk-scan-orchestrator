@@ -9,6 +9,7 @@ public final class ExceptionRecordFields {
     public static final String SEARCH_CASE_REFERENCE_TYPE = "searchCaseReferenceType";
     public static final String ATTACH_TO_CASE_REFERENCE = "attachToCaseReference";
     public static final String SCANNED_DOCUMENTS = "scannedDocuments";
+    public static final String EVIDENCE_HANDLED = "evidenceHandled";
 
 
     private ExceptionRecordFields() {

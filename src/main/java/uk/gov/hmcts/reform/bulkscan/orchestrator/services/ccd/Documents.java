@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
@@ -76,13 +75,12 @@ final class Documents {
     }
 
 
-    static Map<String, Object> insertNewRecords(List<Map<String, Object>> exceptionDocuments,
-                                                List<Map<String, Object>> existingDocuments) {
-        ImmutableList<Object> documentList = ImmutableList.builder()
+    static List<Object> addNewRecords(List<Map<String, Object>> exceptionDocuments,
+                                               List<Map<String, Object>> existingDocuments) {
+        return ImmutableList.builder()
             .addAll(existingDocuments)
             .addAll(exceptionDocuments)
             .build();
-        return ImmutableMap.of(SCANNED_DOCUMENTS, documentList);
     }
 
 

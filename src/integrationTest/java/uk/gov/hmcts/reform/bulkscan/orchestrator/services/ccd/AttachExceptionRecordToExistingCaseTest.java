@@ -492,6 +492,7 @@ class AttachExceptionRecordToExistingCaseTest {
             exceptionData.put("searchCaseReference", searchCaseReference);
         }
 
+        exceptionData.put("evidenceHandled", "No");
         return exceptionData;
     }
 
@@ -543,6 +544,7 @@ class AttachExceptionRecordToExistingCaseTest {
         Map<String, Object> responseData = responseJson.getMap(RESPONSE_FIELD_DATA);
         assertThat(responseData).isNotNull();
         assertThat(responseData.get("attachToCaseReference")).isEqualTo(CASE_REF);
+        assertThat(responseData.get("evidenceHandled")).isEqualTo("No");
     }
 
     private CaseDetails exceptionRecord(String attachToCaseReference) {
