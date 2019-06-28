@@ -492,7 +492,6 @@ class AttachExceptionRecordToExistingCaseTest {
             exceptionData.put("searchCaseReference", searchCaseReference);
         }
 
-        exceptionData.put("evidenceHandled", "No");
         return exceptionData;
     }
 
@@ -532,6 +531,11 @@ class AttachExceptionRecordToExistingCaseTest {
             submittedScannedRecords(),
             "$.event_token",
             WireMock.equalTo(EVENT_TOKEN)
+        );
+        verifyRequestPattern(
+            submittedScannedRecords(),
+            "$.data.evidenceHandled",
+            WireMock.equalTo("No")
         );
     }
 

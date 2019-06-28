@@ -75,8 +75,10 @@ final class Documents {
     }
 
 
-    static List<Object> addNewRecords(List<Map<String, Object>> exceptionDocuments,
-                                               List<Map<String, Object>> existingDocuments) {
+    static List<Object> concatDocuments(
+        List<Map<String, Object>> exceptionDocuments,
+        List<Map<String, Object>> existingDocuments
+    ) {
         return ImmutableList.builder()
             .addAll(existingDocuments)
             .addAll(exceptionDocuments)

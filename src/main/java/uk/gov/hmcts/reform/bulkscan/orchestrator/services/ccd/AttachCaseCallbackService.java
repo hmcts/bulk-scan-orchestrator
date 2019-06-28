@@ -26,8 +26,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasSearchCaseReference;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasSearchCaseReferenceType;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.addNewRecords;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.checkForDuplicatesOrElse;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.concatDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.getDocumentNumbers;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.getScannedDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.CCD_CASE_REFERENCE;
@@ -231,9 +231,11 @@ public class AttachCaseCallbackService {
         log.info("Attached exception record '{}' to case with CCD ID '{}'", exceptionRecordId, targetCaseCcdRef);
     }
 
-    private Map<String, Object> buildCaseData(List<Map<String, Object>> exceptionDocuments,
-                                              List<Map<String, Object>> existingDocuments) {
-        List<Object> documents = addNewRecords(exceptionDocuments, existingDocuments);
+    private Map<String, Object> buildCaseData(
+        List<Map<String, Object>> exceptionDocuments,
+        List<Map<String, Object>> existingDocuments
+    ) {
+        List<Object> documents = concatDocuments(exceptionDocuments, existingDocuments);
         return ImmutableMap.of(SCANNED_DOCUMENTS, documents, EVIDENCE_HANDLED, "No");
     }
 
