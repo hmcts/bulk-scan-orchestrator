@@ -500,6 +500,11 @@ class AttachExceptionRecordToExistingCaseTest {
         verify(startEventRequest());
         verifyRequestPattern(
             submittedScannedRecords(),
+            "$.data.evidenceHandled",
+            WireMock.equalTo("No")
+        );
+        verifyRequestPattern(
+            submittedScannedRecords(),
             "$.data.scannedDocuments.length()",
             WireMock.equalTo("2")
         );
@@ -544,7 +549,6 @@ class AttachExceptionRecordToExistingCaseTest {
         Map<String, Object> responseData = responseJson.getMap(RESPONSE_FIELD_DATA);
         assertThat(responseData).isNotNull();
         assertThat(responseData.get("attachToCaseReference")).isEqualTo(CASE_REF);
-        assertThat(responseData.get("evidenceHandled")).isEqualTo("No");
     }
 
     private CaseDetails exceptionRecord(String attachToCaseReference) {
