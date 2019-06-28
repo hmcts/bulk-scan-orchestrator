@@ -77,7 +77,8 @@ class AttachExceptionRecordToExistingCaseTest {
     private static final Map<String, Object> EXISTING_DOC = document(DOCUMENT_FILENAME, DOCUMENT_NUMBER);
 
     private static final Map<String, Object> CASE_DATA = ImmutableMap.of(
-        "scannedDocuments", ImmutableList.of(EXISTING_DOC)
+        "scannedDocuments", ImmutableList.of(EXISTING_DOC),
+        "evidenceHandled", "No"
     );
 
     private static final CaseDetails CASE_DETAILS = CaseDetails.builder()
