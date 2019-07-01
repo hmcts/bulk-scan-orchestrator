@@ -499,6 +499,11 @@ class AttachExceptionRecordToExistingCaseTest {
         verify(startEventRequest());
         verifyRequestPattern(
             submittedScannedRecords(),
+            "$.data.evidenceHandled",
+            WireMock.equalTo("No")
+        );
+        verifyRequestPattern(
+            submittedScannedRecords(),
             "$.data.scannedDocuments.length()",
             WireMock.equalTo("2")
         );

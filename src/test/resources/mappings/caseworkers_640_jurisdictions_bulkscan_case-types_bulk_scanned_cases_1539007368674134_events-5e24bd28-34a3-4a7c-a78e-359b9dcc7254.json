@@ -10,6 +10,12 @@
           "expression": "$.data.scannedDocuments[0].value.fileName",
           "contains": "testfilename"
         }
+      },
+      {
+        "matchesJsonPath": {
+          "expression": "$.data.evidenceHandled",
+          "contains": "No"
+        }
       }
     ]
   },
