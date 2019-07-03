@@ -40,6 +40,7 @@ import static java.util.Collections.singletonList;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getCaseDataForField;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getScannedDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.CCD_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.EXTERNAL_CASE_REFERENCE;
@@ -304,6 +305,9 @@ class AttachExceptionRecordToExistingCaseTest {
             exceptionRecord.getId(),
             expectedExceptionRecordsSize
         );
+
+        String evidenceHandled = getCaseDataForField(updatedCase, "evidenceHandled");
+        assertThat(evidenceHandled).isEqualTo("No");
     }
 
     private void isExceptionReferenceAttachedToTheScannedDocuments(

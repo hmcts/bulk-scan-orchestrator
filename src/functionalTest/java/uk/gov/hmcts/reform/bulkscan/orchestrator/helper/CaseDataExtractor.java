@@ -57,6 +57,11 @@ public class CaseDataExtractor {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public static String getCaseDataForField(CaseDetails caseDetails, String property) {
+        return (String) caseDetails.getData().get(property);
+    }
+
     private static ScannedDocument mapDocument(
         Document document,
         String dmUrl,
