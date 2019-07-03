@@ -236,7 +236,6 @@ public class AttachCaseCallbackService {
         attachExceptionRecordReference(exceptionRecordDocuments, exceptionRecordId);
 
         StartEventResponse event = ccdApi.startAttachScannedDocs(theCase, idamToken, userId);
-
         ccdApi.attachExceptionRecord(
             theCase,
             idamToken,
