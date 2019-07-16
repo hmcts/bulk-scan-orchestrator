@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.endpoints.IdamConfigStatusEndpoint;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.out.JurisdictionConfigurationStatus;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 
@@ -16,7 +15,7 @@ import java.util.stream.Collectors;
 @EnableConfigurationProperties(JurisdictionToUserMapping.class)
 public class AuthenticationChecker {
 
-    private static final Logger log = LoggerFactory.getLogger(IdamConfigStatusEndpoint.class);
+    private static final Logger log = LoggerFactory.getLogger(AuthenticationChecker.class);
 
     private final JurisdictionToUserMapping jurisdictionMapping;
     private final IdamClient idamClient;
