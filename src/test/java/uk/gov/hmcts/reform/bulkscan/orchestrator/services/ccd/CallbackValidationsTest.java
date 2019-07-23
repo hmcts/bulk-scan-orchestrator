@@ -261,7 +261,7 @@ class CallbackValidationsTest {
             expectedValueOrError
         );
     }
-
+  
     private <T> void checkValidation(CaseDetails input,
                                      boolean valid,
                                      T realValue,
