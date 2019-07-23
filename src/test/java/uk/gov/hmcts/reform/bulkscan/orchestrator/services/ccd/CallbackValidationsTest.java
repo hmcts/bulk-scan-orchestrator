@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.vavr.control.Validation;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -186,6 +187,28 @@ class CallbackValidationsTest {
             expectedValueOrError,
             CallbackValidations::hasServiceNameInCaseTypeId,
             expectedValueOrError
+        );
+    }
+
+    @Test
+    void invalidJurisdictionTest() {
+        checkValidation(
+            createCaseWith(b -> b.jurisdiction(null)),
+            false,
+            null,
+            CallbackValidations::hasJurisdiction,
+            "Internal Error: invalid jurisdiction supplied: null"
+        );
+    }
+
+    @Test
+    void noCaseIdTest() {
+        checkValidation(
+            createCaseWith(b -> b.id(null)),
+            false,
+            null,
+            CallbackValidations::hasAnId,
+            "Exception case has no Id"
         );
     }
 
