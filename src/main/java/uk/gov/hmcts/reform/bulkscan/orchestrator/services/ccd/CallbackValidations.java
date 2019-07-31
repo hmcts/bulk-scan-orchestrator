@@ -21,12 +21,13 @@ final class CallbackValidations {
 
     private static final String SUPPLEMENTARY_EVIDENCE = "supplementary_evidence";
     private static final String EXCEPTION = "exception";
+    private static final String ATTACH_TO_EXISTING_CASE = "attachToExistingCase";
 
     private static final Logger log = LoggerFactory.getLogger(CallbackValidations.class);
 
     private static final CaseReferenceValidator caseRefValidator = new CaseReferenceValidator();
     private static final ScannedDocumentValidator scannedDocumentValidator = new ScannedDocumentValidator();
-    public static final String ATTACH_TO_EXISTING_CASE = "attachToExistingCase";
+
 
     private CallbackValidations() {
     }
