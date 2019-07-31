@@ -80,6 +80,7 @@
     <!-- jackson-databind -->
     <cve>CVE-2018-5968</cve>
     <cve>CVE-2018-7489</cve>
+    <cve>CVE-2018-11307</cve>
     <cve>CVE-2018-12022</cve>
     <cve>CVE-2018-12023</cve>
     <cve>CVE-2018-14718</cve>
