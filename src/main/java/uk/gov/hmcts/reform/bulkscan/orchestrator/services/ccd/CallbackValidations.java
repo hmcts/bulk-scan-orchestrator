@@ -112,14 +112,14 @@ final class CallbackValidations {
                     if ("supplementary_evidence".equalsIgnoreCase((String) classification)) {
                         return "attachToExistingCase".equalsIgnoreCase(eventId)
                             ? Validation.<String, String>valid("Valid Journey classification and event type id")
-                            : Validation.<String, String>valid(
+                            : Validation.<String, String>invalid(
                             format("The %s event is not supported for %s", eventId, classification)
                         );
                     } else if ("exception".equalsIgnoreCase((String) classification)) {
                         // When classification is exception and case data has ocr in it and if orchestrator
                         // url is configured for create case it will be invalid CCD configuration.
                         return exceptionRecordHasOcr(theCase)
-                            ? Validation.<String, String>valid(
+                            ? Validation.<String, String>invalid(
                             format(
                                 "The %s event is not supported for exception records with OCR "
                                     + "or invalid CCD configuration",

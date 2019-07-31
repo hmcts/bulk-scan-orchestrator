@@ -196,7 +196,7 @@ class CallbackValidationsTest {
             {"Invalid journey classification", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "invalid_classification"))), false, "Invalid journey classification invalid_classification"},
             {"Valid journey classification(supplementary evidence)", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "supplementary_evidence"))), true, "Valid Journey classification and event type id"},
             {"Valid journey classification(exception without ocr)", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "exception"))), true, "Valid Journey classification and event type id"},
-            {"Valid journey classification(exception with ocr)", createCaseWith(b -> b.data(sampleOcrData())), true, "The attachToExistingCase event is not supported for exception records with OCR or invalid CCD configuration"}
+            {"Valid journey classification(exception with ocr)", createCaseWith(b -> b.data(sampleOcrData())), false, "The attachToExistingCase event is not supported for exception records with OCR or invalid CCD configuration"}
         };
     }
 
@@ -222,9 +222,9 @@ class CallbackValidationsTest {
     private static Object[][] classificationInvalidEventIdTestParams() {
         return new Object[][]{
             {"Invalid journey classification", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "invalid_classification"))), false, "Invalid journey classification invalid_classification"},
-            {"Valid journey classification(supplementary evidence)", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "supplementary_evidence"))), true, "The createCase event is not supported for supplementary_evidence"},
+            {"Valid journey classification(supplementary evidence)", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "supplementary_evidence"))), false, "The createCase event is not supported for supplementary_evidence"},
             {"Valid journey classification(exception without ocr)", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "exception"))), true, "Valid Journey classification and event type id"},
-            {"Valid journey classification(exception with ocr)", createCaseWith(b -> b.data(sampleOcrData())), true, "The createCase event is not supported for exception records with OCR or invalid CCD configuration"}
+            {"Valid journey classification(exception with ocr)", createCaseWith(b -> b.data(sampleOcrData())), false, "The createCase event is not supported for exception records with OCR or invalid CCD configuration"}
         };
     }
 
