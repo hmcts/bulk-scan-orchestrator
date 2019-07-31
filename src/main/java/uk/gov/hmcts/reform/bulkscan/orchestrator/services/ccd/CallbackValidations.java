@@ -109,37 +109,39 @@ final class CallbackValidations {
     ) {
         return getJourneyClassification(theCase)
             .map(classification -> {
-                    if ("supplementary_evidence".equalsIgnoreCase((String) classification)) {
-                        return "attachToExistingCase".equalsIgnoreCase(eventId)
-                            ? Validation.<String, String>valid("Valid Journey classification and event type id")
-                            : Validation.<String, String>invalid(
-                            format("The %s event is not supported for %s", eventId, classification)
-                        );
-                    } else if ("exception".equalsIgnoreCase((String) classification)) {
-                        // When classification is exception and case data has ocr in it and if orchestrator
-                        // url is configured for create case it will be invalid CCD configuration.
-                        return exceptionRecordHasOcr(theCase)
-                            ? Validation.<String, String>invalid(
-                            format(
-                                "The %s event is not supported for exception records with OCR "
-                                    + "or invalid CCD configuration",
-                                eventId
+                    switch (classification) {
+                        case "supplementary_evidence":
+                            return "attachToExistingCase".equalsIgnoreCase(eventId)
+                                ? Validation.<String, String>valid("Valid journey classification and event type id")
+                                : Validation.<String, String>invalid(
+                                format("The %s event is not supported for %s", eventId, classification)
+                            );
+                        case "exception":
+                            // When classification is exception and case data has ocr in it and
+                            // if orchestrator url is configured for create case it will be invalid CCD configuration.
+                            return exceptionRecordHasOcr(theCase)
+                                ? Validation.<String, String>invalid(
+                                format(
+                                    "The %s event is not supported for exception records with OCR "
+                                        + "or invalid CCD configuration",
+                                    eventId
+                                )
                             )
-                        )
-                            : Validation.<String, String>valid("Valid Journey classification and event type id");
-                    } else {
-                        return Validation.<String, String>invalid(
-                            format("Invalid journey classification %s", classification)
-                        );
+                                : Validation.<String, String>valid("Valid journey classification and event type id");
+                        default:
+                            return Validation.<String, String>invalid(
+                                format("Invalid journey classification %s", classification)
+                            );
                     }
                 }
             ).orElseGet(() -> invalid("No journey classification supplied"));
     }
 
-    private static Optional<Object> getJourneyClassification(CaseDetails theCase) {
+    private static Optional<String> getJourneyClassification(CaseDetails theCase) {
         return Optional.ofNullable(theCase)
             .map(CaseDetails::getData)
-            .map(data -> data.get("journeyClassification"));
+            .map(data -> data.get("journeyClassification"))
+            .map(c -> (String) c);
     }
 
     private static boolean exceptionRecordHasOcr(CaseDetails theCase) {
