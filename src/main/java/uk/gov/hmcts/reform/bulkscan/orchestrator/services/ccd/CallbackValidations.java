@@ -116,7 +116,7 @@ final class CallbackValidations {
                             format("The %s event is not supported for %s", eventId, classification)
                         );
                     } else if ("exception".equalsIgnoreCase((String) classification)) {
-                        // When classification is exception and it has case data has ocr in it and if orchestrator
+                        // When classification is exception and case data has ocr in it and if orchestrator
                         // url is configured for create case it will be invalid CCD configuration.
                         return exceptionRecordHasOcr(theCase)
                             ? Validation.<String, String>valid(
