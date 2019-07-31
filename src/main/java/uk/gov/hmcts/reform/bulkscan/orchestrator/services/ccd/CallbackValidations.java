@@ -19,10 +19,14 @@ final class CallbackValidations {
 
     private static final String CASE_TYPE_ID_SUFFIX = "_ExceptionRecord";
 
+    private static final String SUPPLEMENTARY_EVIDENCE = "supplementary_evidence";
+    private static final String EXCEPTION = "exception";
+
     private static final Logger log = LoggerFactory.getLogger(CallbackValidations.class);
 
     private static final CaseReferenceValidator caseRefValidator = new CaseReferenceValidator();
     private static final ScannedDocumentValidator scannedDocumentValidator = new ScannedDocumentValidator();
+    public static final String ATTACH_TO_EXISTING_CASE = "attachToExistingCase";
 
     private CallbackValidations() {
     }
@@ -103,38 +107,43 @@ final class CallbackValidations {
     }
 
     @Nonnull
-    static Validation<String, String> hasValidCombinationOfEventIdAndClassification(
+    static Validation<String, Void> hasValidCombinationOfEventIdAndClassification(
         CaseDetails theCase,
         String eventId
     ) {
         return getJourneyClassification(theCase)
             .map(classification -> {
                     switch (classification) {
-                        case "supplementary_evidence":
-                            return "attachToExistingCase".equalsIgnoreCase(eventId)
-                                ? Validation.<String, String>valid("Valid journey classification and event type id")
-                                : Validation.<String, String>invalid(
-                                format("The %s event is not supported for %s", eventId, classification)
+                        case SUPPLEMENTARY_EVIDENCE:
+                            return ATTACH_TO_EXISTING_CASE.equalsIgnoreCase(eventId)
+                                ? Validation.<String, Void>valid(null)
+                                : Validation.<String, Void>invalid(
+                                format("The %s event is not supported for %s", eventId, classification
+                                )
                             );
-                        case "exception":
+                        case EXCEPTION:
                             // When classification is exception and case data has ocr in it and
                             // if orchestrator url is configured for create case it will be invalid CCD configuration.
-                            return exceptionRecordHasOcr(theCase)
-                                ? Validation.<String, String>invalid(
-                                format(
-                                    "The %s event is not supported for exception records with OCR "
-                                        + "or invalid CCD configuration",
-                                    eventId
-                                )
-                            )
-                                : Validation.<String, String>valid("Valid journey classification and event type id");
+                            boolean isExceptionRecordWithOcr = exceptionRecordHasOcr(theCase);
+                            return !isExceptionRecordWithOcr && ATTACH_TO_EXISTING_CASE.equalsIgnoreCase(eventId)
+                                ? Validation.<String, Void>valid(null)
+                                : Validation.<String, Void>invalid(
+                                errorMessage(eventId, classification, isExceptionRecordWithOcr)
+                            );
                         default:
-                            return Validation.<String, String>invalid(
+                            return Validation.<String, Void>invalid(
                                 format("Invalid journey classification %s", classification)
                             );
                     }
                 }
             ).orElseGet(() -> invalid("No journey classification supplied"));
+    }
+
+    private static String errorMessage(String eventId, String classification, boolean isExceptionRecordWithOcr) {
+        return isExceptionRecordWithOcr ? format(
+            "The %s event is not supported for exception records with OCR",
+            eventId
+        ) : format("The %s event is not supported for %s or invalid CCD configuration", eventId, classification);
     }
 
     private static Optional<String> getJourneyClassification(CaseDetails theCase) {

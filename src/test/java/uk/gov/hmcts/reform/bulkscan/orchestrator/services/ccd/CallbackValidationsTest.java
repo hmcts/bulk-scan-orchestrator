@@ -192,17 +192,17 @@ class CallbackValidationsTest {
 
     private static Object[][] classificationValidEventIdTestParams() {
         return new Object[][]{
-            {"No journey classification", createCaseWith(b -> b.data(ImmutableMap.of())), false, "No journey classification supplied"},
-            {"Invalid journey classification", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "invalid_classification"))), false, "Invalid journey classification invalid_classification"},
-            {"Valid journey classification(supplementary evidence)", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "supplementary_evidence"))), true, "Valid journey classification and event type id"},
-            {"Valid journey classification(exception without ocr)", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "exception"))), true, "Valid journey classification and event type id"},
-            {"Valid journey classification(exception with ocr)", createCaseWith(b -> b.data(caseDataWithOcr())), false, "The attachToExistingCase event is not supported for exception records with OCR or invalid CCD configuration"}
+            {"Valid event-No journey classification", createCaseWith(b -> b.data(ImmutableMap.of())), false, "No journey classification supplied"},
+            {"Valid event-Invalid journey classification", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "invalid_classification"))), false, "Invalid journey classification invalid_classification"},
+            {"Valid event-Valid journey classification(supplementary evidence)", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "supplementary_evidence"))), true, null},
+            {"Valid event-Valid journey classification(exception without ocr)", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "exception"))), true, null},
+            {"Valid event-Valid journey classification(exception with ocr)", createCaseWith(b -> b.data(caseDataWithOcr())), false, "The attachToExistingCase event is not supported for exception records with OCR"}
         };
     }
 
     @ParameterizedTest(name = "{0}: valid:{2} error/value:{3}")
     @MethodSource("classificationValidEventIdTestParams")
-    @DisplayName("Should accept event ID")
+    @DisplayName("Journey classifications with valid event id")
     void journeyClassificationAndValidEventIdCombinationTest(
         String caseDescription,
         CaseDetails inputCase,
@@ -221,16 +221,16 @@ class CallbackValidationsTest {
 
     private static Object[][] classificationInvalidEventIdTestParams() {
         return new Object[][]{
-            {"Invalid journey classification", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "invalid_classification"))), false, "Invalid journey classification invalid_classification"},
-            {"Valid journey classification(supplementary evidence)", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "supplementary_evidence"))), false, "The createCase event is not supported for supplementary_evidence"},
-            {"Valid journey classification(exception without ocr)", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "exception"))), true, "Valid journey classification and event type id"},
-            {"Valid journey classification(exception with ocr)", createCaseWith(b -> b.data(caseDataWithOcr())), false, "The createCase event is not supported for exception records with OCR or invalid CCD configuration"}
+            {"Invalid event-Invalid journey classification", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "invalid_classification"))), false, "Invalid journey classification invalid_classification"},
+            {"Invalid event-Valid journey classification(supplementary evidence)", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "supplementary_evidence"))), false, "The createCase event is not supported for supplementary_evidence"},
+            {"Invalid event-Valid journey classification(exception without ocr)", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "exception"))), false, "The createCase event is not supported for exception or invalid CCD configuration"},
+            {"Invalid event-Valid journey classification(exception with ocr)", createCaseWith(b -> b.data(caseDataWithOcr())), false, "The createCase event is not supported for exception records with OCR"}
         };
     }
 
     @ParameterizedTest(name = "{0}: valid:{2} error/value:{3}")
     @MethodSource("classificationInvalidEventIdTestParams")
-    @DisplayName("Should accept event ID")
+    @DisplayName("Journey classifications with invalid event id")
     void journeyClassificationAndInValidEventIdCombinationTest(
         String caseDescription,
         CaseDetails inputCase,
@@ -283,9 +283,9 @@ class CallbackValidationsTest {
                                                          String eventId,
                                                          boolean valid,
                                                          T realValue,
-                                                         BiFunction<CaseDetails, String, Validation<String, T>> validationMethod,
+                                                         BiFunction<CaseDetails, String, Validation<String, Void>> validationMethod,
                                                          String errorString) {
-        Validation<String, T> validation = validationMethod.apply(input, eventId);
+        Validation<String, Void> validation = validationMethod.apply(input, eventId);
 
         softlyAssertValidations(valid, realValue, errorString, validation);
     }
@@ -293,7 +293,7 @@ class CallbackValidationsTest {
     private <T> void softlyAssertValidations(boolean valid,
                                              T realValue,
                                              String errorString,
-                                             Validation<String, T> validation) {
+                                             Validation<String, ?> validation) {
         if (valid) {
             assertSoftly(softly -> {
                 softly.assertThat(validation.isValid()).isTrue();
