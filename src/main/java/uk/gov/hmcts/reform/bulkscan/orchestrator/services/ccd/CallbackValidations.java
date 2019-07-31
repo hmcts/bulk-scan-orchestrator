@@ -101,4 +101,51 @@ final class CallbackValidations {
     static Validation<String, List<Map<String, Object>>> hasAScannedRecord(CaseDetails theCase) {
         return scannedDocumentValidator.validate(theCase);
     }
+
+    @Nonnull
+    static Validation<String, String> hasValidCombinationOfEventIdAndClassification(
+        CaseDetails theCase,
+        String eventId
+    ) {
+        return getJourneyClassification(theCase)
+            .map(classification -> {
+                    if ("supplementary_evidence".equalsIgnoreCase((String) classification)) {
+                        return "attachToExistingCase".equalsIgnoreCase(eventId)
+                            ? Validation.<String, String>valid("Valid Journey classification and event type id")
+                            : Validation.<String, String>valid(
+                            format("The %s event is not supported for %s", eventId, classification)
+                        );
+                    } else if ("exception".equalsIgnoreCase((String) classification)) {
+                        // When classification is exception and it has case data has ocr in it and if orchestrator
+                        // url is configured for create case it will be invalid CCD configuration.
+                        return exceptionRecordHasOcr(theCase)
+                            ? Validation.<String, String>valid(
+                            format(
+                                "The %s event is not supported for exception records with OCR "
+                                    + "or invalid CCD configuration",
+                                eventId
+                            )
+                        )
+                            : Validation.<String, String>valid("Valid Journey classification and event type id");
+                    } else {
+                        return Validation.<String, String>invalid(
+                            format("Invalid journey classification %s", classification)
+                        );
+                    }
+                }
+            ).orElseGet(() -> invalid("No journey classification supplied"));
+    }
+
+    private static Optional<Object> getJourneyClassification(CaseDetails theCase) {
+        return Optional.ofNullable(theCase)
+            .map(CaseDetails::getData)
+            .map(data -> data.get("journeyClassification"));
+    }
+
+    private static boolean exceptionRecordHasOcr(CaseDetails theCase) {
+        return Optional.ofNullable(theCase)
+            .map(CaseDetails::getData)
+            .map(data -> data.get("scanOCRData"))
+            .isPresent();
+    }
 }

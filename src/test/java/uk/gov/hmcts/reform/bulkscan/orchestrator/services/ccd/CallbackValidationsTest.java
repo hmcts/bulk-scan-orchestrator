@@ -11,9 +11,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithAttachReference;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithCcdSearchCaseReference;
@@ -188,6 +190,63 @@ class CallbackValidationsTest {
         );
     }
 
+    private static Object[][] classificationValidEventIdTestParams() {
+        return new Object[][]{
+            {"No journey classification", createCaseWith(b -> b.data(ImmutableMap.of())), false, "No journey classification supplied"},
+            {"Invalid journey classification", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "invalid_classification"))), false, "Invalid journey classification invalid_classification"},
+            {"Valid journey classification(supplementary evidence)", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "supplementary_evidence"))), true, "Valid Journey classification and event type id"},
+            {"Valid journey classification(exception without ocr)", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "exception"))), true, "Valid Journey classification and event type id"},
+            {"Valid journey classification(exception with ocr)", createCaseWith(b -> b.data(sampleOcrData())), true, "The attachToExistingCase event is not supported for exception records with OCR or invalid CCD configuration"}
+        };
+    }
+
+    @ParameterizedTest(name = "{0}: valid:{2} error/value:{3}")
+    @MethodSource("classificationValidEventIdTestParams")
+    @DisplayName("Should accept event ID")
+    void journeyClassificationAndValidEventIdCombinationTest(
+        String caseDescription,
+        CaseDetails inputCase,
+        boolean valid,
+        String expectedValueOrError
+    ) {
+        checkValidationWithMultipleArguments(
+            inputCase,
+            "attachToExistingCase",
+            valid,
+            expectedValueOrError,
+            CallbackValidations::hasValidCombinationOfEventIdAndClassification,
+            expectedValueOrError
+        );
+    }
+
+    private static Object[][] classificationInvalidEventIdTestParams() {
+        return new Object[][]{
+            {"Invalid journey classification", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "invalid_classification"))), false, "Invalid journey classification invalid_classification"},
+            {"Valid journey classification(supplementary evidence)", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "supplementary_evidence"))), true, "The createCase event is not supported for supplementary_evidence"},
+            {"Valid journey classification(exception without ocr)", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "exception"))), true, "Valid Journey classification and event type id"},
+            {"Valid journey classification(exception with ocr)", createCaseWith(b -> b.data(sampleOcrData())), true, "The createCase event is not supported for exception records with OCR or invalid CCD configuration"}
+        };
+    }
+
+    @ParameterizedTest(name = "{0}: valid:{2} error/value:{3}")
+    @MethodSource("classificationInvalidEventIdTestParams")
+    @DisplayName("Should accept event ID")
+    void journeyClassificationAndInValidEventIdCombinationTest(
+        String caseDescription,
+        CaseDetails inputCase,
+        boolean valid,
+        String expectedValueOrError
+    ) {
+        checkValidationWithMultipleArguments(
+            inputCase,
+            "createCase",
+            valid,
+            expectedValueOrError,
+            CallbackValidations::hasValidCombinationOfEventIdAndClassification,
+            expectedValueOrError
+        );
+    }
+
     @Test
     void invalidJurisdictionTest() {
         checkValidation(
@@ -216,6 +275,25 @@ class CallbackValidationsTest {
                                      Function<CaseDetails, Validation<String, T>> validationMethod,
                                      String errorString) {
         Validation<String, T> validation = validationMethod.apply(input);
+
+        softlyAssertValidations(valid, realValue, errorString, validation);
+    }
+
+    private <T> void checkValidationWithMultipleArguments(CaseDetails input,
+                                                         String eventId,
+                                                         boolean valid,
+                                                         T realValue,
+                                                         BiFunction<CaseDetails, String, Validation<String, T>> validationMethod,
+                                                         String errorString) {
+        Validation<String, T> validation = validationMethod.apply(input, eventId);
+
+        softlyAssertValidations(valid, realValue, errorString, validation);
+    }
+
+    private <T> void softlyAssertValidations(boolean valid,
+                                             T realValue,
+                                             String errorString,
+                                             Validation<String, T> validation) {
         if (valid) {
             assertSoftly(softly -> {
                 softly.assertThat(validation.isValid()).isTrue();
@@ -227,5 +305,14 @@ class CallbackValidationsTest {
                 softly.assertThat(validation.getError()).isEqualTo(errorString);
             });
         }
+    }
+
+    private static ImmutableMap<String, Object> sampleOcrData() {
+        return ImmutableMap.of(
+            "journeyClassification", "exception",
+            "scanOCRData", singletonList(
+                ImmutableMap.of("first_name", "John")
+            )
+        );
     }
 }
