@@ -19,15 +19,14 @@ final class CallbackValidations {
 
     private static final String CASE_TYPE_ID_SUFFIX = "_ExceptionRecord";
 
-    private static final String SUPPLEMENTARY_EVIDENCE = "supplementary_evidence";
-    private static final String EXCEPTION = "exception";
-    private static final String ATTACH_TO_EXISTING_CASE = "attachToExistingCase";
+    private static final String CLASSIFICATION_SUPPLEMENTARY_EVIDENCE = "supplementary_evidence";
+    private static final String CLASSIFICATION_EXCEPTION = "exception";
+    private static final String EVENT_ID_ATTACH_TO_CASE = "attachToExistingCase";
 
     private static final Logger log = LoggerFactory.getLogger(CallbackValidations.class);
 
     private static final CaseReferenceValidator caseRefValidator = new CaseReferenceValidator();
     private static final ScannedDocumentValidator scannedDocumentValidator = new ScannedDocumentValidator();
-
 
     private CallbackValidations() {
     }
@@ -113,23 +112,23 @@ final class CallbackValidations {
         String eventId
     ) {
         return getJourneyClassification(theCase)
-            .map(classification -> {
+            .map(
+                classification -> {
                     switch (classification) {
-                        case SUPPLEMENTARY_EVIDENCE:
-                            return ATTACH_TO_EXISTING_CASE.equalsIgnoreCase(eventId)
+                        case CLASSIFICATION_SUPPLEMENTARY_EVIDENCE:
+                            return EVENT_ID_ATTACH_TO_CASE.equalsIgnoreCase(eventId)
                                 ? Validation.<String, Void>valid(null)
                                 : Validation.<String, Void>invalid(
-                                format("The %s event is not supported for %s", eventId, classification
-                                )
+                                    format("The %s event is not supported for %s", eventId, classification)
                             );
-                        case EXCEPTION:
+                        case CLASSIFICATION_EXCEPTION:
                             // When classification is exception and case data has ocr in it and
                             // if orchestrator url is configured for create case it will be invalid CCD configuration.
                             boolean isExceptionRecordWithOcr = exceptionRecordHasOcr(theCase);
-                            return !isExceptionRecordWithOcr && ATTACH_TO_EXISTING_CASE.equalsIgnoreCase(eventId)
+                            return !isExceptionRecordWithOcr && EVENT_ID_ATTACH_TO_CASE.equalsIgnoreCase(eventId)
                                 ? Validation.<String, Void>valid(null)
                                 : Validation.<String, Void>invalid(
-                                errorMessage(eventId, classification, isExceptionRecordWithOcr)
+                                    errorMessageBasedOnOcrPresence(eventId, classification, isExceptionRecordWithOcr)
                             );
                         default:
                             return Validation.<String, Void>invalid(
@@ -140,7 +139,11 @@ final class CallbackValidations {
             ).orElseGet(() -> invalid("No journey classification supplied"));
     }
 
-    private static String errorMessage(String eventId, String classification, boolean isExceptionRecordWithOcr) {
+    private static String errorMessageBasedOnOcrPresence(
+        String eventId,
+        String classification,
+        boolean isExceptionRecordWithOcr
+    ) {
         return isExceptionRecordWithOcr ? format(
             "The %s event is not supported for exception records with OCR",
             eventId

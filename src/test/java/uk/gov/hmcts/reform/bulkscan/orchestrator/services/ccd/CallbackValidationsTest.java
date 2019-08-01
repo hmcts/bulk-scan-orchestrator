@@ -231,7 +231,7 @@ class CallbackValidationsTest {
     @ParameterizedTest(name = "{0}: valid:{2} error/value:{3}")
     @MethodSource("classificationInvalidEventIdTestParams")
     @DisplayName("Journey classifications with invalid event id")
-    void journeyClassificationAndInValidEventIdCombinationTest(
+    void journeyClassificationAndInvalidEventIdCombinationTest(
         String caseDescription,
         CaseDetails inputCase,
         boolean valid,
