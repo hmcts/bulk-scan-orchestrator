@@ -11,9 +11,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithAttachReference;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithCcdSearchCaseReference;
@@ -29,6 +31,7 @@ class CallbackValidationsTest {
 
     public static final String NO_CASE_TYPE_ID_SUPPLIED_ERROR = "No case type ID supplied";
     public static final String NO_CASE_REFERENCE_TYPE_SUPPLIED_ERROR = "No case reference type supplied";
+    public static final String JOURNEY_CLASSIFICATION = "journeyClassification";
 
     private static Object[][] attachToCaseReferenceTestParams() {
         String noReferenceSupplied = "No case reference supplied";
@@ -188,6 +191,63 @@ class CallbackValidationsTest {
         );
     }
 
+    private static Object[][] classificationValidEventIdTestParams() {
+        return new Object[][]{
+            {"Valid event-No journey classification", createCaseWith(b -> b.data(ImmutableMap.of())), false, "No journey classification supplied"},
+            {"Valid event-Invalid journey classification", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, "invalid_classification"))), false, "Invalid journey classification invalid_classification"},
+            {"Valid event-Valid journey classification(supplementary evidence)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, "supplementary_evidence"))), true, null},
+            {"Valid event-Valid journey classification(exception without ocr)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, "exception"))), true, null},
+            {"Valid event-Valid journey classification(exception with ocr)", createCaseWith(b -> b.data(caseDataWithOcr())), false, "The attachToExistingCase event is not supported for exception records with OCR"}
+        };
+    }
+
+    @ParameterizedTest(name = "{0}: valid:{2} error/value:{3}")
+    @MethodSource("classificationValidEventIdTestParams")
+    @DisplayName("Journey classifications with valid event id")
+    void journeyClassificationAndValidEventIdCombinationTest(
+        String caseDescription,
+        CaseDetails inputCase,
+        boolean valid,
+        String expectedValueOrError
+    ) {
+        checkValidationWithMultipleArguments(
+            inputCase,
+            "attachToExistingCase",
+            valid,
+            expectedValueOrError,
+            CallbackValidations::hasValidCombinationOfEventIdAndClassification,
+            expectedValueOrError
+        );
+    }
+
+    private static Object[][] classificationInvalidEventIdTestParams() {
+        return new Object[][]{
+            {"Invalid event-Invalid journey classification", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, "invalid_classification"))), false, "Invalid journey classification invalid_classification"},
+            {"Invalid event-Valid journey classification(supplementary evidence)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, "supplementary_evidence"))), false, "The createCase event is not supported for supplementary_evidence"},
+            {"Invalid event-Valid journey classification(exception without ocr)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, "exception"))), false, "The createCase event is not supported for exception. Please contact service team"},
+            {"Invalid event-Valid journey classification(exception with ocr)", createCaseWith(b -> b.data(caseDataWithOcr())), false, "The createCase event is not supported for exception records with OCR"}
+        };
+    }
+
+    @ParameterizedTest(name = "{0}: valid:{2} error/value:{3}")
+    @MethodSource("classificationInvalidEventIdTestParams")
+    @DisplayName("Journey classifications with invalid event id")
+    void journeyClassificationAndInvalidEventIdCombinationTest(
+        String caseDescription,
+        CaseDetails inputCase,
+        boolean valid,
+        String expectedValueOrError
+    ) {
+        checkValidationWithMultipleArguments(
+            inputCase,
+            "createCase",
+            valid,
+            expectedValueOrError,
+            CallbackValidations::hasValidCombinationOfEventIdAndClassification,
+            expectedValueOrError
+        );
+    }
+
     @Test
     void invalidJurisdictionTest() {
         checkValidation(
@@ -216,6 +276,25 @@ class CallbackValidationsTest {
                                      Function<CaseDetails, Validation<String, T>> validationMethod,
                                      String errorString) {
         Validation<String, T> validation = validationMethod.apply(input);
+
+        softlyAssertValidations(valid, realValue, errorString, validation);
+    }
+
+    private <T> void checkValidationWithMultipleArguments(CaseDetails input,
+                                                         String eventId,
+                                                         boolean valid,
+                                                         T realValue,
+                                                         BiFunction<CaseDetails, String, Validation<String, Void>> validationMethod,
+                                                         String errorString) {
+        Validation<String, Void> validation = validationMethod.apply(input, eventId);
+
+        softlyAssertValidations(valid, realValue, errorString, validation);
+    }
+
+    private <T> void softlyAssertValidations(boolean valid,
+                                             T realValue,
+                                             String errorString,
+                                             Validation<String, ?> validation) {
         if (valid) {
             assertSoftly(softly -> {
                 softly.assertThat(validation.isValid()).isTrue();
@@ -227,5 +306,14 @@ class CallbackValidationsTest {
                 softly.assertThat(validation.getError()).isEqualTo(errorString);
             });
         }
+    }
+
+    private static ImmutableMap<String, Object> caseDataWithOcr() {
+        return ImmutableMap.of(
+            JOURNEY_CLASSIFICATION, "exception",
+            "scanOCRData", singletonList(
+                ImmutableMap.of("first_name", "John")
+            )
+        );
     }
 }

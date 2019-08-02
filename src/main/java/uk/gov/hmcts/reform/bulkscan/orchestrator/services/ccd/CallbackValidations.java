@@ -19,6 +19,10 @@ final class CallbackValidations {
 
     private static final String CASE_TYPE_ID_SUFFIX = "_ExceptionRecord";
 
+    private static final String CLASSIFICATION_SUPPLEMENTARY_EVIDENCE = "supplementary_evidence";
+    private static final String CLASSIFICATION_EXCEPTION = "exception";
+    private static final String EVENT_ID_ATTACH_TO_CASE = "attachToExistingCase";
+
     private static final Logger log = LoggerFactory.getLogger(CallbackValidations.class);
 
     private static final CaseReferenceValidator caseRefValidator = new CaseReferenceValidator();
@@ -100,5 +104,64 @@ final class CallbackValidations {
     @Nonnull
     static Validation<String, List<Map<String, Object>>> hasAScannedRecord(CaseDetails theCase) {
         return scannedDocumentValidator.validate(theCase);
+    }
+
+    @Nonnull
+    static Validation<String, Void> hasValidCombinationOfEventIdAndClassification(
+        CaseDetails theCase,
+        String eventId
+    ) {
+        return getJourneyClassification(theCase)
+            .map(
+                classification -> {
+                    switch (classification) {
+                        case CLASSIFICATION_SUPPLEMENTARY_EVIDENCE:
+                            return EVENT_ID_ATTACH_TO_CASE.equalsIgnoreCase(eventId)
+                                ? Validation.<String, Void>valid(null)
+                                : Validation.<String, Void>invalid(
+                                    format("The %s event is not supported for %s", eventId, classification)
+                            );
+                        case CLASSIFICATION_EXCEPTION:
+                            // When classification is exception and case data has ocr in it and
+                            // if orchestrator url is configured for create case it will be invalid CCD configuration.
+                            boolean isExceptionRecordWithOcr = exceptionRecordHasOcr(theCase);
+                            return !isExceptionRecordWithOcr && EVENT_ID_ATTACH_TO_CASE.equalsIgnoreCase(eventId)
+                                ? Validation.<String, Void>valid(null)
+                                : Validation.<String, Void>invalid(
+                                    errorMessageBasedOnOcrPresence(eventId, classification, isExceptionRecordWithOcr)
+                            );
+                        default:
+                            return Validation.<String, Void>invalid(
+                                format("Invalid journey classification %s", classification)
+                            );
+                    }
+                }
+            ).orElseGet(() -> invalid("No journey classification supplied"));
+    }
+
+    private static String errorMessageBasedOnOcrPresence(
+        String eventId,
+        String classification,
+        boolean isExceptionRecordWithOcr
+    ) {
+        return isExceptionRecordWithOcr ? format(
+            "The %s event is not supported for exception records with OCR",
+            eventId
+        ) : format("The %s event is not supported for %s. Please contact service team", eventId, classification);
+        // Add service team contact and email when available known to above message
+    }
+
+    private static Optional<String> getJourneyClassification(CaseDetails theCase) {
+        return Optional.ofNullable(theCase)
+            .map(CaseDetails::getData)
+            .map(data -> data.get("journeyClassification"))
+            .map(c -> (String) c);
+    }
+
+    private static boolean exceptionRecordHasOcr(CaseDetails theCase) {
+        return Optional.ofNullable(theCase)
+            .map(CaseDetails::getData)
+            .map(data -> data.get("scanOCRData"))
+            .isPresent();
     }
 }
