@@ -503,7 +503,7 @@ class AttachExceptionRecordToExistingCaseTest {
             );
     }
 
-    @DisplayName("Exception journey classification with ocr data")
+    @DisplayName("Exception journey classification without ocr data")
     @Test
     public void should_succeed_when_classification_is_exception_and_exception_record_does_not_include_ocr()
         throws Exception {
