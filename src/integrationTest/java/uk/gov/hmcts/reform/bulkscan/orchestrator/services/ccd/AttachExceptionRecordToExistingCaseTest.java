@@ -110,6 +110,7 @@ class AttachExceptionRecordToExistingCaseTest {
     private static final String RESPONSE_FIELD_DATA = "data";
     private static final String EVENT_ID_ATTACH_TO_CASE = "attachToExistingCase";
     private static final String ATTACH_CASE = "attach_case";
+    private static final String CLASSIFICATION_EXCEPTION = "exception";
 
     @LocalServerPort
     private int applicationPort;
@@ -492,11 +493,29 @@ class AttachExceptionRecordToExistingCaseTest {
     @Test
     public void should_fail_when_classification_is_exception_and_exception_record_has_ocr() throws Exception {
         given()
-            .body(callbackRequestWith(EVENT_ID_ATTACH_TO_CASE, "exception", true))
+            .body(callbackRequestWith(EVENT_ID_ATTACH_TO_CASE, CLASSIFICATION_EXCEPTION, true))
             .post("/callback/{type}", ATTACH_CASE)
             .then()
             .statusCode(200)
-            .body(RESPONSE_FIELD_ERRORS, hasItem("The attachToExistingCase event is not supported for exception records with OCR"));
+            .body(
+                RESPONSE_FIELD_ERRORS,
+                hasItem("The attachToExistingCase event is not supported for exception records with OCR")
+            );
+    }
+
+    @DisplayName("Exception journey classification with ocr data")
+    @Test
+    public void should_succeed_when_classification_is_exception_and_exception_record_does_not_include_ocr()
+        throws Exception {
+        ValidatableResponse response =
+            given()
+                .body(callbackRequestWith(EVENT_ID_ATTACH_TO_CASE, CLASSIFICATION_EXCEPTION, false))
+                .post("/callback/{type}", ATTACH_CASE)
+                .then()
+                .statusCode(200);
+
+        verifySuccessResponseWithAttachToCaseReference(response);
+        verifyRequestedAttachingToCase();
     }
 
     private CallbackRequest attachToCaseRequest(String attachToCaseReference) {
@@ -644,6 +663,9 @@ class AttachExceptionRecordToExistingCaseTest {
                 ImmutableMap.of("first_name", "John")
             ));
         }
+
+        caseData.put("scannedDocuments", ImmutableList.of(EXCEPTION_RECORD_DOC));
+        caseData.put("attachToCaseReference", CASE_REF);
 
         return CaseDetails.builder()
             .jurisdiction(JURISDICTION)
