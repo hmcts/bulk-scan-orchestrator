@@ -223,7 +223,7 @@ class CallbackValidationsTest {
         return new Object[][]{
             {"Invalid event-Invalid journey classification", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "invalid_classification"))), false, "Invalid journey classification invalid_classification"},
             {"Invalid event-Valid journey classification(supplementary evidence)", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "supplementary_evidence"))), false, "The createCase event is not supported for supplementary_evidence"},
-            {"Invalid event-Valid journey classification(exception without ocr)", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "exception"))), false, "The createCase event is not supported for exception or invalid CCD configuration"},
+            {"Invalid event-Valid journey classification(exception without ocr)", createCaseWith(b -> b.data(ImmutableMap.of("journeyClassification", "exception"))), false, "The createCase event is not supported for exception. Please contact service team"},
             {"Invalid event-Valid journey classification(exception with ocr)", createCaseWith(b -> b.data(caseDataWithOcr())), false, "The createCase event is not supported for exception records with OCR"}
         };
     }

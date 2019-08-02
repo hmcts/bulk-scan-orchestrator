@@ -147,7 +147,8 @@ final class CallbackValidations {
         return isExceptionRecordWithOcr ? format(
             "The %s event is not supported for exception records with OCR",
             eventId
-        ) : format("The %s event is not supported for %s or invalid CCD configuration", eventId, classification);
+        ) : format("The %s event is not supported for %s. Please contact service team", eventId, classification);
+        // Add service team contact and email when available known to above message
     }
 
     private static Optional<String> getJourneyClassification(CaseDetails theCase) {
