@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
@@ -26,6 +27,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasSearchCaseReference;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasSearchCaseReferenceType;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasValidCombinationOfEventIdAndClassification;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.checkForDuplicatesOrElse;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.concatDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.getDocumentNumbers;
@@ -56,18 +58,30 @@ public class AttachCaseCallbackService {
      * @return Either a map of fields that should be modified in CCD when processing was successful,
      *         or the list of errors, in case of errors
      */
-    public Either<List<String>, Map<String, Object>> process(CaseDetails exceptionRecord) {
+    public Either<List<String>, Map<String, Object>> process(CaseDetails exceptionRecord, String eventId) {
         boolean useSearchCaseReference = isSearchCaseReferenceTypePresent(exceptionRecord);
 
-        return getValidation(exceptionRecord, useSearchCaseReference)
+        return getValidation(exceptionRecord, useSearchCaseReference, eventId)
             .map(this::tryAttachToCase)
             .getOrElseGet(errors -> Either.left(errors.toJavaList()));
     }
 
     private Validation<Seq<String>, AttachToCaseEventData> getValidation(
         CaseDetails exceptionRecord,
-        boolean useSearchCaseReference
+        boolean useSearchCaseReference,
+        String eventId
     ) {
+        // check if event id - classification is valid or not
+        Validation<String, Void> eventIdClassificationValidation =
+            hasValidCombinationOfEventIdAndClassification(exceptionRecord, eventId);
+
+        if (eventIdClassificationValidation.isInvalid()) {
+            String eventIdClassificationValidationError = eventIdClassificationValidation.getError();
+            log.warn("Validation error {}", eventIdClassificationValidationError);
+            final Seq<String> errors = io.vavr.collection.List.of(eventIdClassificationValidationError);
+            return invalid(errors);
+        }
+
         Validation<String, String> caseReferenceTypeValidation = useSearchCaseReference
             ? hasSearchCaseReferenceType(exceptionRecord)
             : valid(CCD_CASE_REFERENCE);
