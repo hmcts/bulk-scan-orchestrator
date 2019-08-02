@@ -57,6 +57,7 @@ service-config:
   services:
     - service: bulkscan # service name corresponds to the name of the container in Blob Storage
       jurisdiction: BULKSCAN
+      transformation-url: ${TRANSFORMATION_URL_BULKSCAN}
       case-type-ids:
         - Bulk_Scanned
 

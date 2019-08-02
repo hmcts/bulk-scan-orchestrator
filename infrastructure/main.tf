@@ -77,6 +77,10 @@ locals {
     DELETE_ENVELOPES_DLQ_MESSAGES_CRON    = "${var.delete_envelopes_dlq_messages_cron}"
     DELETE_ENVELOPES_DLQ_MESSAGES_TTL     = "${var.delete_envelopes_dlq_messages_ttl}"
 
+    // region transformation URLs
+    TRANSFORMATION_URL_BULKSCAN = "${var.transformation_url_bulkscan}"
+    // endregion
+
     TMP_DUMMY_VAR = "remove me"
   }
 }
