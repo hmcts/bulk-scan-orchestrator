@@ -70,3 +70,7 @@ variable "delete_envelopes_dlq_messages_cron" {
 variable "delete_envelopes_dlq_messages_ttl" {
   default = "72h"
 }
+
+variable "transformation_url_bulkscan" {
+  default = "http://bulk-scan-sample-app-aat.service.core-compute-aat.internal"
+}
