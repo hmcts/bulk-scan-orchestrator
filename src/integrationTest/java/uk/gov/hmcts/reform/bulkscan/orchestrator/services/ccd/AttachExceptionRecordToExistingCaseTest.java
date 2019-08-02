@@ -106,6 +106,8 @@ class AttachExceptionRecordToExistingCaseTest {
     private static final String RESPONSE_FIELD_ERRORS = "errors";
     private static final String RESPONSE_FIELD_WARNINGS = "warnings";
     private static final String RESPONSE_FIELD_DATA = "data";
+    private static final String EVENT_ID_ATTACH_TO_CASE = "attachToExistingCase";
+    private static final String ATTACH_CASE = "attach_case";
 
     @LocalServerPort
     private int applicationPort;
@@ -136,7 +138,7 @@ class AttachExceptionRecordToExistingCaseTest {
         ValidatableResponse response =
             given()
                 .body(exceptionRecordCallbackRequest(CASE_REF))
-                .post("/callback/{type}", "attach_case")
+                .post("/callback/{type}", ATTACH_CASE)
                 .then()
                 .statusCode(200);
 
@@ -156,7 +158,7 @@ class AttachExceptionRecordToExistingCaseTest {
                         CASE_TYPE_EXCEPTION_RECORD
                     )
                 )
-                .post("/callback/{type}", "attach_case")
+                .post("/callback/{type}", ATTACH_CASE)
                 .then()
                 .statusCode(200);
 
@@ -188,7 +190,7 @@ class AttachExceptionRecordToExistingCaseTest {
                         CASE_TYPE_EXCEPTION_RECORD
                     )
                 )
-                .post("/callback/{type}", "attach_case")
+                .post("/callback/{type}", ATTACH_CASE)
                 .then()
                 .statusCode(200);
 
@@ -203,7 +205,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
         given()
             .body(exceptionRecordCallbackRequest())
-            .post("/callback/{type}", "attach_case")
+            .post("/callback/{type}", ATTACH_CASE)
             .then()
             .statusCode(200)
             .body(RESPONSE_FIELD_ERRORS, hasItem(AttachCaseCallbackService.INTERNAL_ERROR_MSG));
@@ -216,7 +218,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
         given()
             .body(exceptionRecordCallbackRequest())
-            .post("/callback/{type}", "attach_case")
+            .post("/callback/{type}", ATTACH_CASE)
             .then()
             .statusCode(200)
             .body(RESPONSE_FIELD_ERRORS, hasItem(AttachCaseCallbackService.INTERNAL_ERROR_MSG));
@@ -227,7 +229,7 @@ class AttachExceptionRecordToExistingCaseTest {
     public void should_fail_correctly_if_document_is_duplicate_or_document_is_already_attached() {
         given()
             .body(attachToCaseRequest(CASE_REF, null, null, EXISTING_DOC))
-            .post("/callback/{type}", "attach_case")
+            .post("/callback/{type}", ATTACH_CASE)
             .then()
             .statusCode(200)
             .body(RESPONSE_FIELD_ERRORS, hasItem(String.format(
@@ -247,7 +249,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
         given()
             .body(exceptionRecordCallbackRequest())
-            .post("/callback/{type}", "attach_case")
+            .post("/callback/{type}", ATTACH_CASE)
             .then()
             .statusCode(200)
             .body(RESPONSE_FIELD_ERRORS, hasItem("Could not find case: " + CASE_REF));
@@ -267,7 +269,7 @@ class AttachExceptionRecordToExistingCaseTest {
                     CASE_TYPE_EXCEPTION_RECORD
                 )
             )
-            .post("/callback/{type}", "attach_case")
+            .post("/callback/{type}", ATTACH_CASE)
             .then()
             .statusCode(200)
             .body(RESPONSE_FIELD_ERRORS, hasItem("Could not find case: " + nonExistingCaseRef));
@@ -293,7 +295,7 @@ class AttachExceptionRecordToExistingCaseTest {
                     CASE_TYPE_EXCEPTION_RECORD
                 )
             )
-            .post("/callback/{type}", "attach_case")
+            .post("/callback/{type}", ATTACH_CASE)
             .then()
             .statusCode(200)
             .body(RESPONSE_FIELD_ERRORS, hasItem("No case found for legacy case reference " + nonExistingLegacyId));
@@ -323,7 +325,7 @@ class AttachExceptionRecordToExistingCaseTest {
                     CASE_TYPE_EXCEPTION_RECORD
                 )
             )
-            .post("/callback/{type}", "attach_case")
+            .post("/callback/{type}", ATTACH_CASE)
             .then()
             .statusCode(200)
             .body(RESPONSE_FIELD_ERRORS, hasItem(expectedErrorMessage));
@@ -335,7 +337,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
         given()
             .body(exceptionRecordCallbackRequest())
-            .post("/callback/{type}", "attach_case")
+            .post("/callback/{type}", ATTACH_CASE)
             .then()
             .statusCode(200)
             .body(RESPONSE_FIELD_ERRORS, hasItem("Invalid case ID: " + CASE_REF));
@@ -352,7 +354,7 @@ class AttachExceptionRecordToExistingCaseTest {
                     "invalid-case-type"
                 )
             )
-            .post("/callback/{type}", "attach_case")
+            .post("/callback/{type}", ATTACH_CASE)
             .then()
             .statusCode(200)
             .body(RESPONSE_FIELD_ERRORS, hasItem("Case type ID (invalid-case-type) has invalid format"));
@@ -368,7 +370,7 @@ class AttachExceptionRecordToExistingCaseTest {
                     CASE_TYPE_EXCEPTION_RECORD
                 )
             )
-            .post("/callback/{type}", "attach_case")
+            .post("/callback/{type}", ATTACH_CASE)
             .then()
             .statusCode(200)
             .body(RESPONSE_FIELD_ERRORS, hasItem("Invalid case reference type supplied: invalid-reference-type"));
@@ -385,7 +387,7 @@ class AttachExceptionRecordToExistingCaseTest {
                     CASE_TYPE_EXCEPTION_RECORD
                 )
             )
-            .post("/callback/{type}", "attach_case")
+            .post("/callback/{type}", ATTACH_CASE)
             .then()
             .statusCode(200)
             .body(RESPONSE_FIELD_ERRORS, hasItem("Invalid case reference: 'invalid-ccd-reference'"));
@@ -398,7 +400,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
         given()
             .body(exceptionRecordCallbackRequest(CASE_REF))
-            .post("/callback/{type}", "attach_case")
+            .post("/callback/{type}", ATTACH_CASE)
             .then()
             .statusCode(200)
             .body(RESPONSE_FIELD_ERRORS, hasItem(AttachCaseCallbackService.INTERNAL_ERROR_MSG));
@@ -412,7 +414,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
         given()
             .body(callbackRequest)
-            .post("/callback/{type}", "attach_case")
+            .post("/callback/{type}", ATTACH_CASE)
             .then()
             .statusCode(200)
             .body(RESPONSE_FIELD_ERRORS, hasItem("Internal Error: callback or case details were empty"));
@@ -432,7 +434,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
         given()
             .body(attachToCaseRequest(CASE_REF))
-            .post("/callback/{type}", "attach_case")
+            .post("/callback/{type}", ATTACH_CASE)
             .then()
             .statusCode(200)
             .body(RESPONSE_FIELD_ERRORS, hasItem("Exception record is already attached to case " + caseRef));
@@ -446,6 +448,42 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/{type}", "someType")
             .then()
             .statusCode(404);
+    }
+
+    @DisplayName("Valid event id and invalid journey classification")
+    @Test
+    public void should_fail_when_exception_record_has_invalid_journey_classification() throws Exception {
+        given()
+            .body(callbackRequestWithEventIdAndClassification(EVENT_ID_ATTACH_TO_CASE, "invalid_classification"))
+            .post("/callback/{type}", ATTACH_CASE)
+            .then()
+            .statusCode(200)
+            .body(RESPONSE_FIELD_ERRORS, hasItem("Invalid journey classification invalid_classification"));
+    }
+
+    @DisplayName("Invalid event id and valid journey classification")
+    @Test
+    public void should_fail_when_callback_request_has_invalid_event_id() throws Exception {
+        given()
+            .body(callbackRequestWithEventIdAndClassification("invalid_event_id", "supplementary_evidence"))
+            .post("/callback/{type}", ATTACH_CASE)
+            .then()
+            .statusCode(200)
+            .body(
+                RESPONSE_FIELD_ERRORS,
+                hasItem("The invalid_event_id event is not supported for supplementary_evidence")
+            );
+    }
+
+    @DisplayName("Missing journey classification")
+    @Test
+    public void should_fail_when_classification_is_missing_from_exception_record() throws Exception {
+        given()
+            .body(callbackRequestWithEventIdAndClassification(EVENT_ID_ATTACH_TO_CASE, null))
+            .post("/callback/{type}", ATTACH_CASE)
+            .then()
+            .statusCode(200)
+            .body(RESPONSE_FIELD_ERRORS, hasItem("No journey classification supplied"));
     }
 
     private CallbackRequest attachToCaseRequest(String attachToCaseReference) {
@@ -463,6 +501,7 @@ class AttachExceptionRecordToExistingCaseTest {
             searchCaseReferenceType,
             searchCaseReference,
             CASE_TYPE_EXCEPTION_RECORD,
+            EVENT_ID_ATTACH_TO_CASE,
             document
         );
     }
@@ -491,6 +530,8 @@ class AttachExceptionRecordToExistingCaseTest {
         if (searchCaseReference != null) {
             exceptionData.put("searchCaseReference", searchCaseReference);
         }
+
+        exceptionData.put("journeyClassification","supplementary_evidence");
 
         return exceptionData;
     }
@@ -581,6 +622,20 @@ class AttachExceptionRecordToExistingCaseTest {
             ).build();
     }
 
+    private CaseDetails exceptionRecordWithClassification(String classification) {
+        ImmutableMap<String,Object> caseData =
+            classification == null
+                ? ImmutableMap.of()
+                : ImmutableMap.of("journeyClassification", classification);
+
+        return CaseDetails.builder()
+            .jurisdiction(JURISDICTION)
+            .id(EXCEPTION_RECORD_ID)
+            .caseTypeId(CASE_TYPE_EXCEPTION_RECORD)
+            .data(caseData)
+            .build();
+    }
+
     private void mockCaseSearchByCcdId(String ccdId, ResponseDefinitionBuilder responseBuilder) {
         givenThat(
             get("/cases/" + ccdId)
@@ -635,6 +690,7 @@ class AttachExceptionRecordToExistingCaseTest {
             null,
             null,
             CASE_TYPE_EXCEPTION_RECORD,
+            EVENT_ID_ATTACH_TO_CASE,
             EXCEPTION_RECORD_DOC
         );
     }
@@ -650,6 +706,7 @@ class AttachExceptionRecordToExistingCaseTest {
             searchCaseReferenceType,
             searchCaseReference,
             caseTypeId,
+            EVENT_ID_ATTACH_TO_CASE,
             EXCEPTION_RECORD_DOC
         );
     }
@@ -659,6 +716,7 @@ class AttachExceptionRecordToExistingCaseTest {
         String searchCaseReferenceType,
         String searchCaseReference,
         String caseTypeId,
+        String eventId,
         Map<String, Object> document
     ) {
         return CallbackRequest
@@ -672,7 +730,15 @@ class AttachExceptionRecordToExistingCaseTest {
                     document
                 )
             )
-            .eventId("attachToExistingCase")
+            .eventId(eventId)
+            .build();
+    }
+
+    private CallbackRequest callbackRequestWithEventIdAndClassification(String eventId, String classification) {
+        return CallbackRequest
+            .builder()
+            .caseDetails(exceptionRecordWithClassification(classification))
+            .eventId(eventId)
             .build();
     }
 
