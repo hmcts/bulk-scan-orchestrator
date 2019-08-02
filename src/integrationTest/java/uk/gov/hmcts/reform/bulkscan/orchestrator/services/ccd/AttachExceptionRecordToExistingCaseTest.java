@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -43,6 +44,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
+import static java.util.Collections.singletonList;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -454,7 +456,7 @@ class AttachExceptionRecordToExistingCaseTest {
     @Test
     public void should_fail_when_exception_record_has_invalid_journey_classification() throws Exception {
         given()
-            .body(callbackRequestWithEventIdAndClassification(EVENT_ID_ATTACH_TO_CASE, "invalid_classification"))
+            .body(callbackRequestWith(EVENT_ID_ATTACH_TO_CASE, "invalid_classification", false))
             .post("/callback/{type}", ATTACH_CASE)
             .then()
             .statusCode(200)
@@ -465,7 +467,7 @@ class AttachExceptionRecordToExistingCaseTest {
     @Test
     public void should_fail_when_callback_request_has_invalid_event_id() throws Exception {
         given()
-            .body(callbackRequestWithEventIdAndClassification("invalid_event_id", "supplementary_evidence"))
+            .body(callbackRequestWith("invalid_event_id", "supplementary_evidence", false))
             .post("/callback/{type}", ATTACH_CASE)
             .then()
             .statusCode(200)
@@ -479,11 +481,22 @@ class AttachExceptionRecordToExistingCaseTest {
     @Test
     public void should_fail_when_classification_is_missing_from_exception_record() throws Exception {
         given()
-            .body(callbackRequestWithEventIdAndClassification(EVENT_ID_ATTACH_TO_CASE, null))
+            .body(callbackRequestWith(EVENT_ID_ATTACH_TO_CASE, null, false))
             .post("/callback/{type}", ATTACH_CASE)
             .then()
             .statusCode(200)
             .body(RESPONSE_FIELD_ERRORS, hasItem("No journey classification supplied"));
+    }
+
+    @DisplayName("Exception journey classification with ocr data")
+    @Test
+    public void should_fail_when_classification_is_exception_and_exception_record_has_ocr() throws Exception {
+        given()
+            .body(callbackRequestWith(EVENT_ID_ATTACH_TO_CASE, "exception", true))
+            .post("/callback/{type}", ATTACH_CASE)
+            .then()
+            .statusCode(200)
+            .body(RESPONSE_FIELD_ERRORS, hasItem("The attachToExistingCase event is not supported for exception records with OCR"));
     }
 
     private CallbackRequest attachToCaseRequest(String attachToCaseReference) {
@@ -622,11 +635,15 @@ class AttachExceptionRecordToExistingCaseTest {
             ).build();
     }
 
-    private CaseDetails exceptionRecordWithClassification(String classification) {
-        ImmutableMap<String,Object> caseData =
-            classification == null
-                ? ImmutableMap.of()
-                : ImmutableMap.of("journeyClassification", classification);
+    private CaseDetails exceptionRecordWith(String classification, boolean includeOcr) {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("journeyClassification", classification);
+
+        if (includeOcr) {
+            caseData.put("scanOCRData", singletonList(
+                ImmutableMap.of("first_name", "John")
+            ));
+        }
 
         return CaseDetails.builder()
             .jurisdiction(JURISDICTION)
@@ -734,10 +751,14 @@ class AttachExceptionRecordToExistingCaseTest {
             .build();
     }
 
-    private CallbackRequest callbackRequestWithEventIdAndClassification(String eventId, String classification) {
+    private CallbackRequest callbackRequestWith(
+        String eventId,
+        String classification,
+        boolean includeOcr
+    ) {
         return CallbackRequest
             .builder()
-            .caseDetails(exceptionRecordWithClassification(classification))
+            .caseDetails(exceptionRecordWith(classification,includeOcr))
             .eventId(eventId)
             .build();
     }
