@@ -219,7 +219,7 @@ class CallbackValidationsTest {
     private static Object[][] eventIdTestParams() {
         return new Object[][]{
             {"Invalid event id", "invalid_event_id", false, "The invalid_event_id event is not supported. Please contact service team"},
-            {"Valid journey classification(supplementary evidence)", "attachToExistingCase", true, null},
+            {"Valid event id", "attachToExistingCase", true, null},
         };
     }
 
