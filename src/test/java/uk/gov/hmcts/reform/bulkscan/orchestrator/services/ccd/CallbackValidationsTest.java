@@ -31,6 +31,7 @@ class CallbackValidationsTest {
     public static final String NO_CASE_TYPE_ID_SUPPLIED_ERROR = "No case type ID supplied";
     public static final String NO_CASE_REFERENCE_TYPE_SUPPLIED_ERROR = "No case reference type supplied";
     public static final String JOURNEY_CLASSIFICATION = "journeyClassification";
+    public static final String CLASSIFICATION_EXCEPTION = "EXCEPTION";
 
     private static Object[][] attachToCaseReferenceTestParams() {
         String noReferenceSupplied = "No case reference supplied";
@@ -193,8 +194,8 @@ class CallbackValidationsTest {
     private static Object[][] classificationTestParams() {
         return new Object[][]{
             {"Invalid journey classification", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, "invalid_classification"))), false, "Invalid journey classification invalid_classification"},
-            {"Valid journey classification(supplementary evidence)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, "supplementary_evidence"))), true, null},
-            {"Valid journey classification(exception without ocr)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, "exception"))), true, null},
+            {"Valid journey classification(supplementary evidence)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, "SUPPLEMENTARY_EVIDENCE"))), true, null},
+            {"Valid journey classification(exception without ocr)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, CLASSIFICATION_EXCEPTION))), true, null},
             {"Invalid action-Valid journey classification(exception with ocr)", createCaseWith(b -> b.data(caseDataWithOcr())), false, "The 'attach to case' event is not supported for exception records with OCR"}
         };
     }
@@ -264,7 +265,7 @@ class CallbackValidationsTest {
 
     private static ImmutableMap<String, Object> caseDataWithOcr() {
         return ImmutableMap.of(
-            JOURNEY_CLASSIFICATION, "exception",
+            JOURNEY_CLASSIFICATION, CLASSIFICATION_EXCEPTION,
             "scanOCRData", singletonList(
                 ImmutableMap.of("first_name", "John")
             )
