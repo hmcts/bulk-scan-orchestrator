@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -472,7 +471,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .statusCode(200)
             .body(
                 RESPONSE_FIELD_ERRORS,
-                hasItem("The invalid_event_id event is not supported for supplementary_evidence")
+                hasItem("The invalid_event_id event is not supported. Please contact service team")
             );
     }
 
@@ -495,7 +494,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .statusCode(200)
             .body(
                 RESPONSE_FIELD_ERRORS,
-                hasItem("The attachToExistingCase event is not supported for exception records with OCR")
+                hasItem("The attach to case event is not supported for exception records with OCR")
             );
     }
 

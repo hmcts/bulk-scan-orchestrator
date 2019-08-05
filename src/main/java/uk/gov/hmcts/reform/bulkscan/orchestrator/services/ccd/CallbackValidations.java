@@ -107,28 +107,18 @@ final class CallbackValidations {
     }
 
     @Nonnull
-    static Validation<String, Void> hasValidCombinationOfEventIdAndClassification(
-        CaseDetails theCase,
-        String eventId
-    ) {
+    static Validation<String, Void> canBeAttachedToCase(CaseDetails theCase) {
         return getJourneyClassification(theCase)
             .map(
                 classification -> {
                     switch (classification) {
                         case CLASSIFICATION_SUPPLEMENTARY_EVIDENCE:
-                            return EVENT_ID_ATTACH_TO_CASE.equalsIgnoreCase(eventId)
-                                ? Validation.<String, Void>valid(null)
-                                : Validation.<String, Void>invalid(
-                                    format("The %s event is not supported for %s", eventId, classification)
-                            );
+                            return Validation.<String, Void>valid(null);
                         case CLASSIFICATION_EXCEPTION:
-                            // When classification is exception and case data has ocr in it and
-                            // if orchestrator url is configured for create case it will be invalid CCD configuration.
-                            boolean isExceptionRecordWithOcr = exceptionRecordHasOcr(theCase);
-                            return !isExceptionRecordWithOcr && EVENT_ID_ATTACH_TO_CASE.equalsIgnoreCase(eventId)
+                            return !exceptionRecordHasOcr(theCase)
                                 ? Validation.<String, Void>valid(null)
                                 : Validation.<String, Void>invalid(
-                                    errorMessageBasedOnOcrPresence(eventId, classification, isExceptionRecordWithOcr)
+                                    format("The attach to case event is not supported for exception records with OCR")
                             );
                         default:
                             return Validation.<String, Void>invalid(
@@ -139,16 +129,13 @@ final class CallbackValidations {
             ).orElseGet(() -> invalid("No journey classification supplied"));
     }
 
-    private static String errorMessageBasedOnOcrPresence(
-        String eventId,
-        String classification,
-        boolean isExceptionRecordWithOcr
-    ) {
-        return isExceptionRecordWithOcr ? format(
-            "The %s event is not supported for exception records with OCR",
-            eventId
-        ) : format("The %s event is not supported for %s. Please contact service team", eventId, classification);
-        // Add service team contact and email when available known to above message
+    @Nonnull
+    static Validation<String, Void> hasValidEventId(String eventId) {
+        return EVENT_ID_ATTACH_TO_CASE.equalsIgnoreCase(eventId)
+            ? Validation.<String, Void>valid(null)
+            : Validation.<String, Void>invalid(
+            format("The %s event is not supported. Please contact service team", eventId)
+        );
     }
 
     private static Optional<String> getJourneyClassification(CaseDetails theCase) {
