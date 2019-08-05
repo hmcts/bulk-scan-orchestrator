@@ -6,7 +6,7 @@ import java.util.List;
 
 public class ErrorResponse {
 
-    private final List<String> errors;
+    public final List<String> errors;
 
     public ErrorResponse(
         @JsonProperty("errors") List<String> errors

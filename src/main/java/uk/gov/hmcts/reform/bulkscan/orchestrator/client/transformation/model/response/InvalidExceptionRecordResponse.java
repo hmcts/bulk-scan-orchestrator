@@ -6,8 +6,8 @@ import java.util.List;
 
 public class InvalidExceptionRecordResponse {
 
-    private final List<String> errors;
-    private final List<String> warnings;
+    public final List<String> errors;
+    public final List<String> warnings;
 
     public InvalidExceptionRecordResponse(
         @JsonProperty("errors") List<String> errors,
