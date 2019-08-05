@@ -494,7 +494,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .statusCode(200)
             .body(
                 RESPONSE_FIELD_ERRORS,
-                hasItem("The attach to case event is not supported for exception records with OCR")
+                hasItem("The 'attach to case' event is not supported for exception records with OCR")
             );
     }
 
