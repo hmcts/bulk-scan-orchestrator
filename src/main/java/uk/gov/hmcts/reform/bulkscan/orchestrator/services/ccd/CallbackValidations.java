@@ -132,10 +132,7 @@ final class CallbackValidations {
     @Nonnull
     static Validation<String, Void> hasValidEventId(String eventId) {
         return EVENT_ID_ATTACH_TO_CASE.equalsIgnoreCase(eventId)
-            ? Validation.<String, Void>valid(null)
-            : Validation.<String, Void>invalid(
-            format("The %s event is not supported. Please contact service team", eventId)
-        );
+            ? valid(null) : invalid(format("The %s event is not supported. Please contact service team", eventId));
     }
 
     private static Optional<String> getJourneyClassification(CaseDetails theCase) {
