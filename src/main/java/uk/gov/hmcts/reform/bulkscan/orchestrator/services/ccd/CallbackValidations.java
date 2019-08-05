@@ -19,8 +19,8 @@ final class CallbackValidations {
 
     private static final String CASE_TYPE_ID_SUFFIX = "_ExceptionRecord";
 
-    private static final String CLASSIFICATION_SUPPLEMENTARY_EVIDENCE = "supplementary_evidence";
-    private static final String CLASSIFICATION_EXCEPTION = "exception";
+    private static final String CLASSIFICATION_SUPPLEMENTARY_EVIDENCE = "SUPPLEMENTARY_EVIDENCE";
+    private static final String CLASSIFICATION_EXCEPTION = "EXCEPTION";
     private static final String EVENT_ID_ATTACH_TO_CASE = "attachToExistingCase";
 
     private static final Logger log = LoggerFactory.getLogger(CallbackValidations.class);

@@ -109,7 +109,7 @@ class AttachExceptionRecordToExistingCaseTest {
     private static final String RESPONSE_FIELD_WARNINGS = "warnings";
     private static final String RESPONSE_FIELD_DATA = "data";
     private static final String EVENT_ID_ATTACH_TO_CASE = "attachToExistingCase";
-    private static final String CLASSIFICATION_EXCEPTION = "exception";
+    private static final String CLASSIFICATION_EXCEPTION = "EXCEPTION";
 
     @LocalServerPort
     private int applicationPort;
@@ -556,7 +556,7 @@ class AttachExceptionRecordToExistingCaseTest {
             exceptionData.put("searchCaseReference", searchCaseReference);
         }
 
-        exceptionData.put("journeyClassification", "supplementary_evidence");
+        exceptionData.put("journeyClassification", "SUPPLEMENTARY_EVIDENCE");
 
         return exceptionData;
     }
