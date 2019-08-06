@@ -6,7 +6,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.req
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.ErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.InvalidExceptionRecordResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
@@ -40,15 +39,6 @@ public class TransformationDataTest {
 
         assertThat(response.errors).isNotEmpty();
         assertThat(response.warnings).isEmpty();
-    }
-
-    @Test
-    public void testTransformationErrorResponse() {
-        ErrorResponse response = new ErrorResponse(
-            singletonList("Invalid Exception Record")
-        );
-
-        assertThat(response.errors).isNotEmpty();
     }
 
     @Test
