@@ -64,17 +64,12 @@ test {
 task functional(type: Test, description: 'Runs the functional tests.', group: 'Verification') {
   testClassesDirs = sourceSets.functionalTest.output.classesDirs
   classpath = sourceSets.functionalTest.runtimeClasspath
-
-  environment 'APPINSIGHTS_INSTRUMENTATIONKEY', 'functional-test'
 }
 
 task integration(type: Test, description: 'Runs the integration tests.', group: 'Verification') {
   testClassesDirs = sourceSets.integrationTest.output.classesDirs
   classpath = sourceSets.integrationTest.runtimeClasspath
   failFast = true
-
-  // this will go away once java-logging-appinsights is bumped to 5.x.x
-  environment 'APPINSIGHTS_INSTRUMENTATIONKEY', 'test'
 }
 
 task smoke(type: Test) {

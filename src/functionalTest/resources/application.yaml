@@ -12,6 +12,8 @@ queue:
 
 # because functional tests load up SpringBootTest
 azure:
+  application-insights:
+    instrumentation-key: integration-test
   servicebus:
     envelopes:
       max-delivery-count: 10
