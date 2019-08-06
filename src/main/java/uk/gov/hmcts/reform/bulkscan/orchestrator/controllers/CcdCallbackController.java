@@ -33,7 +33,7 @@ public class CcdCallbackController {
         if (callback != null && callback.getCaseDetails() != null) {
 
             return attachCaseCallbackService
-                .process(callback.getCaseDetails())
+                .process(callback.getCaseDetails(), callback.getEventId())
                 .map(modifiedFields -> okResponse(modifiedFields))
                 .getOrElseGet(errors -> errorResponse(errors));
         } else {

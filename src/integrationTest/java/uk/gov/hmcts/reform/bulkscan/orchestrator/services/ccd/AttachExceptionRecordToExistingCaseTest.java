@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -43,6 +44,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
+import static java.util.Collections.singletonList;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -106,6 +108,8 @@ class AttachExceptionRecordToExistingCaseTest {
     private static final String RESPONSE_FIELD_ERRORS = "errors";
     private static final String RESPONSE_FIELD_WARNINGS = "warnings";
     private static final String RESPONSE_FIELD_DATA = "data";
+    private static final String EVENT_ID_ATTACH_TO_CASE = "attachToExistingCase";
+    private static final String CLASSIFICATION_EXCEPTION = "EXCEPTION";
 
     @LocalServerPort
     private int applicationPort;
@@ -448,6 +452,66 @@ class AttachExceptionRecordToExistingCaseTest {
             .statusCode(404);
     }
 
+    @Test
+    public void should_fail_when_event_id_is_valid_and_journey_classification_is_invalid() throws Exception {
+        given()
+            .body(callbackRequestWith(EVENT_ID_ATTACH_TO_CASE, "invalid_classification", false))
+            .post("/callback/{type}", "attach_case")
+            .then()
+            .statusCode(200)
+            .body(RESPONSE_FIELD_ERRORS, hasItem("Invalid journey classification invalid_classification"));
+    }
+
+    @Test
+    public void should_fail_when_callback_request_has_invalid_event_id() throws Exception {
+        given()
+            .body(callbackRequestWith("invalid_event_id", "supplementary_evidence", false))
+            .post("/callback/{type}", "attach_case")
+            .then()
+            .statusCode(200)
+            .body(
+                RESPONSE_FIELD_ERRORS,
+                hasItem("The invalid_event_id event is not supported. Please contact service team")
+            );
+    }
+
+    @Test
+    public void should_fail_when_classification_is_missing_from_exception_record() throws Exception {
+        given()
+            .body(callbackRequestWith(EVENT_ID_ATTACH_TO_CASE, null, false))
+            .post("/callback/{type}", "attach_case")
+            .then()
+            .statusCode(200)
+            .body(RESPONSE_FIELD_ERRORS, hasItem("No journey classification supplied"));
+    }
+
+    @Test
+    public void should_fail_when_classification_is_exception_and_exception_record_has_ocr() throws Exception {
+        given()
+            .body(callbackRequestWith(EVENT_ID_ATTACH_TO_CASE, CLASSIFICATION_EXCEPTION, true))
+            .post("/callback/{type}", "attach_case")
+            .then()
+            .statusCode(200)
+            .body(
+                RESPONSE_FIELD_ERRORS,
+                hasItem("The 'attach to case' event is not supported for exception records with OCR")
+            );
+    }
+
+    @Test
+    public void should_succeed_when_classification_is_exception_and_exception_record_does_not_include_ocr()
+        throws Exception {
+        ValidatableResponse response =
+            given()
+                .body(callbackRequestWith(EVENT_ID_ATTACH_TO_CASE, CLASSIFICATION_EXCEPTION, false))
+                .post("/callback/{type}", "attach_case")
+                .then()
+                .statusCode(200);
+
+        verifySuccessResponseWithAttachToCaseReference(response);
+        verifyRequestedAttachingToCase();
+    }
+
     private CallbackRequest attachToCaseRequest(String attachToCaseReference) {
         return attachToCaseRequest(attachToCaseReference, null, null, EXCEPTION_RECORD_DOC);
     }
@@ -491,6 +555,8 @@ class AttachExceptionRecordToExistingCaseTest {
         if (searchCaseReference != null) {
             exceptionData.put("searchCaseReference", searchCaseReference);
         }
+
+        exceptionData.put("journeyClassification", "SUPPLEMENTARY_EVIDENCE");
 
         return exceptionData;
     }
@@ -673,6 +739,39 @@ class AttachExceptionRecordToExistingCaseTest {
                 )
             )
             .eventId("attachToExistingCase")
+            .build();
+    }
+
+    private CallbackRequest callbackRequestWith(
+        String eventId,
+        String classification,
+        boolean includeOcr
+    ) {
+        return CallbackRequest
+            .builder()
+            .caseDetails(exceptionRecordWith(classification,includeOcr))
+            .eventId(eventId)
+            .build();
+    }
+
+    private CaseDetails exceptionRecordWith(String classification, boolean includeOcr) {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("journeyClassification", classification);
+
+        if (includeOcr) {
+            caseData.put("scanOCRData", singletonList(
+                ImmutableMap.of("first_name", "John")
+            ));
+        }
+
+        caseData.put("scannedDocuments", ImmutableList.of(EXCEPTION_RECORD_DOC));
+        caseData.put("attachToCaseReference", CASE_REF);
+
+        return CaseDetails.builder()
+            .jurisdiction(JURISDICTION)
+            .id(EXCEPTION_RECORD_ID)
+            .caseTypeId(CASE_TYPE_EXCEPTION_RECORD)
+            .data(caseData)
             .build();
     }
 
