@@ -38,7 +38,8 @@ import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 @IntegrationTest
 public class TransformationClientTest {
 
-    public static final String TRANSFORM_EXCEPTION_RECORD_URL = "/transform-exception-record";
+    private static final String TRANSFORM_EXCEPTION_RECORD_URL = "/transform-exception-record";
+
     @Autowired
     private TransformationClient client;
 

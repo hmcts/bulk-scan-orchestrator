@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.req
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.InvalidExceptionRecordResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 
+import java.io.IOException;
+
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
@@ -37,7 +39,7 @@ public class TransformationClient {
         String baseUrl,
         ExceptionRecord exceptionRecord,
         String s2sToken
-    ) throws Exception {
+    ) throws IOException, CaseTransformationException {
         HttpHeaders headers = new HttpHeaders();
         headers.add("ServiceAuthorization", "Bearer " + s2sToken);
 
