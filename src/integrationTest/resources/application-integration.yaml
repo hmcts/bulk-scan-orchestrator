@@ -25,6 +25,8 @@ scheduling:
       enabled: false
 
 azure:
+  application-insights:
+    instrumentation-key: integration-test
   servicebus:
     envelopes:
       max-delivery-count: 10
