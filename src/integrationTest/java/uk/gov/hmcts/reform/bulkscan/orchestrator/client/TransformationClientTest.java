@@ -223,7 +223,7 @@ public class TransformationClientTest {
             .put("case_creation_details", new JSONObject()
                 .put("case_type_id", "some_case_type")
                 .put("event_id", "createCase")
-                .put("case_data", new JSONObject().put("case_field", "soem value")))
+                .put("case_data", new JSONObject().put("case_field", "some value")))
             .put("warnings", new JSONArray());
     }
 
