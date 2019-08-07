@@ -4,4 +4,4 @@ idam_client_redirect_uri = "https://rpe-bulk-scan-processor-prod.service.core-co
 
 delete_envelopes_dlq_messages_enabled = "true"
 
-transformation_url_bulkscan = "http://bulk-scan-sample-app-prod.service.core-compute-prod.internal"
+transformation_url_bulkscan = ""
