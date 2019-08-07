@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.core.Options;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,9 +41,6 @@ public class TransformationClientTest {
     public static final String TRANSFORM_EXCEPTION_RECORD_URL = "/transform-exception-record";
     @Autowired
     private TransformationClient client;
-
-    @Autowired
-    private ObjectMapper mapper;
 
     @Autowired
     private Options wiremockOptions;
