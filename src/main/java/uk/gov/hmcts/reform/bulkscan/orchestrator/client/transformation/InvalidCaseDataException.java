@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpStatusCodeException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.InvalidExceptionRecordResponse;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.TransformationErrorResponse;
 
 public class InvalidCaseDataException extends RuntimeException {
 
@@ -10,11 +10,11 @@ public class InvalidCaseDataException extends RuntimeException {
 
     private final HttpStatus status;
 
-    private final transient InvalidExceptionRecordResponse response;
+    private final transient TransformationErrorResponse response;
 
     public InvalidCaseDataException(
         HttpStatusCodeException cause,
-        InvalidExceptionRecordResponse response
+        TransformationErrorResponse response
     ) {
         super(cause);
         this.status = cause.getStatusCode();
@@ -25,7 +25,7 @@ public class InvalidCaseDataException extends RuntimeException {
         return status;
     }
 
-    public InvalidExceptionRecordResponse getResponse() {
+    public TransformationErrorResponse getResponse() {
         return response;
     }
 

@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
-public class InvalidExceptionRecordResponse {
+public class TransformationErrorResponse {
 
     public final List<String> errors;
     public final List<String> warnings;
 
-    public InvalidExceptionRecordResponse(
+    public TransformationErrorResponse(
         @JsonProperty("errors") List<String> errors,
         @JsonProperty("warnings") List<String> warnings
     ) {

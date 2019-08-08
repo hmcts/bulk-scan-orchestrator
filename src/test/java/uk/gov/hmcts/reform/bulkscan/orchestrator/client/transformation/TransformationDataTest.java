@@ -6,8 +6,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.req
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.InvalidExceptionRecordResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.TransformationErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 
 import java.time.Instant;
@@ -32,7 +32,7 @@ public class TransformationDataTest {
 
     @Test
     public void testInvalidFormatTransformationResponse() {
-        InvalidExceptionRecordResponse response = new InvalidExceptionRecordResponse(
+        TransformationErrorResponse response = new TransformationErrorResponse(
             singletonList("Invalid Exception Record"),
             Collections.emptyList()
         );
