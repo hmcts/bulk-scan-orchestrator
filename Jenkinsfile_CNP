@@ -4,7 +4,7 @@
 import uk.gov.hmcts.contino.GradleBuilder
 import uk.gov.hmcts.contino.Kubectl
 import uk.gov.hmcts.contino.DockerImage
-import uk.gov.hmcts.contino.TeamNames
+import uk.gov.hmcts.pipeline.TeamConfig
 
 def type = "java"
 def product = "bulk-scan"
@@ -47,7 +47,7 @@ withPipeline(type, product, component) {
       def subscription = env.SUBSCRIPTION_NAME
       def aksServiceName = dockerImage.getAksServiceName().toLowerCase()
       def sbNamespaceSecret = "servicebus-secret-namespace-${aksServiceName}"
-      def namespace = new TeamNames(this).getNameSpace(product)
+      def namespace = new TeamConfig(this).getNameSpace(product)
 
       def kubectl = new Kubectl(this, subscription, namespace)
       kubectl.login()
