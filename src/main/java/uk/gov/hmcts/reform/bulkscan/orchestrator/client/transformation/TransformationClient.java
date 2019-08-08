@@ -10,8 +10,8 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.InvalidExceptionRecordResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.TransformationErrorResponse;
 
 import java.io.IOException;
 
@@ -66,7 +66,7 @@ public class TransformationClient {
             if (ex.getStatusCode().equals(UNPROCESSABLE_ENTITY) || ex.getStatusCode().equals(BAD_REQUEST)) {
                 throw new InvalidCaseDataException(
                     ex,
-                    objectMapper.readValue(ex.getResponseBodyAsByteArray(), InvalidExceptionRecordResponse.class)
+                    objectMapper.readValue(ex.getResponseBodyAsByteArray(), TransformationErrorResponse.class)
                 );
             }
 
