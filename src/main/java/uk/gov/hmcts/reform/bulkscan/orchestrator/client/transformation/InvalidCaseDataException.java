@@ -6,6 +6,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.res
 
 public class InvalidCaseDataException extends RuntimeException {
 
+    private static final long serialVersionUID = -8700417115686776610L;
+
     private final HttpStatus status;
 
     private final transient InvalidExceptionRecordResponse response;

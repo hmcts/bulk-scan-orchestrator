@@ -5,6 +5,8 @@ import org.springframework.web.client.HttpStatusCodeException;
 
 public class CaseTransformationException extends Exception {
 
+    private static final long serialVersionUID = 8081182548244205380L;
+
     private final HttpStatus status;
 
     private final transient String response;
