@@ -36,7 +36,7 @@ public class TransformationClient {
     }
 
     public SuccessfulTransformationResponse transformExceptionRecord(
-        String baseUrl, // todo base url as part of constructor grabbed from config
+        String baseUrl,
         ExceptionRecord exceptionRecord,
         String s2sToken
     ) throws IOException, CaseTransformationException {
