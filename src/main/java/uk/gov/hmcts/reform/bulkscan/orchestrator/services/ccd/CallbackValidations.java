@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import io.vavr.control.Validation;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -142,10 +143,12 @@ final class CallbackValidations {
             .map(c -> (String) c);
     }
 
+    @SuppressWarnings("unchecked")
     private static boolean exceptionRecordHasOcr(CaseDetails theCase) {
         return Optional.ofNullable(theCase)
             .map(CaseDetails::getData)
-            .map(data -> data.get("scanOCRData"))
-            .isPresent();
+            .map(data -> (List<Map<String, Object>>) data.get("scanOCRData"))
+            .map(CollectionUtils::isNotEmpty)
+            .orElse(false);
     }
 }

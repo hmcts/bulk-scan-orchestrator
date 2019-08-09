@@ -44,6 +44,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -763,6 +764,8 @@ class AttachExceptionRecordToExistingCaseTest {
             caseData.put("scanOCRData", singletonList(
                 ImmutableMap.of("first_name", "John")
             ));
+        } else {
+            caseData.put("scanOCRData", emptyList());
         }
 
         caseData.put("scannedDocuments", ImmutableList.of(EXCEPTION_RECORD_DOC));
