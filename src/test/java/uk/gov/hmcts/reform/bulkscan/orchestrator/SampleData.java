@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.time.temporal.ChronoUnit.DAYS;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.DatetimeHelper.toIso8601;
 
@@ -143,7 +144,8 @@ public class SampleData {
             Instant.now(),
             Classification.NEW_APPLICATION,
             documents(numberOfDocuments),
-            ocrData
+            ocrData,
+            asList("warning 1")
         );
     }
 
@@ -160,7 +162,8 @@ public class SampleData {
             Instant.now(),
             classification,
             documents(1),
-            ImmutableList.of(new OcrDataField("fieldName1", "value1"))
+            ImmutableList.of(new OcrDataField("fieldName1", "value1")),
+            asList("warning 1", "warning 2")
         );
     }
 

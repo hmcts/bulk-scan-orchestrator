@@ -229,6 +229,7 @@ public class CaseFinderTest {
             Instant.now(),
             Classification.SUPPLEMENTARY_EVIDENCE,
             emptyList(),
+            emptyList(),
             emptyList()
         );
     }
