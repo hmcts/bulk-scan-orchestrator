@@ -1,6 +1,5 @@
 java:
   environment:
-    APPINSIGHTS_INSTRUMENTATIONKEY: "00000000-0000-0000-0000-000000000000"
     S2S_NAME: "bulk_scan_orchestrator"
     S2S_URL: "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
     IDAM_API_URL: "https://idam-api.aat.platform.hmcts.net"
