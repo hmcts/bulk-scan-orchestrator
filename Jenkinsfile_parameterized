@@ -1,5 +1,5 @@
 #!groovy
-@Library(value="Infrastructure", changelog=false) _
+@Library(value="Infrastructure", changelog=false)
 
 def channel = '#bsp-build-notices'
 
@@ -15,10 +15,14 @@ properties([
   pipelineTriggers([[$class: 'GitHubPushTrigger']])
 ])
 
-List<LinkedHashMap<String, Object>> secrets = [
-  secret('s2s-secret-for-tests', 'S2S_SECRET'),
-  secret('idam-users-bulkscan-password', 'IDAM_USER_PASSWORD'),
-  secret('idam-client-secret', 'IDAM_CLIENT_SECRET'),
+def secrets = [
+  's2s-${env}': [
+    secret('microservicekey-secret-for-tests', 'S2S_SECRET')
+  ],
+  'bulk-scan-${env}': [
+    secret('idam-users-bulkscan-password', 'IDAM_USER_PASSWORD'),
+    secret('idam-client-secret', 'IDAM_CLIENT_SECRET')
+  ]
 ]
 
 static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
