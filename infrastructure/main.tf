@@ -155,10 +155,3 @@ data "azurerm_key_vault_secret" "processed_envelopes_queue_send_conn_str" {
   key_vault_id = "${data.azurerm_key_vault.key_vault.id}"
   name         = "processed-envelopes-queue-send-connection-string"
 }
-
-# the s2s secret is copied to app's own vault, so that Jeknins can convert it to an env variable
-resource "azurerm_key_vault_secret" "s2s_secret_for_tests" {
-  key_vault_id = "${data.azurerm_key_vault.key_vault.id}"
-  name         = "s2s-secret-for-tests"
-  value        = "${data.azurerm_key_vault_secret.s2s_secret.value}"
-}
