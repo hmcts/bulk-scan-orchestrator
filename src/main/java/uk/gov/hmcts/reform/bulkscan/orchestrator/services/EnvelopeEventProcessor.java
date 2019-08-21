@@ -64,8 +64,11 @@ public class EnvelopeEventProcessor {
         IMessage message = messageReceiver.receive();
 
         if (message != null) {
+            log.info("Started processing message with ID {}", message.getMessageId());
             MessageProcessingResult result = process(message);
             tryFinaliseProcessedMessage(message, result);
+        } else {
+            log.info("No envelope messages left to process");
         }
 
         return message != null;
