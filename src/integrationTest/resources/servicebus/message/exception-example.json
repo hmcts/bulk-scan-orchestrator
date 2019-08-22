@@ -27,5 +27,8 @@
       "metadata_field_name": "field2",
       "metadata_field_value": "value2"
     }
+  ],
+  "ocr_validation_warnings": [
+    "warning 1"
   ]
 }
