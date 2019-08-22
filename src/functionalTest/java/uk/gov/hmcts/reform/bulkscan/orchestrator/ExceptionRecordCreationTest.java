@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CreateExceptionRecord;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -22,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getOcrData;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getOcrDataValidationWarnings;
 
 @SpringBootTest
 @ActiveProfiles("nosb")  // no servicebus queue handler registration
@@ -96,6 +98,9 @@ class ExceptionRecordCreationTest {
 
         Map<String, String> expectedOcrData = ImmutableMap.of("field1", "value1", "field2", "value2");
         assertThat(getOcrData(caseDetails)).isEqualTo(expectedOcrData);
+
+        List<String> expectedOcrDataWarnings = Arrays.asList("warning 1", "warning 2");
+        assertThat(getOcrDataValidationWarnings(caseDetails)).isEqualTo(expectedOcrDataWarnings);
     }
 
     @DisplayName("Should create ExceptionRecord when provided/requested case reference is invalid")

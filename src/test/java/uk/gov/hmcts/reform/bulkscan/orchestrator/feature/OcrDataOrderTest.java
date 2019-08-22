@@ -55,5 +55,11 @@ public class OcrDataOrderTest {
                 new CcdCollectionElement<>(new CcdKeyValue("boolean_field", "true")),
                 new CcdCollectionElement<>(new CcdKeyValue("null_field", null))
             );
+
+        assertThat(record.ocrDataValidationWarnings)
+            .usingRecursiveFieldByFieldElementComparator()
+            .containsExactly(
+                new CcdCollectionElement<>("warning 1")
+            );
     }
 }
