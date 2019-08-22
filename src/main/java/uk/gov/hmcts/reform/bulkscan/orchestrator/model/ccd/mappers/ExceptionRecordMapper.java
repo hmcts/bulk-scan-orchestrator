@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envel
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.OcrDataField;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentMapper.getLocalDateTime;
@@ -36,7 +37,8 @@ public class ExceptionRecordMapper {
             getLocalDateTime(envelope.deliveryDate),
             getLocalDateTime(envelope.openingDate),
             mapDocuments(envelope.documents, documentManagementUrl, contextPath, envelope.deliveryDate),
-            mapOcrData(envelope.ocrData)
+            mapOcrData(envelope.ocrData),
+            mapOcrDataWarnings(envelope.ocrDataValidationWarnings)
         );
     }
 
@@ -49,5 +51,12 @@ public class ExceptionRecordMapper {
                 .collect(toList());
         }
         return null;
+    }
+
+    private List<CcdCollectionElement<String>> mapOcrDataWarnings(List<String> ocrDataWarnings) {
+        return ocrDataWarnings
+            .stream()
+            .map(CcdCollectionElement::new)
+            .collect(Collectors.toList());
     }
 }
