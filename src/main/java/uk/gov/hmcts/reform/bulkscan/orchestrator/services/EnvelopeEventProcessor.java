@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.handler.Mes
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
 import java.time.Instant;
+import java.util.Objects;
 
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.EnvelopeParser.parse;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.handler.MessageProcessingResultType.POTENTIALLY_RECOVERABLE_FAILURE;
@@ -31,6 +32,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.hand
 public class EnvelopeEventProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(EnvelopeEventProcessor.class);
+
+    public static final String HEARTBEAT_LABEL = "heartbeat";
 
     private final EnvelopeHandler envelopeHandler;
     private final IProcessedEnvelopeNotifier processedEnvelopeNotifier;
@@ -71,27 +74,32 @@ public class EnvelopeEventProcessor {
     private MessageProcessingResult process(IMessage message) {
         log.info("Started processing message with ID {}", message.getMessageId());
 
-        Envelope envelope = null;
-
-        try {
-            envelope = parse(MessageBodyRetriever.getBinaryData(message.getMessageBody()));
-            logMessageParsed(message, envelope);
-            envelopeHandler.handleEnvelope(envelope);
-            processedEnvelopeNotifier.notify(envelope.id);
-            log.info("Processed message with ID {}. File name: {}", message.getMessageId(), envelope.zipFileName);
+        if (Objects.equals(message.getLabel(), HEARTBEAT_LABEL)) {
+            log.info("Heartbeat message received");
             return new MessageProcessingResult(SUCCESS);
-        } catch (InvalidMessageException ex) {
-            log.error("Rejected message with ID {}, because it's invalid", message.getMessageId(), ex);
-            return new MessageProcessingResult(UNRECOVERABLE_FAILURE, ex);
-        } catch (NotificationSendingException ex) {
-            logMessageProcessingError(message, envelope, ex);
+        } else {
+            Envelope envelope = null;
 
-            // CCD changes have been made, so it's better to dead-letter the message and
-            // not repeat them, at least until CCD operations become idempotent
-            return new MessageProcessingResult(UNRECOVERABLE_FAILURE, ex);
-        } catch (Exception ex) {
-            logMessageProcessingError(message, envelope, ex);
-            return new MessageProcessingResult(POTENTIALLY_RECOVERABLE_FAILURE);
+            try {
+                envelope = parse(MessageBodyRetriever.getBinaryData(message.getMessageBody()));
+                logMessageParsed(message, envelope);
+                envelopeHandler.handleEnvelope(envelope);
+                processedEnvelopeNotifier.notify(envelope.id);
+                log.info("Processed message with ID {}. File name: {}", message.getMessageId(), envelope.zipFileName);
+                return new MessageProcessingResult(SUCCESS);
+            } catch (InvalidMessageException ex) {
+                log.error("Rejected message with ID {}, because it's invalid", message.getMessageId(), ex);
+                return new MessageProcessingResult(UNRECOVERABLE_FAILURE, ex);
+            } catch (NotificationSendingException ex) {
+                logMessageProcessingError(message, envelope, ex);
+
+                // CCD changes have been made, so it's better to dead-letter the message and
+                // not repeat them, at least until CCD operations become idempotent
+                return new MessageProcessingResult(UNRECOVERABLE_FAILURE, ex);
+            } catch (Exception ex) {
+                logMessageProcessingError(message, envelope, ex);
+                return new MessageProcessingResult(POTENTIALLY_RECOVERABLE_FAILURE);
+            }
         }
     }
 

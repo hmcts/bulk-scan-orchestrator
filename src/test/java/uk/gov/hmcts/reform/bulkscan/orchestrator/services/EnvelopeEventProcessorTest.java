@@ -32,6 +32,7 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelopeJson;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.NEW_APPLICATION;
 
@@ -290,6 +291,24 @@ class EnvelopeEventProcessorTest {
 
         assertThatThrownBy(() -> processor.processNextMessage())
             .isSameAs(receiverException);
+    }
+
+    @Test
+    void should_not_treat_heartbeat_messages_as_envelopes() throws Exception {
+        // given
+        IMessage message = mock(IMessage.class);
+        given(message.getLabel()).willReturn(EnvelopeEventProcessor.HEARTBEAT_LABEL);
+
+        given(messageReceiver.receive()).willReturn(message);
+
+        // when
+        processor.processNextMessage();
+
+        // then
+        verifyZeroInteractions(
+            envelopeHandler,
+            processedEnvelopeNotifier
+        );
     }
 
     private IMessage getValidMessage() {
