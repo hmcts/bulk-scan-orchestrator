@@ -2,7 +2,7 @@ java:
   applicationPort: 8582
   secrets:
     SB_CONN_STRING:
-      secretRef: servicebus-secret-namespace-${SERVICE_NAME}
+      secretRef: servicebus-secret-namespace-{{ .Release.Name }}
       key: connectionString
   environment:
     ENVELOPES_QUEUE_CONNECTION_STRING: "$(SB_CONN_STRING);EntityPath=envelopes"
@@ -20,8 +20,7 @@ java:
       secrets:
         - microservicekey-bulk-scan-orchestrator
   # Don't modify below here
-  image: ${IMAGE_NAME}
-  ingressHost: ${SERVICE_FQDN}
+  image: 'hmctspublic.azurecr.io/bulk-scan/orchestrator:latest'
 
 servicebus:
   resourceGroup: bulk-scan-aks
@@ -33,4 +32,3 @@ servicebus:
       - name: envelopes
       - name: notifications
       - name: processed-envelopes
-
