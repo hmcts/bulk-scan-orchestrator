@@ -1,8 +1,11 @@
 java:
   applicationPort: 8582
   secrets:
-    SB_CONN_STRING:
-      secretRef: servicebus-secret-namespace-{{ .Release.Name }}
+    SB_ENVELOPES_CONN_STRING:
+      secretRef: servicebus-queue-{{ .Release.Name }}-envelopes
+      key: connectionString
+    SB_PROCESSED_ENVELOPES_CONN_STRING:
+      secretRef: servicebus-queue-{{ .Release.Name }}-processed-envelopes
       key: connectionString
   environment:
     CORE_CASE_DATA_API_URL: "http://ccd-data-store-api-aat.service.core-compute-aat.internal"
@@ -10,11 +13,11 @@ java:
     DELETE_ENVELOPES_DLQ_MESSAGES_CRON: "0 * * * * *"
     DELETE_ENVELOPES_DLQ_MESSAGES_TTL: "10s"
     DOCUMENT_MANAGEMENT_URL: "http://dm-store-aat.service.core-compute-aat.internal"
-    ENVELOPES_QUEUE_CONNECTION_STRING: "$(SB_CONN_STRING);EntityPath=envelopes"
+    ENVELOPES_QUEUE_CONNECTION_STRING: "$(SB_ENVELOPES_CONN_STRING);EntityPath=envelopes"
     ENVELOPES_QUEUE_MAX_DELIVERY_COUNT: "10"
     IDAM_API_URL: "https://idam-api.aat.platform.hmcts.net"
     IDAM_CLIENT_REDIRECT_URI: "https://bulk-scan-orchestrator-aat.service.core-compute-aat.internal/oauth2/callback"
-    PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING: "$(SB_CONN_STRING);EntityPath=processed-envelopes"
+    PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING: "$(SB_PROCESSED_ENVELOPES_CONN_STRING);EntityPath=processed-envelopes"
     QUEUE_READ_INTERVAL: "30000"
     S2S_NAME: "bulk_scan_orchestrator"
     S2S_URL: "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
