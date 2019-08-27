@@ -294,7 +294,7 @@ class EnvelopeEventProcessorTest {
     }
 
     @Test
-    void should_not_treat_heartbeat_messages_as_envelopes() throws Exception {
+    public void should_not_treat_heartbeat_messages_as_envelopes() throws Exception {
         // given
         IMessage message = mock(IMessage.class);
         given(message.getLabel()).willReturn(EnvelopeEventProcessor.HEARTBEAT_LABEL);
