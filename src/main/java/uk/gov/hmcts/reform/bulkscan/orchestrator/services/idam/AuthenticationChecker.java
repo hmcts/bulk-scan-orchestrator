@@ -48,11 +48,11 @@ public class AuthenticationChecker {
         try {
             idamClient.authenticateUser(credential.getUsername(), credential.getPassword());
 
-            log.debug("Successful authentication of {} jurisdiction", jurisdiction);
+            log.info("Successful authentication of {} jurisdiction", jurisdiction);
 
             return new JurisdictionConfigurationStatus(jurisdiction, true);
         } catch (FeignException e) {
-            log.warn(
+            log.error(
                 "An error occurred while authenticating {} jurisdiction with {} username",
                 jurisdiction,
                 credential.getUsername(),
