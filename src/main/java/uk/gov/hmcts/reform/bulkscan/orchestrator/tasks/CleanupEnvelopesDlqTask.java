@@ -64,6 +64,7 @@ public class CleanupEnvelopesDlqTask {
                         Instant.now()
                     );
                 } else {
+                    log.info("Leaving message on dql, ttl has not passed yet. Message id: {}", message.getMessageId())
                     messageReceiver.abandon(message.getLockToken());
                 }
                 message = messageReceiver.receive();
@@ -101,8 +102,10 @@ public class CleanupEnvelopesDlqTask {
             );
         } catch (InvalidMessageException e) {
             // Not logging the exception as it prints the sensitive information from the envelope
-            log.error("An error occurred while parsing the dlq message with messageId: {}",
-                msg.getMessageId());
+            log.error(
+                "An error occurred while parsing the dlq message with messageId: {}",
+                msg.getMessageId()
+            );
         }
     }
 
@@ -114,7 +117,8 @@ public class CleanupEnvelopesDlqTask {
             Instant deadLetteredAt = Instant.parse(messageProperties.get("deadLetteredAt"));
 
             log.info(
-                "MessageId: {} Dead lettered time: {} ttl: {} Current time: {}",
+                "Checking if DQL message can be completed. "
+                    + "MessageId: {}, dead lettered time: {}, ttl: {}, current time: {}",
                 message.getMessageId(),
                 deadLetteredAt,
                 this.ttl,
