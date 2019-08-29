@@ -117,7 +117,7 @@ public class CleanupEnvelopesDlqTask {
             Instant deadLetteredAt = Instant.parse(messageProperties.get("deadLetteredAt"));
 
             log.info(
-                "Checking if DQL message can be completed. "
+                "Checking if DLQ message can be completed. "
                     + "MessageId: {}, dead lettered time: {}, ttl: {}, current time: {}",
                 message.getMessageId(),
                 deadLetteredAt,
