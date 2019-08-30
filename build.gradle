@@ -172,7 +172,7 @@ ext["rest-assured.version"] = '4.0.0'
 dependencyManagement {
   dependencies {
     // CVE-2018-10237 - Unbounded memory allocation
-    dependencySet(group: 'com.google.guava', version: '28.0-jre') {
+    dependencySet(group: 'com.google.guava', version: '28.1-jre') {
       entry 'guava'
     }
     // CVE-2019-12814
