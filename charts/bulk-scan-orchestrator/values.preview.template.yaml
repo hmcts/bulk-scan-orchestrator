@@ -1,8 +1,7 @@
 java:
-  applicationPort: 8582
   secrets:
     SB_CONN_STRING:
-      secretRef: servicebus-secret-namespace-${SERVICE_NAME}
+      secretRef: servicebus-secret-namespace-{{ .Release.Name }}
       key: connectionString
   environment:
     ENVELOPES_QUEUE_CONNECTION_STRING: "$(SB_CONN_STRING);EntityPath=envelopes"
