@@ -1,9 +1,13 @@
 java:
-  # Don't modify below here
-  image: ${IMAGE_NAME}
-  ingressHost: ${SERVICE_FQDN}
+  secrets:
+    SB_CONN_STRING:
+      secretRef: servicebus-secret-namespace-{{ .Release.Name }}
+      key: connectionString
   environment:
     APPINSIGHTS_INSTRUMENTATIONKEY: "00000000-0000-0000-0000-000000000000"
+    ENVELOPES_QUEUE_CONNECTION_STRING: "$(SB_CONN_STRING);EntityPath=envelopes"
+    ENVELOPES_QUEUE_MAX_DELIVERY_COUNT: "10"
+    PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING: "$(SB_CONN_STRING);EntityPath=processed-envelopes"
     S2S_NAME: "bulk_scan_orchestrator"
     S2S_URL: "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
     IDAM_API_URL: "https://idam-api.aat.platform.hmcts.net"
@@ -14,3 +18,18 @@ java:
     DELETE_ENVELOPES_DLQ_MESSAGES_ENABLED: "true"
     DELETE_ENVELOPES_DLQ_MESSAGES_CRON: "0 * * * * *"
     DELETE_ENVELOPES_DLQ_MESSAGES_TTL: "10s"
+  # Don't modify below here
+  image: ${IMAGE_NAME}
+  ingressHost: ${SERVICE_FQDN}
+
+servicebus:
+  resourceGroup: bulk-scan-aks
+  teamName: "Software Engineering"
+  location: ukwest
+  serviceplan: basic
+  setup:
+    queues:
+      - name: envelopes
+      - name: notifications
+      - name: processed-envelopes
+
