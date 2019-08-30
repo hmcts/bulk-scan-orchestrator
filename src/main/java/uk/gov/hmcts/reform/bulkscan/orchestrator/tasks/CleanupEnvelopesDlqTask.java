@@ -64,7 +64,7 @@ public class CleanupEnvelopesDlqTask {
                         Instant.now()
                     );
                 } else {
-                    log.info("Leaving message on dlq, ttl has not passed yet. Message id: {}", message.getMessageId())
+                    log.info("Leaving message on dlq, ttl has not passed yet. Message id: {}", message.getMessageId());
                     messageReceiver.abandon(message.getLockToken());
                 }
                 message = messageReceiver.receive();
