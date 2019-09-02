@@ -80,7 +80,7 @@ task smoke(type: Test) {
 
 checkstyle {
   maxWarnings = 0
-  toolVersion = '8.19'
+  toolVersion = '8.24'
   // need to set configDir to rootDir otherwise submodule will use submodule/config/checkstyle
   configDir = new File(rootDir, 'config/checkstyle')
 }
@@ -178,10 +178,6 @@ dependencyManagement {
     // CVE-2019-12814
     dependencySet(group: 'com.fasterxml.jackson.core', version: '2.9.9.2') {
       entry 'jackson-databind'
-    }
-    // CVE-2019-10086
-    dependencySet(group: 'commons-beanutils', version: '1.9.4') {
-      entry 'commons-beanutils'
     }
     // solves: CVE-2017-13098, CVE-2018-1000180, CVE-2018-1000613
     dependencySet(group: 'org.bouncycastle', version: '1.62') {
