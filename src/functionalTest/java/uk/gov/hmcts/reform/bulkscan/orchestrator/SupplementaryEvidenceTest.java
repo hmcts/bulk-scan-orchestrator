@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import com.google.common.base.Strings;
 import org.apache.commons.lang3.StringUtils;
-import org.awaitility.Duration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,6 +14,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -63,7 +63,7 @@ class SupplementaryEvidenceTest {
         assertThat(dmUrl).isNotNull();
         await("Supplementary evidence is attached to the case in ccd")
             .atMost(60, TimeUnit.SECONDS)
-            .pollInterval(Duration.TWO_SECONDS)
+            .pollInterval(Duration.ofSeconds(2))
             .until(() -> hasCaseBeenUpdatedWithSupplementaryEvidence(caseDetails, 1));
     }
 
@@ -93,7 +93,7 @@ class SupplementaryEvidenceTest {
         // then
         await("Supplementary evidence is attached to the case in ccd")
             .atMost(60, TimeUnit.SECONDS)
-            .pollInterval(Duration.TWO_SECONDS)
+            .pollInterval(Duration.ofSeconds(2))
             .until(() -> hasCaseBeenUpdatedWithSupplementaryEvidence(caseDetails, 2));
     }
 
@@ -108,7 +108,7 @@ class SupplementaryEvidenceTest {
 
         await("The new case can be found by legacy ID")
             .atMost(30, TimeUnit.SECONDS)
-            .pollInterval(Duration.ONE_SECOND)
+            .pollInterval(Duration.ofSeconds(1))
             .until(() -> !ccdApi.getCaseRefsByLegacyId(legacyId, TEST_SERVICE_NAME).isEmpty());
 
         // when
@@ -123,7 +123,7 @@ class SupplementaryEvidenceTest {
         // then
         await("Supplementary evidence is attached to the case in ccd")
             .atMost(60, TimeUnit.SECONDS)
-            .pollInterval(Duration.TWO_SECONDS)
+            .pollInterval(Duration.ofSeconds(2))
             .until(() -> hasCaseBeenUpdatedWithSupplementaryEvidence(caseDetails, 1));
     }
 
