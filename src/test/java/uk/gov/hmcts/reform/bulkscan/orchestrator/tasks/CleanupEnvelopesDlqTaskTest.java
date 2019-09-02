@@ -109,7 +109,7 @@ class CleanupEnvelopesDlqTaskTest {
     }
 
     @Test
-    void should_leave_message_on_dlw_when_the_ttl_is_less_than_duration() throws Exception {
+    void should_leave_message_on_dlq_when_the_ttl_is_less_than_duration() throws Exception {
         //given
         given(message.getProperties())
             .willReturn(
