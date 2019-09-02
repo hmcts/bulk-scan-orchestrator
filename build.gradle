@@ -176,7 +176,7 @@ dependencyManagement {
       entry 'guava'
     }
     // CVE-2019-12814
-    dependencySet(group: 'com.fasterxml.jackson.core', version: '2.9.9.2') {
+    dependencySet(group: 'com.fasterxml.jackson.core', version: '2.10.0.pr2') {
       entry 'jackson-databind'
     }
     // solves: CVE-2017-13098, CVE-2018-1000180, CVE-2018-1000613
