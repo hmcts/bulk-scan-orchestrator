@@ -179,6 +179,10 @@ dependencyManagement {
     dependencySet(group: 'com.fasterxml.jackson.core', version: '2.9.9.2') {
       entry 'jackson-databind'
     }
+    // CVE-2019-10086
+    dependencySet(group: 'commons-beanutils', version: '1.9.4') {
+      entry 'commons-beanutils'
+    }
     // solves: CVE-2017-13098, CVE-2018-1000180, CVE-2018-1000613
     dependencySet(group: 'org.bouncycastle', version: '1.62') {
       entry 'bcprov-jdk15on'
