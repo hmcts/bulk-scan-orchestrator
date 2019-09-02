@@ -64,8 +64,8 @@ public class CleanupEnvelopesDlqTask {
                         Instant.now()
                     );
                 } else {
+                    // just continue, lock on the current msg will expire automatically
                     log.info("Leaving message on dlq, ttl has not passed yet. Message id: {}", message.getMessageId());
-                    messageReceiver.abandon(message.getLockToken());
                 }
                 message = messageReceiver.receive();
             }
