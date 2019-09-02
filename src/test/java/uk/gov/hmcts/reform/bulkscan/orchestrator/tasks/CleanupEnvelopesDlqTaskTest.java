@@ -94,28 +94,22 @@ class CleanupEnvelopesDlqTaskTest {
     void should_not_delete_messages_from_dlq_when_deadLetteredTime_is_not_set()
         throws Exception {
         //given
-        UUID uuid = UUID.randomUUID();
-        given(message.getLockToken()).willReturn(uuid);
         given(message.getProperties()).willReturn(Collections.emptyMap());
         given(message.getProperties().get("deadLetteredAt")).willReturn(null);
         given(messageReceiver.receive()).willReturn(message).willReturn(null);
-
-        ArgumentCaptor<UUID> uuidArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
 
         //when
         cleanupDlqTask.deleteMessagesInEnvelopesDlq();
 
         //then
         verify(messageReceiver, times(2)).receive();
-        verify(messageReceiver).abandon(uuidArgumentCaptor.capture());
-        assertThat(uuidArgumentCaptor.getValue()).isEqualTo(uuid);
         verify(messageReceiver, never()).complete(any());
         verify(messageReceiver, times(1)).close();
         verifyNoMoreInteractions(messageReceiver);
     }
 
     @Test
-    void should_call_abandon_message_when_the_ttl_is_less_than_duration() throws Exception {
+    void should_leave_message_on_dlq_when_the_ttl_is_less_than_duration() throws Exception {
         //given
         given(message.getProperties())
             .willReturn(
@@ -132,7 +126,6 @@ class CleanupEnvelopesDlqTaskTest {
         //then
         verify(messageReceiver, times(2)).receive();
         verify(messageReceiver, never()).complete(any());
-        verify(messageReceiver, times(1)).abandon(any());
         verify(messageReceiver, times(1)).close();
         verifyNoMoreInteractions(messageReceiver);
     }
