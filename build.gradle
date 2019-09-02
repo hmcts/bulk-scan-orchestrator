@@ -123,10 +123,10 @@ sonarqube {
 
 dependencyUpdates.resolutionStrategy {
   componentSelection { rules ->
-    rules.all {
+    rules.all { ComponentSelection selection ->
       def isNonStable = { String version ->
         ['alpha', 'beta', 'rc', 'cr', 'm', 'preview', 'b', 'ea'].any { qualifier ->
-          version ==~ /(?i).*[.-]\$qualifier[.\\d-+]*/
+          version ==~ /(?i).*[.-]$qualifier[.\d-+]*/
         }
       }
 
