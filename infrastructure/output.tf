@@ -1,7 +1,3 @@
-output "microserviceName" {
-  value = "${var.component}"
-}
-
 // region: settings for functional tests
 
 output "ENVELOPES_QUEUE_WRITE_CONN_STRING" {
