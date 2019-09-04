@@ -51,7 +51,7 @@ class ExceptionRecordCreationTest {
 
     @DisplayName("Should create ExceptionRecord when provided/requested supplementary evidence is not present")
     @Test
-    void create_exception_record_from_supplementary_evidence() throws Exception {
+    public void create_exception_record_from_supplementary_evidence() throws Exception {
         // given
         UUID randomPoBox = UUID.randomUUID();
 
@@ -73,7 +73,7 @@ class ExceptionRecordCreationTest {
 
     @DisplayName("Should create ExceptionRecord when classification is NEW_APPLICATION")
     @Test
-    void should_create_exception_record_for_new_application() throws Exception {
+    public void should_create_exception_record_for_new_application() throws Exception {
         // given
         UUID randomPoBox = UUID.randomUUID();
 
@@ -105,7 +105,7 @@ class ExceptionRecordCreationTest {
 
     @DisplayName("Should create ExceptionRecord when provided/requested case reference is invalid")
     @Test
-    void create_exception_record_for_invalid_case_reference() throws Exception {
+    public void create_exception_record_for_invalid_case_reference() throws Exception {
         // given
         UUID randomPoBox = UUID.randomUUID();
 
