@@ -129,10 +129,18 @@ public class SampleData {
     }
 
     public static Envelope envelope(int numberOfDocuments) {
-        return envelope(numberOfDocuments, ImmutableList.of(new OcrDataField("fieldName1", "value1")));
+        return envelope(
+            numberOfDocuments,
+            ImmutableList.of(new OcrDataField("fieldName1", "value1")),
+            asList("warning 1", "warning 2")
+        );
     }
 
-    public static Envelope envelope(int numberOfDocuments, List<OcrDataField> ocrData) {
+    public static Envelope envelope(
+        int numberOfDocuments,
+        List<OcrDataField> ocrData,
+        List<String> ocrDataValidationWarnings
+    ) {
         return new Envelope(
             ENVELOPE_ID,
             CASE_REF,
@@ -146,7 +154,7 @@ public class SampleData {
             Classification.NEW_APPLICATION,
             documents(numberOfDocuments),
             ocrData,
-            asList("warning 1")
+            ocrDataValidationWarnings
         );
     }
 
