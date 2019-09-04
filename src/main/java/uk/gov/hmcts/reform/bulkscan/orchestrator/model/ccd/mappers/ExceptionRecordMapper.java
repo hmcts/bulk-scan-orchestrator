@@ -33,6 +33,7 @@ public class ExceptionRecordMapper {
             envelope.classification.name(),
             envelope.poBox,
             envelope.jurisdiction,
+            envelope.formType,
             getLocalDateTime(envelope.deliveryDate),
             getLocalDateTime(envelope.openingDate),
             mapDocuments(envelope.documents, documentManagementUrl, contextPath, envelope.deliveryDate),

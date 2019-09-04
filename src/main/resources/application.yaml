@@ -16,6 +16,8 @@ spring:
     name: Bulk Scan Orchestrator
 
 azure:
+  application-insights:
+    instrumentation-key: integration-test
   servicebus:
     envelopes:
       connection-string: ${ENVELOPES_QUEUE_CONNECTION_STRING}

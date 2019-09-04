@@ -41,6 +41,7 @@ public class SampleData {
     public static final String JURSIDICTION = "BULKSCAN";
     public static final String CONTAINER = "bulkscan";
     public static final String PO_BOX = "BULKSCAN_PO_BOX";
+    public static final String FORM_TYPE = "FORM_TYPE";
     public static final long CASE_ID = 23L;
     public static final String EXAMPLE_JSON_FILE = "envelopes/example.json";
     public static final String BULK_SCANNED_CASE_TYPE = "Bulk_Scanned";
@@ -140,6 +141,7 @@ public class SampleData {
             JURSIDICTION,
             CONTAINER,
             "zip-file-test.zip",
+            FORM_TYPE,
             Instant.now(),
             Instant.now(),
             Classification.NEW_APPLICATION,
@@ -158,6 +160,7 @@ public class SampleData {
             JURSIDICTION,
             CONTAINER,
             "zip-file-test.zip",
+            FORM_TYPE,
             Instant.now(),
             Instant.now(),
             classification,
