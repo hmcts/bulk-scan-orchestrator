@@ -20,12 +20,12 @@ public final class EventIdValidator {
 
     @Nonnull
     static Validation<String, Void> isAttachToCaseEvent(String eventId) {
-        return hasValidEventId(EVENT_ID_ATTACH_TO_CASE::equalsIgnoreCase, eventId);
+        return hasValidEventId(EVENT_ID_ATTACH_TO_CASE::equals, eventId);
     }
 
     @Nonnull
     static Validation<String, Void> isCreateCaseEvent(String eventId) {
-        return hasValidEventId(EVENT_ID_CREATE_CASE::equalsIgnoreCase, eventId);
+        return hasValidEventId(EVENT_ID_CREATE_CASE::equals, eventId);
     }
 
     @Nonnull

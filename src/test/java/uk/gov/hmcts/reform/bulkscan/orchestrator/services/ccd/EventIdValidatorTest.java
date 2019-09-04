@@ -11,6 +11,7 @@ class EventIdValidatorTest {
     private static Object[][] attachToCaseEventIdTestParams() {
         return new Object[][]{
             {"Invalid 'Attach to Case' event id", "invalid_event_id", false},
+            {"Invalid 'Attach to Case' event id", "AttachToExistingCase", false},
             {"Valid 'Attach to Case' event id", "attachToExistingCase", true}
         };
     }
@@ -18,12 +19,16 @@ class EventIdValidatorTest {
     @ParameterizedTest(name = "{0}: valid:{2}")
     @MethodSource("attachToCaseEventIdTestParams")
     void attachToCaseEventIdTest(String caseDescription, String eventId, boolean expectedIsValid) {
-        assertEventIdValidation(EventIdValidator.isAttachToCaseEvent(eventId), expectedIsValid);
+        Validation<String, Void> validation = EventIdValidator.isAttachToCaseEvent(eventId);
+
+        assertThat(validation.isValid()).isEqualTo(expectedIsValid);
+        assertErrorMessage(validation, eventId);
     }
 
     private static Object[][] createCaseEventIdTestParams() {
         return new Object[][]{
             {"Invalid 'Create Case' event id", "invalid_event_id", false},
+            {"Valid 'Create Case' event id", "CreateCase", false},
             {"Valid 'Create Case' event id", "createCase", true}
         };
     }
@@ -31,15 +36,17 @@ class EventIdValidatorTest {
     @ParameterizedTest(name = "{0}: valid:{2}")
     @MethodSource("createCaseEventIdTestParams")
     void createCaseEventIdTest(String caseDescription, String eventId, boolean expectedIsValid) {
-        assertEventIdValidation(EventIdValidator.isCreateCaseEvent(eventId), expectedIsValid);
+        Validation<String, Void> validation = EventIdValidator.isCreateCaseEvent(eventId);
+
+        assertThat(validation.isValid()).isEqualTo(expectedIsValid);
+        assertErrorMessage(validation, eventId);
     }
 
-    private void assertEventIdValidation(Validation<String, Void> validation, boolean expectedIsValid) {
-        assertThat(validation.isValid()).isEqualTo(expectedIsValid);
-
+    private void assertErrorMessage(Validation<String, Void> validation, String expectedEventId) {
         if (validation.isInvalid()) {
             assertThat(validation.getError()).isEqualTo(
-                "The invalid_event_id event is not supported. Please contact service team"
+                "The %s event is not supported. Please contact service team",
+                expectedEventId
             );
         }
     }
