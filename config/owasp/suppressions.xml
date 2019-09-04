@@ -36,7 +36,7 @@
   </suppress>
   <suppress>
     <notes><![CDATA[No fix is available]]></notes>
-    <gav regex="true">^org\.springframework\.security:spring-security-crypto:5\.1\.5\.RELEASE$</gav>
+    <gav regex="true">^org\.springframework\.security:spring-security-crypto:5\.1\.6\.RELEASE$</gav>
     <cve>CVE-2018-1258</cve>
   </suppress>
 
@@ -80,6 +80,7 @@
     <!-- jackson-databind -->
     <cve>CVE-2018-5968</cve>
     <cve>CVE-2018-7489</cve>
+    <cve>CVE-2018-11307</cve>
     <cve>CVE-2018-12022</cve>
     <cve>CVE-2018-12023</cve>
     <cve>CVE-2018-14718</cve>
@@ -105,5 +106,8 @@
     <cve>CVE-2012-6708</cve>
     <cve>CVE-2015-9251</cve>
     <cve>CVE-2019-11358</cve>
+    <!--jackson databind-->
+    <cve>CVE-2019-14379</cve>
+    <cve>CVE-2019-14439</cve>
   </suppress>
 </suppressions>

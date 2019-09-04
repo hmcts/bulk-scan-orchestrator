@@ -1,0 +1,14 @@
+java:
+  applicationPort: 8582
+  keyVaults:
+    bulk-scan:
+      resourceGroup: bulk-scan
+      secrets:
+        - idam-client-secret
+        - idam-users-bulkscan-username
+        - idam-users-bulkscan-password
+    s2s:
+      resourceGroup: rpe-service-auth-provider
+      secrets:
+        - microservicekey-bulk-scan-orchestrator
+  image: hmctspublic.azurecr.io/bulk-scan/orchestrator:latest

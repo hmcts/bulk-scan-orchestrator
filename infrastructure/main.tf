@@ -77,6 +77,10 @@ locals {
     DELETE_ENVELOPES_DLQ_MESSAGES_CRON    = "${var.delete_envelopes_dlq_messages_cron}"
     DELETE_ENVELOPES_DLQ_MESSAGES_TTL     = "${var.delete_envelopes_dlq_messages_ttl}"
 
+    // region transformation URLs
+    TRANSFORMATION_URL_BULKSCAN = "${var.transformation_url_bulkscan}"
+    // endregion
+
     TMP_DUMMY_VAR = "remove me"
   }
 }
@@ -150,11 +154,4 @@ data "azurerm_key_vault_secret" "envelopes_queue_max_delivery_count" {
 data "azurerm_key_vault_secret" "processed_envelopes_queue_send_conn_str" {
   key_vault_id = "${data.azurerm_key_vault.key_vault.id}"
   name         = "processed-envelopes-queue-send-connection-string"
-}
-
-# the s2s secret is copied to app's own vault, so that Jeknins can convert it to an env variable
-resource "azurerm_key_vault_secret" "s2s_secret_for_tests" {
-  key_vault_id = "${data.azurerm_key_vault.key_vault.id}"
-  name         = "s2s-secret-for-tests"
-  value        = "${data.azurerm_key_vault_secret.s2s_secret.value}"
 }

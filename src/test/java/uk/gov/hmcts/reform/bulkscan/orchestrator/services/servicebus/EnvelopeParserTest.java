@@ -74,7 +74,8 @@ class EnvelopeParserTest {
                 new OcrDataField("key1", "value1"),
                 new OcrDataField("key2", "value2"),
                 new OcrDataField("key0", "value0")
-            )
+            ),
+            ImmutableList.of("warning 1")
         );
     }
 
@@ -98,6 +99,7 @@ class EnvelopeParserTest {
                     .put(toJson(envelope.documents.get(1)))
                 )
                 .put("ocr_data", toOcrJson(envelope.ocrData))
+                .put("ocr_validation_warnings", new JSONArray(envelope.ocrValidationWarnings))
                 .toString();
 
         // when
@@ -160,6 +162,7 @@ class EnvelopeParserTest {
                 )
                 .put("some_extra_ignored_field", "some_ignored_value")
                 .put("ocr_data", toOcrJson(envelope.ocrData))
+                .put("ocr_validation_warnings", new JSONArray(envelope.ocrValidationWarnings))
                 .toString();
 
         // when

@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithAttachReference;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithCcdSearchCaseReference;
@@ -31,6 +32,8 @@ class CallbackValidationsTest {
     public static final String NO_CASE_REFERENCE_TYPE_SUPPLIED_ERROR = "No case reference type supplied";
     public static final String NO_IDAM_TOKEN_RECEIVED_ERROR = "Callback has no Idam token received in the header";
     public static final String NO_USER_ID_RECEIVED_ERROR = "Callback has no user id received in the header";
+    public static final String JOURNEY_CLASSIFICATION = "journeyClassification";
+    public static final String CLASSIFICATION_EXCEPTION = "EXCEPTION";
 
     private static Object[][] attachToCaseReferenceTestParams() {
         String noReferenceSupplied = "No case reference supplied";
@@ -190,6 +193,57 @@ class CallbackValidationsTest {
         );
     }
 
+    private static Object[][] classificationTestParams() {
+        return new Object[][]{
+            {"Invalid journey classification", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, "invalid_classification"))), false, "Invalid journey classification invalid_classification"},
+            {"Valid journey classification(supplementary evidence)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, "SUPPLEMENTARY_EVIDENCE"))), true, null},
+            {"Valid journey classification(exception without ocr)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, CLASSIFICATION_EXCEPTION))), true, null},
+            {"Valid journey classification(exception with empty ocr list)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, CLASSIFICATION_EXCEPTION, "scanOCRData", emptyList()))), true, null},
+            {"Invalid action-Valid journey classification(exception with ocr)", createCaseWith(b -> b.data(caseDataWithOcr())), false, "The 'attach to case' event is not supported for exception records with OCR"}
+        };
+    }
+
+    @ParameterizedTest(name = "{0}: valid:{2} error/value:{3}")
+    @MethodSource("classificationTestParams")
+    void canBeAttachedToCaseTest(
+        String caseDescription,
+        CaseDetails inputCase,
+        boolean valid,
+        String expectedValueOrError
+    ) {
+        checkValidation(
+            inputCase,
+            valid,
+            expectedValueOrError,
+            CallbackValidations::canBeAttachedToCase,
+            expectedValueOrError
+        );
+    }
+
+    private static Object[][] eventIdTestParams() {
+        return new Object[][]{
+            {"Invalid event id", "invalid_event_id", false, "The invalid_event_id event is not supported. Please contact service team"},
+            {"Valid event id", "attachToExistingCase", true, null},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}: valid:{2} error/value:{3}")
+    @MethodSource("eventIdTestParams")
+    void eventIdTest(
+        String caseDescription,
+        String eventId,
+        boolean valid,
+        String expectedValueOrError
+    ) {
+        checkValidation(
+            eventId,
+            valid,
+            expectedValueOrError,
+            CallbackValidations::hasValidEventId,
+            expectedValueOrError
+        );
+    }
+
     @Test
     void invalidJurisdictionTest() {
         checkValidation(
@@ -228,7 +282,7 @@ class CallbackValidationsTest {
         boolean valid,
         String expectedValueOrError
     ) {
-        checkRequestedUserValidation(
+        checkValidation(
             input,
             valid,
             expectedValueOrError,
@@ -253,7 +307,7 @@ class CallbackValidationsTest {
         boolean valid,
         String expectedValueOrError
     ) {
-        checkRequestedUserValidation(
+        checkValidation(
             input,
             valid,
             expectedValueOrError,
@@ -261,32 +315,37 @@ class CallbackValidationsTest {
             expectedValueOrError
         );
     }
-  
+
+    private static ImmutableMap<String, Object> caseDataWithOcr() {
+        return ImmutableMap.of(
+            JOURNEY_CLASSIFICATION, CLASSIFICATION_EXCEPTION,
+            "scanOCRData", singletonList(
+                ImmutableMap.of("first_name", "John")
+            )
+        );
+    }
+
     private <T> void checkValidation(CaseDetails input,
                                      boolean valid,
                                      T realValue,
-                                     Function<CaseDetails, Validation<String, T>> validationMethod,
-                                     String errorString
-    ) {
-        Validation<String, T> validation = validationMethod.apply(input);
-        assertValidationResult(valid, realValue, errorString, validation);
+                                     Function<CaseDetails, Validation<String, ?>> validationMethod,
+                                     String errorString) {
+        Validation<String, ?> validation = validationMethod.apply(input);
+
+        softAssertions(valid, realValue, errorString, validation);
     }
 
-    private <T> void checkRequestedUserValidation(String input,
-                                                  boolean valid,
-                                                  T realValue,
-                                                  Function<String, Validation<String, T>> validationMethod,
-                                                  String errorString
-    ) {
-        Validation<String, T> validation = validationMethod.apply(input);
-        assertValidationResult(valid, realValue, errorString, validation);
+    private <T> void checkValidation(String input,
+                                     boolean valid,
+                                     T realValue,
+                                     Function<String, Validation<String, ?>> validationMethod,
+                                     String errorString) {
+        Validation<String, ?> validation = validationMethod.apply(input);
+
+        softAssertions(valid, realValue, errorString, validation);
     }
 
-    private <T> void assertValidationResult(boolean valid,
-                                            T realValue,
-                                            String errorString,
-                                            Validation<String, T> validation
-    ) {
+    private <T> void softAssertions(boolean valid, T realValue, String errorString, Validation<String, ?> validation) {
         if (valid) {
             assertSoftly(softly -> {
                 softly.assertThat(validation.isValid()).isTrue();

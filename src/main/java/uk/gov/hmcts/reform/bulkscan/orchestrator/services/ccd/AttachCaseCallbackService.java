@@ -19,6 +19,7 @@ import static io.vavr.control.Validation.valid;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.canBeAttachedToCase;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAScannedRecord;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAnId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAttachToCaseReference;
@@ -28,6 +29,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasSearchCaseReferenceType;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasUserId;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasValidEventId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.checkForDuplicatesOrElse;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.concatDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.getDocumentNumbers;
@@ -61,8 +63,24 @@ public class AttachCaseCallbackService {
     public Either<List<String>, Map<String, Object>> process(
         CaseDetails exceptionRecord,
         String requesterIdamToken,
-        String requesterUserId
+        String requesterUserId,
+        String eventId
     ) {
+        Validation<String, Void> eventIdValidation = hasValidEventId(eventId);
+
+        if (eventIdValidation.isInvalid()) {
+            String eventIdValidationError = eventIdValidation.getError();
+            log.warn("Validation error {}", eventIdValidationError);
+            return Either.left(singletonList(eventIdValidationError));
+        }
+
+        Validation<String, Void> classificationValidation = canBeAttachedToCase(exceptionRecord);
+
+        if (classificationValidation.isInvalid()) {
+            String eventIdClassificationValidationError = classificationValidation.getError();
+            log.warn("Validation error {}", eventIdClassificationValidationError);
+            return Either.left(singletonList(eventIdClassificationValidationError));
+        }
         boolean useSearchCaseReference = isSearchCaseReferenceTypePresent(exceptionRecord);
 
         return getValidation(exceptionRecord, useSearchCaseReference, requesterIdamToken, requesterUserId)

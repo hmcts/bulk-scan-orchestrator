@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import com.google.common.collect.ImmutableMap;
-import org.awaitility.Duration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,6 +13,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CreateExceptionRecord;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -65,7 +65,7 @@ class ExceptionRecordCreationTest {
         // then
         await("Exception record being created")
             .atMost(60, TimeUnit.SECONDS)
-            .pollInterval(Duration.FIVE_SECONDS)
+            .pollInterval(Duration.ofSeconds(5))
             .until(() -> findCasesByPoBox(randomPoBox).size() == 1);
     }
 
@@ -87,7 +87,7 @@ class ExceptionRecordCreationTest {
         // then
         await("Exception record should be created")
             .atMost(60, TimeUnit.SECONDS)
-            .pollInterval(Duration.FIVE_SECONDS)
+            .pollInterval(Duration.ofSeconds(5))
             .until(() -> findCasesByPoBox(randomPoBox).size() == 1);
 
         CaseDetails caseDetails = findCasesByPoBox(randomPoBox).get(0);
@@ -116,7 +116,7 @@ class ExceptionRecordCreationTest {
         // then
         await("Exception record being created")
             .atMost(60, TimeUnit.SECONDS)
-            .pollInterval(Duration.FIVE_SECONDS)
+            .pollInterval(Duration.ofSeconds(5))
             .until(() -> findCasesByPoBox(randomPoBox).size() == 1);
     }
 
