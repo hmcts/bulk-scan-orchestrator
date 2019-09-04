@@ -26,7 +26,7 @@ class ExceptionRecordMapperTest {
     private final ExceptionRecordMapper mapper = new ExceptionRecordMapper("https://example.gov.uk", "files");
 
     @Test
-    void mapEnvelope_maps_all_fields_correctly() {
+    public void mapEnvelope_maps_all_fields_correctly() {
         // given
         Envelope envelope = envelope(2);
 
@@ -62,14 +62,14 @@ class ExceptionRecordMapperTest {
     }
 
     @Test
-    void mapEnvelope_handles_null_ocr_data() {
+    public void mapEnvelope_handles_null_ocr_data() {
         Envelope envelope = envelope(2, null, emptyList());
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
         assertThat(exceptionRecord.ocrData).isNull();
     }
 
     @Test
-    void mapEnvelope_maps_subtype_values_in_documents() {
+    public void mapEnvelope_maps_subtype_values_in_documents() {
         // given
         Envelope envelope = envelope(2, null, emptyList());
 
@@ -89,7 +89,7 @@ class ExceptionRecordMapperTest {
     }
 
     @Test
-    void mapEnvelope_sets_warnings_presence_correctly() {
+    public void mapEnvelope_sets_warnings_presence_correctly() {
         Envelope envelopeWithWarning = envelope(2, null, newArrayList("Warning"));
         Envelope envelopeWithoutWarning = envelope(2, null, emptyList());
 
