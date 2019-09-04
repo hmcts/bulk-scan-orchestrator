@@ -58,6 +58,6 @@ public class ExceptionRecordMapper {
         return ocrDataWarnings
             .stream()
             .map(CcdCollectionElement::new)
-            .collect(Collectors.toList());
+            .collect(toList());
     }
 }
