@@ -535,6 +535,7 @@ class AttachExceptionRecordToExistingCaseTest {
         ValidatableResponse response =
             given()
                 .body(callbackRequestWith(EVENT_ID_ATTACH_TO_CASE, CLASSIFICATION_EXCEPTION, false))
+                .headers(userHeaders())
                 .post(CALLBACK_ATTACH_CASE_PATH)
                 .then()
                 .statusCode(200);
@@ -780,7 +781,7 @@ class AttachExceptionRecordToExistingCaseTest {
     ) {
         return CallbackRequest
             .builder()
-            .caseDetails(exceptionRecordWith(classification,includeOcr))
+            .caseDetails(exceptionRecordWith(classification, includeOcr))
             .eventId(eventId)
             .build();
     }
