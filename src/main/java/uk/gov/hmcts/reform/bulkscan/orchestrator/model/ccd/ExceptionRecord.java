@@ -26,6 +26,7 @@ public class ExceptionRecord implements CaseData {
     @JsonProperty("scanOCRData")
     public final List<CcdCollectionElement<CcdKeyValue>> ocrData;
 
+    @SuppressWarnings("squid:S00107") // number of params
     public ExceptionRecord(
         String classification,
         String poBox,
