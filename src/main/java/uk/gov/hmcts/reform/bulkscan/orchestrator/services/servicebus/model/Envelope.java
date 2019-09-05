@@ -32,7 +32,7 @@ public class Envelope {
         @JsonProperty(value = "jurisdiction", required = true) String jurisdiction,
         @JsonProperty(value = "container", required = true) String container,
         @JsonProperty(value = "zip_file_name", required = true) String zipFileName,
-        @JsonProperty(value = "form_type") String formType,
+        @JsonProperty("form_type") String formType,
         @JsonProperty(value = "delivery_date", required = true) Instant deliveryDate,
         @JsonProperty(value = "opening_date", required = true) Instant openingDate,
         @JsonProperty(value = "classification", required = true) Classification classification,
