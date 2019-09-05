@@ -7,7 +7,6 @@
   "container": "bulkscan",
   "classification": "SUPPLEMENTARY_EVIDENCE",
   "zip_file_name": "zip-file-test-updated.zip",
-  "form_type": "form type1",
   "delivery_date": "1970-01-01T00:00:00.000Z",
   "opening_date": "1970-01-01T00:00:00.000Z",
   "documents": [
