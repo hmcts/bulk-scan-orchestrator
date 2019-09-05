@@ -47,12 +47,12 @@ public class Envelope {
         this.jurisdiction = jurisdiction;
         this.container = container;
         this.zipFileName = zipFileName;
+        this.formType = formType;
         this.deliveryDate = deliveryDate;
         this.openingDate = openingDate;
         this.classification = classification;
         this.documents = documents;
         this.ocrData = ocrData;
         this.ocrValidationWarnings = ocrValidationWarnings;
-        this.formType = formType;
     }
 }
