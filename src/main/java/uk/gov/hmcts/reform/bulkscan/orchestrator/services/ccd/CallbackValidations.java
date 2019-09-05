@@ -130,12 +130,6 @@ final class CallbackValidations {
             ).orElseGet(() -> invalid("No journey classification supplied"));
     }
 
-    @Nonnull
-    static Validation<String, Void> hasValidEventId(String eventId) {
-        return EVENT_ID_ATTACH_TO_CASE.equalsIgnoreCase(eventId)
-            ? valid(null) : invalid(format("The %s event is not supported. Please contact service team", eventId));
-    }
-
     private static Optional<String> getJourneyClassification(CaseDetails theCase) {
         return Optional.ofNullable(theCase)
             .map(CaseDetails::getData)
