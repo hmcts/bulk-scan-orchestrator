@@ -218,30 +218,6 @@ class CallbackValidationsTest {
         );
     }
 
-    private static Object[][] eventIdTestParams() {
-        return new Object[][]{
-            {"Invalid event id", "invalid_event_id", false, "The invalid_event_id event is not supported. Please contact service team"},
-            {"Valid event id", "attachToExistingCase", true, null},
-        };
-    }
-
-    @ParameterizedTest(name = "{0}: valid:{2} error/value:{3}")
-    @MethodSource("eventIdTestParams")
-    void eventIdTest(
-        String caseDescription,
-        String eventId,
-        boolean valid,
-        String expectedValueOrError
-    ) {
-        checkValidation(
-            eventId,
-            valid,
-            expectedValueOrError,
-            CallbackValidations::hasValidEventId,
-            expectedValueOrError
-        );
-    }
-
     @Test
     void invalidJurisdictionTest() {
         checkValidation(
@@ -277,16 +253,6 @@ class CallbackValidationsTest {
                                      boolean valid,
                                      T realValue,
                                      Function<CaseDetails, Validation<String, ?>> validationMethod,
-                                     String errorString) {
-        Validation<String, ?> validation = validationMethod.apply(input);
-
-        softAssertions(valid, realValue, errorString, validation);
-    }
-
-    private <T> void checkValidation(String input,
-                                     boolean valid,
-                                     T realValue,
-                                     Function<String, Validation<String, ?>> validationMethod,
                                      String errorString) {
         Validation<String, ?> validation = validationMethod.apply(input);
 
