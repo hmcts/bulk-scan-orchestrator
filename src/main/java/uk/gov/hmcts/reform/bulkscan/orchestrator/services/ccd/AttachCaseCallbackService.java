@@ -34,6 +34,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.c
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.concatDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.getDocumentNumbers;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.getScannedDocuments;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isAttachToCaseEvent;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.CCD_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.EXTERNAL_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.ATTACH_TO_CASE_REFERENCE;
@@ -66,7 +67,7 @@ public class AttachCaseCallbackService {
         String requesterUserId,
         String eventId
     ) {
-        Validation<String, Void> eventIdValidation = hasValidEventId(eventId);
+        Validation<String, Void> eventIdValidation = isAttachToCaseEvent(eventId);
 
         if (eventIdValidation.isInvalid()) {
             String eventIdValidationError = eventIdValidation.getError();
