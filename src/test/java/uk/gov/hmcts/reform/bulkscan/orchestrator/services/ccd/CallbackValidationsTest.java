@@ -30,6 +30,8 @@ class CallbackValidationsTest {
 
     public static final String NO_CASE_TYPE_ID_SUPPLIED_ERROR = "No case type ID supplied";
     public static final String NO_CASE_REFERENCE_TYPE_SUPPLIED_ERROR = "No case reference type supplied";
+    public static final String NO_IDAM_TOKEN_RECEIVED_ERROR = "Callback has no Idam token received in the header";
+    public static final String NO_USER_ID_RECEIVED_ERROR = "Callback has no user id received in the header";
     public static final String JOURNEY_CLASSIFICATION = "journeyClassification";
     public static final String CLASSIFICATION_EXCEPTION = "EXCEPTION";
 
@@ -218,6 +220,30 @@ class CallbackValidationsTest {
         );
     }
 
+    private static Object[][] eventIdTestParams() {
+        return new Object[][]{
+            {"Invalid event id", "invalid_event_id", false, "The invalid_event_id event is not supported. Please contact service team"},
+            {"Valid event id", "attachToExistingCase", true, null},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}: valid:{2} error/value:{3}")
+    @MethodSource("eventIdTestParams")
+    void eventIdTest(
+        String caseDescription,
+        String eventId,
+        boolean valid,
+        String expectedValueOrError
+    ) {
+        checkValidation(
+            eventId,
+            valid,
+            expectedValueOrError,
+            CallbackValidations::hasValidEventId,
+            expectedValueOrError
+        );
+    }
+
     @Test
     void invalidJurisdictionTest() {
         checkValidation(
@@ -240,6 +266,56 @@ class CallbackValidationsTest {
         );
     }
 
+    private static Object[][] idamTokenTestParams() {
+        return new Object[][]{
+            {"null idam token", null, false, NO_IDAM_TOKEN_RECEIVED_ERROR},
+            {"valid idam token", "valid token", true, "valid token"}
+        };
+    }
+
+    @ParameterizedTest(name = "{0}: valid:{2} error/value:{3}")
+    @MethodSource("idamTokenTestParams")
+    @DisplayName("Should have idam token in the request")
+    void idamTokenInTheRequestTest(
+        String caseDescription,
+        String input,
+        boolean valid,
+        String expectedValueOrError
+    ) {
+        checkValidation(
+            input,
+            valid,
+            expectedValueOrError,
+            CallbackValidations::hasIdamToken,
+            expectedValueOrError
+        );
+    }
+
+    private static Object[][] userIdTestParams() {
+        return new Object[][]{
+            {"null user id", null, false, NO_USER_ID_RECEIVED_ERROR},
+            {"valid user id", "valid user id", true, "valid user id"}
+        };
+    }
+
+    @ParameterizedTest(name = "{0}: valid:{2} error/value:{3}")
+    @MethodSource("userIdTestParams")
+    @DisplayName("Should have user id in the request")
+    void userIdInTheRequestTest(
+        String caseDescription,
+        String input,
+        boolean valid,
+        String expectedValueOrError
+    ) {
+        checkValidation(
+            input,
+            valid,
+            expectedValueOrError,
+            CallbackValidations::hasUserId,
+            expectedValueOrError
+        );
+    }
+
     private static ImmutableMap<String, Object> caseDataWithOcr() {
         return ImmutableMap.of(
             JOURNEY_CLASSIFICATION, CLASSIFICATION_EXCEPTION,
@@ -253,6 +329,16 @@ class CallbackValidationsTest {
                                      boolean valid,
                                      T realValue,
                                      Function<CaseDetails, Validation<String, ?>> validationMethod,
+                                     String errorString) {
+        Validation<String, ?> validation = validationMethod.apply(input);
+
+        softAssertions(valid, realValue, errorString, validation);
+    }
+
+    private <T> void checkValidation(String input,
+                                     boolean valid,
+                                     T realValue,
+                                     Function<String, Validation<String, ?>> validationMethod,
                                      String errorString) {
         Validation<String, ?> validation = validationMethod.apply(input);
 
