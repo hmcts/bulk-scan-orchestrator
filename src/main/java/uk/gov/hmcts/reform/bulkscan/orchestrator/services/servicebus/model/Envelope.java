@@ -36,7 +36,7 @@ public class Envelope {
         @JsonProperty(value = "classification", required = true) Classification classification,
         @JsonProperty(value = "documents", required = true) List<Document> documents,
         @JsonProperty(value = "ocr_data") List<OcrDataField> ocrData,
-        @JsonProperty(value = "ocr_validation_warnings", required = true) List<String> ocrDataValidationWarnings
+        @JsonProperty(value = "ocr_data_validation_warnings", required = true) List<String> ocrDataValidationWarnings
     ) {
         this.id = id;
         this.caseRef = caseRef;
