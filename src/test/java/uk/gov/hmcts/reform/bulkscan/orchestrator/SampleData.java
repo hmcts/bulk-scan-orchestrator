@@ -104,7 +104,7 @@ public class SampleData {
                         .put("uuid", "uuid123")
                     )
                 )
-                .put("ocr_validation_warnings", new JSONArray())
+                .put("ocr_data_validation_warnings", new JSONArray())
                 .toString().getBytes();
         } catch (Exception e) {
             throw new RuntimeException("Could not make envelopeJson", e);

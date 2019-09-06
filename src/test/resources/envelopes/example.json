@@ -36,7 +36,7 @@
       "metadata_field_value": null
     }
   ],
-  "ocr_validation_warnings": [
+  "ocr_data_validation_warnings": [
     "warning 1"
   ]
 }
