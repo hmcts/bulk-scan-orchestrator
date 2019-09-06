@@ -52,7 +52,20 @@ class TestCaseBuilder {
         return createCaseWith(b -> b.data(data));
     }
 
-    static List<Map<String, Object>> document(String name) {
-        return ImmutableList.of(ImmutableMap.of("fileName", name));
+    static List<Map<String, Object>> document(String url, String name) {
+        Map<String, Object> doc = new HashMap<>();
+
+        doc.put("type", "Other");
+        doc.put("url", ImmutableMap.of(
+            "document_url", url,
+            "document_binary_url", url,
+            "document_filename", name
+        ));
+        doc.put("controlNumber", "1234");
+        doc.put("fileName", "file");
+        doc.put("scannedDate", "2019-09-06T15:40:00.000Z");
+        doc.put("deliveryDate", "2019-09-06T15:40:00.001Z");
+
+        return ImmutableList.of(ImmutableMap.of("value", doc));
     }
 }

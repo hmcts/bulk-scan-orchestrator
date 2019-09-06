@@ -142,9 +142,9 @@ class CallbackValidationsTest {
 
     private static Object[][] scannedRecordTestParams() {
         String noDocumentError = "There were no documents in exception record";
-        CaseDetails validDoc = caseWithDocument(document("fileName.pdf"));
+        CaseDetails validDoc = caseWithDocument(document("https://url", "fileName.pdf"));
         return new Object[][]{
-            {"Correct map with document", validDoc, true, document("fileName.pdf"), null},
+            {"Correct map with document", validDoc, true, document("https://url", "fileName.pdf"), null},
             {"Null case details", null, false, null, noDocumentError},
             {"Null data supplied", createCaseWith(b -> b.data(null)), false, null, noDocumentError},
             {"Empty data supplied", createCaseWith(b -> b.data(ImmutableMap.of())), false, null, noDocumentError},
