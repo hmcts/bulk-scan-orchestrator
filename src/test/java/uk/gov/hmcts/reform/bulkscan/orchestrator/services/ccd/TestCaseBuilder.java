@@ -68,4 +68,8 @@ class TestCaseBuilder {
 
         return ImmutableList.of(ImmutableMap.of("value", doc));
     }
+
+    static List<Map<String, Object>> ocrDataEntry(String key, String value) {
+        return ImmutableList.of(ImmutableMap.of("value", ImmutableMap.of("key", key, "value", value)));
+    }
 }
