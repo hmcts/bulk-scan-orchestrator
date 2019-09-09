@@ -27,7 +27,7 @@ public class ExceptionRecord implements CaseData {
     public final List<CcdCollectionElement<String>> ocrDataValidationWarnings;
 
     // Yes/No field indicating if there are warnings to show
-    public final String hasWarnings;
+    public final String displayWarnings;
 
     public ExceptionRecord(
         String classification,
@@ -38,7 +38,7 @@ public class ExceptionRecord implements CaseData {
         List<CcdCollectionElement<ScannedDocument>> scannedDocuments,
         List<CcdCollectionElement<CcdKeyValue>> ocrData,
         List<CcdCollectionElement<String>> ocrDataValidationWarnings,
-        String hasWarnings
+        String displayWarnings
     ) {
         this.classification = classification;
         this.poBox = poBox;
@@ -48,6 +48,6 @@ public class ExceptionRecord implements CaseData {
         this.scannedDocuments = scannedDocuments;
         this.ocrData = ocrData;
         this.ocrDataValidationWarnings = ocrDataValidationWarnings;
-        this.hasWarnings = hasWarnings;
+        this.displayWarnings = displayWarnings;
     }
 }
