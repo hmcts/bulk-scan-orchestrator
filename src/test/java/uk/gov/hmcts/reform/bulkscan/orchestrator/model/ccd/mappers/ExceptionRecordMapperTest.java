@@ -93,8 +93,8 @@ class ExceptionRecordMapperTest {
         Envelope envelopeWithWarning = envelope(2, null, newArrayList("Warning"));
         Envelope envelopeWithoutWarning = envelope(2, null, emptyList());
 
-        assertThat(mapper.mapEnvelope(envelopeWithWarning).hasWarnings).isEqualTo("Yes");
-        assertThat(mapper.mapEnvelope(envelopeWithoutWarning).hasWarnings).isEqualTo("No");
+        assertThat(mapper.mapEnvelope(envelopeWithWarning).displayWarnings).isEqualTo("Yes");
+        assertThat(mapper.mapEnvelope(envelopeWithoutWarning).displayWarnings).isEqualTo("No");
     }
 
     private List<OcrDataField> ocrDataAsList(List<CcdCollectionElement<CcdKeyValue>> ocrData) {
