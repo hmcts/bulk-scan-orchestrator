@@ -22,7 +22,6 @@ final class CallbackValidations {
 
     private static final String CLASSIFICATION_SUPPLEMENTARY_EVIDENCE = "SUPPLEMENTARY_EVIDENCE";
     private static final String CLASSIFICATION_EXCEPTION = "EXCEPTION";
-    private static final String EVENT_ID_ATTACH_TO_CASE = "attachToExistingCase";
 
     private static final Logger log = LoggerFactory.getLogger(CallbackValidations.class);
 
@@ -142,12 +141,6 @@ final class CallbackValidations {
         return userId != null
             ? valid(userId)
             : invalid("Callback has no user id received in the header");
-    }
-
-    @Nonnull
-    static Validation<String, Void> hasValidEventId(String eventId) {
-        return EVENT_ID_ATTACH_TO_CASE.equalsIgnoreCase(eventId)
-            ? valid(null) : invalid(format("The %s event is not supported. Please contact service team", eventId));
     }
 
     private static Optional<String> getJourneyClassification(CaseDetails theCase) {

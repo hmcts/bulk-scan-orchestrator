@@ -4,6 +4,7 @@ import io.vavr.control.Either;
 import io.vavr.control.Validation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
@@ -24,7 +25,8 @@ public class CreateCaseCallbackService {
      *
      * @return Either TBD - not yet implemented
      */
-    public Either<List<String>, Object> process(CaseDetails caseDetails, String eventId) {
+    @SuppressWarnings("squid:S1172") // tmp. suppress unused `caseDetails` parameter
+    public Either<List<String>, ExceptionRecord> process(CaseDetails caseDetails, String eventId) {
         Validation<String, Void> eventIdValidation = isCreateCaseEvent(eventId);
 
         if (eventIdValidation.isInvalid()) {
