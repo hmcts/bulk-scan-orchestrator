@@ -25,6 +25,7 @@ public class CreateCaseCallbackService {
      *
      * @return Either TBD - not yet implemented
      */
+    @SuppressWarnings("squid:S1172") // tmp. suppress unused `caseDetails` parameter
     public Either<List<String>, ExceptionRecord> process(CaseDetails caseDetails, String eventId) {
         Validation<String, Void> eventIdValidation = isCreateCaseEvent(eventId);
 
