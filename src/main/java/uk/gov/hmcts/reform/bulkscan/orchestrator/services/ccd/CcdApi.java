@@ -25,6 +25,7 @@ import static java.util.stream.Collectors.toList;
  * This class is intended to be a wrapper/adaptor/facade for the orchestrator -> CcdApi.
  * In theory this should make the calls to ccd both easier to manage and quicker to refactor.
  */
+
 @Component
 public class CcdApi {
 
@@ -53,13 +54,15 @@ public class CcdApi {
     }
 
     private StartEventResponse startAttachScannedDocs(String caseRef,
-                                                      CcdAuthenticator authenticator,
+                                                      String serviceToken,
+                                                      String idamToken,
+                                                      String userId,
                                                       String jurisdiction,
                                                       String caseTypeId) {
         return feignCcdApi.startEventForCaseWorker(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
+            idamToken,
+            serviceToken,
+            userId,
             jurisdiction,
             caseTypeId,
             caseRef,
@@ -68,11 +71,19 @@ public class CcdApi {
     }
 
     @Nonnull
-    StartEventResponse startAttachScannedDocs(CaseDetails theCase) {
+    StartEventResponse startAttachScannedDocs(CaseDetails theCase, String idamToken, String userId) {
         String caseRef = String.valueOf(theCase.getId());
         try {
+            //TODO We don't need to login here as we just need the service token
             CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(theCase.getJurisdiction());
-            return startAttachScannedDocs(caseRef, authenticator, theCase.getJurisdiction(), theCase.getCaseTypeId());
+            return startAttachScannedDocs(
+                caseRef,
+                authenticator.getServiceToken(),
+                idamToken,
+                userId,
+                theCase.getJurisdiction(),
+                theCase.getCaseTypeId()
+            );
         } catch (FeignException e) {
             throw new CcdCallException(
                 format("Internal Error: start event call failed case: %s Error: %s", caseRef, e.status()), e
@@ -131,6 +142,8 @@ public class CcdApi {
     }
 
     void attachExceptionRecord(CaseDetails theCase,
+                               String idamToken,
+                               String userId,
                                Map<String, Object> data,
                                String eventSummary,
                                StartEventResponse event) {
@@ -138,9 +151,12 @@ public class CcdApi {
         String jurisdiction = theCase.getJurisdiction();
         String caseTypeId = theCase.getCaseTypeId();
         try {
+            //TODO We don't need to login here as we just need the service token
             CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
             attachCall(caseRef,
-                authenticator,
+                authenticator.getServiceToken(),
+                idamToken,
+                userId,
                 data,
                 event.getToken(),
                 jurisdiction,
@@ -155,16 +171,18 @@ public class CcdApi {
     }
 
     private void attachCall(String caseRef,
-                            CcdAuthenticator authenticator,
+                            String serviceToken,
+                            String idamToken,
+                            String userId,
                             Map<String, Object> data,
                             String eventToken,
                             String jurisdiction,
                             String caseTypeId,
                             Event eventInfo) {
         feignCcdApi.submitEventForCaseWorker(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
+            idamToken,
+            serviceToken,
+            userId,
             jurisdiction,
             caseTypeId,
             caseRef,
