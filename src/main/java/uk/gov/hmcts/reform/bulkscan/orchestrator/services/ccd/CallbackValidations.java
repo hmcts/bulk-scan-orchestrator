@@ -126,7 +126,7 @@ final class CallbackValidations {
                         case CLASSIFICATION_SUPPLEMENTARY_EVIDENCE:
                             return Validation.<String, Void>valid(null);
                         case CLASSIFICATION_EXCEPTION:
-                            return !exceptionRecordHasOcr(theCase)
+                            return !hasOcr(theCase)
                                 ? Validation.<String, Void>valid(null)
                                 : Validation.<String, Void>invalid(
                                     format("The 'attach to case' event is not supported for exception records with OCR")
@@ -162,7 +162,7 @@ final class CallbackValidations {
     }
 
     @SuppressWarnings("unchecked")
-    private static boolean exceptionRecordHasOcr(CaseDetails theCase) {
+    static boolean hasOcr(CaseDetails theCase) {
         return Optional.ofNullable(theCase)
             .map(CaseDetails::getData)
             .map(data -> (List<Map<String, Object>>) data.get("scanOCRData"))
@@ -183,14 +183,33 @@ final class CallbackValidations {
             .orElse(Validation.valid(null));
     }
 
+    /**
+     * Used in createCase callback only. For further integration need more generic few and refactor
+     * @param theCase from CCD
+     * @return Validation of it
+     */
     static Validation<String, Classification> hasJourneyClassification(CaseDetails theCase) {
-        return getJourneyClassification(theCase)
+        Optional<String> classificationOption = getJourneyClassification(theCase);
+
+        return classificationOption
             .map(classification -> Try.of(() -> Classification.valueOf(classification)))
             .map(Try::toValidation)
             .map(validation -> validation
-                .mapError(throwable -> "Invalid classification. Error: " + throwable.getMessage())
+                .mapError(throwable -> "Invalid journeyClassification. Error: " + throwable.getMessage())
             )
-            .orElse(invalid("Missing journeyClassification"));
+            .orElse(invalid("Missing journeyClassification"))
+            .filter(classification -> {
+                switch (classification) {
+                    case EXCEPTION:
+                    case NEW_APPLICATION:
+                        return true;
+                    case SUPPLEMENTARY_EVIDENCE:
+                    default:
+                        return false;
+                }
+            })
+            .filter(classification -> hasOcr(theCase))
+            .getOrElse(Validation.invalid("Incorrect journeyClassification: " + classificationOption.orElse("null")));
     }
 
     /**

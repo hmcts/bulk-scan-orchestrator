@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
+import com.google.common.collect.ImmutableMap;
 import io.vavr.control.Either;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
@@ -32,7 +33,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(output.getLeft()).containsOnly(
             "Missing caseType",
             "Internal Error: invalid jurisdiction supplied: null",
-            "Missing journeyClassification"
+            "Incorrect journeyClassification: null"
         );
     }
 
@@ -61,5 +62,54 @@ class CreateCaseCallbackServiceTest {
         assertThat(output.isRight()).isTrue();
         assertThat(output.get().scannedDocuments).hasSize(0);
         assertThat(output.get().ocrDataFields).hasSize(0);
+    }
+
+    @Test
+    void should_warn_about_incorrect_classification_being_used() {
+        // given
+        Map<String, Object> data = new HashMap<>();
+        // putting 6 via `ImmutableMap` is available from Java 9
+        data.put("poBox", "12345");
+        data.put("journeyClassification", "SUPPLEMENTARY_EVIDENCE");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
+        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
+
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .caseTypeId("some case type")
+            .jurisdiction("some jurisdiction")
+            .data(data)
+        );
+
+        // when
+        Either<List<String>, ExceptionRecord> output = SERVICE.process(caseDetails, EVENT_ID);
+
+        // then
+        assertThat(output.isLeft()).isTrue();
+        assertThat(output.getLeft()).containsOnly("Incorrect journeyClassification: SUPPLEMENTARY_EVIDENCE");
+    }
+
+    @Test
+    void should_warn_about_missing_classification() {
+        // given
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .caseTypeId("some case type")
+            .jurisdiction("some jurisdiction")
+            .data(ImmutableMap.of(
+                "poBox", "12345",
+                "deliveryDate", "2019-09-06T15:30:03.000Z",
+                "openingDate", "2019-09-06T15:30:04.000Z",
+                "scannedDocuments", TestCaseBuilder.document("https://url", "some doc"),
+                "scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value")
+            ))
+        );
+
+        // when
+        Either<List<String>, ExceptionRecord> output = SERVICE.process(caseDetails, EVENT_ID);
+
+        // then
+        assertThat(output.isLeft()).isTrue();
+        assertThat(output.getLeft()).containsOnly("Missing journeyClassification");
     }
 }
