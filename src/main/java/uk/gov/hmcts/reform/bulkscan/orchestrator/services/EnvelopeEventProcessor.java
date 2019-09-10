@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -191,13 +192,14 @@ public class EnvelopeEventProcessor {
 
     private void logMessageParsed(IMessage message, Envelope envelope) {
         log.info(
-            "Parsed message. ID: {}, Envelope ID: {}, File name: {}, Jurisdiction: {}, Classification: {}, Case: {}",
+            "Parsed message. ID: {}, Env ID: {}, File name: {}, Jurisd: {}, Classif: {}, Case: {}, OCR warnings: {}",
             message.getMessageId(),
             envelope.id,
             envelope.zipFileName,
             envelope.jurisdiction,
             envelope.classification,
-            envelope.caseRef
+            envelope.caseRef,
+            StringUtils.join(envelope.ocrDataValidationWarnings, "|")
         );
     }
 
