@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
+import feign.FeignException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,6 +99,16 @@ public class EnvelopeEventProcessor {
                 // not repeat them, at least until CCD operations become idempotent
                 return new MessageProcessingResult(UNRECOVERABLE_FAILURE, ex);
             } catch (Exception ex) {
+                if (ex instanceof FeignException) {
+                    FeignException fex = (FeignException)ex;
+                    log.error(
+                        "Feign exception thrown. Status: {}, Response content: '{}'",
+                        fex.status(),
+                        fex.contentUTF8(),
+                        fex
+                    );
+                }
+
                 logMessageProcessingError(message, envelope, ex);
                 return new MessageProcessingResult(POTENTIALLY_RECOVERABLE_FAILURE);
             }
