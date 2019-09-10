@@ -171,7 +171,7 @@ final class CallbackValidations {
     }
 
     /**
-     * Extracting PO BOX, optionally
+     * Extracting PO BOX, optionally.
      * @param theCase from CCD
      * @return Validation of it which is always valid
      */
@@ -184,7 +184,7 @@ final class CallbackValidations {
     }
 
     /**
-     * Used in createCase callback only. For further integration need more generic few and refactor
+     * Used in createCase callback only. For further integration need more generic few and refactor.
      * @param theCase from CCD
      * @return Validation of it
      */
