@@ -22,7 +22,7 @@ public class Envelope {
     public final Classification classification;
     public final List<Document> documents;
     public final List<OcrDataField> ocrData;
-    public final List<String> ocrValidationWarnings;
+    public final List<String> ocrDataValidationWarnings;
 
     public Envelope(
         @JsonProperty(value = "id", required = true) String id,
@@ -38,7 +38,7 @@ public class Envelope {
         @JsonProperty(value = "classification", required = true) Classification classification,
         @JsonProperty(value = "documents", required = true) List<Document> documents,
         @JsonProperty(value = "ocr_data") List<OcrDataField> ocrData,
-        @JsonProperty(value = "ocr_validation_warnings") List<String> ocrValidationWarnings
+        @JsonProperty(value = "ocr_data_validation_warnings", required = true) List<String> ocrDataValidationWarnings
     ) {
         this.id = id;
         this.caseRef = caseRef;
@@ -53,6 +53,6 @@ public class Envelope {
         this.classification = classification;
         this.documents = documents;
         this.ocrData = ocrData;
-        this.ocrValidationWarnings = ocrValidationWarnings;
+        this.ocrDataValidationWarnings = ocrDataValidationWarnings;
     }
 }

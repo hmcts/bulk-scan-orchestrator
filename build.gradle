@@ -5,7 +5,7 @@ plugins {
   id 'jacoco'
   id 'io.spring.dependency-management' version '1.0.8.RELEASE'
   id 'org.owasp.dependencycheck' version '5.2.1'
-  id 'org.springframework.boot' version '2.1.7.RELEASE'
+  id 'org.springframework.boot' version '2.1.8.RELEASE'
   id 'com.github.ben-manes.versions' version '0.24.0'
   id 'org.sonarqube' version '2.7.1'
 }
@@ -224,7 +224,7 @@ dependencies {
   testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: '3.0.0'
   testCompile group: 'org.assertj', name: 'assertj-core', version: '3.13.2'
   testCompile group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '2.0.2.RELEASE'
-  testCompile group: 'org.awaitility', name: 'awaitility', version: '4.0.0'
+  testCompile group: 'org.awaitility', name: 'awaitility', version: '4.0.1'
   testCompile group: 'io.rest-assured', name: 'rest-assured'
 
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: versions.junit
