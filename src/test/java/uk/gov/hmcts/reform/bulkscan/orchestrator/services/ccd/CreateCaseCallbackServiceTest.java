@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.EXCEPTION;
 
 class CreateCaseCallbackServiceTest {
 
@@ -43,7 +44,7 @@ class CreateCaseCallbackServiceTest {
         Map<String, Object> data = new HashMap<>();
         // putting 6 via `ImmutableMap` is available from Java 9
         data.put("poBox", "12345");
-        data.put("journeyClassification", "EXCEPTION");
+        data.put("journeyClassification", EXCEPTION.name());
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
