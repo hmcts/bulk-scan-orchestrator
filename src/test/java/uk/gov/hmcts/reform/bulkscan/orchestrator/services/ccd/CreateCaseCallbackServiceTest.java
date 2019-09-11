@@ -137,13 +137,13 @@ class CreateCaseCallbackServiceTest {
                     + Classification.class.getName() + ".EXCEPTIONS",
                 "Invalid scannedDocuments format. Error: No enum constant " + DocumentType.class.getName() + ".OTHERS"
             );
+        String match =
+            "Invalid OCR data format. Error: (class )?java.lang.Integer cannot be cast to (class )?java.lang.String.*";
         assertThat(output.getLeft())
             .filteredOn(string -> string.startsWith("Invalid OCR data format."))
             .hasSize(1)
             .element(0)
             .asString()
-            .matches(
-                "Invalid OCR data format. Error: class java.lang.Integer cannot be cast to class java.lang.String.*"
-            );
+            .matches(match);
     }
 }
