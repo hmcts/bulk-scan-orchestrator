@@ -1,9 +1,12 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.vavr.control.Either;
 import org.junit.jupiter.api.Test;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.HashMap;
@@ -64,8 +67,8 @@ class CreateCaseCallbackServiceTest {
 
         // then
         assertThat(output.isRight()).isTrue();
-        assertThat(output.get().scannedDocuments).hasSize(0);
-        assertThat(output.get().ocrDataFields).hasSize(0);
+        assertThat(output.get().scannedDocuments).hasSize(1);
+        assertThat(output.get().ocrDataFields).hasSize(1);
     }
 
     @Test
@@ -89,5 +92,58 @@ class CreateCaseCallbackServiceTest {
         // then
         assertThat(output.isLeft()).isTrue();
         assertThat(output.getLeft()).containsOnly("Missing journeyClassification");
+    }
+
+    @Test
+    void should_report_errors_when_data_is_in_invalid_form() {
+        // given
+        Map<String, Object> doc = new HashMap<>();
+
+        // putting 6 via `ImmutableMap` is available from Java 9
+        doc.put("type", "Others");
+        doc.put("url", ImmutableMap.of(
+            "document_filename", "name"
+        ));
+        doc.put("controlNumber", "1234");
+        doc.put("fileName", "file");
+        doc.put("scannedDate", "2019-09-06T15:40:00.000Z");
+        doc.put("deliveryDate", "2019-09-06T15:40:00.001Z");
+
+        Map<String, Object> data = new HashMap<>();
+
+        data.put("poBox", "12345");
+        data.put("journeyClassification", "EXCEPTIONS");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", ImmutableList.of(ImmutableMap.of("value", doc)));
+        data.put("scanOCRData", ImmutableList.of(ImmutableMap.of("value", ImmutableMap.of(
+            "key", "k",
+            "value", 1
+        ))));
+
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .caseTypeId("some case type")
+            .jurisdiction("some jurisdiction")
+            .data(data)
+        );
+
+        // when
+        Either<List<String>, ExceptionRecord> output = SERVICE.process(caseDetails, EVENT_ID);
+
+        assertThat(output.getLeft())
+            .hasSize(3)
+            .contains(
+                "Invalid journeyClassification. Error: No enum constant "
+                    + Classification.class.getName() + ".EXCEPTIONS",
+                "Invalid scannedDocuments format. Error: No enum constant " + DocumentType.class.getName() + ".OTHERS"
+            );
+        assertThat(output.getLeft())
+            .filteredOn(string -> string.startsWith("Invalid OCR data format."))
+            .hasSize(1)
+            .element(0)
+            .asString()
+            .matches(
+                "Invalid OCR data format. Error: class java.lang.Integer cannot be cast to class java.lang.String.*"
+            );
     }
 }
