@@ -170,11 +170,6 @@ final class CallbackValidations {
             .orElse(false);
     }
 
-    /**
-     * Extracting PO BOX, optionally.
-     * @param theCase from CCD
-     * @return Validation of it which is always valid
-     */
     static Validation<String, String> hasPoBox(CaseDetails theCase) {
         return Optional.ofNullable(theCase)
             .map(CaseDetails::getData)
@@ -200,12 +195,6 @@ final class CallbackValidations {
             .orElse(invalid("Missing journeyClassification"));
     }
 
-    /**
-     * Extracting any date, optionally.
-     * @param theCase from CCD
-     * @param dateField name
-     * @return Validation of it which is always valid
-     */
     static Validation<String, Instant> hasDateField(CaseDetails theCase, String dateField) {
         return Optional.ofNullable(theCase)
             .map(CaseDetails::getData)
