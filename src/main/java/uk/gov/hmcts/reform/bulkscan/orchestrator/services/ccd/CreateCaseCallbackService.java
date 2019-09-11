@@ -50,9 +50,6 @@ public class CreateCaseCallbackService {
     }
 
     private Validation<Seq<String>, ExceptionRecord> getValidation(CaseDetails caseDetails) {
-        Validation<String, List<ScannedDocument>> scannedDocuments = getScannedDocuments();
-        Validation<String, List<OcrDataField>> ocrDataFields = getOcrDataFields();
-
         return Validation
             .combine(
                 hasCaseTypeId(caseDetails),
@@ -61,8 +58,8 @@ public class CreateCaseCallbackService {
                 hasJourneyClassification(caseDetails),
                 hasDateField(caseDetails, "deliveryDate"),
                 hasDateField(caseDetails, "openingDate"),
-                scannedDocuments,
-                ocrDataFields
+                getScannedDocuments(),
+                getOcrDataFields()
             )
             .ap(ExceptionRecord::new);
     }
