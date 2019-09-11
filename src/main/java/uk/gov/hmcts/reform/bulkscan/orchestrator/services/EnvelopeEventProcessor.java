@@ -75,8 +75,6 @@ public class EnvelopeEventProcessor {
     }
 
     private MessageProcessingResult process(IMessage message) {
-        log.info("Started processing message with ID {}", message.getMessageId());
-
         if (Objects.equals(message.getLabel(), HEARTBEAT_LABEL)) {
             log.info("Heartbeat message received");
             return new MessageProcessingResult(SUCCESS);
