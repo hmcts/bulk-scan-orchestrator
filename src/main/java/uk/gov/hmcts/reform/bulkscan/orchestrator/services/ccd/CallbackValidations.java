@@ -180,7 +180,7 @@ final class CallbackValidations {
             .map(CaseDetails::getData)
             .map(data -> data.get("poBox"))
             .map(o -> Validation.<String, String>valid((String) o))
-            .orElse(Validation.valid(null));
+            .orElse(invalid("Missing poBox"));
     }
 
     /**
@@ -211,6 +211,6 @@ final class CallbackValidations {
             .map(CaseDetails::getData)
             .map(data -> data.get(dateField))
             .map(o -> Validation.<String, Instant>valid(Instant.parse((String) o)))
-            .orElse(Validation.valid(null));
+            .orElse(invalid("Missing " + dateField));
     }
 }

@@ -33,8 +33,11 @@ class CreateCaseCallbackServiceTest {
         assertThat(output.isLeft()).isTrue();
         assertThat(output.getLeft()).containsOnly(
             "Missing caseType",
+            "Missing poBox",
             "Internal Error: invalid jurisdiction supplied: null",
-            "Missing journeyClassification"
+            "Missing journeyClassification",
+            "Missing deliveryDate",
+            "Missing openingDate"
         );
     }
 
