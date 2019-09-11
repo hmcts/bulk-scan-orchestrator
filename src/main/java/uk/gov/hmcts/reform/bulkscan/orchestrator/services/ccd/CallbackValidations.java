@@ -184,7 +184,7 @@ final class CallbackValidations {
     }
 
     /**
-     * Used in createCase callback only. For further integration need more generic few and refactor.
+     * Used in createCase callback only.
      * @param theCase from CCD
      * @return Validation of it
      */
@@ -197,19 +197,7 @@ final class CallbackValidations {
             .map(validation -> validation
                 .mapError(throwable -> "Invalid journeyClassification. Error: " + throwable.getMessage())
             )
-            .orElse(invalid("Missing journeyClassification"))
-            .filter(classification -> {
-                switch (classification) {
-                    case EXCEPTION:
-                    case NEW_APPLICATION:
-                        return true;
-                    case SUPPLEMENTARY_EVIDENCE:
-                    default:
-                        return false;
-                }
-            })
-            .filter(classification -> hasOcr(theCase))
-            .getOrElse(Validation.invalid("Incorrect journeyClassification: " + classificationOption.orElse("null")));
+            .orElse(invalid("Missing journeyClassification"));
     }
 
     /**
