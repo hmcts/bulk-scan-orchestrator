@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers;
 
 import com.google.common.collect.ImmutableList;
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -55,6 +56,24 @@ public class CcdCallbackController {
                 .process(callback.getCaseDetails(), idamToken, userId, callback.getEventId())
                 .map(modifiedFields -> okResponse(modifiedFields))
                 .getOrElseGet(errors -> errorResponse(errors));
+        } else {
+            return EMPTY_CALLBACK_ERROR_RESPONSE;
+        }
+    }
+
+    @PostMapping(path = "/create-case") // TODO, why attach is with `_`
+    public CallbackResponse createCase(
+        @RequestBody CallbackRequest callback,
+        @RequestHeader(value = "Authorization", required = false) String idamToken,
+        @RequestHeader(value = USER_ID, required = false) String userId
+    ) {
+        if (callback != null && callback.getCaseDetails() != null) {
+            return createCaseCallbackService
+                .process(callback.getCaseDetails(), idamToken, userId, callback.getEventId())
+                .<CallbackResponse>map(e -> {
+                    throw new NotImplementedException("Create Case event not yet implemented");
+                })
+                .getOrElseGet(this::errorResponse);
         } else {
             return EMPTY_CALLBACK_ERROR_RESPONSE;
         }
