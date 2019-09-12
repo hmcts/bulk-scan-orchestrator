@@ -1,5 +1,10 @@
 scheduling:
   enabled: false
+  task:
+    delete-envelopes-dlq-messages:
+      enabled: false
+    consume-envelopes-queue:
+      enabled: false
 
 spring:
   application:
