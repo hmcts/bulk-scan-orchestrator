@@ -15,6 +15,8 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
@@ -24,7 +26,7 @@ class ExceptionRecordMapperTest {
     private final ExceptionRecordMapper mapper = new ExceptionRecordMapper("https://example.gov.uk", "files");
 
     @Test
-    void mapEnvelope_maps_all_fields_correctly() {
+    public void mapEnvelope_maps_all_fields_correctly() {
         // given
         Envelope envelope = envelope(2);
 
@@ -53,19 +55,23 @@ class ExceptionRecordMapperTest {
         assertThat(ocrDataAsList(exceptionRecord.ocrData))
             .usingFieldByFieldElementComparator()
             .containsAll(envelope.ocrData);
+
+        assertThat(toEnvelopeOcrDataWarnings(exceptionRecord.ocrDataValidationWarnings))
+            .usingFieldByFieldElementComparator()
+            .containsExactlyElementsOf(envelope.ocrDataValidationWarnings);
     }
 
     @Test
-    void mapEnvelope_handles_null_ocr_data() {
-        Envelope envelope = envelope(2, null);
+    public void mapEnvelope_handles_null_ocr_data() {
+        Envelope envelope = envelope(2, null, emptyList());
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
         assertThat(exceptionRecord.ocrData).isNull();
     }
 
     @Test
-    void mapEnvelope_maps_subtype_values_in_documents() {
+    public void mapEnvelope_maps_subtype_values_in_documents() {
         // given
-        Envelope envelope = envelope(2, null);
+        Envelope envelope = envelope(2, null, emptyList());
 
         // when
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
@@ -80,7 +86,15 @@ class ExceptionRecordMapperTest {
             exceptionRecord.scannedDocuments.stream().map(d -> d.value.subtype).collect(toList());
 
         assertThat(actualDocumentSubtypeValues).isEqualTo(expectedDocumentSubtypeValues);
+    }
 
+    @Test
+    public void mapEnvelope_sets_warnings_presence_correctly() {
+        Envelope envelopeWithWarning = envelope(2, null, newArrayList("Warning"));
+        Envelope envelopeWithoutWarning = envelope(2, null, emptyList());
+
+        assertThat(mapper.mapEnvelope(envelopeWithWarning).displayWarnings).isEqualTo("Yes");
+        assertThat(mapper.mapEnvelope(envelopeWithoutWarning).displayWarnings).isEqualTo("No");
     }
 
     private List<OcrDataField> ocrDataAsList(List<CcdCollectionElement<CcdKeyValue>> ocrData) {
@@ -88,6 +102,13 @@ class ExceptionRecordMapperTest {
             .stream()
             .map(element -> new OcrDataField(element.value.key, element.value.value))
             .collect(Collectors.toList());
+    }
+
+    private List<String> toEnvelopeOcrDataWarnings(List<CcdCollectionElement<String>> ocrDataValidationWarnings) {
+        return ocrDataValidationWarnings
+            .stream()
+            .map(e -> e.value)
+            .collect(toList());
     }
 
     private List<Document> toEnvelopeDocuments(List<CcdCollectionElement<ScannedDocument>> ccdDocuments) {
@@ -103,7 +124,7 @@ class ExceptionRecordMapperTest {
                     scannedDocument.scannedDate.atZone(ZoneId.systemDefault()).toInstant(),
                     StringUtils.substringAfterLast(scannedDocument.url.documentUrl, "/"),
                     scannedDocument.deliveryDate.atZone(ZoneId.systemDefault()).toInstant()
-                    )
+                )
             ).collect(toList());
     }
 }

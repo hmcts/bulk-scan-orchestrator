@@ -18,5 +18,7 @@
       "scanned_at": "2018-01-01T11:20:00.000Z",
       "uuid": "ee69aee8-1a33-40dd-9af9-d90da1b104babc"
     }
+  ],
+  "ocr_data_validation_warnings": [
   ]
 }

@@ -13,6 +13,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
@@ -54,6 +55,21 @@ public class CaseDataExtractor {
                 );
         } else {
             return ImmutableMap.of();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<String> getOcrDataValidationWarnings(CaseDetails caseDetails) {
+        List<Map<String, Object>> ccdOcrDataValidationWarnings =
+            (List<Map<String, Object>>) caseDetails.getData().get("ocrDataValidationWarnings");
+
+        if (ccdOcrDataValidationWarnings != null) {
+            return ccdOcrDataValidationWarnings
+                .stream()
+                .map(ccdCollectionElement -> (String)ccdCollectionElement.get("value"))
+                .collect(toList());
+        } else {
+            return emptyList();
         }
     }
 
