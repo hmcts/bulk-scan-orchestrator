@@ -36,7 +36,9 @@ public class ExceptionRecordMapper {
             getLocalDateTime(envelope.deliveryDate),
             getLocalDateTime(envelope.openingDate),
             mapDocuments(envelope.documents, documentManagementUrl, contextPath, envelope.deliveryDate),
-            mapOcrData(envelope.ocrData)
+            mapOcrData(envelope.ocrData),
+            mapOcrDataWarnings(envelope.ocrDataValidationWarnings),
+            envelope.ocrDataValidationWarnings.isEmpty() ? "No" : "Yes"
         );
     }
 
@@ -49,5 +51,12 @@ public class ExceptionRecordMapper {
                 .collect(toList());
         }
         return null;
+    }
+
+    private List<CcdCollectionElement<String>> mapOcrDataWarnings(List<String> ocrDataWarnings) {
+        return ocrDataWarnings
+            .stream()
+            .map(CcdCollectionElement::new)
+            .collect(toList());
     }
 }
