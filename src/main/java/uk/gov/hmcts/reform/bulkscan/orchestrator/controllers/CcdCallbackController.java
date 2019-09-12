@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.AttachCaseCallbackService;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CreateCaseCallbackService;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
@@ -24,6 +25,8 @@ public class CcdCallbackController {
 
     private final AttachCaseCallbackService attachCaseCallbackService;
 
+    private final CreateCaseCallbackService createCaseCallbackService;
+
     public static final String USER_ID = "user-id";
 
     private static final CallbackResponse EMPTY_CALLBACK_ERROR_RESPONSE = AboutToStartOrSubmitCallbackResponse
@@ -32,8 +35,12 @@ public class CcdCallbackController {
         .build();
 
     @Autowired
-    public CcdCallbackController(AttachCaseCallbackService attachCaseCallbackService) {
+    public CcdCallbackController(
+        AttachCaseCallbackService attachCaseCallbackService,
+        CreateCaseCallbackService createCaseCallbackService
+    ) {
         this.attachCaseCallbackService = attachCaseCallbackService;
+        this.createCaseCallbackService = createCaseCallbackService;
     }
 
     @PostMapping(path = "/attach_case")
