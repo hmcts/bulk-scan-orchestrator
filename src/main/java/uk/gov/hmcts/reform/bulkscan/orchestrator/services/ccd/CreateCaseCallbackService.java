@@ -1,15 +1,24 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
+import io.vavr.collection.Seq;
 import io.vavr.control.Either;
 import io.vavr.control.Validation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.OcrDataField;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseTypeId;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasDateField;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJourneyClassification;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJurisdiction;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasPoBox;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isCreateCaseEvent;
 
 public class CreateCaseCallbackService {
@@ -25,7 +34,6 @@ public class CreateCaseCallbackService {
      *
      * @return Either TBD - not yet implemented
      */
-    @SuppressWarnings("squid:S1172") // tmp. suppress unused `caseDetails` parameter
     public Either<List<String>, ExceptionRecord> process(CaseDetails caseDetails, String eventId) {
         Validation<String, Void> eventIdValidation = isCreateCaseEvent(eventId);
 
@@ -36,6 +44,31 @@ public class CreateCaseCallbackService {
             return Either.left(singletonList(eventIdValidationError));
         }
 
-        return Either.left(singletonList("Not yet implemented"));
+        return getValidation(caseDetails)
+            .toEither()
+            .mapLeft(Seq::asJava);
+    }
+
+    private Validation<Seq<String>, ExceptionRecord> getValidation(CaseDetails caseDetails) {
+        return Validation
+            .combine(
+                hasCaseTypeId(caseDetails),
+                hasPoBox(caseDetails),
+                hasJurisdiction(caseDetails),
+                hasJourneyClassification(caseDetails),
+                hasDateField(caseDetails, "deliveryDate"),
+                hasDateField(caseDetails, "openingDate"),
+                getScannedDocuments(),
+                getOcrDataFields()
+            )
+            .ap(ExceptionRecord::new);
+    }
+
+    private Validation<String, List<ScannedDocument>> getScannedDocuments() {
+        return Validation.valid(emptyList());
+    }
+
+    private Validation<String, List<OcrDataField>> getOcrDataFields() {
+        return Validation.valid(emptyList());
     }
 }
