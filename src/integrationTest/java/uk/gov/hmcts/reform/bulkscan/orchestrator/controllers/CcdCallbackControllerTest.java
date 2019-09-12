@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers;
 
 import io.restassured.response.ValidatableResponse;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -38,6 +39,7 @@ class CcdCallbackControllerTest {
     @SpyBean
     private CreateCaseCallbackService callbackService;
 
+    @Disabled("Validation endpoint not fully implemented. Happy path not available")
     @Test
     void should_successfully_create_case() {
         // TBD - WIP
