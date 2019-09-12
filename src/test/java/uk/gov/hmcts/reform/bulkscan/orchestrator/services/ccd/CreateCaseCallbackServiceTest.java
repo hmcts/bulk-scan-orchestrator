@@ -16,11 +16,13 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.mode
 class CreateCaseCallbackServiceTest {
 
     private static final String EVENT_ID = "createCase";
+    private static final String IDAM_TOKEN = "token";
+    private static final String USER_ID = "user-id";
     private static final CreateCaseCallbackService SERVICE = new CreateCaseCallbackService();
 
     @Test
     void should_not_allow_to_process_callback_in_case_wrong_event_id_is_received() {
-        Either<List<String>, ExceptionRecord> output = SERVICE.process(null, "some event");
+        Either<List<String>, ExceptionRecord> output = SERVICE.process(null, IDAM_TOKEN, USER_ID, "some event");
 
         assertThat(output.isLeft()).isTrue();
         assertThat(output.getLeft()).containsOnly("The some event event is not supported. Please contact service team");
@@ -28,7 +30,7 @@ class CreateCaseCallbackServiceTest {
 
     @Test
     void should_report_all_errors_when_null_is_provided_as_case_details() {
-        Either<List<String>, ExceptionRecord> output = SERVICE.process(null, EVENT_ID);
+        Either<List<String>, ExceptionRecord> output = SERVICE.process(null, IDAM_TOKEN, USER_ID, EVENT_ID);
 
         assertThat(output.isLeft()).isTrue();
         assertThat(output.getLeft()).containsOnly(
@@ -60,7 +62,7 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, ExceptionRecord> output = SERVICE.process(caseDetails, EVENT_ID);
+        Either<List<String>, ExceptionRecord> output = SERVICE.process(caseDetails, IDAM_TOKEN, USER_ID, EVENT_ID);
 
         // then
         assertThat(output.isRight()).isTrue();
@@ -84,7 +86,7 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, ExceptionRecord> output = SERVICE.process(caseDetails, EVENT_ID);
+        Either<List<String>, ExceptionRecord> output = SERVICE.process(caseDetails, IDAM_TOKEN, USER_ID, EVENT_ID);
 
         // then
         assertThat(output.isLeft()).isTrue();

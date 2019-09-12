@@ -34,7 +34,12 @@ public class CreateCaseCallbackService {
      *
      * @return Either TBD - not yet implemented
      */
-    public Either<List<String>, ExceptionRecord> process(CaseDetails caseDetails, String eventId) {
+    public Either<List<String>, ExceptionRecord> process(
+        CaseDetails caseDetails,
+        String idamToken,
+        String userId,
+        String eventId
+    ) {
         Validation<String, Void> eventIdValidation = isCreateCaseEvent(eventId);
 
         if (eventIdValidation.isInvalid()) {
