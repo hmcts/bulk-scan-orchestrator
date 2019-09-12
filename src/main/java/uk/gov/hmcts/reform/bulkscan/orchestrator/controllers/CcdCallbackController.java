@@ -26,6 +26,11 @@ public class CcdCallbackController {
 
     public static final String USER_ID = "user-id";
 
+    private static final CallbackResponse EMPTY_CALLBACK_ERROR_RESPONSE = AboutToStartOrSubmitCallbackResponse
+        .builder()
+        .errors(ImmutableList.of("Internal Error: callback or case details were empty"))
+        .build();
+
     @Autowired
     public CcdCallbackController(AttachCaseCallbackService attachCaseCallbackService) {
         this.attachCaseCallbackService = attachCaseCallbackService;
@@ -44,7 +49,7 @@ public class CcdCallbackController {
                 .map(modifiedFields -> okResponse(modifiedFields))
                 .getOrElseGet(errors -> errorResponse(errors));
         } else {
-            return errorResponse(ImmutableList.of("Internal Error: callback or case details were empty"));
+            return EMPTY_CALLBACK_ERROR_RESPONSE;
         }
     }
 
