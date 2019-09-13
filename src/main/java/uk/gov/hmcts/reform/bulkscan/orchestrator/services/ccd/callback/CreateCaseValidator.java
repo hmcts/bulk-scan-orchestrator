@@ -42,18 +42,27 @@ public class CreateCaseValidator {
     /**
      * Any prerequisites to execute prior further action. Failing fast.
      * Easy extension for more mandatory prerequisites - just flatmap next Validation.
-     * @param eventIdValidation Top level requirement - valid event ID
+     * @param prerequisites Top level requirements failing fast
      * @return Either singleton list of errors or green pass to proceed further
      */
-    public Either<List<String>, Void> mandatoryPrerequisites(
-        Supplier<Validation<String, Void>> eventIdValidation
+    @SafeVarargs
+    public final Either<List<String>, Void> mandatoryPrerequisites(
+        Supplier<Validation<String, Void>>... prerequisites
     ) {
-        return eventIdValidation.get()
-            .mapError(error -> {
-                log.warn("Validation error {}", error);
+        for (Supplier<Validation<String, Void>> prerequisite : prerequisites) {
+            Validation<List<String>, Void> requirement = prerequisite.get()
+                .mapError(error -> {
+                    log.warn("Validation error {}", error);
 
-                return singletonList(error);
-            }).toEither();
+                    return singletonList(error);
+                });
+
+            if (requirement.isInvalid()) {
+                return requirement.toEither();
+            }
+        }
+
+        return Either.right(null);
     }
 
     public Validation<Seq<String>, ExceptionRecord> getValidation(CaseDetails caseDetails) {
