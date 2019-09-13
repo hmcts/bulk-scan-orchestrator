@@ -202,4 +202,18 @@ final class CallbackValidations {
             .map(o -> Validation.<String, Instant>valid(Instant.parse((String) o)))
             .orElse(invalid("Missing " + dateField));
     }
+
+    /**
+     * Used in createCase callback only. Can be reviewed later and with BPS-746 - revised the usage.
+     * @param theCase from CCD.
+     * @return Validation of it
+     */
+    @SuppressWarnings("unchecked")
+    static Validation<Object, List<Map<String, Object>>> getOcrData(CaseDetails theCase) {
+        return Optional.ofNullable(theCase)
+            .map(CaseDetails::getData)
+            .map(data -> (List<Map<String, Object>>) data.get("scanOCRData"))
+            .map(Validation::valid)
+            .orElse(invalid("Missing OCR data"));
+    }
 }
