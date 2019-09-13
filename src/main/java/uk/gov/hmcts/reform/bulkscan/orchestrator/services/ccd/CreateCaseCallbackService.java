@@ -81,15 +81,7 @@ public class CreateCaseCallbackService {
                 .map(items -> items.get("value"))
                 .filter(item -> item instanceof Map)
                 .map(item -> (Map<String, Object>) item)
-                .map(document -> new ScannedDocument(
-                    DocumentType.valueOf(((String) document.get("type")).toUpperCase()),
-                    (String) document.get("subType"),
-                    ((Map<String, String>) document.get("url")).get("document_url"),
-                    (String) document.get("controlNumber"),
-                    (String) document.get("fileName"),
-                    Instant.parse((String) document.get("scannedDate")),
-                    Instant.parse((String) document.get("deliveryDate"))
-                ))
+                .map(this::mapScannedDocument)
                 .collect(toList())
         ).toValidation().mapError(throwable -> "Invalid scannedDocuments format. Error: " + throwable.getMessage());
     }
@@ -113,5 +105,18 @@ public class CreateCaseCallbackService {
                     .collect(toList())
                 ).toValidation().mapError(throwable -> "Invalid OCR data format. Error: " + throwable.getMessage())
             );
+    }
+
+    @SuppressWarnings("unchecked")
+    private ScannedDocument mapScannedDocument(Map<String, Object> document) {
+        return new ScannedDocument(
+            DocumentType.valueOf(((String) document.get("type")).toUpperCase()),
+            (String) document.get("subType"),
+            ((Map<String, String>) document.get("url")).get("document_url"),
+            (String) document.get("controlNumber"),
+            (String) document.get("fileName"),
+            Instant.parse((String) document.get("scannedDate")),
+            Instant.parse((String) document.get("deliveryDate"))
+        );
     }
 }
