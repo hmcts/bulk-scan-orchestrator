@@ -96,7 +96,33 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
-    void should_report_errors_when_data_is_in_invalid_form() {
+    void should_report_errors_when_journey_classification_is_invalid() {
+        // given
+        Map<String, Object> data = new HashMap<>();
+
+        data.put("poBox", "12345");
+        data.put("journeyClassification", "EXCEPTIONS");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "filename"));
+        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
+
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .caseTypeId("some case type")
+            .jurisdiction("some jurisdiction")
+            .data(data)
+        );
+
+        // when
+        Either<List<String>, ExceptionRecord> output = SERVICE.process(caseDetails, EVENT_ID);
+
+        assertThat(output.getLeft()).containsOnly(
+            "Invalid journeyClassification. Error: No enum constant " + Classification.class.getName() + ".EXCEPTIONS"
+        );
+    }
+
+    @Test
+    void should_report_errors_when_scanned_document_is_invalid() {
         // given
         Map<String, Object> doc = new HashMap<>();
 
@@ -113,10 +139,36 @@ class CreateCaseCallbackServiceTest {
         Map<String, Object> data = new HashMap<>();
 
         data.put("poBox", "12345");
-        data.put("journeyClassification", "EXCEPTIONS");
+        data.put("journeyClassification", "EXCEPTION");
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", ImmutableList.of(ImmutableMap.of("value", doc)));
+        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
+
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .caseTypeId("some case type")
+            .jurisdiction("some jurisdiction")
+            .data(data)
+        );
+
+        // when
+        Either<List<String>, ExceptionRecord> output = SERVICE.process(caseDetails, EVENT_ID);
+
+        assertThat(output.getLeft()).containsOnly(
+            "Invalid scannedDocuments format. Error: No enum constant " + DocumentType.class.getName() + ".OTHERS"
+        );
+    }
+
+    @Test
+    void should_report_errors_when_ocr_data_is_invalid() {
+        // given
+        Map<String, Object> data = new HashMap<>();
+
+        data.put("poBox", "12345");
+        data.put("journeyClassification", "EXCEPTION");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
         data.put("scanOCRData", ImmutableList.of(ImmutableMap.of("value", ImmutableMap.of(
             "key", "k",
             "value", 1
@@ -131,17 +183,9 @@ class CreateCaseCallbackServiceTest {
         // when
         Either<List<String>, ExceptionRecord> output = SERVICE.process(caseDetails, EVENT_ID);
 
-        assertThat(output.getLeft())
-            .hasSize(3)
-            .contains(
-                "Invalid journeyClassification. Error: No enum constant "
-                    + Classification.class.getName() + ".EXCEPTIONS",
-                "Invalid scannedDocuments format. Error: No enum constant " + DocumentType.class.getName() + ".OTHERS"
-            );
         String match =
             "Invalid OCR data format. Error: (class )?java.lang.Integer cannot be cast to (class )?java.lang.String.*";
         assertThat(output.getLeft())
-            .filteredOn(string -> string.startsWith("Invalid OCR data format."))
             .hasSize(1)
             .element(0)
             .asString()
