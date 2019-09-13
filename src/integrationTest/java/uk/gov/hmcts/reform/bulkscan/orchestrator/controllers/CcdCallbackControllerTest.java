@@ -74,7 +74,7 @@ class CcdCallbackControllerTest {
 
     private byte[] getRequestBody(String filename) {
         try {
-            return toByteArray(getResource("ccd/callback/request/" + filename));
+            return toByteArray(getResource("ccd/callback/create-case/request/" + filename));
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
