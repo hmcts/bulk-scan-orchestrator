@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-class TestCaseBuilder {
+public class TestCaseBuilder {
     private TestCaseBuilder(){
     }
 
-    static CaseDetails createCaseWith(Function<CaseDetailsBuilder, CaseDetailsBuilder> builder) {
+    public static CaseDetails createCaseWith(Function<CaseDetailsBuilder, CaseDetailsBuilder> builder) {
         return builder.apply(CaseDetails.builder()).build();
     }
 
@@ -52,7 +52,7 @@ class TestCaseBuilder {
         return createCaseWith(b -> b.data(data));
     }
 
-    static List<Map<String, Object>> document(String url, String name) {
+    public static List<Map<String, Object>> document(String url, String name) {
         Map<String, Object> doc = new HashMap<>();
 
         doc.put("type", "Other");
@@ -69,7 +69,7 @@ class TestCaseBuilder {
         return ImmutableList.of(ImmutableMap.of("value", doc));
     }
 
-    static List<Map<String, Object>> ocrDataEntry(String key, String value) {
+    public static List<Map<String, Object>> ocrDataEntry(String key, String value) {
         return ImmutableList.of(ImmutableMap.of("value", ImmutableMap.of("key", key, "value", value)));
     }
 }

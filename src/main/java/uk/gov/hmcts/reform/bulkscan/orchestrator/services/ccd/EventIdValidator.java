@@ -24,7 +24,7 @@ public final class EventIdValidator {
     }
 
     @Nonnull
-    static Validation<String, Void> isCreateCaseEvent(String eventId) {
+    public static Validation<String, Void> isCreateCaseEvent(String eventId) {
         return hasValidEventId(EVENT_ID_CREATE_CASE::equals, eventId);
     }
 

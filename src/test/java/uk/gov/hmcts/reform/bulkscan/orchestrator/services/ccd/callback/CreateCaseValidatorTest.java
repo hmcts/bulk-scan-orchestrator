@@ -1,11 +1,15 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import io.vavr.collection.Seq;
 import io.vavr.control.Either;
+import io.vavr.control.Validation;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -16,25 +20,35 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.EXCEPTION;
 
-class CreateCaseCallbackServiceTest {
+class CreateCaseValidatorTest {
 
-    private static final String EVENT_ID = "createCase";
-    private static final CreateCaseCallbackService SERVICE = new CreateCaseCallbackService();
+    private static final CreateCaseValidator VALIDATOR = new CreateCaseValidator();
 
     @Test
-    void should_not_allow_to_process_callback_in_case_wrong_event_id_is_received() {
-        Either<List<String>, ExceptionRecord> output = SERVICE.process(null, "some event");
+    void should_not_allow_to_process_in_case_wrong_event_id_is_received() {
+        Either<List<String>, Void> output = VALIDATOR.mandatoryPrerequisites(
+            () -> EventIdValidator.isCreateCaseEvent("some event")
+        );
 
         assertThat(output.isLeft()).isTrue();
         assertThat(output.getLeft()).containsOnly("The some event event is not supported. Please contact service team");
     }
 
     @Test
-    void should_report_all_errors_when_null_is_provided_as_case_details() {
-        Either<List<String>, ExceptionRecord> output = SERVICE.process(null, EVENT_ID);
+    void should_allow_to_process_when_event_id_is_correct() {
+        Either<List<String>, Void> output = VALIDATOR.mandatoryPrerequisites(
+            () -> EventIdValidator.isCreateCaseEvent("createCase")
+        );
 
-        assertThat(output.isLeft()).isTrue();
-        assertThat(output.getLeft()).containsOnly(
+        assertThat(output.isRight()).isTrue();
+    }
+
+    @Test
+    void should_report_all_errors_when_null_is_provided_as_case_details() {
+        Validation<Seq<String>, ExceptionRecord> output = VALIDATOR.getValidation(null);
+
+        assertThat(output.isInvalid()).isTrue();
+        assertThat(output.getError()).containsOnly(
             "Missing caseType",
             "Missing poBox",
             "Internal Error: invalid jurisdiction supplied: null",
@@ -64,10 +78,10 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, ExceptionRecord> output = SERVICE.process(caseDetails, EVENT_ID);
+        Validation<Seq<String>, ExceptionRecord> output = VALIDATOR.getValidation(caseDetails);
 
         // then
-        assertThat(output.isRight()).isTrue();
+        assertThat(output.isValid()).isTrue();
         assertThat(output.get().scannedDocuments).hasSize(1);
         assertThat(output.get().ocrDataFields).hasSize(1);
     }
@@ -88,11 +102,11 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, ExceptionRecord> output = SERVICE.process(caseDetails, EVENT_ID);
+        Validation<Seq<String>, ExceptionRecord> output = VALIDATOR.getValidation(caseDetails);
 
         // then
-        assertThat(output.isLeft()).isTrue();
-        assertThat(output.getLeft()).containsOnly("Missing journeyClassification");
+        assertThat(output.isInvalid()).isTrue();
+        assertThat(output.getError()).containsOnly("Missing journeyClassification");
     }
 
     @Test
@@ -114,9 +128,9 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, ExceptionRecord> output = SERVICE.process(caseDetails, EVENT_ID);
+        Validation<Seq<String>, ExceptionRecord> output = VALIDATOR.getValidation(caseDetails);
 
-        assertThat(output.getLeft()).containsOnly(
+        assertThat(output.getError()).containsOnly(
             "Invalid journeyClassification. Error: No enum constant " + Classification.class.getName() + ".EXCEPTIONS"
         );
     }
@@ -152,9 +166,9 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, ExceptionRecord> output = SERVICE.process(caseDetails, EVENT_ID);
+        Validation<Seq<String>, ExceptionRecord> output = VALIDATOR.getValidation(caseDetails);
 
-        assertThat(output.getLeft()).containsOnly(
+        assertThat(output.getError()).containsOnly(
             "Invalid scannedDocuments format. Error: No enum constant " + DocumentType.class.getName() + ".OTHERS"
         );
     }
@@ -181,11 +195,11 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, ExceptionRecord> output = SERVICE.process(caseDetails, EVENT_ID);
+        Validation<Seq<String>, ExceptionRecord> output = VALIDATOR.getValidation(caseDetails);
 
         String match =
             "Invalid OCR data format. Error: (class )?java.lang.Integer cannot be cast to (class )?java.lang.String.*";
-        assertThat(output.getLeft())
+        assertThat(output.getError())
             .hasSize(1)
             .element(0)
             .asString()
