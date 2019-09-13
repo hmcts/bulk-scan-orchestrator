@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Class
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.time.Instant;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -207,7 +206,7 @@ final class CallbackValidations {
     /**
      * Used in createCase callback only. Can be reviewed later and with BPS-746 - revised the usage.
      * @param theCase from CCD.
-     * @return Validation of it which is always valid
+     * @return Validation of it
      */
     @SuppressWarnings("unchecked")
     static Validation<Object, List<Map<String, Object>>> getOcrData(CaseDetails theCase) {
@@ -215,6 +214,6 @@ final class CallbackValidations {
             .map(CaseDetails::getData)
             .map(data -> (List<Map<String, Object>>) data.get("scanOCRData"))
             .map(Validation::valid)
-            .orElse(Validation.valid(Collections.emptyList()));
+            .orElse(invalid("Missing OCR data"));
     }
 }

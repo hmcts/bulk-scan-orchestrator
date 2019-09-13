@@ -40,7 +40,8 @@ class CreateCaseCallbackServiceTest {
             "Internal Error: invalid jurisdiction supplied: null",
             "Missing journeyClassification",
             "Missing deliveryDate",
-            "Missing openingDate"
+            "Missing openingDate",
+            "Missing OCR data"
         );
     }
 
