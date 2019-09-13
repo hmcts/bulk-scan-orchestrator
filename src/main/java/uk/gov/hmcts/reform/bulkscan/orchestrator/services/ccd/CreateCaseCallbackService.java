@@ -2,18 +2,25 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import io.vavr.collection.Seq;
 import io.vavr.control.Either;
+import io.vavr.control.Try;
 import io.vavr.control.Validation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.getOcrData;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasDateField;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJourneyClassification;
@@ -58,17 +65,58 @@ public class CreateCaseCallbackService {
                 hasJourneyClassification(caseDetails),
                 hasDateField(caseDetails, "deliveryDate"),
                 hasDateField(caseDetails, "openingDate"),
-                getScannedDocuments(),
-                getOcrDataFields()
+                getScannedDocuments(caseDetails),
+                getOcrDataFields(caseDetails)
             )
             .ap(ExceptionRecord::new);
     }
 
-    private Validation<String, List<ScannedDocument>> getScannedDocuments() {
-        return Validation.valid(emptyList());
+    @SuppressWarnings("unchecked")
+    private Validation<String, List<ScannedDocument>> getScannedDocuments(CaseDetails caseDetails) {
+        return Try.of(() ->
+            Optional.ofNullable(caseDetails)
+                .map(Documents::getScannedDocuments)
+                .orElse(emptyList())
+                .stream()
+                .map(items -> items.get("value"))
+                .filter(item -> item instanceof Map)
+                .map(item -> (Map<String, Object>) item)
+                .map(this::mapScannedDocument)
+                .collect(toList())
+        ).toValidation().mapError(throwable -> "Invalid scannedDocuments format. Error: " + throwable.getMessage());
     }
 
-    private Validation<String, List<OcrDataField>> getOcrDataFields() {
-        return Validation.valid(emptyList());
+    @SuppressWarnings("unchecked")
+    private Validation<String, List<OcrDataField>> getOcrDataFields(CaseDetails caseDetails) {
+        return getOcrData(caseDetails)
+            // following mapError should never happen as getting should be non-breaking
+            // left side must be String
+            .mapError(Object::toString)
+            .flatMap(fields ->
+                Try.of(() -> fields
+                    .stream()
+                    .map(items -> items.get("value"))
+                    .filter(item -> item instanceof Map)
+                    .map(item -> (Map<String, String>) item)
+                    .map(ocrData -> new OcrDataField(
+                        ocrData.get("key"),
+                        ocrData.get("value")
+                    ))
+                    .collect(toList())
+                ).toValidation().mapError(throwable -> "Invalid OCR data format. Error: " + throwable.getMessage())
+            );
+    }
+
+    @SuppressWarnings("unchecked")
+    private ScannedDocument mapScannedDocument(Map<String, Object> document) {
+        return new ScannedDocument(
+            DocumentType.valueOf(((String) document.get("type")).toUpperCase()),
+            (String) document.get("subType"),
+            ((Map<String, String>) document.get("url")).get("document_url"),
+            (String) document.get("controlNumber"),
+            (String) document.get("fileName"),
+            Instant.parse((String) document.get("scannedDate")),
+            Instant.parse((String) document.get("deliveryDate"))
+        );
     }
 }
