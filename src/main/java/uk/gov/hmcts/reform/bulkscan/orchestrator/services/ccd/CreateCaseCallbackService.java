@@ -30,7 +30,7 @@ public class CreateCaseCallbackService {
     public Either<List<String>, ExceptionRecord> process(CaseDetails caseDetails, String eventId) {
         return validator
             .mandatoryPrerequisites(() -> isCreateCaseEvent(eventId))
-            .flatMap(aVoid -> validator
+            .flatMap(theVoid -> validator
                 .getValidation(caseDetails)
                 .toEither()
                 .mapLeft(Seq::asJava)

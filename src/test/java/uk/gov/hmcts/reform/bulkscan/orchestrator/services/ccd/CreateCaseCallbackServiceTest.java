@@ -6,6 +6,7 @@ import io.vavr.control.Either;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -19,7 +20,9 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.mode
 class CreateCaseCallbackServiceTest {
 
     private static final String EVENT_ID = "createCase";
-    private static final CreateCaseCallbackService SERVICE = new CreateCaseCallbackService();
+    private static final CreateCaseCallbackService SERVICE = new CreateCaseCallbackService(
+        new CreateCaseValidator()
+    );
 
     @Test
     void should_not_allow_to_process_callback_in_case_wrong_event_id_is_received() {
