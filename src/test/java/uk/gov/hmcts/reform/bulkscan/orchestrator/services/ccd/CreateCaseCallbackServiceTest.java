@@ -8,7 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.CaseTransformationException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentType;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
@@ -16,11 +19,13 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceNotConfi
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -39,13 +44,17 @@ class CreateCaseCallbackServiceTest {
     @Mock
     private ServiceConfigProvider serviceConfigProvider;
 
+    @Mock
+    private TransformationClient transformationClient;
+
     private CreateCaseCallbackService service;
 
     @BeforeEach
     void setUp() {
         service = new CreateCaseCallbackService(
             VALIDATOR,
-            serviceConfigProvider
+            serviceConfigProvider,
+            transformationClient
         );
     }
 
@@ -135,7 +144,8 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
-    void should_successfully_create_exception_record_with_documents_and_ocr_data_for_transformation_client() {
+    void should_successfully_create_exception_record_with_documents_and_ocr_data_for_transformation_client()
+        throws IOException, CaseTransformationException {
         // given
         setUpTransformationUrl();
 
@@ -160,6 +170,9 @@ class CreateCaseCallbackServiceTest {
         // then
         assertThat(output.isRight()).isTrue();
         assertThat(output.get().keySet()).containsOnly("caseReference");
+
+        // and verify all calls were made
+        verify(transformationClient).transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString());
     }
 
     @Test

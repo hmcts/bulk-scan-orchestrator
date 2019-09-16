@@ -8,6 +8,7 @@ import io.vavr.control.Either;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseValidator;
@@ -27,13 +28,16 @@ public class CreateCaseCallbackService {
 
     private final CreateCaseValidator validator;
     private final ServiceConfigProvider serviceConfigProvider;
+    private final TransformationClient transformationClient;
 
     public CreateCaseCallbackService(
         CreateCaseValidator validator,
-        ServiceConfigProvider serviceConfigProvider
+        ServiceConfigProvider serviceConfigProvider,
+        TransformationClient transformationClient
     ) {
         this.validator = validator;
         this.serviceConfigProvider = serviceConfigProvider;
+        this.transformationClient = transformationClient;
     }
 
     /**
@@ -48,6 +52,7 @@ public class CreateCaseCallbackService {
                 .combine(getServiceConfig(caseDetails).mapError(Array::of))
                 .ap(this::createExceptionRecord)
                 .mapError(errors -> errors.flatMap(Function.identity()))
+                .flatMap(Function.identity())
                 .toEither()
                 .mapLeft(Seq::asJava)
             );
@@ -70,7 +75,22 @@ public class CreateCaseCallbackService {
             .getOrElse(Validation.invalid("Transformation URL is not configured"));
     }
 
-    private Map<String, Object> createExceptionRecord(ExceptionRecord exceptionRecord, ServiceConfigItem configItem) {
-        return ImmutableMap.of("caseReference", UUID.randomUUID());
+    private Validation<Seq<String>, Map<String, Object>> createExceptionRecord(
+        ExceptionRecord exceptionRecord,
+        ServiceConfigItem configItem
+    ) {
+        try {
+            // log
+            transformationClient.transformExceptionRecord(
+                configItem.getTransformationUrl(),
+                exceptionRecord,
+                "s2s token"
+            );
+
+            return Validation.valid(ImmutableMap.of("caseReference", UUID.randomUUID()));
+        } catch (Exception exception) {
+            // log
+            return Validation.invalid(Array.of("Internal error. " + exception.getMessage()));
+        }
     }
 }
