@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.CaseTransformationException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentType;
@@ -170,6 +172,47 @@ class CreateCaseCallbackServiceTest {
         // then
         assertThat(output.isRight()).isTrue();
         assertThat(output.get().keySet()).containsOnly("caseReference");
+
+        // and verify all calls were made
+        verify(transformationClient).transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString());
+    }
+
+    @Test
+    void should_report_with_internal_error_message_when_transformation_client_throws_exception()
+        throws IOException, CaseTransformationException {
+        // given
+        setUpTransformationUrl();
+        CaseTransformationException exception = new CaseTransformationException(
+            new HttpClientErrorException(HttpStatus.CONFLICT),
+            "oh no"
+        );
+        doThrow(exception)
+            .when(transformationClient)
+            .transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString());
+
+        Map<String, Object> data = new HashMap<>();
+        // putting 6 via `ImmutableMap` is available from Java 9
+        data.put("poBox", "12345");
+        data.put("journeyClassification", EXCEPTION.name());
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
+        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
+
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .caseTypeId(CASE_TYPE_ID)
+            .jurisdiction("some jurisdiction")
+            .data(data)
+        );
+
+        // when
+        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
+
+        // then
+        assertThat(output.isLeft()).isTrue();
+        assertThat(output.getLeft())
+            .hasSize(1)
+            .containsOnly("Internal error. " + exception.getMessage());
 
         // and verify all calls were made
         verify(transformationClient).transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString());
