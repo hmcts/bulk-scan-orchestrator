@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadServ
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseSearcher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
@@ -39,7 +38,6 @@ import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getScannedDocuments;
 
 @SpringBootTest
 @ActiveProfiles("nosb") // no servicebus queue handler registration
@@ -75,7 +73,7 @@ class CreateCaseTest {
     private String dmUrl;
 
     @BeforeEach
-    void setup() throws Exception {
+    void setUp() throws Exception {
 
         dmUrl = dmUploadService.uploadToDmStore(
             "Certificate.pdf",
@@ -84,7 +82,7 @@ class CreateCaseTest {
     }
 
     @Test
-    public void should_create_case_upon_exception_record() throws Exception {
+    public void should_create_case_from_valid_exception_record() throws Exception {
         // given
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/exception-with-evidence.json");
 
@@ -95,7 +93,7 @@ class CreateCaseTest {
         await("Case is created")
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
-            .until(() -> isCaseCreated(caseCcdId, exceptionRecord, 1));
+            .until(() -> isCaseCreated(caseCcdId, exceptionRecord));
 
         verifyCaseIsCreated(caseCcdId, exceptionRecord);
     }
@@ -139,7 +137,7 @@ class CreateCaseTest {
         return getCaseCcdId(response);
     }
 
-    private String getCaseCcdId(Response response) throws java.io.IOException {
+    private String getCaseCcdId(Response response) throws IOException {
         assertThat(response.getStatusCode()).isEqualTo(200);
 
         final AboutToStartOrSubmitCallbackResponse callbackResponse =
@@ -180,16 +178,14 @@ class CreateCaseTest {
         return caseDetailsList.stream().findFirst();
     }
 
-    private Boolean isCaseCreated(String caseCcdId, CaseDetails exceptionRecord, int expectedScannedDocsSize) {
+    private Boolean isCaseCreated(String caseCcdId, CaseDetails exceptionRecord) {
 
-        CaseDetails updatedCase = ccdApi.getCase(
+        CaseDetails createdCase = ccdApi.getCase(
             String.valueOf(caseCcdId),
             exceptionRecord.getJurisdiction()
         );
 
-        List<ScannedDocument> updatedScannedDocuments = getScannedDocuments(updatedCase);
-
-        return updatedScannedDocuments.size() == expectedScannedDocsSize;
+        return createdCase != null;
     }
 
     private void verifyCaseIsCreated(
