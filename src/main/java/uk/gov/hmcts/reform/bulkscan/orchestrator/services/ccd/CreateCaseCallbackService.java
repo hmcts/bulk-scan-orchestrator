@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
+import io.vavr.collection.Array;
 import io.vavr.collection.Seq;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
@@ -13,6 +15,9 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigPr
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.Function;
 
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isCreateCaseEvent;
@@ -34,12 +39,15 @@ public class CreateCaseCallbackService {
     /**
      * Create case record from exception case record.
      *
-     * @return Either TBD - not yet implemented
+     * @return Either list of errors or map of changes - new case reference
      */
-    public Either<List<String>, ExceptionRecord> process(CaseDetails caseDetails, String eventId) {
+    public Either<List<String>, Map<String, Object>> process(CaseDetails caseDetails, String eventId) {
         return assertAllowToAccess(caseDetails, eventId)
             .flatMap(theVoid -> validator
                 .getValidation(caseDetails)
+                .combine(getServiceConfig(caseDetails).mapError(Array::of))
+                .ap(this::createExceptionRecord)
+                .mapError(errors -> errors.flatMap(Function.identity()))
                 .toEither()
                 .mapLeft(Seq::asJava)
             );
@@ -60,5 +68,9 @@ public class CreateCaseCallbackService {
         )
             .filter(item -> !Strings.isNullOrEmpty(item.getTransformationUrl()))
             .getOrElse(Validation.invalid("Transformation URL is not configured"));
+    }
+
+    private Map<String, Object> createExceptionRecord(ExceptionRecord exceptionRecord, ServiceConfigItem configItem) {
+        return ImmutableMap.of("caseReference", UUID.randomUUID());
     }
 }

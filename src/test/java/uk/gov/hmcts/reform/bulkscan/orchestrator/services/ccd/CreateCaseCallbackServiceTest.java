@@ -9,7 +9,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentType;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
@@ -52,7 +51,7 @@ class CreateCaseCallbackServiceTest {
 
     @Test
     void should_not_allow_to_process_callback_in_case_wrong_event_id_is_received() {
-        Either<List<String>, ExceptionRecord> output = service.process(null, "some event");
+        Either<List<String>, Map<String, Object>> output = service.process(null, "some event");
 
         assertThat(output.isLeft()).isTrue();
         assertThat(output.getLeft()).containsOnly("The some event event is not supported. Please contact service team");
@@ -65,7 +64,7 @@ class CreateCaseCallbackServiceTest {
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.id(1L));
 
         // when
-        Either<List<String>, ExceptionRecord> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
 
         assertThat(output.isLeft()).isTrue();
         assertThat(output.getLeft()).containsOnly("No case type ID supplied");
@@ -78,7 +77,7 @@ class CreateCaseCallbackServiceTest {
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(""));
 
         // when
-        Either<List<String>, ExceptionRecord> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
 
         // then
         assertThat(output.isLeft()).isTrue();
@@ -93,7 +92,7 @@ class CreateCaseCallbackServiceTest {
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(CASE_TYPE_ID));
 
         // when
-        Either<List<String>, ExceptionRecord> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
 
         // then
         assertThat(output.isLeft()).isTrue();
@@ -107,7 +106,7 @@ class CreateCaseCallbackServiceTest {
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(CASE_TYPE_ID));
 
         // when
-        Either<List<String>, ExceptionRecord> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
 
         // then
         assertThat(output.isLeft()).isTrue();
@@ -122,7 +121,7 @@ class CreateCaseCallbackServiceTest {
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(CASE_TYPE_ID));
 
         // when
-        Either<List<String>, ExceptionRecord> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
 
         assertThat(output.isLeft()).isTrue();
         assertThat(output.getLeft()).containsOnly(
@@ -156,12 +155,11 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, ExceptionRecord> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
 
         // then
         assertThat(output.isRight()).isTrue();
-        assertThat(output.get().scannedDocuments).hasSize(1);
-        assertThat(output.get().ocrDataFields).hasSize(1);
+        assertThat(output.get().keySet()).containsOnly("caseReference");
     }
 
     @Test
@@ -182,7 +180,7 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, ExceptionRecord> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
 
         // then
         assertThat(output.isLeft()).isTrue();
@@ -210,7 +208,7 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, ExceptionRecord> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
 
         assertThat(output.getLeft()).containsOnly(
             "Invalid journeyClassification. Error: No enum constant " + Classification.class.getName() + ".EXCEPTIONS"
@@ -250,7 +248,7 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, ExceptionRecord> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
 
         assertThat(output.getLeft()).containsOnly(
             "Invalid scannedDocuments format. Error: No enum constant " + DocumentType.class.getName() + ".OTHERS"
@@ -281,7 +279,7 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, ExceptionRecord> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
 
         String match =
             "Invalid OCR data format. Error: (class )?java.lang.Integer cannot be cast to (class )?java.lang.String.*";
