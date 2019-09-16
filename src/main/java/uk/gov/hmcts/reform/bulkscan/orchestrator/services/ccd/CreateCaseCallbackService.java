@@ -10,6 +10,7 @@ import io.vavr.control.Validation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.InvalidCaseDataException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
@@ -34,15 +35,18 @@ public class CreateCaseCallbackService {
     private final CreateCaseValidator validator;
     private final ServiceConfigProvider serviceConfigProvider;
     private final TransformationClient transformationClient;
+    private final AuthTokenGenerator s2sTokenGenerator;
 
     public CreateCaseCallbackService(
         CreateCaseValidator validator,
         ServiceConfigProvider serviceConfigProvider,
-        TransformationClient transformationClient
+        TransformationClient transformationClient,
+        AuthTokenGenerator s2sTokenGenerator
     ) {
         this.validator = validator;
         this.serviceConfigProvider = serviceConfigProvider;
         this.transformationClient = transformationClient;
+        this.s2sTokenGenerator = s2sTokenGenerator;
     }
 
     /**
@@ -99,7 +103,7 @@ public class CreateCaseCallbackService {
             transformationClient.transformExceptionRecord(
                 configItem.getTransformationUrl(),
                 exceptionRecord,
-                "s2s token"
+                s2sTokenGenerator.generate()
             );
 
             return Validation.valid(ImmutableMap.of("caseReference", UUID.randomUUID()));
