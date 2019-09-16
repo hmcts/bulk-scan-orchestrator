@@ -85,13 +85,13 @@ class CreateCaseTest {
 
     @Test
     public void should_create_case_upon_exception_record() throws Exception {
-        //given
-        CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
+        // given
+        CaseDetails exceptionRecord = createExceptionRecord("envelopes/exception-with-evidence.json");
 
         // when
         String caseCcdId = invokeCallbackEndpoint(exceptionRecord, "ccdCaseReference");
 
-        //then
+        // then
         await("Case is created")
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)

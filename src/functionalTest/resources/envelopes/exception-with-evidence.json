@@ -1,0 +1,35 @@
+{
+  "id": "0191",
+  "case_ref": "",
+  "po_box": "BULKSCAN PO BOX",
+  "jurisdiction": "BULKSCAN",
+  "container": "bulkscan",
+  "classification": "EXCEPTION",
+  "zip_file_name": "zip-file-test.zip",
+  "delivery_date": "1970-01-01T00:00:00.000Z",
+  "opening_date": "1970-01-01T00:00:00.000Z",
+  "documents": [
+    {
+      "file_name": "certificate1.pdf",
+      "control_number": "154565768",
+      "type": "other",
+      "subtype": null,
+      "scanned_at": "2018-01-01T10:30:00.000Z",
+      "uuid": "ee69aee8-1a33-40dd-9af9-d90da1b104ba"
+    }
+  ],
+  "ocr_data": [
+    {
+      "metadata_field_name": "field1",
+      "metadata_field_value": "value1"
+    },
+    {
+      "metadata_field_name": "field2",
+      "metadata_field_value": "value2"
+    }
+  ],
+  "ocr_data_validation_warnings": [
+    "warning 1",
+    "warning 2"
+  ]
+}
