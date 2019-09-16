@@ -54,7 +54,11 @@ public class CreateCaseCallbackService {
             .flatMap(theVoid -> validator
                 .getValidation(caseDetails)
                 .combine(getServiceConfig(caseDetails).mapError(Array::of))
-                .ap(this::createExceptionRecord)
+                .ap((exceptionRecord, configItem) -> createExceptionRecord(
+                    exceptionRecord,
+                    configItem,
+                    caseDetails.getId()
+                ))
                 .mapError(errors -> errors.flatMap(Function.identity()))
                 .flatMap(Function.identity())
                 .toEither()
@@ -81,10 +85,11 @@ public class CreateCaseCallbackService {
 
     private Validation<Seq<String>, Map<String, Object>> createExceptionRecord(
         ExceptionRecord exceptionRecord,
-        ServiceConfigItem configItem
+        ServiceConfigItem configItem,
+        long caseId
     ) {
         try {
-            log.info("Start creating exception record for {}", configItem.getService());
+            log.info("Start creating exception record for {} {}", configItem.getService(), caseId);
 
             transformationClient.transformExceptionRecord(
                 configItem.getTransformationUrl(),
@@ -94,7 +99,7 @@ public class CreateCaseCallbackService {
 
             return Validation.valid(ImmutableMap.of("caseReference", UUID.randomUUID()));
         } catch (Exception exception) {
-            log.error("Failed to create exception for {}", configItem.getService(), exception);
+            log.error("Failed to create exception for {} {}", configItem.getService(), caseId, exception);
 
             return Validation.invalid(Array.of("Internal error. " + exception.getMessage()));
         }
