@@ -7,6 +7,8 @@ import io.vavr.collection.Seq;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
@@ -25,6 +27,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdVali
 
 @Service
 public class CreateCaseCallbackService {
+
+    private static final Logger log = LoggerFactory.getLogger(CreateCaseCallbackService.class);
 
     private final CreateCaseValidator validator;
     private final ServiceConfigProvider serviceConfigProvider;
@@ -80,7 +84,8 @@ public class CreateCaseCallbackService {
         ServiceConfigItem configItem
     ) {
         try {
-            // log
+            log.info("Start creating exception record for {}", configItem.getService());
+
             transformationClient.transformExceptionRecord(
                 configItem.getTransformationUrl(),
                 exceptionRecord,
@@ -89,7 +94,8 @@ public class CreateCaseCallbackService {
 
             return Validation.valid(ImmutableMap.of("caseReference", UUID.randomUUID()));
         } catch (Exception exception) {
-            // log
+            log.error("Failed to create exception for {}", configItem.getService(), exception);
+
             return Validation.invalid(Array.of("Internal error. " + exception.getMessage()));
         }
     }
