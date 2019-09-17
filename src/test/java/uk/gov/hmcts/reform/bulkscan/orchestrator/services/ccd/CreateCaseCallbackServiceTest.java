@@ -60,7 +60,7 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
-    void should_not_allow_to_process_callback_in_case_wrong_case_type_id_is_missing() {
+    void should_not_allow_to_process_callback_when_case_type_id_is_missing() {
         // given
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.id(1L));
 
@@ -73,7 +73,7 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
-    void should_not_allow_to_process_callback_in_case_wrong_case_type_id_is_empty() {
+    void should_not_allow_to_process_callback_when_case_type_id_is_empty() {
         // given
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(""));
 
