@@ -17,7 +17,7 @@ import javax.validation.constraints.NotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.stream.Collectors.toSet;
 
-final class Documents {
+public final class Documents {
     private static final String SCANNED_DOCUMENTS = "scannedDocuments";
 
     private Documents() {
@@ -67,7 +67,7 @@ final class Documents {
 
     @Nonnull
     @SuppressWarnings("unchecked")
-    static List<Map<String, Object>> getScannedDocuments(CaseDetails theCase) {
+    public static List<Map<String, Object>> getScannedDocuments(CaseDetails theCase) {
         return (List<Map<String, Object>>)
             Optional.ofNullable(theCase.getData())
                 .map(map -> map.get(SCANNED_DOCUMENTS))
