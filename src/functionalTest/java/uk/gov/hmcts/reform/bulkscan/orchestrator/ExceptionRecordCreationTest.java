@@ -102,6 +102,7 @@ class ExceptionRecordCreationTest {
         List<String> expectedOcrDataWarnings = Arrays.asList("warning 1", "warning 2");
         assertThat(getOcrDataValidationWarnings(caseDetails)).isEqualTo(expectedOcrDataWarnings);
 
+        // envelope ID from the JSON resource representing the test message
         String messageEnvelopeId = "743aeac9-1791-463a-b929-9526e285fe2e";
         assertThat(caseDetails.getData().get("envelopeId")).isEqualTo(messageEnvelopeId);
     }

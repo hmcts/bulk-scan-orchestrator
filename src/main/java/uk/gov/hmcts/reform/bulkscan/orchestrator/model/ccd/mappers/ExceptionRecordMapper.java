@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.OcrDa
 
 import java.util.List;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentMapper.getLocalDateTime;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentMapper.mapDocuments;
@@ -23,16 +22,13 @@ public class ExceptionRecordMapper {
     private final List<String> jurisdictionsWithDuplicatePrevention;
 
     public ExceptionRecordMapper(
-        @Value("${document_management.url}")
-        final String documentManagementUrl,
-        @Value("${document_management.context-path}")
-        final String contextPath,
-        @Value("${jurisdictions-with-duplicate-er-prevention}")
-        final String[] jurisdictionsWithDuplicatePrevention
+        @Value("${document_management.url}") final String documentManagementUrl,
+        @Value("${document_management.context-path}") final String contextPath,
+        @Value("${jurisdictions-with-duplicate-er-prevention}") final List<String> jurisdictionsWithDuplicatePrevention
     ) {
         this.documentManagementUrl = documentManagementUrl;
         this.contextPath = contextPath;
-        this.jurisdictionsWithDuplicatePrevention = newArrayList(jurisdictionsWithDuplicatePrevention);
+        this.jurisdictionsWithDuplicatePrevention = jurisdictionsWithDuplicatePrevention;
     }
 
     public ExceptionRecord mapEnvelope(Envelope envelope) {

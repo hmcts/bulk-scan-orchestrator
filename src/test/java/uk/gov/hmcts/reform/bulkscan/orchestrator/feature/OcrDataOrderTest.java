@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.OcrDa
 import java.util.ArrayList;
 import java.util.ListIterator;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class OcrDataOrderTest {
@@ -33,7 +34,7 @@ public class OcrDataOrderTest {
         ExceptionRecordMapper mapper = new ExceptionRecordMapper(
             "http://localhost",
             "files",
-            new String[] {"BULKSCAN"}
+            newArrayList("BULKSCAN")
         );
 
         ExceptionRecord record = mapper.mapEnvelope(envelope);

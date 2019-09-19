@@ -168,7 +168,7 @@ class ExceptionRecordMapperTest {
         return new ExceptionRecordMapper(
             "https://example.gov.uk",
             "files",
-            jurisdictionsWithDuplicatePrevention
+            newArrayList(jurisdictionsWithDuplicatePrevention)
         );
     }
 }
