@@ -30,7 +30,12 @@ public class OcrDataOrderTest {
         assertThat(envelope.ocrData).isInstanceOf(ArrayList.class);
 
         // and
-        ExceptionRecordMapper mapper = new ExceptionRecordMapper("http://localhost", "files");
+        ExceptionRecordMapper mapper = new ExceptionRecordMapper(
+            "http://localhost",
+            "files",
+            new String[] {"BULKSCAN"}
+        );
+
         ExceptionRecord record = mapper.mapEnvelope(envelope);
         assertThat(record.ocrData).isInstanceOf(ArrayList.class);
         assertThat(record.ocrData.size()).isEqualTo(envelope.ocrData.size());
