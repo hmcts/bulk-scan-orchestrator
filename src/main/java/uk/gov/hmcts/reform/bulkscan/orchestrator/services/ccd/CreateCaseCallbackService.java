@@ -89,7 +89,11 @@ public class CreateCaseCallbackService {
         long caseId
     ) {
         try {
-            log.info("Start creating exception record for {} {}", configItem.getService(), caseId);
+            log.info(
+                "Start creating exception record for service {} and exception record {}",
+                configItem.getService(),
+                caseId
+            );
 
             transformationClient.transformExceptionRecord(
                 configItem.getTransformationUrl(),
@@ -99,7 +103,12 @@ public class CreateCaseCallbackService {
 
             return Validation.valid(ImmutableMap.of("caseReference", UUID.randomUUID()));
         } catch (Exception exception) {
-            log.error("Failed to create exception for {} {}", configItem.getService(), caseId, exception);
+            log.error(
+                "Failed to create exception for service {} and exception record {}",
+                configItem.getService(),
+                caseId,
+                exception
+            );
 
             return Validation.invalid(Array.of("Internal error. " + exception.getMessage()));
         }
