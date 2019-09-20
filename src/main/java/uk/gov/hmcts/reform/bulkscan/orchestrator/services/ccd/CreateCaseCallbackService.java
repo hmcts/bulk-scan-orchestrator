@@ -10,6 +10,7 @@ import io.vavr.control.Validation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.InvalidCaseDataException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
@@ -102,6 +103,9 @@ public class CreateCaseCallbackService {
             );
 
             return Validation.valid(ImmutableMap.of("caseReference", UUID.randomUUID()));
+        } catch (InvalidCaseDataException exception) {
+            // let controller deal with this. it is 422 or 400
+            throw exception;
         } catch (Exception exception) {
             log.error(
                 "Failed to create exception for service {} and exception record {}",

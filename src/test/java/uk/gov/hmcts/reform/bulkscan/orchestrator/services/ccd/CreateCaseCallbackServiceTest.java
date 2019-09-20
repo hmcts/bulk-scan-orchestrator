@@ -6,14 +6,18 @@ import io.vavr.control.Either;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.CaseTransformationException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.InvalidCaseDataException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.TransformationErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
@@ -26,7 +30,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -218,6 +224,47 @@ class CreateCaseCallbackServiceTest {
 
         // and verify all calls were made
         verify(transformationClient).transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString());
+    }
+
+    // todo move to integration test
+    @ParameterizedTest
+    @EnumSource(value = HttpStatus.class, names = {
+        "UNPROCESSABLE_ENTITY",
+        "BAD_REQUEST"
+    })
+    void should_throw_InvalidCaseDataException_when_transformation_client_returns_422_or_400(HttpStatus httpStatus)
+        throws IOException, CaseTransformationException {
+        // given
+        setUpTransformationUrl();
+        InvalidCaseDataException exception = new InvalidCaseDataException(
+            new HttpClientErrorException(httpStatus),
+            new TransformationErrorResponse(emptyList(), emptyList())
+        );
+        doThrow(exception)
+            .when(transformationClient)
+            .transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString());
+
+        Map<String, Object> data = new HashMap<>();
+        // putting 6 via `ImmutableMap` is available from Java 9
+        data.put("poBox", "12345");
+        data.put("journeyClassification", EXCEPTION.name());
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
+        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
+
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .id(1L)
+            .caseTypeId(CASE_TYPE_ID)
+            .jurisdiction("some jurisdiction")
+            .data(data)
+        );
+
+        // when
+        Throwable throwable = catchThrowable(() -> service.process(caseDetails, EVENT_ID));
+
+        // then
+        assertThat(throwable).isInstanceOf(InvalidCaseDataException.class);
     }
 
     @Test
