@@ -54,7 +54,7 @@ public class CreateCaseCallbackService {
             .flatMap(theVoid -> validator
                 .getValidation(caseDetails)
                 .combine(getServiceConfig(caseDetails).mapError(Array::of))
-                .ap((exceptionRecord, configItem) -> createExceptionRecord(
+                .ap((exceptionRecord, configItem) -> createNewCase(
                     exceptionRecord,
                     configItem,
                     caseDetails.getId()
@@ -83,7 +83,7 @@ public class CreateCaseCallbackService {
             .getOrElse(Validation.invalid("Transformation URL is not configured"));
     }
 
-    private Validation<Seq<String>, Map<String, Object>> createExceptionRecord(
+    private Validation<Seq<String>, Map<String, Object>> createNewCase(
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,
         long caseId
