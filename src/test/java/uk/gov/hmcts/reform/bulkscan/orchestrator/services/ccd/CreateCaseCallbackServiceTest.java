@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessRe
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceNotConfiguredException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.io.IOException;
@@ -62,6 +63,9 @@ class CreateCaseCallbackServiceTest {
     @Mock
     private AuthTokenGenerator s2sTokenGenerator;
 
+    @Mock
+    private CoreCaseDataApi ccdApi;
+
     private CreateCaseCallbackService service;
 
     @BeforeEach
@@ -70,7 +74,8 @@ class CreateCaseCallbackServiceTest {
             VALIDATOR,
             serviceConfigProvider,
             transformationClient,
-            s2sTokenGenerator
+            s2sTokenGenerator,
+            ccdApi
         );
     }
 
@@ -191,41 +196,6 @@ class CreateCaseCallbackServiceTest {
         assertThat(output.isLeft()).isTrue();
         assertThat(output.getLeft()).containsOnly(
             "Event createCase not allowed for the current journey classification SUPPLEMENTARY_EVIDENCE"
-        );
-    }
-
-    @Test
-    void should_report_error_if_classification_is_exception_without_ocr() {
-        // given
-        setUpTransformationUrl();
-
-        Map<String, Object> data = new HashMap<>();
-        // putting 6 via `ImmutableMap` is available from Java 9
-        data.put("poBox", "12345");
-        data.put("journeyClassification", EXCEPTION.name());
-        data.put("formType", "Form1");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
-
-        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
-            .id(1L)
-            .caseTypeId(CASE_TYPE_ID)
-            .jurisdiction("some jurisdiction")
-            .data(data)
-        );
-
-        // when
-        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
-            caseDetails,
-            true
-        ), IDAM_TOKEN, USER_ID);
-
-        // then
-        assertThat(output.isLeft()).isTrue();
-        assertThat(output.getLeft()).containsOnly(
-            "Event createCase not allowed for the current journey classification EXCEPTION without OCR"
         );
     }
 

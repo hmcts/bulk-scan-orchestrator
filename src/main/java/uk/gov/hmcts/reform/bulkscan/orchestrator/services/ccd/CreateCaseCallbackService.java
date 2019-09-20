@@ -20,10 +20,13 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.Event;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.function.Function;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -39,17 +42,20 @@ public class CreateCaseCallbackService {
     private final ServiceConfigProvider serviceConfigProvider;
     private final TransformationClient transformationClient;
     private final AuthTokenGenerator s2sTokenGenerator;
+    private final CoreCaseDataApi feignCcdApi;
 
     public CreateCaseCallbackService(
         CreateCaseValidator validator,
         ServiceConfigProvider serviceConfigProvider,
         TransformationClient transformationClient,
-        AuthTokenGenerator s2sTokenGenerator
+        AuthTokenGenerator s2sTokenGenerator,
+        CoreCaseDataApi feignCcdApi
     ) {
         this.validator = validator;
         this.serviceConfigProvider = serviceConfigProvider;
         this.transformationClient = transformationClient;
         this.s2sTokenGenerator = s2sTokenGenerator;
+        this.feignCcdApi = feignCcdApi;
     }
 
     /**
@@ -70,7 +76,9 @@ public class CreateCaseCallbackService {
                     exceptionRecord,
                     configItem,
                     request.getCaseDetails().getId(),
-                    request.isIgnoreWarnings()
+                    request.isIgnoreWarnings(),
+                    idamToken,
+                    userId
                 ))
                 .mapError(errors -> errors.flatMap(Function.identity()))
                 .flatMap(Function.identity())
@@ -100,30 +108,72 @@ public class CreateCaseCallbackService {
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,
         long caseId,
-        boolean ignoreWarnings
+        boolean ignoreWarnings,
+        String idamToken,
+        String userId
     ) {
+        String caseIdStringify = Long.toString(caseId);
+
+        log.info("Start creating exception record for {} {}", configItem.getService(), caseIdStringify);
+
         try {
-            log.info(
-                "Start creating exception record for service {} and exception record {}",
-                configItem.getService(),
-                caseId
-            );
+            String s2sToken = s2sTokenGenerator.generate();
 
             SuccessfulTransformationResponse transformationResponse = transformationClient.transformExceptionRecord(
                 configItem.getTransformationUrl(),
                 exceptionRecord,
-                s2sTokenGenerator.generate()
+                s2sToken
             );
 
             if (!ignoreWarnings && !transformationResponse.warnings.isEmpty()) {
                 log.warn("Transformation warnings: {}", String.join(", ", transformationResponse.warnings));
 
                 return Validation.invalid(Array.ofAll(transformationResponse.warnings));
-            } else {
-                return Validation.valid(new ProcessResult(
-                    ImmutableMap.of("caseReference", UUID.randomUUID())
-                ));
             }
+
+            log.info("Successfully transformed exception record for {} {}", configItem.getService(), caseIdStringify);
+
+            StartEventResponse eventResponse = feignCcdApi.startForCaseworker(
+                idamToken,
+                s2sToken,
+                userId,
+                exceptionRecord.poBoxJurisdiction,
+                transformationResponse.caseCreationDetails.caseTypeId,
+                transformationResponse.caseCreationDetails.eventId
+            );
+
+            CaseDetails caseDetails = feignCcdApi.submitForCaseworker(
+                idamToken,
+                s2sToken,
+                userId,
+                exceptionRecord.poBoxJurisdiction,
+                transformationResponse.caseCreationDetails.caseTypeId,
+                true,
+                CaseDataContent
+                    .builder()
+                    .caseReference(caseIdStringify)
+                    .data(transformationResponse.caseCreationDetails.caseData)
+                    .event(Event
+                        .builder()
+                        .id(eventResponse.getEventId())
+                        .summary("Case created")
+                        .description("Case created from exception record ref " + caseIdStringify)
+                        .build()
+                    )
+                    .eventToken(eventResponse.getToken())
+                    .build()
+            );
+
+            log.info(
+                "Successfully created case for {} with new case ID {} from exception record {}",
+                configItem.getService(),
+                caseDetails.getId(),
+                caseIdStringify
+            );
+
+            return Validation.valid(new ProcessResult(
+                ImmutableMap.of("caseReference", Long.toString(caseDetails.getId()))
+            ));
         } catch (InvalidCaseDataException exception) {
             if (BAD_REQUEST.equals(exception.getStatus())) {
                 throw exception;
@@ -137,7 +187,7 @@ public class CreateCaseCallbackService {
             log.error(
                 "Failed to create exception for service {} and exception record {}",
                 configItem.getService(),
-                caseId,
+                caseIdStringify,
                 exception
             );
 
