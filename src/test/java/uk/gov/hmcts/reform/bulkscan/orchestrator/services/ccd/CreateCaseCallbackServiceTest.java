@@ -28,6 +28,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.EXCEPTION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.NEW_APPLICATION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.SUPPLEMENTARY_EVIDENCE;
 
 @ExtendWith(MockitoExtension.class)
 class CreateCaseCallbackServiceTest {
@@ -130,13 +132,68 @@ class CreateCaseCallbackServiceTest {
             "Internal Error: invalid jurisdiction supplied: null",
             "Missing journeyClassification",
             "Missing deliveryDate",
-            "Missing openingDate",
-            "Missing OCR data"
+            "Missing openingDate"
         );
     }
 
     @Test
-    void should_successfully_create_exception_record_with_documents_and_ocr_data_for_transformation_client() {
+    void should_create_exception_record_if_classification_new_application_with_documents_and_ocr_data() {
+        // given
+        setUpTransformationUrl();
+
+        Map<String, Object> data = new HashMap<>();
+        // putting 6 via `ImmutableMap` is available from Java 9
+        data.put("poBox", "12345");
+        data.put("journeyClassification", NEW_APPLICATION.name());
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
+        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
+
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .caseTypeId(CASE_TYPE_ID)
+            .jurisdiction("some jurisdiction")
+            .data(data)
+        );
+
+        // when
+        Either<List<String>, ExceptionRecord> output = service.process(caseDetails, EVENT_ID);
+
+        // then
+        assertThat(output.isRight()).isTrue();
+        assertThat(output.get().scannedDocuments).hasSize(1);
+        assertThat(output.get().ocrDataFields).hasSize(1);
+    }
+
+    @Test
+    void should_create_exception_record_if_classification_new_application_with_documents_and_without_ocr_data() {
+        // given
+        setUpTransformationUrl();
+
+        Map<String, Object> data = new HashMap<>();
+        // putting 6 via `ImmutableMap` is available from Java 9
+        data.put("poBox", "12345");
+        data.put("journeyClassification", NEW_APPLICATION.name());
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
+
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .caseTypeId(CASE_TYPE_ID)
+            .jurisdiction("some jurisdiction")
+            .data(data)
+        );
+
+        // when
+        Either<List<String>, ExceptionRecord> output = service.process(caseDetails, EVENT_ID);
+
+        // then
+        assertThat(output.isRight()).isTrue();
+        assertThat(output.get().scannedDocuments).hasSize(1);
+    }
+
+    @Test
+    void should_create_exception_record_if_classification_exception_with_documents_and_ocr_data() {
         // given
         setUpTransformationUrl();
 
@@ -162,6 +219,65 @@ class CreateCaseCallbackServiceTest {
         assertThat(output.isRight()).isTrue();
         assertThat(output.get().scannedDocuments).hasSize(1);
         assertThat(output.get().ocrDataFields).hasSize(1);
+    }
+
+    @Test
+    void should_report_error_if_classification_is_supplementary_evidence() {
+        // given
+        setUpTransformationUrl();
+
+        Map<String, Object> data = new HashMap<>();
+        // putting 6 via `ImmutableMap` is available from Java 9
+        data.put("poBox", "12345");
+        data.put("journeyClassification", SUPPLEMENTARY_EVIDENCE.name());
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
+        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
+
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .caseTypeId(CASE_TYPE_ID)
+            .jurisdiction("some jurisdiction")
+            .data(data)
+        );
+
+        // when
+        Either<List<String>, ExceptionRecord> output = service.process(caseDetails, EVENT_ID);
+
+        // then
+        assertThat(output.isLeft()).isTrue();
+        assertThat(output.getLeft()).containsOnly(
+            "Event createCase not allowed for the current journey classification SUPPLEMENTARY_EVIDENCE"
+        );
+    }
+
+    @Test
+    void should_report_error_if_classification_is_exception_without_ocr() {
+        // given
+        setUpTransformationUrl();
+
+        Map<String, Object> data = new HashMap<>();
+        // putting 6 via `ImmutableMap` is available from Java 9
+        data.put("poBox", "12345");
+        data.put("journeyClassification", EXCEPTION.name());
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
+
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .caseTypeId(CASE_TYPE_ID)
+            .jurisdiction("some jurisdiction")
+            .data(data)
+        );
+
+        // when
+        Either<List<String>, ExceptionRecord> output = service.process(caseDetails, EVENT_ID);
+
+        // then
+        assertThat(output.isLeft()).isTrue();
+        assertThat(output.getLeft()).containsOnly(
+            "Event createCase not allowed for the current journey classification EXCEPTION without OCR"
+        );
     }
 
     @Test

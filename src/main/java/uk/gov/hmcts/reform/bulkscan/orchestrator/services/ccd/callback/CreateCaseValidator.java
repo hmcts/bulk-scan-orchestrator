@@ -26,9 +26,9 @@ import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.getOcrData;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasDateField;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJourneyClassification;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJurisdiction;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasPoBox;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasValidJourneyClassification;
 
 @Component
 public class CreateCaseValidator {
@@ -71,7 +71,7 @@ public class CreateCaseValidator {
                 hasCaseTypeId(caseDetails),
                 hasPoBox(caseDetails),
                 hasJurisdiction(caseDetails),
-                hasJourneyClassification(caseDetails),
+                hasValidJourneyClassification(caseDetails),
                 hasDateField(caseDetails, "deliveryDate"),
                 hasDateField(caseDetails, "openingDate"),
                 getScannedDocuments(caseDetails),
@@ -100,9 +100,8 @@ public class CreateCaseValidator {
         return getOcrData(caseDetails)
             // following mapError should never happen as getting should be non-breaking
             // left side must be String
-            .mapError(Object::toString)
-            .flatMap(fields ->
-                Try.of(() -> fields
+            .map(ocrDataList ->
+                Try.of(() -> ocrDataList
                     .stream()
                     .map(items -> items.get("value"))
                     .filter(item -> item instanceof Map)
@@ -113,7 +112,8 @@ public class CreateCaseValidator {
                     ))
                     .collect(toList())
                 ).toValidation().mapError(throwable -> "Invalid OCR data format. Error: " + throwable.getMessage())
-            );
+            )
+            .orElse(Validation.valid(null));
     }
 
     @SuppressWarnings("unchecked")

@@ -18,6 +18,8 @@ import javax.annotation.Nonnull;
 import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
 import static java.lang.String.format;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.EXCEPTION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.SUPPLEMENTARY_EVIDENCE;
 
 public final class CallbackValidations {
 
@@ -163,9 +165,7 @@ public final class CallbackValidations {
 
     @SuppressWarnings("unchecked")
     static boolean hasOcr(CaseDetails theCase) {
-        return Optional.ofNullable(theCase)
-            .map(CaseDetails::getData)
-            .map(data -> (List<Map<String, Object>>) data.get("scanOCRData"))
+        return getOcrData(theCase)
             .map(CollectionUtils::isNotEmpty)
             .orElse(false);
     }
@@ -183,16 +183,48 @@ public final class CallbackValidations {
      * @param theCase from CCD
      * @return Validation of it
      */
-    public static Validation<String, Classification> hasJourneyClassification(CaseDetails theCase) {
+    public static Validation<String, Classification> hasValidJourneyClassification(CaseDetails theCase) {
         Optional<String> classificationOption = getJourneyClassification(theCase);
 
-        return classificationOption
+        Validation<String, Classification> primaryValidationResult = classificationOption
             .map(classification -> Try.of(() -> Classification.valueOf(classification)))
             .map(Try::toValidation)
             .map(validation -> validation
                 .mapError(throwable -> "Invalid journeyClassification. Error: " + throwable.getMessage())
             )
             .orElse(invalid("Missing journeyClassification"));
+
+        if (primaryValidationResult.isInvalid()) {
+            return primaryValidationResult;
+        }
+
+        return validateClassification(primaryValidationResult.get(), theCase);
+    }
+
+    private static Validation<String, Classification> validateClassification(
+        Classification classification,
+        CaseDetails theCase
+    ) {
+        if (SUPPLEMENTARY_EVIDENCE.equals(classification)) {
+            return invalid(format(
+                "Event %s not allowed for the current journey classification %s",
+                "createCase",
+                classification
+            ));
+        }
+
+        if (EXCEPTION.equals(classification)) {
+            Optional<List<Map<String, Object>>> ocrDataOpt = getOcrData(theCase);
+            if (!ocrDataOpt.isPresent() || ocrDataOpt.get().isEmpty()) {
+                return invalid(format(
+                    "Event %s not allowed for the current journey classification %s without OCR",
+                    "createCase",
+                    classification
+                ));
+            }
+        }
+
+        return valid(classification);
     }
 
     public static Validation<String, Instant> hasDateField(CaseDetails theCase, String dateField) {
@@ -203,17 +235,10 @@ public final class CallbackValidations {
             .orElse(invalid("Missing " + dateField));
     }
 
-    /**
-     * Used in createCase callback only. Can be reviewed later and with BPS-746 - revised the usage.
-     * @param theCase from CCD.
-     * @return Validation of it
-     */
     @SuppressWarnings("unchecked")
-    public static Validation<Object, List<Map<String, Object>>> getOcrData(CaseDetails theCase) {
+    public static Optional<List<Map<String, Object>>> getOcrData(CaseDetails theCase) {
         return Optional.ofNullable(theCase)
             .map(CaseDetails::getData)
-            .map(data -> (List<Map<String, Object>>) data.get("scanOCRData"))
-            .map(Validation::valid)
-            .orElse(invalid("Missing OCR data"));
+            .map(data -> (List<Map<String, Object>>) data.get("scanOCRData"));
     }
 }
