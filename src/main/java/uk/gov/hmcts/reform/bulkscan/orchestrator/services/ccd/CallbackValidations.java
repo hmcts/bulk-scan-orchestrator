@@ -206,13 +206,11 @@ public final class CallbackValidations {
             ));
         }
 
-        if (EXCEPTION.equals(classification)) {
-            if (!hasOcr(theCase)) {
-                return invalid(format(
-                    "Event createCase not allowed for the current journey classification %s without OCR",
-                    classification
-                ));
-            }
+        if (EXCEPTION.equals(classification) && !hasOcr(theCase)) {
+            return invalid(format(
+                "Event createCase not allowed for the current journey classification %s without OCR",
+                classification
+            ));
         }
 
         return valid(classification);
