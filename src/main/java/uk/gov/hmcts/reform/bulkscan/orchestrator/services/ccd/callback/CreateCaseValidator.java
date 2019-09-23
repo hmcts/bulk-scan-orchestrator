@@ -28,7 +28,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasDateField;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJurisdiction;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasPoBox;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasValidJourneyClassification;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJourneyClassification;
 
 @Component
 public class CreateCaseValidator {
@@ -71,7 +71,7 @@ public class CreateCaseValidator {
                 hasCaseTypeId(caseDetails),
                 hasPoBox(caseDetails),
                 hasJurisdiction(caseDetails),
-                hasValidJourneyClassification(caseDetails),
+                hasJourneyClassification(caseDetails),
                 hasDateField(caseDetails, "deliveryDate"),
                 hasDateField(caseDetails, "openingDate"),
                 getScannedDocuments(caseDetails),

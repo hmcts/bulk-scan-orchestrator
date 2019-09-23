@@ -163,7 +163,6 @@ public final class CallbackValidations {
             .map(c -> (String) c);
     }
 
-    @SuppressWarnings("unchecked")
     static boolean hasOcr(CaseDetails theCase) {
         return getOcrData(theCase)
             .map(CollectionUtils::isNotEmpty)
@@ -183,7 +182,7 @@ public final class CallbackValidations {
      * @param theCase from CCD
      * @return Validation of it
      */
-    public static Validation<String, Classification> hasValidJourneyClassification(CaseDetails theCase) {
+    public static Validation<String, Classification> hasJourneyClassification(CaseDetails theCase) {
         Optional<String> classificationOption = getJourneyClassification(theCase);
 
         return classificationOption
@@ -191,33 +190,26 @@ public final class CallbackValidations {
             .map(Try::toValidation)
             .map(validation -> validation
                 .mapError(throwable -> "Invalid journeyClassification. Error: " + throwable.getMessage())
+                .flatMap(classification -> validateClassification(classification, theCase))
             )
-            .map(validation -> validateClassification(validation, theCase))
             .orElse(invalid("Missing journeyClassification"));
     }
 
     private static Validation<String, Classification> validateClassification(
-        Validation<String, Classification> validation,
+        Classification classification,
         CaseDetails theCase
     ) {
-        if (validation.isInvalid()) {
-            return validation;
-        }
-        Classification classification = validation.get();
         if (SUPPLEMENTARY_EVIDENCE.equals(classification)) {
             return invalid(format(
-                "Event %s not allowed for the current journey classification %s",
-                "createCase",
+                "Event createCase not allowed for the current journey classification %s",
                 classification
             ));
         }
 
         if (EXCEPTION.equals(classification)) {
-            Optional<List<Map<String, Object>>> ocrDataOpt = getOcrData(theCase);
-            if (!ocrDataOpt.isPresent() || ocrDataOpt.get().isEmpty()) {
+            if (!hasOcr(theCase)) {
                 return invalid(format(
-                    "Event %s not allowed for the current journey classification %s without OCR",
-                    "createCase",
+                    "Event createCase not allowed for the current journey classification %s without OCR",
                     classification
                 ));
             }
