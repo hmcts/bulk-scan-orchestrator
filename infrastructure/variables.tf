@@ -74,3 +74,10 @@ variable "delete_envelopes_dlq_messages_ttl" {
 variable "transformation_url_bulkscan" {
   default = "http://bulk-scan-sample-app-aat.service.core-compute-aat.internal"
 }
+
+// TODO: remove when all jurisdictions support the prevention in all environments
+variable "jurisdictions_with_duplicate_er_prevention" {
+  type = "list"
+  description = "Jurisdictions that support the prevention of duplicate exception records"
+  default = ["BULKSCAN"]
+}
