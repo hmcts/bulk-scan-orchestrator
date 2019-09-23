@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.CaseTransformationException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.InvalidCaseDataException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
+import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
@@ -55,6 +57,9 @@ class CreateCaseCallbackServiceTest {
     @Mock
     private TransformationClient transformationClient;
 
+    @Mock
+    private AuthTokenGenerator s2sTokenGenerator;
+
     private CreateCaseCallbackService service;
 
     @BeforeEach
@@ -62,7 +67,8 @@ class CreateCaseCallbackServiceTest {
         service = new CreateCaseCallbackService(
             VALIDATOR,
             serviceConfigProvider,
-            transformationClient
+            transformationClient,
+            s2sTokenGenerator
         );
     }
 
@@ -156,6 +162,7 @@ class CreateCaseCallbackServiceTest {
         throws IOException, CaseTransformationException {
         // given
         setUpTransformationUrl();
+        when(s2sTokenGenerator.generate()).thenReturn(randomUUID().toString());
 
         Map<String, Object> data = new HashMap<>();
         // putting 6 via `ImmutableMap` is available from Java 9
@@ -196,6 +203,7 @@ class CreateCaseCallbackServiceTest {
         doThrow(exception)
             .when(transformationClient)
             .transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString());
+        when(s2sTokenGenerator.generate()).thenReturn(randomUUID().toString());
 
         Map<String, Object> data = new HashMap<>();
         // putting 6 via `ImmutableMap` is available from Java 9
@@ -221,9 +229,6 @@ class CreateCaseCallbackServiceTest {
         assertThat(output.getLeft())
             .hasSize(1)
             .containsOnly("Internal error. " + exception.getMessage());
-
-        // and verify all calls were made
-        verify(transformationClient).transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString());
     }
 
     // todo move to integration test
@@ -235,6 +240,7 @@ class CreateCaseCallbackServiceTest {
     void should_throw_InvalidCaseDataException_when_transformation_client_returns_422_or_400(HttpStatus httpStatus)
         throws IOException, CaseTransformationException {
         // given
+        when(s2sTokenGenerator.generate()).thenReturn(randomUUID().toString());
         setUpTransformationUrl();
         InvalidCaseDataException exception = new InvalidCaseDataException(
             new HttpClientErrorException(httpStatus),
