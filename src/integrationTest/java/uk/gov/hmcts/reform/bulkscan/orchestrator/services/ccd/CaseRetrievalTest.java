@@ -114,8 +114,8 @@ class CaseRetrievalTest {
     @Test
     public void getExceptionRecordRefsByEnvelopeId_should_return_list_with_ids_of_all_records_found() {
         // given
-        Long foundId1 = 12345L;
-        Long foundId2 = 56789L;
+        Long foundId1 = 12_345L;
+        Long foundId2 = 56_789L;
 
         String searchResultBody = format(
             fileContentAsString("ccd/response/search-by-envelope-id/result-format-two-records.json"),
