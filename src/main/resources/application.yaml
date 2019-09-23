@@ -82,6 +82,11 @@ service-config:
       case-type-ids:
         - MoneyClaimCase
 
+# comma-separated list of jurisdictions that support duplicate exception record prevention
+# TODO: remove this setting when all jurisdictions support ER prevention in all environments
+jurisdictions-with-duplicate-er-prevention: ${JURISDICTIONS_WITH_DUPLICATE_ER_PREVENTION}
+
+
 scheduling:
   task:
     delete-envelopes-dlq-messages:
