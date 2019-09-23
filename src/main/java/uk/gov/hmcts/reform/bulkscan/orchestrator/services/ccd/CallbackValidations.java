@@ -186,25 +186,24 @@ public final class CallbackValidations {
     public static Validation<String, Classification> hasValidJourneyClassification(CaseDetails theCase) {
         Optional<String> classificationOption = getJourneyClassification(theCase);
 
-        Validation<String, Classification> primaryValidationResult = classificationOption
+        return classificationOption
             .map(classification -> Try.of(() -> Classification.valueOf(classification)))
             .map(Try::toValidation)
             .map(validation -> validation
                 .mapError(throwable -> "Invalid journeyClassification. Error: " + throwable.getMessage())
             )
+            .map(validation -> validateClassification(validation, theCase))
             .orElse(invalid("Missing journeyClassification"));
-
-        if (primaryValidationResult.isInvalid()) {
-            return primaryValidationResult;
-        }
-
-        return validateClassification(primaryValidationResult.get(), theCase);
     }
 
     private static Validation<String, Classification> validateClassification(
-        Classification classification,
+        Validation<String, Classification> validation,
         CaseDetails theCase
     ) {
+        if (validation.isInvalid()) {
+            return validation;
+        }
+        Classification classification = validation.get();
         if (SUPPLEMENTARY_EVIDENCE.equals(classification)) {
             return invalid(format(
                 "Event %s not allowed for the current journey classification %s",
