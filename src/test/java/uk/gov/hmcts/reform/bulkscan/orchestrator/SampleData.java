@@ -161,10 +161,10 @@ public class SampleData {
     public static Envelope envelope(Classification classification, String jurisdiction, String caseRef) {
         return new Envelope(
             ENVELOPE_ID,
-            CASE_REF,
+            caseRef,
             CASE_LEGACY_ID,
             PO_BOX,
-            JURSIDICTION,
+            jurisdiction,
             CONTAINER,
             "zip-file-test.zip",
             Instant.now(),

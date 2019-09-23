@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.OcrDa
 import java.util.ArrayList;
 import java.util.ListIterator;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class OcrDataOrderTest {
@@ -30,7 +31,12 @@ public class OcrDataOrderTest {
         assertThat(envelope.ocrData).isInstanceOf(ArrayList.class);
 
         // and
-        ExceptionRecordMapper mapper = new ExceptionRecordMapper("http://localhost", "files");
+        ExceptionRecordMapper mapper = new ExceptionRecordMapper(
+            "http://localhost",
+            "files",
+            newArrayList("BULKSCAN")
+        );
+
         ExceptionRecord record = mapper.mapEnvelope(envelope);
         assertThat(record.ocrData).isInstanceOf(ArrayList.class);
         assertThat(record.ocrData.size()).isEqualTo(envelope.ocrData.size());

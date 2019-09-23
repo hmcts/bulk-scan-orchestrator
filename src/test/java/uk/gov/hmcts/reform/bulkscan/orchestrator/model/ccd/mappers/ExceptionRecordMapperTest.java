@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdKeyValue;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.OcrDataField;
@@ -23,7 +24,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 
 class ExceptionRecordMapperTest {
 
-    private final ExceptionRecordMapper mapper = new ExceptionRecordMapper("https://example.gov.uk", "files");
+    private final ExceptionRecordMapper mapper = exceptionRecordMapper("BULKSCAN");
 
     @Test
     public void mapEnvelope_maps_all_fields_correctly() {
@@ -59,6 +60,8 @@ class ExceptionRecordMapperTest {
         assertThat(toEnvelopeOcrDataWarnings(exceptionRecord.ocrDataValidationWarnings))
             .usingFieldByFieldElementComparator()
             .containsExactlyElementsOf(envelope.ocrDataValidationWarnings);
+
+        assertThat(exceptionRecord.envelopeId).isEqualTo(envelope.id);
     }
 
     @Test
@@ -97,6 +100,39 @@ class ExceptionRecordMapperTest {
         assertThat(mapper.mapEnvelope(envelopeWithoutWarning).displayWarnings).isEqualTo("No");
     }
 
+    @Test
+    public void mapEnvelope_copies_envelope_id_when_jurisdiction_supports_duplicate_prevention() {
+        // given
+        String supportedJurisdiction = "supported-jurisdiction1";
+        ExceptionRecordMapper exceptionRecordMapper = exceptionRecordMapper(supportedJurisdiction, "jurisdiction2");
+
+        // when
+        Envelope envelope = envelopeWithJurisdiction(supportedJurisdiction);
+
+        // then
+        ExceptionRecord exceptionRecord = exceptionRecordMapper.mapEnvelope(envelope);
+
+        assertThat(exceptionRecord.envelopeId).isEqualTo(envelope.id);
+    }
+
+    @Test
+    public void mapEnvelope_sets_envelope_id_to_null_when_jurisdiction_does_not_support_duplicate_prevention() {
+        // given
+        ExceptionRecordMapper exceptionRecordMapper = exceptionRecordMapper("jurisdiction1", "jurisdiction2");
+
+        // when
+        Envelope envelope = envelopeWithJurisdiction("unsupported-jurisdiction1");
+
+        // then
+        ExceptionRecord exceptionRecord = exceptionRecordMapper.mapEnvelope(envelope);
+
+        assertThat(exceptionRecord.envelopeId).isNull();
+    }
+
+    private Envelope envelopeWithJurisdiction(String jurisdiction) {
+        return envelope(Classification.NEW_APPLICATION, jurisdiction, "1231231232312765");
+    }
+
     private List<OcrDataField> ocrDataAsList(List<CcdCollectionElement<CcdKeyValue>> ocrData) {
         return ocrData
             .stream()
@@ -126,5 +162,13 @@ class ExceptionRecordMapperTest {
                     scannedDocument.deliveryDate.atZone(ZoneId.systemDefault()).toInstant()
                 )
             ).collect(toList());
+    }
+
+    private ExceptionRecordMapper exceptionRecordMapper(String... jurisdictionsWithDuplicatePrevention) {
+        return new ExceptionRecordMapper(
+            "https://example.gov.uk",
+            "files",
+            newArrayList(jurisdictionsWithDuplicatePrevention)
+        );
     }
 }
