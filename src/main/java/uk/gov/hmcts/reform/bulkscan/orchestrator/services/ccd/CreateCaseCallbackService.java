@@ -14,13 +14,14 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.InvalidCaseDataException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseValidator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -54,7 +55,7 @@ public class CreateCaseCallbackService {
      *
      * @return Either list of errors or map of changes - new case reference
      */
-    public Either<List<String>, Map<String, Object>> process(CaseDetails caseDetails, String eventId) {
+    public Either<List<String>, ProcessResult> process(CaseDetails caseDetails, String eventId) {
         return assertAllowToAccess(caseDetails, eventId)
             .flatMap(theVoid -> validator
                 .getValidation(caseDetails)
@@ -88,7 +89,7 @@ public class CreateCaseCallbackService {
             .getOrElse(Validation.invalid("Transformation URL is not configured"));
     }
 
-    private Validation<Seq<String>, Map<String, Object>> createNewCase(
+    private Validation<Seq<String>, ProcessResult> createNewCase(
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,
         long caseId
@@ -100,13 +101,16 @@ public class CreateCaseCallbackService {
                 caseId
             );
 
-            transformationClient.transformExceptionRecord(
+            SuccessfulTransformationResponse transformationResponse = transformationClient.transformExceptionRecord(
                 configItem.getTransformationUrl(),
                 exceptionRecord,
                 s2sTokenGenerator.generate()
             );
 
-            return Validation.valid(ImmutableMap.of("caseReference", UUID.randomUUID()));
+            return Validation.valid(new ProcessResult(
+                ImmutableMap.of("caseReference", UUID.randomUUID()),
+                transformationResponse.warnings
+            ));
         } catch (InvalidCaseDataException exception) {
             // let controller deal with this. it is 422 or 400
             throw exception;
