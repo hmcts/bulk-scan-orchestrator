@@ -148,7 +148,7 @@ public class CcdApi {
         ServiceConfigItem serviceConfig = serviceConfigProvider.getConfig(service);
 
         String jurisdiction = serviceConfig.getJurisdiction();
-        String caseTypeIdsStr = format("%s_ExceptionRecord", serviceConfig.getJurisdiction());
+        String caseTypeIdsStr = format("%s_ExceptionRecord", service.toUpperCase());
         CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
 
         SearchResult searchResult = feignCcdApi.searchCases(
