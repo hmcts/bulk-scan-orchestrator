@@ -112,8 +112,10 @@ public class CreateCaseCallbackService {
                 transformationResponse.warnings
             ));
         } catch (InvalidCaseDataException exception) {
-            // let controller deal with this. it is 422 or 400
-            throw exception;
+            return Validation.valid(new ProcessResult(
+                exception.getResponse().warnings,
+                exception.getResponse().errors
+            ));
         } catch (Exception exception) {
             log.error(
                 "Failed to create exception for service {} and exception record {}",

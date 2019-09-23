@@ -34,9 +34,9 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -377,7 +377,7 @@ class CreateCaseCallbackServiceTest {
         setUpTransformationUrl();
         InvalidCaseDataException exception = new InvalidCaseDataException(
             new HttpClientErrorException(httpStatus),
-            new TransformationErrorResponse(emptyList(), emptyList())
+            new TransformationErrorResponse(singletonList("error"), singletonList("warning"))
         );
         doThrow(exception)
             .when(transformationClient)
@@ -401,10 +401,13 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Throwable throwable = catchThrowable(() -> service.process(caseDetails, EVENT_ID));
+        Either<List<String>, ProcessResult> output = service.process(caseDetails, EVENT_ID);
 
         // then
-        assertThat(throwable).isInstanceOf(InvalidCaseDataException.class);
+        assertThat(output.isRight()).isTrue();
+        assertThat(output.get().getModifiedFields()).isEmpty();
+        assertThat(output.get().getWarnings()).containsOnly("warning");
+        assertThat(output.get().getErrors()).containsOnly("error");
     }
 
     @Test
