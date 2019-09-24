@@ -105,7 +105,8 @@ jacocoTestReport {
   afterEvaluate {
     getClassDirectories().from = getClassDirectories().files.collect {
       fileTree(dir: it, exclude: [
-        'uk/gov/hmcts/reform/bulkscan/orchestrator/config/**'
+        'uk/gov/hmcts/reform/bulkscan/orchestrator/config/**',
+        'uk/gov/hmcts/reform/bulkscan/orchestrator/util/**' // remove when used in source code
       ])
     }
   }
