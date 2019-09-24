@@ -34,6 +34,9 @@ public class CcdApi {
     public static final String SEARCH_BY_LEGACY_ID_QUERY_FORMAT =
         "{\"query\": { \"match_phrase\" : { \"alias.previousServiceCaseReference\" : \"%s\" }}}";
 
+    public static final String SEARCH_BY_ENVELOPE_ID_QUERY_FORMAT =
+        "{\"query\": { \"match_phrase\" : { \"data.envelopeId\" : \"%s\" }}}";
+
     private final CoreCaseDataApi feignCcdApi;
     private final CcdAuthenticatorFactory authenticatorFactory;
     private final ServiceConfigProvider serviceConfigProvider;
@@ -141,6 +144,27 @@ public class CcdApi {
         }
     }
 
+    public List<Long> getExceptionRecordRefsByEnvelopeId(String envelopeId, String service) {
+        ServiceConfigItem serviceConfig = serviceConfigProvider.getConfig(service);
+
+        String jurisdiction = serviceConfig.getJurisdiction();
+        String caseTypeIdsStr = format("%s_ExceptionRecord", service.toUpperCase());
+        CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
+
+        SearchResult searchResult = feignCcdApi.searchCases(
+            authenticator.getUserToken(),
+            authenticator.getServiceToken(),
+            caseTypeIdsStr,
+            format(SEARCH_BY_ENVELOPE_ID_QUERY_FORMAT, envelopeId)
+        );
+
+        return searchResult
+            .getCases()
+            .stream()
+            .map(CaseDetails::getId)
+            .collect(toList());
+    }
+
     void attachExceptionRecord(CaseDetails theCase,
                                String idamToken,
                                String userId,
@@ -206,7 +230,7 @@ public class CcdApi {
         String caseRef,
         String eventTypeId
     ) {
-        return  caseRef == null
+        return caseRef == null
             ? feignCcdApi.startForCaseworker(
                 authenticator.getUserToken(),
                 authenticator.getServiceToken(),

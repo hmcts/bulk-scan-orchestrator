@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 
+import java.util.List;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
@@ -17,11 +19,14 @@ import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.willReturn;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.fileContentAsString;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_SEARCH_URL;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.EXCEPTION_RECORD_SEARCH_URL;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.GET_CASE_URL;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURISDICTION;
 
@@ -89,5 +94,42 @@ class CaseRetrievalTest {
 
         // then
         WireMock.verify(0, postRequestedFor(urlEqualTo(CASE_SEARCH_URL)));
+    }
+
+    @Test
+    public void getExceptionRecordRefsByEnvelopeId_should_return_empty_list_when_no_records_found() {
+        // given
+        givenThat(post(EXCEPTION_RECORD_SEARCH_URL).willReturn(aResponse().withBody(
+            fileContentAsString("ccd/response/search-by-envelope-id/result-empty.json")
+        )));
+
+        // when
+        List<Long> ids = ccdApi.getExceptionRecordRefsByEnvelopeId("envelope-id-123", TEST_SERVICE_NAME);
+
+        // then
+        assertThat(ids).isEmpty();
+        WireMock.verify(postRequestedFor(urlEqualTo(EXCEPTION_RECORD_SEARCH_URL)));
+    }
+
+    @Test
+    public void getExceptionRecordRefsByEnvelopeId_should_return_list_with_ids_of_all_records_found() {
+        // given
+        Long foundId1 = 12_345L;
+        Long foundId2 = 56_789L;
+
+        String searchResultBody = format(
+            fileContentAsString("ccd/response/search-by-envelope-id/result-format-two-records.json"),
+            foundId1,
+            foundId2
+        );
+
+        givenThat(post(EXCEPTION_RECORD_SEARCH_URL).willReturn(aResponse().withBody(searchResultBody)));
+
+        // when
+        List<Long> ids = ccdApi.getExceptionRecordRefsByEnvelopeId("envelope-id-123", TEST_SERVICE_NAME);
+
+        // then
+        assertThat(ids).containsExactly(foundId1, foundId2);
+        WireMock.verify(postRequestedFor(urlEqualTo(EXCEPTION_RECORD_SEARCH_URL)));
     }
 }

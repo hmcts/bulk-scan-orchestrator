@@ -19,7 +19,7 @@ import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
 import static java.lang.String.format;
 
-final class CallbackValidations {
+public final class CallbackValidations {
 
     private static final String CASE_TYPE_ID_SUFFIX = "_ExceptionRecord";
 
@@ -48,7 +48,7 @@ final class CallbackValidations {
     }
 
     @Nonnull
-    static Validation<String, String> hasCaseTypeId(CaseDetails theCase) {
+    public static Validation<String, String> hasCaseTypeId(CaseDetails theCase) {
         return Optional.ofNullable(theCase)
             .map(CaseDetails::getCaseTypeId)
             .map(Validation::<String, String>valid)
@@ -56,7 +56,7 @@ final class CallbackValidations {
     }
 
     @Nonnull
-    static Validation<String, String> hasJurisdiction(CaseDetails theCase) {
+    public static Validation<String, String> hasJurisdiction(CaseDetails theCase) {
         String jurisdiction = null;
         return theCase != null
             && (jurisdiction = theCase.getJurisdiction()) != null
@@ -170,7 +170,7 @@ final class CallbackValidations {
             .orElse(false);
     }
 
-    static Validation<String, String> hasPoBox(CaseDetails theCase) {
+    public static Validation<String, String> hasPoBox(CaseDetails theCase) {
         return Optional.ofNullable(theCase)
             .map(CaseDetails::getData)
             .map(data -> data.get("poBox"))
@@ -183,7 +183,7 @@ final class CallbackValidations {
      * @param theCase from CCD
      * @return Validation of it
      */
-    static Validation<String, Classification> hasJourneyClassification(CaseDetails theCase) {
+    public static Validation<String, Classification> hasJourneyClassification(CaseDetails theCase) {
         Optional<String> classificationOption = getJourneyClassification(theCase);
 
         return classificationOption
@@ -195,7 +195,7 @@ final class CallbackValidations {
             .orElse(invalid("Missing journeyClassification"));
     }
 
-    static Validation<String, Instant> hasDateField(CaseDetails theCase, String dateField) {
+    public static Validation<String, Instant> hasDateField(CaseDetails theCase, String dateField) {
         return Optional.ofNullable(theCase)
             .map(CaseDetails::getData)
             .map(data -> data.get(dateField))
@@ -209,7 +209,7 @@ final class CallbackValidations {
      * @return Validation of it
      */
     @SuppressWarnings("unchecked")
-    static Validation<Object, List<Map<String, Object>>> getOcrData(CaseDetails theCase) {
+    public static Validation<Object, List<Map<String, Object>>> getOcrData(CaseDetails theCase) {
         return Optional.ofNullable(theCase)
             .map(CaseDetails::getData)
             .map(data -> (List<Map<String, Object>>) data.get("scanOCRData"))
