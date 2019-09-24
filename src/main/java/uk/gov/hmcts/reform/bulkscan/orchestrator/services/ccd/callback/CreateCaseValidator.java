@@ -98,8 +98,6 @@ public class CreateCaseValidator {
     @SuppressWarnings("unchecked")
     private Validation<String, List<OcrDataField>> getOcrDataFields(CaseDetails caseDetails) {
         return getOcrData(caseDetails)
-            // following mapError should never happen as getting should be non-breaking
-            // left side must be String
             .map(ocrDataList ->
                 Try.of(() -> ocrDataList
                     .stream()
