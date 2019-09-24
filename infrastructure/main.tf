@@ -81,7 +81,7 @@ locals {
     TRANSFORMATION_URL_BULKSCAN = "${var.transformation_url_bulkscan}"
     // endregion
 
-    JURISDICTIONS_WITH_DUPLICATE_ER_PREVENTION = join(",", var.jurisdictions_with_duplicate_er_prevention)
+    JURISDICTIONS_WITH_DUPLICATE_ER_PREVENTION = "${join(",", var.jurisdictions_with_duplicate_er_prevention)}"
   }
 }
 
