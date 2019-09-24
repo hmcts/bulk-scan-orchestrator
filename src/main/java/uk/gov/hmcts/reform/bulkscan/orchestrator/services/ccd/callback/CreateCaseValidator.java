@@ -111,7 +111,7 @@ public class CreateCaseValidator {
                     .collect(toList())
                 ).toValidation().mapError(throwable -> "Invalid OCR data format. Error: " + throwable.getMessage())
             )
-            .orElse(Validation.valid(null));
+            .orElse(Validation.valid(emptyList()));
     }
 
     @SuppressWarnings("unchecked")
