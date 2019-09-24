@@ -5,6 +5,7 @@ import io.vavr.control.Validation;
 
 import java.util.Objects;
 
+@SuppressWarnings("LineLength")
 public interface HmctsValidation<E, T> extends Validation<E, T> {
 
     static <E, T1, T2, T3, T4, T5, T6, T7, T8, T9> Builder9<E, T1, T2, T3, T4, T5, T6, T7, T8, T9> combine(Validation<E, T1> validation1, Validation<E, T2> validation2, Validation<E, T3> validation3, Validation<E, T4> validation4, Validation<E, T5> validation5, Validation<E, T6> validation6, Validation<E, T7> validation7, Validation<E, T8> validation8, Validation<E, T9> validation9) {
