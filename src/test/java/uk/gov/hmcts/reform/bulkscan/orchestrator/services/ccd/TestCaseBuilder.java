@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 class TestCaseBuilder {
-    private TestCaseBuilder(){
+    private TestCaseBuilder() {
     }
 
     static CaseDetails createCaseWith(Function<CaseDetailsBuilder, CaseDetailsBuilder> builder) {

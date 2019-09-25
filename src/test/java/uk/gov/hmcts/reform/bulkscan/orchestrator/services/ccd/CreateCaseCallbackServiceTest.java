@@ -153,6 +153,7 @@ class CreateCaseCallbackServiceTest {
             "Missing poBox",
             "Internal Error: invalid jurisdiction supplied: null",
             "Missing journeyClassification",
+            "Missing Form Type",
             "Missing deliveryDate",
             "Missing openingDate"
         );
@@ -167,6 +168,7 @@ class CreateCaseCallbackServiceTest {
         // putting 6 via `ImmutableMap` is available from Java 9
         data.put("poBox", "12345");
         data.put("journeyClassification", NEW_APPLICATION.name());
+        data.put("formType", "Form1");
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
@@ -196,6 +198,7 @@ class CreateCaseCallbackServiceTest {
         // putting 6 via `ImmutableMap` is available from Java 9
         data.put("poBox", "12345");
         data.put("journeyClassification", NEW_APPLICATION.name());
+        data.put("formType", "Form1");
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
@@ -226,6 +229,7 @@ class CreateCaseCallbackServiceTest {
         // putting 6 via `ImmutableMap` is available from Java 9
         data.put("poBox", "12345");
         data.put("journeyClassification", EXCEPTION.name());
+        data.put("formType", "Form1");
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
@@ -258,6 +262,7 @@ class CreateCaseCallbackServiceTest {
         // putting 6 via `ImmutableMap` is available from Java 9
         data.put("poBox", "12345");
         data.put("journeyClassification", SUPPLEMENTARY_EVIDENCE.name());
+        data.put("formType", "Form1");
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
@@ -289,6 +294,7 @@ class CreateCaseCallbackServiceTest {
         // putting 6 via `ImmutableMap` is available from Java 9
         data.put("poBox", "12345");
         data.put("journeyClassification", EXCEPTION.name());
+        data.put("formType", "Form1");
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
@@ -328,6 +334,7 @@ class CreateCaseCallbackServiceTest {
         // putting 6 via `ImmutableMap` is available from Java 9
         data.put("poBox", "12345");
         data.put("journeyClassification", EXCEPTION.name());
+        data.put("formType", "Form1");
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
@@ -373,6 +380,7 @@ class CreateCaseCallbackServiceTest {
         // putting 6 via `ImmutableMap` is available from Java 9
         data.put("poBox", "12345");
         data.put("journeyClassification", EXCEPTION.name());
+        data.put("formType", "Form1");
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
@@ -397,16 +405,19 @@ class CreateCaseCallbackServiceTest {
         // given
         setUpTransformationUrl();
 
+        Map<String, Object> data = new HashMap<>();
+        // putting 6 via `ImmutableMap` is available from Java 9
+        data.put("poBox", "12345");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("formType", "Form1");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
+        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
+
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
             .caseTypeId(CASE_TYPE_ID)
             .jurisdiction("some jurisdiction")
-            .data(ImmutableMap.of(
-                "poBox", "12345",
-                "deliveryDate", "2019-09-06T15:30:03.000Z",
-                "openingDate", "2019-09-06T15:30:04.000Z",
-                "scannedDocuments", TestCaseBuilder.document("https://url", "some doc"),
-                "scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value")
-            ))
+            .data(data)
         );
 
         // when
@@ -426,6 +437,7 @@ class CreateCaseCallbackServiceTest {
 
         data.put("poBox", "12345");
         data.put("journeyClassification", "EXCEPTIONS");
+        data.put("formType", "Form1");
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "filename"));
@@ -466,6 +478,7 @@ class CreateCaseCallbackServiceTest {
 
         data.put("poBox", "12345");
         data.put("journeyClassification", "EXCEPTION");
+        data.put("formType", "Form1");
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", ImmutableList.of(ImmutableMap.of("value", doc)));
@@ -494,6 +507,7 @@ class CreateCaseCallbackServiceTest {
 
         data.put("poBox", "12345");
         data.put("journeyClassification", "EXCEPTION");
+        data.put("formType", "Form1");
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
@@ -513,6 +527,38 @@ class CreateCaseCallbackServiceTest {
 
         String match =
             "Invalid OCR data format. Error: (class )?java.lang.Integer cannot be cast to (class )?java.lang.String.*";
+        assertThat(output.getLeft())
+            .hasSize(1)
+            .element(0)
+            .asString()
+            .matches(match);
+    }
+
+    @Test
+    void should_report_errors_when_form_type_is_null() {
+        // given
+        setUpTransformationUrl();
+
+        Map<String, Object> data = new HashMap<>();
+
+        data.put("poBox", "12345");
+        data.put("journeyClassification", "EXCEPTION");
+        data.put("formType", null);
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
+        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
+
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .caseTypeId(CASE_TYPE_ID)
+            .jurisdiction("some jurisdiction")
+            .data(data)
+        );
+
+        // when
+        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
+
+        String match = "Missing Form Type";
         assertThat(output.getLeft())
             .hasSize(1)
             .element(0)
