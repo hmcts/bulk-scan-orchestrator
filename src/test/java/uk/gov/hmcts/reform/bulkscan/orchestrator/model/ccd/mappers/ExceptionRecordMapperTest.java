@@ -114,7 +114,6 @@ class ExceptionRecordMapperTest {
 
         assertThat(exceptionRecord.envelopeId).isEqualTo(envelope.id);
     }
-    }
 
     @Test
     public void mapEnvelope_sets_envelope_id_to_null_when_jurisdiction_does_not_support_duplicate_prevention() {
