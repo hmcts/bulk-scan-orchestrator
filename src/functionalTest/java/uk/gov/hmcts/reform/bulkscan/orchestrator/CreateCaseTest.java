@@ -16,7 +16,6 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.CcdCallbackController;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseSearcher;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
@@ -38,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 @ActiveProfiles("nosb") // no servicebus queue handler registration
@@ -58,9 +57,6 @@ class CreateCaseTest {
     private CcdApi ccdApi;
 
     @Autowired
-    private CcdCaseCreator ccdCaseCreator;
-
-    @Autowired
     private CaseSearcher caseSearcher;
 
     @Autowired
@@ -75,7 +71,7 @@ class CreateCaseTest {
     private String dmUrl;
 
     @BeforeEach
-    void setUp() throws Exception {
+    public void setUp() throws Exception {
 
         dmUrl = dmUploadService.uploadToDmStore(
             "Certificate.pdf",
@@ -199,6 +195,6 @@ class CreateCaseTest {
             exceptionRecord.getJurisdiction()
         );
 
-        assertTrue(createdCase != null);
+        assertNotNull(createdCase, "createdCase should not be null");
     }
 }
