@@ -58,6 +58,15 @@ public final class CallbackValidations {
     }
 
     @Nonnull
+    public static Validation<String, String> hasFormType(CaseDetails theCase) {
+        return Optional.ofNullable(theCase)
+            .map(CaseDetails::getData)
+            .map(data -> (String) data.get("formType"))
+            .map(Validation::<String, String>valid)
+            .orElse(invalid("Missing Form Type"));
+    }
+
+    @Nonnull
     public static Validation<String, String> hasJurisdiction(CaseDetails theCase) {
         String jurisdiction = null;
         return theCase != null

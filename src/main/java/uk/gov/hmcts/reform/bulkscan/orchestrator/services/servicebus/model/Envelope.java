@@ -16,6 +16,7 @@ public class Envelope {
     public final String jurisdiction;
     public final String container;
     public final String zipFileName;
+    public final String formType;
     public final Instant deliveryDate;
     public final Instant openingDate;
     public final Classification classification;
@@ -32,6 +33,7 @@ public class Envelope {
         @JsonProperty(value = "jurisdiction", required = true) String jurisdiction,
         @JsonProperty(value = "container", required = true) String container,
         @JsonProperty(value = "zip_file_name", required = true) String zipFileName,
+        @JsonProperty("form_type") String formType,
         @JsonProperty(value = "delivery_date", required = true) Instant deliveryDate,
         @JsonProperty(value = "opening_date", required = true) Instant openingDate,
         @JsonProperty(value = "classification", required = true) Classification classification,
@@ -47,6 +49,7 @@ public class Envelope {
         this.jurisdiction = jurisdiction;
         this.container = container;
         this.zipFileName = zipFileName;
+        this.formType = formType;
         this.deliveryDate = deliveryDate;
         this.openingDate = openingDate;
         this.classification = classification;

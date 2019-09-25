@@ -225,6 +225,7 @@ public class CaseFinderTest {
             JURISDICTION,
             SERVICE,
             "zip-file-name.zip",
+            "formtype_1",
             Instant.now(),
             Instant.now(),
             Classification.SUPPLEMENTARY_EVIDENCE,

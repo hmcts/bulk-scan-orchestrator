@@ -232,6 +232,17 @@ class CallbackValidationsTest {
     }
 
     @Test
+    void noFormTypeTest() {
+        checkValidation(
+            createCaseWith(b -> b.data(null)),
+            false,
+            null,
+            CallbackValidations::hasFormType,
+            "Missing Form Type"
+        );
+    }
+
+    @Test
     void noCaseIdTest() {
         checkValidation(
             createCaseWith(b -> b.id(null)),
