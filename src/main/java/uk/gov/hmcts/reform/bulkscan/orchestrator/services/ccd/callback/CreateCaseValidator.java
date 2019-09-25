@@ -81,7 +81,7 @@ public class CreateCaseValidator {
         Validation<String, List<ScannedDocument>> hasScannedDocuments = getScannedDocuments(caseDetails);
         Validation<String, List<OcrDataField>> hasOcrDataFields = getOcrDataFields(caseDetails);
 
-        Array<Validation<String, ?>> validations = Array.of(
+        Seq<Validation<String, ?>> validations = Array.of(
             hasCaseTypeId,
             hasPoBox,
             hasJurisdiction,
@@ -93,7 +93,7 @@ public class CreateCaseValidator {
             hasOcrDataFields
         );
 
-        Array<String> errors = getValidationErrors(validations);
+        Seq<String> errors = getValidationErrors(validations);
         if (errors.isEmpty()) {
             return Validation.valid(new ExceptionRecord(
                 hasCaseTypeId.get(),
@@ -110,7 +110,7 @@ public class CreateCaseValidator {
         return Validation.invalid(errors);
     }
 
-    private Array<String> getValidationErrors(Array<Validation<String, ?>> validations) {
+    private Seq<String> getValidationErrors(Seq<Validation<String, ?>> validations) {
         return validations
             .filter(Validation::isInvalid)
             .map(Validation::getError);
