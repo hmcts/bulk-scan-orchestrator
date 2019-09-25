@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback;
 
+import io.vavr.collection.Array;
 import io.vavr.collection.Seq;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -17,17 +17,14 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Class
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.getOcrData;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasDateField;
@@ -84,7 +81,7 @@ public class CreateCaseValidator {
         Validation<String, List<ScannedDocument>> hasScannedDocuments = getScannedDocuments(caseDetails);
         Validation<String, List<OcrDataField>> hasOcrDataFields = getOcrDataFields(caseDetails);
 
-        List<Validation<String, ?>> validations = Arrays.asList(
+        Array<Validation<String, ?>> validations = Array.of(
             hasCaseTypeId,
             hasPoBox,
             hasJurisdiction,
@@ -96,10 +93,9 @@ public class CreateCaseValidator {
             hasOcrDataFields
         );
 
-        List<String> errors = getValidationErrors(validations);
-        ExceptionRecord exceptionRecord = null;
-        if (CollectionUtils.isEmpty(errors)) {
-            exceptionRecord = new ExceptionRecord(
+        Array<String> errors = getValidationErrors(validations);
+        if (errors.isEmpty()) {
+            return Validation.valid(new ExceptionRecord(
                 hasCaseTypeId.get(),
                 hasPoBox.get(),
                 hasJurisdiction.get(),
@@ -109,20 +105,15 @@ public class CreateCaseValidator {
                 hasOpeningDate.get(),
                 hasScannedDocuments.get(),
                 hasOcrDataFields.get()
-            );
+            ));
         }
-
-        return isNotEmpty(errors)
-            ? Validation.fromEither(Either.left(io.vavr.collection.List.ofAll(errors)))
-            : Validation.fromEither(Either.right(exceptionRecord));
+        return Validation.invalid(errors);
     }
 
-    private List<String> getValidationErrors(List<Validation<String, ?>> validations) {
+    private Array<String> getValidationErrors(Array<Validation<String, ?>> validations) {
         return validations
-            .stream()
             .filter(Validation::isInvalid)
-            .map(Validation::getError)
-            .collect(Collectors.toList());
+            .map(Validation::getError);
     }
 
     @SuppressWarnings("unchecked")
