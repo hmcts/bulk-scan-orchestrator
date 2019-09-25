@@ -92,8 +92,6 @@ class CreateCaseTest {
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
             .until(() -> isCaseCreated(caseCcdId, exceptionRecord));
-
-        verifyCaseIsCreated(caseCcdId, exceptionRecord);
     }
 
     /**
