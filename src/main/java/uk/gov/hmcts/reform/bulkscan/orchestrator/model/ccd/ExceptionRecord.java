@@ -18,6 +18,8 @@ public class ExceptionRecord implements CaseData {
     @JsonProperty("poBoxJurisdiction")
     public final String jurisdiction;
 
+    public final String formType;
+
     public final LocalDateTime deliveryDate;
 
     public final LocalDateTime openingDate;
@@ -41,6 +43,7 @@ public class ExceptionRecord implements CaseData {
         String classification,
         String poBox,
         String jurisdiction,
+        String formType,
         LocalDateTime deliveryDate,
         LocalDateTime openingDate,
         List<CcdCollectionElement<ScannedDocument>> scannedDocuments,
@@ -52,6 +55,7 @@ public class ExceptionRecord implements CaseData {
         this.classification = classification;
         this.poBox = poBox;
         this.jurisdiction = jurisdiction;
+        this.formType = formType;
         this.deliveryDate = deliveryDate;
         this.openingDate = openingDate;
         this.scannedDocuments = scannedDocuments;
