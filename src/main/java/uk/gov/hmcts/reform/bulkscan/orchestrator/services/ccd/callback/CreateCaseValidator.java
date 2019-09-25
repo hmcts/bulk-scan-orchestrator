@@ -4,6 +4,7 @@ import io.vavr.collection.Seq;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -12,18 +13,21 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.req
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.util.HmctsValidation;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.getOcrData;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasDateField;
@@ -69,19 +73,56 @@ public class CreateCaseValidator {
     }
 
     public Validation<Seq<String>, ExceptionRecord> getValidation(CaseDetails caseDetails) {
-        return HmctsValidation
-            .combine(
-                hasCaseTypeId(caseDetails),
-                hasPoBox(caseDetails),
-                hasJurisdiction(caseDetails),
-                hasJourneyClassification(caseDetails),
-                hasFormType(caseDetails),
-                hasDateField(caseDetails, "deliveryDate"),
-                hasDateField(caseDetails, "openingDate"),
-                getScannedDocuments(caseDetails),
-                getOcrDataFields(caseDetails)
-            )
-            .ap(ExceptionRecord::new);
+
+        Validation<String, String> hasCaseTypeId = hasCaseTypeId(caseDetails);
+        Validation<String, String> hasPoBox = hasPoBox(caseDetails);
+        Validation<String, String> hasJurisdiction = hasJurisdiction(caseDetails);
+        Validation<String, String> hasFormType = hasFormType(caseDetails);
+        Validation<String, Classification> hasJourneyClassification = hasJourneyClassification(caseDetails);
+        Validation<String, Instant> hasDeliveryDate = hasDateField(caseDetails, "deliveryDate");
+        Validation<String, Instant> hasOpeningDate = hasDateField(caseDetails, "openingDate");
+        Validation<String, List<ScannedDocument>> hasScannedDocuments = getScannedDocuments(caseDetails);
+        Validation<String, List<OcrDataField>> hasOcrDataFields = getOcrDataFields(caseDetails);
+
+        List<Validation<String, ?>> validations = Arrays.asList(
+            hasCaseTypeId,
+            hasPoBox,
+            hasJurisdiction,
+            hasFormType,
+            hasJourneyClassification,
+            hasDeliveryDate,
+            hasOpeningDate,
+            hasScannedDocuments,
+            hasOcrDataFields
+        );
+
+        List<String> errors = getValidationErrors(validations);
+        ExceptionRecord exceptionRecord = null;
+        if (CollectionUtils.isEmpty(errors)) {
+            exceptionRecord = new ExceptionRecord(
+                hasCaseTypeId.get(),
+                hasPoBox.get(),
+                hasJurisdiction.get(),
+                hasJourneyClassification.get(),
+                hasFormType.get(),
+                hasDeliveryDate.get(),
+                hasOpeningDate.get(),
+                hasScannedDocuments.get(),
+                hasOcrDataFields.get()
+            );
+        }
+
+        return isNotEmpty(errors)
+            ? Validation.fromEither(Either.left(io.vavr.collection.List.ofAll(errors)))
+            : Validation.fromEither(Either.right(exceptionRecord));
+    }
+
+    private List<String> getValidationErrors(List<Validation<String, ?>> validations) {
+        return validations
+            .stream()
+            .filter(Validation::isInvalid)
+            .map(Validation::getError)
+            .collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")

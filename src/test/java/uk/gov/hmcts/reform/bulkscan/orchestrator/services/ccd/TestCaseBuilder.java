@@ -52,12 +52,6 @@ class TestCaseBuilder {
         return createCaseWith(b -> b.data(data));
     }
 
-    /*static CaseDetails caseWithFormType(List<Map<String, Object>> formType) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("formType", formType);
-        return createCaseWith(b -> b.data(data));
-    }*/
-
     static List<Map<String, Object>> document(String url, String name) {
         Map<String, Object> doc = new HashMap<>();
 

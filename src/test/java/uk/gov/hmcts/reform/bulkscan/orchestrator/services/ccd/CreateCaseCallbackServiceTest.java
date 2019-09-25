@@ -168,6 +168,7 @@ class CreateCaseCallbackServiceTest {
         // putting 6 via `ImmutableMap` is available from Java 9
         data.put("poBox", "12345");
         data.put("journeyClassification", NEW_APPLICATION.name());
+        data.put("formType", "Form1");
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
@@ -197,6 +198,7 @@ class CreateCaseCallbackServiceTest {
         // putting 6 via `ImmutableMap` is available from Java 9
         data.put("poBox", "12345");
         data.put("journeyClassification", NEW_APPLICATION.name());
+        data.put("formType", "Form1");
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
@@ -260,6 +262,7 @@ class CreateCaseCallbackServiceTest {
         // putting 6 via `ImmutableMap` is available from Java 9
         data.put("poBox", "12345");
         data.put("journeyClassification", SUPPLEMENTARY_EVIDENCE.name());
+        data.put("formType", "Form1");
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
@@ -291,6 +294,7 @@ class CreateCaseCallbackServiceTest {
         // putting 6 via `ImmutableMap` is available from Java 9
         data.put("poBox", "12345");
         data.put("journeyClassification", EXCEPTION.name());
+        data.put("formType", "Form1");
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
