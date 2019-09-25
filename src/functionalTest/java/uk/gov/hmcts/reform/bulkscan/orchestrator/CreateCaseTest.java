@@ -37,7 +37,6 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 @ActiveProfiles("nosb") // no servicebus queue handler registration
@@ -182,17 +181,5 @@ class CreateCaseTest {
         );
 
         return createdCase != null;
-    }
-
-    private void verifyCaseIsCreated(
-        String caseCcdId,
-        CaseDetails exceptionRecord
-    ) {
-        CaseDetails createdCase = ccdApi.getCase(
-            String.valueOf(caseCcdId),
-            exceptionRecord.getJurisdiction()
-        );
-
-        assertNotNull(createdCase, "createdCase should not be null");
     }
 }
