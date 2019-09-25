@@ -230,6 +230,7 @@ public class CaseFinderTest {
             Classification.SUPPLEMENTARY_EVIDENCE,
             emptyList(),
             emptyList(),
+            emptyList(),
             emptyList()
         );
     }

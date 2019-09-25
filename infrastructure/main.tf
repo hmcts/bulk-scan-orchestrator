@@ -67,6 +67,8 @@ locals {
     ENVELOPES_QUEUE_MAX_DELIVERY_COUNT          = "${data.azurerm_key_vault_secret.envelopes_queue_max_delivery_count.value - 5}"
     PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING = "${data.azurerm_key_vault_secret.processed_envelopes_queue_send_conn_str.value}"
 
+    PAYMENTS_QUEUE_CONNECTION_STRING = "${data.azurerm_key_vault_secret.payments_queue_send_conn_str.value}"
+
     IDAM_API_URL              = "${var.idam_api_url}"
     IDAM_CLIENT_SECRET        = "${data.azurerm_key_vault_secret.idam_client_secret.value}"
     IDAM_CLIENT_REDIRECT_URI  = "${var.idam_client_redirect_uri}"
@@ -154,4 +156,9 @@ data "azurerm_key_vault_secret" "envelopes_queue_max_delivery_count" {
 data "azurerm_key_vault_secret" "processed_envelopes_queue_send_conn_str" {
   key_vault_id = "${data.azurerm_key_vault.key_vault.id}"
   name         = "processed-envelopes-queue-send-connection-string"
+}
+
+data "azurerm_key_vault_secret" "payments_queue_send_conn_str" {
+  key_vault_id = "${data.azurerm_key_vault.key_vault.id}"
+  name         = "payments-queue-send-connection-string"
 }

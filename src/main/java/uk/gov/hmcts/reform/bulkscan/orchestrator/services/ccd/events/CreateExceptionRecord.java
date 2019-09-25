@@ -37,7 +37,7 @@ public class CreateExceptionRecord {
     /**
      * Creates an Exception Record from given envelope.
      */
-    public void createFrom(Envelope envelope) {
+    public CaseDetails createFrom(Envelope envelope) {
         log.info("Creating exception record for envelope {}", envelope.id);
 
         CcdAuthenticator authenticator = ccdApi.authenticateJurisdiction(envelope.jurisdiction);
@@ -68,6 +68,8 @@ public class CreateExceptionRecord {
             caseDetails.getId(),
             caseTypeId
         );
+
+        return caseDetails;
     }
 
     private CaseDataContent buildCaseDataContent(Envelope envelope, String startEventResponseToken) {
