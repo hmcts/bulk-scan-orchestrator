@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.req
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.util.HmctsValidation;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.time.Instant;
@@ -26,6 +27,7 @@ import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.getOcrData;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasDateField;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasFormType;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJourneyClassification;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJurisdiction;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasPoBox;
@@ -42,6 +44,7 @@ public class CreateCaseValidator {
     /**
      * Any prerequisites to execute prior further action. Failing fast.
      * Easy extension for more mandatory prerequisites - just flatmap next Validation.
+     *
      * @param prerequisites Top level requirements failing fast
      * @return Either singleton list of errors or green pass to proceed further
      */
@@ -66,12 +69,13 @@ public class CreateCaseValidator {
     }
 
     public Validation<Seq<String>, ExceptionRecord> getValidation(CaseDetails caseDetails) {
-        return Validation
+        return HmctsValidation
             .combine(
                 hasCaseTypeId(caseDetails),
                 hasPoBox(caseDetails),
                 hasJurisdiction(caseDetails),
                 hasJourneyClassification(caseDetails),
+                hasFormType(caseDetails),
                 hasDateField(caseDetails, "deliveryDate"),
                 hasDateField(caseDetails, "openingDate"),
                 getScannedDocuments(caseDetails),

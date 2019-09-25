@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 class TestCaseBuilder {
-    private TestCaseBuilder(){
+    private TestCaseBuilder() {
     }
 
     static CaseDetails createCaseWith(Function<CaseDetailsBuilder, CaseDetailsBuilder> builder) {
@@ -51,6 +51,12 @@ class TestCaseBuilder {
         data.put("scannedDocuments", caseReference);
         return createCaseWith(b -> b.data(data));
     }
+
+    /*static CaseDetails caseWithFormType(List<Map<String, Object>> formType) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("formType", formType);
+        return createCaseWith(b -> b.data(data));
+    }*/
 
     static List<Map<String, Object>> document(String url, String name) {
         Map<String, Object> doc = new HashMap<>();
