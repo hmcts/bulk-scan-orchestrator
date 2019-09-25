@@ -21,7 +21,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.matchesRegex;
+import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.springframework.http.HttpStatus.OK;
 
 @IntegrationTest
@@ -47,7 +47,7 @@ class CreateCaseCallbackTest {
             .statusCode(OK.value())
             .body("errors", empty())
             .body("warnings", empty())
-            .body("data.caseReference", matchesRegex(CASE_ID_REGEX));
+            .body("data.caseReference", matchesPattern(CASE_ID_REGEX));
     }
 
     @Test
@@ -58,7 +58,7 @@ class CreateCaseCallbackTest {
             .statusCode(OK.value())
             .body("errors", empty())
             .body("warnings", contains("case type id looks like a number"))
-            .body("data.caseReference", matchesRegex(CASE_ID_REGEX));
+            .body("data.caseReference", matchesPattern(CASE_ID_REGEX));
     }
 
     @Test
@@ -69,7 +69,7 @@ class CreateCaseCallbackTest {
             .statusCode(OK.value())
             .body("errors", empty())
             .body("warnings", empty())
-            .body("data.caseReference", matchesRegex(CASE_ID_REGEX));
+            .body("data.caseReference", matchesPattern(CASE_ID_REGEX));
     }
 
     @Test
