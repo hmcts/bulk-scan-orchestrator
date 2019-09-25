@@ -28,16 +28,12 @@ public class EnvelopesQueueConsumeTask {
 
     @Scheduled(fixedDelay = 1000)
     public void consumeMessages() {
-        log.info("Started the job consuming envelope messages");
-
         try {
             boolean queueMayHaveMessages = true;
 
             while (queueMayHaveMessages && isReadyForConsumingMessages()) {
                 queueMayHaveMessages = envelopeEventProcessor.processNextMessage();
             }
-
-            log.info("Finished the job consuming envelope messages");
         } catch (InterruptedException exception) {
             logTaskError(exception);
             Thread.currentThread().interrupt();
