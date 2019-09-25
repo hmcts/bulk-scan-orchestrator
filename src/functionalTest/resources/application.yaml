@@ -1,5 +1,10 @@
 scheduling:
   enabled: false
+  task:
+    delete-envelopes-dlq-messages:
+      enabled: false
+    consume-envelopes-queue:
+      enabled: false
 
 spring:
   application:
@@ -54,3 +59,6 @@ service-config:
       jurisdiction: BULKSCAN
       case-type-ids:
         - Bulk_Scanned
+
+# TODO: remove this setting when all jurisdictions support ER prevention in all environments
+jurisdictions-with-duplicate-er-prevention: "BULKSCAN"

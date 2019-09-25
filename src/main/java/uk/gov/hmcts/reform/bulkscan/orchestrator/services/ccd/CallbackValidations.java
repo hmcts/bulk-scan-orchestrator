@@ -1,11 +1,14 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
+import io.vavr.control.Try;
 import io.vavr.control.Validation;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -15,8 +18,10 @@ import javax.annotation.Nonnull;
 import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
 import static java.lang.String.format;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.EXCEPTION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.SUPPLEMENTARY_EVIDENCE;
 
-final class CallbackValidations {
+public final class CallbackValidations {
 
     private static final String CASE_TYPE_ID_SUFFIX = "_ExceptionRecord";
 
@@ -45,7 +50,15 @@ final class CallbackValidations {
     }
 
     @Nonnull
-    static Validation<String, String> hasJurisdiction(CaseDetails theCase) {
+    public static Validation<String, String> hasCaseTypeId(CaseDetails theCase) {
+        return Optional.ofNullable(theCase)
+            .map(CaseDetails::getCaseTypeId)
+            .map(Validation::<String, String>valid)
+            .orElse(invalid("Missing caseType"));
+    }
+
+    @Nonnull
+    public static Validation<String, String> hasJurisdiction(CaseDetails theCase) {
         String jurisdiction = null;
         return theCase != null
             && (jurisdiction = theCase.getJurisdiction()) != null
@@ -115,7 +128,7 @@ final class CallbackValidations {
                         case CLASSIFICATION_SUPPLEMENTARY_EVIDENCE:
                             return Validation.<String, Void>valid(null);
                         case CLASSIFICATION_EXCEPTION:
-                            return !exceptionRecordHasOcr(theCase)
+                            return !hasOcr(theCase)
                                 ? Validation.<String, Void>valid(null)
                                 : Validation.<String, Void>invalid(
                                     format("The 'attach to case' event is not supported for exception records with OCR")
@@ -150,12 +163,71 @@ final class CallbackValidations {
             .map(c -> (String) c);
     }
 
-    @SuppressWarnings("unchecked")
-    private static boolean exceptionRecordHasOcr(CaseDetails theCase) {
-        return Optional.ofNullable(theCase)
-            .map(CaseDetails::getData)
-            .map(data -> (List<Map<String, Object>>) data.get("scanOCRData"))
+    static boolean hasOcr(CaseDetails theCase) {
+        return getOcrData(theCase)
             .map(CollectionUtils::isNotEmpty)
             .orElse(false);
+    }
+
+    public static Validation<String, String> hasPoBox(CaseDetails theCase) {
+        return Optional.ofNullable(theCase)
+            .map(CaseDetails::getData)
+            .map(data -> data.get("poBox"))
+            .map(o -> Validation.<String, String>valid((String) o))
+            .orElse(invalid("Missing poBox"));
+    }
+
+    /**
+     * Used in createCase callback only.
+     * @param theCase from CCD
+     * @return Validation of it
+     */
+    public static Validation<String, Classification> hasJourneyClassification(CaseDetails theCase) {
+        Optional<String> classificationOption = getJourneyClassification(theCase);
+
+        return classificationOption
+            .map(classification -> Try.of(() -> Classification.valueOf(classification)))
+            .map(Try::toValidation)
+            .map(validation -> validation
+                .mapError(throwable -> "Invalid journeyClassification. Error: " + throwable.getMessage())
+                .flatMap(classification -> validateClassification(classification, theCase))
+            )
+            .orElse(invalid("Missing journeyClassification"));
+    }
+
+    private static Validation<String, Classification> validateClassification(
+        Classification classification,
+        CaseDetails theCase
+    ) {
+        if (SUPPLEMENTARY_EVIDENCE.equals(classification)) {
+            return invalid(format(
+                "Event createCase not allowed for the current journey classification %s",
+                classification
+            ));
+        }
+
+        if (EXCEPTION.equals(classification) && !hasOcr(theCase)) {
+            return invalid(format(
+                "Event createCase not allowed for the current journey classification %s without OCR",
+                classification
+            ));
+        }
+
+        return valid(classification);
+    }
+
+    public static Validation<String, Instant> hasDateField(CaseDetails theCase, String dateField) {
+        return Optional.ofNullable(theCase)
+            .map(CaseDetails::getData)
+            .map(data -> data.get(dateField))
+            .map(o -> Validation.<String, Instant>valid(Instant.parse((String) o)))
+            .orElse(invalid("Missing " + dateField));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Optional<List<Map<String, Object>>> getOcrData(CaseDetails theCase) {
+        return Optional.ofNullable(theCase)
+            .map(CaseDetails::getData)
+            .map(data -> (List<Map<String, Object>>) data.get("scanOCRData"));
     }
 }

@@ -1,9 +1,12 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
 public class ExceptionRecord implements CaseData {
 
@@ -26,13 +29,16 @@ public class ExceptionRecord implements CaseData {
     @JsonProperty("scanOCRData")
     public final List<CcdCollectionElement<CcdKeyValue>> ocrData;
 
-
     public final List<CcdCollectionElement<String>> ocrDataValidationWarnings;
+
+    // TODO: remove @JsonInclude when envelopeId is present in exception record definitions
+    // for all services in all environments
+    @JsonInclude(NON_EMPTY)
+    public final String envelopeId;
 
     // Yes/No field indicating if there are warnings to show
     public final String displayWarnings;
 
-    @SuppressWarnings("squid:S00107") // number of params
     public ExceptionRecord(
         String classification,
         String poBox,
@@ -43,7 +49,8 @@ public class ExceptionRecord implements CaseData {
         List<CcdCollectionElement<ScannedDocument>> scannedDocuments,
         List<CcdCollectionElement<CcdKeyValue>> ocrData,
         List<CcdCollectionElement<String>> ocrDataValidationWarnings,
-        String displayWarnings
+        String displayWarnings,
+        String envelopeId
     ) {
         this.classification = classification;
         this.poBox = poBox;
@@ -55,5 +62,6 @@ public class ExceptionRecord implements CaseData {
         this.ocrData = ocrData;
         this.ocrDataValidationWarnings = ocrDataValidationWarnings;
         this.displayWarnings = displayWarnings;
+        this.envelopeId = envelopeId;
     }
 }

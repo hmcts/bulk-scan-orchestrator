@@ -81,7 +81,7 @@ locals {
     TRANSFORMATION_URL_BULKSCAN = "${var.transformation_url_bulkscan}"
     // endregion
 
-    TMP_DUMMY_VAR = "remove me"
+    JURISDICTIONS_WITH_DUPLICATE_ER_PREVENTION = "${join(",", var.jurisdictions_with_duplicate_er_prevention)}"
   }
 }
 
