@@ -44,7 +44,6 @@ class CreateCaseCallbackTest {
         setUpTransformation(getTransformationResponseBody("ok-no-warnings.json"));
 
         postWithBody(getRequestBody("valid-new-application.json"))
-            .log().all()
             .statusCode(OK.value())
             .body("errors", empty())
             .body("warnings", empty())
@@ -56,7 +55,6 @@ class CreateCaseCallbackTest {
         setUpTransformation(getTransformationResponseBody("ok-with-warnings.json"));
 
         postWithBody(getRequestBody("valid-new-application-with-ocr.json"))
-            .log().all()
             .statusCode(OK.value())
             .body("errors", empty())
             .body("warnings", contains("case type id looks like a number"))
@@ -68,7 +66,6 @@ class CreateCaseCallbackTest {
         setUpTransformation(getTransformationResponseBody("ok-no-warnings.json"));
 
         postWithBody(getRequestBody("valid-exception.json"))
-            .log().all()
             .statusCode(OK.value())
             .body("errors", empty())
             .body("warnings", empty())
