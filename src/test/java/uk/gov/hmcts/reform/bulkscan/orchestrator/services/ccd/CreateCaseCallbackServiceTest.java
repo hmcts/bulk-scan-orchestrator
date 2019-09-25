@@ -164,9 +164,16 @@ class CreateCaseCallbackServiceTest {
 
     // todo happy path will go into integration test once endpoint is created
     @Test
-    void should_create_exception_record_if_classification_new_application_with_documents_and_ocr_data() {
+    void should_create_exception_record_if_classification_new_application_with_documents_and_ocr_data()
+        throws IOException, CaseTransformationException {
         // given
         setUpTransformationUrl();
+        when(s2sTokenGenerator.generate()).thenReturn(randomUUID().toString());
+        when(transformationClient.transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString()))
+            .thenReturn(new SuccessfulTransformationResponse(
+                null,
+                singletonList("some warning")
+            ));
 
         Map<String, Object> data = new HashMap<>();
         // putting 6 via `ImmutableMap` is available from Java 9
@@ -186,17 +193,25 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, ProcessResult> output = service.process(caseDetails, EVENT_ID);
 
         // then
         assertThat(output.isRight()).isTrue();
-        assertThat(output.get().keySet()).containsOnly("caseReference");
+        assertThat(output.get().getModifiedFields().keySet()).containsOnly("caseReference");
+        assertThat(output.get().getWarnings()).containsOnly("some warning");
     }
 
     @Test
-    void should_create_exception_record_if_classification_new_application_with_documents_and_without_ocr_data() {
+    void should_create_exception_record_if_classification_new_application_with_documents_and_without_ocr_data()
+        throws IOException, CaseTransformationException {
         // given
         setUpTransformationUrl();
+        when(s2sTokenGenerator.generate()).thenReturn(randomUUID().toString());
+        when(transformationClient.transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString()))
+            .thenReturn(new SuccessfulTransformationResponse(
+                null,
+                emptyList()
+            ));
 
         Map<String, Object> data = new HashMap<>();
         // putting 6 via `ImmutableMap` is available from Java 9
@@ -215,11 +230,12 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, ProcessResult> output = service.process(caseDetails, EVENT_ID);
 
         // then
         assertThat(output.isRight()).isTrue();
-        assertThat(output.get().keySet()).containsOnly("caseReference");
+        assertThat(output.get().getModifiedFields().keySet()).containsOnly("caseReference");
+        assertThat(output.get().getWarnings()).isEmpty();
     }
 
     @Test
@@ -283,7 +299,7 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, ProcessResult> output = service.process(caseDetails, EVENT_ID);
 
         // then
         assertThat(output.isLeft()).isTrue();
@@ -314,7 +330,7 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, ProcessResult> output = service.process(caseDetails, EVENT_ID);
 
         // then
         assertThat(output.isLeft()).isTrue();
@@ -566,7 +582,7 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, ProcessResult> output = service.process(caseDetails, EVENT_ID);
 
         String match = "Missing Form Type";
         assertThat(output.getLeft())
