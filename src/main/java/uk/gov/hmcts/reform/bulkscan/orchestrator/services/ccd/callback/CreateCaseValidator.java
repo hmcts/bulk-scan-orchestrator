@@ -98,11 +98,8 @@ public class CreateCaseValidator {
     @SuppressWarnings("unchecked")
     private Validation<String, List<OcrDataField>> getOcrDataFields(CaseDetails caseDetails) {
         return getOcrData(caseDetails)
-            // following mapError should never happen as getting should be non-breaking
-            // left side must be String
-            .mapError(Object::toString)
-            .flatMap(fields ->
-                Try.of(() -> fields
+            .map(ocrDataList ->
+                Try.of(() -> ocrDataList
                     .stream()
                     .map(items -> items.get("value"))
                     .filter(item -> item instanceof Map)
@@ -113,7 +110,8 @@ public class CreateCaseValidator {
                     ))
                     .collect(toList())
                 ).toValidation().mapError(throwable -> "Invalid OCR data format. Error: " + throwable.getMessage())
-            );
+            )
+            .orElse(Validation.valid(emptyList()));
     }
 
     @SuppressWarnings("unchecked")
