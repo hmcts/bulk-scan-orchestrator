@@ -71,40 +71,40 @@ public class CreateCaseValidator {
 
     public Validation<Seq<String>, ExceptionRecord> getValidation(CaseDetails caseDetails) {
 
-        Validation<String, String> hasCaseTypeId = hasCaseTypeId(caseDetails);
-        Validation<String, String> hasPoBox = hasPoBox(caseDetails);
-        Validation<String, String> hasJurisdiction = hasJurisdiction(caseDetails);
-        Validation<String, String> hasFormType = hasFormType(caseDetails);
-        Validation<String, Classification> hasJourneyClassification = hasJourneyClassification(caseDetails);
-        Validation<String, Instant> hasDeliveryDate = hasDateField(caseDetails, "deliveryDate");
-        Validation<String, Instant> hasOpeningDate = hasDateField(caseDetails, "openingDate");
-        Validation<String, List<ScannedDocument>> hasScannedDocuments = getScannedDocuments(caseDetails);
-        Validation<String, List<OcrDataField>> hasOcrDataFields = getOcrDataFields(caseDetails);
+        Validation<String, String> caseTypeIdValidation = hasCaseTypeId(caseDetails);
+        Validation<String, String> poBoxValidation = hasPoBox(caseDetails);
+        Validation<String, String> jurisdictionValidation = hasJurisdiction(caseDetails);
+        Validation<String, String> formTypeValidation = hasFormType(caseDetails);
+        Validation<String, Classification> journeyClassificationValidation = hasJourneyClassification(caseDetails);
+        Validation<String, Instant> deliveryDateValidation = hasDateField(caseDetails, "deliveryDate");
+        Validation<String, Instant> openingDateValidation = hasDateField(caseDetails, "openingDate");
+        Validation<String, List<ScannedDocument>> scannedDocumentsValidation = getScannedDocuments(caseDetails);
+        Validation<String, List<OcrDataField>> ocrDataFieldsValidation = getOcrDataFields(caseDetails);
 
         Seq<Validation<String, ?>> validations = Array.of(
-            hasCaseTypeId,
-            hasPoBox,
-            hasJurisdiction,
-            hasFormType,
-            hasJourneyClassification,
-            hasDeliveryDate,
-            hasOpeningDate,
-            hasScannedDocuments,
-            hasOcrDataFields
+            caseTypeIdValidation,
+            poBoxValidation,
+            jurisdictionValidation,
+            formTypeValidation,
+            journeyClassificationValidation,
+            deliveryDateValidation,
+            openingDateValidation,
+            scannedDocumentsValidation,
+            ocrDataFieldsValidation
         );
 
         Seq<String> errors = getValidationErrors(validations);
         if (errors.isEmpty()) {
             return Validation.valid(new ExceptionRecord(
-                hasCaseTypeId.get(),
-                hasPoBox.get(),
-                hasJurisdiction.get(),
-                hasJourneyClassification.get(),
-                hasFormType.get(),
-                hasDeliveryDate.get(),
-                hasOpeningDate.get(),
-                hasScannedDocuments.get(),
-                hasOcrDataFields.get()
+                caseTypeIdValidation.get(),
+                poBoxValidation.get(),
+                jurisdictionValidation.get(),
+                journeyClassificationValidation.get(),
+                formTypeValidation.get(),
+                deliveryDateValidation.get(),
+                openingDateValidation.get(),
+                scannedDocumentsValidation.get(),
+                ocrDataFieldsValidation.get()
             ));
         }
         return Validation.invalid(errors);
