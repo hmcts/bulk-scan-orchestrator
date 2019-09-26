@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -33,8 +32,6 @@ class CreateCaseCallbackTest {
 
     private static final String IDAM_TOKEN = "idam-token";
     private static final String USER_ID = "user-id";
-
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @LocalServerPort
     int serverPort;
