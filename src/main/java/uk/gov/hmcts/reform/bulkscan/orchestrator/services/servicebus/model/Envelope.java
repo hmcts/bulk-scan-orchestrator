@@ -20,6 +20,7 @@ public class Envelope {
     public final Instant openingDate;
     public final Classification classification;
     public final List<Document> documents;
+    public final List<Payment> payments;
     public final List<OcrDataField> ocrData;
     public final List<String> ocrDataValidationWarnings;
 
@@ -35,6 +36,7 @@ public class Envelope {
         @JsonProperty(value = "opening_date", required = true) Instant openingDate,
         @JsonProperty(value = "classification", required = true) Classification classification,
         @JsonProperty(value = "documents", required = true) List<Document> documents,
+        @JsonProperty(value = "payments") List<Payment> payments,
         @JsonProperty(value = "ocr_data") List<OcrDataField> ocrData,
         @JsonProperty(value = "ocr_data_validation_warnings", required = true) List<String> ocrDataValidationWarnings
     ) {
@@ -49,6 +51,7 @@ public class Envelope {
         this.openingDate = openingDate;
         this.classification = classification;
         this.documents = documents;
+        this.payments = payments;
         this.ocrData = ocrData;
         this.ocrDataValidationWarnings = ocrDataValidationWarnings;
     }
