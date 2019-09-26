@@ -129,6 +129,19 @@ class ExceptionRecordMapperTest {
         assertThat(exceptionRecord.envelopeId).isNull();
     }
 
+    @Test
+    public void mapEnvelope_sets_payDcnProcessed_correctly() {
+        // given
+        Envelope envelope = envelope(1);
+
+        // when
+        ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
+
+        // then
+        assertThat(exceptionRecord.payDcnProcessed).isEqualTo("No");
+    }
+
+
     private Envelope envelopeWithJurisdiction(String jurisdiction) {
         return envelope(Classification.NEW_APPLICATION, jurisdiction, "1231231232312765");
     }

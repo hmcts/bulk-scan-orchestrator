@@ -105,6 +105,8 @@ class ExceptionRecordCreationTest {
         // envelope ID from the JSON resource representing the test message
         String messageEnvelopeId = "743aeac9-1791-463a-b929-9526e285fe2e";
         assertThat(caseDetails.getData().get("envelopeId")).isEqualTo(messageEnvelopeId);
+        // Verify Exception Record is created with payDcnProcessed value
+        assertThat(caseDetails.getData().get("payDcnProcessed")).isEqualTo("No");
     }
 
     @DisplayName("Should create ExceptionRecord when provided/requested case reference is invalid")

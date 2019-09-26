@@ -43,7 +43,8 @@ public class ExceptionRecordMapper {
             mapOcrData(envelope.ocrData),
             mapOcrDataWarnings(envelope.ocrDataValidationWarnings),
             envelope.ocrDataValidationWarnings.isEmpty() ? "No" : "Yes",
-            jurisdictionsWithDuplicatePrevention.contains(envelope.jurisdiction) ? envelope.id : null
+            jurisdictionsWithDuplicatePrevention.contains(envelope.jurisdiction) ? envelope.id : null,
+            "No"
         );
     }
 
