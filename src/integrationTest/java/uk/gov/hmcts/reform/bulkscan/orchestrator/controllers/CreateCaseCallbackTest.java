@@ -83,6 +83,7 @@ class CreateCaseCallbackTest {
             .body("errors", hasItems(
                 "Missing poBox",
                 "Missing journeyClassification",
+                "Missing Form Type",
                 "Missing deliveryDate",
                 "Missing openingDate"
             ));
