@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.InvalidCaseDataException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
@@ -133,46 +134,24 @@ public class CreateCaseCallbackService {
 
             log.info("Successfully transformed exception record for {} {}", configItem.getService(), caseIdStringify);
 
-            StartEventResponse eventResponse = feignCcdApi.startForCaseworker(
+            long newCaseId = createNewCaseInCcd(
                 idamToken,
                 s2sToken,
                 userId,
                 exceptionRecord.poBoxJurisdiction,
-                transformationResponse.caseCreationDetails.caseTypeId,
-                transformationResponse.caseCreationDetails.eventId
-            );
-
-            CaseDetails caseDetails = feignCcdApi.submitForCaseworker(
-                idamToken,
-                s2sToken,
-                userId,
-                exceptionRecord.poBoxJurisdiction,
-                transformationResponse.caseCreationDetails.caseTypeId,
-                true,
-                CaseDataContent
-                    .builder()
-                    .caseReference(caseIdStringify)
-                    .data(transformationResponse.caseCreationDetails.caseData)
-                    .event(Event
-                        .builder()
-                        .id(eventResponse.getEventId())
-                        .summary("Case created")
-                        .description("Case created from exception record ref " + caseIdStringify)
-                        .build()
-                    )
-                    .eventToken(eventResponse.getToken())
-                    .build()
+                transformationResponse.caseCreationDetails,
+                caseIdStringify
             );
 
             log.info(
                 "Successfully created case for {} with new case ID {} from exception record {}",
                 configItem.getService(),
-                caseDetails.getId(),
+                newCaseId,
                 caseIdStringify
             );
 
             return Validation.valid(new ProcessResult(
-                ImmutableMap.of("caseReference", Long.toString(caseDetails.getId()))
+                ImmutableMap.of("caseReference", Long.toString(newCaseId))
             ));
         } catch (InvalidCaseDataException exception) {
             if (BAD_REQUEST.equals(exception.getStatus())) {
@@ -193,5 +172,45 @@ public class CreateCaseCallbackService {
 
             return Validation.invalid(Array.of("Internal error. " + exception.getMessage()));
         }
+    }
+
+    private long createNewCaseInCcd(
+        String idamToken,
+        String s2sToken,
+        String userId,
+        String jurisdiction,
+        CaseCreationDetails caseCreationDetails,
+        String originalCaseId
+    ) {
+        StartEventResponse eventResponse = feignCcdApi.startForCaseworker(
+            idamToken,
+            s2sToken,
+            userId,
+            jurisdiction,
+            caseCreationDetails.caseTypeId,
+            caseCreationDetails.eventId
+        );
+
+        return feignCcdApi.submitForCaseworker(
+            idamToken,
+            s2sToken,
+            userId,
+            jurisdiction,
+            caseCreationDetails.caseTypeId,
+            true,
+            CaseDataContent
+                .builder()
+                .caseReference(originalCaseId)
+                .data(caseCreationDetails.caseData)
+                .event(Event
+                    .builder()
+                    .id(eventResponse.getEventId())
+                    .summary("Case created")
+                    .description("Case created from exception record ref " + originalCaseId)
+                    .build()
+                )
+                .eventToken(eventResponse.getToken())
+                .build()
+        ).getId();
     }
 }
