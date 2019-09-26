@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.springframework.http.HttpStatus.OK;
 
@@ -65,8 +66,8 @@ class CreateCaseCallbackTest {
         postWithBody(getRequestBody("valid-exception-warnings-flag-on.json"))
             .statusCode(OK.value())
             .body("errors", contains("case type id looks like a number"))
-            .body("warnings", empty())
-            .body("data", empty());
+            .body("warnings", nullValue())
+            .body("data", nullValue());
     }
 
     @Test
