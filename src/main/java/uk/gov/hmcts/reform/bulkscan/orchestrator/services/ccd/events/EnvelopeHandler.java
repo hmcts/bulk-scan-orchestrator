@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseFinder;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.PaymentsPublisher;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.PaymentsProcessor;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -14,17 +14,17 @@ public class EnvelopeHandler {
     private final AttachDocsToSupplementaryEvidence evidenceAttacher;
     private final CreateExceptionRecord exceptionRecordCreator;
     private final CaseFinder caseFinder;
-    private final PaymentsPublisher paymentsPublisher;
+    private final PaymentsProcessor paymentsProcessor;
 
     public EnvelopeHandler(
         AttachDocsToSupplementaryEvidence evidenceAttacher,
         CreateExceptionRecord exceptionRecordCreator,
         CaseFinder caseFinder,
-        PaymentsPublisher paymentsPublisher) {
+        PaymentsProcessor paymentsProcessor) {
         this.evidenceAttacher = evidenceAttacher;
         this.exceptionRecordCreator = exceptionRecordCreator;
         this.caseFinder = caseFinder;
-        this.paymentsPublisher = paymentsPublisher;
+        this.paymentsProcessor = paymentsProcessor;
     }
 
     public void handleEnvelope(Envelope envelope) {
@@ -44,7 +44,7 @@ public class EnvelopeHandler {
                 break;
             case NEW_APPLICATION:
                 CaseDetails caseDetails = exceptionRecordCreator.createFrom(envelope);
-                paymentsPublisher.publishPayments(envelope, caseDetails, true);
+                paymentsProcessor.processPayments(envelope, caseDetails, true);
                 break;
             default:
                 throw new UnknownClassificationException(

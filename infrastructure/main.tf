@@ -158,6 +158,11 @@ data "azurerm_key_vault_secret" "processed_envelopes_queue_send_conn_str" {
   name         = "processed-envelopes-queue-send-connection-string"
 }
 
+data "azurerm_key_vault_secret" "payments_queue_max_delivery_count" {
+  key_vault_id = "${data.azurerm_key_vault.key_vault.id}"
+  name         = "payments-queue-max-delivery-count"
+}
+
 data "azurerm_key_vault_secret" "payments_queue_send_conn_str" {
   key_vault_id = "${data.azurerm_key_vault.key_vault.id}"
   name         = "payments-queue-send-connection-string"

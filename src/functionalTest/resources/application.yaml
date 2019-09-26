@@ -14,6 +14,8 @@ queue:
   envelopes:
     write-connection-string: ${ENVELOPES_QUEUE_WRITE_CONN_STRING}
     read-connection-string: ${ENVELOPES_QUEUE_READ_CONN_STRING}
+  payments:
+    write-connection-string: ${PAYMENTS_QUEUE_WRITE_CONN_STRING}
 
 # because functional tests load up SpringBootTest
 azure:
@@ -21,6 +23,8 @@ azure:
     instrumentation-key: integration-test
   servicebus:
     envelopes:
+      max-delivery-count: 10
+    payments:
       max-delivery-count: 10
 
 core_case_data:

@@ -11,7 +11,7 @@ public class PaymentsData {
     public final String jurisdiction;
     public final String poBox;
     public final boolean isExceptionRecord;
-    public final List<String> documentControlNumbers;
+    public final List<PaymentData> payments;
 
     @JsonCreator
     public PaymentsData(
@@ -19,12 +19,12 @@ public class PaymentsData {
         @JsonProperty(value = "jurisdiction") String jurisdiction,
         @JsonProperty(value = "po_box") String poBox,
         @JsonProperty(value = "is_exception_record") boolean isExceptionRecord,
-        @JsonProperty(value = "document_control_numbers") List<String> documentControlNumbers
+        @JsonProperty(value = "payments") List<PaymentData> payments
     ) {
         this.ccdReference = ccdReference;
         this.jurisdiction = jurisdiction;
         this.poBox = poBox;
         this.isExceptionRecord = isExceptionRecord;
-        this.documentControlNumbers = documentControlNumbers;
+        this.payments = payments;
     }
 }

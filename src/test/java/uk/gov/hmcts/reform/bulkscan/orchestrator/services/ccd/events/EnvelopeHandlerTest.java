@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseFinder;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.PaymentsPublisher;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.PaymentsProcessor;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -42,7 +42,7 @@ class EnvelopeHandlerTest {
     private CaseDetails caseDetails;
 
     @Mock
-    private PaymentsPublisher paymentsPublisher;
+    private PaymentsProcessor paymentsProcessor;
 
     private EnvelopeHandler envelopeHandler;
 
@@ -52,7 +52,7 @@ class EnvelopeHandlerTest {
             attachDocsToSupplementaryEvidence,
             createExceptionRecord,
             caseFinder,
-            paymentsPublisher);
+            paymentsProcessor);
     }
 
     @AfterEach
@@ -61,7 +61,7 @@ class EnvelopeHandlerTest {
             attachDocsToSupplementaryEvidence,
             createExceptionRecord,
             caseFinder,
-            paymentsPublisher
+            paymentsProcessor
         );
     }
 
@@ -115,7 +115,7 @@ class EnvelopeHandlerTest {
         // then
         verify(this.createExceptionRecord).createFrom(envelope);
         verify(caseFinder, never()).findCase(any());
-        verify(paymentsPublisher).publishPayments(envelope, THE_CASE, true);
+        verify(paymentsProcessor).processPayments(envelope, THE_CASE, true);
     }
 
 }

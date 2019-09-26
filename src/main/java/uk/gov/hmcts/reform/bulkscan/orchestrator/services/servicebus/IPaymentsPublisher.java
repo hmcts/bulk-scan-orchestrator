@@ -4,5 +4,5 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Payme
 
 public interface IPaymentsPublisher {
 
-    void publish(PaymentsData paymentsData);
+    void publishPayments(PaymentsData paymentsData);
 }

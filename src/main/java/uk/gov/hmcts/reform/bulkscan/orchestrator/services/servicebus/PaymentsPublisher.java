@@ -15,9 +15,6 @@ import java.time.Instant;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
-/**
- * Notifies about successfully processed envelopes via queue.
- */
 @Service
 @Profile("!nosb") // do not register for the nosb (test) profile
 public class PaymentsPublisher implements IPaymentsPublisher {
@@ -35,7 +32,7 @@ public class PaymentsPublisher implements IPaymentsPublisher {
         this.objectMapper = objectMapper;
     }
 
-    public void publish(PaymentsData paymentsData) {
+    public void publishPayments(PaymentsData paymentsData) {
         try {
             String messageBody = objectMapper.writeValueAsString(paymentsData);
 
@@ -47,7 +44,7 @@ public class PaymentsPublisher implements IPaymentsPublisher {
             log.info("Sent message to payments queue. CCD Reference: {}", paymentsData.ccdReference);
         } catch (Exception ex) {
             throw new NotificationSendingException(
-                "An error occurred when trying to send notification about successfully processed envelope",
+                "An error occurred when trying to publish payment",
                 ex
             );
         }
