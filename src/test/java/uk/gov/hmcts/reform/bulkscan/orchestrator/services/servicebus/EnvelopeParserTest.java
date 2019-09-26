@@ -48,6 +48,7 @@ class EnvelopeParserTest {
             "jurisdiction",
             "container",
             "zip-file-test.zip",
+            "form_type",
             Instant.now(),
             Instant.now(),
             Classification.SUPPLEMENTARY_EVIDENCE,
@@ -95,6 +96,7 @@ class EnvelopeParserTest {
                 .put("jurisdiction", envelope.jurisdiction)
                 .put("container", envelope.container)
                 .put("zip_file_name", envelope.zipFileName)
+                .put("form_type", envelope.formType)
                 .put("delivery_date", envelope.deliveryDate)
                 .put("opening_date", envelope.openingDate)
                 .put("classification", envelope.classification.toString().toLowerCase())
@@ -158,6 +160,7 @@ class EnvelopeParserTest {
                 .put("jurisdiction", envelope.jurisdiction)
                 .put("container", envelope.container)
                 .put("zip_file_name", envelope.zipFileName)
+                .put("form_type", envelope.formType)
                 .put("delivery_date", envelope.deliveryDate)
                 .put("opening_date", envelope.openingDate)
                 .put("classification", envelope.classification.toString().toLowerCase())
