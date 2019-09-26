@@ -17,28 +17,16 @@ public class ProcessResult {
 
     private final List<String> errors;
 
-    private ProcessResult(
-        Map<String, Object> modifiedFields,
-        List<String> warnings,
-        List<String> errors
-    ) {
+    public ProcessResult(Map<String, Object> modifiedFields) {
         this.modifiedFields = modifiedFields;
+        this.warnings = emptyList();
+        this.errors = emptyList();
+    }
+
+    public ProcessResult(List<String> warnings, List<String> errors) {
+        this.modifiedFields = emptyMap();
         this.warnings = warnings;
         this.errors = errors;
-    }
-
-    public ProcessResult(
-        Map<String, Object> modifiedFields,
-        List<String> warnings
-    ) {
-        this(modifiedFields, warnings, emptyList());
-    }
-
-    public ProcessResult(
-        List<String> warnings,
-        List<String> errors
-    ) {
-        this(emptyMap(), warnings, errors);
     }
 
     public Map<String, Object> getModifiedFields() {

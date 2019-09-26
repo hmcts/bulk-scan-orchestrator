@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.Transform
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isCreateCaseEvent;
 
@@ -55,15 +57,16 @@ public class CreateCaseCallbackService {
      *
      * @return Either list of errors or map of changes - new case reference
      */
-    public Either<List<String>, ProcessResult> process(CaseDetails caseDetails, String eventId) {
-        return assertAllowToAccess(caseDetails, eventId)
+    public Either<List<String>, ProcessResult> process(CcdCallbackRequest request) {
+        return assertAllowToAccess(request.getCaseDetails(), request.getEventId())
             .flatMap(theVoid -> validator
-                .getValidation(caseDetails)
-                .combine(getServiceConfig(caseDetails).mapError(Array::of))
+                .getValidation(request.getCaseDetails())
+                .combine(getServiceConfig(request.getCaseDetails()).mapError(Array::of))
                 .ap((exceptionRecord, configItem) -> createNewCase(
                     exceptionRecord,
                     configItem,
-                    caseDetails.getId()
+                    request.getCaseDetails().getId(),
+                    request.isIgnoreWarnings()
                 ))
                 .mapError(errors -> errors.flatMap(Function.identity()))
                 .flatMap(Function.identity())
@@ -92,7 +95,8 @@ public class CreateCaseCallbackService {
     private Validation<Seq<String>, ProcessResult> createNewCase(
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,
-        long caseId
+        long caseId,
+        boolean ignoreWarnings
     ) {
         try {
             log.info(
@@ -107,15 +111,24 @@ public class CreateCaseCallbackService {
                 s2sTokenGenerator.generate()
             );
 
-            return Validation.valid(new ProcessResult(
-                ImmutableMap.of("caseReference", UUID.randomUUID()),
-                transformationResponse.warnings
-            ));
+            if (!ignoreWarnings && !transformationResponse.warnings.isEmpty()) {
+                log.warn("Transformation warnings: {}", String.join(", ", transformationResponse.warnings));
+
+                return Validation.invalid(Array.ofAll(transformationResponse.warnings));
+            } else {
+                return Validation.valid(new ProcessResult(
+                    ImmutableMap.of("caseReference", UUID.randomUUID())
+                ));
+            }
         } catch (InvalidCaseDataException exception) {
-            return Validation.valid(new ProcessResult(
-                exception.getResponse().warnings,
-                exception.getResponse().errors
-            ));
+            if (BAD_REQUEST.equals(exception.getStatus())) {
+                throw exception;
+            } else {
+                return Validation.valid(new ProcessResult(
+                    exception.getResponse().warnings,
+                    exception.getResponse().errors
+                ));
+            }
         } catch (Exception exception) {
             log.error(
                 "Failed to create exception for service {} and exception record {}",
