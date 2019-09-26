@@ -12,6 +12,6 @@
     "security_classification": "PUBLIC",
     "callback_response_status": ""
   },
-  "case_details_before": {},
-  "event_id": "createCase"
+  "event_id": "createCase",
+  "ignore_warning": false
 }
