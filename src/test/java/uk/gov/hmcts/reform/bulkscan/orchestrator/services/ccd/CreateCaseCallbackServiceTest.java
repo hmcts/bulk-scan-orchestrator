@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
@@ -18,9 +18,12 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.InvalidCa
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.TransformationErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseValidator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceNotConfiguredException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
@@ -32,11 +35,12 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -76,7 +80,11 @@ class CreateCaseCallbackServiceTest {
 
     @Test
     void should_not_allow_to_process_callback_in_case_wrong_event_id_is_received() {
-        Either<List<String>, Map<String, Object>> output = service.process(null, "some event");
+        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+            "some event",
+            null,
+            true
+        ));
 
         assertThat(output.isLeft()).isTrue();
         assertThat(output.getLeft()).containsOnly("The some event event is not supported. Please contact service team");
@@ -89,7 +97,11 @@ class CreateCaseCallbackServiceTest {
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.id(1L));
 
         // when
-        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+            EVENT_ID,
+            caseDetails,
+            true
+        ));
 
         assertThat(output.isLeft()).isTrue();
         assertThat(output.getLeft()).containsOnly("No case type ID supplied");
@@ -102,7 +114,11 @@ class CreateCaseCallbackServiceTest {
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(""));
 
         // when
-        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+            EVENT_ID,
+            caseDetails,
+            true
+        ));
 
         // then
         assertThat(output.isLeft()).isTrue();
@@ -117,7 +133,11 @@ class CreateCaseCallbackServiceTest {
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(CASE_TYPE_ID));
 
         // when
-        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+            EVENT_ID,
+            caseDetails,
+            true
+        ));
 
         // then
         assertThat(output.isLeft()).isTrue();
@@ -131,7 +151,11 @@ class CreateCaseCallbackServiceTest {
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(CASE_TYPE_ID));
 
         // when
-        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+            EVENT_ID,
+            caseDetails,
+            true
+        ));
 
         // then
         assertThat(output.isLeft()).isTrue();
@@ -146,7 +170,11 @@ class CreateCaseCallbackServiceTest {
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(CASE_TYPE_ID));
 
         // when
-        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+            EVENT_ID,
+            caseDetails,
+            true
+        ));
 
         assertThat(output.isLeft()).isTrue();
         assertThat(output.getLeft()).containsOnly(
@@ -159,10 +187,20 @@ class CreateCaseCallbackServiceTest {
         );
     }
 
-    @Test
-    void should_create_exception_record_if_classification_new_application_with_documents_and_ocr_data() {
+    // todo happy path will go into integration test once endpoint is created
+    @ParameterizedTest
+    @ValueSource(strings = { "true", "false" })
+    void should_create_exception_record_if_classification_new_application_with_documents_and_ocr_data(
+        boolean ignoreWarnings
+    ) throws IOException, CaseTransformationException {
         // given
         setUpTransformationUrl();
+        when(s2sTokenGenerator.generate()).thenReturn(randomUUID().toString());
+        when(transformationClient.transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString()))
+            .thenReturn(new SuccessfulTransformationResponse(
+                null,
+                singletonList("some warning")
+            ));
 
         Map<String, Object> data = new HashMap<>();
         // putting 6 via `ImmutableMap` is available from Java 9
@@ -182,17 +220,33 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+            EVENT_ID,
+            caseDetails,
+            ignoreWarnings
+        ));
 
         // then
-        assertThat(output.isRight()).isTrue();
-        assertThat(output.get().keySet()).containsOnly("caseReference");
+        if (ignoreWarnings) {
+            assertThat(output.isRight()).isTrue();
+            assertThat(output.get().getModifiedFields().keySet()).containsOnly("caseReference");
+        } else {
+            assertThat(output.isLeft()).isTrue();
+            assertThat(output.getLeft()).containsOnly("some warning");
+        }
     }
 
     @Test
-    void should_create_exception_record_if_classification_new_application_with_documents_and_without_ocr_data() {
+    void should_create_exception_record_if_classification_new_application_with_documents_and_without_ocr_data()
+        throws IOException, CaseTransformationException {
         // given
         setUpTransformationUrl();
+        when(s2sTokenGenerator.generate()).thenReturn(randomUUID().toString());
+        when(transformationClient.transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString()))
+            .thenReturn(new SuccessfulTransformationResponse(
+                null,
+                emptyList()
+            ));
 
         Map<String, Object> data = new HashMap<>();
         // putting 6 via `ImmutableMap` is available from Java 9
@@ -211,11 +265,16 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+            EVENT_ID,
+            caseDetails,
+            true
+        ));
 
         // then
         assertThat(output.isRight()).isTrue();
-        assertThat(output.get().keySet()).containsOnly("caseReference");
+        assertThat(output.get().getModifiedFields().keySet()).containsOnly("caseReference");
+        assertThat(output.get().getWarnings()).isEmpty();
     }
 
     @Test
@@ -224,6 +283,8 @@ class CreateCaseCallbackServiceTest {
         // given
         setUpTransformationUrl();
         when(s2sTokenGenerator.generate()).thenReturn(randomUUID().toString());
+        when(transformationClient.transformExceptionRecord(eq("url"), any(ExceptionRecord.class), anyString()))
+            .thenReturn(new SuccessfulTransformationResponse(null, emptyList()));
 
         Map<String, Object> data = new HashMap<>();
         // putting 6 via `ImmutableMap` is available from Java 9
@@ -243,11 +304,16 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+            EVENT_ID,
+            caseDetails,
+            true
+        ));
 
         // then
         assertThat(output.isRight()).isTrue();
-        assertThat(output.get().keySet()).containsOnly("caseReference");
+        assertThat(output.get().getModifiedFields().keySet()).containsOnly("caseReference");
+        assertThat(output.get().getWarnings()).isEmpty();
 
         // and verify all calls were made
         verify(transformationClient).transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString());
@@ -276,7 +342,11 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+            EVENT_ID,
+            caseDetails,
+            true
+        ));
 
         // then
         assertThat(output.isLeft()).isTrue();
@@ -307,7 +377,11 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+            EVENT_ID,
+            caseDetails,
+            true
+        ));
 
         // then
         assertThat(output.isLeft()).isTrue();
@@ -348,7 +422,11 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+            EVENT_ID,
+            caseDetails,
+            true
+        ));
 
         // then
         assertThat(output.isLeft()).isTrue();
@@ -358,19 +436,15 @@ class CreateCaseCallbackServiceTest {
     }
 
     // todo move to integration test
-    @ParameterizedTest
-    @EnumSource(value = HttpStatus.class, names = {
-        "UNPROCESSABLE_ENTITY",
-        "BAD_REQUEST"
-    })
-    void should_throw_InvalidCaseDataException_when_transformation_client_returns_422_or_400(HttpStatus httpStatus)
+    @Test
+    void should_throw_InvalidCaseDataException_when_transformation_client_returns_422()
         throws IOException, CaseTransformationException {
         // given
         when(s2sTokenGenerator.generate()).thenReturn(randomUUID().toString());
         setUpTransformationUrl();
         InvalidCaseDataException exception = new InvalidCaseDataException(
-            new HttpClientErrorException(httpStatus),
-            new TransformationErrorResponse(emptyList(), emptyList())
+            new HttpClientErrorException(HttpStatus.UNPROCESSABLE_ENTITY),
+            new TransformationErrorResponse(singletonList("error"), singletonList("warning"))
         );
         doThrow(exception)
             .when(transformationClient)
@@ -394,10 +468,17 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Throwable throwable = catchThrowable(() -> service.process(caseDetails, EVENT_ID));
+        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+            EVENT_ID,
+            caseDetails,
+            true
+        ));
 
         // then
-        assertThat(throwable).isInstanceOf(InvalidCaseDataException.class);
+        assertThat(output.isRight()).isTrue();
+        assertThat(output.get().getModifiedFields()).isEmpty();
+        assertThat(output.get().getWarnings()).containsOnly("warning");
+        assertThat(output.get().getErrors()).containsOnly("error");
     }
 
     @Test
@@ -421,7 +502,11 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+            EVENT_ID,
+            caseDetails,
+            true
+        ));
 
         // then
         assertThat(output.isLeft()).isTrue();
@@ -450,7 +535,11 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+            EVENT_ID,
+            caseDetails,
+            true
+        ));
 
         assertThat(output.getLeft()).containsOnly(
             "Invalid journeyClassification. Error: No enum constant " + Classification.class.getName() + ".EXCEPTIONS"
@@ -491,7 +580,11 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+            EVENT_ID,
+            caseDetails,
+            true
+        ));
 
         assertThat(output.getLeft()).containsOnly(
             "Invalid scannedDocuments format. Error: No enum constant " + DocumentType.class.getName() + ".OTHERS"
@@ -523,7 +616,11 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+            EVENT_ID,
+            caseDetails,
+            true
+        ));
 
         String match =
             "Invalid OCR data format. Error: (class )?java.lang.Integer cannot be cast to (class )?java.lang.String.*";
@@ -556,7 +653,11 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, Map<String, Object>> output = service.process(caseDetails, EVENT_ID);
+        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+            EVENT_ID,
+            caseDetails,
+            true
+        ));
 
         String match = "Missing Form Type";
         assertThat(output.getLeft())
