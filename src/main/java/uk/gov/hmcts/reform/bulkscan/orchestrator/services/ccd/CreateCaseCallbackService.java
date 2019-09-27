@@ -43,20 +43,20 @@ public class CreateCaseCallbackService {
     private final ServiceConfigProvider serviceConfigProvider;
     private final TransformationClient transformationClient;
     private final AuthTokenGenerator s2sTokenGenerator;
-    private final CoreCaseDataApi feignCcdApi;
+    private final CoreCaseDataApi ccdApi;
 
     public CreateCaseCallbackService(
         CreateCaseValidator validator,
         ServiceConfigProvider serviceConfigProvider,
         TransformationClient transformationClient,
         AuthTokenGenerator s2sTokenGenerator,
-        CoreCaseDataApi feignCcdApi
+        CoreCaseDataApi ccdApi
     ) {
         this.validator = validator;
         this.serviceConfigProvider = serviceConfigProvider;
         this.transformationClient = transformationClient;
         this.s2sTokenGenerator = s2sTokenGenerator;
-        this.feignCcdApi = feignCcdApi;
+        this.ccdApi = ccdApi;
     }
 
     /**
@@ -186,7 +186,7 @@ public class CreateCaseCallbackService {
         CaseCreationDetails caseCreationDetails,
         String originalCaseId
     ) {
-        StartEventResponse eventResponse = feignCcdApi.startForCaseworker(
+        StartEventResponse eventResponse = ccdApi.startForCaseworker(
             idamToken,
             s2sToken,
             userId,
@@ -195,7 +195,7 @@ public class CreateCaseCallbackService {
             caseCreationDetails.eventId
         );
 
-        return feignCcdApi.submitForCaseworker(
+        return ccdApi.submitForCaseworker(
             idamToken,
             s2sToken,
             userId,
