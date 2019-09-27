@@ -6,6 +6,8 @@ import io.vavr.control.Either;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
@@ -160,6 +162,80 @@ class CreateCaseCallbackServiceTest {
         // then
         assertThat(output.isLeft()).isTrue();
         assertThat(output.getLeft()).containsOnly("Transformation URL is not configured");
+    }
+
+    @Test
+    void should_report_all_errors_when_null_is_provided_as_case_details() {
+        // given
+        setUpTransformationUrl();
+
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(CASE_TYPE_ID));
+
+        // when
+        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+            EVENT_ID,
+            caseDetails,
+            true
+        ), IDAM_TOKEN, USER_ID);
+
+        assertThat(output.isLeft()).isTrue();
+        assertThat(output.getLeft()).containsOnly(
+            "Missing poBox",
+            "Internal Error: invalid jurisdiction supplied: null",
+            "Missing journeyClassification",
+            "Missing Form Type",
+            "Missing deliveryDate",
+            "Missing openingDate"
+        );
+    }
+
+    // todo happy path will go into integration test once endpoint is created
+    @ParameterizedTest
+    @ValueSource(strings = { "true", "false" })
+    void should_create_exception_record_if_classification_new_application_with_documents_and_ocr_data(
+        boolean ignoreWarnings
+    ) throws IOException, CaseTransformationException {
+        // given
+        setUpTransformationUrl();
+        when(s2sTokenGenerator.generate()).thenReturn(randomUUID().toString());
+        when(transformationClient.transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString()))
+            .thenReturn(new SuccessfulTransformationResponse(
+                null,
+                singletonList("some warning")
+            ));
+
+        Map<String, Object> data = new HashMap<>();
+        // putting 6 via `ImmutableMap` is available from Java 9
+        data.put("poBox", "12345");
+        data.put("journeyClassification", NEW_APPLICATION.name());
+        data.put("formType", "Form1");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
+        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
+
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .id(1L)
+            .caseTypeId(CASE_TYPE_ID)
+            .jurisdiction("some jurisdiction")
+            .data(data)
+        );
+
+        // when
+        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+            EVENT_ID,
+            caseDetails,
+            ignoreWarnings
+        ), IDAM_TOKEN, USER_ID);
+
+        // then
+        if (ignoreWarnings) {
+            assertThat(output.isRight()).isTrue();
+            assertThat(output.get().getModifiedFields().keySet()).containsOnly("caseReference");
+        } else {
+            assertThat(output.isLeft()).isTrue();
+            assertThat(output.getLeft()).containsOnly("some warning");
+        }
     }
 
     @Test
