@@ -82,7 +82,7 @@ class ExceptionRecordCreationTest {
         UUID randomPoBox = UUID.randomUUID();
 
         // when
-        envelopeMessager.sendMessageFromFile(
+        String messageEnvelopeId = envelopeMessager.sendMessageFromFile(
             "envelopes/new-envelope-with-evidence.json", // with payments dcn
             "0000000000000000",
             null,
@@ -107,7 +107,6 @@ class ExceptionRecordCreationTest {
         assertThat(getOcrDataValidationWarnings(caseDetails)).isEqualTo(expectedOcrDataWarnings);
 
         // envelope ID from the JSON resource representing the test message
-        String messageEnvelopeId = "743aeac9-1791-463a-b929-9526e285fe2e";
         assertThat(caseDetails.getData().get("envelopeId")).isEqualTo(messageEnvelopeId);
 
         assertThat(getCaseDataForField(caseDetails, "awaitingDCNProcessing")).isEqualTo("Yes");
