@@ -20,7 +20,8 @@ public class EnvelopeHandler {
         AttachDocsToSupplementaryEvidence evidenceAttacher,
         CreateExceptionRecord exceptionRecordCreator,
         CaseFinder caseFinder,
-        PaymentsProcessor paymentsProcessor) {
+        PaymentsProcessor paymentsProcessor
+    ) {
         this.evidenceAttacher = evidenceAttacher;
         this.exceptionRecordCreator = exceptionRecordCreator;
         this.caseFinder = caseFinder;
@@ -28,23 +29,26 @@ public class EnvelopeHandler {
     }
 
     public void handleEnvelope(Envelope envelope) {
+        Optional<CaseDetails> caseDetailsOpt;
         switch (envelope.classification) {
             case SUPPLEMENTARY_EVIDENCE:
-                Optional<CaseDetails> caseDetailsOpt = caseFinder.findCase(envelope);
+                caseDetailsOpt = caseFinder.findCase(envelope);
 
                 if (caseDetailsOpt.isPresent()) {
                     evidenceAttacher.attach(envelope, caseDetailsOpt.get());
                 } else {
-                    exceptionRecordCreator.createFrom(envelope);
+                    exceptionRecordCreator.tryCreateFrom(envelope);
                 }
 
                 break;
             case EXCEPTION:
-                exceptionRecordCreator.createFrom(envelope);
+                exceptionRecordCreator.tryCreateFrom(envelope);
                 break;
             case NEW_APPLICATION:
-                CaseDetails caseDetails = exceptionRecordCreator.createFrom(envelope);
-                paymentsProcessor.processPayments(envelope, caseDetails, true);
+                caseDetailsOpt = exceptionRecordCreator.tryCreateFrom(envelope);
+                if (caseDetailsOpt.isPresent()) {
+                    paymentsProcessor.processPayments(envelope, caseDetailsOpt.get(), true);
+                }
                 break;
             default:
                 throw new UnknownClassificationException(

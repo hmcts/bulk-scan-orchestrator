@@ -56,6 +56,7 @@ service-config:
   services:
     - service: bulkscan # service name corresponds to the name of the container in Blob Storage
       jurisdiction: BULKSCAN
+      transformation-url: *wiremock
       case-type-ids:
         - Bulk_Scanned
 
