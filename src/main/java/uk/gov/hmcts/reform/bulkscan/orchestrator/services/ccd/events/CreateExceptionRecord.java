@@ -52,7 +52,7 @@ public class CreateExceptionRecord {
             List<Long> existingExceptionRecords =
                 ccdApi.getExceptionRecordRefsByEnvelopeId(envelope.id, envelope.container);
 
-            if (existingExceptionRecords.isEmpty()) {
+            if (!existingExceptionRecords.isEmpty()) {
                 log.error(
                     "Creating of exception record aborted - exception records already exist for envelope {}: [{}]",
                     envelope.id,
@@ -68,6 +68,7 @@ public class CreateExceptionRecord {
             );
 
         }
+
         CaseDetails caseDetails = createExceptionRecord(envelope);
         return Optional.of(caseDetails);
     }

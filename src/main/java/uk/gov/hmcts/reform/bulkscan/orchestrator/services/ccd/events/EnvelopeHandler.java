@@ -46,9 +46,11 @@ public class EnvelopeHandler {
                 break;
             case NEW_APPLICATION:
                 caseDetailsOpt = exceptionRecordCreator.tryCreateFrom(envelope);
+
                 if (caseDetailsOpt.isPresent()) {
                     paymentsProcessor.processPayments(envelope, caseDetailsOpt.get(), true);
                 }
+
                 break;
             default:
                 throw new UnknownClassificationException(

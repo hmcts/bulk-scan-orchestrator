@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -35,14 +34,11 @@ public class ExceptionRecordCreatorTest {
     @Mock
     private ExceptionRecordMapper exceptionRecordMapper;
 
-    @BeforeEach
-    public void setUp() {
-        setupCcdApi();
-    }
-
     @Test
     public void should_create_exception_record_when_duplicate_prevention_not_supported() {
         // given
+        setupCcdApi();
+
         Envelope envelope = envelope(1);
         ExceptionRecord expectedExceptionRecord = mock(ExceptionRecord.class);
         given(exceptionRecordMapper.mapEnvelope(envelope)).willReturn(expectedExceptionRecord);
@@ -61,6 +57,8 @@ public class ExceptionRecordCreatorTest {
     @Test
     public void should_create_exception_record_when_none_exists_for_the_envelope() {
         // given
+        setupCcdApi();
+
         given(ccdApi.getExceptionRecordRefsByEnvelopeId(any(), any())).willReturn(emptyList());
         Envelope envelope = envelope(1);
         ExceptionRecord expectedExceptionRecord = mock(ExceptionRecord.class);
@@ -89,8 +87,6 @@ public class ExceptionRecordCreatorTest {
 
         // then
         verify(ccdApi).getExceptionRecordRefsByEnvelopeId(envelope.id, envelope.container);
-        verify(ccdApi).authenticateJurisdiction(envelope.jurisdiction);
-        verify(exceptionRecordMapper).mapEnvelope(envelope);
         verifyNoMoreInteractions(ccdApi);
         verifyNoMoreInteractions(exceptionRecordMapper);
     }
