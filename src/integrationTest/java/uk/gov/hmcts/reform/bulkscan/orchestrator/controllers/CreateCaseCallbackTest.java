@@ -60,10 +60,10 @@ class CreateCaseCallbackTest {
 
     @Test
     void should_not_create_case_if_classification_exception_without_ocr_data() {
-        postWithBody(getRequestBody("invalid-new-application-without-ocr.json"))
+        postWithBody(getRequestBody("invalid-exception-without-ocr.json"))
             .statusCode(OK.value())
             .body("errors", contains("Event createCase not allowed "
-                + "for the current journey classification NEW_APPLICATION without OCR"))
+                + "for the current journey classification EXCEPTION without OCR"))
             .body("warnings", nullValue())
             .body("data", nullValue());
     }
