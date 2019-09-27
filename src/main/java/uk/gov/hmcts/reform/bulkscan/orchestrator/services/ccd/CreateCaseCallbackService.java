@@ -57,7 +57,11 @@ public class CreateCaseCallbackService {
      *
      * @return Either list of errors or map of changes - new case reference
      */
-    public Either<List<String>, ProcessResult> process(CcdCallbackRequest request) {
+    public Either<List<String>, ProcessResult> process(
+        CcdCallbackRequest request,
+        String idamToken,
+        String userId
+    ) {
         return assertAllowToAccess(request.getCaseDetails(), request.getEventId())
             .flatMap(theVoid -> validator
                 .getValidation(request.getCaseDetails())
