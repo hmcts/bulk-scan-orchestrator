@@ -52,7 +52,7 @@ class CreateCaseCallbackTest {
     void should_not_create_case_if_request_specifies_to_not_ignore_warnings() {
         setUpTransformation(getTransformationResponseBody("ok-with-warnings.json"));
 
-        postWithBody(getRequestBody("valid-exception-warnings-flag-on.json"))
+        postWithBody(getRequestBody("valid-exExceptionRecordCreatorTestception-warnings-flag-on.json"))
             .statusCode(OK.value())
             .body("errors", contains("case type id looks like a number"))
             .body("warnings", nullValue())

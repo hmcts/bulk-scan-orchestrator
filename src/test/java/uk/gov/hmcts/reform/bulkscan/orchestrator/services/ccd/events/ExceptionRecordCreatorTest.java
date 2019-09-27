@@ -90,6 +90,7 @@ public class ExceptionRecordCreatorTest {
         // then
         verify(ccdApi).getExceptionRecordRefsByEnvelopeId(envelope.id, envelope.container);
         verify(ccdApi).authenticateJurisdiction(envelope.jurisdiction);
+        verify(exceptionRecordMapper).mapEnvelope(envelope);
         verifyNoMoreInteractions(ccdApi);
         verifyNoMoreInteractions(exceptionRecordMapper);
     }
