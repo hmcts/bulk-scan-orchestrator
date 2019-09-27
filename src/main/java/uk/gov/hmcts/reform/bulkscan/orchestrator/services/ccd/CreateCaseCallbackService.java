@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import java.util.List;
 import java.util.function.Function;
 
+import static java.util.Collections.emptyList;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isCreateCaseEvent;
@@ -128,7 +129,10 @@ public class CreateCaseCallbackService {
 
             if (!ignoreWarnings && !transformationResponse.warnings.isEmpty()) {
                 // do not log warnings
-                return Validation.invalid(Array.ofAll(transformationResponse.warnings));
+                return Validation.valid(new ProcessResult(
+                    transformationResponse.warnings,
+                    emptyList()
+                ));
             }
 
             log.info(
