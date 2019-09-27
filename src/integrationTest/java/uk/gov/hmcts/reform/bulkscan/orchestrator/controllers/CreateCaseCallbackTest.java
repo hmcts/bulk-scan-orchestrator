@@ -49,17 +49,6 @@ class CreateCaseCallbackTest {
     }
 
     @Test
-    void should_create_case_if_classification_new_application_with_documents_and_without_ocr_data() {
-        setUpTransformation(getTransformationResponseBody("ok-with-warnings.json"));
-
-        postWithBody(getRequestBody("valid-new-application.json"))
-            .statusCode(OK.value())
-            .body("errors", empty())
-            .body("warnings", empty())
-            .body("data.caseReference", matchesPattern(CASE_ID_REGEX));
-    }
-
-    @Test
     void should_not_create_case_if_request_specifies_to_not_ignore_warnings() {
         setUpTransformation(getTransformationResponseBody("ok-with-warnings.json"));
 
