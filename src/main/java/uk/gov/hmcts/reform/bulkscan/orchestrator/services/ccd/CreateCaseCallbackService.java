@@ -127,8 +127,7 @@ public class CreateCaseCallbackService {
             );
 
             if (!ignoreWarnings && !transformationResponse.warnings.isEmpty()) {
-                log.warn("Transformation warnings: {}", String.join(", ", transformationResponse.warnings));
-
+                // do not log warnings
                 return Validation.invalid(Array.ofAll(transformationResponse.warnings));
             }
 
