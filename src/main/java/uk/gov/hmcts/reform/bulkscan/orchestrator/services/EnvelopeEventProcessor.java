@@ -93,10 +93,7 @@ public class EnvelopeEventProcessor {
                 return new MessageProcessingResult(UNRECOVERABLE_FAILURE, ex);
             } catch (NotificationSendingException ex) {
                 logMessageProcessingError(message, envelope, ex);
-
-                // CCD changes have been made, so it's better to dead-letter the message and
-                // not repeat them, at least until CCD operations become idempotent
-                return new MessageProcessingResult(UNRECOVERABLE_FAILURE, ex);
+                return new MessageProcessingResult(POTENTIALLY_RECOVERABLE_FAILURE, ex);
             } catch (Exception ex) {
                 logMessageProcessingError(message, envelope, ex);
                 return new MessageProcessingResult(POTENTIALLY_RECOVERABLE_FAILURE);

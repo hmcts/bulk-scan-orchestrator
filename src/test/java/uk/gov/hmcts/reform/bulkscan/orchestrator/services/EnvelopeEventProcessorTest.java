@@ -159,7 +159,7 @@ class EnvelopeEventProcessorTest {
     }
 
     @Test
-    public void should_dead_letter_the_message_when_notification_sending_fails() throws Exception {
+    public void should_not_complete_the_message_when_notification_sending_fails() throws Exception {
         // given
         String exceptionMessage = "test exception";
         willThrow(new NotificationSendingException(exceptionMessage, null))
@@ -175,21 +175,6 @@ class EnvelopeEventProcessorTest {
 
         // then
         verify(messageReceiver).receive();
-
-        verify(messageReceiver).deadLetter(
-            eq(validMessage.getLockToken()),
-            eq(DEAD_LETTER_REASON_PROCESSING_ERROR),
-            eq(exceptionMessage),
-            any()
-        );
-
-        verify(appInsights).trackDeadLetteredMessage(
-            validMessage,
-            "envelopes",
-            DEAD_LETTER_REASON_PROCESSING_ERROR,
-            exceptionMessage
-        );
-
         verifyNoMoreInteractions(messageReceiver);
     }
 
