@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Class
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.OcrDataField;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Payment;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -72,6 +73,9 @@ class EnvelopeParserTest {
                 )
             ),
             ImmutableList.of(
+                new Payment("dcn1")
+            ),
+            ImmutableList.of(
                 new OcrDataField("key1", "value1"),
                 new OcrDataField("key2", "value2"),
                 new OcrDataField("key0", "value0")
@@ -100,6 +104,7 @@ class EnvelopeParserTest {
                     .put(toJson(envelope.documents.get(0)))
                     .put(toJson(envelope.documents.get(1)))
                 )
+                .put("payments", toPaymentsJson(envelope.payments))
                 .put("ocr_data", toOcrJson(envelope.ocrData))
                 .put("ocr_data_validation_warnings", new JSONArray(envelope.ocrDataValidationWarnings))
                 .toString();
@@ -164,6 +169,7 @@ class EnvelopeParserTest {
                     .put(toJson(envelope.documents.get(1)))
                 )
                 .put("some_extra_ignored_field", "some_ignored_value")
+                .put("payments", toPaymentsJson(envelope.payments))
                 .put("ocr_data", toOcrJson(envelope.ocrData))
                 .put("ocr_data_validation_warnings", new JSONArray(envelope.ocrDataValidationWarnings))
                 .toString();
@@ -256,6 +262,18 @@ class EnvelopeParserTest {
             .put("delivery_date", toIso8601(doc.deliveryDate));
     }
 
+    private JSONArray toPaymentsJson(List<Payment> payments) throws JSONException {
+        JSONArray paymentsJson = new JSONArray();
+        JSONObject paymentEntry;
+
+        for (Payment payment : payments) {
+            paymentEntry = new JSONObject();
+            paymentEntry.put("document_control_number", payment.documentControlNumber);
+            paymentsJson.put(paymentEntry);
+        }
+        return paymentsJson;
+    }
+
     private JSONArray toOcrJson(List<OcrDataField> ocrDataFields) throws JSONException {
         JSONArray ocrJson = new JSONArray();
         JSONObject ocrDataEntry;
@@ -268,5 +286,4 @@ class EnvelopeParserTest {
         }
         return ocrJson;
     }
-
 }
