@@ -17,7 +17,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.google.common.io.Resources.getResource;
 import static com.google.common.io.Resources.toByteArray;
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.anEmptyMap;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
@@ -56,8 +55,7 @@ class CreateCaseCallbackTest {
         postWithBody(getRequestBody("valid-exception-warnings-flag-on.json"))
             .statusCode(OK.value())
             .body("errors", empty())
-            .body("warnings", contains("case type id looks like a number"))
-            .body("data", anEmptyMap());
+            .body("warnings", contains("case type id looks like a number"));
     }
 
     @Test
