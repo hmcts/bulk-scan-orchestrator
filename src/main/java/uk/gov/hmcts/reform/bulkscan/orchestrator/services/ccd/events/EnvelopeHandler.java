@@ -32,13 +32,13 @@ public class EnvelopeHandler {
                 if (caseDetails.isPresent()) {
                     evidenceAttacher.attach(envelope, caseDetails.get());
                 } else {
-                    exceptionRecordCreator.createFrom(envelope);
+                    exceptionRecordCreator.tryCreateFrom(envelope);
                 }
 
                 break;
             case EXCEPTION:
             case NEW_APPLICATION:
-                exceptionRecordCreator.createFrom(envelope);
+                exceptionRecordCreator.tryCreateFrom(envelope);
                 break;
             default:
                 throw new UnknownClassificationException(
