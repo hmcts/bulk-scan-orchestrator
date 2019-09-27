@@ -91,9 +91,6 @@ public class EnvelopeEventProcessor {
             } catch (InvalidMessageException ex) {
                 log.error("Rejected message with ID {}, because it's invalid", message.getMessageId(), ex);
                 return new MessageProcessingResult(UNRECOVERABLE_FAILURE, ex);
-            } catch (NotificationSendingException ex) {
-                logMessageProcessingError(message, envelope, ex);
-                return new MessageProcessingResult(POTENTIALLY_RECOVERABLE_FAILURE, ex);
             } catch (Exception ex) {
                 logMessageProcessingError(message, envelope, ex);
                 return new MessageProcessingResult(POTENTIALLY_RECOVERABLE_FAILURE);
