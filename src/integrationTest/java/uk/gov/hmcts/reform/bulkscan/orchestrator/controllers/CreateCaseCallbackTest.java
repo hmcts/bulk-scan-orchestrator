@@ -19,16 +19,14 @@ import static com.google.common.io.Resources.toByteArray;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.springframework.http.HttpStatus.OK;
 
 @IntegrationTest
 class CreateCaseCallbackTest {
-
-    private static final String CASE_ID_REGEX = "\\d+";
 
     private static final String IDAM_TOKEN = "idam-token";
     private static final String USER_ID = "user-id";
@@ -48,7 +46,7 @@ class CreateCaseCallbackTest {
             .statusCode(OK.value())
             .body("errors", empty())
             .body("warnings", empty())
-            .body("data.caseReference", matchesPattern(CASE_ID_REGEX));
+            .body("data.caseReference", equalTo("1539007368674134")); // from sample-case.json
     }
 
     @Test
@@ -74,7 +72,7 @@ class CreateCaseCallbackTest {
             .statusCode(OK.value())
             .body("errors", empty())
             .body("warnings", empty())
-            .body("data.caseReference", matchesPattern(CASE_ID_REGEX));
+            .body("data.caseReference", equalTo("1539007368674134")); // from sample-case.json
     }
 
     @Test
