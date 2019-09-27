@@ -113,9 +113,9 @@ public class CreateCaseCallbackService {
         String idamToken,
         String userId
     ) {
-        String caseIdStringify = Long.toString(caseId);
+        String caseIdAsString = Long.toString(caseId);
 
-        log.info("Start creating exception record for {} {}", configItem.getService(), caseIdStringify);
+        log.info("Start creating exception record for {} {}", configItem.getService(), caseIdAsString);
 
         try {
             String s2sToken = s2sTokenGenerator.generate();
@@ -132,7 +132,7 @@ public class CreateCaseCallbackService {
                 return Validation.invalid(Array.ofAll(transformationResponse.warnings));
             }
 
-            log.info("Successfully transformed exception record for {} {}", configItem.getService(), caseIdStringify);
+            log.info("Successfully transformed exception record for {} {}", configItem.getService(), caseIdAsString);
 
             long newCaseId = createNewCaseInCcd(
                 idamToken,
@@ -140,14 +140,14 @@ public class CreateCaseCallbackService {
                 userId,
                 exceptionRecord.poBoxJurisdiction,
                 transformationResponse.caseCreationDetails,
-                caseIdStringify
+                caseIdAsString
             );
 
             log.info(
                 "Successfully created case for {} with new case ID {} from exception record {}",
                 configItem.getService(),
                 newCaseId,
-                caseIdStringify
+                caseIdAsString
             );
 
             return Validation.valid(new ProcessResult(
@@ -166,7 +166,7 @@ public class CreateCaseCallbackService {
             log.error(
                 "Failed to create exception for service {} and exception record {}",
                 configItem.getService(),
-                caseIdStringify,
+                caseIdAsString,
                 exception
             );
 
