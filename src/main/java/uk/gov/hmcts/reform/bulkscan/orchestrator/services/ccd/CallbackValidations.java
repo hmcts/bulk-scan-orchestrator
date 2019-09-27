@@ -19,6 +19,7 @@ import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
 import static java.lang.String.format;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.EXCEPTION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.NEW_APPLICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.SUPPLEMENTARY_EVIDENCE;
 
 public final class CallbackValidations {
@@ -215,7 +216,7 @@ public final class CallbackValidations {
             ));
         }
 
-        if (EXCEPTION.equals(classification) && !hasOcr(theCase)) {
+        if ((EXCEPTION.equals(classification) || NEW_APPLICATION.equals(classification)) && !hasOcr(theCase)) {
             return invalid(format(
                 "Event createCase not allowed for the current journey classification %s without OCR",
                 classification

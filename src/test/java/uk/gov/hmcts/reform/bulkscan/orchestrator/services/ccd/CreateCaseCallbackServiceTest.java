@@ -237,16 +237,10 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
-    void should_create_exception_record_if_classification_new_application_with_documents_and_without_ocr_data()
+    void should_report_error_if_classification_new_application_with_documents_and_without_ocr_data()
         throws IOException, CaseTransformationException {
         // given
         setUpTransformationUrl();
-        when(s2sTokenGenerator.generate()).thenReturn(randomUUID().toString());
-        when(transformationClient.transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString()))
-            .thenReturn(new SuccessfulTransformationResponse(
-                null,
-                emptyList()
-            ));
 
         Map<String, Object> data = new HashMap<>();
         // putting 6 via `ImmutableMap` is available from Java 9
@@ -272,9 +266,10 @@ class CreateCaseCallbackServiceTest {
         ));
 
         // then
-        assertThat(output.isRight()).isTrue();
-        assertThat(output.get().getModifiedFields().keySet()).containsOnly("caseReference");
-        assertThat(output.get().getWarnings()).isEmpty();
+        assertThat(output.isLeft()).isTrue();
+        assertThat(output.getLeft()).containsOnly(
+            "Event createCase not allowed for the current journey classification NEW_APPLICATION without OCR"
+        );
     }
 
     @Test
