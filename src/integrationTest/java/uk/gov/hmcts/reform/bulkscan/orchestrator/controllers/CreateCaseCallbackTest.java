@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.http.HttpStatus.OK;
 
 @IntegrationTest
@@ -46,6 +47,26 @@ class CreateCaseCallbackTest {
             .body("errors", empty())
             .body("warnings", empty())
             .body("data.caseReference", equalTo("1539007368674134")); // from sample-case.json
+    }
+
+    @Test
+    void should_not_create_case_if_classification_new_application_without_ocr_data() {
+        postWithBody(getRequestBody("invalid-new-application-without-ocr.json"))
+            .statusCode(OK.value())
+            .body("errors", contains("Event createCase not allowed "
+                + "for the current journey classification NEW_APPLICATION without OCR"))
+            .body("warnings", nullValue())
+            .body("data", nullValue());
+    }
+
+    @Test
+    void should_not_create_case_if_classification_exception_without_ocr_data() {
+        postWithBody(getRequestBody("invalid-exception-without-ocr.json"))
+            .statusCode(OK.value())
+            .body("errors", contains("Event createCase not allowed "
+                + "for the current journey classification EXCEPTION without OCR"))
+            .body("warnings", nullValue())
+            .body("data", nullValue());
     }
 
     @Test
