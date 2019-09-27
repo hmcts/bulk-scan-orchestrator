@@ -6,8 +6,6 @@ import io.vavr.control.Either;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
@@ -18,7 +16,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.InvalidCa
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.TransformationErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
@@ -34,13 +31,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -165,80 +160,6 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
-    void should_report_all_errors_when_null_is_provided_as_case_details() {
-        // given
-        setUpTransformationUrl();
-
-        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(CASE_TYPE_ID));
-
-        // when
-        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
-            caseDetails,
-            true
-        ), IDAM_TOKEN, USER_ID);
-
-        assertThat(output.isLeft()).isTrue();
-        assertThat(output.getLeft()).containsOnly(
-            "Missing poBox",
-            "Internal Error: invalid jurisdiction supplied: null",
-            "Missing journeyClassification",
-            "Missing Form Type",
-            "Missing deliveryDate",
-            "Missing openingDate"
-        );
-    }
-
-    // todo happy path will go into integration test once endpoint is created
-    @ParameterizedTest
-    @ValueSource(strings = { "true", "false" })
-    void should_create_exception_record_if_classification_new_application_with_documents_and_ocr_data(
-        boolean ignoreWarnings
-    ) throws IOException, CaseTransformationException {
-        // given
-        setUpTransformationUrl();
-        when(s2sTokenGenerator.generate()).thenReturn(randomUUID().toString());
-        when(transformationClient.transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString()))
-            .thenReturn(new SuccessfulTransformationResponse(
-                null,
-                singletonList("some warning")
-            ));
-
-        Map<String, Object> data = new HashMap<>();
-        // putting 6 via `ImmutableMap` is available from Java 9
-        data.put("poBox", "12345");
-        data.put("journeyClassification", NEW_APPLICATION.name());
-        data.put("formType", "Form1");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
-        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
-
-        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
-            .id(1L)
-            .caseTypeId(CASE_TYPE_ID)
-            .jurisdiction("some jurisdiction")
-            .data(data)
-        );
-
-        // when
-        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
-            caseDetails,
-            ignoreWarnings
-        ), IDAM_TOKEN, USER_ID);
-
-        // then
-        if (ignoreWarnings) {
-            assertThat(output.isRight()).isTrue();
-            assertThat(output.get().getModifiedFields().keySet()).containsOnly("caseReference");
-        } else {
-            assertThat(output.isLeft()).isTrue();
-            assertThat(output.getLeft()).containsOnly("some warning");
-        }
-    }
-
-    @Test
     void should_report_error_if_classification_new_application_with_documents_and_without_ocr_data()
         throws IOException, CaseTransformationException {
         // given
@@ -272,48 +193,6 @@ class CreateCaseCallbackServiceTest {
         assertThat(output.getLeft()).containsOnly(
             "Event createCase not allowed for the current journey classification NEW_APPLICATION without OCR"
         );
-    }
-
-    @Test
-    void should_create_exception_record_classification_exception_with_documents_and_ocr_data_for_transformation_client()
-        throws IOException, CaseTransformationException {
-        // given
-        setUpTransformationUrl();
-        when(s2sTokenGenerator.generate()).thenReturn(randomUUID().toString());
-        when(transformationClient.transformExceptionRecord(eq("url"), any(ExceptionRecord.class), anyString()))
-            .thenReturn(new SuccessfulTransformationResponse(null, emptyList()));
-
-        Map<String, Object> data = new HashMap<>();
-        // putting 6 via `ImmutableMap` is available from Java 9
-        data.put("poBox", "12345");
-        data.put("journeyClassification", EXCEPTION.name());
-        data.put("formType", "Form1");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
-        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
-
-        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
-            .id(1L)
-            .caseTypeId(CASE_TYPE_ID)
-            .jurisdiction("some jurisdiction")
-            .data(data)
-        );
-
-        // when
-        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
-            caseDetails,
-            true
-        ), IDAM_TOKEN, USER_ID);
-
-        // then
-        assertThat(output.isRight()).isTrue();
-        assertThat(output.get().getModifiedFields().keySet()).containsOnly("caseReference");
-        assertThat(output.get().getWarnings()).isEmpty();
-
-        // and verify all calls were made
-        verify(transformationClient).transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString());
     }
 
     @Test
