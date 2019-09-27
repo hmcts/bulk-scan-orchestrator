@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
@@ -10,6 +11,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Class
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.OcrDataField;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Payment;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -127,6 +129,35 @@ class ExceptionRecordMapperTest {
         ExceptionRecord exceptionRecord = exceptionRecordMapper.mapEnvelope(envelope);
 
         assertThat(exceptionRecord.envelopeId).isNull();
+    }
+
+    @Test
+    public void mapEnvelope_sets_awaitingDcnProcessing_to_no_when_envelope_contains_payments() {
+        //given
+        Envelope envelope = envelope(
+            2,
+            ImmutableList.of(new Payment("dcn1")),
+            null,
+            emptyList()
+        );
+
+        //when
+        ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
+
+        //then
+        assertThat(exceptionRecord.awaitingDcnProcessing).isEqualTo("Yes");
+    }
+
+    @Test
+    public void mapEnvelope_sets_awaitingDcnProcessing_to_no_when_envelope_does_not_contain_payments() {
+        //given
+        Envelope envelope = envelope(2, null, null, emptyList());
+
+        //when
+        ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
+
+        //then
+        assertThat(exceptionRecord.awaitingDcnProcessing).isEqualTo("No");
     }
 
     private Envelope envelopeWithJurisdiction(String jurisdiction) {
