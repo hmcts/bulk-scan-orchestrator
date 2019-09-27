@@ -39,7 +39,7 @@ public class ExceptionRecord implements CaseData {
     // Yes/No field indicating if there are warnings to show
     public final String displayWarnings;
 
-    // Yes/No field indicating if the payments are processed
+    // Yes/No field indicating if the payment document control numbers are processed
     @JsonProperty("awaitingDCNProcessing")
     public final String awaitingDcnProcessing;
 
