@@ -66,7 +66,7 @@ class ExceptionRecordMapperTest {
 
     @Test
     public void mapEnvelope_handles_null_ocr_data() {
-        Envelope envelope = envelope(2, null, emptyList());
+        Envelope envelope = envelope(2, emptyList(), null, emptyList());
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
         assertThat(exceptionRecord.ocrData).isNull();
     }
@@ -74,7 +74,7 @@ class ExceptionRecordMapperTest {
     @Test
     public void mapEnvelope_maps_subtype_values_in_documents() {
         // given
-        Envelope envelope = envelope(2, null, emptyList());
+        Envelope envelope = envelope(2, null, emptyList(), emptyList());
 
         // when
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
@@ -93,8 +93,8 @@ class ExceptionRecordMapperTest {
 
     @Test
     public void mapEnvelope_sets_warnings_presence_correctly() {
-        Envelope envelopeWithWarning = envelope(2, null, newArrayList("Warning"));
-        Envelope envelopeWithoutWarning = envelope(2, null, emptyList());
+        Envelope envelopeWithWarning = envelope(2, null, emptyList(), newArrayList("Warning"));
+        Envelope envelopeWithoutWarning = envelope(2, null, emptyList(), emptyList());
 
         assertThat(mapper.mapEnvelope(envelopeWithWarning).displayWarnings).isEqualTo("Yes");
         assertThat(mapper.mapEnvelope(envelopeWithoutWarning).displayWarnings).isEqualTo("No");

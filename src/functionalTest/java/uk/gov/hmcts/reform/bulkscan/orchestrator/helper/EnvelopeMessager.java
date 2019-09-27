@@ -25,17 +25,30 @@ public class EnvelopeMessager {
 
     private static final Logger logger = LoggerFactory.getLogger(EnvelopeMessager.class);
 
+    private static final String ENVELOPE_ID_PLACEHOLDER = "{ENVELOPE_ID}";
+
     @Autowired
     private QueueClient client;
 
-    public void sendMessageFromFile(
+    /**
+     * Sends a message, with content from the given file, to the queue.
+     *
+     * @return Envelope/message ID
+     */
+    public String sendMessageFromFile(
         String jsonFileName,
         String caseRef,
         String legacyCaseRef,
         UUID poBox,
         String documentUrl
     ) throws JSONException, InterruptedException, ServiceBusException {
-        JSONObject updateCaseData = new JSONObject(SampleData.fileContentAsString(jsonFileName));
+        String envelopeId = UUID.randomUUID().toString();
+        String messageContent =
+            SampleData.fileContentAsString(jsonFileName)
+                .replace(ENVELOPE_ID_PLACEHOLDER, envelopeId);
+
+        JSONObject updateCaseData = new JSONObject(messageContent);
+
         updateCaseData.put("case_ref", caseRef);
         updateCaseData.put("previous_service_case_ref", legacyCaseRef);
 
@@ -49,7 +62,7 @@ public class EnvelopeMessager {
         document.put("uuid", StringUtils.substringAfterLast(documentUrl, "/")); //extract uuid from document url
 
         Message message = new Message(
-            UUID.randomUUID().toString(),
+            envelopeId,
             updateCaseData.toString(),
             MediaType.APPLICATION_JSON_UTF8_VALUE
         );
@@ -61,6 +74,8 @@ public class EnvelopeMessager {
             message.getMessageId(),
             Instant.now()
         );
+
+        return envelopeId;
     }
 
 }
