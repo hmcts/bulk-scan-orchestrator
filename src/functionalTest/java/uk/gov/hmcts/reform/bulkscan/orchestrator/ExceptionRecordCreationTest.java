@@ -72,7 +72,7 @@ class ExceptionRecordCreationTest {
             .until(() -> findCasesByPoBox(randomPoBox).size() == 1);
 
         CaseDetails caseDetails = findCasesByPoBox(randomPoBox).get(0);
-        assertThat(getCaseDataForField(caseDetails, "awaitingDcnProcessing")).isEqualTo("No");
+        assertThat(getCaseDataForField(caseDetails, "awaitingDCNProcessing")).isEqualTo("No");
     }
 
     @DisplayName("Should create ExceptionRecord when classification is NEW_APPLICATION")
@@ -110,7 +110,7 @@ class ExceptionRecordCreationTest {
         String messageEnvelopeId = "743aeac9-1791-463a-b929-9526e285fe2e";
         assertThat(caseDetails.getData().get("envelopeId")).isEqualTo(messageEnvelopeId);
 
-        assertThat(getCaseDataForField(caseDetails, "awaitingDcnProcessing")).isEqualTo("Yes");
+        assertThat(getCaseDataForField(caseDetails, "awaitingDCNProcessing")).isEqualTo("Yes");
     }
 
     @DisplayName("Should create ExceptionRecord when provided/requested case reference is invalid")
