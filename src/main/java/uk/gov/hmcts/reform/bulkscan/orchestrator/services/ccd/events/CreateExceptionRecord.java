@@ -1,7 +1,9 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.ExceptionRecordMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
@@ -12,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import java.util.List;
 import java.util.Locale;
 
 @Component
@@ -25,19 +28,50 @@ public class CreateExceptionRecord {
 
     private final ExceptionRecordMapper mapper;
     private final CcdApi ccdApi;
+    private final List<String> jurisdictionsWithDuplicatePrevention;
 
     public CreateExceptionRecord(
         ExceptionRecordMapper mapper,
-        CcdApi ccdApi
+        CcdApi ccdApi,
+        @Value("${jurisdictions-with-duplicate-er-prevention}") final List<String> jurisdictionsWithDuplicatePrevention
     ) {
         this.mapper = mapper;
         this.ccdApi = ccdApi;
+        this.jurisdictionsWithDuplicatePrevention = jurisdictionsWithDuplicatePrevention;
     }
 
     /**
-     * Creates an Exception Record from given envelope.
+     * Creates an exception record from given envelope, unless an exception record
+     * already exists for this envelope.
      */
-    public void createFrom(Envelope envelope) {
+    public void tryCreateFrom(Envelope envelope) {
+        if (jurisdictionsWithDuplicatePrevention.contains(envelope.jurisdiction)) {
+            log.info("Checking for existing exception records for envelope {}", envelope.id);
+
+            List<Long> existingExceptionRecords =
+                ccdApi.getExceptionRecordRefsByEnvelopeId(envelope.id, envelope.container);
+
+            if (existingExceptionRecords.isEmpty()) {
+                createExceptionRecord(envelope);
+            } else {
+                log.error(
+                    "Creating of exception record aborted - exception records already exist for envelope {}: [{}]",
+                    envelope.id,
+                    StringUtils.join(existingExceptionRecords, ",")
+                );
+            }
+        } else {
+            log.warn(
+                "Duplicate exception record detection skipped for envelope {} - jurisdiction {} doesn't support it",
+                envelope.id,
+                envelope.jurisdiction
+            );
+
+            createExceptionRecord(envelope);
+        }
+    }
+
+    private void createExceptionRecord(Envelope envelope) {
         log.info("Creating exception record for envelope {}", envelope.id);
 
         CcdAuthenticator authenticator = ccdApi.authenticateJurisdiction(envelope.jurisdiction);
