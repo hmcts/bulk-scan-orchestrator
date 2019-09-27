@@ -29,6 +29,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_SEARCH_URL;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_BULK_SCAN;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_EXCEPTION_RECORD;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.EXCEPTION_RECORD_SEARCH_URL;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.GET_CASE_URL;
 
 @IntegrationTest
@@ -38,6 +39,8 @@ class ExceptionRecordCreatorTest {
         .replace(CASE_TYPE_BULK_SCAN, CASE_TYPE_EXCEPTION_RECORD);
     private static final String CASE_SUBMIT_URL = Environment.CASE_SUBMIT_URL
         .replace(CASE_TYPE_BULK_SCAN, CASE_TYPE_EXCEPTION_RECORD);
+
+    private static final String ELASTICSEARCH_EMPTY_RESPONSE = "{\"total\": 0,\"cases\": []}";
 
     @SpyBean
     private IMessageReceiver messageReceiver;
@@ -54,7 +57,11 @@ class ExceptionRecordCreatorTest {
         )));
 
         givenThat(post(CASE_SEARCH_URL).willReturn(
-            aResponse().withBody("{\"total\": 0,\"cases\": []}")
+            aResponse().withBody(ELASTICSEARCH_EMPTY_RESPONSE)
+        ));
+
+        givenThat(post(EXCEPTION_RECORD_SEARCH_URL).willReturn(
+            aResponse().withBody(ELASTICSEARCH_EMPTY_RESPONSE)
         ));
     }
 
