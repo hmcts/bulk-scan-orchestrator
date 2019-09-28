@@ -64,7 +64,7 @@ public class FunctionalQueueConfig {
     @Profile("nosb") // apply only when Service Bus should not be used
     IPaymentsPublisher testPaymentsPublisher() {
         // return implementation that does nothing
-        return envelopeId -> {
+        return paymentsData -> {
         };
     }
 
