@@ -30,8 +30,6 @@ azure:
   servicebus:
     envelopes:
       max-delivery-count: 10
-    payments:
-      max-delivery-count: 10
 
 hystrix:
   command:

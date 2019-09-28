@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EnvelopeHan
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IProcessedEnvelopeNotifier;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.MessageBodyRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.NotificationSendingException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.PaymentsPublishingException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.InvalidMessageException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.MessageProcessingException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.handler.MessageProcessingResult;
@@ -91,7 +92,7 @@ public class EnvelopeEventProcessor {
             } catch (InvalidMessageException ex) {
                 log.error("Rejected message with ID {}, because it's invalid", message.getMessageId(), ex);
                 return new MessageProcessingResult(UNRECOVERABLE_FAILURE, ex);
-            } catch (NotificationSendingException ex) {
+            } catch (NotificationSendingException | PaymentsPublishingException ex) {
                 logMessageProcessingError(message, envelope, ex);
 
                 // CCD changes have been made, so it's better to dead-letter the message and

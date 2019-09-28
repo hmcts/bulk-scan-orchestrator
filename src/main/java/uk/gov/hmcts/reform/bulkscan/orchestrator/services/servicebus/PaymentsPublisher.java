@@ -32,13 +32,17 @@ public class PaymentsPublisher implements IPaymentsPublisher {
         this.objectMapper = objectMapper;
     }
 
+    @Override
     public void publishPayments(PaymentsData paymentsData) {
         try {
             String messageBody = objectMapper.writeValueAsString(paymentsData);
 
-            IMessage message = new Message(paymentsData.ccdReference, messageBody, APPLICATION_JSON.toString());
+            IMessage message = new Message(
+                paymentsData.ccdReference,
+                messageBody,
+                APPLICATION_JSON.toString()
+            );
 
-            // TODO: change back to `queueClient.send(message)` when BPS-694 is implemented
             queueClient.scheduleMessage(message, Instant.now().plusSeconds(10));
 
             log.info("Sent message to payments queue. CCD Reference: {}", paymentsData.ccdReference);
