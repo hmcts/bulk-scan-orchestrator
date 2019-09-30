@@ -33,8 +33,9 @@ import java.util.function.Function;
 import static java.util.Collections.emptyList;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isCreateCaseEvent;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isCreateNewCaseEvent;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.CASE_REFERENCE;
+
 
 @Service
 public class CreateCaseCallbackService {
@@ -92,7 +93,7 @@ public class CreateCaseCallbackService {
 
     private Either<List<String>, Void> assertAllowToAccess(CaseDetails caseDetails, String eventId) {
         return validator.mandatoryPrerequisites(
-            () -> isCreateCaseEvent(eventId),
+            () -> isCreateNewCaseEvent(eventId),
             () -> getServiceConfig(caseDetails).map(item -> null)
         );
     }
