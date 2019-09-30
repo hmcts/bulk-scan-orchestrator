@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class PaymentData {
 
-    @JsonProperty(value = "document_control_number")
+    @JsonProperty("document_control_number")
     public final String documentControlNumber;
 
     public PaymentData(

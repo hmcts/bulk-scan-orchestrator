@@ -6,19 +6,19 @@ import java.util.List;
 
 public class PaymentsData {
 
-    @JsonProperty(value = "ccd_reference")
+    @JsonProperty("ccd_reference")
     public final String ccdReference;
 
-    @JsonProperty(value = "jurisdiction")
+    @JsonProperty("jurisdiction")
     public final String jurisdiction;
 
-    @JsonProperty(value = "po_box")
+    @JsonProperty("po_box")
     public final String poBox;
 
     @JsonProperty(value = "is_exception_record")
     public final boolean isExceptionRecord;
 
-    @JsonProperty(value = "payments")
+    @JsonProperty("payments")
     public final List<PaymentData> payments;
 
     public PaymentsData(
