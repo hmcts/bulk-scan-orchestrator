@@ -34,7 +34,7 @@ public class ExceptionRecordCreatorTest {
     @Mock
     private ExceptionRecordMapper exceptionRecordMapper;
 
-    private static final Long caseDetailsId = 12345L;
+    private static final Long CASE_DETAILS_ID = 234L;
 
     @Test
     public void should_create_exception_record_when_duplicate_prevention_not_supported() {
@@ -49,7 +49,7 @@ public class ExceptionRecordCreatorTest {
         Long ccdRef = exceptionRecordCreator("other-jurisdiction1").tryCreateFrom(envelope);
 
         // then
-        assertThat(ccdRef).isSameAs(caseDetailsId);
+        assertThat(ccdRef).isSameAs(CASE_DETAILS_ID);
         assertExceptionRecordCreated(expectedExceptionRecord, envelope);
 
         // no duplicate search is performed
@@ -70,7 +70,7 @@ public class ExceptionRecordCreatorTest {
         // when
         Long ccdRef = exceptionRecordCreator(envelope.jurisdiction).tryCreateFrom(envelope);
 
-        assertThat(ccdRef).isSameAs(caseDetailsId);
+        assertThat(ccdRef).isSameAs(CASE_DETAILS_ID);
         assertExceptionRecordCreated(expectedExceptionRecord, envelope);
 
         verify(ccdApi).getExceptionRecordRefsByEnvelopeId(envelope.id, envelope.container);
@@ -80,7 +80,7 @@ public class ExceptionRecordCreatorTest {
     @Test
     public void should_not_create_exception_record_when_one_exists_for_the_envelope() {
         // given
-        Long existingExceptionRecordId = 12345L;
+        Long existingExceptionRecordId = 234L;
         given(ccdApi.getExceptionRecordRefsByEnvelopeId(any(), any()))
             .willReturn(newArrayList(existingExceptionRecordId));
 
@@ -126,7 +126,7 @@ public class ExceptionRecordCreatorTest {
             .willReturn(mock(StartEventResponse.class));
 
         CaseDetails caseDetails = mock(CaseDetails.class);
-        given(caseDetails.getId()).willReturn(caseDetailsId);
+        given(caseDetails.getId()).willReturn(CASE_DETAILS_ID);
         given(ccdApi.submitEvent(any(),any(), any(), any(), any()))
             .willReturn(caseDetails);
     }

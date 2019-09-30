@@ -19,7 +19,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @Profile("!nosb") // do not register for the nosb (test) profile
 public class PaymentsPublisher implements IPaymentsPublisher {
 
-    private static final Logger log = LoggerFactory.getLogger(PaymentsPublisher.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PaymentsPublisher.class);
 
     private final QueueClient queueClient;
     private final ObjectMapper objectMapper;
@@ -45,7 +45,7 @@ public class PaymentsPublisher implements IPaymentsPublisher {
 
             queueClient.scheduleMessage(message, Instant.now().plusSeconds(10));
 
-            log.info("Sent message to payments queue. CCD Reference: {}", paymentsData.ccdReference);
+            LOG.info("Sent message to payments queue. CCD Reference: {}", paymentsData.ccdReference);
         } catch (Exception ex) {
             throw new PaymentsPublishingException(
                 String.format(

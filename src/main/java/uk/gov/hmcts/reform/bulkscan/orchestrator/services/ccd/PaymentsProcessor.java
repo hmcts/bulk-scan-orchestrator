@@ -12,7 +12,7 @@ import static java.util.stream.Collectors.toList;
 
 @Service
 public class PaymentsProcessor {
-    private static final Logger log = LoggerFactory.getLogger(PaymentsProcessor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PaymentsProcessor.class);
 
     private final IPaymentsPublisher paymentsPublisher;
 
@@ -34,7 +34,7 @@ public class PaymentsProcessor {
                     .collect(toList())
             );
 
-            log.info("Started processing payments for case with CCD reference {}", paymentsData.ccdReference);
+            LOG.info("Started processing payments for case with CCD reference {}", paymentsData.ccdReference);
             paymentsPublisher.publishPayments(paymentsData);
         }
     }
