@@ -48,7 +48,7 @@ public class PaymentsPublisher implements IPaymentsPublisher {
             log.info("Sent message to payments queue. CCD Reference: {}", paymentsData.ccdReference);
         } catch (Exception ex) {
             throw new PaymentsPublishingException(
-                "An error occurred when trying to publish payments",
+                String.format("An error occurred when trying to publish payments for CCD %s", paymentsData.ccdReference),
                 ex
             );
         }

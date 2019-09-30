@@ -43,6 +43,8 @@ public class CreateExceptionRecord {
     /**
      * Creates an exception record from given envelope, unless an exception record
      * already exists for this envelope.
+     *
+     * @return ccdReference of the created or already existing exception record
      */
     public Long tryCreateFrom(Envelope envelope) {
         if (jurisdictionsWithDuplicatePrevention.contains(envelope.jurisdiction)) {
