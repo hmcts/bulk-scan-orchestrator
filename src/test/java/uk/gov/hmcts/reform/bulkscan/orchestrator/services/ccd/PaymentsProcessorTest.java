@@ -15,9 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -55,13 +53,13 @@ class PaymentsProcessorTest {
         // then
         verify(paymentsPublisher).publishPayments(paymentsDataCaptor.capture());
         PaymentsData paymentsData = paymentsDataCaptor.getValue();
-        assertThat(paymentsData.ccdReference, is(Long.toString(caseDetails.getId())));
-        assertThat(paymentsData.jurisdiction, is(envelope.jurisdiction));
-        assertThat(paymentsData.poBox, is(envelope.poBox));
-        assertThat(paymentsData.isExceptionRecord, is(true));
-        assertThat(paymentsData.payments, hasSize(envelope.payments.size()));
-        assertThat(paymentsData.payments.get(0).documentControlNumber,
-            is(envelope.payments.get(0).documentControlNumber));
+        assertThat(paymentsData.ccdReference).isEqualTo(Long.toString(caseDetails.getId()));
+        assertThat(paymentsData.jurisdiction).isEqualTo(envelope.jurisdiction);
+        assertThat(paymentsData.poBox).isEqualTo(envelope.poBox);
+        assertThat(paymentsData.isExceptionRecord).isTrue();
+        assertThat(paymentsData.payments.size()).isEqualTo(envelope.payments.size());
+        assertThat(paymentsData.payments.get(0).documentControlNumber)
+            .isEqualTo(envelope.payments.get(0).documentControlNumber);
     }
 
     @Test

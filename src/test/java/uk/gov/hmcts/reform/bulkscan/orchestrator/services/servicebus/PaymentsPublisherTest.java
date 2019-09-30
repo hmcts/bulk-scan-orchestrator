@@ -82,7 +82,12 @@ class PaymentsPublisherTest {
 
         assertThatThrownBy(() -> paymentsPublisher.publishPayments(paymentsData))
             .isInstanceOf(PaymentsPublishingException.class)
-            .hasMessage("An error occurred when trying to publish payments")
+            .hasMessage(
+                String.format(
+                    "An error occurred when trying to publish payments for CCD Ref %s",
+                    paymentsData.ccdReference
+                )
+            )
             .hasCause(exceptionToThrow);
     }
 
