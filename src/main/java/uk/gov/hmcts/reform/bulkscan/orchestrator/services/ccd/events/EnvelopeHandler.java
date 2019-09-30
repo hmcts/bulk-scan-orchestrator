@@ -29,13 +29,12 @@ public class EnvelopeHandler {
     }
 
     public void handleEnvelope(Envelope envelope) {
-        Optional<CaseDetails> caseDetailsOpt;
         switch (envelope.classification) {
             case SUPPLEMENTARY_EVIDENCE:
-                caseDetailsOpt = caseFinder.findCase(envelope);
+                Optional<CaseDetails> caseDetailsFound = caseFinder.findCase(envelope);
 
-                if (caseDetailsOpt.isPresent()) {
-                    evidenceAttacher.attach(envelope, caseDetailsOpt.get());
+                if (caseDetailsFound.isPresent()) {
+                    evidenceAttacher.attach(envelope, caseDetailsFound.get());
                 } else {
                     exceptionRecordCreator.tryCreateFrom(envelope);
                 }
@@ -45,7 +44,7 @@ public class EnvelopeHandler {
                 exceptionRecordCreator.tryCreateFrom(envelope);
                 break;
             case NEW_APPLICATION:
-                caseDetailsOpt = exceptionRecordCreator.tryCreateFrom(envelope);
+                Optional<CaseDetails> caseDetailsOpt = exceptionRecordCreator.tryCreateFrom(envelope);
 
                 caseDetailsOpt.ifPresent(
                     caseDetails -> paymentsProcessor.processPayments(
