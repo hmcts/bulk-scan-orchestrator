@@ -19,7 +19,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @Profile("!nosb") // do not register for the nosb (test) profile
 public class PaymentsPublisher implements IPaymentsPublisher {
 
-    private final Logger log = LoggerFactory.getLogger(PaymentsPublisher.class);
+    private static final Logger log = LoggerFactory.getLogger(PaymentsPublisher.class);
 
     private final QueueClient queueClient;
     private final ObjectMapper objectMapper;
