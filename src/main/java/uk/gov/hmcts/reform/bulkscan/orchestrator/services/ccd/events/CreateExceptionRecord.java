@@ -23,8 +23,8 @@ public class CreateExceptionRecord {
     private static final Logger log = LoggerFactory.getLogger(CreateExceptionRecord.class);
 
     public static final String CASE_TYPE = "ExceptionRecord";
-    public static final String EVENT_TYPE_ID = "createException";
-    public static final String EVENT_SUMMARY = "Create an exception record";
+    private static final String EVENT_TYPE_ID = "createException";
+    private static final String EVENT_SUMMARY = "Create an exception record";
 
     private final ExceptionRecordMapper mapper;
     private final CcdApi ccdApi;
@@ -71,11 +71,10 @@ public class CreateExceptionRecord {
 
         }
 
-        CaseDetails caseDetails = createExceptionRecord(envelope);
-        return caseDetails.getId();
+        return createExceptionRecord(envelope);
     }
 
-    public CaseDetails createExceptionRecord(Envelope envelope) {
+    private Long createExceptionRecord(Envelope envelope) {
         log.info("Creating exception record for envelope {}", envelope.id);
 
         CcdAuthenticator authenticator = ccdApi.authenticateJurisdiction(envelope.jurisdiction);
@@ -107,7 +106,7 @@ public class CreateExceptionRecord {
             caseTypeId
         );
 
-        return caseDetails;
+        return caseDetails.getId();
     }
 
     private CaseDataContent buildCaseDataContent(Envelope envelope, String startEventResponseToken) {
