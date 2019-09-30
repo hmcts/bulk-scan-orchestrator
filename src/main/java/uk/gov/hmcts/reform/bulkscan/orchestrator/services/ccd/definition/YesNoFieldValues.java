@@ -5,10 +5,10 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition;
  */
 public class YesNoFieldValues {
 
+    public static final String YES = "Yes";
+    public static final String NO = "No";
+
     private YesNoFieldValues() {
         // utility class
     }
-
-    public static final String YES = "Yes";
-    public static final String NO = "No";
 }
