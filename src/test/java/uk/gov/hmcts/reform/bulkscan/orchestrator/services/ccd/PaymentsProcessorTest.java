@@ -50,7 +50,7 @@ class PaymentsProcessorTest {
         ArgumentCaptor<PaymentsData> paymentsDataCaptor = ArgumentCaptor.forClass(PaymentsData.class);
 
         // when
-        paymentsProcessor.processPayments(envelope, caseDetails, true);
+        paymentsProcessor.processPayments(envelope, caseDetails.getId(), true);
 
         // then
         verify(paymentsPublisher).publishPayments(paymentsDataCaptor.capture());
@@ -75,7 +75,7 @@ class PaymentsProcessorTest {
         caseDetails = CaseDetails.builder().id(20L).build();
 
         // when
-        paymentsProcessor.processPayments(envelope, caseDetails, true);
+        paymentsProcessor.processPayments(envelope, caseDetails.getId(), true);
 
         // then
         verify(paymentsPublisher, never()).publishPayments(any());
@@ -92,7 +92,7 @@ class PaymentsProcessorTest {
         caseDetails = CaseDetails.builder().id(20L).build();
 
         // when
-        paymentsProcessor.processPayments(envelope, caseDetails, true);
+        paymentsProcessor.processPayments(envelope, caseDetails.getId(), true);
 
         // then
         verify(paymentsPublisher, never()).publishPayments(any());

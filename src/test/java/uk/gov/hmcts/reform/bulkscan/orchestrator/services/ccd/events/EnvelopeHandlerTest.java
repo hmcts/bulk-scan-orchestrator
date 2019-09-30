@@ -107,7 +107,7 @@ class EnvelopeHandlerTest {
     void should_call_CreateExceptionRecord_for_new_application_classification() {
         // given
         Envelope envelope = envelope(NEW_APPLICATION, JURSIDICTION, CASE_REF);
-        given(createExceptionRecord.tryCreateFrom(envelope)).willReturn(Optional.of(THE_CASE));
+        given(createExceptionRecord.tryCreateFrom(envelope)).willReturn(THE_CASE.getId());
 
         // when
         envelopeHandler.handleEnvelope(envelope);
@@ -115,7 +115,7 @@ class EnvelopeHandlerTest {
         // then
         verify(this.createExceptionRecord).tryCreateFrom(envelope);
         verify(caseFinder, never()).findCase(any());
-        verify(paymentsProcessor).processPayments(envelope, THE_CASE, true);
+        verify(paymentsProcessor).processPayments(envelope, THE_CASE.getId(), true);
     }
 
 }

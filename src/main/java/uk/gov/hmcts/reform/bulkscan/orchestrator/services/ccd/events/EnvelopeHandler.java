@@ -44,15 +44,9 @@ public class EnvelopeHandler {
                 exceptionRecordCreator.tryCreateFrom(envelope);
                 break;
             case NEW_APPLICATION:
-                Optional<CaseDetails> caseDetailsOpt = exceptionRecordCreator.tryCreateFrom(envelope);
+                Long ccdId = exceptionRecordCreator.tryCreateFrom(envelope);
 
-                caseDetailsOpt.ifPresent(
-                    caseDetails -> paymentsProcessor.processPayments(
-                        envelope,
-                        caseDetails,
-                        true
-                    )
-                );
+                paymentsProcessor.processPayments(envelope, ccdId,true);
 
                 break;
             default:

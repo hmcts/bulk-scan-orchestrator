@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IPaymentsPu
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.PaymentData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.PaymentsData;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import static java.util.stream.Collectors.toList;
 
@@ -23,10 +22,10 @@ public class PaymentsProcessor {
         this.paymentsPublisher = paymentsPublisher;
     }
 
-    public void processPayments(Envelope envelope, CaseDetails caseDetails, boolean isExceptionRecord) {
+    public void processPayments(Envelope envelope, Long ccdId, boolean isExceptionRecord) {
         if (envelope.payments != null && !envelope.payments.isEmpty()) {
             PaymentsData paymentsData = new PaymentsData(
-                Long.toString(caseDetails.getId()),
+                Long.toString(ccdId),
                 envelope.jurisdiction,
                 envelope.poBox,
                 isExceptionRecord,

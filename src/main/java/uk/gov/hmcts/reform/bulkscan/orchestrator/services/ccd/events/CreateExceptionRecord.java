@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 
 @Component
 public class CreateExceptionRecord {
@@ -45,7 +44,7 @@ public class CreateExceptionRecord {
      * Creates an exception record from given envelope, unless an exception record
      * already exists for this envelope.
      */
-    public Optional<CaseDetails> tryCreateFrom(Envelope envelope) {
+    public Long tryCreateFrom(Envelope envelope) {
         if (jurisdictionsWithDuplicatePrevention.contains(envelope.jurisdiction)) {
             log.info("Checking for existing exception records for envelope {}", envelope.id);
 
@@ -58,7 +57,8 @@ public class CreateExceptionRecord {
                     envelope.id,
                     StringUtils.join(existingExceptionRecords, ",")
                 );
-                return Optional.empty();
+
+                return existingExceptionRecords.get(0);
             }
         } else {
             log.warn(
@@ -70,7 +70,7 @@ public class CreateExceptionRecord {
         }
 
         CaseDetails caseDetails = createExceptionRecord(envelope);
-        return Optional.of(caseDetails);
+        return caseDetails.getId();
     }
 
     public CaseDetails createExceptionRecord(Envelope envelope) {
