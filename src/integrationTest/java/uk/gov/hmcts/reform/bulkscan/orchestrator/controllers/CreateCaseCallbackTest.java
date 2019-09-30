@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
 import java.io.IOException;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -18,18 +19,14 @@ import static com.google.common.io.Resources.toByteArray;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.springframework.http.HttpStatus.OK;
 
 @IntegrationTest
 class CreateCaseCallbackTest {
-
-    private static final String CASE_ID_REGEX =
-        // will be replaced with real one after ccd api
-        "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
 
     private static final String IDAM_TOKEN = "idam-token";
     private static final String USER_ID = "user-id";
@@ -40,12 +37,36 @@ class CreateCaseCallbackTest {
     @Test
     void should_create_case_if_classification_new_application_with_documents_and_ocr_data() {
         setUpTransformation(getTransformationResponseBody("ok-no-warnings.json"));
+        setUpCcdCreateCase(
+            getCcdResponseBody("start-event.json"),
+            getCcdResponseBody("sample-case.json")
+        );
 
         postWithBody(getRequestBody("valid-new-application-with-ocr.json"))
             .statusCode(OK.value())
             .body("errors", empty())
             .body("warnings", empty())
-            .body("data.caseReference", matchesPattern(CASE_ID_REGEX));
+            .body("data.caseReference", equalTo("1539007368674134")); // from sample-case.json
+    }
+
+    @Test
+    void should_not_create_case_if_classification_new_application_without_ocr_data() {
+        postWithBody(getRequestBody("invalid-new-application-without-ocr.json"))
+            .statusCode(OK.value())
+            .body("errors", contains("Event createCase not allowed "
+                + "for the current journey classification NEW_APPLICATION without OCR"))
+            .body("warnings", nullValue())
+            .body("data", nullValue());
+    }
+
+    @Test
+    void should_not_create_case_if_classification_exception_without_ocr_data() {
+        postWithBody(getRequestBody("invalid-exception-without-ocr.json"))
+            .statusCode(OK.value())
+            .body("errors", contains("Event createCase not allowed "
+                + "for the current journey classification EXCEPTION without OCR"))
+            .body("warnings", nullValue())
+            .body("data", nullValue());
     }
 
     @Test
@@ -54,20 +75,23 @@ class CreateCaseCallbackTest {
 
         postWithBody(getRequestBody("valid-exception-warnings-flag-on.json"))
             .statusCode(OK.value())
-            .body("errors", contains("case type id looks like a number"))
-            .body("warnings", nullValue())
-            .body("data", nullValue());
+            .body("errors", empty())
+            .body("warnings", contains("case type id looks like a number"));
     }
 
     @Test
     void should_create_case_if_classification_exception_with_documents_and_ocr_data() {
         setUpTransformation(getTransformationResponseBody("ok-no-warnings.json"));
+        setUpCcdCreateCase(
+            getCcdResponseBody("start-event.json"),
+            getCcdResponseBody("sample-case.json")
+        );
 
         postWithBody(getRequestBody("valid-exception.json"))
             .statusCode(OK.value())
             .body("errors", empty())
             .body("warnings", empty())
-            .body("data.caseReference", matchesPattern(CASE_ID_REGEX));
+            .body("data.caseReference", equalTo("1539007368674134")); // from sample-case.json
     }
 
     @Test
@@ -97,6 +121,26 @@ class CreateCaseCallbackTest {
         );
     }
 
+    private void setUpCcdCreateCase(String startResponseBody, String submitResponseBody) {
+        givenThat(
+            get(
+                // values from config + initial request body
+                "/caseworkers/" + USER_ID + "/jurisdictions/BULKSCAN/case-types/123/event-triggers/createCase/token"
+            )
+            .withHeader("ServiceAuthorization", containing("Bearer"))
+            .willReturn(okJson(startResponseBody))
+        );
+
+        givenThat(
+            post(
+                // values from config + initial request body
+                "/caseworkers/" + USER_ID + "/jurisdictions/BULKSCAN/case-types/123/cases?ignore-warning=true"
+            )
+                .withHeader("ServiceAuthorization", containing("Bearer"))
+                .willReturn(okJson(submitResponseBody))
+        );
+    }
+
     private byte[] getFileContents(String ccdCallbackSubFolders, String filename) {
         try {
             return toByteArray(getResource("ccd/callback/" + ccdCallbackSubFolders + filename));
@@ -111,6 +155,10 @@ class CreateCaseCallbackTest {
 
     private String getTransformationResponseBody(String filename) {
         return new String(getFileContents("transformation-client/response/", filename));
+    }
+
+    private String getCcdResponseBody(String filename) {
+        return new String(getFileContents("../response/", filename));
     }
 
     private ValidatableResponse postWithBody(byte[] body) {

@@ -10,7 +10,7 @@
     "security_level": 0,
     "case_data": {
       "poBox": "PO 12345",
-      "journeyClassification": "NEW_APPLICATION",
+      "journeyClassification": "EXCEPTION",
       "formType": "B123",
       "deliveryDate": "2018-01-02T12:34:56.123Z",
       "openingDate": "2018-01-03T12:34:56.123Z"
@@ -19,5 +19,5 @@
     "callback_response_status": ""
   },
   "event_id": "createCase",
-  "ignore_warning": true
+  "ignore_warning": false
 }
