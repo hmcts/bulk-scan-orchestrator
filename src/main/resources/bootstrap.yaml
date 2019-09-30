@@ -8,4 +8,5 @@ spring:
         bulk-scan.idam-users-bulkscan-username: IDAM_USERS_BULKSCAN_USERNAME
         bulk-scan.idam-users-bulkscan-password: IDAM_USERS_BULKSCAN_PASSWORD
         bulk-scan.idam-client-secret: IDAM_CLIENT_SECRET
+        bulk-scan.payments-queue-send-connection-string : PAYMENTS_QUEUE_CONNECTION_STRING
         s2s.microservicekey-bulk-scan-orchestrator: S2S_SECRET
