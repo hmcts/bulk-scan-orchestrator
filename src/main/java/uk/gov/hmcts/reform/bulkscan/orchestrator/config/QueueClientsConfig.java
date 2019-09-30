@@ -35,4 +35,15 @@ public class QueueClientsConfig {
             ReceiveMode.PEEKLOCK
         );
     }
+
+    @Bean("payments")
+    public QueueClient paymentsQueueClient(
+        @Value("${azure.servicebus.payments.connection-string}") String connectionString,
+        @Value("${azure.servicebus.payments.queue-name}") String queueName
+    ) throws InterruptedException, ServiceBusException {
+        return new QueueClient(
+            new ConnectionStringBuilder(connectionString, queueName),
+            ReceiveMode.PEEKLOCK
+        );
+    }
 }

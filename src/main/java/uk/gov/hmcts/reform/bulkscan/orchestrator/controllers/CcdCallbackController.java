@@ -55,7 +55,7 @@ public class CcdCallbackController {
         }
     }
 
-    @PostMapping(path = "/create-case")
+    @PostMapping(path = "/create-new-case")
     public CallbackResponse createCase(
         @RequestBody CcdCallbackRequest callbackRequest,
         @RequestHeader(value = "Authorization", required = false) String idamToken,
