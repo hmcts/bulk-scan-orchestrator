@@ -67,6 +67,7 @@ service-config:
 
     - service: probate
       jurisdiction: PROBATE
+      transformation-url: ${TRANSFORMATION_URL_PROBATE}
       case-type-ids: []
 
     - service: divorce
