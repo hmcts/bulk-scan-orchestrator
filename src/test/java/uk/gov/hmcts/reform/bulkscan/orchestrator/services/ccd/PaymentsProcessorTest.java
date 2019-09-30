@@ -39,7 +39,8 @@ class PaymentsProcessorTest {
     @Test
     void calls_payments_publisher_if_envelope_contains_payments() {
         // given
-        envelope = SampleData.envelope(1,
+        envelope = SampleData.envelope(
+            1,
             asList(new Payment("dcn1")),
             emptyList(),
             emptyList()
