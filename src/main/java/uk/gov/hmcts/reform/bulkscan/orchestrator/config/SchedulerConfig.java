@@ -62,7 +62,7 @@ public class SchedulerConfig implements SchedulingConfigurer {
 
         @Override
         public void execute(Runnable command) {
-            super.execute(new WrappedRunnable(command, REQUEST_CONTEXT_SUPPLIER.get()));
+            super.execute(getWrappedRunnable(command));
         }
 
         @Override
@@ -72,33 +72,31 @@ public class SchedulerConfig implements SchedulingConfigurer {
 
         @Override
         public ScheduledFuture<?> schedule(Runnable task, Date startTime) {
-            return super.schedule(new WrappedRunnable(task, REQUEST_CONTEXT_SUPPLIER.get()), startTime);
+            return super.schedule(getWrappedRunnable(task), startTime);
         }
 
         @Override
         public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Date startTime, long period) {
-            return super.scheduleAtFixedRate(new WrappedRunnable(
-                task,
-                REQUEST_CONTEXT_SUPPLIER.get()
-            ), startTime, period);
+            return super.scheduleAtFixedRate(getWrappedRunnable(task), startTime, period);
         }
 
         @Override
         public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, long period) {
-            return super.scheduleAtFixedRate(new WrappedRunnable(task, REQUEST_CONTEXT_SUPPLIER.get()), period);
+            return super.scheduleAtFixedRate(getWrappedRunnable(task), period);
         }
 
         @Override
         public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Date startTime, long delay) {
-            return super.scheduleWithFixedDelay(new WrappedRunnable(
-                task,
-                REQUEST_CONTEXT_SUPPLIER.get()
-            ), startTime, delay);
+            return super.scheduleWithFixedDelay(getWrappedRunnable(task), startTime, delay);
         }
 
         @Override
         public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, long delay) {
-            return super.scheduleWithFixedDelay(new WrappedRunnable(task, REQUEST_CONTEXT_SUPPLIER.get()), delay);
+            return super.scheduleWithFixedDelay(getWrappedRunnable(task), delay);
+        }
+
+        private Runnable getWrappedRunnable(Runnable task) {
+            return new WrappedRunnable(task, REQUEST_CONTEXT_SUPPLIER.get());
         }
     }
 
