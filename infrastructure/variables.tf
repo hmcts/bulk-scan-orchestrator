@@ -83,5 +83,5 @@ variable "transformation_url_probate" {
 variable "jurisdictions_with_duplicate_er_prevention" {
   type = "list"
   description = "Jurisdictions that support the prevention of duplicate exception records"
-  default = ["BULKSCAN"]
+  default = ["BULKSCAN", "CMC", "DIVORCE", "PROBATE", "SSCS"]
 }
