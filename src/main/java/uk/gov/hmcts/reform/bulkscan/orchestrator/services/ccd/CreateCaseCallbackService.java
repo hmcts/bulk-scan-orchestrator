@@ -34,6 +34,7 @@ import static java.util.Collections.emptyList;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isCreateCaseEvent;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.CASE_REFERENCE;
 
 @Service
 public class CreateCaseCallbackService {
@@ -158,7 +159,7 @@ public class CreateCaseCallbackService {
             );
 
             return Validation.valid(new ProcessResult(
-                ImmutableMap.of("caseReference", Long.toString(newCaseId))
+                ImmutableMap.of(CASE_REFERENCE, Long.toString(newCaseId))
             ));
         } catch (InvalidCaseDataException exception) {
             if (BAD_REQUEST.equals(exception.getStatus())) {
