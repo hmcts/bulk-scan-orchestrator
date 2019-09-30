@@ -8,6 +8,7 @@ java:
     CORE_CASE_DATA_API_URL: "http://ccd-data-store-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     DOCUMENT_MANAGEMENT_URL: "http://dm-store-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     JURISDICTIONS_WITH_DUPLICATE_ER_PREVENTION: "BULKSCAN,CMC,DIVORCE,PROBATE,SSCS"
+    TRANSFORMATION_URL_PROBATE: "http://probate-back-office-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
   keyVaults:
     bulk-scan:
       resourceGroup: bulk-scan

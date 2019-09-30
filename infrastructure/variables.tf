@@ -75,6 +75,10 @@ variable "transformation_url_bulkscan" {
   default = "http://bulk-scan-sample-app-aat.service.core-compute-aat.internal"
 }
 
+variable "transformation_url_probate" {
+  default = ""
+}
+
 // TODO: remove when all jurisdictions support the prevention in all environments
 variable "jurisdictions_with_duplicate_er_prevention" {
   type = "list"
