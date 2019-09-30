@@ -25,10 +25,6 @@ class PaymentsProcessorTest {
     @Mock
     private PaymentsPublisher paymentsPublisher;
 
-    private Envelope envelope;
-
-    private CaseDetails caseDetails;
-
     private PaymentsProcessor paymentsProcessor;
 
     @BeforeEach
@@ -39,13 +35,13 @@ class PaymentsProcessorTest {
     @Test
     void calls_payments_publisher_if_envelope_contains_payments() {
         // given
-        envelope = SampleData.envelope(
+        Envelope envelope = SampleData.envelope(
             1,
             asList(new Payment("dcn1")),
             emptyList(),
             emptyList()
         );
-        caseDetails = CaseDetails.builder().id(20L).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(20L).build();
         ArgumentCaptor<PaymentsData> paymentsDataCaptor = ArgumentCaptor.forClass(PaymentsData.class);
 
         // when
@@ -66,12 +62,12 @@ class PaymentsProcessorTest {
     @Test
     void does_not_call_payments_publisher_if_envelope_contains_zero_payments() {
         // given
-        envelope = SampleData.envelope(1,
+        Envelope envelope = SampleData.envelope(1,
             emptyList(),
             emptyList(),
             emptyList()
         );
-        caseDetails = CaseDetails.builder().id(20L).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(20L).build();
 
         // when
         paymentsProcessor.processPayments(envelope, caseDetails.getId(), true);
@@ -83,12 +79,12 @@ class PaymentsProcessorTest {
     @Test
     void does_not_call_payments_publisher_if_envelope_contains_null_payments() {
         // given
-        envelope = SampleData.envelope(1,
+        Envelope envelope = SampleData.envelope(1,
             null,
             emptyList(),
             emptyList()
         );
-        caseDetails = CaseDetails.builder().id(20L).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(20L).build();
 
         // when
         paymentsProcessor.processPayments(envelope, caseDetails.getId(), true);
