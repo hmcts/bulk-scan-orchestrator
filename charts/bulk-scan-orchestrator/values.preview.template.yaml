@@ -27,6 +27,7 @@ servicebus:
       - name: envelopes
       - name: notifications
       - name: processed-envelopes
+      - name: payments
 bso:
   servicebus:
     enabled: true
