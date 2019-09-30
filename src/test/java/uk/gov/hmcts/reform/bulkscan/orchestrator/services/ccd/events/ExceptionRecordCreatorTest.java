@@ -34,6 +34,8 @@ public class ExceptionRecordCreatorTest {
     @Mock
     private ExceptionRecordMapper exceptionRecordMapper;
 
+    private static final Long caseDetailsId = 12345L;
+
     @Test
     public void should_create_exception_record_when_duplicate_prevention_not_supported() {
         // given
@@ -44,14 +46,15 @@ public class ExceptionRecordCreatorTest {
         given(exceptionRecordMapper.mapEnvelope(envelope)).willReturn(expectedExceptionRecord);
 
         // when
-        exceptionRecordCreator("other-jurisdiction1").tryCreateFrom(envelope);
+        Long ccdRef = exceptionRecordCreator("other-jurisdiction1").tryCreateFrom(envelope);
 
         // then
+        assertThat(ccdRef).isSameAs(caseDetailsId);
+        assertExceptionRecordCreated(expectedExceptionRecord, envelope);
+
         // no duplicate search is performed
         verify(ccdApi, never()).getExceptionRecordRefsByEnvelopeId(any(), any());
         verify(exceptionRecordMapper).mapEnvelope(envelope);
-
-        assertExceptionRecordCreated(expectedExceptionRecord, envelope);
     }
 
     @Test
@@ -65,27 +68,30 @@ public class ExceptionRecordCreatorTest {
         given(exceptionRecordMapper.mapEnvelope(envelope)).willReturn(expectedExceptionRecord);
 
         // when
-        exceptionRecordCreator(envelope.jurisdiction).tryCreateFrom(envelope);
+        Long ccdRef = exceptionRecordCreator(envelope.jurisdiction).tryCreateFrom(envelope);
+
+        assertThat(ccdRef).isSameAs(caseDetailsId);
+        assertExceptionRecordCreated(expectedExceptionRecord, envelope);
 
         verify(ccdApi).getExceptionRecordRefsByEnvelopeId(envelope.id, envelope.container);
         verify(exceptionRecordMapper).mapEnvelope(envelope);
-
-        assertExceptionRecordCreated(expectedExceptionRecord, envelope);
     }
 
     @Test
     public void should_not_create_exception_record_when_one_exists_for_the_envelope() {
         // given
-        long existingExceptionRecordId = 12345;
+        Long existingExceptionRecordId = 12345L;
         given(ccdApi.getExceptionRecordRefsByEnvelopeId(any(), any()))
             .willReturn(newArrayList(existingExceptionRecordId));
 
         Envelope envelope = envelope(1);
 
         // when
-        exceptionRecordCreator(envelope.jurisdiction).tryCreateFrom(envelope);
+        Long ccdRef = exceptionRecordCreator(envelope.jurisdiction).tryCreateFrom(envelope);
 
         // then
+        assertThat(ccdRef).isSameAs(existingExceptionRecordId);
+
         verify(ccdApi).getExceptionRecordRefsByEnvelopeId(envelope.id, envelope.container);
         verifyNoMoreInteractions(ccdApi);
         verifyNoMoreInteractions(exceptionRecordMapper);
@@ -119,7 +125,9 @@ public class ExceptionRecordCreatorTest {
         given(ccdApi.startEvent(any(), any(), any(), any(), any()))
             .willReturn(mock(StartEventResponse.class));
 
+        CaseDetails caseDetails = mock(CaseDetails.class);
+        given(caseDetails.getId()).willReturn(caseDetailsId);
         given(ccdApi.submitEvent(any(),any(), any(), any(), any()))
-            .willReturn(mock(CaseDetails.class));
+            .willReturn(caseDetails);
     }
 }
