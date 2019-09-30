@@ -15,7 +15,7 @@ public class PaymentsData {
     @JsonProperty("po_box")
     public final String poBox;
 
-    @JsonProperty(value = "is_exception_record")
+    @JsonProperty("is_exception_record")
     public final boolean isExceptionRecord;
 
     @JsonProperty("payments")
