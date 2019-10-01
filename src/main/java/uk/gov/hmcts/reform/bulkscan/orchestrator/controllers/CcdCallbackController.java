@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.AttachCaseCallbackService;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CreateCaseCallbackService;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
@@ -23,12 +25,17 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class CcdCallbackController {
 
     private final AttachCaseCallbackService attachCaseCallbackService;
+    private final CreateCaseCallbackService createCaseCallbackService;
 
     public static final String USER_ID = "user-id";
 
     @Autowired
-    public CcdCallbackController(AttachCaseCallbackService attachCaseCallbackService) {
+    public CcdCallbackController(
+        AttachCaseCallbackService attachCaseCallbackService,
+        CreateCaseCallbackService createCaseCallbackService
+    ) {
         this.attachCaseCallbackService = attachCaseCallbackService;
+        this.createCaseCallbackService = createCaseCallbackService;
     }
 
     @PostMapping(path = "/attach_case")
@@ -43,6 +50,28 @@ public class CcdCallbackController {
                 .process(callback.getCaseDetails(), idamToken, userId, callback.getEventId())
                 .map(modifiedFields -> okResponse(modifiedFields))
                 .getOrElseGet(errors -> errorResponse(errors));
+        } else {
+            return errorResponse(ImmutableList.of("Internal Error: callback or case details were empty"));
+        }
+    }
+
+    @PostMapping(path = "/create-new-case")
+    public CallbackResponse createCase(
+        @RequestBody CcdCallbackRequest callbackRequest,
+        @RequestHeader(value = "Authorization", required = false) String idamToken,
+        @RequestHeader(value = USER_ID, required = false) String userId
+    ) {
+        if (callbackRequest != null && callbackRequest.getCaseDetails() != null) {
+            return createCaseCallbackService
+                .process(callbackRequest, idamToken, userId)
+                .map(result -> AboutToStartOrSubmitCallbackResponse
+                    .builder()
+                    .data(result.getModifiedFields())
+                    .warnings(result.getWarnings())
+                    .errors(result.getErrors())
+                    .build()
+                )
+                .getOrElseGet(this::errorResponse);
         } else {
             return errorResponse(ImmutableList.of("Internal Error: callback or case details were empty"));
         }
