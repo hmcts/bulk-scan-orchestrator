@@ -48,7 +48,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.mode
 @ExtendWith(MockitoExtension.class)
 class CreateCaseCallbackServiceTest {
 
-    private static final String EVENT_ID = "createCase";
+    private static final String EVENT_ID = "createNewCase";
     private static final String IDAM_TOKEN = "idam-token";
     private static final String USER_ID = "user-id";
     private static final String SERVICE = "service";
@@ -196,7 +196,7 @@ class CreateCaseCallbackServiceTest {
         // then
         assertThat(output.isLeft()).isTrue();
         assertThat(output.getLeft()).containsOnly(
-            "Event createCase not allowed for the current journey classification NEW_APPLICATION without OCR"
+            "Event " + EVENT_ID + " not allowed for the current journey classification NEW_APPLICATION without OCR"
         );
     }
 
@@ -232,7 +232,7 @@ class CreateCaseCallbackServiceTest {
         // then
         assertThat(output.isLeft()).isTrue();
         assertThat(output.getLeft()).containsOnly(
-            "Event createCase not allowed for the current journey classification SUPPLEMENTARY_EVIDENCE"
+            "Event " + EVENT_ID + " not allowed for the current journey classification SUPPLEMENTARY_EVIDENCE"
         );
     }
 

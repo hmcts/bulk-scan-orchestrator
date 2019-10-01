@@ -28,15 +28,15 @@ class EventIdValidatorTest {
     private static Object[][] createCaseEventIdTestParams() {
         return new Object[][]{
             {"Invalid 'Create Case' event id", "invalid_event_id", false},
-            {"Valid 'Create Case' event id", "CreateCase", false},
-            {"Valid 'Create Case' event id", "createCase", true}
+            {"Valid 'Create Case' event id", "CreateNewCase", false},
+            {"Valid 'Create Case' event id", "createNewCase", true}
         };
     }
 
     @ParameterizedTest(name = "{0}: valid:{2}")
     @MethodSource("createCaseEventIdTestParams")
     void createCaseEventIdTest(String caseDescription, String eventId, boolean expectedIsValid) {
-        Validation<String, Void> validation = EventIdValidator.isCreateCaseEvent(eventId);
+        Validation<String, Void> validation = EventIdValidator.isCreateNewCaseEvent(eventId);
 
         assertThat(validation.isValid()).isEqualTo(expectedIsValid);
         assertErrorMessage(validation, eventId);

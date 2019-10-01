@@ -211,14 +211,14 @@ public final class CallbackValidations {
     ) {
         if (SUPPLEMENTARY_EVIDENCE.equals(classification)) {
             return invalid(format(
-                "Event createCase not allowed for the current journey classification %s",
+                "Event createNewCase not allowed for the current journey classification %s",
                 classification
             ));
         }
 
         if ((EXCEPTION.equals(classification) || NEW_APPLICATION.equals(classification)) && !hasOcr(theCase)) {
             return invalid(format(
-                "Event createCase not allowed for the current journey classification %s without OCR",
+                "Event createNewCase not allowed for the current journey classification %s without OCR",
                 classification
             ));
         }

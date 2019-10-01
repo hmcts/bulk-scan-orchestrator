@@ -53,7 +53,7 @@ class CreateCaseCallbackTest {
     void should_not_create_case_if_classification_new_application_without_ocr_data() {
         postWithBody(getRequestBody("invalid-new-application-without-ocr.json"))
             .statusCode(OK.value())
-            .body("errors", contains("Event createCase not allowed "
+            .body("errors", contains("Event createNewCase not allowed "
                 + "for the current journey classification NEW_APPLICATION without OCR"))
             .body("warnings", nullValue())
             .body("data", nullValue());
@@ -63,7 +63,7 @@ class CreateCaseCallbackTest {
     void should_not_create_case_if_classification_exception_without_ocr_data() {
         postWithBody(getRequestBody("invalid-exception-without-ocr.json"))
             .statusCode(OK.value())
-            .body("errors", contains("Event createCase not allowed "
+            .body("errors", contains("Event createNewCase not allowed "
                 + "for the current journey classification EXCEPTION without OCR"))
             .body("warnings", nullValue())
             .body("data", nullValue());
@@ -125,7 +125,7 @@ class CreateCaseCallbackTest {
         givenThat(
             get(
                 // values from config + initial request body
-                "/caseworkers/" + USER_ID + "/jurisdictions/BULKSCAN/case-types/123/event-triggers/createCase/token"
+                "/caseworkers/" + USER_ID + "/jurisdictions/BULKSCAN/case-types/123/event-triggers/createNewCase/token"
             )
             .withHeader("ServiceAuthorization", containing("Bearer"))
             .willReturn(okJson(startResponseBody))
@@ -167,7 +167,7 @@ class CreateCaseCallbackTest {
             .header(HttpHeaders.AUTHORIZATION, IDAM_TOKEN)
             .header(CcdCallbackController.USER_ID, USER_ID)
             .body(body)
-            .post("http://localhost:" + serverPort + "/callback/create-case")
+            .post("http://localhost:" + serverPort + "/callback/create-new-case")
             .then();
     }
 }
