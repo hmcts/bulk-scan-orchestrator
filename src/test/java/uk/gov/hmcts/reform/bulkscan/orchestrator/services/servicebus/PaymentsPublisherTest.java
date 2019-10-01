@@ -106,7 +106,7 @@ class PaymentsPublisherTest {
                 Long.toString(10L),
                 "jurisdiction",
                 "pobox",
-            isExceptionRecord,
+                isExceptionRecord,
                 asList(new PaymentData("dcn1"))
             );
     }
