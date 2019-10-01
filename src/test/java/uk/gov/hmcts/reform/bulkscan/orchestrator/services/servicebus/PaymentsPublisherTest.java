@@ -5,8 +5,9 @@ import com.microsoft.azure.servicebus.Message;
 import com.microsoft.azure.servicebus.QueueClient;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,6 +28,13 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class PaymentsPublisherTest {
 
+    private static Object[][] getIsExceptionRecord() {
+        return new Object[][]{
+            {true},
+            {false}
+        };
+    }
+
     private PaymentsPublisher paymentsPublisher;
 
     @Mock
@@ -37,10 +45,11 @@ class PaymentsPublisherTest {
         paymentsPublisher = new PaymentsPublisher(queueClient, new ObjectMapper());
     }
 
-    @Test
-    void notify_should_send_message_with_right_content() throws Exception {
+    @ParameterizedTest
+    @MethodSource("getIsExceptionRecord")
+    void notify_should_send_message_with_right_content(boolean isExceptionRecord) throws Exception {
         // given
-        PaymentsData paymentsData = getPaymentsData();
+        PaymentsData paymentsData = getPaymentsData(isExceptionRecord);
         Instant startTime = Instant.now();
 
         // when
@@ -73,9 +82,10 @@ class PaymentsPublisherTest {
         JSONAssert.assertEquals(expectedMessageBodyJson, messageBodyJson, JSONCompareMode.LENIENT);
     }
 
-    @Test
-    void notify_should_throw_exception_when_queue_client_fails() throws Exception {
-        PaymentsData paymentsData = getPaymentsData();
+    @ParameterizedTest
+    @MethodSource("getIsExceptionRecord")
+    void notify_should_throw_exception_when_queue_client_fails(boolean isExceptionRecord) throws Exception {
+        PaymentsData paymentsData = getPaymentsData(isExceptionRecord);
 
         ServiceBusException exceptionToThrow = new ServiceBusException(true, "test exception");
         willThrow(exceptionToThrow).given(queueClient).scheduleMessage(any(), any());
@@ -91,12 +101,12 @@ class PaymentsPublisherTest {
             .hasCause(exceptionToThrow);
     }
 
-    private PaymentsData getPaymentsData() {
+    private PaymentsData getPaymentsData(boolean isExceptionRecord) {
         return new PaymentsData(
                 Long.toString(10L),
                 "jurisdiction",
                 "pobox",
-                true,
+            isExceptionRecord,
                 asList(new PaymentData("dcn1"))
             );
     }
