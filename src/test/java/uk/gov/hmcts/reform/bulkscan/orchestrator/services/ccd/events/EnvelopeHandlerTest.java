@@ -71,7 +71,7 @@ class EnvelopeHandlerTest {
         envelopeHandler.handleEnvelope(envelope);
 
         // then
-        verify(this.createExceptionRecord).createFrom(envelope);
+        verify(this.createExceptionRecord).tryCreateFrom(envelope);
     }
 
     @Test
@@ -83,7 +83,7 @@ class EnvelopeHandlerTest {
         envelopeHandler.handleEnvelope(envelope);
 
         // then
-        verify(this.createExceptionRecord).createFrom(envelope);
+        verify(this.createExceptionRecord).tryCreateFrom(envelope);
         verify(caseFinder, never()).findCase(any());
     }
 
@@ -96,7 +96,7 @@ class EnvelopeHandlerTest {
         envelopeHandler.handleEnvelope(envelope);
 
         // then
-        verify(this.createExceptionRecord).createFrom(envelope);
+        verify(this.createExceptionRecord).tryCreateFrom(envelope);
         verify(caseFinder, never()).findCase(any());
     }
 

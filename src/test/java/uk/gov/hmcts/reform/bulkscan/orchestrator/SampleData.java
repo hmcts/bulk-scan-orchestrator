@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Class
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.OcrDataField;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Payment;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
@@ -41,6 +42,7 @@ public class SampleData {
     public static final String JURSIDICTION = "BULKSCAN";
     public static final String CONTAINER = "bulkscan";
     public static final String PO_BOX = "BULKSCAN_PO_BOX";
+    public static final String FORM_TYPE = "FORM_TYPE";
     public static final long CASE_ID = 23L;
     public static final String EXAMPLE_JSON_FILE = "envelopes/example.json";
     public static final String BULK_SCANNED_CASE_TYPE = "Bulk_Scanned";
@@ -131,6 +133,7 @@ public class SampleData {
     public static Envelope envelope(int numberOfDocuments) {
         return envelope(
             numberOfDocuments,
+            ImmutableList.of(new Payment("dcn1")),
             ImmutableList.of(new OcrDataField("fieldName1", "value1")),
             asList("warning 1", "warning 2")
         );
@@ -138,6 +141,7 @@ public class SampleData {
 
     public static Envelope envelope(
         int numberOfDocuments,
+        List<Payment> payments,
         List<OcrDataField> ocrData,
         List<String> ocrDataValidationWarnings
     ) {
@@ -149,10 +153,12 @@ public class SampleData {
             JURSIDICTION,
             CONTAINER,
             "zip-file-test.zip",
+            FORM_TYPE,
             Instant.now(),
             Instant.now(),
             Classification.NEW_APPLICATION,
             documents(numberOfDocuments),
+            payments,
             ocrData,
             ocrDataValidationWarnings
         );
@@ -167,10 +173,12 @@ public class SampleData {
             jurisdiction,
             CONTAINER,
             "zip-file-test.zip",
+            FORM_TYPE,
             Instant.now(),
             Instant.now(),
             classification,
             documents(1),
+            ImmutableList.of(new Payment("dcn1")),
             ImmutableList.of(new OcrDataField("fieldName1", "value1")),
             asList("warning 1", "warning 2")
         );

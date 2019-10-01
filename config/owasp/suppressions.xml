@@ -2,13 +2,6 @@
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
 
   <suppress>
-    <notes><![CDATA[Shadowed dependency from AppInsights]]></notes>
-    <gav regex="true">^io\.netty:netty-tcnative-boringssl-static:2\.0\.17\.Final$</gav>
-    <cve>CVE-2014-3488</cve>
-    <cve>CVE-2015-2156</cve>
-  </suppress>
-
-  <suppress>
     <notes><![CDATA[
       Newer version not available.
     ]]></notes>
@@ -49,9 +42,17 @@
   </suppress>
 
   <suppress>
-    <notes><![CDATA[No fix is availabel]]></notes>
+    <notes><![CDATA[No fix is available]]></notes>
     <gav regex="true">^com\.sun\.jersey\.contribs:jersey-apache-client4:1\.19\.1$</gav>
     <cve>CVE-2006-0550</cve>
+  </suppress>
+
+  <suppress>
+    <notes><![CDATA[No fix is available. Used only in functional tests]]></notes>
+    <cpe regex="true">^a:netty:netty:0\.4\.9$</cpe>
+    <cve>CVE-2014-3488</cve>
+    <cve>CVE-2015-2156</cve>
+    <cve>CVE-2019-16869</cve>
   </suppress>
 
   <!-- this is for the TEST jar wiremock-standalone -->

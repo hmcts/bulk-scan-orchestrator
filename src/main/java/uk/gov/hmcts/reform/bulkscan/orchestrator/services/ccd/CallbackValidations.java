@@ -19,6 +19,7 @@ import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
 import static java.lang.String.format;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.EXCEPTION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.NEW_APPLICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.SUPPLEMENTARY_EVIDENCE;
 
 public final class CallbackValidations {
@@ -55,6 +56,15 @@ public final class CallbackValidations {
             .map(CaseDetails::getCaseTypeId)
             .map(Validation::<String, String>valid)
             .orElse(invalid("Missing caseType"));
+    }
+
+    @Nonnull
+    public static Validation<String, String> hasFormType(CaseDetails theCase) {
+        return Optional.ofNullable(theCase)
+            .map(CaseDetails::getData)
+            .map(data -> (String) data.get("formType"))
+            .map(Validation::<String, String>valid)
+            .orElse(invalid("Missing Form Type"));
     }
 
     @Nonnull
@@ -201,14 +211,14 @@ public final class CallbackValidations {
     ) {
         if (SUPPLEMENTARY_EVIDENCE.equals(classification)) {
             return invalid(format(
-                "Event createCase not allowed for the current journey classification %s",
+                "Event createNewCase not allowed for the current journey classification %s",
                 classification
             ));
         }
 
-        if (EXCEPTION.equals(classification) && !hasOcr(theCase)) {
+        if ((EXCEPTION.equals(classification) || NEW_APPLICATION.equals(classification)) && !hasOcr(theCase)) {
             return invalid(format(
-                "Event createCase not allowed for the current journey classification %s without OCR",
+                "Event createNewCase not allowed for the current journey classification %s without OCR",
                 classification
             ));
         }
