@@ -126,7 +126,7 @@ class CreateCaseTest {
             .header(CcdCallbackController.USER_ID, ccdAuthenticator.getUserDetails().getId())
             .body(callbackRequest)
             .when()
-            .post("/callback/create-case")
+            .post("/callback/create-new-case")
             .andReturn();
 
         return getCaseCcdId(response);
