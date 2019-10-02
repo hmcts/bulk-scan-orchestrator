@@ -36,6 +36,7 @@ public class PaymentsProcessor {
 
             LOG.info("Started processing payments for case with CCD reference {}", paymentsData.ccdReference);
             paymentsPublisher.publishPayments(paymentsData);
+            LOG.info("Finished processing payments for case with CCD reference {}", paymentsData.ccdReference);
         }
     }
 }
