@@ -12,8 +12,8 @@
       "poBox": "PO 12345",
       "journeyClassification": "EXCEPTION",
       "formType": "B123",
-      "deliveryDate": "2018-01-02T12:34:56",
-      "openingDate": "2018-01-03T12:34:56",
+      "deliveryDate": "2018-01-02T12:34:56.123Z",
+      "openingDate": "2018-01-03T12:34:56.123Z",
       "scanOCRData": [
         {
           "value": {
