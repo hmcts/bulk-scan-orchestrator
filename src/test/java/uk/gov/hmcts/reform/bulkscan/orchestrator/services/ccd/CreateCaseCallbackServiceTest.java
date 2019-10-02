@@ -175,8 +175,8 @@ class CreateCaseCallbackServiceTest {
         data.put("poBox", "12345");
         data.put("journeyClassification", NEW_APPLICATION.name());
         data.put("formType", "Form1");
-        data.put("deliveryDate", "2019-09-06T15:30:03");
-        data.put("openingDate", "2019-09-06T15:30:04");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
 
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
@@ -210,8 +210,8 @@ class CreateCaseCallbackServiceTest {
         data.put("poBox", "12345");
         data.put("journeyClassification", SUPPLEMENTARY_EVIDENCE.name());
         data.put("formType", "Form1");
-        data.put("deliveryDate", "2019-09-06T15:30:03");
-        data.put("openingDate", "2019-09-06T15:30:04");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
         data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
 
@@ -255,8 +255,8 @@ class CreateCaseCallbackServiceTest {
         data.put("poBox", "12345");
         data.put("journeyClassification", EXCEPTION.name());
         data.put("formType", "Form1");
-        data.put("deliveryDate", "2019-09-06T15:30:03");
-        data.put("openingDate", "2019-09-06T15:30:04");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
         data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
 
@@ -289,9 +289,9 @@ class CreateCaseCallbackServiceTest {
         Map<String, Object> data = new HashMap<>();
         // putting 6 via `ImmutableMap` is available from Java 9
         data.put("poBox", "12345");
-        data.put("deliveryDate", "2019-09-06T15:30:03");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("formType", "Form1");
-        data.put("openingDate", "2019-09-06T15:30:04");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
         data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
 
@@ -323,8 +323,8 @@ class CreateCaseCallbackServiceTest {
         data.put("poBox", "12345");
         data.put("journeyClassification", "EXCEPTIONS");
         data.put("formType", "Form1");
-        data.put("deliveryDate", "2019-09-06T15:30:03");
-        data.put("openingDate", "2019-09-06T15:30:04");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "filename"));
         data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
 
@@ -360,7 +360,7 @@ class CreateCaseCallbackServiceTest {
         ));
         doc.put("controlNumber", "1234");
         doc.put("fileName", "file");
-        doc.put("scannedDate", "2019-09-06T15:40:00");
+        doc.put("scannedDate", "2019-09-06T15:40:00.000Z");
         doc.put("deliveryDate", "2019-09-06T15:40:00.001Z");
 
         Map<String, Object> data = new HashMap<>();
@@ -368,8 +368,8 @@ class CreateCaseCallbackServiceTest {
         data.put("poBox", "12345");
         data.put("journeyClassification", "EXCEPTION");
         data.put("formType", "Form1");
-        data.put("deliveryDate", "2019-09-06T15:30:03");
-        data.put("openingDate", "2019-09-06T15:30:04");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", ImmutableList.of(ImmutableMap.of("value", doc)));
         data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
 
@@ -401,8 +401,8 @@ class CreateCaseCallbackServiceTest {
         data.put("poBox", "12345");
         data.put("journeyClassification", "EXCEPTION");
         data.put("formType", "Form1");
-        data.put("deliveryDate", "2019-09-06T15:30:03");
-        data.put("openingDate", "2019-09-06T15:30:04");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
         data.put("scanOCRData", ImmutableList.of(ImmutableMap.of("value", ImmutableMap.of(
             "key", "k",
@@ -441,8 +441,8 @@ class CreateCaseCallbackServiceTest {
         data.put("poBox", "12345");
         data.put("journeyClassification", "EXCEPTION");
         data.put("formType", null);
-        data.put("deliveryDate", "2019-09-06T15:30:03");
-        data.put("openingDate", "2019-09-06T15:30:04");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
         data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
 
