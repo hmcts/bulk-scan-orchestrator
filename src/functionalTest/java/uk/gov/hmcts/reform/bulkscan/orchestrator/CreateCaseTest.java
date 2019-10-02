@@ -128,11 +128,11 @@ class CreateCaseTest {
     private String getCaseCcdId(ValidatableResponse response) throws IOException {
         assertThat(response.statusCode(200));
 
-//        final AboutToStartOrSubmitCallbackResponse callbackResponse =
-//            new ObjectMapper().readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
-//        assertThat(callbackResponse.getData()).isNotNull();
-//        assertThat(callbackResponse.getData().containsKey(CASE_REFERENCE)).isTrue();
-//        return (String)callbackResponse.getData().get(CASE_REFERENCE);
+        //final AboutToStartOrSubmitCallbackResponse callbackResponse =
+        //new ObjectMapper().readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
+        //assertThat(callbackResponse.getData()).isNotNull();
+        //assertThat(callbackResponse.getData().containsKey(CASE_REFERENCE)).isTrue();
+        //return (String)callbackResponse.getData().get(CASE_REFERENCE);
         return "123";
     }
 
@@ -158,12 +158,12 @@ class CreateCaseTest {
         return lookUpExceptionRecord(poBox).get();
     }
 
-    private Optional<CaseDetails> lookUpExceptionRecord(UUID randomPoBox) {
+    private Optional<CaseDetails> lookUpExceptionRecord(UUID poBox) {
         List<CaseDetails> caseDetailsList = caseSearcher.search(
             SampleData.JURSIDICTION,
             SampleData.JURSIDICTION + "_" + CreateExceptionRecord.CASE_TYPE,
             ImmutableMap.of(
-                "case.poBox", randomPoBox.toString()
+                "case.poBox", poBox.toString()
             )
         );
         return caseDetailsList.stream().findFirst();
