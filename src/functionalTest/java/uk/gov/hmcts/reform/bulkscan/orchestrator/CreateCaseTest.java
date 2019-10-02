@@ -123,6 +123,7 @@ class CreateCaseTest {
             .log().all()
             .post("/callback/create-new-case")
             .andReturn();
+        response.then().log().all();
 
         return getCaseCcdId(response);
     }
