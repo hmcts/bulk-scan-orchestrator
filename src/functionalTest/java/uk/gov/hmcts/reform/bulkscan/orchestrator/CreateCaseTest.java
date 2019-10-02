@@ -41,6 +41,8 @@ import static org.awaitility.Awaitility.await;
 @ActiveProfiles("nosb") // no servicebus queue handler registration
 class CreateCaseTest {
 
+    private static final String CASE_REFERENCE = "case_reference";
+
     @Value("${test-url}")
     private String testUrl;
 
@@ -129,7 +131,9 @@ class CreateCaseTest {
 
         final AboutToStartOrSubmitCallbackResponse callbackResponse =
             new ObjectMapper().readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
-        return (String)callbackResponse.getData().get("CASE_REFERENCE");
+        assertThat(callbackResponse.getData()).isNotNull();
+        assertThat(callbackResponse.getData().containsKey(CASE_REFERENCE)).isTrue();
+        return (String)callbackResponse.getData().get(CASE_REFERENCE);
     }
 
     private Map<String, Object> exceptionRecordDataWithSearchFields(
