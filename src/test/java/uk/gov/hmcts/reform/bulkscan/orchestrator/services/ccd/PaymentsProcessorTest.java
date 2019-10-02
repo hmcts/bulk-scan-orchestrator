@@ -79,7 +79,8 @@ class PaymentsProcessorTest {
     @Test
     void does_not_call_payments_publisher_if_envelope_contains_null_payments() {
         // given
-        Envelope envelope = SampleData.envelope(1,
+        Envelope envelope = SampleData.envelope(
+            1,
             null,
             emptyList(),
             emptyList()
