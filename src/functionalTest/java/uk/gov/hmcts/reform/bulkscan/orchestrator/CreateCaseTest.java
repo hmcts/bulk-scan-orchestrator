@@ -1,8 +1,9 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import io.restassured.RestAssured;
-import io.restassured.response.ValidatableResponse;
+import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CreateExceptionRecord;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.logging.appinsights.SyntheticHeaders;
@@ -73,7 +75,7 @@ class CreateCaseTest {
     @Test
     public void should_create_case_from_valid_exception_record() throws Exception {
         // given
-        CaseDetails exceptionRecord = createExceptionRecord("envelopes/exception-with-evidence.json");
+        CaseDetails exceptionRecord = createExceptionRecord("envelopes/new-envelope-with-evidence.json");
 
         // when
         String caseCcdId = invokeCallbackEndpoint(exceptionRecord, "ccdCaseReference");
@@ -108,7 +110,7 @@ class CreateCaseTest {
 
         CcdAuthenticator ccdAuthenticator = ccdAuthenticatorFactory.createForJurisdiction("BULKSCAN");
 
-        ValidatableResponse response = RestAssured
+        Response response = RestAssured
             .given()
             .relaxedHTTPSValidation()
             .baseUri(testUrl)
@@ -120,20 +122,19 @@ class CreateCaseTest {
             .when()
             .log().all()
             .post("/callback/create-new-case")
-            .then().log().all();
+            .andReturn();
 
         return getCaseCcdId(response);
     }
 
-    private String getCaseCcdId(ValidatableResponse response) throws IOException {
-        assertThat(response.statusCode(200));
+    private String getCaseCcdId(Response response) throws IOException {
+        assertThat(response.getStatusCode()).isEqualTo(200);
 
-        //final AboutToStartOrSubmitCallbackResponse callbackResponse =
-        //new ObjectMapper().readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
-        //assertThat(callbackResponse.getData()).isNotNull();
-        //assertThat(callbackResponse.getData().containsKey(CASE_REFERENCE)).isTrue();
-        //return (String)callbackResponse.getData().get(CASE_REFERENCE);
-        return "123";
+        final AboutToStartOrSubmitCallbackResponse callbackResponse =
+            new ObjectMapper().readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
+        assertThat(callbackResponse.getData()).isNotNull();
+        assertThat(callbackResponse.getData().containsKey(CASE_REFERENCE)).isTrue();
+        return (String) callbackResponse.getData().get(CASE_REFERENCE);
     }
 
     private Map<String, Object> exceptionRecordDataWithSearchFields(
