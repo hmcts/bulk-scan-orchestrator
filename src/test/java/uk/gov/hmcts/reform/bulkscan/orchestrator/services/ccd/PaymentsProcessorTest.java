@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.PaymentsPub
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Payment;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.PaymentsData;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -22,6 +21,8 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentsProcessorTest {
+    private static final long CCD_REFERENCE = 20L;
+    
     @Mock
     private PaymentsPublisher paymentsPublisher;
 
@@ -41,16 +42,15 @@ class PaymentsProcessorTest {
             emptyList(),
             emptyList()
         );
-        CaseDetails caseDetails = CaseDetails.builder().id(20L).build();
         ArgumentCaptor<PaymentsData> paymentsDataCaptor = ArgumentCaptor.forClass(PaymentsData.class);
 
         // when
-        paymentsProcessor.processPayments(envelope, caseDetails.getId(), true);
+        paymentsProcessor.processPayments(envelope, CCD_REFERENCE, true);
 
         // then
         verify(paymentsPublisher).publishPayments(paymentsDataCaptor.capture());
         PaymentsData paymentsData = paymentsDataCaptor.getValue();
-        assertThat(paymentsData.ccdReference).isEqualTo(Long.toString(caseDetails.getId()));
+        assertThat(paymentsData.ccdReference).isEqualTo(Long.toString(CCD_REFERENCE));
         assertThat(paymentsData.jurisdiction).isEqualTo(envelope.jurisdiction);
         assertThat(paymentsData.poBox).isEqualTo(envelope.poBox);
         assertThat(paymentsData.isExceptionRecord).isTrue();
@@ -67,10 +67,9 @@ class PaymentsProcessorTest {
             emptyList(),
             emptyList()
         );
-        CaseDetails caseDetails = CaseDetails.builder().id(20L).build();
 
         // when
-        paymentsProcessor.processPayments(envelope, caseDetails.getId(), true);
+        paymentsProcessor.processPayments(envelope, CCD_REFERENCE, true);
 
         // then
         verify(paymentsPublisher, never()).publishPayments(any());
@@ -85,10 +84,9 @@ class PaymentsProcessorTest {
             emptyList(),
             emptyList()
         );
-        CaseDetails caseDetails = CaseDetails.builder().id(20L).build();
 
         // when
-        paymentsProcessor.processPayments(envelope, caseDetails.getId(), true);
+        paymentsProcessor.processPayments(envelope, CCD_REFERENCE, true);
 
         // then
         verify(paymentsPublisher, never()).publishPayments(any());
