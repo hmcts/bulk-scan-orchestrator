@@ -104,7 +104,7 @@ class CreateCaseTest {
 
         CallbackRequest callbackRequest = CallbackRequest
             .builder()
-            .eventId("createCase")
+            .eventId("createNewCase")
             .caseDetails(exceptionRecordWithSearchFields)
             .build();
 

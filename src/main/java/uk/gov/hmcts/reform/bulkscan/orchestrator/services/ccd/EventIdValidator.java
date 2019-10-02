@@ -12,7 +12,7 @@ import static java.lang.String.format;
 public final class EventIdValidator {
 
     private static final String EVENT_ID_ATTACH_TO_CASE = "attachToExistingCase";
-    private static final String EVENT_ID_CREATE_NEW_CASE = "createCase";
+    private static final String EVENT_ID_CREATE_NEW_CASE = "createNewCase";
 
     private EventIdValidator() {
         // utility class constructor

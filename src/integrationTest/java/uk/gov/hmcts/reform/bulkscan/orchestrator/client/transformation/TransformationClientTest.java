@@ -71,7 +71,7 @@ public class TransformationClientTest {
         CaseCreationDetails caseCreationDetails = response.caseCreationDetails;
         assertThat(caseCreationDetails).isNotNull();
         assertThat(caseCreationDetails.caseTypeId).isEqualTo("some_case_type");
-        assertThat(caseCreationDetails.eventId).isEqualTo("createCase");
+        assertThat(caseCreationDetails.eventId).isEqualTo("createNewCase");
         assertThat(caseCreationDetails.caseData).isNotNull();
     }
 
@@ -217,7 +217,7 @@ public class TransformationClientTest {
         return new JSONObject()
             .put("case_creation_details", new JSONObject()
                 .put("case_type_id", "some_case_type")
-                .put("event_id", "createCase")
+                .put("event_id", "createNewCase")
                 .put(
                     "case_data",
                     new JSONObject()
