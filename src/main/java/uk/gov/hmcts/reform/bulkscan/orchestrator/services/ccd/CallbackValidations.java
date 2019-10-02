@@ -9,9 +9,9 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Class
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -34,7 +34,13 @@ public final class CallbackValidations {
 
     private static final Logger log = LoggerFactory.getLogger(CallbackValidations.class);
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+    private static final DateTimeFormatter FORMATTER = new DateTimeFormatterBuilder()
+        // date/time
+        .append(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        // optional offset
+        .optionalStart().appendOffsetId()
+        .toFormatter()
+        .withZone(ZoneOffset.UTC);
 
     private static final CaseReferenceValidator caseRefValidator = new CaseReferenceValidator();
     private static final ScannedDocumentValidator scannedDocumentValidator = new ScannedDocumentValidator();
@@ -235,9 +241,7 @@ public final class CallbackValidations {
         return Optional.ofNullable(theCase)
             .map(CaseDetails::getData)
             .map(data -> data.get(dateField))
-            .map(o -> Validation.<String, Instant>valid(
-                LocalDateTime.parse((String) o, FORMATTER).atZone(ZoneId.of("Europe/London")).toInstant()
-            ))
+            .map(o -> Validation.<String, Instant>valid(Instant.from(FORMATTER.parse((String) o))))
             .orElse(invalid("Missing " + dateField));
     }
 
