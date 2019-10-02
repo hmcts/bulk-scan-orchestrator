@@ -150,10 +150,11 @@ class CreateCaseTest {
 
         envelopeMessager.sendMessageFromFile(resourceName, "0000000000000000", null, poBox, dmUrl);
 
-        await("Exception record is created")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollDelay(2, TimeUnit.SECONDS)
-            .until(() -> lookUpExceptionRecord(poBox).isPresent());
+        await("").timeout(60, TimeUnit.SECONDS);
+        //await("Exception record is created")
+        //    .atMost(60, TimeUnit.SECONDS)
+        //    .pollDelay(2, TimeUnit.SECONDS)
+        //    .until(() -> lookUpExceptionRecord(poBox).isPresent());
 
         return lookUpExceptionRecord(poBox).get();
     }
