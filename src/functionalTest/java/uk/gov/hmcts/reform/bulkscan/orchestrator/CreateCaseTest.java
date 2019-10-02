@@ -44,12 +44,6 @@ class CreateCaseTest {
     @Value("${test-url}")
     private String testUrl;
 
-    @Value("${document_management.url}")
-    private String documentManagementUrl;
-
-    @Value("${document_management.context-path}")
-    private String dmContextPath;
-
     @Autowired
     private CcdApi ccdApi;
 
