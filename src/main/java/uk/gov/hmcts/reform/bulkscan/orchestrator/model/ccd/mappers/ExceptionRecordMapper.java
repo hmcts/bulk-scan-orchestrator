@@ -21,16 +21,13 @@ public class ExceptionRecordMapper {
 
     private final String documentManagementUrl;
     private final String contextPath;
-    private final List<String> jurisdictionsWithDuplicatePrevention;
 
     public ExceptionRecordMapper(
         @Value("${document_management.url}") final String documentManagementUrl,
-        @Value("${document_management.context-path}") final String contextPath,
-        @Value("${jurisdictions-with-duplicate-er-prevention}") final List<String> jurisdictionsWithDuplicatePrevention
+        @Value("${document_management.context-path}") final String contextPath
     ) {
         this.documentManagementUrl = documentManagementUrl;
         this.contextPath = contextPath;
-        this.jurisdictionsWithDuplicatePrevention = jurisdictionsWithDuplicatePrevention;
     }
 
     public ExceptionRecord mapEnvelope(Envelope envelope) {
@@ -45,7 +42,7 @@ public class ExceptionRecordMapper {
             mapOcrData(envelope.ocrData),
             mapOcrDataWarnings(envelope.ocrDataValidationWarnings),
             envelope.ocrDataValidationWarnings.isEmpty() ? NO : YES,
-            jurisdictionsWithDuplicatePrevention.contains(envelope.jurisdiction) ? envelope.id : null
+            envelope.id
         );
     }
 

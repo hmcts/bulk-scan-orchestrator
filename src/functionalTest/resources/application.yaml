@@ -61,6 +61,3 @@ service-config:
       jurisdiction: BULKSCAN
       case-type-ids:
         - Bulk_Scanned
-
-# TODO: remove this setting when all jurisdictions support ER prevention in all environments
-jurisdictions-with-duplicate-er-prevention: "BULKSCAN"

@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.ExceptionRecordMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
@@ -28,16 +27,13 @@ public class CreateExceptionRecord {
 
     private final ExceptionRecordMapper mapper;
     private final CcdApi ccdApi;
-    private final List<String> jurisdictionsWithDuplicatePrevention;
 
     public CreateExceptionRecord(
         ExceptionRecordMapper mapper,
-        CcdApi ccdApi,
-        @Value("${jurisdictions-with-duplicate-er-prevention}") final List<String> jurisdictionsWithDuplicatePrevention
+        CcdApi ccdApi
     ) {
         this.mapper = mapper;
         this.ccdApi = ccdApi;
-        this.jurisdictionsWithDuplicatePrevention = jurisdictionsWithDuplicatePrevention;
     }
 
     /**
@@ -47,31 +43,22 @@ public class CreateExceptionRecord {
      * @return ccdReference of the created or already existing exception record
      */
     public Long tryCreateFrom(Envelope envelope) {
-        if (jurisdictionsWithDuplicatePrevention.contains(envelope.jurisdiction)) {
-            log.info("Checking for existing exception records for envelope {}", envelope.id);
+        log.info("Checking for existing exception records for envelope {}", envelope.id);
 
-            List<Long> existingExceptionRecords =
-                ccdApi.getExceptionRecordRefsByEnvelopeId(envelope.id, envelope.container);
+        List<Long> existingExceptionRecords =
+            ccdApi.getExceptionRecordRefsByEnvelopeId(envelope.id, envelope.container);
 
-            if (!existingExceptionRecords.isEmpty()) {
-                log.error(
-                    "Creating of exception record aborted - exception records already exist for envelope {}: [{}]",
-                    envelope.id,
-                    StringUtils.join(existingExceptionRecords, ",")
-                );
-
-                return existingExceptionRecords.get(0);
-            }
-        } else {
-            log.warn(
-                "Duplicate exception record detection skipped for envelope {} - jurisdiction {} doesn't support it",
+        if (!existingExceptionRecords.isEmpty()) {
+            log.error(
+                "Creating of exception record aborted - exception records already exist for envelope {}: [{}]",
                 envelope.id,
-                envelope.jurisdiction
+                StringUtils.join(existingExceptionRecords, ",")
             );
 
+            return existingExceptionRecords.get(0);
+        } else {
+            return createExceptionRecord(envelope);
         }
-
-        return createExceptionRecord(envelope);
     }
 
     private Long createExceptionRecord(Envelope envelope) {
