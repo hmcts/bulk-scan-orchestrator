@@ -128,7 +128,8 @@ public class CreateCaseValidator {
                 .map(item -> (Map<String, Object>) item)
                 .map(this::mapScannedDocument)
                 .collect(toList())
-        ).toValidation().mapError(throwable -> "Invalid scannedDocuments format. Error: " + throwable.getMessage());
+        ).toValidation().mapError(throwable -> "Invalid scannedDocuments format. Error: " + throwable.getMessage()
+            + throwable.toString());
     }
 
     @SuppressWarnings("unchecked")
