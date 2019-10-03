@@ -396,6 +396,20 @@ class CreateCaseCallbackServiceTest {
         // given
         setUpTransformationUrl();
 
+        // modify scannedDocs to proof datetime field is bulletproof
+        Map<String, Object> doc = new HashMap<>();
+
+        doc.put("type", "Other");
+        doc.put("url", ImmutableMap.of(
+            "document_url", "https://some-url",
+            "document_binary_url", "https://some-bin-url",
+            "document_filename", "some-name"
+        ));
+        doc.put("controlNumber", "1234");
+        doc.put("fileName", "file");
+        doc.put("scannedDate", "2019-09-06T15:40:00Z");
+        doc.put("deliveryDate", "2019-09-06T15:40:00");
+
         Map<String, Object> data = new HashMap<>();
 
         data.put("poBox", "12345");
@@ -403,7 +417,7 @@ class CreateCaseCallbackServiceTest {
         data.put("formType", "Form1");
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
+        data.put("scannedDocuments", ImmutableList.of(ImmutableMap.of("value", doc)));
         data.put("scanOCRData", ImmutableList.of(ImmutableMap.of("value", ImmutableMap.of(
             "key", "k",
             "value", 1

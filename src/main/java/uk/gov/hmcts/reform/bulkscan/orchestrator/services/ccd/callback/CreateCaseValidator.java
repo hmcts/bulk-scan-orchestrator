@@ -25,6 +25,7 @@ import java.util.function.Supplier;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.FORMATTER;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.getOcrData;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasDateField;
@@ -158,8 +159,8 @@ public class CreateCaseValidator {
             ((Map<String, String>) document.get("url")).get("document_url"),
             (String) document.get("controlNumber"),
             (String) document.get("fileName"),
-            Instant.parse((String) document.get("scannedDate")),
-            Instant.parse((String) document.get("deliveryDate"))
+            Instant.from(FORMATTER.parse((String) document.get("scannedDate"))),
+            Instant.from(FORMATTER.parse((String) document.get("deliveryDate")))
         );
     }
 }
