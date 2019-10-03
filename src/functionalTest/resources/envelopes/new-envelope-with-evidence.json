@@ -4,6 +4,7 @@
   "po_box": "BULKSCAN PO BOX",
   "jurisdiction": "BULKSCAN",
   "container": "bulkscan",
+  "formType": "B123",
   "classification": "NEW_APPLICATION",
   "zip_file_name": "zip-file-test.zip",
   "delivery_date": "1970-01-01T00:00:00.000Z",
@@ -14,7 +15,7 @@
       "control_number": "154565768",
       "type": "other",
       "subtype": null,
-      "scanned_at": "2018-01-01T10:30:00.000Z",
+      "scanned_at": "2018-01-01T10:30:00",
       "uuid": "ee69aee8-1a33-40dd-9af9-d90da1b104ba"
     }
   ],
