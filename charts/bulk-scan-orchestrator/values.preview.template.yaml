@@ -13,6 +13,7 @@ java:
     DELETE_ENVELOPES_DLQ_MESSAGES_ENABLED: "true"
     DELETE_ENVELOPES_DLQ_MESSAGES_CRON: "0 * * * * *"
     DELETE_ENVELOPES_DLQ_MESSAGES_TTL: "10s"
+    TRANSFORMATION_URL_BULKSCAN: "http://bulk-scan-orchestrator-aat.service.core-compute-aat.internal/callback/create-new-case"
   # Don't modify below here
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
