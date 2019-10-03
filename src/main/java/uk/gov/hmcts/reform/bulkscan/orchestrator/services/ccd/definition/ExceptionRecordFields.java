@@ -10,7 +10,7 @@ public final class ExceptionRecordFields {
     public static final String ATTACH_TO_CASE_REFERENCE = "attachToCaseReference";
     public static final String SCANNED_DOCUMENTS = "scannedDocuments";
     public static final String EVIDENCE_HANDLED = "evidenceHandled";
-
+    public static final String CASE_REFERENCE = "caseReference";
 
     private ExceptionRecordFields() {
         // hiding the constructor
