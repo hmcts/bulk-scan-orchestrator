@@ -145,7 +145,7 @@ class ExceptionRecordMapperTest {
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
 
         //then
-        assertThat(exceptionRecord.awaitingDcnProcessing).isEqualTo("Yes");
+        assertThat(exceptionRecord.awaitingPaymentDcnProcessing).isEqualTo("Yes");
     }
 
     @Test
@@ -157,7 +157,7 @@ class ExceptionRecordMapperTest {
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
 
         //then
-        assertThat(exceptionRecord.awaitingDcnProcessing).isEqualTo("No");
+        assertThat(exceptionRecord.awaitingPaymentDcnProcessing).isEqualTo("No");
     }
 
     private Envelope envelopeWithJurisdiction(String jurisdiction) {
