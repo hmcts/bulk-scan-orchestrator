@@ -131,6 +131,7 @@ class CreateCaseTest {
     }
 
     private CaseDetails createExceptionRecord(String resourceName) throws Exception {
+        // TODO use envelopeId for search
         UUID poBox = UUID.randomUUID();
 
         envelopeMessager.sendMessageFromFile(resourceName, "0000000000000000", null, poBox, dmUrl);
