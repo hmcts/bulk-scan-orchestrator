@@ -33,7 +33,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.EXCEP
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.GET_CASE_URL;
 
 @IntegrationTest
-class ExceptionRecordCreatorTest {
+class ExceptionRecordCreationTest {
 
     private static final String CASE_EVENT_TRIGGER_START_URL = Environment.CASE_EVENT_TRIGGER_START_URL
         .replace(CASE_TYPE_BULK_SCAN, CASE_TYPE_EXCEPTION_RECORD);
