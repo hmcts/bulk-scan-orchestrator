@@ -26,9 +26,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.logging.appinsights.SyntheticHeaders;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -78,7 +76,7 @@ class CreateCaseTest {
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/new-envelope-with-evidence.json");
 
         // when
-        String caseCcdId = invokeCallbackEndpoint(exceptionRecord, "ccdCaseReference");
+        String caseCcdId = invokeCallbackEndpoint(exceptionRecord);
 
         // then
         await("Case is created")
@@ -91,16 +89,10 @@ class CreateCaseTest {
      * Hits the services callback endpoint with a request to create case upon an exception record.
      */
     private String invokeCallbackEndpoint(
-        CaseDetails exceptionRecord,
-        String searchCaseReferenceType
+        CaseDetails exceptionRecord
     ) throws IOException {
-        Map<String, Object> exceptionRecordDataWithSearchFields = exceptionRecordDataWithSearchFields(
-            exceptionRecord,
-            searchCaseReferenceType
-        );
-
         CaseDetails exceptionRecordWithSearchFields =
-            exceptionRecord.toBuilder().data(exceptionRecordDataWithSearchFields).build();
+            exceptionRecord.toBuilder().build();
 
         CallbackRequest callbackRequest = CallbackRequest
             .builder()
@@ -138,14 +130,14 @@ class CreateCaseTest {
         return (String) callbackResponse.getData().get(CASE_REFERENCE);
     }
 
-    private Map<String, Object> exceptionRecordDataWithSearchFields(
-        CaseDetails exceptionRecord,
-        String searchCaseReferenceType
-    ) {
-        Map<String, Object> exceptionRecordData = new HashMap<>(exceptionRecord.getData());
-        exceptionRecordData.put("searchCaseReferenceType", searchCaseReferenceType);
-        return exceptionRecordData;
-    }
+//    private Map<String, Object> exceptionRecordDataWithSearchFields(
+//        CaseDetails exceptionRecord,
+//        String searchCaseReferenceType
+//    ) {
+//        Map<String, Object> exceptionRecordData = new HashMap<>(exceptionRecord.getData());
+//        exceptionRecordData.put("searchCaseReferenceType", searchCaseReferenceType);
+//        return exceptionRecordData;
+//    }
 
     private CaseDetails createExceptionRecord(String resourceName) throws Exception {
         UUID poBox = UUID.randomUUID();
