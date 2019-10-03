@@ -34,6 +34,7 @@ public final class CallbackValidations {
 
     private static final Logger log = LoggerFactory.getLogger(CallbackValidations.class);
 
+    // todo review usage
     public static final DateTimeFormatter FORMATTER = new DateTimeFormatterBuilder()
         // date/time
         .append(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
