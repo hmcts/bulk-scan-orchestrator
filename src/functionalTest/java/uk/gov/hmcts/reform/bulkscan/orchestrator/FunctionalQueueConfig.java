@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IPaymentsPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.IProcessedEnvelopeNotifier;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.ConnectionException;
 
@@ -56,6 +57,14 @@ public class FunctionalQueueConfig {
     IProcessedEnvelopeNotifier testProcessedEnvelopeNotifier() {
         // return implementation that does nothing
         return envelopeId -> {
+        };
+    }
+
+    @Bean
+    @Profile("nosb") // apply only when Service Bus should not be used
+    IPaymentsPublisher testPaymentsPublisher() {
+        // return implementation that does nothing
+        return paymentsData -> {
         };
     }
 

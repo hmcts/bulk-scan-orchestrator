@@ -23,8 +23,8 @@ public class CreateExceptionRecord {
     private static final Logger log = LoggerFactory.getLogger(CreateExceptionRecord.class);
 
     public static final String CASE_TYPE = "ExceptionRecord";
-    public static final String EVENT_TYPE_ID = "createException";
-    public static final String EVENT_SUMMARY = "Create an exception record";
+    private static final String EVENT_TYPE_ID = "createException";
+    private static final String EVENT_SUMMARY = "Create an exception record";
 
     private final ExceptionRecordMapper mapper;
     private final CcdApi ccdApi;
@@ -43,22 +43,24 @@ public class CreateExceptionRecord {
     /**
      * Creates an exception record from given envelope, unless an exception record
      * already exists for this envelope.
+     *
+     * @return ccdReference of the created or already existing exception record
      */
-    public void tryCreateFrom(Envelope envelope) {
+    public Long tryCreateFrom(Envelope envelope) {
         if (jurisdictionsWithDuplicatePrevention.contains(envelope.jurisdiction)) {
             log.info("Checking for existing exception records for envelope {}", envelope.id);
 
             List<Long> existingExceptionRecords =
                 ccdApi.getExceptionRecordRefsByEnvelopeId(envelope.id, envelope.container);
 
-            if (existingExceptionRecords.isEmpty()) {
-                createExceptionRecord(envelope);
-            } else {
+            if (!existingExceptionRecords.isEmpty()) {
                 log.error(
                     "Creating of exception record aborted - exception records already exist for envelope {}: [{}]",
                     envelope.id,
                     StringUtils.join(existingExceptionRecords, ",")
                 );
+
+                return existingExceptionRecords.get(0);
             }
         } else {
             log.warn(
@@ -67,11 +69,12 @@ public class CreateExceptionRecord {
                 envelope.jurisdiction
             );
 
-            createExceptionRecord(envelope);
         }
+
+        return createExceptionRecord(envelope);
     }
 
-    private void createExceptionRecord(Envelope envelope) {
+    private Long createExceptionRecord(Envelope envelope) {
         log.info("Creating exception record for envelope {}", envelope.id);
 
         CcdAuthenticator authenticator = ccdApi.authenticateJurisdiction(envelope.jurisdiction);
@@ -102,6 +105,8 @@ public class CreateExceptionRecord {
             caseDetails.getId(),
             caseTypeId
         );
+
+        return caseDetails.getId();
     }
 
     private CaseDataContent buildCaseDataContent(Envelope envelope, String startEventResponseToken) {
