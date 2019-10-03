@@ -130,15 +130,6 @@ class CreateCaseTest {
         return (String) callbackResponse.getData().get(CASE_REFERENCE);
     }
 
-//    private Map<String, Object> exceptionRecordDataWithSearchFields(
-//        CaseDetails exceptionRecord,
-//        String searchCaseReferenceType
-//    ) {
-//        Map<String, Object> exceptionRecordData = new HashMap<>(exceptionRecord.getData());
-//        exceptionRecordData.put("searchCaseReferenceType", searchCaseReferenceType);
-//        return exceptionRecordData;
-//    }
-
     private CaseDetails createExceptionRecord(String resourceName) throws Exception {
         UUID poBox = UUID.randomUUID();
 
