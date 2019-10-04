@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -77,8 +77,8 @@ public class CreateCaseValidator {
         Validation<String, String> jurisdictionValidation = hasJurisdiction(caseDetails);
         Validation<String, String> formTypeValidation = hasFormType(caseDetails);
         Validation<String, Classification> journeyClassificationValidation = hasJourneyClassification(caseDetails);
-        Validation<String, Instant> deliveryDateValidation = hasDateField(caseDetails, "deliveryDate");
-        Validation<String, Instant> openingDateValidation = hasDateField(caseDetails, "openingDate");
+        Validation<String, LocalDateTime> deliveryDateValidation = hasDateField(caseDetails, "deliveryDate");
+        Validation<String, LocalDateTime> openingDateValidation = hasDateField(caseDetails, "openingDate");
         Validation<String, List<ScannedDocument>> scannedDocumentsValidation = getScannedDocuments(caseDetails);
         Validation<String, List<OcrDataField>> ocrDataFieldsValidation = getOcrDataFields(caseDetails);
 
@@ -159,8 +159,8 @@ public class CreateCaseValidator {
             ((Map<String, String>) document.get("url")).get("document_url"),
             (String) document.get("controlNumber"),
             (String) document.get("fileName"),
-            Instant.from(FORMATTER.parse((String) document.get("scannedDate"))),
-            Instant.from(FORMATTER.parse((String) document.get("deliveryDate")))
+            LocalDateTime.parse((String) document.get("scannedDate"), FORMATTER),
+            LocalDateTime.parse((String) document.get("deliveryDate"), FORMATTER)
         );
     }
 }

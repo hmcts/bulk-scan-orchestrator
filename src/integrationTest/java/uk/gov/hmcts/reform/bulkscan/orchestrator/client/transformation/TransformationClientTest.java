@@ -16,8 +16,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.res
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 
-import java.time.Instant;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.forbidden;
@@ -27,6 +25,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.serverError;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.unauthorized;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static java.time.LocalDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
@@ -195,16 +194,16 @@ public class TransformationClientTest {
             "BULKSCAN",
             Classification.NEW_APPLICATION,
             "D8",
-            Instant.now(),
-            Instant.now(),
+            now(),
+            now(),
             singletonList(new ScannedDocument(
                 DocumentType.CHERISHED,
                 "D8",
                 "http://locahost",
                 "1234",
                 "file1.pdf",
-                Instant.now(),
-                Instant.now()
+                now(),
+                now()
             )),
             asList(
                 new OcrDataField("name1", "value1"),
