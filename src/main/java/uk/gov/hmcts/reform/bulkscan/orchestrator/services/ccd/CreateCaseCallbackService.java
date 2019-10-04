@@ -179,8 +179,7 @@ public class CreateCaseCallbackService {
                 exception
             );
 
-            return Validation.invalid(Array.of("Internal error. " + exception.getClass().getName()
-                + " "  + exception.getMessage()));
+            return Validation.invalid(Array.of("Internal error. " + exception.getMessage()));
         }
     }
 
