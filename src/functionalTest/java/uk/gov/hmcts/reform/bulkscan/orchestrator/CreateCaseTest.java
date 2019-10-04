@@ -92,7 +92,7 @@ class CreateCaseTest {
         CaseDetails exceptionRecord
     ) throws IOException {
         CaseDetails exceptionRecordWithSearchFields =
-            exceptionRecord.toBuilder().createdDate(null).lastModified(null).build();
+            exceptionRecord.toBuilder().build();
 
         CallbackRequest callbackRequest = CallbackRequest
             .builder()
