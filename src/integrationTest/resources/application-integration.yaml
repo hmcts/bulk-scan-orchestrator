@@ -57,5 +57,3 @@ service-config:
       transformation-url: *wiremock
       case-type-ids:
         - Bulk_Scanned
-
-jurisdictions-with-duplicate-er-prevention: BULKSCAN
