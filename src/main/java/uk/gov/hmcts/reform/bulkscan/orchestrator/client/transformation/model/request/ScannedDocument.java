@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.re
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public class ScannedDocument {
 
@@ -22,10 +22,10 @@ public class ScannedDocument {
     public final String fileName;
 
     @JsonProperty("scanned_date")
-    public final Instant scannedDate;
+    public final LocalDateTime scannedDate;
 
     @JsonProperty("delivery_date")
-    public final Instant deliveryDate;
+    public final LocalDateTime deliveryDate;
 
     public ScannedDocument(
         DocumentType type,
@@ -33,8 +33,8 @@ public class ScannedDocument {
         String url,
         String controlNumber,
         String fileName,
-        Instant scannedDate,
-        Instant deliveryDate
+        LocalDateTime scannedDate,
+        LocalDateTime deliveryDate
     ) {
         this.type = type;
         this.subtype = subtype;

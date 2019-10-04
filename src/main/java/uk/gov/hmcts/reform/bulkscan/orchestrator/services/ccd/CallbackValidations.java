@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -238,11 +238,11 @@ public final class CallbackValidations {
         return valid(classification);
     }
 
-    public static Validation<String, Instant> hasDateField(CaseDetails theCase, String dateField) {
+    public static Validation<String, LocalDateTime> hasDateField(CaseDetails theCase, String dateField) {
         return Optional.ofNullable(theCase)
             .map(CaseDetails::getData)
             .map(data -> data.get(dateField))
-            .map(o -> Validation.<String, Instant>valid(Instant.from(FORMATTER.parse((String) o))))
+            .map(o -> Validation.<String, LocalDateTime>valid(LocalDateTime.parse((String) o, FORMATTER)))
             .orElse(invalid("Missing " + dateField));
     }
 
