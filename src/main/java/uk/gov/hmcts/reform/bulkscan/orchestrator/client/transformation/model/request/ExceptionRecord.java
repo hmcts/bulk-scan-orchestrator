@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 
 import java.time.Instant;
 import java.util.List;

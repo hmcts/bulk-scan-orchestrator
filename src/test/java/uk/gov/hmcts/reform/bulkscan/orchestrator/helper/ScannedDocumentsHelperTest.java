@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 
 import org.junit.jupiter.api.Test;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.io.IOException;

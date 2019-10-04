@@ -1,10 +1,10 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes;
 
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.InvalidMessageException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 
 import java.io.IOException;
 
