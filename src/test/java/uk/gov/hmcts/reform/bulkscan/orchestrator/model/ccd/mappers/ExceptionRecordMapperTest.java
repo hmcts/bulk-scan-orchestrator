@@ -132,7 +132,7 @@ class ExceptionRecordMapperTest {
     }
 
     @Test
-    public void mapEnvelope_sets_awaitingDcnProcessing_to_yes_when_envelope_contains_payments() {
+    public void mapEnvelope_sets_awaitingPaymentDcnProcessing_to_yes_when_envelope_contains_payments() {
         //given
         Envelope envelope = envelope(
             2,
@@ -149,7 +149,7 @@ class ExceptionRecordMapperTest {
     }
 
     @Test
-    public void mapEnvelope_sets_awaitingDcnProcessing_to_no_when_envelope_does_not_contain_payments() {
+    public void mapEnvelope_sets_awaitingPaymentDcnProcessing_to_no_when_envelope_does_not_contain_payments() {
         //given
         Envelope envelope = envelope(2, null, null, emptyList());
 
