@@ -1,9 +1,13 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.dm;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
@@ -26,11 +30,18 @@ public class DocumentManagementUploadService {
     private static final String FILES_NAME = "files";
 
     DocumentManagementUploadService(
+        @Value("${document_management.url}") final String dmUri,
+        ObjectMapper objectMapper,
         CcdAuthenticatorFactory ccdAuthenticatorFactory,
-        DocumentUploadClientApi documentUploadClientApi
+        HttpComponentsClientHttpRequestFactory clientHttpRequestFactory
     ) {
         this.ccdAuthenticatorFactory = ccdAuthenticatorFactory;
-        this.documentUploadClientApi = documentUploadClientApi;
+        this.documentUploadClientApi =
+            new DocumentUploadClientApi(
+                dmUri,
+                new RestTemplate(clientHttpRequestFactory),
+                objectMapper
+            );
     }
 
     /**
