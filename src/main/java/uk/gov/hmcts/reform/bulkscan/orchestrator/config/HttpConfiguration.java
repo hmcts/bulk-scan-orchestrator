@@ -27,13 +27,13 @@ public class HttpConfiguration {
 
     @Bean
     public RestTemplate restTemplate(ObjectMapper objectMapper) {
-        RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory());
-
         List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
         MappingJackson2HttpMessageConverter jsonMessageConverter = new MappingJackson2HttpMessageConverter();
         jsonMessageConverter.setObjectMapper(objectMapper);
         messageConverters.add(jsonMessageConverter);
         messageConverters.add(new FormHttpMessageConverter());
+
+        RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory());
         restTemplate.setMessageConverters(messageConverters);
 
         return restTemplate;
