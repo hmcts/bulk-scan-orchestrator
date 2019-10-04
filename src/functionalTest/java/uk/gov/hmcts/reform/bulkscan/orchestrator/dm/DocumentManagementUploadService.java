@@ -1,6 +1,9 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.dm;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,14 +35,13 @@ public class DocumentManagementUploadService {
     DocumentManagementUploadService(
         @Value("${document_management.url}") final String dmUri,
         ObjectMapper objectMapper,
-        CcdAuthenticatorFactory ccdAuthenticatorFactory,
-        HttpComponentsClientHttpRequestFactory clientHttpRequestFactory
+        CcdAuthenticatorFactory ccdAuthenticatorFactory
     ) {
         this.ccdAuthenticatorFactory = ccdAuthenticatorFactory;
         this.documentUploadClientApi =
             new DocumentUploadClientApi(
                 dmUri,
-                new RestTemplate(clientHttpRequestFactory),
+                new RestTemplate(clientHttpRequestFactory()),
                 objectMapper
             );
     }
@@ -75,5 +77,23 @@ public class DocumentManagementUploadService {
             .links
             .self
             .href;
+    }
+
+    public HttpComponentsClientHttpRequestFactory clientHttpRequestFactory() {
+        return new HttpComponentsClientHttpRequestFactory(getHttpClient());
+    }
+
+    private CloseableHttpClient getHttpClient() {
+        RequestConfig config = RequestConfig.custom()
+            .setConnectTimeout(30000)
+            .setConnectionRequestTimeout(30000)
+            .setSocketTimeout(60000)
+            .build();
+
+        return HttpClientBuilder
+            .create()
+            .useSystemProperties()
+            .setDefaultRequestConfig(config)
+            .build();
     }
 }

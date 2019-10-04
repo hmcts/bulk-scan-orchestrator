@@ -30,7 +30,6 @@ public class HttpConfiguration {
         MappingJackson2HttpMessageConverter jsonMessageConverter = new MappingJackson2HttpMessageConverter();
         jsonMessageConverter.setObjectMapper(objectMapper);
         messageConverters.add(jsonMessageConverter);
-        //messageConverters.add(new FormHttpMessageConverter());
 
         RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory());
         restTemplate.setMessageConverters(messageConverters);
