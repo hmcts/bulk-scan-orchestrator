@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes;
 
 import com.google.common.collect.ImmutableMap;
 import com.microsoft.azure.servicebus.IMessage;
