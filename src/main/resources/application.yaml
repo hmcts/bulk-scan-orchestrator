@@ -14,9 +14,6 @@ management:
 spring:
   application:
     name: Bulk Scan Orchestrator
-  jackson:
-    serialization:
-      WRITE_DATES_AS_TIMESTAMPS: false
 
 azure:
   servicebus:
