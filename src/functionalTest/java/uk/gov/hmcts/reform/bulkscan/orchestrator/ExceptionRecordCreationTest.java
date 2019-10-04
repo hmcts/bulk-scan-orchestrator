@@ -72,7 +72,7 @@ class ExceptionRecordCreationTest {
             .until(() -> findCasesByPoBox(randomPoBox).size() == 1);
 
         CaseDetails caseDetails = findCasesByPoBox(randomPoBox).get(0);
-        assertThat(getCaseDataForField(caseDetails, "awaitingDCNProcessing")).isEqualTo("No");
+        assertThat(getCaseDataForField(caseDetails, "awaitingPaymentDCNProcessing")).isEqualTo("No");
     }
 
     @DisplayName("Should create ExceptionRecord when classification is NEW_APPLICATION")
