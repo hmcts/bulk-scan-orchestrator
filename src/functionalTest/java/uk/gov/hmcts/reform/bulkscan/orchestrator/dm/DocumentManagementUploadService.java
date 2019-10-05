@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.dm;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.util.StdDateFormat;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -34,14 +36,13 @@ public class DocumentManagementUploadService {
 
     DocumentManagementUploadService(
         @Value("${document_management.url}") final String dmUri,
-        ObjectMapper objectMapper,
         CcdAuthenticatorFactory ccdAuthenticatorFactory
     ) {
         this.ccdAuthenticatorFactory = ccdAuthenticatorFactory;
 
-        //ObjectMapper objectMapper = new ObjectMapper();
-        //objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        //objectMapper.setDateFormat(new StdDateFormat().withColonInTimeZone(false));
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        objectMapper.setDateFormat(new StdDateFormat().withColonInTimeZone(false));
 
         this.documentUploadClientApi =
             new DocumentUploadClientApi(
