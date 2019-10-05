@@ -41,7 +41,7 @@ public class TransformationClient {
         String s2sToken
     ) throws IOException, CaseTransformationException {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("ServiceAuthorization", "Bearer " + s2sToken);
+        headers.add("ServiceAuthorization", s2sToken);
 
         String url =
             UriComponentsBuilder

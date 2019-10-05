@@ -53,7 +53,7 @@ public class TransformationClientTest {
 
         stubFor(
             post(urlPathMatching(TRANSFORM_EXCEPTION_RECORD_URL))
-                .withHeader("ServiceAuthorization", equalTo("Bearer " + s2sToken))
+                .withHeader("ServiceAuthorization", equalTo(s2sToken))
                 .willReturn(okJson(successResponse().toString()))
         );
 
@@ -80,7 +80,7 @@ public class TransformationClientTest {
         String s2sToken = randomUUID().toString();
         stubFor(
             post(urlPathMatching(TRANSFORM_EXCEPTION_RECORD_URL))
-                .withHeader("ServiceAuthorization", equalTo("Bearer " + s2sToken))
+                .withHeader("ServiceAuthorization", equalTo(s2sToken))
                 .willReturn(aResponse().withBody(errorResponse().toString()).withStatus(422)));
 
         // when
@@ -106,7 +106,7 @@ public class TransformationClientTest {
         String s2sToken = randomUUID().toString();
         stubFor(
             post(urlPathMatching(TRANSFORM_EXCEPTION_RECORD_URL))
-                .withHeader("ServiceAuthorization", equalTo("Bearer " + s2sToken))
+                .withHeader("ServiceAuthorization", equalTo(s2sToken))
                 .willReturn(aResponse().withBody(invalidDataResponse().toString()).withStatus(400)));
 
         // when
