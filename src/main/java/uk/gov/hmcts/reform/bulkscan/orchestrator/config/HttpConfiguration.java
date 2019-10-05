@@ -37,6 +37,11 @@ public class HttpConfiguration {
         return restTemplate;
     }
 
+    @Bean("standard")
+    public RestTemplate restTemplateStd() {
+        return new RestTemplate(clientHttpRequestFactory());
+    }
+
     @Bean
     public HttpComponentsClientHttpRequestFactory clientHttpRequestFactory() {
         return new HttpComponentsClientHttpRequestFactory(getHttpClient());

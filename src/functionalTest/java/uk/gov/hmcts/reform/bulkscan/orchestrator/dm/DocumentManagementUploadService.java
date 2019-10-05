@@ -3,14 +3,11 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.dm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,6 +33,7 @@ public class DocumentManagementUploadService {
 
     DocumentManagementUploadService(
         @Value("${document_management.url}") final String dmUri,
+        @Qualifier("standard") RestTemplate restTemplate,
         CcdAuthenticatorFactory ccdAuthenticatorFactory
     ) {
         this.ccdAuthenticatorFactory = ccdAuthenticatorFactory;
@@ -47,7 +45,7 @@ public class DocumentManagementUploadService {
         this.documentUploadClientApi =
             new DocumentUploadClientApi(
                 dmUri,
-                new RestTemplate(clientHttpRequestFactory()),
+                restTemplate,
                 objectMapper
             );
     }
@@ -83,23 +81,5 @@ public class DocumentManagementUploadService {
             .links
             .self
             .href;
-    }
-
-    public HttpComponentsClientHttpRequestFactory clientHttpRequestFactory() {
-        return new HttpComponentsClientHttpRequestFactory(getHttpClient());
-    }
-
-    private CloseableHttpClient getHttpClient() {
-        RequestConfig config = RequestConfig.custom()
-            .setConnectTimeout(30000)
-            .setConnectionRequestTimeout(30000)
-            .setSocketTimeout(60000)
-            .build();
-
-        return HttpClientBuilder
-            .create()
-            .useSystemProperties()
-            .setDefaultRequestConfig(config)
-            .build();
     }
 }
