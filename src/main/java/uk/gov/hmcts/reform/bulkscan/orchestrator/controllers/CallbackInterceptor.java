@@ -19,7 +19,7 @@ public class CallbackInterceptor extends AbstractRequestLoggingFilter {
 
     @Override
     protected boolean shouldLog(HttpServletRequest request) {
-        return request.getRequestURI().contains("ccd-data-store-api")
+        return request.getRequestURI().contains("ccd-data-store-api-aat")
             && request.getRequestURI().contains("callback/create-new-case");
     }
 
