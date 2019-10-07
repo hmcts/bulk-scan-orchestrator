@@ -107,7 +107,7 @@ class CreateCaseTest {
         Response response = RestAssured
             .given()
             .relaxedHTTPSValidation()
-            .proxy("proxyout.reform.hmcts.net", 8080)
+            //.proxy("proxyout.reform.hmcts.net", 8080)
             .baseUri(testUrl)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .header(SyntheticHeaders.SYNTHETIC_TEST_SOURCE, "Bulk Scan Orchestrator Functional test")
