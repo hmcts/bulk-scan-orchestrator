@@ -88,6 +88,7 @@ checkstyle {
 pmd {
   toolVersion = "6.14.0"
   ignoreFailures = true
+  incrementalAnalysis = true
   sourceSets = [sourceSets.main, sourceSets.test, sourceSets.functionalTest, sourceSets.integrationTest, sourceSets.smokeTest]
   reportsDir = file("$project.buildDir/reports/pmd")
   ruleSetFiles = files("config/pmd/ruleset.xml")
