@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseFinder;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.PaymentsProcessor;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -15,8 +17,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.JURSIDICTION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.THE_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.NEW_APPLICATION;
@@ -37,6 +41,9 @@ class EnvelopeHandlerTest {
     @Mock
     private CaseDetails caseDetails;
 
+    @Mock
+    private PaymentsProcessor paymentsProcessor;
+
     private EnvelopeHandler envelopeHandler;
 
     @BeforeEach
@@ -44,7 +51,17 @@ class EnvelopeHandlerTest {
         envelopeHandler = new EnvelopeHandler(
             attachDocsToSupplementaryEvidence,
             createExceptionRecord,
-            caseFinder
+            caseFinder,
+            paymentsProcessor);
+    }
+
+    @AfterEach
+    void tearDown() {
+        verifyNoMoreInteractions(
+            attachDocsToSupplementaryEvidence,
+            createExceptionRecord,
+            caseFinder,
+            paymentsProcessor
         );
     }
 
@@ -71,7 +88,7 @@ class EnvelopeHandlerTest {
         envelopeHandler.handleEnvelope(envelope);
 
         // then
-        verify(this.createExceptionRecord).createFrom(envelope);
+        verify(this.createExceptionRecord).tryCreateFrom(envelope);
     }
 
     @Test
@@ -83,21 +100,22 @@ class EnvelopeHandlerTest {
         envelopeHandler.handleEnvelope(envelope);
 
         // then
-        verify(this.createExceptionRecord).createFrom(envelope);
-        verify(caseFinder, never()).findCase(any());
+        verify(this.createExceptionRecord).tryCreateFrom(envelope);
     }
 
     @Test
     void should_call_CreateExceptionRecord_for_new_application_classification() {
         // given
         Envelope envelope = envelope(NEW_APPLICATION, JURSIDICTION, CASE_REF);
+        given(createExceptionRecord.tryCreateFrom(envelope)).willReturn(THE_CASE.getId());
 
         // when
         envelopeHandler.handleEnvelope(envelope);
 
         // then
-        verify(this.createExceptionRecord).createFrom(envelope);
+        verify(this.createExceptionRecord).tryCreateFrom(envelope);
         verify(caseFinder, never()).findCase(any());
+        verify(paymentsProcessor).processPayments(envelope, THE_CASE.getId(), true);
     }
 
 }

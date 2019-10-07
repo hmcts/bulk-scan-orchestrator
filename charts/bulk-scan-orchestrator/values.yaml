@@ -7,6 +7,7 @@ java:
     IDAM_CLIENT_REDIRECT_URI: "https://bulk-scan-orchestrator-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/oauth2/callback"
     CORE_CASE_DATA_API_URL: "http://ccd-data-store-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     DOCUMENT_MANAGEMENT_URL: "http://dm-store-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
+    TRANSFORMATION_URL_PROBATE: "http://probate-back-office-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
   keyVaults:
     bulk-scan:
       resourceGroup: bulk-scan

@@ -14,21 +14,28 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.InvalidCaseDataException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.Event;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.function.Function;
 
+import static java.util.Collections.emptyList;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isCreateCaseEvent;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isCreateNewCaseEvent;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.CASE_REFERENCE;
+
 
 @Service
 public class CreateCaseCallbackService {
@@ -39,17 +46,20 @@ public class CreateCaseCallbackService {
     private final ServiceConfigProvider serviceConfigProvider;
     private final TransformationClient transformationClient;
     private final AuthTokenGenerator s2sTokenGenerator;
+    private final CoreCaseDataApi ccdApi;
 
     public CreateCaseCallbackService(
         CreateCaseValidator validator,
         ServiceConfigProvider serviceConfigProvider,
         TransformationClient transformationClient,
-        AuthTokenGenerator s2sTokenGenerator
+        AuthTokenGenerator s2sTokenGenerator,
+        CoreCaseDataApi ccdApi
     ) {
         this.validator = validator;
         this.serviceConfigProvider = serviceConfigProvider;
         this.transformationClient = transformationClient;
         this.s2sTokenGenerator = s2sTokenGenerator;
+        this.ccdApi = ccdApi;
     }
 
     /**
@@ -57,7 +67,11 @@ public class CreateCaseCallbackService {
      *
      * @return Either list of errors or map of changes - new case reference
      */
-    public Either<List<String>, ProcessResult> process(CcdCallbackRequest request) {
+    public Either<List<String>, ProcessResult> process(
+        CcdCallbackRequest request,
+        String idamToken,
+        String userId
+    ) {
         return assertAllowToAccess(request.getCaseDetails(), request.getEventId())
             .flatMap(theVoid -> validator
                 .getValidation(request.getCaseDetails())
@@ -66,7 +80,9 @@ public class CreateCaseCallbackService {
                     exceptionRecord,
                     configItem,
                     request.getCaseDetails().getId(),
-                    request.isIgnoreWarnings()
+                    request.isIgnoreWarnings(),
+                    idamToken,
+                    userId
                 ))
                 .mapError(errors -> errors.flatMap(Function.identity()))
                 .flatMap(Function.identity())
@@ -77,7 +93,7 @@ public class CreateCaseCallbackService {
 
     private Either<List<String>, Void> assertAllowToAccess(CaseDetails caseDetails, String eventId) {
         return validator.mandatoryPrerequisites(
-            () -> isCreateCaseEvent(eventId),
+            () -> isCreateNewCaseEvent(eventId),
             () -> getServiceConfig(caseDetails).map(item -> null)
         );
     }
@@ -96,30 +112,56 @@ public class CreateCaseCallbackService {
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,
         long caseId,
-        boolean ignoreWarnings
+        boolean ignoreWarnings,
+        String idamToken,
+        String userId
     ) {
+        String caseIdAsString = Long.toString(caseId);
+
+        log.info("Start creating new case for {} from exception record {}", configItem.getService(), caseIdAsString);
+
         try {
-            log.info(
-                "Start creating exception record for service {} and exception record {}",
-                configItem.getService(),
-                caseId
-            );
+            String s2sToken = s2sTokenGenerator.generate();
 
             SuccessfulTransformationResponse transformationResponse = transformationClient.transformExceptionRecord(
                 configItem.getTransformationUrl(),
                 exceptionRecord,
-                s2sTokenGenerator.generate()
+                s2sToken
             );
 
             if (!ignoreWarnings && !transformationResponse.warnings.isEmpty()) {
-                log.warn("Transformation warnings: {}", String.join(", ", transformationResponse.warnings));
-
-                return Validation.invalid(Array.ofAll(transformationResponse.warnings));
-            } else {
+                // do not log warnings
                 return Validation.valid(new ProcessResult(
-                    ImmutableMap.of("caseReference", UUID.randomUUID())
+                    transformationResponse.warnings,
+                    emptyList()
                 ));
             }
+
+            log.info(
+                "Successfully transformed exception record for {} from exception record {}",
+                configItem.getService(),
+                caseIdAsString
+            );
+
+            long newCaseId = createNewCaseInCcd(
+                idamToken,
+                s2sToken,
+                userId,
+                exceptionRecord.poBoxJurisdiction,
+                transformationResponse.caseCreationDetails,
+                caseIdAsString
+            );
+
+            log.info(
+                "Successfully created new case for {} with case ID {} from exception record {}",
+                configItem.getService(),
+                newCaseId,
+                caseIdAsString
+            );
+
+            return Validation.valid(new ProcessResult(
+                ImmutableMap.of(CASE_REFERENCE, Long.toString(newCaseId))
+            ));
         } catch (InvalidCaseDataException exception) {
             if (BAD_REQUEST.equals(exception.getStatus())) {
                 throw exception;
@@ -133,11 +175,51 @@ public class CreateCaseCallbackService {
             log.error(
                 "Failed to create exception for service {} and exception record {}",
                 configItem.getService(),
-                caseId,
+                caseIdAsString,
                 exception
             );
 
             return Validation.invalid(Array.of("Internal error. " + exception.getMessage()));
         }
+    }
+
+    private long createNewCaseInCcd(
+        String idamToken,
+        String s2sToken,
+        String userId,
+        String jurisdiction,
+        CaseCreationDetails caseCreationDetails,
+        String originalCaseId
+    ) {
+        StartEventResponse eventResponse = ccdApi.startForCaseworker(
+            idamToken,
+            s2sToken,
+            userId,
+            jurisdiction,
+            caseCreationDetails.caseTypeId,
+            caseCreationDetails.eventId
+        );
+
+        return ccdApi.submitForCaseworker(
+            idamToken,
+            s2sToken,
+            userId,
+            jurisdiction,
+            caseCreationDetails.caseTypeId,
+            true,
+            CaseDataContent
+                .builder()
+                .caseReference(originalCaseId)
+                .data(caseCreationDetails.caseData)
+                .event(Event
+                    .builder()
+                    .id(eventResponse.getEventId())
+                    .summary("Case created")
+                    .description("Case created from exception record ref " + originalCaseId)
+                    .build()
+                )
+                .eventToken(eventResponse.getToken())
+                .build()
+        ).getId();
     }
 }

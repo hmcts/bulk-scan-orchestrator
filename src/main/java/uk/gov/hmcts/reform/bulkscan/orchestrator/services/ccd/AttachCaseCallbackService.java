@@ -8,6 +8,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
@@ -272,7 +273,7 @@ public class AttachCaseCallbackService {
         List<Map<String, Object>> existingDocuments
     ) {
         List<Object> documents = concatDocuments(exceptionDocuments, existingDocuments);
-        return ImmutableMap.of(SCANNED_DOCUMENTS, documents, EVIDENCE_HANDLED, "No");
+        return ImmutableMap.of(SCANNED_DOCUMENTS, documents, EVIDENCE_HANDLED, YesNoFieldValues.NO);
     }
 
     private void verifyExceptionRecordIsNotAttachedToCase(

@@ -9,6 +9,9 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Class
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -19,6 +22,7 @@ import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
 import static java.lang.String.format;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.EXCEPTION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.NEW_APPLICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.SUPPLEMENTARY_EVIDENCE;
 
 public final class CallbackValidations {
@@ -29,6 +33,15 @@ public final class CallbackValidations {
     private static final String CLASSIFICATION_EXCEPTION = "EXCEPTION";
 
     private static final Logger log = LoggerFactory.getLogger(CallbackValidations.class);
+
+    // todo review usage
+    public static final DateTimeFormatter FORMATTER = new DateTimeFormatterBuilder()
+        // date/time
+        .append(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        // optional offset
+        .optionalStart().appendOffsetId()
+        .toFormatter()
+        .withZone(ZoneOffset.UTC);
 
     private static final CaseReferenceValidator caseRefValidator = new CaseReferenceValidator();
     private static final ScannedDocumentValidator scannedDocumentValidator = new ScannedDocumentValidator();
@@ -210,14 +223,14 @@ public final class CallbackValidations {
     ) {
         if (SUPPLEMENTARY_EVIDENCE.equals(classification)) {
             return invalid(format(
-                "Event createCase not allowed for the current journey classification %s",
+                "Event createNewCase not allowed for the current journey classification %s",
                 classification
             ));
         }
 
-        if (EXCEPTION.equals(classification) && !hasOcr(theCase)) {
+        if ((EXCEPTION.equals(classification) || NEW_APPLICATION.equals(classification)) && !hasOcr(theCase)) {
             return invalid(format(
-                "Event createCase not allowed for the current journey classification %s without OCR",
+                "Event createNewCase not allowed for the current journey classification %s without OCR",
                 classification
             ));
         }
@@ -229,7 +242,7 @@ public final class CallbackValidations {
         return Optional.ofNullable(theCase)
             .map(CaseDetails::getData)
             .map(data -> data.get(dateField))
-            .map(o -> Validation.<String, Instant>valid(Instant.parse((String) o)))
+            .map(o -> Validation.<String, Instant>valid(Instant.from(FORMATTER.parse((String) o))))
             .orElse(invalid("Missing " + dateField));
     }
 

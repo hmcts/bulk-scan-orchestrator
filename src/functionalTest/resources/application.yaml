@@ -14,6 +14,8 @@ queue:
   envelopes:
     write-connection-string: ${ENVELOPES_QUEUE_WRITE_CONN_STRING}
     read-connection-string: ${ENVELOPES_QUEUE_READ_CONN_STRING}
+  payments:
+    write-connection-string: ${PAYMENTS_QUEUE_WRITE_CONN_STRING}
 
 # because functional tests load up SpringBootTest
 azure:
@@ -59,6 +61,3 @@ service-config:
       jurisdiction: BULKSCAN
       case-type-ids:
         - Bulk_Scanned
-
-# TODO: remove this setting when all jurisdictions support ER prevention in all environments
-jurisdictions-with-duplicate-er-prevention: "BULKSCAN"

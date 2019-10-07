@@ -24,6 +24,9 @@ azure:
     processed-envelopes:
       connection-string: ${PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING}
       queue-name: processed-envelopes
+    payments:
+      connection-string: ${PAYMENTS_QUEUE_CONNECTION_STRING}
+      queue-name: payments
 
 core_case_data:
   api:
@@ -67,6 +70,7 @@ service-config:
 
     - service: probate
       jurisdiction: PROBATE
+      transformation-url: ${TRANSFORMATION_URL_PROBATE}
       case-type-ids: []
 
     - service: divorce
@@ -81,11 +85,6 @@ service-config:
       jurisdiction: CMC
       case-type-ids:
         - MoneyClaimCase
-
-# comma-separated list of jurisdictions that support duplicate exception record prevention
-# TODO: remove this setting when all jurisdictions support ER prevention in all environments
-jurisdictions-with-duplicate-er-prevention: ${JURISDICTIONS_WITH_DUPLICATE_ER_PREVENTION}
-
 
 scheduling:
   task:

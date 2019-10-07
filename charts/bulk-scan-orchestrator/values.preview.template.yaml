@@ -8,11 +8,11 @@ java:
     ENVELOPES_QUEUE_CONNECTION_STRING: "$(SB_CONN_STRING);EntityPath=envelopes"
     ENVELOPES_QUEUE_MAX_DELIVERY_COUNT: "10"
     PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING: "$(SB_CONN_STRING);EntityPath=processed-envelopes"
+    PAYMENTS_QUEUE_CONNECTION_STRING: "$(SB_CONN_STRING);EntityPath=payments"
     QUEUE_READ_INTERVAL: "30000"
     DELETE_ENVELOPES_DLQ_MESSAGES_ENABLED: "true"
     DELETE_ENVELOPES_DLQ_MESSAGES_CRON: "0 * * * * *"
     DELETE_ENVELOPES_DLQ_MESSAGES_TTL: "10s"
-    JURISDICTIONS_WITH_DUPLICATE_ER_PREVENTION: "BULKSCAN"
   # Don't modify below here
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
@@ -27,6 +27,7 @@ servicebus:
       - name: envelopes
       - name: notifications
       - name: processed-envelopes
+      - name: payments
 bso:
   servicebus:
     enabled: true
