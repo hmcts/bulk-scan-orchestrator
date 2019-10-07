@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.SupplementaryEvidence;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 
 import java.time.Instant;
 import java.util.List;

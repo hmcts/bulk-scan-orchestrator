@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
