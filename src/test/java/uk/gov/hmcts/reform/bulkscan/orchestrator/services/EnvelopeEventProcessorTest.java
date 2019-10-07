@@ -32,8 +32,8 @@ import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelopeJson;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 
@@ -291,7 +291,7 @@ class EnvelopeEventProcessorTest {
         processor.processNextMessage();
 
         // then
-        verifyZeroInteractions(
+        verifyNoInteractions(
             envelopeHandler,
             processedEnvelopeNotifier
         );
