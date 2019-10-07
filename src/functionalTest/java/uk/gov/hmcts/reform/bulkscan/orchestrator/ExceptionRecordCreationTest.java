@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getCaseDataForField;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getOcrData;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getOcrDataValidationWarnings;
 
@@ -57,7 +58,7 @@ class ExceptionRecordCreationTest {
 
         // when
         envelopeMessager.sendMessageFromFile(
-            "envelopes/supplementary-evidence-envelope.json",
+            "envelopes/supplementary-evidence-envelope.json", // no payments
             "0000000000000000",
             null,
             randomPoBox,
@@ -69,6 +70,9 @@ class ExceptionRecordCreationTest {
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
             .until(() -> findCasesByPoBox(randomPoBox).size() == 1);
+
+        CaseDetails caseDetails = findCasesByPoBox(randomPoBox).get(0);
+        assertThat(getCaseDataForField(caseDetails, "awaitingPaymentDCNProcessing")).isEqualTo("No");
     }
 
     @DisplayName("Should create ExceptionRecord when classification is NEW_APPLICATION")
@@ -79,7 +83,7 @@ class ExceptionRecordCreationTest {
 
         // when
         String messageEnvelopeId = envelopeMessager.sendMessageFromFile(
-            "envelopes/new-envelope-with-evidence.json",
+            "envelopes/new-envelope-with-evidence.json", // with payments dcn
             "0000000000000000",
             null,
             randomPoBox,
@@ -104,6 +108,8 @@ class ExceptionRecordCreationTest {
 
         // envelope ID from the JSON resource representing the test message
         assertThat(caseDetails.getData().get("envelopeId")).isEqualTo(messageEnvelopeId);
+
+        assertThat(getCaseDataForField(caseDetails, "awaitingPaymentDCNProcessing")).isEqualTo("Yes");
     }
 
     @DisplayName("Should create ExceptionRecord when provided/requested case reference is invalid")
