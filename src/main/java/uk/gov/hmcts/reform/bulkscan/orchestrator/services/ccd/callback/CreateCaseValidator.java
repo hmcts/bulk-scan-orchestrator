@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.req
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ScannedDocument;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ScannedDocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -156,7 +157,11 @@ public class CreateCaseValidator {
         return new ScannedDocument(
             DocumentType.valueOf(((String) document.get("type")).toUpperCase()),
             (String) document.get("subType"),
-            ((Map<String, String>) document.get("url")).get("document_url"),
+            new ScannedDocumentUrl(
+                ((Map<String, String>) document.get("url")).get("document_url"),
+                ((Map<String, String>) document.get("url")).get("document_filename"),
+                ((Map<String, String>) document.get("url")).get("document_binary_url")
+            ),
             (String) document.get("controlNumber"),
             (String) document.get("fileName"),
             LocalDateTime.parse((String) document.get("scannedDate"), FORMATTER),

@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.req
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ScannedDocument;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ScannedDocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
@@ -199,7 +200,11 @@ public class TransformationClientTest {
             singletonList(new ScannedDocument(
                 DocumentType.CHERISHED,
                 "D8",
-                "http://locahost",
+                new ScannedDocumentUrl(
+                    "http://locahost",
+                    "file1.pdf",
+                    "http://locahost/binary"
+                ),
                 "1234",
                 "file1.pdf",
                 now(),
