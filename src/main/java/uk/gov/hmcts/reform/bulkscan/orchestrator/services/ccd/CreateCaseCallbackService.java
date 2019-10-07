@@ -203,26 +203,34 @@ public class CreateCaseCallbackService {
             caseCreationDetails.eventId
         );
 
-        return ccdApi.submitForCaseworker(
-            idamToken,
-            s2sToken,
-            userId,
-            jurisdiction,
-            caseCreationDetails.caseTypeId,
-            true,
-            CaseDataContent
+        CaseDataContent caseCreated = CaseDataContent
+            .builder()
+            .caseReference(originalCaseId)
+            .data(caseCreationDetails.caseData)
+            .event(Event
                 .builder()
-                .caseReference(originalCaseId)
-                .data(caseCreationDetails.caseData)
-                .event(Event
-                    .builder()
-                    .id(eventResponse.getEventId())
-                    .summary("Case created")
-                    .description("Case created from exception record ref " + originalCaseId)
-                    .build()
-                )
-                .eventToken(eventResponse.getToken())
+                .id(eventResponse.getEventId())
+                .summary("Case created")
+                .description("Case created from exception record ref " + originalCaseId)
                 .build()
-        ).getId();
+            )
+            .eventToken(eventResponse.getToken())
+            .build();
+        try {
+            Long ccdRef = ccdApi.submitForCaseworker(
+                idamToken,
+                s2sToken,
+                userId,
+                jurisdiction,
+                caseCreationDetails.caseTypeId,
+                true,
+                caseCreated
+            ).getId();
+            return ccdRef;
+        } catch (Exception ex) {
+            throw new RuntimeException(caseCreated.getCaseReference() + "," + caseCreated.getEventToken() + ","
+                + caseCreated.getEvent() + "," + caseCreated.getData().getClass().getName()
+                + "," + caseCreated.getData() + "," + ex.getMessage(), ex);
+        }
     }
 }
