@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.Credential;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
@@ -55,6 +56,9 @@ public class SampleData {
         USER_DETAILS,
         () -> USER_TOKEN
     );
+
+    public static final CaseCreationDetails CASE_CREATION_DETAILS =
+        new CaseCreationDetails("case_type_id", "event_id", new Object());
 
     public static final CaseDetails THE_CASE = CaseDetails.builder()
         .id(CASE_ID)

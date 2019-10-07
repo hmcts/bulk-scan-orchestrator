@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.InvalidCa
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.TransformationErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
@@ -25,22 +26,27 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigPr
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceNotConfiguredException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.CASE_CREATION_DETAILS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.NEW_APPLICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.SUPPLEMENTARY_EVIDENCE;
@@ -319,6 +325,62 @@ class CreateCaseCallbackServiceTest {
         assertThat(output.get().getModifiedFields()).isEmpty();
         assertThat(output.get().getWarnings()).containsOnly("warning");
         assertThat(output.get().getErrors()).containsOnly("error");
+    }
+
+    @Test
+    void should_throw_Exception_when_ccdapi_throws_exception() throws Exception {
+        // given
+        setUpTransformationUrl();
+
+        when(ccdApi.startForCaseworker(
+            anyString(),
+            any(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString())
+        )
+            .thenReturn(StartEventResponse.builder().eventId("event_id").token("token").build());
+
+        doThrow(new RuntimeException("oh no")).when(ccdApi).submitForCaseworker(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyBoolean(),
+            any(CaseDataContent.class)
+        );
+
+        Map<String, Object> data = new HashMap<>();
+        // putting 6 via `ImmutableMap` is available from Java 9
+        data.put("poBox", "12345");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("formType", "Form1");
+        data.put("journeyClassification", "NEW_APPLICATION");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
+        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
+
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .id(1L)
+            .caseTypeId(CASE_TYPE_ID)
+            .jurisdiction("some jurisdiction")
+            .data(data)
+        );
+
+        when(transformationClient.transformExceptionRecord(anyString(), any(ExceptionRecord.class), any()))
+            .thenReturn(new SuccessfulTransformationResponse(CASE_CREATION_DETAILS, emptyList()));
+
+        // when
+        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+            EVENT_ID,
+            caseDetails,
+            true
+        ), IDAM_TOKEN, USER_ID);
+
+        // then
+        assertThat(output.isLeft()).isTrue();
     }
 
     @Test
