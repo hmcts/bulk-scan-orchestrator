@@ -74,6 +74,8 @@ class CreateCaseTest {
     public void should_create_case_from_valid_exception_record() throws Exception {
         // given
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/new-envelope-with-evidence.json");
+        exceptionRecord.setCreatedDate(null);
+        exceptionRecord.setLastModified(null);
 
         // when
         String caseCcdId = invokeCallbackEndpoint(exceptionRecord);
@@ -105,6 +107,7 @@ class CreateCaseTest {
         Response response = RestAssured
             .given()
             .relaxedHTTPSValidation()
+            .proxy("proxyout.reform.hmcts.net", 8080)
             .baseUri(testUrl)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .header(SyntheticHeaders.SYNTHETIC_TEST_SOURCE, "Bulk Scan Orchestrator Functional test")
@@ -141,7 +144,8 @@ class CreateCaseTest {
             .pollDelay(2, TimeUnit.SECONDS)
             .until(() -> lookUpExceptionRecord(poBox).isPresent());
 
-        return lookUpExceptionRecord(poBox).get();
+        CaseDetails caseDetails = lookUpExceptionRecord(poBox).get();
+        return caseDetails;
     }
 
     private Optional<CaseDetails> lookUpExceptionRecord(UUID poBox) {
