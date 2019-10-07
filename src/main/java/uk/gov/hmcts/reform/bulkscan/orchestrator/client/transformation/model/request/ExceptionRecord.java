@@ -17,11 +17,11 @@ public class ExceptionRecord {
     @JsonProperty("po_box_jurisdiction")
     public final String poBoxJurisdiction;
 
-    @JsonProperty("journey_classification")
-    public final Classification journeyClassification;
-
     @JsonProperty("form_type")
     public final String formType;
+
+    @JsonProperty("journey_classification")
+    public final Classification journeyClassification;
 
     @JsonProperty("delivery_date")
     public final LocalDateTime deliveryDate;
