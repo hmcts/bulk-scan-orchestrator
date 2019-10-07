@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.handler;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.handler;
 
 public enum MessageProcessingResultType {
     SUCCESS,

@@ -24,7 +24,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCas
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceNotConfiguredException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -47,9 +47,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.CASE_CREATION_DETAILS;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.EXCEPTION;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.NEW_APPLICATION;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.SUPPLEMENTARY_EVIDENCE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
 
 @ExtendWith(MockitoExtension.class)
 class CreateCaseCallbackServiceTest {
@@ -243,47 +243,7 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
-    void should_throw_InvalidCaseDataException_when_transformation_client_throws_exception()
-        throws IOException, CaseTransformationException {
-        // given
-        when(s2sTokenGenerator.generate()).thenReturn(randomUUID().toString());
-        setUpTransformationUrl();
-        Exception exception = new RuntimeException("Error message");
-        doThrow(exception)
-            .when(transformationClient)
-            .transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString());
-
-        Map<String, Object> data = new HashMap<>();
-        // putting 6 via `ImmutableMap` is available from Java 9
-        data.put("poBox", "12345");
-        data.put("journeyClassification", EXCEPTION.name());
-        data.put("formType", "Form1");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
-        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
-
-        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
-            .id(1L)
-            .caseTypeId(CASE_TYPE_ID)
-            .jurisdiction("some jurisdiction")
-            .data(data)
-        );
-
-        // when
-        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
-            caseDetails,
-            true
-        ), IDAM_TOKEN, USER_ID);
-
-        // then
-        assertThat(output.isLeft()).isTrue();
-        assertThat(output.getLeft()).containsOnly("Internal error. Error message");
-    }
-
-    @Test
-    void should_throw_Exception_when_transformation_client_returns_422()
+    void should_throw_InvalidCaseDataException_when_transformation_client_returns_422()
         throws IOException, CaseTransformationException {
         // given
         when(s2sTokenGenerator.generate()).thenReturn(randomUUID().toString());

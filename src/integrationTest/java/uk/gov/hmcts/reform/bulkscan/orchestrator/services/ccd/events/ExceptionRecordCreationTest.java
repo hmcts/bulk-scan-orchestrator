@@ -11,7 +11,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.EnvelopeEventProcessor;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeEventProcessor;
 
 import java.util.concurrent.TimeUnit;
 

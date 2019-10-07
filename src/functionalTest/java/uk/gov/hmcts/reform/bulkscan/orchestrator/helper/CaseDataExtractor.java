@@ -3,8 +3,8 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 import com.google.common.collect.ImmutableMap;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Document;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.time.Instant;
