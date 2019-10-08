@@ -24,6 +24,9 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.http.HttpStatus.OK;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_CREATE_NEW_CASE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 
 @IntegrationTest
 class CreateCaseCallbackTest {
@@ -53,8 +56,8 @@ class CreateCaseCallbackTest {
     void should_not_create_case_if_classification_new_application_without_ocr_data() {
         postWithBody(getRequestBody("invalid-new-application-without-ocr.json"))
             .statusCode(OK.value())
-            .body("errors", contains("Event createNewCase not allowed "
-                + "for the current journey classification NEW_APPLICATION without OCR"))
+            .body("errors", contains("Event " + EVENT_ID_CREATE_NEW_CASE + " not allowed "
+                + "for the current journey classification " + NEW_APPLICATION.name() + " without OCR"))
             .body("warnings", nullValue())
             .body("data", nullValue());
     }
@@ -63,8 +66,8 @@ class CreateCaseCallbackTest {
     void should_not_create_case_if_classification_exception_without_ocr_data() {
         postWithBody(getRequestBody("invalid-exception-without-ocr.json"))
             .statusCode(OK.value())
-            .body("errors", contains("Event createNewCase not allowed "
-                + "for the current journey classification EXCEPTION without OCR"))
+            .body("errors", contains("Event " + EVENT_ID_CREATE_NEW_CASE + " not allowed "
+                + "for the current journey classification " + EXCEPTION.name() + " without OCR"))
             .body("warnings", nullValue())
             .body("data", nullValue());
     }
@@ -125,7 +128,11 @@ class CreateCaseCallbackTest {
         givenThat(
             get(
                 // values from config + initial request body
-                "/caseworkers/" + USER_ID + "/jurisdictions/BULKSCAN/case-types/123/event-triggers/createNewCase/token"
+                "/caseworkers/"
+                    + USER_ID
+                    + "/jurisdictions/BULKSCAN/case-types/123/event-triggers/"
+                    + EVENT_ID_CREATE_NEW_CASE
+                    + "/token"
             )
             .withHeader("ServiceAuthorization", containing("Bearer"))
             .willReturn(okJson(startResponseBody))
