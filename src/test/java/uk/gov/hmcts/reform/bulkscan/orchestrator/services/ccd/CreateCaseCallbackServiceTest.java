@@ -41,6 +41,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_CREATE_NEW_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
@@ -48,7 +49,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 @ExtendWith(MockitoExtension.class)
 class CreateCaseCallbackServiceTest {
 
-    private static final String EVENT_ID = "createNewCase";
     private static final String IDAM_TOKEN = "idam-token";
     private static final String USER_ID = "user-id";
     private static final String SERVICE = "service";
@@ -100,7 +100,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
+            EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -117,7 +117,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
+            EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -136,7 +136,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
+            EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -154,7 +154,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
+            EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -188,7 +188,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
+            EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -196,7 +196,8 @@ class CreateCaseCallbackServiceTest {
         // then
         assertThat(output.isLeft()).isTrue();
         assertThat(output.getLeft()).containsOnly(
-            "Event " + EVENT_ID + " not allowed for the current journey classification NEW_APPLICATION without OCR"
+            "Event " + EVENT_ID_CREATE_NEW_CASE
+                + " not allowed for the current journey classification NEW_APPLICATION without OCR"
         );
     }
 
@@ -224,7 +225,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
+            EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -232,7 +233,8 @@ class CreateCaseCallbackServiceTest {
         // then
         assertThat(output.isLeft()).isTrue();
         assertThat(output.getLeft()).containsOnly(
-            "Event " + EVENT_ID + " not allowed for the current journey classification SUPPLEMENTARY_EVIDENCE"
+            "Event " + EVENT_ID_CREATE_NEW_CASE
+                + " not allowed for the current journey classification SUPPLEMENTARY_EVIDENCE"
         );
     }
 
@@ -269,7 +271,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
+            EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -303,7 +305,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
+            EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -336,7 +338,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
+            EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -381,7 +383,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
+            EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -431,7 +433,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
+            EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -468,7 +470,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
+            EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
