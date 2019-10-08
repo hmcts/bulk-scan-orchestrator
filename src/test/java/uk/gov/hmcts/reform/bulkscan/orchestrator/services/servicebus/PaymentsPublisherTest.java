@@ -70,9 +70,10 @@ class PaymentsPublisherTest {
 
         String messageBodyJson = new String(MessageBodyRetriever.getBinaryData(message.getMessageBody()));
         String expectedMessageBodyJson = String.format(
-            "{\"ccd_reference\":\"%s\", \"jurisdiction\":\"%s\", \"service\":\"%s\", \"po_box\":\"%s\", "
-                + "\"is_exception_record\":%s, "
+            "{\"envelope_id\":\"%s\", \"ccd_reference\":\"%s\", \"jurisdiction\":\"%s\", \"service\":\"%s\", "
+                + "\"po_box\":\"%s\", " + "\"is_exception_record\":%s, "
                 + "\"payments\":[{\"document_control_number\":\"%s\"}]}",
+            paymentsData.envelopeId,
             paymentsData.ccdReference,
             paymentsData.jurisdiction,
             paymentsData.service,
@@ -104,6 +105,7 @@ class PaymentsPublisherTest {
 
     private PaymentsData getPaymentsData(boolean isExceptionRecord) {
         return new PaymentsData(
+            "envelope-id",
                 Long.toString(10L),
                 "jurisdiction",
                 "service",
