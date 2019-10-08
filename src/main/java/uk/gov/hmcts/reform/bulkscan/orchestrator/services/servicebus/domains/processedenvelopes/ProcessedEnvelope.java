@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
