@@ -25,6 +25,7 @@ public class PaymentsProcessor {
     public void processPayments(Envelope envelope, Long ccdId, boolean isExceptionRecord) {
         if (envelope.payments != null && !envelope.payments.isEmpty()) {
             PaymentsData paymentsData = new PaymentsData(
+                envelope.id,
                 Long.toString(ccdId),
                 envelope.jurisdiction,
                 envelope.container,
