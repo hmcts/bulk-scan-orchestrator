@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentType;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ScannedDocument;
@@ -199,7 +200,11 @@ public class TransformationClientTest {
             singletonList(new ScannedDocument(
                 DocumentType.CHERISHED,
                 "D8",
-                "http://locahost",
+                new DocumentUrl(
+                    "http://locahost",
+                    "http://locahost/binary",
+                    "file1.pdf"
+                ),
                 "1234",
                 "file1.pdf",
                 now(),
