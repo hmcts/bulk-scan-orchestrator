@@ -42,20 +42,20 @@ class PaymentsProcessorTest {
             emptyList(),
             emptyList()
         );
-        ArgumentCaptor<CreatePaymentsCommand> paymentsDataCaptor = ArgumentCaptor.forClass(CreatePaymentsCommand.class);
+        ArgumentCaptor<CreatePaymentsCommand> cmdCaptor = ArgumentCaptor.forClass(CreatePaymentsCommand.class);
 
         // when
         paymentsProcessor.processPayments(envelope, CCD_REFERENCE, true);
 
         // then
-        verify(paymentsPublisher).send(paymentsDataCaptor.capture());
-        CreatePaymentsCommand createPaymentsCommand = paymentsDataCaptor.getValue();
-        assertThat(createPaymentsCommand.ccdReference).isEqualTo(Long.toString(CCD_REFERENCE));
-        assertThat(createPaymentsCommand.jurisdiction).isEqualTo(envelope.jurisdiction);
-        assertThat(createPaymentsCommand.poBox).isEqualTo(envelope.poBox);
-        assertThat(createPaymentsCommand.isExceptionRecord).isTrue();
-        assertThat(createPaymentsCommand.payments.size()).isEqualTo(envelope.payments.size());
-        assertThat(createPaymentsCommand.payments.get(0).documentControlNumber)
+        verify(paymentsPublisher).send(cmdCaptor.capture());
+        CreatePaymentsCommand cmd = cmdCaptor.getValue();
+        assertThat(cmd.ccdReference).isEqualTo(Long.toString(CCD_REFERENCE));
+        assertThat(cmd.jurisdiction).isEqualTo(envelope.jurisdiction);
+        assertThat(cmd.poBox).isEqualTo(envelope.poBox);
+        assertThat(cmd.isExceptionRecord).isTrue();
+        assertThat(cmd.payments.size()).isEqualTo(envelope.payments.size());
+        assertThat(cmd.payments.get(0).documentControlNumber)
             .isEqualTo(envelope.payments.get(0).documentControlNumber);
     }
 
