@@ -195,9 +195,10 @@ class CreateCaseCallbackServiceTest {
 
         // then
         assertThat(output.isLeft()).isTrue();
-        assertThat(output.getLeft()).containsOnly(
-            "Event " + EVENT_ID_CREATE_NEW_CASE
-                + " not allowed for the current journey classification NEW_APPLICATION without OCR"
+        assertThat(output.getLeft()).containsOnly("Event " + EVENT_ID_CREATE_NEW_CASE
+            + " not allowed for the current journey classification "
+            + NEW_APPLICATION.name()
+            + " without OCR"
         );
     }
 
@@ -232,9 +233,10 @@ class CreateCaseCallbackServiceTest {
 
         // then
         assertThat(output.isLeft()).isTrue();
-        assertThat(output.getLeft()).containsOnly(
-            "Event " + EVENT_ID_CREATE_NEW_CASE
-                + " not allowed for the current journey classification SUPPLEMENTARY_EVIDENCE"
+        assertThat(output.getLeft()).containsOnly("Event "
+            + EVENT_ID_CREATE_NEW_CASE
+            + " not allowed for the current journey classification "
+            + SUPPLEMENTARY_EVIDENCE.name()
         );
     }
 
@@ -368,7 +370,7 @@ class CreateCaseCallbackServiceTest {
         Map<String, Object> data = new HashMap<>();
 
         data.put("poBox", "12345");
-        data.put("journeyClassification", "EXCEPTION");
+        data.put("journeyClassification", EXCEPTION.name());
         data.put("formType", "Form1");
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
@@ -415,7 +417,7 @@ class CreateCaseCallbackServiceTest {
         Map<String, Object> data = new HashMap<>();
 
         data.put("poBox", "12345");
-        data.put("journeyClassification", "EXCEPTION");
+        data.put("journeyClassification", EXCEPTION.name());
         data.put("formType", "Form1");
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
@@ -455,7 +457,7 @@ class CreateCaseCallbackServiceTest {
         Map<String, Object> data = new HashMap<>();
 
         data.put("poBox", "12345");
-        data.put("journeyClassification", "EXCEPTION");
+        data.put("journeyClassification", EXCEPTION.name());
         data.put("formType", null);
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
