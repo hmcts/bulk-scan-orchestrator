@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentType;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ScannedDocument;
@@ -153,10 +154,15 @@ public class CreateCaseValidator {
 
     @SuppressWarnings("unchecked")
     private ScannedDocument mapScannedDocument(Map<String, Object> document) {
+        Map<String, String> ccdUrl = (Map<String, String>) document.get("url");
         return new ScannedDocument(
             DocumentType.valueOf(((String) document.get("type")).toUpperCase()),
             (String) document.get("subType"),
-            ((Map<String, String>) document.get("url")).get("document_url"),
+            new DocumentUrl(
+                ccdUrl.get("document_url"),
+                ccdUrl.get("document_binary_url"),
+                ccdUrl.get("document_filename")
+            ),
             (String) document.get("controlNumber"),
             (String) document.get("fileName"),
             LocalDateTime.parse((String) document.get("scannedDate"), FORMATTER),

@@ -27,6 +27,7 @@ public class PaymentsProcessor {
             PaymentsData paymentsData = new PaymentsData(
                 Long.toString(ccdId),
                 envelope.jurisdiction,
+                envelope.container,
                 envelope.poBox,
                 isExceptionRecord,
                 envelope.payments.stream()
