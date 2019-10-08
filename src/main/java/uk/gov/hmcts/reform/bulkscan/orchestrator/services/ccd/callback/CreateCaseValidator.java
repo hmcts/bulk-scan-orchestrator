@@ -9,10 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentType;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ScannedDocument;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ScannedDocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -154,13 +154,14 @@ public class CreateCaseValidator {
 
     @SuppressWarnings("unchecked")
     private ScannedDocument mapScannedDocument(Map<String, Object> document) {
+        Map<String, String> ccdUrl = (Map<String, String>) document.get("url");
         return new ScannedDocument(
             DocumentType.valueOf(((String) document.get("type")).toUpperCase()),
             (String) document.get("subType"),
-            new ScannedDocumentUrl(
-                ((Map<String, String>) document.get("url")).get("document_url"),
-                ((Map<String, String>) document.get("url")).get("document_filename"),
-                ((Map<String, String>) document.get("url")).get("document_binary_url")
+            new DocumentUrl(
+                ccdUrl.get("document_url"),
+                ccdUrl.get("document_binary_url"),
+                ccdUrl.get("document_filename")
             ),
             (String) document.get("controlNumber"),
             (String) document.get("fileName"),

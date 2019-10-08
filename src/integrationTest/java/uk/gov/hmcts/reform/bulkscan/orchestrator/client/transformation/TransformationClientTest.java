@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentType;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ScannedDocument;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ScannedDocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
@@ -71,7 +71,7 @@ public class TransformationClientTest {
         CaseCreationDetails caseCreationDetails = response.caseCreationDetails;
         assertThat(caseCreationDetails).isNotNull();
         assertThat(caseCreationDetails.caseTypeId).isEqualTo("some_case_type");
-        assertThat(caseCreationDetails.eventId).isEqualTo("createNewCase");
+        assertThat(caseCreationDetails.eventId).isEqualTo("createCase");
         assertThat(caseCreationDetails.caseData).isNotNull();
     }
 
@@ -200,10 +200,10 @@ public class TransformationClientTest {
             singletonList(new ScannedDocument(
                 DocumentType.CHERISHED,
                 "D8",
-                new ScannedDocumentUrl(
+                new DocumentUrl(
                     "http://locahost",
-                    "file1.pdf",
-                    "http://locahost/binary"
+                    "http://locahost/binary",
+                    "file1.pdf"
                 ),
                 "1234",
                 "file1.pdf",
@@ -221,7 +221,7 @@ public class TransformationClientTest {
         return new JSONObject()
             .put("case_creation_details", new JSONObject()
                 .put("case_type_id", "some_case_type")
-                .put("event_id", "createNewCase")
+                .put("event_id", "createCase")
                 .put(
                     "case_data",
                     new JSONObject()
