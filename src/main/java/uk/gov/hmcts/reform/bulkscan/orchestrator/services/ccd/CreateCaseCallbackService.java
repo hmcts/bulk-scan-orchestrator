@@ -88,6 +88,9 @@ public class CreateCaseCallbackService {
                 .flatMap(Function.identity())
                 .toEither()
                 .mapLeft(Seq::asJava)
+            )
+            .peekLeft(warnings ->
+                log.warn("Warnings found during callback process:\n  - {}", String.join("\n  - ", warnings))
             );
     }
 
