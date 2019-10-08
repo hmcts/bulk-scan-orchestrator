@@ -83,6 +83,9 @@ locals {
     TRANSFORMATION_URL_BULKSCAN = "${var.transformation_url_bulkscan}"
     TRANSFORMATION_URL_PROBATE  = "${var.transformation_url_probate}"
     // endregion
+
+    // TMP
+    CCD_LOG_LEVEL = "${var.ccd-feign-logging}"
   }
 }
 
