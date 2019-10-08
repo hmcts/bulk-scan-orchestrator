@@ -28,6 +28,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.verify;
 
+@SuppressWarnings("checkstyle:LineLength")
 @ExtendWith(MockitoExtension.class)
 class PaymentsPublisherTest {
 
