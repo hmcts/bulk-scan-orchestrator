@@ -6,6 +6,9 @@ import java.util.List;
 
 public class CreatePaymentsCommand {
 
+    @JsonProperty("envelope_id")
+    public final String envelopeId;
+
     @JsonProperty("ccd_reference")
     public final String ccdReference;
 
@@ -25,6 +28,7 @@ public class CreatePaymentsCommand {
     public final List<PaymentData> payments;
 
     public CreatePaymentsCommand(
+        String envelopeId,
         String ccdReference,
         String jurisdiction,
         String service,
@@ -32,6 +36,7 @@ public class CreatePaymentsCommand {
         boolean isExceptionRecord,
         List<PaymentData> payments
     ) {
+        this.envelopeId = envelopeId;
         this.ccdReference = ccdReference;
         this.jurisdiction = jurisdiction;
         this.service = service;
