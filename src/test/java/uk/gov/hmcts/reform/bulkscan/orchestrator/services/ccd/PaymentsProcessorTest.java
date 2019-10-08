@@ -7,10 +7,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.PaymentsPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Payment;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.PaymentsData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublisher;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentsData;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -62,7 +62,8 @@ class PaymentsProcessorTest {
     @Test
     void does_not_call_payments_publisher_if_envelope_contains_zero_payments() {
         // given
-        Envelope envelope = SampleData.envelope(1,
+        Envelope envelope = SampleData.envelope(
+            1,
             emptyList(),
             emptyList(),
             emptyList()
