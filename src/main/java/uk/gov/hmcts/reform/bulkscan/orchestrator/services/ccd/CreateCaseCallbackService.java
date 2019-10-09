@@ -33,7 +33,6 @@ import java.util.function.Function;
 import static java.util.Collections.emptyList;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_CREATE_NEW_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isCreateNewCaseEvent;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.CASE_REFERENCE;
 
@@ -201,7 +200,8 @@ public class CreateCaseCallbackService {
             userId,
             jurisdiction,
             caseCreationDetails.caseTypeId,
-            EVENT_ID_CREATE_NEW_CASE
+            // when onboarding remind services to not configure about to submit callback for this event
+            caseCreationDetails.eventId
         );
 
         return ccdApi.submitForCaseworker(
