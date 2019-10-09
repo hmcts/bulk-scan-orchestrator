@@ -9,8 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.CreatePaymentsCommand;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.UpdatePaymentsCommand;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentCommand;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -35,23 +34,14 @@ public class PaymentsPublisher implements IPaymentsPublisher {
     }
 
     @Override
-    public void send(CreatePaymentsCommand cmd) {
-        send(cmd, Labels.CREATE);
-    }
-
-    @Override
-    public void send(UpdatePaymentsCommand cmd) {
-        send(cmd, Labels.UPDATE);
-    }
-
-    private void send(Object cmd, String label) {
+    public void send(PaymentCommand cmd) {
         try {
             IMessage message = new Message(
                 UUID.randomUUID().toString(),
                 objectMapper.writeValueAsString(cmd),
                 APPLICATION_JSON.toString()
             );
-            message.setLabel(label);
+            message.setLabel(cmd.getLabel());
 
             queueClient.scheduleMessage(message, Instant.now().plusSeconds(10));
 

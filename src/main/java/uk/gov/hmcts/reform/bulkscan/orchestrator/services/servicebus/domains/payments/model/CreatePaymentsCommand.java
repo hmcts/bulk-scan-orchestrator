@@ -1,10 +1,11 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.Labels;
 
 import java.util.List;
 
-public class CreatePaymentsCommand {
+public class CreatePaymentsCommand implements PaymentCommand {
 
     @JsonProperty("envelope_id")
     public final String envelopeId;
@@ -43,5 +44,10 @@ public class CreatePaymentsCommand {
         this.poBox = poBox;
         this.isExceptionRecord = isExceptionRecord;
         this.payments = payments;
+    }
+
+    @Override
+    public String getLabel() {
+        return Labels.CREATE;
     }
 }
