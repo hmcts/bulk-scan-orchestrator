@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import feign.FeignException;
 import io.vavr.collection.Array;
 import io.vavr.collection.Seq;
 import io.vavr.control.Either;
@@ -228,6 +229,9 @@ public class CreateCaseCallbackService {
                 caseCreated
             ).getId();
             return ccdRef;
+        } catch (FeignException ex) {
+            String desc = ex.content() != null ? ex.contentUTF8() : ex.getMessage();
+            throw new RuntimeException(desc, ex);
         } catch (Exception ex) {
             throw new RuntimeException(caseCreated.getCaseReference() + "," + caseCreated.getEventToken() + ","
                 + caseCreated.getEvent() + "," + caseCreated.getData().getClass().getName()
