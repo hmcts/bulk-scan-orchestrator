@@ -30,7 +30,7 @@
     },
     {
       "metadata_field_name": "email",
-      "metadata_field_value": "value3"
+      "metadata_field_value": "hello@test.com"
     }
   ],
   "ocr_data_validation_warnings": [
