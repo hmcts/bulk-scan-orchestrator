@@ -13,10 +13,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.Labels;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.CreatePaymentsCommand;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentData;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentsData;
 
 import java.time.Instant;
 
@@ -27,6 +28,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.verify;
 
+@SuppressWarnings("checkstyle:LineLength")
 @ExtendWith(MockitoExtension.class)
 class PaymentsPublisherTest {
 
@@ -49,13 +51,13 @@ class PaymentsPublisherTest {
 
     @ParameterizedTest
     @MethodSource("getIsExceptionRecord")
-    void notify_should_send_message_with_right_content(boolean isExceptionRecord) throws Exception {
+    void sending_create_command_should_send_message_with_right_content(boolean isExceptionRecord) throws Exception {
         // given
-        PaymentsData paymentsData = getPaymentsData(isExceptionRecord);
+        CreatePaymentsCommand cmd = getCreatePaymentsCommand(isExceptionRecord);
         Instant startTime = Instant.now();
 
         // when
-        paymentsPublisher.publishPayments(paymentsData);
+        paymentsPublisher.send(cmd);
 
         // then
         ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
@@ -67,51 +69,54 @@ class PaymentsPublisherTest {
 
         Message message = messageCaptor.getValue();
 
-        assertThat(message.getMessageId()).isEqualTo(paymentsData.ccdReference);
+        assertThat(message.getMessageId()).isEqualTo(cmd.ccdReference);
         assertThat(message.getContentType()).isEqualTo("application/json");
+        assertThat(message.getLabel()).isEqualTo(Labels.CREATE);
 
         String messageBodyJson = new String(MessageBodyRetriever.getBinaryData(message.getMessageBody()));
         String expectedMessageBodyJson = String.format(
-            "{\"ccd_reference\":\"%s\", \"jurisdiction\":\"%s\", \"service\":\"%s\", \"po_box\":\"%s\", "
-                + "\"is_exception_record\":%s, "
+            "{\"envelope_id\":\"%s\", \"ccd_reference\":\"%s\", \"jurisdiction\":\"%s\", \"service\":\"%s\", "
+                + "\"po_box\":\"%s\", " + "\"is_exception_record\":%s, "
                 + "\"payments\":[{\"document_control_number\":\"%s\"}]}",
-            paymentsData.ccdReference,
-            paymentsData.jurisdiction,
-            paymentsData.service,
-            paymentsData.poBox,
-            Boolean.toString(paymentsData.isExceptionRecord),
-            paymentsData.payments.get(0).documentControlNumber
+            cmd.envelopeId,
+            cmd.ccdReference,
+            cmd.jurisdiction,
+            cmd.service,
+            cmd.poBox,
+            Boolean.toString(cmd.isExceptionRecord),
+            cmd.payments.get(0).documentControlNumber
         );
         JSONAssert.assertEquals(expectedMessageBodyJson, messageBodyJson, JSONCompareMode.LENIENT);
     }
 
     @ParameterizedTest
     @MethodSource("getIsExceptionRecord")
-    void notify_should_throw_exception_when_queue_client_fails(boolean isExceptionRecord) throws Exception {
-        PaymentsData paymentsData = getPaymentsData(isExceptionRecord);
+    void sending_create_command_should_throw_exception_when_queue_client_fails(boolean isExceptionRecord) throws Exception {
+        CreatePaymentsCommand cmd = getCreatePaymentsCommand(isExceptionRecord);
 
         ServiceBusException exceptionToThrow = new ServiceBusException(true, "test exception");
         willThrow(exceptionToThrow).given(queueClient).scheduleMessage(any(), any());
 
-        assertThatThrownBy(() -> paymentsPublisher.publishPayments(paymentsData))
+        assertThatThrownBy(() -> paymentsPublisher.send(cmd))
             .isInstanceOf(PaymentsPublishingException.class)
             .hasMessage(
                 String.format(
                     "An error occurred when trying to publish payments for CCD Ref %s",
-                    paymentsData.ccdReference
+                    cmd.ccdReference
                 )
             )
             .hasCause(exceptionToThrow);
     }
 
-    private PaymentsData getPaymentsData(boolean isExceptionRecord) {
-        return new PaymentsData(
-                Long.toString(10L),
-                "jurisdiction",
-                "service",
-                "pobox",
-                isExceptionRecord,
-                asList(new PaymentData("dcn1"))
-            );
+    private CreatePaymentsCommand getCreatePaymentsCommand(boolean isExceptionRecord) {
+        return new CreatePaymentsCommand(
+            "envelope-id",
+            Long.toString(10L),
+            "jurisdiction",
+            "service",
+            "pobox",
+            isExceptionRecord,
+            asList(new PaymentData("dcn1"))
+        );
     }
 }

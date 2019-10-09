@@ -31,6 +31,9 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 @IntegrationTest
 class CreateCaseCallbackTest {
 
+    // event id used for service specific case creation
+    private static final String EVENT_ID = "createCase";
+
     private static final String IDAM_TOKEN = "idam-token";
     private static final String USER_ID = "user-id";
 
@@ -131,7 +134,7 @@ class CreateCaseCallbackTest {
                 "/caseworkers/"
                     + USER_ID
                     + "/jurisdictions/BULKSCAN/case-types/123/event-triggers/"
-                    + EVENT_ID_CREATE_NEW_CASE
+                    + EVENT_ID
                     + "/token"
             )
             .withHeader("ServiceAuthorization", containing("Bearer"))

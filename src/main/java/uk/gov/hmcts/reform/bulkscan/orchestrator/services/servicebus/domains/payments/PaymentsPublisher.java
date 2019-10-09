@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentsData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.CreatePaymentsCommand;
 
 import java.time.Instant;
 
@@ -33,23 +33,24 @@ public class PaymentsPublisher implements IPaymentsPublisher {
     }
 
     @Override
-    public void publishPayments(PaymentsData paymentsData) {
+    public void send(CreatePaymentsCommand cmd) {
         try {
-            String messageBody = objectMapper.writeValueAsString(paymentsData);
+            String messageBody = objectMapper.writeValueAsString(cmd);
 
             IMessage message = new Message(
-                paymentsData.ccdReference,
+                cmd.ccdReference,
                 messageBody,
                 APPLICATION_JSON.toString()
             );
+            message.setLabel(Labels.CREATE);
 
             queueClient.scheduleMessage(message, Instant.now().plusSeconds(10));
 
-            LOG.info("Sent message to payments queue. CCD Reference: {}", paymentsData.ccdReference);
+            LOG.info("Sent message to payments queue. CCD Reference: {}", cmd.ccdReference);
         } catch (Exception ex) {
             throw new PaymentsPublishingException(
                 String.format(
-                    "An error occurred when trying to publish payments for CCD Ref %s", paymentsData.ccdReference
+                    "An error occurred when trying to publish payments for CCD Ref %s", cmd.ccdReference
                 ),
                 ex
             );
