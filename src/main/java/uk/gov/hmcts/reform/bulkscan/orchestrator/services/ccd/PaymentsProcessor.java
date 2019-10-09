@@ -5,8 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.IPaymentsPublisher;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.CreatePaymentsCommand;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentData;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentsData;
 
 import static java.util.stream.Collectors.toList;
 
@@ -24,7 +24,7 @@ public class PaymentsProcessor {
 
     public void processPayments(Envelope envelope, Long ccdId, boolean isExceptionRecord) {
         if (envelope.payments != null && !envelope.payments.isEmpty()) {
-            PaymentsData paymentsData = new PaymentsData(
+            CreatePaymentsCommand cmd = new CreatePaymentsCommand(
                 envelope.id,
                 Long.toString(ccdId),
                 envelope.jurisdiction,
@@ -36,9 +36,9 @@ public class PaymentsProcessor {
                     .collect(toList())
             );
 
-            LOG.info("Started processing payments for case with CCD reference {}", paymentsData.ccdReference);
-            paymentsPublisher.publishPayments(paymentsData);
-            LOG.info("Finished processing payments for case with CCD reference {}", paymentsData.ccdReference);
+            LOG.info("Started processing payments for case with CCD reference {}", cmd.ccdReference);
+            paymentsPublisher.send(cmd);
+            LOG.info("Finished processing payments for case with CCD reference {}", cmd.ccdReference);
         }
     }
 }

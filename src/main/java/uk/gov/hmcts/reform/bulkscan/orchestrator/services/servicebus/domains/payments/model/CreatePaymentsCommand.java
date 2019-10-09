@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
-public class PaymentsData {
+public class CreatePaymentsCommand {
 
     @JsonProperty("envelope_id")
     public final String envelopeId;
@@ -27,7 +27,7 @@ public class PaymentsData {
     @JsonProperty("payments")
     public final List<PaymentData> payments;
 
-    public PaymentsData(
+    public CreatePaymentsCommand(
         String envelopeId,
         String ccdReference,
         String jurisdiction,
