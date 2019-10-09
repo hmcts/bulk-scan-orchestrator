@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class UpdatePaymentsCommand {
 
-    @JsonProperty("exception_ref")
+    @JsonProperty("exception_record_ref")
     public final String exceptionRecordRef;
 
     @JsonProperty("new_case_ref")
