@@ -6,5 +6,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.pay
 public interface IPaymentsPublisher {
 
     void send(CreatePaymentsCommand createPaymentsCommand);
+
     void send(UpdatePaymentsCommand updatePaymentsCommand);
 }
