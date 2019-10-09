@@ -1,11 +1,8 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments;
 
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.CreatePaymentsCommand;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.UpdatePaymentsCommand;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentCommand;
 
 public interface IPaymentsPublisher {
 
-    void send(CreatePaymentsCommand createPaymentsCommand);
-
-    void send(UpdatePaymentsCommand updatePaymentsCommand);
+    void send(PaymentCommand cmd);
 }
