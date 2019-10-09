@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import feign.FeignException;
 import io.vavr.control.Either;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,6 +44,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -307,6 +309,67 @@ class CreateCaseCallbackServiceTest {
             .thenReturn(StartEventResponse.builder().eventId("event_id").token("token").build());
 
         doThrow(new RuntimeException("oh no")).when(ccdApi).submitForCaseworker(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyBoolean(),
+            any(CaseDataContent.class)
+        );
+
+        Map<String, Object> data = new HashMap<>();
+        // putting 6 via `ImmutableMap` is available from Java 9
+        data.put("poBox", "12345");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("formType", "Form1");
+        data.put("journeyClassification", "NEW_APPLICATION");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
+        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
+
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .id(1L)
+            .caseTypeId(CASE_TYPE_ID)
+            .jurisdiction("some jurisdiction")
+            .data(data)
+        );
+
+        when(transformationClient.transformExceptionRecord(anyString(), any(ExceptionRecord.class), any()))
+            .thenReturn(new SuccessfulTransformationResponse(CASE_CREATION_DETAILS, emptyList()));
+
+        // when
+        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+            EVENT_ID_CREATE_NEW_CASE,
+            caseDetails,
+            true
+        ), IDAM_TOKEN, USER_ID);
+
+        // then
+        assertThat(output.isLeft()).isTrue();
+    }
+
+
+    @Test
+    void should_throw_Exception_when_ccdapi_throws_feign_exception() throws Exception {
+        // given
+        setUpTransformationUrl();
+
+        when(ccdApi.startForCaseworker(
+            anyString(),
+            any(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString())
+        )
+            .thenReturn(StartEventResponse.builder().eventId("event_id").token("token").build());
+
+        FeignException feignException = mock(FeignException.class);
+        when(feignException.content()).thenReturn("message".getBytes());
+        when(feignException.contentUTF8()).thenReturn("message");
+        when(feignException.getMessage()).thenReturn("message");
+        doThrow(feignException).when(ccdApi).submitForCaseworker(
             anyString(),
             anyString(),
             anyString(),
