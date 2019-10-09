@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.Message;
 import com.microsoft.azure.servicebus.QueueClient;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -18,6 +20,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.pay
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.CreatePaymentsCommand;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.UpdatePaymentsCommand;
 
 import java.time.Instant;
 
@@ -33,7 +36,7 @@ import static org.mockito.Mockito.verify;
 class PaymentsPublisherTest {
 
     private static Object[][] getIsExceptionRecord() {
-        return new Object[][]{
+        return new Object[][] {
             {true},
             {false}
         };
@@ -69,7 +72,6 @@ class PaymentsPublisherTest {
 
         Message message = messageCaptor.getValue();
 
-        assertThat(message.getMessageId()).isEqualTo(cmd.ccdReference);
         assertThat(message.getContentType()).isEqualTo("application/json");
         assertThat(message.getLabel()).isEqualTo(Labels.CREATE);
 
@@ -99,13 +101,46 @@ class PaymentsPublisherTest {
 
         assertThatThrownBy(() -> paymentsPublisher.send(cmd))
             .isInstanceOf(PaymentsPublishingException.class)
-            .hasMessage(
-                String.format(
-                    "An error occurred when trying to publish payments for CCD Ref %s",
-                    cmd.ccdReference
-                )
-            )
+            .hasMessageContaining("An error occurred when trying to publish message to payments queue.")
             .hasCause(exceptionToThrow);
+    }
+
+    @Test
+    void sending_update_command_should_message_with_correct_content() throws Exception {
+        // given
+        UpdatePaymentsCommand cmd =
+            new UpdatePaymentsCommand(
+                "er-ref",
+                "new-case-ref",
+                "envelope-id",
+                "service",
+                "jurisdiction"
+            );
+
+        // when
+        paymentsPublisher.send(cmd);
+
+        // then
+        ArgumentCaptor<IMessage> messageCaptor = ArgumentCaptor.forClass(IMessage.class);
+        verify(queueClient).scheduleMessage(messageCaptor.capture(), any());
+
+        IMessage msg = messageCaptor.getValue();
+
+        assertThat(msg.getLabel()).isEqualTo(Labels.UPDATE);
+
+        JSONAssert.assertEquals(
+            (
+                "{"
+                    + "'exception_record_ref': 'er-ref',"
+                    + "'new_case_ref': 'new-case-ref',"
+                    + "'envelope_id': 'envelope-id',"
+                    + "'service': 'service',"
+                    + "'jurisdiction': 'jurisdiction'"
+                    + "}"
+            ).replace("'", "\""),
+            new String(MessageBodyRetriever.getBinaryData(msg.getMessageBody())),
+            JSONCompareMode.LENIENT
+        );
     }
 
     private CreatePaymentsCommand getCreatePaymentsCommand(boolean isExceptionRecord) {

@@ -73,7 +73,7 @@ class PaymentsProcessorTest {
         paymentsProcessor.processPayments(envelope, CCD_REFERENCE, true);
 
         // then
-        verify(paymentsPublisher, never()).send(any());
+        verify(paymentsPublisher, never()).send(any(CreatePaymentsCommand.class));
     }
 
     @Test
@@ -90,6 +90,6 @@ class PaymentsProcessorTest {
         paymentsProcessor.processPayments(envelope, CCD_REFERENCE, true);
 
         // then
-        verify(paymentsPublisher, never()).send(any());
+        verify(paymentsPublisher, never()).send(any(CreatePaymentsCommand.class));
     }
 }

@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.IPaymentsPublisher;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.CreatePaymentsCommand;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.UpdatePaymentsCommand;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.IProcessedEnvelopeNotifier;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.ConnectionException;
 
@@ -64,7 +66,16 @@ public class FunctionalQueueConfig {
     @Profile("nosb") // apply only when Service Bus should not be used
     IPaymentsPublisher testPaymentsPublisher() {
         // return implementation that does nothing
-        return paymentsData -> {
+        return new IPaymentsPublisher() {
+            @Override
+            public void send(CreatePaymentsCommand createPaymentsCommand) {
+                // nosb
+            }
+
+            @Override
+            public void send(UpdatePaymentsCommand updatePaymentsCommand) {
+                // nosb
+            }
         };
     }
 

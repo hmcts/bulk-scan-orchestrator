@@ -10,8 +10,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.CreatePaymentsCommand;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.UpdatePaymentsCommand;
 
 import java.time.Instant;
+import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
@@ -34,24 +36,30 @@ public class PaymentsPublisher implements IPaymentsPublisher {
 
     @Override
     public void send(CreatePaymentsCommand cmd) {
-        try {
-            String messageBody = objectMapper.writeValueAsString(cmd);
+        send(cmd, Labels.CREATE);
+    }
 
+    @Override
+    public void send(UpdatePaymentsCommand cmd) {
+        send(cmd, Labels.UPDATE);
+    }
+
+    private void send(Object cmd, String label) {
+        try {
             IMessage message = new Message(
-                cmd.ccdReference,
-                messageBody,
+                UUID.randomUUID().toString(),
+                objectMapper.writeValueAsString(cmd),
                 APPLICATION_JSON.toString()
             );
-            message.setLabel(Labels.CREATE);
+            message.setLabel(label);
 
             queueClient.scheduleMessage(message, Instant.now().plusSeconds(10));
 
-            LOG.info("Sent message to payments queue. CCD Reference: {}", cmd.ccdReference);
+            LOG.info("Sent message to payments queue. ID: {}, Label: {}", message.getMessageId(), message.getLabel());
+
         } catch (Exception ex) {
             throw new PaymentsPublishingException(
-                String.format(
-                    "An error occurred when trying to publish payments for CCD Ref %s", cmd.ccdReference
-                ),
+                "An error occurred when trying to publish message to payments queue.",
                 ex
             );
         }
