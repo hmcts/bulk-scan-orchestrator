@@ -229,13 +229,18 @@ public class CreateCaseCallbackService {
                 caseCreated
             ).getId();
             return ccdRef;
-        } catch (FeignException ex) {
-            String desc = ex.content() != null ? ex.contentUTF8() : ex.getMessage();
-            throw new RuntimeException(desc, ex);
         } catch (Exception ex) {
-            throw new RuntimeException(caseCreated.getCaseReference() + "," + caseCreated.getEventToken() + ","
-                + caseCreated.getEvent() + "," + caseCreated.getData().getClass().getName()
-                + "," + caseCreated.getData() + "," + ex.getMessage(), ex);
+            throw processException(caseCreated, ex);
         }
+    }
+
+    public RuntimeException processException(CaseDataContent caseCreated, Exception ex) {
+        if (ex instanceof FeignException) {
+            String desc = ((FeignException)ex).content() != null ? ((FeignException)ex).contentUTF8() : ex.getMessage();
+            return new RuntimeException(desc, ex);
+        }
+        return new RuntimeException(caseCreated.getCaseReference() + "," + caseCreated.getEventToken() + ","
+            + caseCreated.getEvent() + "," + caseCreated.getData().getClass().getName()
+            + "," + caseCreated.getData() + "," + ex.getMessage(), ex);
     }
 }
