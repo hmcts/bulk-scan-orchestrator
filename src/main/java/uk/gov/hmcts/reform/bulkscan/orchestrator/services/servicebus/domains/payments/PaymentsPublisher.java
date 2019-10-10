@@ -37,7 +37,7 @@ public class PaymentsPublisher implements IPaymentsPublisher {
     public void send(PaymentCommand cmd) {
         try {
             final String messageContent = objectMapper.writeValueAsString(cmd);
-            
+
             IMessage message = new Message(
                 UUID.randomUUID().toString(),
                 messageContent,
