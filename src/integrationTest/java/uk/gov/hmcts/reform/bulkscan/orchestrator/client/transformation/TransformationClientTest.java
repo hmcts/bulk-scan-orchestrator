@@ -20,6 +20,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.env
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.forbidden;
+import static com.github.tomakehurst.wiremock.client.WireMock.matching;
+import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.serverError;
@@ -55,6 +57,7 @@ public class TransformationClientTest {
         stubFor(
             post(urlPathMatching(TRANSFORM_EXCEPTION_RECORD_URL))
                 .withHeader("ServiceAuthorization", equalTo(s2sToken))
+                .withRequestBody(matchingJsonPath("scanned_documents[0].type", matching("[a-z]+")))
                 .willReturn(okJson(successResponse().toString()))
         );
 
