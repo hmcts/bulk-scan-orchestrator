@@ -5,10 +5,10 @@ import io.vavr.control.Validation;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -21,9 +21,9 @@ import javax.annotation.Nonnull;
 import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
 import static java.lang.String.format;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.EXCEPTION;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.NEW_APPLICATION;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.SUPPLEMENTARY_EVIDENCE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
 
 public final class CallbackValidations {
 
@@ -34,7 +34,8 @@ public final class CallbackValidations {
 
     private static final Logger log = LoggerFactory.getLogger(CallbackValidations.class);
 
-    private static final DateTimeFormatter FORMATTER = new DateTimeFormatterBuilder()
+    // todo review usage
+    public static final DateTimeFormatter FORMATTER = new DateTimeFormatterBuilder()
         // date/time
         .append(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
         // optional offset
@@ -237,11 +238,11 @@ public final class CallbackValidations {
         return valid(classification);
     }
 
-    public static Validation<String, Instant> hasDateField(CaseDetails theCase, String dateField) {
+    public static Validation<String, LocalDateTime> hasDateField(CaseDetails theCase, String dateField) {
         return Optional.ofNullable(theCase)
             .map(CaseDetails::getData)
             .map(data -> data.get(dateField))
-            .map(o -> Validation.<String, Instant>valid(Instant.from(FORMATTER.parse((String) o))))
+            .map(o -> Validation.<String, LocalDateTime>valid(LocalDateTime.parse((String) o, FORMATTER)))
             .orElse(invalid("Missing " + dateField));
     }
 

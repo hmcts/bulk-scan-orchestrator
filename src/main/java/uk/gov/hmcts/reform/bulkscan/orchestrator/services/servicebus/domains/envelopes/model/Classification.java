@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model;
 
 public enum Classification {
     EXCEPTION,

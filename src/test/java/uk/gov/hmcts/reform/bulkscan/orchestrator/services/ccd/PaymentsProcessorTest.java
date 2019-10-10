@@ -7,10 +7,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.PaymentsPublisher;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Payment;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.PaymentsData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Payment;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublisher;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.CreatePaymentsCommand;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class PaymentsProcessorTest {
     private static final long CCD_REFERENCE = 20L;
-    
+
     @Mock
     private PaymentsPublisher paymentsPublisher;
 
@@ -42,27 +42,28 @@ class PaymentsProcessorTest {
             emptyList(),
             emptyList()
         );
-        ArgumentCaptor<PaymentsData> paymentsDataCaptor = ArgumentCaptor.forClass(PaymentsData.class);
+        ArgumentCaptor<CreatePaymentsCommand> cmdCaptor = ArgumentCaptor.forClass(CreatePaymentsCommand.class);
 
         // when
         paymentsProcessor.processPayments(envelope, CCD_REFERENCE, true);
 
         // then
-        verify(paymentsPublisher).publishPayments(paymentsDataCaptor.capture());
-        PaymentsData paymentsData = paymentsDataCaptor.getValue();
-        assertThat(paymentsData.ccdReference).isEqualTo(Long.toString(CCD_REFERENCE));
-        assertThat(paymentsData.jurisdiction).isEqualTo(envelope.jurisdiction);
-        assertThat(paymentsData.poBox).isEqualTo(envelope.poBox);
-        assertThat(paymentsData.isExceptionRecord).isTrue();
-        assertThat(paymentsData.payments.size()).isEqualTo(envelope.payments.size());
-        assertThat(paymentsData.payments.get(0).documentControlNumber)
+        verify(paymentsPublisher).send(cmdCaptor.capture());
+        CreatePaymentsCommand cmd = cmdCaptor.getValue();
+        assertThat(cmd.ccdReference).isEqualTo(Long.toString(CCD_REFERENCE));
+        assertThat(cmd.jurisdiction).isEqualTo(envelope.jurisdiction);
+        assertThat(cmd.poBox).isEqualTo(envelope.poBox);
+        assertThat(cmd.isExceptionRecord).isTrue();
+        assertThat(cmd.payments.size()).isEqualTo(envelope.payments.size());
+        assertThat(cmd.payments.get(0).documentControlNumber)
             .isEqualTo(envelope.payments.get(0).documentControlNumber);
     }
 
     @Test
     void does_not_call_payments_publisher_if_envelope_contains_zero_payments() {
         // given
-        Envelope envelope = SampleData.envelope(1,
+        Envelope envelope = SampleData.envelope(
+            1,
             emptyList(),
             emptyList(),
             emptyList()
@@ -72,7 +73,7 @@ class PaymentsProcessorTest {
         paymentsProcessor.processPayments(envelope, CCD_REFERENCE, true);
 
         // then
-        verify(paymentsPublisher, never()).publishPayments(any());
+        verify(paymentsPublisher, never()).send(any(CreatePaymentsCommand.class));
     }
 
     @Test
@@ -89,6 +90,6 @@ class PaymentsProcessorTest {
         paymentsProcessor.processPayments(envelope, CCD_REFERENCE, true);
 
         // then
-        verify(paymentsPublisher, never()).publishPayments(any());
+        verify(paymentsPublisher, never()).send(any(CreatePaymentsCommand.class));
     }
 }

@@ -9,14 +9,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentType;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +26,7 @@ import java.util.function.Supplier;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.FORMATTER;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.getOcrData;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasDateField;
@@ -76,8 +78,8 @@ public class CreateCaseValidator {
         Validation<String, String> jurisdictionValidation = hasJurisdiction(caseDetails);
         Validation<String, String> formTypeValidation = hasFormType(caseDetails);
         Validation<String, Classification> journeyClassificationValidation = hasJourneyClassification(caseDetails);
-        Validation<String, Instant> deliveryDateValidation = hasDateField(caseDetails, "deliveryDate");
-        Validation<String, Instant> openingDateValidation = hasDateField(caseDetails, "openingDate");
+        Validation<String, LocalDateTime> deliveryDateValidation = hasDateField(caseDetails, "deliveryDate");
+        Validation<String, LocalDateTime> openingDateValidation = hasDateField(caseDetails, "openingDate");
         Validation<String, List<ScannedDocument>> scannedDocumentsValidation = getScannedDocuments(caseDetails);
         Validation<String, List<OcrDataField>> ocrDataFieldsValidation = getOcrDataFields(caseDetails);
 
@@ -152,14 +154,19 @@ public class CreateCaseValidator {
 
     @SuppressWarnings("unchecked")
     private ScannedDocument mapScannedDocument(Map<String, Object> document) {
+        Map<String, String> ccdUrl = (Map<String, String>) document.get("url");
         return new ScannedDocument(
             DocumentType.valueOf(((String) document.get("type")).toUpperCase()),
             (String) document.get("subType"),
-            ((Map<String, String>) document.get("url")).get("document_url"),
+            new DocumentUrl(
+                ccdUrl.get("document_url"),
+                ccdUrl.get("document_binary_url"),
+                ccdUrl.get("document_filename")
+            ),
             (String) document.get("controlNumber"),
             (String) document.get("fileName"),
-            Instant.parse((String) document.get("scannedDate")),
-            Instant.parse((String) document.get("deliveryDate"))
+            LocalDateTime.parse((String) document.get("scannedDate"), FORMATTER),
+            LocalDateTime.parse((String) document.get("deliveryDate"), FORMATTER)
         );
     }
 }

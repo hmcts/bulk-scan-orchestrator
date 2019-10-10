@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class ExceptionRecord {
@@ -24,10 +24,10 @@ public class ExceptionRecord {
     public final String formType;
 
     @JsonProperty("delivery_date")
-    public final Instant deliveryDate;
+    public final LocalDateTime deliveryDate;
 
     @JsonProperty("opening_date")
-    public final Instant openingDate;
+    public final LocalDateTime openingDate;
 
     @JsonProperty("scanned_documents")
     public final List<ScannedDocument> scannedDocuments;
@@ -41,8 +41,8 @@ public class ExceptionRecord {
         String poBoxJurisdiction,
         Classification journeyClassification,
         String formType,
-        Instant deliveryDate,
-        Instant openingDate,
+        LocalDateTime deliveryDate,
+        LocalDateTime openingDate,
         List<ScannedDocument> scannedDocuments,
         List<OcrDataField> ocrDataFields
     ) {

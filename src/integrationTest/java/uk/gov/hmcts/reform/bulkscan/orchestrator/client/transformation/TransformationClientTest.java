@@ -8,15 +8,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentType;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
-
-import java.time.Instant;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
@@ -27,6 +26,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.serverError;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.unauthorized;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static java.time.LocalDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
@@ -54,7 +54,7 @@ public class TransformationClientTest {
 
         stubFor(
             post(urlPathMatching(TRANSFORM_EXCEPTION_RECORD_URL))
-                .withHeader("ServiceAuthorization", equalTo("Bearer " + s2sToken))
+                .withHeader("ServiceAuthorization", equalTo(s2sToken))
                 .willReturn(okJson(successResponse().toString()))
         );
 
@@ -81,7 +81,7 @@ public class TransformationClientTest {
         String s2sToken = randomUUID().toString();
         stubFor(
             post(urlPathMatching(TRANSFORM_EXCEPTION_RECORD_URL))
-                .withHeader("ServiceAuthorization", equalTo("Bearer " + s2sToken))
+                .withHeader("ServiceAuthorization", equalTo(s2sToken))
                 .willReturn(aResponse().withBody(errorResponse().toString()).withStatus(422)));
 
         // when
@@ -107,7 +107,7 @@ public class TransformationClientTest {
         String s2sToken = randomUUID().toString();
         stubFor(
             post(urlPathMatching(TRANSFORM_EXCEPTION_RECORD_URL))
-                .withHeader("ServiceAuthorization", equalTo("Bearer " + s2sToken))
+                .withHeader("ServiceAuthorization", equalTo(s2sToken))
                 .willReturn(aResponse().withBody(invalidDataResponse().toString()).withStatus(400)));
 
         // when
@@ -195,16 +195,20 @@ public class TransformationClientTest {
             "BULKSCAN",
             Classification.NEW_APPLICATION,
             "D8",
-            Instant.now(),
-            Instant.now(),
+            now(),
+            now(),
             singletonList(new ScannedDocument(
                 DocumentType.CHERISHED,
                 "D8",
-                "http://locahost",
+                new DocumentUrl(
+                    "http://locahost",
+                    "http://locahost/binary",
+                    "file1.pdf"
+                ),
                 "1234",
                 "file1.pdf",
-                Instant.now(),
-                Instant.now()
+                now(),
+                now()
             )),
             asList(
                 new OcrDataField("name1", "value1"),

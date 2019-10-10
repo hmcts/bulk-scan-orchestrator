@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -8,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.ExceptionRecordMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Envelope;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -20,7 +21,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
@@ -36,25 +36,14 @@ public class ExceptionRecordCreatorTest {
 
     private static final Long CASE_DETAILS_ID = 234L;
 
-    @Test
-    public void should_create_exception_record_when_duplicate_prevention_not_supported() {
-        // given
-        setupCcdApi();
+    private CreateExceptionRecord exceptionRecordCreator;
 
-        Envelope envelope = envelope(1);
-        ExceptionRecord expectedExceptionRecord = mock(ExceptionRecord.class);
-        given(exceptionRecordMapper.mapEnvelope(envelope)).willReturn(expectedExceptionRecord);
-
-        // when
-        Long ccdRef = exceptionRecordCreator("other-jurisdiction1").tryCreateFrom(envelope);
-
-        // then
-        assertThat(ccdRef).isSameAs(CASE_DETAILS_ID);
-        assertExceptionRecordCreated(expectedExceptionRecord, envelope);
-
-        // no duplicate search is performed
-        verify(ccdApi, never()).getExceptionRecordRefsByEnvelopeId(any(), any());
-        verify(exceptionRecordMapper).mapEnvelope(envelope);
+    @BeforeEach
+    public void setUp() {
+        exceptionRecordCreator = new CreateExceptionRecord(
+            exceptionRecordMapper,
+            ccdApi
+        );
     }
 
     @Test
@@ -68,7 +57,7 @@ public class ExceptionRecordCreatorTest {
         given(exceptionRecordMapper.mapEnvelope(envelope)).willReturn(expectedExceptionRecord);
 
         // when
-        Long ccdRef = exceptionRecordCreator(envelope.jurisdiction).tryCreateFrom(envelope);
+        Long ccdRef = exceptionRecordCreator.tryCreateFrom(envelope);
 
         assertThat(ccdRef).isSameAs(CASE_DETAILS_ID);
         assertExceptionRecordCreated(expectedExceptionRecord, envelope);
@@ -87,7 +76,7 @@ public class ExceptionRecordCreatorTest {
         Envelope envelope = envelope(1);
 
         // when
-        Long ccdRef = exceptionRecordCreator(envelope.jurisdiction).tryCreateFrom(envelope);
+        Long ccdRef = exceptionRecordCreator.tryCreateFrom(envelope);
 
         // then
         assertThat(ccdRef).isSameAs(existingExceptionRecordId);
@@ -95,14 +84,6 @@ public class ExceptionRecordCreatorTest {
         verify(ccdApi).getExceptionRecordRefsByEnvelopeId(envelope.id, envelope.container);
         verifyNoMoreInteractions(ccdApi);
         verifyNoMoreInteractions(exceptionRecordMapper);
-    }
-
-    private CreateExceptionRecord exceptionRecordCreator(String... jurisdictionsWithDuplicatePrevention) {
-        return new CreateExceptionRecord(
-            exceptionRecordMapper,
-            ccdApi,
-            newArrayList(jurisdictionsWithDuplicatePrevention)
-        );
     }
 
     private void assertExceptionRecordCreated(ExceptionRecord expectedExceptionRecord, Envelope envelope) {

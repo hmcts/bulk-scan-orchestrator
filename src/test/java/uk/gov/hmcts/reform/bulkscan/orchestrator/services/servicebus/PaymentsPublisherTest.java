@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.Message;
 import com.microsoft.azure.servicebus.QueueClient;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -13,8 +15,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.PaymentData;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.PaymentsData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.Labels;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublisher;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.CreatePaymentsCommand;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.UpdatePaymentsCommand;
 
 import java.time.Instant;
 
@@ -25,11 +31,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.verify;
 
+@SuppressWarnings("checkstyle:LineLength")
 @ExtendWith(MockitoExtension.class)
 class PaymentsPublisherTest {
 
     private static Object[][] getIsExceptionRecord() {
-        return new Object[][]{
+        return new Object[][] {
             {true},
             {false}
         };
@@ -47,13 +54,13 @@ class PaymentsPublisherTest {
 
     @ParameterizedTest
     @MethodSource("getIsExceptionRecord")
-    void notify_should_send_message_with_right_content(boolean isExceptionRecord) throws Exception {
+    void sending_create_command_should_send_message_with_right_content(boolean isExceptionRecord) throws Exception {
         // given
-        PaymentsData paymentsData = getPaymentsData(isExceptionRecord);
+        CreatePaymentsCommand cmd = getCreatePaymentsCommand(isExceptionRecord);
         Instant startTime = Instant.now();
 
         // when
-        paymentsPublisher.publishPayments(paymentsData);
+        paymentsPublisher.send(cmd);
 
         // then
         ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
@@ -65,49 +72,86 @@ class PaymentsPublisherTest {
 
         Message message = messageCaptor.getValue();
 
-        assertThat(message.getMessageId()).isEqualTo(paymentsData.ccdReference);
         assertThat(message.getContentType()).isEqualTo("application/json");
+        assertThat(message.getLabel()).isEqualTo(Labels.CREATE);
 
         String messageBodyJson = new String(MessageBodyRetriever.getBinaryData(message.getMessageBody()));
         String expectedMessageBodyJson = String.format(
-            "{\"ccd_reference\":\"%s\", \"jurisdiction\":\"%s\", \"po_box\":\"%s\", "
-                + "\"is_exception_record\":%s, "
+            "{\"envelope_id\":\"%s\", \"ccd_reference\":\"%s\", \"jurisdiction\":\"%s\", \"service\":\"%s\", "
+                + "\"po_box\":\"%s\", " + "\"is_exception_record\":%s, "
                 + "\"payments\":[{\"document_control_number\":\"%s\"}]}",
-            paymentsData.ccdReference,
-            paymentsData.jurisdiction,
-            paymentsData.poBox,
-            Boolean.toString(paymentsData.isExceptionRecord),
-            paymentsData.payments.get(0).documentControlNumber
+            cmd.envelopeId,
+            cmd.ccdReference,
+            cmd.jurisdiction,
+            cmd.service,
+            cmd.poBox,
+            Boolean.toString(cmd.isExceptionRecord),
+            cmd.payments.get(0).documentControlNumber
         );
         JSONAssert.assertEquals(expectedMessageBodyJson, messageBodyJson, JSONCompareMode.LENIENT);
     }
 
     @ParameterizedTest
     @MethodSource("getIsExceptionRecord")
-    void notify_should_throw_exception_when_queue_client_fails(boolean isExceptionRecord) throws Exception {
-        PaymentsData paymentsData = getPaymentsData(isExceptionRecord);
+    void sending_create_command_should_throw_exception_when_queue_client_fails(boolean isExceptionRecord) throws Exception {
+        CreatePaymentsCommand cmd = getCreatePaymentsCommand(isExceptionRecord);
 
         ServiceBusException exceptionToThrow = new ServiceBusException(true, "test exception");
         willThrow(exceptionToThrow).given(queueClient).scheduleMessage(any(), any());
 
-        assertThatThrownBy(() -> paymentsPublisher.publishPayments(paymentsData))
+        assertThatThrownBy(() -> paymentsPublisher.send(cmd))
             .isInstanceOf(PaymentsPublishingException.class)
-            .hasMessage(
-                String.format(
-                    "An error occurred when trying to publish payments for CCD Ref %s",
-                    paymentsData.ccdReference
-                )
-            )
+            .hasMessageContaining("An error occurred when trying to publish message to payments queue.")
             .hasCause(exceptionToThrow);
     }
 
-    private PaymentsData getPaymentsData(boolean isExceptionRecord) {
-        return new PaymentsData(
-                Long.toString(10L),
-                "jurisdiction",
-                "pobox",
-                isExceptionRecord,
-                asList(new PaymentData("dcn1"))
+    @Test
+    void sending_update_command_should_message_with_correct_content() throws Exception {
+        // given
+        UpdatePaymentsCommand cmd =
+            new UpdatePaymentsCommand(
+                "er-ref",
+                "new-case-ref",
+                "envelope-id",
+                "service",
+                "jurisdiction"
             );
+
+        // when
+        paymentsPublisher.send(cmd);
+
+        // then
+        ArgumentCaptor<IMessage> messageCaptor = ArgumentCaptor.forClass(IMessage.class);
+        verify(queueClient).scheduleMessage(messageCaptor.capture(), any());
+
+        IMessage msg = messageCaptor.getValue();
+
+        assertThat(msg.getLabel()).isEqualTo(Labels.UPDATE);
+
+        JSONAssert.assertEquals(
+            (
+                "{"
+                    + "'exception_record_ref': 'er-ref',"
+                    + "'new_case_ref': 'new-case-ref',"
+                    + "'envelope_id': 'envelope-id',"
+                    + "'service': 'service',"
+                    + "'jurisdiction': 'jurisdiction'"
+                    + "}"
+            ).replace("'", "\""),
+            new String(MessageBodyRetriever.getBinaryData(msg.getMessageBody())),
+            JSONCompareMode.LENIENT
+        );
+    }
+
+    private CreatePaymentsCommand getCreatePaymentsCommand(boolean isExceptionRecord) {
+        return new CreatePaymentsCommand(
+            "envelope-id",
+            Long.toString(10L),
+            "jurisdiction",
+            "service",
+            "pobox",
+            isExceptionRecord,
+            asList(new PaymentData("dcn1"))
+        );
     }
 }

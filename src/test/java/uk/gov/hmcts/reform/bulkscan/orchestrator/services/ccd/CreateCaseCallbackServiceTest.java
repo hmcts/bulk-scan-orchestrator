@@ -23,7 +23,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCas
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceNotConfiguredException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -41,14 +41,14 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.EXCEPTION;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.NEW_APPLICATION;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.model.Classification.SUPPLEMENTARY_EVIDENCE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_CREATE_NEW_CASE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
 
 @ExtendWith(MockitoExtension.class)
 class CreateCaseCallbackServiceTest {
 
-    private static final String EVENT_ID = "createNewCase";
     private static final String IDAM_TOKEN = "idam-token";
     private static final String USER_ID = "user-id";
     private static final String SERVICE = "service";
@@ -100,7 +100,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
+            EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -117,7 +117,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
+            EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -136,7 +136,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
+            EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -154,7 +154,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
+            EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -188,15 +188,17 @@ class CreateCaseCallbackServiceTest {
 
         // when
         Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
+            EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
 
         // then
         assertThat(output.isLeft()).isTrue();
-        assertThat(output.getLeft()).containsOnly(
-            "Event " + EVENT_ID + " not allowed for the current journey classification NEW_APPLICATION without OCR"
+        assertThat(output.getLeft()).containsOnly("Event " + EVENT_ID_CREATE_NEW_CASE
+            + " not allowed for the current journey classification "
+            + NEW_APPLICATION.name()
+            + " without OCR"
         );
     }
 
@@ -224,15 +226,17 @@ class CreateCaseCallbackServiceTest {
 
         // when
         Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
+            EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
 
         // then
         assertThat(output.isLeft()).isTrue();
-        assertThat(output.getLeft()).containsOnly(
-            "Event " + EVENT_ID + " not allowed for the current journey classification SUPPLEMENTARY_EVIDENCE"
+        assertThat(output.getLeft()).containsOnly("Event "
+            + EVENT_ID_CREATE_NEW_CASE
+            + " not allowed for the current journey classification "
+            + SUPPLEMENTARY_EVIDENCE.name()
         );
     }
 
@@ -269,7 +273,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
+            EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -303,7 +307,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
+            EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -336,7 +340,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
+            EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -366,7 +370,7 @@ class CreateCaseCallbackServiceTest {
         Map<String, Object> data = new HashMap<>();
 
         data.put("poBox", "12345");
-        data.put("journeyClassification", "EXCEPTION");
+        data.put("journeyClassification", EXCEPTION.name());
         data.put("formType", "Form1");
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
@@ -381,7 +385,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
+            EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -396,14 +400,28 @@ class CreateCaseCallbackServiceTest {
         // given
         setUpTransformationUrl();
 
+        // modify scannedDocs to proof datetime field is bulletproof
+        Map<String, Object> doc = new HashMap<>();
+
+        doc.put("type", "Other");
+        doc.put("url", ImmutableMap.of(
+            "document_url", "https://some-url",
+            "document_binary_url", "https://some-bin-url",
+            "document_filename", "some-name"
+        ));
+        doc.put("controlNumber", "1234");
+        doc.put("fileName", "file");
+        doc.put("scannedDate", "2019-09-06T15:40:00Z");
+        doc.put("deliveryDate", "2019-09-06T15:40:00");
+
         Map<String, Object> data = new HashMap<>();
 
         data.put("poBox", "12345");
-        data.put("journeyClassification", "EXCEPTION");
+        data.put("journeyClassification", EXCEPTION.name());
         data.put("formType", "Form1");
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
+        data.put("scannedDocuments", ImmutableList.of(ImmutableMap.of("value", doc)));
         data.put("scanOCRData", ImmutableList.of(ImmutableMap.of("value", ImmutableMap.of(
             "key", "k",
             "value", 1
@@ -417,7 +435,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
+            EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -439,7 +457,7 @@ class CreateCaseCallbackServiceTest {
         Map<String, Object> data = new HashMap<>();
 
         data.put("poBox", "12345");
-        data.put("journeyClassification", "EXCEPTION");
+        data.put("journeyClassification", EXCEPTION.name());
         data.put("formType", null);
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
@@ -454,7 +472,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
-            EVENT_ID,
+            EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
