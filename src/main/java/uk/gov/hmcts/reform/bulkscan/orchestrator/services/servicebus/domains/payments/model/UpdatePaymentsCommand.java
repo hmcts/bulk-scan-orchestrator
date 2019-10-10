@@ -1,8 +1,9 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.Labels;
 
-public class UpdatePaymentsCommand {
+public class UpdatePaymentsCommand implements PaymentCommand {
 
     @JsonProperty("exception_record_ref")
     public final String exceptionRecordRef;
@@ -31,5 +32,10 @@ public class UpdatePaymentsCommand {
         this.envelopeId = envelopeId;
         this.service = service;
         this.jurisdiction = jurisdiction;
+    }
+
+    @Override
+    public String getLabel() {
+        return Labels.UPDATE;
     }
 }
