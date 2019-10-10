@@ -36,17 +36,23 @@ public class PaymentsPublisher implements IPaymentsPublisher {
     @Override
     public void send(PaymentCommand cmd) {
         try {
+            final String messageContent = objectMapper.writeValueAsString(cmd);
+            
             IMessage message = new Message(
                 UUID.randomUUID().toString(),
-                objectMapper.writeValueAsString(cmd),
+                messageContent,
                 APPLICATION_JSON.toString()
             );
             message.setLabel(cmd.getLabel());
 
             queueClient.scheduleMessage(message, Instant.now().plusSeconds(10));
 
-            LOG.info("Sent message to payments queue. ID: {}, Label: {}", message.getMessageId(), message.getLabel());
-
+            LOG.info(
+                "Sent message to payments queue. ID: {}, Label: {}, Content: {}",
+                message.getMessageId(),
+                message.getLabel(),
+                messageContent
+            );
         } catch (Exception ex) {
             throw new PaymentsPublishingException(
                 "An error occurred when trying to publish message to payments queue.",
