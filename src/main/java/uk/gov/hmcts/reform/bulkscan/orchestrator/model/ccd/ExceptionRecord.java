@@ -39,6 +39,10 @@ public class ExceptionRecord implements CaseData {
     // Yes/No field indicating if there are warnings to show
     public final String displayWarnings;
 
+    // Yes/No field indicating if the payment document control numbers are processed
+    @JsonProperty("awaitingPaymentDCNProcessing")
+    public final String awaitingPaymentDcnProcessing;
+
     public ExceptionRecord(
         String classification,
         String poBox,
@@ -50,7 +54,8 @@ public class ExceptionRecord implements CaseData {
         List<CcdCollectionElement<CcdKeyValue>> ocrData,
         List<CcdCollectionElement<String>> ocrDataValidationWarnings,
         String displayWarnings,
-        String envelopeId
+        String envelopeId,
+        String awaitingPaymentDcnProcessing
     ) {
         this.classification = classification;
         this.poBox = poBox;
@@ -63,5 +68,6 @@ public class ExceptionRecord implements CaseData {
         this.ocrDataValidationWarnings = ocrDataValidationWarnings;
         this.displayWarnings = displayWarnings;
         this.envelopeId = envelopeId;
+        this.awaitingPaymentDcnProcessing = awaitingPaymentDcnProcessing;
     }
 }
