@@ -73,7 +73,7 @@ class CreateCaseTest {
     @Test
     public void should_create_case_from_valid_exception_record() throws Exception {
         // given
-        CaseDetails exceptionRecord = createExceptionRecord("envelopes/new-envelope-with-evidence.json");
+        CaseDetails exceptionRecord = createExceptionRecord("envelopes/new-envelope-create-case-with-evidence.json");
         exceptionRecord.setCreatedDate(null);
         exceptionRecord.setLastModified(null);
 
