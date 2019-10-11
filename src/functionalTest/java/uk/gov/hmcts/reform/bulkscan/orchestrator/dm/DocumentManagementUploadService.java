@@ -1,15 +1,9 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.dm;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.util.StdDateFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
@@ -32,22 +26,11 @@ public class DocumentManagementUploadService {
     private static final String FILES_NAME = "files";
 
     DocumentManagementUploadService(
-        @Value("${document_management.url}") final String dmUri,
-        @Qualifier("standard") RestTemplate restTemplate,
-        CcdAuthenticatorFactory ccdAuthenticatorFactory
+        CcdAuthenticatorFactory ccdAuthenticatorFactory,
+        DocumentUploadClientApi documentUploadClientApi
     ) {
         this.ccdAuthenticatorFactory = ccdAuthenticatorFactory;
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        objectMapper.setDateFormat(new StdDateFormat().withColonInTimeZone(false));
-
-        this.documentUploadClientApi =
-            new DocumentUploadClientApi(
-                dmUri,
-                restTemplate,
-                objectMapper
-            );
+        this.documentUploadClientApi = documentUploadClientApi;
     }
 
     /**
