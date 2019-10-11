@@ -16,6 +16,7 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.ValidatableResponse;
 import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -57,6 +58,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURIS
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.CcdCallbackController.USER_ID;
 
 @IntegrationTest
+@Disabled
 class AttachExceptionRecordToExistingCaseTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();

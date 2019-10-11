@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -31,6 +32,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.GET_C
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURISDICTION;
 
 @IntegrationTest
+@Disabled
 class CaseRetrievalTest {
 
     private static final String TEST_SERVICE_NAME = "bulkscan";

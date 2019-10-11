@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.core.Options;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,6 +39,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
 @IntegrationTest
+@Disabled
 public class TransformationClientTest {
 
     private static final String TRANSFORM_EXCEPTION_RECORD_URL = "/transform-exception-record";
