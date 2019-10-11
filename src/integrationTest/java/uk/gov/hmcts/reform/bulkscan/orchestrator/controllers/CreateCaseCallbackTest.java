@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers;
 
 import io.restassured.response.ValidatableResponse;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
@@ -30,7 +29,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 
 @IntegrationTest
-@Disabled
 class CreateCaseCallbackTest {
 
     // event id used for service specific case creation

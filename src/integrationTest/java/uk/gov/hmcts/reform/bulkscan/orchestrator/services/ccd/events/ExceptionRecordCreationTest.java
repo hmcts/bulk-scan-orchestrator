@@ -4,7 +4,6 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.microsoft.azure.servicebus.IMessageReceiver;
 import com.microsoft.azure.servicebus.Message;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +33,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.EXCEP
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.GET_CASE_URL;
 
 @IntegrationTest
-@Disabled
 class ExceptionRecordCreationTest {
 
     private static final String CASE_EVENT_TRIGGER_START_URL = Environment.CASE_EVENT_TRIGGER_START_URL

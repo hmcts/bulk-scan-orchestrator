@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.endpoints;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 @IntegrationTest
 @AutoConfigureMockMvc
-@Disabled
 class IdamConfigStatusEndpointTest {
 
     @Autowired
