@@ -39,7 +39,7 @@ import static org.awaitility.Awaitility.await;
 @ActiveProfiles("nosb") // no servicebus queue handler registration
 class CreateCaseTest {
 
-    private static final String CASE_REFERENCE = "case_reference";
+    private static final String CASE_REFERENCE = "caseReference";
 
     @Value("${test-url}")
     private String testUrl;
@@ -124,7 +124,7 @@ class CreateCaseTest {
     }
 
     private String getCaseCcdId(Response response) throws IOException {
-        //assertThat(response.getStatusCode()).isEqualTo(200);
+        assertThat(response.getStatusCode()).isEqualTo(200);
 
         final AboutToStartOrSubmitCallbackResponse callbackResponse =
             new ObjectMapper().readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
