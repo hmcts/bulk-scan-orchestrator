@@ -177,7 +177,7 @@ dependencyManagement {
       entry 'guava'
     }
     // solves: CVE-2017-13098, CVE-2018-1000180, CVE-2018-1000613
-    dependencySet(group: 'org.bouncycastle', version: '1.63') {
+    dependencySet(group: 'org.bouncycastle', version: '1.64') {
       entry 'bcprov-jdk15on'
     }
     // solves: CVE-2016-4977, CVE-2018-15758
