@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import feign.FeignException;
 import io.vavr.collection.Array;
 import io.vavr.collection.Seq;
 import io.vavr.control.Either;
@@ -205,42 +204,26 @@ public class CreateCaseCallbackService {
             caseCreationDetails.eventId
         );
 
-        CaseDataContent caseCreated = CaseDataContent
-            .builder()
-            .caseReference(originalCaseId)
-            .data(caseCreationDetails.caseData)
-            .event(Event
+        return ccdApi.submitForCaseworker(
+            idamToken,
+            s2sToken,
+            userId,
+            jurisdiction,
+            caseCreationDetails.caseTypeId,
+            true,
+            CaseDataContent
                 .builder()
-                .id(eventResponse.getEventId())
-                .summary("Case created")
-                .description("Case created from exception record ref " + originalCaseId)
+                .caseReference(originalCaseId)
+                .data(caseCreationDetails.caseData)
+                .event(Event
+                    .builder()
+                    .id(eventResponse.getEventId())
+                    .summary("Case created")
+                    .description("Case created from exception record ref " + originalCaseId)
+                    .build()
+                )
+                .eventToken(eventResponse.getToken())
                 .build()
-            )
-            .eventToken(eventResponse.getToken())
-            .build();
-        try {
-            Long ccdRef = ccdApi.submitForCaseworker(
-                idamToken,
-                s2sToken,
-                userId,
-                jurisdiction,
-                caseCreationDetails.caseTypeId,
-                true,
-                caseCreated
-            ).getId();
-            return ccdRef;
-        } catch (Exception ex) {
-            throw processException(caseCreated, ex);
-        }
-    }
-
-    public RuntimeException processException(CaseDataContent caseCreated, Exception ex) {
-        if (ex instanceof FeignException) {
-            String desc = ((FeignException)ex).content() != null ? ((FeignException)ex).contentUTF8() : ex.getMessage();
-            return new RuntimeException(desc, ex);
-        }
-        return new RuntimeException(caseCreated.getCaseReference() + "," + caseCreated.getEventToken() + ","
-            + caseCreated.getEvent() + "," + caseCreated.getData().getClass().getName()
-            + "," + caseCreated.getData() + "," + ex.getMessage(), ex);
+        ).getId();
     }
 }
