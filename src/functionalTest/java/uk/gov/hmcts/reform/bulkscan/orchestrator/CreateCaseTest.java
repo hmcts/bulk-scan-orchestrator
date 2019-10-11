@@ -107,7 +107,6 @@ class CreateCaseTest {
         Response response = RestAssured
             .given()
             .relaxedHTTPSValidation()
-            //.proxy("proxyout.reform.hmcts.net", 8080)
             .baseUri(testUrl)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .header(SyntheticHeaders.SYNTHETIC_TEST_SOURCE, "Bulk Scan Orchestrator Functional test")
@@ -115,10 +114,7 @@ class CreateCaseTest {
             .header(CcdCallbackController.USER_ID, ccdAuthenticator.getUserDetails().getId())
             .body(callbackRequest)
             .when()
-            .log().all()
-            .post("/callback/create-new-case")
-            .then().log().all()
-            .and().extract().response();
+            .post("/callback/create-new-case");
 
         return getCaseCcdId(response);
     }
