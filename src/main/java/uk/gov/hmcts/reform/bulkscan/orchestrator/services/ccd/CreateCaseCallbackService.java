@@ -66,31 +66,31 @@ public class CreateCaseCallbackService {
         Validation<String, Void> event = isCreateNewCaseEvent(request.getEventId());
         if (event.isInvalid()) {
             return error(event.getError());
-        }
-        Validation<String, String> serviceName = hasServiceNameInCaseTypeId(request.getCaseDetails());
-        if (serviceName.isInvalid()) {
-            return error(serviceName.getError());
         } else {
-            try {
-                ServiceConfigItem config = serviceConfigProvider.getConfig(serviceName.get());
-                if (config == null || config.getTransformationUrl() == null) {
-                    return error("Transformation URL is not configured");
-                } else {
-                    return validator
-                        .getValidation(request.getCaseDetails())
-                        .map(exceptionRecord -> createNewCase(
-                            exceptionRecord,
-                            config,
-                            request.getCaseDetails().getId(),
-                            request.isIgnoreWarnings(),
-                            idamToken,
-                            userId
-                        ))
-                        .getOrElseGet(errors -> new ProcessResult(emptyList(), errors.asJava()));
-                }
-            } catch (ServiceNotConfiguredException exc) {
-                return error(exc.getMessage());
-            }
+            return hasServiceNameInCaseTypeId(request.getCaseDetails())
+                .map(serviceName -> {
+                    try {
+                        ServiceConfigItem serviceCfg = serviceConfigProvider.getConfig(serviceName);
+                        if (serviceCfg == null || serviceCfg.getTransformationUrl() == null) {
+                            return error("Transformation URL is not configured");
+                        } else {
+                            return validator
+                                .getValidation(request.getCaseDetails())
+                                .map(exceptionRecord -> createNewCase(
+                                    exceptionRecord,
+                                    serviceCfg,
+                                    request.getCaseDetails().getId(),
+                                    request.isIgnoreWarnings(),
+                                    idamToken,
+                                    userId
+                                ))
+                                .getOrElseGet(errors -> new ProcessResult(emptyList(), errors.asJava()));
+                        }
+                    } catch (ServiceNotConfiguredException exc) {
+                        return error(exc.getMessage());
+                    }
+                })
+                .getOrElseGet(err -> error(err));
         }
     }
 
