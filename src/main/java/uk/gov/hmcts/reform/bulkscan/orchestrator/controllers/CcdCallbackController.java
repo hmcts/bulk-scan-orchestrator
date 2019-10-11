@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.AttachCaseCallbackService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CreateCaseCallbackService;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
@@ -62,16 +63,13 @@ public class CcdCallbackController {
         @RequestHeader(value = USER_ID, required = false) String userId
     ) {
         if (callbackRequest != null && callbackRequest.getCaseDetails() != null) {
-            return createCaseCallbackService
-                .process(callbackRequest, idamToken, userId)
-                .map(result -> AboutToStartOrSubmitCallbackResponse
+            ProcessResult result = createCaseCallbackService.process(callbackRequest, idamToken, userId);
+            return AboutToStartOrSubmitCallbackResponse
                     .builder()
                     .data(result.getModifiedFields())
                     .warnings(result.getWarnings())
                     .errors(result.getErrors())
-                    .build()
-                )
-                .getOrElseGet(this::errorResponse);
+                    .build();
         } else {
             return errorResponse(ImmutableList.of("Internal Error: callback or case details were empty"));
         }

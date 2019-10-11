@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import io.vavr.control.Either;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +28,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.singletonList;
@@ -82,14 +80,14 @@ class CreateCaseCallbackServiceTest {
 
     @Test
     void should_not_allow_to_process_callback_in_case_wrong_event_id_is_received() {
-        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+        ProcessResult output = service.process(new CcdCallbackRequest(
             "some event",
             null,
             true
         ), IDAM_TOKEN, USER_ID);
 
-        assertThat(output.isLeft()).isTrue();
-        assertThat(output.getLeft()).containsOnly("The some event event is not supported. Please contact service team");
+        assertThat(output.getModifiedFields()).isEmpty();
+        assertThat(output.getErrors()).containsOnly("The some event event is not supported. Please contact service team");
         verify(serviceConfigProvider, never()).getConfig(anyString());
     }
 
@@ -99,14 +97,14 @@ class CreateCaseCallbackServiceTest {
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.id(1L));
 
         // when
-        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+        ProcessResult output = service.process(new CcdCallbackRequest(
             EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
 
-        assertThat(output.isLeft()).isTrue();
-        assertThat(output.getLeft()).containsOnly("No case type ID supplied");
+        assertThat(output.getModifiedFields()).isEmpty();
+        assertThat(output.getErrors()).containsOnly("No case type ID supplied");
         verify(serviceConfigProvider, never()).getConfig(anyString());
     }
 
@@ -116,15 +114,15 @@ class CreateCaseCallbackServiceTest {
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(""));
 
         // when
-        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+        ProcessResult output = service.process(new CcdCallbackRequest(
             EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
 
         // then
-        assertThat(output.isLeft()).isTrue();
-        assertThat(output.getLeft()).containsOnly("Case type ID () has invalid format");
+        assertThat(output.getModifiedFields()).isEmpty();
+        assertThat(output.getErrors()).containsOnly("Case type ID () has invalid format");
         verify(serviceConfigProvider, never()).getConfig(anyString());
     }
 
@@ -135,15 +133,15 @@ class CreateCaseCallbackServiceTest {
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(CASE_TYPE_ID));
 
         // when
-        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+        ProcessResult output = service.process(new CcdCallbackRequest(
             EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
 
         // then
-        assertThat(output.isLeft()).isTrue();
-        assertThat(output.getLeft()).containsOnly("oh no");
+        assertThat(output.getModifiedFields()).isEmpty();
+        assertThat(output.getErrors()).containsOnly("oh no");
     }
 
     @Test
@@ -153,15 +151,15 @@ class CreateCaseCallbackServiceTest {
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(CASE_TYPE_ID));
 
         // when
-        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+        ProcessResult output = service.process(new CcdCallbackRequest(
             EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
 
         // then
-        assertThat(output.isLeft()).isTrue();
-        assertThat(output.getLeft()).containsOnly("Transformation URL is not configured");
+        assertThat(output.getModifiedFields()).isEmpty();
+        assertThat(output.getErrors()).containsOnly("Transformation URL is not configured");
     }
 
     @Test
@@ -187,15 +185,15 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+        ProcessResult output = service.process(new CcdCallbackRequest(
             EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
 
         // then
-        assertThat(output.isLeft()).isTrue();
-        assertThat(output.getLeft()).containsOnly("Event " + EVENT_ID_CREATE_NEW_CASE
+        assertThat(output.getModifiedFields()).isEmpty();
+        assertThat(output.getErrors()).containsOnly("Event " + EVENT_ID_CREATE_NEW_CASE
             + " not allowed for the current journey classification "
             + NEW_APPLICATION.name()
             + " without OCR"
@@ -225,15 +223,15 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+        ProcessResult output = service.process(new CcdCallbackRequest(
             EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
 
         // then
-        assertThat(output.isLeft()).isTrue();
-        assertThat(output.getLeft()).containsOnly("Event "
+        assertThat(output.getModifiedFields()).isEmpty();
+        assertThat(output.getErrors()).containsOnly("Event "
             + EVENT_ID_CREATE_NEW_CASE
             + " not allowed for the current journey classification "
             + SUPPLEMENTARY_EVIDENCE.name()
@@ -272,17 +270,16 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+        ProcessResult output = service.process(new CcdCallbackRequest(
             EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
 
         // then
-        assertThat(output.isRight()).isTrue();
-        assertThat(output.get().getModifiedFields()).isEmpty();
-        assertThat(output.get().getWarnings()).containsOnly("warning");
-        assertThat(output.get().getErrors()).containsOnly("error");
+        assertThat(output.getModifiedFields()).isEmpty();
+        assertThat(output.getWarnings()).containsOnly("warning");
+        assertThat(output.getErrors()).containsOnly("error");
     }
 
     @Test
@@ -306,15 +303,15 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+        ProcessResult output = service.process(new CcdCallbackRequest(
             EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
 
         // then
-        assertThat(output.isLeft()).isTrue();
-        assertThat(output.getLeft()).containsOnly("Missing journeyClassification");
+        assertThat(output.getModifiedFields()).isEmpty();
+        assertThat(output.getErrors()).containsOnly("Missing journeyClassification");
     }
 
     @Test
@@ -339,13 +336,13 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+        ProcessResult output = service.process(new CcdCallbackRequest(
             EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
 
-        assertThat(output.getLeft()).containsOnly(
+        assertThat(output.getErrors()).containsOnly(
             "Invalid journeyClassification. Error: No enum constant " + Classification.class.getName() + ".EXCEPTIONS"
         );
     }
@@ -384,13 +381,13 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+        ProcessResult output = service.process(new CcdCallbackRequest(
             EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
 
-        assertThat(output.getLeft()).containsOnly(
+        assertThat(output.getErrors()).containsOnly(
             "Invalid scannedDocuments format. Error: No enum constant " + DocumentType.class.getName() + ".OTHERS"
         );
     }
@@ -434,7 +431,7 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+        ProcessResult output = service.process(new CcdCallbackRequest(
             EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
@@ -442,7 +439,7 @@ class CreateCaseCallbackServiceTest {
 
         String match =
             "Invalid OCR data format. Error: (class )?java.lang.Integer cannot be cast to (class )?java.lang.String.*";
-        assertThat(output.getLeft())
+        assertThat(output.getErrors())
             .hasSize(1)
             .element(0)
             .asString()
@@ -471,14 +468,14 @@ class CreateCaseCallbackServiceTest {
         );
 
         // when
-        Either<List<String>, ProcessResult> output = service.process(new CcdCallbackRequest(
+        ProcessResult output = service.process(new CcdCallbackRequest(
             EVENT_ID_CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
 
         String match = "Missing Form Type";
-        assertThat(output.getLeft())
+        assertThat(output.getErrors())
             .hasSize(1)
             .element(0)
             .asString()
