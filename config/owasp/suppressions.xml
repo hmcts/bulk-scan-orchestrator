@@ -55,18 +55,6 @@
     <cve>CVE-2019-16869</cve>
   </suppress>
 
-  <suppress>
-    <notes><![CDATA[ file name: jackson-databind-2.9.10.jar No newer version available. ]]></notes>
-    <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-databind@.*$</packageUrl>
-    <cpe>cpe:/a:fasterxml:jackson-databind</cpe>
-  </suppress>
-
-  <suppress>
-    <notes><![CDATA[ file name: handlebars-4.1.2.jar: handlebars-v4.0.4.js ]]></notes>
-    <packageUrl regex="true">^pkg:javascript/handlebars\.js@.*$</packageUrl>
-    <vulnerabilityName>A prototype pollution vulnerability in handlebars is exploitable if an attacker can control the template</vulnerabilityName>
-  </suppress>
-
   <!-- this is for the TEST jar wiremock-standalone -->
   <suppress>
     <notes><![CDATA[
