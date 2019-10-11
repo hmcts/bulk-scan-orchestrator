@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpStatusCodeException;
 
-public class CaseTransformationException extends Exception {
+public class CaseTransformationException extends RuntimeException {
 
     private static final long serialVersionUID = 8081182548244205380L;
 

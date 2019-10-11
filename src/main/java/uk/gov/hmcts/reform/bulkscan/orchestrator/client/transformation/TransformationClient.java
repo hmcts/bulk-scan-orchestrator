@@ -39,7 +39,7 @@ public class TransformationClient {
         String baseUrl,
         ExceptionRecord exceptionRecord,
         String s2sToken
-    ) throws IOException, CaseTransformationException {
+    ) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("ServiceAuthorization", s2sToken);
 
@@ -64,13 +64,18 @@ public class TransformationClient {
             );
 
             if (ex.getStatusCode().equals(UNPROCESSABLE_ENTITY) || ex.getStatusCode().equals(BAD_REQUEST)) {
-                throw new InvalidCaseDataException(
-                    ex,
-                    objectMapper.readValue(ex.getResponseBodyAsByteArray(), TransformationErrorResponse.class)
-                );
+                try {
+                    TransformationErrorResponse error = objectMapper.readValue(
+                        ex.getResponseBodyAsByteArray(),
+                        TransformationErrorResponse.class
+                    );
+                    throw new InvalidCaseDataException(ex, error);
+                } catch (IOException e) {
+                    throw new InvalidCaseDataException(ex, null);
+                }
+            } else {
+                throw new CaseTransformationException(ex, ex.getResponseBodyAsString());
             }
-
-            throw new CaseTransformationException(ex, ex.getResponseBodyAsString());
         }
     }
 }

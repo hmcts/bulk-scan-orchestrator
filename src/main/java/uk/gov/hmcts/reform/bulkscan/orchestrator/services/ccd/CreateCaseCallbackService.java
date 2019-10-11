@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.InvalidCaseDataException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
@@ -24,7 +23,6 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isCreateNewCaseEvent;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.CASE_REFERENCE;
@@ -65,113 +63,57 @@ public class CreateCaseCallbackService {
     ) {
         Validation<String, Void> event = isCreateNewCaseEvent(request.getEventId());
         if (event.isInvalid()) {
-            return error(event.getError());
+            return new ProcessResult(emptyList(), singletonList(event.getError()));
         } else {
             return hasServiceNameInCaseTypeId(request.getCaseDetails())
                 .map(serviceName -> {
                     try {
                         ServiceConfigItem serviceCfg = serviceConfigProvider.getConfig(serviceName);
                         if (serviceCfg == null || serviceCfg.getTransformationUrl() == null) {
-                            return error("Transformation URL is not configured");
+                            return new ProcessResult(emptyList(), singletonList("Transformation URL is not configured"));
                         } else {
                             return validator
                                 .getValidation(request.getCaseDetails())
-                                .map(exceptionRecord -> createNewCase(
-                                    exceptionRecord,
-                                    serviceCfg,
-                                    request.getCaseDetails().getId(),
-                                    request.isIgnoreWarnings(),
-                                    idamToken,
-                                    userId
-                                ))
+                                .map(exceptionRecord -> {
+                                    SuccessfulTransformationResponse transformationResp =
+                                        transformationClient.transformExceptionRecord(
+                                            serviceCfg.getTransformationUrl(),
+                                            exceptionRecord,
+                                            s2sTokenGenerator.generate()
+                                        );
+                                    long newCaseId = createNewCaseInCcd(
+                                        idamToken,
+                                        userId,
+                                        exceptionRecord.poBoxJurisdiction,
+                                        transformationResp.caseCreationDetails,
+                                        request.getCaseDetails().getId().toString()
+                                    );
+                                    return new ProcessResult(ImmutableMap.of(CASE_REFERENCE, Long.toString(newCaseId)));
+                                })
                                 .getOrElseGet(errors -> new ProcessResult(emptyList(), errors.asJava()));
                         }
                     } catch (ServiceNotConfiguredException exc) {
-                        return error(exc.getMessage());
+                        return new ProcessResult(emptyList(), singletonList(exc.getMessage()));
+                    } catch (InvalidCaseDataException exc) {
+                        return new ProcessResult(exc.getResponse().warnings, exc.getResponse().errors);
+                    } catch (Exception exc) {
+                        log.error("Error handling event", exc);
+                        return new ProcessResult(emptyList(), singletonList("Internal error"));
                     }
                 })
-                .getOrElseGet(err -> error(err));
-        }
-    }
-
-    private ProcessResult createNewCase(
-        ExceptionRecord exceptionRecord,
-        ServiceConfigItem configItem,
-        long caseId,
-        boolean ignoreWarnings,
-        String idamToken,
-        String userId
-    ) {
-        String caseIdAsString = Long.toString(caseId);
-
-        log.info("Start creating new case for {} from exception record {}", configItem.getService(), caseIdAsString);
-
-        try {
-            String s2sToken = s2sTokenGenerator.generate();
-
-            SuccessfulTransformationResponse transformationResponse = transformationClient.transformExceptionRecord(
-                configItem.getTransformationUrl(),
-                exceptionRecord,
-                s2sToken
-            );
-
-            if (!ignoreWarnings && !transformationResponse.warnings.isEmpty()) {
-                // do not log warnings
-                return new ProcessResult(transformationResponse.warnings, emptyList());
-            }
-
-            log.info(
-                "Successfully transformed exception record for {} from exception record {}",
-                configItem.getService(),
-                caseIdAsString
-            );
-
-            long newCaseId = createNewCaseInCcd(
-                idamToken,
-                s2sToken,
-                userId,
-                exceptionRecord.poBoxJurisdiction,
-                transformationResponse.caseCreationDetails,
-                caseIdAsString
-            );
-
-            log.info(
-                "Successfully created new case for {} with case ID {} from exception record {}",
-                configItem.getService(),
-                newCaseId,
-                caseIdAsString
-            );
-
-            return new ProcessResult(ImmutableMap.of(CASE_REFERENCE, Long.toString(newCaseId)));
-        } catch (InvalidCaseDataException exception) {
-            if (BAD_REQUEST.equals(exception.getStatus())) {
-                throw exception;
-            } else {
-                return new ProcessResult(
-                    exception.getResponse().warnings,
-                    exception.getResponse().errors
-                );
-            }
-        } catch (Exception exception) {
-            log.error(
-                "Failed to create exception for service {} and exception record {}",
-                configItem.getService(),
-                caseIdAsString,
-                exception
-            );
-
-            return error("Internal error. " + exception.getMessage());
+                .getOrElseGet(err -> new ProcessResult(emptyList(), singletonList(err)));
         }
     }
 
     private long createNewCaseInCcd(
         String idamToken,
-        String s2sToken,
         String userId,
         String jurisdiction,
         CaseCreationDetails caseCreationDetails,
         String originalCaseId
     ) {
+        String s2sToken = s2sTokenGenerator.generate();
+
         StartEventResponse eventResponse = ccdApi.startForCaseworker(
             idamToken,
             s2sToken,
@@ -203,9 +145,5 @@ public class CreateCaseCallbackService {
                 .eventToken(eventResponse.getToken())
                 .build()
         ).getId();
-    }
-
-    private ProcessResult error(String message) {
-        return new ProcessResult(emptyList(), singletonList(message));
     }
 }
