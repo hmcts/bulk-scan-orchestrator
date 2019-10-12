@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -35,6 +36,8 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isCreateNewCaseEvent;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.CASE_REFERENCE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.DISPLAY_WARNINGS;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.OCR_DATA_VALIDATION_WARNINGS;
 
 
 @Service
@@ -162,9 +165,15 @@ public class CreateCaseCallbackService {
                 caseIdAsString
             );
 
-            return Validation.valid(new ProcessResult(
-                ImmutableMap.of(CASE_REFERENCE, Long.toString(newCaseId))
-            ));
+            return Validation.valid(
+                new ProcessResult(
+                    ImmutableMap.<String, Object>builder()
+                        .put(CASE_REFERENCE, Long.toString(newCaseId))
+                        .put(DISPLAY_WARNINGS, YesNoFieldValues.NO)
+                        .put(OCR_DATA_VALIDATION_WARNINGS, emptyList())
+                        .build()
+                )
+            );
         } catch (InvalidCaseDataException exception) {
             if (BAD_REQUEST.equals(exception.getStatus())) {
                 throw exception;

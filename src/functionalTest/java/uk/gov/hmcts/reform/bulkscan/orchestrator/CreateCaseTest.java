@@ -41,6 +41,9 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdVali
 @ActiveProfiles("nosb") // no servicebus queue handler registration
 class CreateCaseTest {
 
+    private static final String DISPLAY_WARNINGS_FIELD = "displayWarnings";
+    private static final String OCR_DATA_VALIDATION_WARNINGS_FIELD = "ocrDataValidationWarnings";
+
     private static final String CASE_REFERENCE = "caseReference";
 
     @Value("${test-url}")
@@ -78,7 +81,8 @@ class CreateCaseTest {
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/new-envelope-create-case-with-evidence.json");
 
         // when
-        String caseCcdId = invokeCallbackEndpoint(exceptionRecord);
+        AboutToStartOrSubmitCallbackResponse callbackResponse = invokeCallbackEndpoint(exceptionRecord);
+        String caseCcdId = getCaseCcdId(callbackResponse);
 
         // then
         CaseDetails createdCase = ccdApi.getCase(caseCcdId, exceptionRecord.getJurisdiction());
@@ -88,10 +92,30 @@ class CreateCaseTest {
         assertThat(createdCase.getData().get("email")).isEqualTo("hello@test.com");
     }
 
+    @Test
+    public void should_clear_exception_record_warnings() throws Exception {
+        // given
+        CaseDetails exceptionRecord = createExceptionRecord("new-application-with-ocr-data-warnings.json");
+
+        // warnings are present
+        assertThat(exceptionRecord).isNotNull();
+        assertThat(exceptionRecord.getData()).isNotNull();
+        assertThat(exceptionRecord.getData().get(DISPLAY_WARNINGS_FIELD)).isEqualTo("Yes");
+        assertThat(exceptionRecord.getData().get(OCR_DATA_VALIDATION_WARNINGS_FIELD)).asList().isNotEmpty();
+
+        // when
+        AboutToStartOrSubmitCallbackResponse response = invokeCallbackEndpoint(exceptionRecord);
+
+        // then
+        assertThat(response.getData()).isNotNull();
+        assertThat(response.getData().get(DISPLAY_WARNINGS_FIELD)).isEqualTo("No");
+        assertThat(response.getData().get(OCR_DATA_VALIDATION_WARNINGS_FIELD)).asList().isEmpty();
+    }
+
     /**
      * Hits the services callback endpoint with a request to create case upon an exception record.
      */
-    private String invokeCallbackEndpoint(
+    private AboutToStartOrSubmitCallbackResponse invokeCallbackEndpoint(
         CaseDetails exceptionRecord
     ) throws IOException {
         CaseDetails exceptionRecordWithSearchFields = exceptionRecord.toBuilder().build();
@@ -116,14 +140,19 @@ class CreateCaseTest {
             .when()
             .post("/callback/create-new-case");
 
-        return getCaseCcdId(response);
+        return parseCcdCallbackResponse(response);
     }
 
-    private String getCaseCcdId(Response response) throws IOException {
+    private AboutToStartOrSubmitCallbackResponse parseCcdCallbackResponse(Response response) throws IOException {
         assertThat(response.getStatusCode()).isEqualTo(200);
 
         final AboutToStartOrSubmitCallbackResponse callbackResponse =
             new ObjectMapper().readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
+
+        return callbackResponse;
+    }
+
+    private String getCaseCcdId(AboutToStartOrSubmitCallbackResponse callbackResponse) {
         assertThat(callbackResponse.getData()).isNotNull();
         assertThat(callbackResponse.getData().containsKey(CASE_REFERENCE)).isTrue();
         return (String) callbackResponse.getData().get(CASE_REFERENCE);
