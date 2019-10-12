@@ -74,8 +74,6 @@ class CreateCaseTest {
     public void should_create_case_from_valid_exception_record() throws Exception {
         // given
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/new-envelope-create-case-with-evidence.json");
-        exceptionRecord.setCreatedDate(null);
-        exceptionRecord.setLastModified(null);
 
         // when
         String caseCcdId = invokeCallbackEndpoint(exceptionRecord);
