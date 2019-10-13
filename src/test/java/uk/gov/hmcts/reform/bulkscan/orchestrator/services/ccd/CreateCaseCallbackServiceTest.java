@@ -87,7 +87,7 @@ class CreateCaseCallbackServiceTest {
             true
         ), IDAM_TOKEN, USER_ID);
 
-        assertThat(output.getModifiedFields()).isEmpty();
+        assertThat(output.getModifiedFields()).isNull();
         assertThat(output.getErrors()).containsOnly("The some event event is not supported. Please contact service team");
         verify(serviceConfigProvider, never()).getConfig(anyString());
     }
@@ -104,7 +104,7 @@ class CreateCaseCallbackServiceTest {
             true
         ), IDAM_TOKEN, USER_ID);
 
-        assertThat(output.getModifiedFields()).isEmpty();
+        assertThat(output.getModifiedFields()).isNull();
         assertThat(output.getErrors()).containsOnly("No case type ID supplied");
         verify(serviceConfigProvider, never()).getConfig(anyString());
     }
@@ -122,7 +122,7 @@ class CreateCaseCallbackServiceTest {
         ), IDAM_TOKEN, USER_ID);
 
         // then
-        assertThat(output.getModifiedFields()).isEmpty();
+        assertThat(output.getModifiedFields()).isNull();
         assertThat(output.getErrors()).containsOnly("Case type ID () has invalid format");
         verify(serviceConfigProvider, never()).getConfig(anyString());
     }
@@ -141,7 +141,7 @@ class CreateCaseCallbackServiceTest {
         ), IDAM_TOKEN, USER_ID);
 
         // then
-        assertThat(output.getModifiedFields()).isEmpty();
+        assertThat(output.getModifiedFields()).isNull();
         assertThat(output.getErrors()).containsOnly("oh no");
     }
 
@@ -159,7 +159,7 @@ class CreateCaseCallbackServiceTest {
         ), IDAM_TOKEN, USER_ID);
 
         // then
-        assertThat(output.getModifiedFields()).isEmpty();
+        assertThat(output.getModifiedFields()).isNull();
         assertThat(output.getErrors()).containsOnly("Transformation URL is not configured");
     }
 
@@ -193,7 +193,7 @@ class CreateCaseCallbackServiceTest {
         ), IDAM_TOKEN, USER_ID);
 
         // then
-        assertThat(output.getModifiedFields()).isEmpty();
+        assertThat(output.getModifiedFields()).isNull();
         assertThat(output.getErrors()).containsOnly("Event " + EVENT_ID_CREATE_NEW_CASE
             + " not allowed for the current journey classification "
             + NEW_APPLICATION.name()
@@ -231,7 +231,7 @@ class CreateCaseCallbackServiceTest {
         ), IDAM_TOKEN, USER_ID);
 
         // then
-        assertThat(output.getModifiedFields()).isEmpty();
+        assertThat(output.getModifiedFields()).isNull();
         assertThat(output.getErrors()).containsOnly("Event "
             + EVENT_ID_CREATE_NEW_CASE
             + " not allowed for the current journey classification "
@@ -278,7 +278,7 @@ class CreateCaseCallbackServiceTest {
         ), IDAM_TOKEN, USER_ID);
 
         // then
-        assertThat(output.getModifiedFields()).isEmpty();
+        assertThat(output.getModifiedFields()).isNull();
         assertThat(output.getWarnings()).containsOnly("warning");
         assertThat(output.getErrors()).containsOnly("error");
     }
@@ -311,7 +311,7 @@ class CreateCaseCallbackServiceTest {
         ), IDAM_TOKEN, USER_ID);
 
         // then
-        assertThat(output.getModifiedFields()).isEmpty();
+        assertThat(output.getModifiedFields()).isNull();
         assertThat(output.getErrors()).containsOnly("Missing journeyClassification");
     }
 
