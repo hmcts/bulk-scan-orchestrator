@@ -24,7 +24,7 @@ public class ProcessResult {
     }
 
     public ProcessResult(List<String> warnings, List<String> errors) {
-        this.modifiedFields = emptyMap();
+        this.modifiedFields = null;
         this.warnings = warnings;
         this.errors = errors;
     }

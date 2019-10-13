@@ -81,14 +81,21 @@ public class CreateCaseCallbackService {
                                             exceptionRecord,
                                             s2sTokenGenerator.generate()
                                         );
-                                    long newCaseId = createNewCaseInCcd(
-                                        idamToken,
-                                        userId,
-                                        exceptionRecord.poBoxJurisdiction,
-                                        transformationResp.caseCreationDetails,
-                                        request.getCaseDetails().getId().toString()
-                                    );
-                                    return new ProcessResult(ImmutableMap.of(CASE_REFERENCE, Long.toString(newCaseId)));
+                                    if (!transformationResp.warnings.isEmpty() && !request.isIgnoreWarnings()) {
+                                        return new ProcessResult(transformationResp.warnings, emptyList());
+                                    } else {
+                                        long newCaseId = createNewCaseInCcd(
+                                            idamToken,
+                                            userId,
+                                            exceptionRecord.poBoxJurisdiction,
+                                            transformationResp.caseCreationDetails,
+                                            request.getCaseDetails().getId().toString()
+                                        );
+                                        return new ProcessResult(ImmutableMap.of(
+                                            CASE_REFERENCE,
+                                            Long.toString(newCaseId)
+                                        ));
+                                    }
                                 })
                                 .getOrElseGet(errors -> new ProcessResult(emptyList(), errors.asJava()));
                         }

@@ -61,7 +61,7 @@ class CreateCaseCallbackTest {
             .statusCode(OK.value())
             .body("errors", contains("Event " + EVENT_ID_CREATE_NEW_CASE + " not allowed "
                 + "for the current journey classification " + NEW_APPLICATION.name() + " without OCR"))
-            .body("warnings", nullValue())
+            .body("warnings", empty())
             .body("data", nullValue());
     }
 
@@ -71,7 +71,7 @@ class CreateCaseCallbackTest {
             .statusCode(OK.value())
             .body("errors", contains("Event " + EVENT_ID_CREATE_NEW_CASE + " not allowed "
                 + "for the current journey classification " + EXCEPTION.name() + " without OCR"))
-            .body("warnings", nullValue())
+            .body("warnings", empty())
             .body("data", nullValue());
     }
 
