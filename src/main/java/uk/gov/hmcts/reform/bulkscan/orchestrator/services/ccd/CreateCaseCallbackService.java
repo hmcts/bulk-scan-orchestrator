@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.InvalidCaseDataException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
@@ -26,7 +27,6 @@ import static java.util.Collections.singletonList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isCreateNewCaseEvent;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.CASE_REFERENCE;
-
 
 @Service
 public class CreateCaseCallbackService {
@@ -70,17 +70,23 @@ public class CreateCaseCallbackService {
                     try {
                         ServiceConfigItem serviceCfg = serviceConfigProvider.getConfig(serviceName);
                         if (serviceCfg == null || serviceCfg.getTransformationUrl() == null) {
-                            return new ProcessResult(emptyList(), singletonList("Transformation URL is not configured"));
+                            return new ProcessResult(
+                                emptyList(),
+                                singletonList("Transformation URL is not configured")
+                            );
                         } else {
                             return validator
                                 .getValidation(request.getCaseDetails())
                                 .map(exceptionRecord -> {
+                                    String exceptionRecordId = request.getCaseDetails().getId().toString();
+
                                     SuccessfulTransformationResponse transformationResp =
-                                        transformationClient.transformExceptionRecord(
-                                            serviceCfg.getTransformationUrl(),
+                                        transformToCase(
                                             exceptionRecord,
-                                            s2sTokenGenerator.generate()
+                                            serviceCfg,
+                                            exceptionRecordId
                                         );
+
                                     if (!transformationResp.warnings.isEmpty() && !request.isIgnoreWarnings()) {
                                         return new ProcessResult(transformationResp.warnings, emptyList());
                                     } else {
@@ -89,7 +95,7 @@ public class CreateCaseCallbackService {
                                             userId,
                                             exceptionRecord.poBoxJurisdiction,
                                             transformationResp.caseCreationDetails,
-                                            request.getCaseDetails().getId().toString()
+                                            exceptionRecordId
                                         );
                                         return new ProcessResult(ImmutableMap.of(
                                             CASE_REFERENCE,
@@ -110,6 +116,27 @@ public class CreateCaseCallbackService {
                 })
                 .getOrElseGet(err -> new ProcessResult(emptyList(), singletonList(err)));
         }
+    }
+
+    private SuccessfulTransformationResponse transformToCase(
+        ExceptionRecord exceptionRecord,
+        ServiceConfigItem serviceCfg,
+        String exceptionRecordId
+    ) {
+        SuccessfulTransformationResponse transformationResp =
+            transformationClient.transformExceptionRecord(
+                serviceCfg.getTransformationUrl(),
+                exceptionRecord,
+                s2sTokenGenerator.generate()
+            );
+
+        log.info(
+            "Successfully transformed exception record for {} from exception record {}",
+            serviceCfg.getService(),
+            exceptionRecordId
+        );
+
+        return transformationResp;
     }
 
     private long createNewCaseInCcd(
