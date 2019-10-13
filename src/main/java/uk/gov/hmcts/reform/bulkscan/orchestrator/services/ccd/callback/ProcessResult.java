@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 
 /**
  * Data model representing objects used in drafting a response to a callback request.
