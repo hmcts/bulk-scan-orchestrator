@@ -61,9 +61,9 @@ public class CreateCaseCallbackService {
         String idamToken,
         String userId
     ) {
-        Validation<String, Void> event = isCreateNewCaseEvent(request.getEventId());
-        if (event.isInvalid()) {
-            return new ProcessResult(emptyList(), singletonList(event.getError()));
+        Validation<String, Void> eventValidation = isCreateNewCaseEvent(request.getEventId());
+        if (eventValidation.isInvalid()) {
+            return new ProcessResult(emptyList(), singletonList(eventValidation.getError()));
         } else {
             return hasServiceNameInCaseTypeId(request.getCaseDetails())
                 .map(serviceName -> {
