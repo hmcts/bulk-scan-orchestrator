@@ -83,7 +83,9 @@ class CreateCaseTest {
         // then
         CaseDetails createdCase = ccdApi.getCase(caseCcdId, exceptionRecord.getJurisdiction());
         assertThat(createdCase.getCaseTypeId()).isEqualTo(BULK_SCANNED_CASE_TYPE);
-        assertThat(createdCase.getData()).containsExactlyEntriesOf(exceptionRecord.getData());
+        assertThat(createdCase.getData().get("firstName")).isEqualTo("value1");
+        assertThat(createdCase.getData().get("lastName")).isEqualTo("value2");
+        assertThat(createdCase.getData().get("email")).isEqualTo("hello@test.com");
     }
 
     /**
