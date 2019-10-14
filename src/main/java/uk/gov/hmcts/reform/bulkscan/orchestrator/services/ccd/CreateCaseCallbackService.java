@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import io.vavr.control.Validation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.InvalidCaseDataException;
@@ -108,7 +109,11 @@ public class CreateCaseCallbackService {
                     } catch (ServiceNotConfiguredException exc) {
                         return new ProcessResult(emptyList(), singletonList(exc.getMessage()));
                     } catch (InvalidCaseDataException exc) {
-                        return new ProcessResult(exc.getResponse().warnings, exc.getResponse().errors);
+                        if (exc.getStatus() == HttpStatus.BAD_REQUEST) {
+                            throw exc;
+                        } else {
+                            return new ProcessResult(exc.getResponse().warnings, exc.getResponse().errors);
+                        }
                     } catch (Exception exc) {
                         log.error("Error handling event", exc);
                         return new ProcessResult(emptyList(), singletonList("Internal error"));
