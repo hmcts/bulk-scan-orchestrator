@@ -63,7 +63,7 @@ class CreateCaseTest {
     private String dmUrl;
 
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() {
 
         dmUrl = dmUploadService.uploadToDmStore(
             "Certificate.pdf",
@@ -80,10 +80,9 @@ class CreateCaseTest {
         String caseCcdId = invokeCallbackEndpoint(exceptionRecord);
 
         // then
-        await("Case is created")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollDelay(2, TimeUnit.SECONDS)
-            .until(() -> isCaseCreated(caseCcdId, exceptionRecord));
+        CaseDetails createdCase = ccdApi.getCase(caseCcdId, exceptionRecord.getJurisdiction());
+        assertThat(createdCase.getCaseTypeId()).isEqualTo(exceptionRecord.getCaseTypeId());
+        assertThat(createdCase.getData()).containsExactlyEntriesOf(exceptionRecord.getData());
     }
 
     /**
@@ -92,8 +91,7 @@ class CreateCaseTest {
     private String invokeCallbackEndpoint(
         CaseDetails exceptionRecord
     ) throws IOException {
-        CaseDetails exceptionRecordWithSearchFields =
-            exceptionRecord.toBuilder().build();
+        CaseDetails exceptionRecordWithSearchFields = exceptionRecord.toBuilder().build();
 
         CallbackRequest callbackRequest = CallbackRequest
             .builder()
@@ -152,15 +150,5 @@ class CreateCaseTest {
             )
         );
         return caseDetailsList.stream().findFirst();
-    }
-
-    private Boolean isCaseCreated(String caseCcdId, CaseDetails exceptionRecord) {
-
-        CaseDetails createdCase = ccdApi.getCase(
-            String.valueOf(caseCcdId),
-            exceptionRecord.getJurisdiction()
-        );
-
-        return createdCase != null;
     }
 }
