@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.microsoft.azure.servicebus.IMessageReceiver;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -12,11 +13,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.ProcessedEnvelopeNotifier;
+import uk.gov.hmcts.reform.idam.client.IdamApi;
 
 import static org.mockito.Mockito.mock;
 import static org.springframework.util.SocketUtils.findAvailableTcpPort;
 
 @Configuration
+@EnableFeignClients(clients = IdamApi.class)
 @Profile({"integration", "nosb"}) // no servicebus queue handler registration
 class IntegrationTestInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
