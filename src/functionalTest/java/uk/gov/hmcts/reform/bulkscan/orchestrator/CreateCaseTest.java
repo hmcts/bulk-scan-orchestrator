@@ -34,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.BULK_SCANNED_CASE_TYPE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_CREATE_NEW_CASE;
 
 @SpringBootTest
@@ -81,7 +82,7 @@ class CreateCaseTest {
 
         // then
         CaseDetails createdCase = ccdApi.getCase(caseCcdId, exceptionRecord.getJurisdiction());
-        assertThat(createdCase.getCaseTypeId()).isEqualTo(exceptionRecord.getCaseTypeId());
+        assertThat(createdCase.getCaseTypeId()).isEqualTo(BULK_SCANNED_CASE_TYPE);
         assertThat(createdCase.getData()).containsExactlyEntriesOf(exceptionRecord.getData());
     }
 
