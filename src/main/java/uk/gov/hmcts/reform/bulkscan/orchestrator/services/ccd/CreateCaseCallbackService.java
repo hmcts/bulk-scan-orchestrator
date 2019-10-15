@@ -67,12 +67,8 @@ public class CreateCaseCallbackService {
      *
      * @return Either list of errors or map of changes - new case reference
      */
-    public Either<List<String>, ProcessResult> process(
-        CcdCallbackRequest request,
-        String idamToken,
-        String userId
-    ) {
-        return assertAllowToAccess(request.getCaseDetails(), request.getEventId())
+    public ProcessResult process(CcdCallbackRequest request, String idamToken, String userId) {
+        ProcessResult result = assertAllowToAccess(request.getCaseDetails(), request.getEventId())
             .flatMap(theVoid -> validator
                 .getValidation(request.getCaseDetails())
                 .combine(getServiceConfig(request.getCaseDetails()).mapError(Array::of))
@@ -89,9 +85,17 @@ public class CreateCaseCallbackService {
                 .toEither()
                 .mapLeft(Seq::asJava)
             )
-            .peekLeft(warnings ->
-                log.warn("Warnings found during callback process:\n  - {}", String.join("\n  - ", warnings))
-            );
+            .getOrElseGet(errors -> new ProcessResult(emptyList(), errors));
+
+        if (!result.getWarnings().isEmpty()) {
+            log.warn("Warnings found during callback process:\n  - {}", String.join("\n  - ", result.getWarnings()));
+        }
+
+        if (!result.getErrors().isEmpty()) {
+            log.error("Errors found during callback process:\n  - {}", String.join("\n  - ", result.getErrors()));
+        }
+
+        return result;
     }
 
     private Either<List<String>, Void> assertAllowToAccess(CaseDetails caseDetails, String eventId) {
