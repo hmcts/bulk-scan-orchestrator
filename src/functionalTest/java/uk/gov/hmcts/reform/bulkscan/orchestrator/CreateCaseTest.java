@@ -95,7 +95,7 @@ class CreateCaseTest {
     @Test
     public void should_clear_exception_record_warnings() throws Exception {
         // given
-        CaseDetails exceptionRecord = createExceptionRecord("new-application-with-ocr-data-warnings.json");
+        CaseDetails exceptionRecord = createExceptionRecord("envelopes/new-application-with-ocr-data-warnings.json");
 
         // warnings are present
         assertThat(exceptionRecord).isNotNull();
