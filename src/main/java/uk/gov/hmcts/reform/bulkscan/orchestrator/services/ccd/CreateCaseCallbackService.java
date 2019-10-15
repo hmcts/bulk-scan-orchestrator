@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import io.vavr.collection.Array;
 import io.vavr.collection.Seq;
-import io.vavr.control.Either;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
 import org.slf4j.Logger;
@@ -35,7 +34,6 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isCreateNewCaseEvent;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.CASE_REFERENCE;
-
 
 @Service
 public class CreateCaseCallbackService {
@@ -82,8 +80,7 @@ public class CreateCaseCallbackService {
                 ))
                 .mapError(errors -> errors.flatMap(Function.identity()))
                 .flatMap(Function.identity())
-                .toEither()
-                .mapLeft(Seq::asJava)
+                .mapError(Seq::asJava)
             )
             .getOrElseGet(errors -> new ProcessResult(emptyList(), errors));
 
@@ -98,7 +95,7 @@ public class CreateCaseCallbackService {
         return result;
     }
 
-    private Either<List<String>, Void> assertAllowToAccess(CaseDetails caseDetails, String eventId) {
+    private Validation<List<String>, Void> assertAllowToAccess(CaseDetails caseDetails, String eventId) {
         return validator.mandatoryPrerequisites(
             () -> isCreateNewCaseEvent(eventId),
             () -> getServiceConfig(caseDetails).map(item -> null)
