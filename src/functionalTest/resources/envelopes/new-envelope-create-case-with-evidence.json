@@ -36,10 +36,5 @@
   "ocr_data_validation_warnings": [
     "warning 1",
     "warning 2"
-  ],
-  "payments": [
-    {
-      "document_control_number": "154565768"
-    }
   ]
 }
