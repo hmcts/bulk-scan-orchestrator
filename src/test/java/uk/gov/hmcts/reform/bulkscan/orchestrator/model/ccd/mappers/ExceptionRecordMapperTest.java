@@ -120,7 +120,7 @@ class ExceptionRecordMapperTest {
     }
 
     @Test
-    public void mapEnvelope_sets_awaitingPaymentDcnProcessing_to_yes_when_envelope_contains_payments() {
+    public void mapEnvelope_sets_payment_fields_to_yes_when_envelope_contains_payments() {
         //given
         Envelope envelope = envelope(
             2,
@@ -134,10 +134,11 @@ class ExceptionRecordMapperTest {
 
         //then
         assertThat(exceptionRecord.awaitingPaymentDcnProcessing).isEqualTo("Yes");
+        assertThat(exceptionRecord.containsPayments).isEqualTo("Yes");
     }
 
     @Test
-    public void mapEnvelope_sets_awaitingPaymentDcnProcessing_to_no_when_envelope_does_not_contain_payments() {
+    public void mapEnvelope_sets_payment_fields_to_no_when_envelope_does_not_contain_payments() {
         //given
         Envelope envelope = envelope(2, null, null, emptyList());
 
@@ -146,6 +147,7 @@ class ExceptionRecordMapperTest {
 
         //then
         assertThat(exceptionRecord.awaitingPaymentDcnProcessing).isEqualTo("No");
+        assertThat(exceptionRecord.containsPayments).isEqualTo("No");
     }
 
     private Envelope envelopeWithJurisdiction(String jurisdiction) {
