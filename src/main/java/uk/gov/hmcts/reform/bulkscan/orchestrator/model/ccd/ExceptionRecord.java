@@ -43,6 +43,10 @@ public class ExceptionRecord implements CaseData {
     @JsonProperty("awaitingPaymentDCNProcessing")
     public final String awaitingPaymentDcnProcessing;
 
+    // Yes/No field indicating if the exception record contains payments
+    @JsonProperty("containsPayments")
+    public final String containsPayments;
+
     public ExceptionRecord(
         String classification,
         String poBox,
@@ -55,7 +59,8 @@ public class ExceptionRecord implements CaseData {
         List<CcdCollectionElement<String>> ocrDataValidationWarnings,
         String displayWarnings,
         String envelopeId,
-        String awaitingPaymentDcnProcessing
+        String awaitingPaymentDcnProcessing,
+        String containsPayments
     ) {
         this.classification = classification;
         this.poBox = poBox;
@@ -69,5 +74,6 @@ public class ExceptionRecord implements CaseData {
         this.displayWarnings = displayWarnings;
         this.envelopeId = envelopeId;
         this.awaitingPaymentDcnProcessing = awaitingPaymentDcnProcessing;
+        this.containsPayments = containsPayments;
     }
 }
