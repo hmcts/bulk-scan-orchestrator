@@ -164,8 +164,7 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
-    void should_report_error_if_classification_new_application_with_documents_and_without_ocr_data()
-        throws IOException, CaseTransformationException {
+    void should_report_error_if_classification_new_application_with_documents_and_without_ocr_data() {
         // given
         setUpTransformationUrl();
 
