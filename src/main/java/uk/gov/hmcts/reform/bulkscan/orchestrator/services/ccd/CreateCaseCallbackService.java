@@ -27,10 +27,10 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
-import java.util.List;
 import java.util.function.Function;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isCreateNewCaseEvent;
@@ -69,22 +69,27 @@ public class CreateCaseCallbackService {
      * @return Either list of errors or map of changes - new case reference
      */
     public ProcessResult process(CcdCallbackRequest request, String idamToken, String userId) {
-        ProcessResult result = assertAllowToAccess(request.getCaseDetails(), request.getEventId())
-            .flatMap(theVoid -> validator
-                .getValidation(request.getCaseDetails())
-                .combine(getServiceConfig(request.getCaseDetails()).mapError(Array::of))
-                .ap((exceptionRecord, configItem) -> createNewCase(
-                    exceptionRecord,
-                    configItem,
-                    request.getCaseDetails().getId(),
-                    request.isIgnoreWarnings(),
-                    idamToken,
-                    userId
-                ))
-                .mapError(errors -> errors.flatMap(Function.identity()))
-                .flatMap(Function.identity())
-                .mapError(Seq::asJava)
-            )
+        Validation<String, Void> canAccess = assertAllowToAccess(request.getCaseDetails(), request.getEventId());
+
+        if (canAccess.isInvalid()) {
+            // log happens in assertion method
+            return new ProcessResult(emptyList(), singletonList(canAccess.getError()));
+        }
+
+        ProcessResult result = validator
+            .getValidation(request.getCaseDetails())
+            .combine(getServiceConfig(request.getCaseDetails()).mapError(Array::of))
+            .ap((exceptionRecord, configItem) -> createNewCase(
+                exceptionRecord,
+                configItem,
+                request.getCaseDetails().getId(),
+                request.isIgnoreWarnings(),
+                idamToken,
+                userId
+            ))
+            .mapError(errors -> errors.flatMap(Function.identity()))
+            .flatMap(Function.identity())
+            .mapError(Seq::asJava)
             .getOrElseGet(errors -> new ProcessResult(emptyList(), errors));
 
         if (!result.getWarnings().isEmpty()) {
@@ -98,7 +103,7 @@ public class CreateCaseCallbackService {
         return result;
     }
 
-    private Validation<List<String>, Void> assertAllowToAccess(CaseDetails caseDetails, String eventId) {
+    private Validation<String, Void> assertAllowToAccess(CaseDetails caseDetails, String eventId) {
         return validator.mandatoryPrerequisites(
             () -> isCreateNewCaseEvent(eventId),
             () -> getServiceConfig(caseDetails).map(item -> null)
