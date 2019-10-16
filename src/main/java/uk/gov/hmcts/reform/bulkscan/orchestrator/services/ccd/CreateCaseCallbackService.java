@@ -90,11 +90,19 @@ public class CreateCaseCallbackService {
             .getOrElseGet(errors -> new ProcessResult(emptyList(), errors));
 
         if (!result.getWarnings().isEmpty()) {
-            log.warn("Warnings found during callback process:\n  - {}", String.join("\n  - ", result.getWarnings()));
+            log.warn(
+                "Warnings found for {} during callback process:\n  - {}",
+                serviceConfigItem.getService(),
+                String.join("\n  - ", result.getWarnings())
+            );
         }
 
         if (!result.getErrors().isEmpty()) {
-            log.error("Errors found during callback process:\n  - {}", String.join("\n  - ", result.getErrors()));
+            log.error(
+                "Errors found for {} during callback process:\n  - {}",
+                serviceConfigItem.getService(),
+                String.join("\n  - ", result.getErrors())
+            );
         }
 
         return result;
