@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.res
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
@@ -75,7 +76,7 @@ public class CreateCaseCallbackService {
     /**
      * Create case record from exception case record.
      *
-     * @return Either list of errors or map of changes - new case reference
+     * @return ProcessResult map of changes or list of errors/warnings
      */
     public ProcessResult process(CcdCallbackRequest request, String idamToken, String userId) {
         Validation<String, Void> canAccess = assertAllowToAccess(request.getCaseDetails(), request.getEventId());
@@ -83,7 +84,7 @@ public class CreateCaseCallbackService {
         if (canAccess.isInvalid()) {
             log.warn("Validation error: {}", canAccess.getError());
 
-            return new ProcessResult(emptyList(), singletonList(canAccess.getError()));
+            throw new CallbackException(canAccess.getError());
         }
 
         // already validated in mandatory section ^
@@ -252,13 +253,13 @@ public class CreateCaseCallbackService {
             }
         } catch (Exception exception) {
             log.error(
-                "Failed to create exception for service {} and exception record {}",
+                "Failed to create new case for service {} from exception record {}",
                 configItem.getService(),
                 exceptionRecord.id,
                 exception
             );
 
-            return new ProcessResult(emptyList(), singletonList("Internal error. " + exception.getMessage()));
+            throw new CallbackException("Failed to create new case", exception);
         }
     }
 

@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.res
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.TransformationErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields;
@@ -41,6 +42,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -102,15 +104,17 @@ class CreateCaseCallbackServiceTest {
 
     @Test
     void should_not_allow_to_process_callback_in_case_wrong_event_id_is_received() {
-        ProcessResult result = service.process(new CcdCallbackRequest(
-            "some event",
-            null,
-            true
-        ), IDAM_TOKEN, USER_ID);
+        CallbackException callbackException = catchThrowableOfType(() ->
+            service.process(new CcdCallbackRequest(
+                "some event",
+                null,
+                true
+            ), IDAM_TOKEN, USER_ID),
+            CallbackException.class
+        );
 
-        assertThat(result.getWarnings()).isEmpty();
-        assertThat(result.getErrors())
-            .containsOnly("The some event event is not supported. Please contact service team");
+        assertThat(callbackException.getCause()).isNull();
+        assertThat(callbackException).hasMessage("The some event event is not supported. Please contact service team");
         verify(serviceConfigProvider, never()).getConfig(anyString());
     }
 
@@ -120,14 +124,17 @@ class CreateCaseCallbackServiceTest {
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.id(1L));
 
         // when
-        ProcessResult result = service.process(new CcdCallbackRequest(
-            EVENT_ID_CREATE_NEW_CASE,
-            caseDetails,
-            true
-        ), IDAM_TOKEN, USER_ID);
+        CallbackException callbackException = catchThrowableOfType(() ->
+            service.process(new CcdCallbackRequest(
+                EVENT_ID_CREATE_NEW_CASE,
+                caseDetails,
+                true
+            ), IDAM_TOKEN, USER_ID),
+            CallbackException.class
+        );
 
-        assertThat(result.getWarnings()).isEmpty();
-        assertThat(result.getErrors()).containsOnly("No case type ID supplied");
+        assertThat(callbackException.getCause()).isNull();
+        assertThat(callbackException).hasMessage("No case type ID supplied");
         verify(serviceConfigProvider, never()).getConfig(anyString());
     }
 
@@ -137,15 +144,18 @@ class CreateCaseCallbackServiceTest {
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(""));
 
         // when
-        ProcessResult result = service.process(new CcdCallbackRequest(
-            EVENT_ID_CREATE_NEW_CASE,
-            caseDetails,
-            true
-        ), IDAM_TOKEN, USER_ID);
+        CallbackException callbackException = catchThrowableOfType(() ->
+            service.process(new CcdCallbackRequest(
+                EVENT_ID_CREATE_NEW_CASE,
+                caseDetails,
+                true
+            ), IDAM_TOKEN, USER_ID),
+            CallbackException.class
+        );
 
         // then
-        assertThat(result.getWarnings()).isEmpty();
-        assertThat(result.getErrors()).containsOnly("Case type ID () has invalid format");
+        assertThat(callbackException.getCause()).isNull();
+        assertThat(callbackException).hasMessage("Case type ID () has invalid format");
         verify(serviceConfigProvider, never()).getConfig(anyString());
     }
 
@@ -156,15 +166,18 @@ class CreateCaseCallbackServiceTest {
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(CASE_TYPE_ID));
 
         // when
-        ProcessResult result = service.process(new CcdCallbackRequest(
-            EVENT_ID_CREATE_NEW_CASE,
-            caseDetails,
-            true
-        ), IDAM_TOKEN, USER_ID);
+        CallbackException callbackException = catchThrowableOfType(() ->
+            service.process(new CcdCallbackRequest(
+                EVENT_ID_CREATE_NEW_CASE,
+                caseDetails,
+                true
+            ), IDAM_TOKEN, USER_ID),
+            CallbackException.class
+        );
 
         // then
-        assertThat(result.getWarnings()).isEmpty();
-        assertThat(result.getErrors()).containsOnly("oh no");
+        assertThat(callbackException.getCause()).isNull();
+        assertThat(callbackException).hasMessage("oh no");
     }
 
     @Test
@@ -174,15 +187,18 @@ class CreateCaseCallbackServiceTest {
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(CASE_TYPE_ID));
 
         // when
-        ProcessResult result = service.process(new CcdCallbackRequest(
-            EVENT_ID_CREATE_NEW_CASE,
-            caseDetails,
-            true
-        ), IDAM_TOKEN, USER_ID);
+        CallbackException callbackException = catchThrowableOfType(() ->
+            service.process(new CcdCallbackRequest(
+                EVENT_ID_CREATE_NEW_CASE,
+                caseDetails,
+                true
+            ), IDAM_TOKEN, USER_ID),
+            CallbackException.class
+        );
 
         // then
-        assertThat(result.getWarnings()).isEmpty();
-        assertThat(result.getErrors()).containsOnly("Transformation URL is not configured");
+        assertThat(callbackException.getCause()).isNull();
+        assertThat(callbackException).hasMessage("Transformation URL is not configured");
     }
 
     @Test
