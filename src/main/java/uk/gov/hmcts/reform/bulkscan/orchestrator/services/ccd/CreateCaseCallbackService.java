@@ -81,7 +81,8 @@ public class CreateCaseCallbackService {
         Validation<String, Void> canAccess = assertAllowToAccess(request.getCaseDetails(), request.getEventId());
 
         if (canAccess.isInvalid()) {
-            // log happens in assertion method
+            log.warn("Validation error: {}", canAccess.getError());
+
             return new ProcessResult(emptyList(), singletonList(canAccess.getError()));
         }
 
