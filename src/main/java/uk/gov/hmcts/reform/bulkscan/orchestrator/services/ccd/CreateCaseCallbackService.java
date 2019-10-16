@@ -81,7 +81,6 @@ public class CreateCaseCallbackService {
             .map(exceptionRecord -> createNewCase(
                 exceptionRecord,
                 serviceConfigItem,
-                request.getCaseDetails().getId(),
                 request.isIgnoreWarnings(),
                 idamToken,
                 userId
@@ -128,14 +127,15 @@ public class CreateCaseCallbackService {
     private ProcessResult createNewCase(
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,
-        long caseId,
         boolean ignoreWarnings,
         String idamToken,
         String userId
     ) {
-        String caseIdAsString = Long.toString(caseId);
-
-        log.info("Start creating new case for {} from exception record {}", configItem.getService(), caseIdAsString);
+        log.info(
+            "Start creating new case for {} from exception record {}",
+            configItem.getService(),
+            exceptionRecord.id
+        );
 
         try {
             String s2sToken = s2sTokenGenerator.generate();
@@ -154,23 +154,22 @@ public class CreateCaseCallbackService {
             log.info(
                 "Successfully transformed exception record for {} from exception record {}",
                 configItem.getService(),
-                caseIdAsString
+                exceptionRecord.id
             );
 
             long newCaseId = createNewCaseInCcd(
                 idamToken,
                 s2sToken,
                 userId,
-                exceptionRecord.poBoxJurisdiction,
-                transformationResponse.caseCreationDetails,
-                caseIdAsString
+                exceptionRecord,
+                transformationResponse.caseCreationDetails
             );
 
             log.info(
                 "Successfully created new case for {} with case ID {} from exception record {}",
                 configItem.getService(),
                 newCaseId,
-                caseIdAsString
+                exceptionRecord.id
             );
 
             return new ProcessResult(
@@ -190,7 +189,7 @@ public class CreateCaseCallbackService {
             log.error(
                 "Failed to create exception for service {} and exception record {}",
                 configItem.getService(),
-                caseIdAsString,
+                exceptionRecord.id,
                 exception
             );
 
@@ -202,15 +201,14 @@ public class CreateCaseCallbackService {
         String idamToken,
         String s2sToken,
         String userId,
-        String jurisdiction,
-        CaseCreationDetails caseCreationDetails,
-        String originalCaseId
+        ExceptionRecord exceptionRecord,
+        CaseCreationDetails caseCreationDetails
     ) {
         StartEventResponse eventResponse = ccdApi.startForCaseworker(
             idamToken,
             s2sToken,
             userId,
-            jurisdiction,
+            exceptionRecord.poBoxJurisdiction,
             caseCreationDetails.caseTypeId,
             // when onboarding remind services to not configure about to submit callback for this event
             caseCreationDetails.eventId
@@ -220,18 +218,18 @@ public class CreateCaseCallbackService {
             idamToken,
             s2sToken,
             userId,
-            jurisdiction,
+            exceptionRecord.poBoxJurisdiction,
             caseCreationDetails.caseTypeId,
             true,
             CaseDataContent
                 .builder()
-                .caseReference(originalCaseId)
+                .caseReference(exceptionRecord.id)
                 .data(caseCreationDetails.caseData)
                 .event(Event
                     .builder()
                     .id(eventResponse.getEventId())
                     .summary("Case created")
-                    .description("Case created from exception record ref " + originalCaseId)
+                    .description("Case created from exception record ref " + exceptionRecord.id)
                     .build()
                 )
                 .eventToken(eventResponse.getToken())
