@@ -52,7 +52,9 @@ class CreateCaseCallbackTest {
             .statusCode(OK.value())
             .body("errors", empty())
             .body("warnings", empty())
-            .body("data.caseReference", equalTo("1539007368674134")); // from sample-case.json
+            .body("data.caseReference", equalTo("1539007368674134")) // from sample-case.json
+            .body("data.displayWarnings", equalTo("No"))
+            .body("data.ocrDataValidationWarnings", empty());
     }
 
     @Test
