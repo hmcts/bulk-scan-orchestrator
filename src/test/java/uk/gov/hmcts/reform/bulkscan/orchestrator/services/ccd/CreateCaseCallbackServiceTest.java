@@ -207,6 +207,58 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
+    void should_not_allow_to_process_callback_when_idam_token_is_missing() {
+        // given
+        setUpTransformationUrl();
+
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .id(CASE_ID)
+            .caseTypeId(CASE_TYPE_ID)
+            .jurisdiction("some jurisdiction")
+        );
+
+        // when
+        CallbackException callbackException = catchThrowableOfType(() ->
+            service.process(new CcdCallbackRequest(
+                EVENT_ID_CREATE_NEW_CASE,
+                caseDetails,
+                true
+            ), null, USER_ID),
+            CallbackException.class
+        );
+
+        // then
+        assertThat(callbackException.getCause()).isNull();
+        assertThat(callbackException).hasMessage("Callback has no Idam token received in the header");
+    }
+
+    @Test
+    void should_not_allow_to_process_callback_when_user_id_is_missing() {
+        // given
+        setUpTransformationUrl();
+
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .id(CASE_ID)
+            .caseTypeId(CASE_TYPE_ID)
+            .jurisdiction("some jurisdiction")
+        );
+
+        // when
+        CallbackException callbackException = catchThrowableOfType(() ->
+            service.process(new CcdCallbackRequest(
+                EVENT_ID_CREATE_NEW_CASE,
+                caseDetails,
+                true
+            ), IDAM_TOKEN, null),
+            CallbackException.class
+        );
+
+        // then
+        assertThat(callbackException.getCause()).isNull();
+        assertThat(callbackException).hasMessage("Callback has no user id received in the header");
+    }
+
+    @Test
     void should_report_error_if_classification_new_application_with_documents_and_without_ocr_data() {
         // given
         setUpTransformationUrl();
