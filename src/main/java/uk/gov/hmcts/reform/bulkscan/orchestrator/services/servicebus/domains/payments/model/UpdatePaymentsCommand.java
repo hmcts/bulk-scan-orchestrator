@@ -11,16 +11,21 @@ public class UpdatePaymentsCommand implements PaymentCommand {
     @JsonProperty("new_case_ref")
     public final String newCaseRef;
 
+    @JsonProperty("envelope_id")
+    public final String envelopeId;
+
     @JsonProperty("jurisdiction")
     public final String jurisdiction;
 
     public UpdatePaymentsCommand(
         String exceptionRecordRef,
         String newCaseRef,
+        String envelopeId,
         String jurisdiction
     ) {
         this.exceptionRecordRef = exceptionRecordRef;
         this.newCaseRef = newCaseRef;
+        this.envelopeId = envelopeId;
         this.jurisdiction = jurisdiction;
     }
 

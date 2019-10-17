@@ -112,6 +112,7 @@ class PaymentsPublisherTest {
             new UpdatePaymentsCommand(
                 "er-ref",
                 "new-case-ref",
+                "envelope-id",
                 "jurisdiction"
             );
 
@@ -131,6 +132,7 @@ class PaymentsPublisherTest {
                 "{"
                     + "'exception_record_ref': 'er-ref',"
                     + "'new_case_ref': 'new-case-ref',"
+                    + "'envelope_id': 'envelope-id',"
                     + "'jurisdiction': 'jurisdiction'"
                     + "}"
             ).replace("'", "\""),
