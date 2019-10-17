@@ -132,4 +132,39 @@ class CaseRetrievalTest {
         assertThat(ids).containsExactly(foundId1, foundId2);
         WireMock.verify(postRequestedFor(urlEqualTo(EXCEPTION_RECORD_SEARCH_URL)));
     }
+
+    @Test
+    public void getCaseByBulkScanCaseReference_should_return_empty_list_when_no_records_found() {
+        // given
+        givenThat(post(CASE_SEARCH_URL).willReturn(aResponse().withBody(
+            fileContentAsString("ccd/response/search-by-bulk-scan-case-reference-id/result-empty.json")
+        )));
+
+        // when
+        List<Long> ids = ccdApi.getCaseRefsByBulkScanCaseReference("ref-123", TEST_SERVICE_NAME);
+
+        // then
+        assertThat(ids).isEmpty();
+        WireMock.verify(postRequestedFor(urlEqualTo(CASE_SEARCH_URL)));
+    }
+
+    @Test
+    public void getCaseByBulkScanCaseReference_should_return_list_with_ids_of_all_records_found() {
+        // given
+        Long foundId1 = 12_345L;
+
+        String searchResultBody = format(
+            fileContentAsString("ccd/response/search-by-bulk-scan-case-reference-id/result-format-single-record.json"),
+            foundId1
+        );
+
+        givenThat(post(CASE_SEARCH_URL).willReturn(aResponse().withBody(searchResultBody)));
+
+        // when
+        List<Long> ids = ccdApi.getCaseRefsByBulkScanCaseReference("ref-123", TEST_SERVICE_NAME);
+
+        // then
+        assertThat(ids).containsExactly(foundId1);
+        WireMock.verify(postRequestedFor(urlEqualTo(CASE_SEARCH_URL)));
+    }
 }
