@@ -37,6 +37,9 @@ public class CcdApi {
     public static final String SEARCH_BY_ENVELOPE_ID_QUERY_FORMAT =
         "{\"query\": { \"match_phrase\" : { \"data.envelopeId\" : \"%s\" }}}";
 
+    public static final String SEARCH_BY_BULK_SCAN_CASE_REFERENCE_QUERY_FORMAT =
+        "{\"query\": { \"match_phrase\" : { \"data.bulkScanCaseReference\" : \"%s\" }}}";
+
     private final CoreCaseDataApi feignCcdApi;
     private final CcdAuthenticatorFactory authenticatorFactory;
     private final ServiceConfigProvider serviceConfigProvider;
@@ -146,38 +149,36 @@ public class CcdApi {
 
     public List<Long> getExceptionRecordRefsByEnvelopeId(String envelopeId, String service) {
         ServiceConfigItem serviceConfig = serviceConfigProvider.getConfig(service);
+        final String caseTypeIdsStr = format("%s_ExceptionRecord", service.toUpperCase());
+        final String searchQuery = format(SEARCH_BY_ENVELOPE_ID_QUERY_FORMAT, envelopeId);
 
-        String jurisdiction = serviceConfig.getJurisdiction();
-        String caseTypeIdsStr = format("%s_ExceptionRecord", service.toUpperCase());
-        CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
-
-        SearchResult searchResult = feignCcdApi.searchCases(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            caseTypeIdsStr,
-            format(SEARCH_BY_ENVELOPE_ID_QUERY_FORMAT, envelopeId)
-        );
-
-        return searchResult
-            .getCases()
-            .stream()
-            .map(CaseDetails::getId)
-            .collect(toList());
+        return getCaseRefs(serviceConfig, caseTypeIdsStr, searchQuery);
     }
 
-    void attachExceptionRecord(CaseDetails theCase,
-                               String idamToken,
-                               String userId,
-                               Map<String, Object> data,
-                               String eventSummary,
-                               StartEventResponse event) {
+    public List<Long> getCaseRefsByBulkScanCaseReference(String bulkScanCaseReference, String service) {
+        ServiceConfigItem serviceConfig = serviceConfigProvider.getConfig(service);
+        final String caseTypeIdsStr = String.join(",", serviceConfig.getCaseTypeIds());
+        final String searchQuery = format(SEARCH_BY_BULK_SCAN_CASE_REFERENCE_QUERY_FORMAT, bulkScanCaseReference);
+
+        return getCaseRefs(serviceConfig, caseTypeIdsStr, searchQuery);
+    }
+
+    void attachExceptionRecord(
+        CaseDetails theCase,
+        String idamToken,
+        String userId,
+        Map<String, Object> data,
+        String eventSummary,
+        StartEventResponse event
+    ) {
         String caseRef = String.valueOf(theCase.getId());
         String jurisdiction = theCase.getJurisdiction();
         String caseTypeId = theCase.getCaseTypeId();
         try {
             //TODO We don't need to login here as we just need the service token
             CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
-            attachCall(caseRef,
+            attachCall(
+                caseRef,
                 authenticator.getServiceToken(),
                 idamToken,
                 userId,
@@ -185,13 +186,36 @@ public class CcdApi {
                 event.getToken(),
                 jurisdiction,
                 caseTypeId,
-                Event.builder().summary(eventSummary).id(event.getEventId()).build());
+                Event.builder().summary(eventSummary).id(event.getEventId()).build()
+            );
         } catch (FeignException e) {
             throw new CcdCallException(
                 format("Internal Error: submitting attach file event failed case: %s Error: %s", caseRef, e.status()),
                 e
             );
         }
+    }
+
+    private List<Long> getCaseRefs(
+        ServiceConfigItem serviceConfig,
+        String caseTypeIdsStr,
+        String searchQuery
+    ) {
+        String jurisdiction = serviceConfig.getJurisdiction();
+        CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
+
+        SearchResult searchResult = feignCcdApi.searchCases(
+            authenticator.getUserToken(),
+            authenticator.getServiceToken(),
+            caseTypeIdsStr,
+            searchQuery
+        );
+
+        return searchResult
+            .getCases()
+            .stream()
+            .map(CaseDetails::getId)
+            .collect(toList());
     }
 
     private void attachCall(String caseRef,
