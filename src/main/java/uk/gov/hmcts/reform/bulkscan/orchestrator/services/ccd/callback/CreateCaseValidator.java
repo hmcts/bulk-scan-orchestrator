@@ -23,7 +23,6 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.FORMATTER;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.getOcrData;
@@ -48,18 +47,18 @@ public class CreateCaseValidator {
      * Easy extension for more mandatory prerequisites - just flatmap next Validation.
      *
      * @param prerequisites Top level requirements failing fast
-     * @return Either singleton list of errors or green pass to proceed further
+     * @return Validation an error or green pass to proceed further
      */
     @SafeVarargs
-    public final Validation<List<String>, Void> mandatoryPrerequisites(
+    public final Validation<String, Void> mandatoryPrerequisites(
         Supplier<Validation<String, Void>>... prerequisites
     ) {
         for (Supplier<Validation<String, Void>> prerequisite : prerequisites) {
-            Validation<List<String>, Void> requirement = prerequisite.get()
+            Validation<String, Void> requirement = prerequisite.get()
                 .mapError(error -> {
-                    log.warn("Validation error {}", error);
+                    log.warn("Validation error: {}", error);
 
-                    return singletonList(error);
+                    return error;
                 });
 
             if (requirement.isInvalid()) {
