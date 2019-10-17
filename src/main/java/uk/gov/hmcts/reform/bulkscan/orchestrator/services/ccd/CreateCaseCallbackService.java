@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import io.vavr.collection.Array;
 import io.vavr.collection.Seq;
-import io.vavr.control.Either;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
 import org.slf4j.Logger;
@@ -39,7 +38,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.DISPLAY_WARNINGS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.OCR_DATA_VALIDATION_WARNINGS;
 
-
 @Service
 public class CreateCaseCallbackService {
 
@@ -70,12 +68,8 @@ public class CreateCaseCallbackService {
      *
      * @return Either list of errors or map of changes - new case reference
      */
-    public Either<List<String>, ProcessResult> process(
-        CcdCallbackRequest request,
-        String idamToken,
-        String userId
-    ) {
-        return assertAllowToAccess(request.getCaseDetails(), request.getEventId())
+    public ProcessResult process(CcdCallbackRequest request, String idamToken, String userId) {
+        ProcessResult result = assertAllowToAccess(request.getCaseDetails(), request.getEventId())
             .flatMap(theVoid -> validator
                 .getValidation(request.getCaseDetails())
                 .combine(getServiceConfig(request.getCaseDetails()).mapError(Array::of))
@@ -89,15 +83,22 @@ public class CreateCaseCallbackService {
                 ))
                 .mapError(errors -> errors.flatMap(Function.identity()))
                 .flatMap(Function.identity())
-                .toEither()
-                .mapLeft(Seq::asJava)
+                .mapError(Seq::asJava)
             )
-            .peekLeft(warnings ->
-                log.warn("Warnings found during callback process:\n  - {}", String.join("\n  - ", warnings))
-            );
+            .getOrElseGet(errors -> new ProcessResult(emptyList(), errors));
+
+        if (!result.getWarnings().isEmpty()) {
+            log.warn("Warnings found during callback process:\n  - {}", String.join("\n  - ", result.getWarnings()));
+        }
+
+        if (!result.getErrors().isEmpty()) {
+            log.error("Errors found during callback process:\n  - {}", String.join("\n  - ", result.getErrors()));
+        }
+
+        return result;
     }
 
-    private Either<List<String>, Void> assertAllowToAccess(CaseDetails caseDetails, String eventId) {
+    private Validation<List<String>, Void> assertAllowToAccess(CaseDetails caseDetails, String eventId) {
         return validator.mandatoryPrerequisites(
             () -> isCreateNewCaseEvent(eventId),
             () -> getServiceConfig(caseDetails).map(item -> null)
