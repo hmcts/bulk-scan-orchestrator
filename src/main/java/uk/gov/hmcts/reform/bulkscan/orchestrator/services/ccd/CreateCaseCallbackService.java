@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import feign.FeignException;
 import io.vavr.collection.Seq;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
@@ -252,13 +253,7 @@ public class CreateCaseCallbackService {
                 return new ProcessResult(exception.getResponse().warnings, exception.getResponse().errors);
             }
         } catch (Exception exception) {
-            log.error(
-                "Failed to create new case for service {} from exception record {}",
-                configItem.getService(),
-                exceptionRecord.id,
-                exception
-            );
-
+            // log happens individually to cover transformation/ccd cases
             throw new CallbackException("Failed to create new case", exception);
         }
     }
@@ -270,37 +265,58 @@ public class CreateCaseCallbackService {
         ExceptionRecord exceptionRecord,
         CaseCreationDetails caseCreationDetails
     ) {
-        StartEventResponse eventResponse = coreCaseDataApi.startForCaseworker(
-            idamToken,
-            s2sToken,
-            userId,
-            exceptionRecord.poBoxJurisdiction,
-            caseCreationDetails.caseTypeId,
-            // when onboarding remind services to not configure about to submit callback for this event
-            caseCreationDetails.eventId
-        );
+        try {
+            StartEventResponse eventResponse = coreCaseDataApi.startForCaseworker(
+                idamToken,
+                s2sToken,
+                userId,
+                exceptionRecord.poBoxJurisdiction,
+                caseCreationDetails.caseTypeId,
+                // when onboarding remind services to not configure about to submit callback for this event
+                caseCreationDetails.eventId
+            );
 
-        return coreCaseDataApi.submitForCaseworker(
-            idamToken,
-            s2sToken,
-            userId,
-            exceptionRecord.poBoxJurisdiction,
-            caseCreationDetails.caseTypeId,
-            true,
-            CaseDataContent
-                .builder()
-                .caseReference(exceptionRecord.id)
-                .data(caseCreationDetails.caseData)
-                .event(Event
+            return coreCaseDataApi.submitForCaseworker(
+                idamToken,
+                s2sToken,
+                userId,
+                exceptionRecord.poBoxJurisdiction,
+                caseCreationDetails.caseTypeId,
+                true,
+                CaseDataContent
                     .builder()
-                    .id(eventResponse.getEventId())
-                    .summary("Case created")
-                    .description("Case created from exception record ref " + exceptionRecord.id)
+                    .caseReference(exceptionRecord.id)
+                    .data(caseCreationDetails.caseData)
+                    .event(Event
+                        .builder()
+                        .id(eventResponse.getEventId())
+                        .summary("Case created")
+                        .description("Case created from exception record ref " + exceptionRecord.id)
+                        .build()
+                    )
+                    .eventToken(eventResponse.getToken())
                     .build()
-                )
-                .eventToken(eventResponse.getToken())
-                .build()
-        ).getId();
+            ).getId();
+        } catch (FeignException exception) {
+            log.error(
+                "Failed to create new case for {} jurisdiction from exception record {}. Service response: {}",
+                exceptionRecord.poBoxJurisdiction,
+                exceptionRecord.id,
+                exception.contentUTF8(),
+                exception
+            );
+
+            throw exception;
+        } catch (Exception exception) {
+            log.error(
+                "Failed to create new case for {} jurisdiction from exception record {}",
+                exceptionRecord.poBoxJurisdiction,
+                exceptionRecord.id,
+                exception
+            );
+
+            throw exception;
+        }
     }
 
     private void checkBulkScanReferenceIsSet(Map<String, ?> caseData, String exceptionRecordId) {
