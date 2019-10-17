@@ -22,7 +22,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.collection.IsMapWithSize.anEmptyMap;
 import static org.springframework.http.HttpStatus.OK;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_CREATE_NEW_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
@@ -63,8 +63,8 @@ class CreateCaseCallbackTest {
             .statusCode(OK.value())
             .body("errors", contains("Event " + EVENT_ID_CREATE_NEW_CASE + " not allowed "
                 + "for the current journey classification " + NEW_APPLICATION.name() + " without OCR"))
-            .body("warnings", nullValue())
-            .body("data", nullValue());
+            .body("warnings", empty())
+            .body("data", anEmptyMap());
     }
 
     @Test
@@ -73,8 +73,8 @@ class CreateCaseCallbackTest {
             .statusCode(OK.value())
             .body("errors", contains("Event " + EVENT_ID_CREATE_NEW_CASE + " not allowed "
                 + "for the current journey classification " + EXCEPTION.name() + " without OCR"))
-            .body("warnings", nullValue())
-            .body("data", nullValue());
+            .body("warnings", empty())
+            .body("data.", anEmptyMap());
     }
 
     @Test

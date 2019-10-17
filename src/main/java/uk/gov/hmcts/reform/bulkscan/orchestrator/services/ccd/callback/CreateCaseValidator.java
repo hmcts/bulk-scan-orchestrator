@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback;
 
 import io.vavr.collection.Array;
 import io.vavr.collection.Seq;
-import io.vavr.control.Either;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
 import org.slf4j.Logger;
@@ -52,7 +51,7 @@ public class CreateCaseValidator {
      * @return Either singleton list of errors or green pass to proceed further
      */
     @SafeVarargs
-    public final Either<List<String>, Void> mandatoryPrerequisites(
+    public final Validation<List<String>, Void> mandatoryPrerequisites(
         Supplier<Validation<String, Void>>... prerequisites
     ) {
         for (Supplier<Validation<String, Void>> prerequisite : prerequisites) {
@@ -64,11 +63,11 @@ public class CreateCaseValidator {
                 });
 
             if (requirement.isInvalid()) {
-                return requirement.toEither();
+                return requirement;
             }
         }
 
-        return Either.right(null);
+        return Validation.valid(null);
     }
 
     public Validation<Seq<String>, ExceptionRecord> getValidation(CaseDetails caseDetails) {
