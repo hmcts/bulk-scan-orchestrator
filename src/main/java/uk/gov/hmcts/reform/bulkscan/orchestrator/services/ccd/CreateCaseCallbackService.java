@@ -26,6 +26,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import java.util.Map;
+
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -39,6 +41,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 public class CreateCaseCallbackService {
 
     private static final Logger log = LoggerFactory.getLogger(CreateCaseCallbackService.class);
+
+    private static final String EXCEPTION_RECORD_REFERENCE = "bulkScanCaseReference";
 
     private final CreateCaseValidator validator;
     private final ServiceConfigProvider serviceConfigProvider;
@@ -81,7 +85,6 @@ public class CreateCaseCallbackService {
             .map(exceptionRecord -> createNewCase(
                 exceptionRecord,
                 serviceConfigItem,
-                request.getCaseDetails().getId(),
                 request.isIgnoreWarnings(),
                 idamToken,
                 userId
@@ -125,17 +128,19 @@ public class CreateCaseCallbackService {
             .getOrElse(Validation.invalid("Transformation URL is not configured"));
     }
 
+    @SuppressWarnings("unchecked")
     private ProcessResult createNewCase(
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,
-        long caseId,
         boolean ignoreWarnings,
         String idamToken,
         String userId
     ) {
-        String caseIdAsString = Long.toString(caseId);
-
-        log.info("Start creating new case for {} from exception record {}", configItem.getService(), caseIdAsString);
+        log.info(
+            "Start creating new case for {} from exception record {}",
+            configItem.getService(),
+            exceptionRecord.id
+        );
 
         try {
             String s2sToken = s2sTokenGenerator.generate();
@@ -154,23 +159,27 @@ public class CreateCaseCallbackService {
             log.info(
                 "Successfully transformed exception record for {} from exception record {}",
                 configItem.getService(),
-                caseIdAsString
+                exceptionRecord.id
+            );
+
+            checkBulkScanReferenceIsSet(
+                (Map<String, ?>) transformationResponse.caseCreationDetails.caseData,
+                exceptionRecord.id
             );
 
             long newCaseId = createNewCaseInCcd(
                 idamToken,
                 s2sToken,
                 userId,
-                exceptionRecord.poBoxJurisdiction,
-                transformationResponse.caseCreationDetails,
-                caseIdAsString
+                exceptionRecord,
+                transformationResponse.caseCreationDetails
             );
 
             log.info(
                 "Successfully created new case for {} with case ID {} from exception record {}",
                 configItem.getService(),
                 newCaseId,
-                caseIdAsString
+                exceptionRecord.id
             );
 
             return new ProcessResult(
@@ -190,7 +199,7 @@ public class CreateCaseCallbackService {
             log.error(
                 "Failed to create exception for service {} and exception record {}",
                 configItem.getService(),
-                caseIdAsString,
+                exceptionRecord.id,
                 exception
             );
 
@@ -202,15 +211,14 @@ public class CreateCaseCallbackService {
         String idamToken,
         String s2sToken,
         String userId,
-        String jurisdiction,
-        CaseCreationDetails caseCreationDetails,
-        String originalCaseId
+        ExceptionRecord exceptionRecord,
+        CaseCreationDetails caseCreationDetails
     ) {
         StartEventResponse eventResponse = ccdApi.startForCaseworker(
             idamToken,
             s2sToken,
             userId,
-            jurisdiction,
+            exceptionRecord.poBoxJurisdiction,
             caseCreationDetails.caseTypeId,
             // when onboarding remind services to not configure about to submit callback for this event
             caseCreationDetails.eventId
@@ -220,22 +228,38 @@ public class CreateCaseCallbackService {
             idamToken,
             s2sToken,
             userId,
-            jurisdiction,
+            exceptionRecord.poBoxJurisdiction,
             caseCreationDetails.caseTypeId,
             true,
             CaseDataContent
                 .builder()
-                .caseReference(originalCaseId)
+                .caseReference(exceptionRecord.id)
                 .data(caseCreationDetails.caseData)
                 .event(Event
                     .builder()
                     .id(eventResponse.getEventId())
                     .summary("Case created")
-                    .description("Case created from exception record ref " + originalCaseId)
+                    .description("Case created from exception record ref " + exceptionRecord.id)
                     .build()
                 )
                 .eventToken(eventResponse.getToken())
                 .build()
         ).getId();
+    }
+
+    private void checkBulkScanReferenceIsSet(Map<String, ?> caseData, String exceptionRecordId) {
+        if (!caseData.containsKey(EXCEPTION_RECORD_REFERENCE)) {
+            log.error(
+                "Transformation did not set '{}' with exception record id {}",
+                EXCEPTION_RECORD_REFERENCE,
+                exceptionRecordId
+            );
+        } else if (!caseData.get(EXCEPTION_RECORD_REFERENCE).equals(exceptionRecordId)) {
+            log.error(
+                "Transformation did not set exception record reference correctly. Actual: {}, expected: {}",
+                caseData.get(EXCEPTION_RECORD_REFERENCE),
+                exceptionRecordId
+            );
+        }
     }
 }

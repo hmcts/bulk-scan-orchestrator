@@ -26,6 +26,7 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.FORMATTER;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.getOcrData;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAnId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasDateField;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasFormType;
@@ -70,7 +71,7 @@ public class CreateCaseValidator {
     }
 
     public Validation<Seq<String>, ExceptionRecord> getValidation(CaseDetails caseDetails) {
-
+        Validation<String, Long> exceptionRecordIdValidation = hasAnId(caseDetails);
         Validation<String, String> caseTypeIdValidation = hasCaseTypeId(caseDetails);
         Validation<String, String> poBoxValidation = hasPoBox(caseDetails);
         Validation<String, String> jurisdictionValidation = hasJurisdiction(caseDetails);
@@ -82,6 +83,7 @@ public class CreateCaseValidator {
         Validation<String, List<OcrDataField>> ocrDataFieldsValidation = getOcrDataFields(caseDetails);
 
         Seq<Validation<String, ?>> validations = Array.of(
+            exceptionRecordIdValidation,
             caseTypeIdValidation,
             poBoxValidation,
             jurisdictionValidation,
@@ -96,6 +98,7 @@ public class CreateCaseValidator {
         Seq<String> errors = getValidationErrors(validations);
         if (errors.isEmpty()) {
             return Validation.valid(new ExceptionRecord(
+                Long.toString(exceptionRecordIdValidation.get()),
                 caseTypeIdValidation.get(),
                 poBoxValidation.get(),
                 jurisdictionValidation.get(),

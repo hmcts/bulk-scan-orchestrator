@@ -104,7 +104,7 @@ public final class CallbackValidations {
     }
 
     @Nonnull
-    static Validation<String, Long> hasAnId(CaseDetails theCase) {
+    public static Validation<String, Long> hasAnId(CaseDetails theCase) {
         return theCase != null
             && theCase.getId() != null
             ? valid(theCase.getId())

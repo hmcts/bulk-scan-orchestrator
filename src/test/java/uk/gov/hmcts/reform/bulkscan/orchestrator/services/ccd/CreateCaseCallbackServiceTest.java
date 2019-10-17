@@ -50,6 +50,7 @@ class CreateCaseCallbackServiceTest {
     private static final String IDAM_TOKEN = "idam-token";
     private static final String USER_ID = "user-id";
     private static final String SERVICE = "service";
+    private static final long CASE_ID = 123;
     private static final String CASE_TYPE_ID = SERVICE + "_ExceptionRecord";
     private static final CreateCaseValidator VALIDATOR = new CreateCaseValidator();
 
@@ -178,7 +179,7 @@ class CreateCaseCallbackServiceTest {
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
 
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
-            .id(1L)
+            .id(CASE_ID)
             .caseTypeId(CASE_TYPE_ID)
             .jurisdiction("some jurisdiction")
             .data(data)
@@ -216,7 +217,7 @@ class CreateCaseCallbackServiceTest {
         data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
 
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
-            .id(1L)
+            .id(CASE_ID)
             .caseTypeId(CASE_TYPE_ID)
             .jurisdiction("some jurisdiction")
             .data(data)
@@ -263,7 +264,7 @@ class CreateCaseCallbackServiceTest {
         data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
 
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
-            .id(1L)
+            .id(CASE_ID)
             .caseTypeId(CASE_TYPE_ID)
             .jurisdiction("some jurisdiction")
             .data(data)
@@ -297,6 +298,7 @@ class CreateCaseCallbackServiceTest {
         data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
 
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .id(CASE_ID)
             .caseTypeId(CASE_TYPE_ID)
             .jurisdiction("some jurisdiction")
             .data(data)
@@ -330,6 +332,7 @@ class CreateCaseCallbackServiceTest {
         data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
 
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .id(CASE_ID)
             .caseTypeId(CASE_TYPE_ID)
             .jurisdiction("some jurisdiction")
             .data(data)
@@ -375,6 +378,7 @@ class CreateCaseCallbackServiceTest {
         data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
 
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .id(CASE_ID)
             .caseTypeId(CASE_TYPE_ID)
             .jurisdiction("some jurisdiction")
             .data(data)
@@ -425,6 +429,7 @@ class CreateCaseCallbackServiceTest {
         ))));
 
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .id(CASE_ID)
             .caseTypeId(CASE_TYPE_ID)
             .jurisdiction("some jurisdiction")
             .data(data)
@@ -462,6 +467,7 @@ class CreateCaseCallbackServiceTest {
         data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
 
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .id(CASE_ID)
             .caseTypeId(CASE_TYPE_ID)
             .jurisdiction("some jurisdiction")
             .data(data)
