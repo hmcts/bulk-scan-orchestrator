@@ -108,17 +108,18 @@ public class CreateCaseCallbackService {
 
         if (!result.getWarnings().isEmpty()) {
             log.warn(
-                "Warnings found for {} during callback process:\n  - {}",
+                "Warnings found for {} during callback process: {}",
                 serviceConfigItem.getService(),
-                String.join("\n  - ", result.getWarnings())
+                result.getWarnings().size()
             );
         }
 
         if (!result.getErrors().isEmpty()) {
-            log.error(
-                "Errors found for {} during callback process:\n  - {}",
+            // no need to error - it's informational log. specific logs will be error'ed already
+            log.warn(
+                "Errors found for {} during callback process: {}",
                 serviceConfigItem.getService(),
-                String.join("\n  - ", result.getErrors())
+                result.getErrors().size()
             );
         }
 
