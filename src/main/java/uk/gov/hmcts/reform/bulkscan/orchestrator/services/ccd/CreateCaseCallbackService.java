@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import io.vavr.collection.Array;
 import io.vavr.collection.Seq;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
@@ -27,10 +26,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
-import java.util.List;
-import java.util.function.Function;
-
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isCreateNewCaseEvent;
@@ -69,36 +66,49 @@ public class CreateCaseCallbackService {
      * @return Either list of errors or map of changes - new case reference
      */
     public ProcessResult process(CcdCallbackRequest request, String idamToken, String userId) {
-        ProcessResult result = assertAllowToAccess(request.getCaseDetails(), request.getEventId())
-            .flatMap(theVoid -> validator
-                .getValidation(request.getCaseDetails())
-                .combine(getServiceConfig(request.getCaseDetails()).mapError(Array::of))
-                .ap((exceptionRecord, configItem) -> createNewCase(
-                    exceptionRecord,
-                    configItem,
-                    request.getCaseDetails().getId(),
-                    request.isIgnoreWarnings(),
-                    idamToken,
-                    userId
-                ))
-                .mapError(errors -> errors.flatMap(Function.identity()))
-                .flatMap(Function.identity())
-                .mapError(Seq::asJava)
-            )
+        Validation<String, Void> canAccess = assertAllowToAccess(request.getCaseDetails(), request.getEventId());
+
+        if (canAccess.isInvalid()) {
+            // log happens in assertion method
+            return new ProcessResult(emptyList(), singletonList(canAccess.getError()));
+        }
+
+        // already validated in mandatory section ^
+        ServiceConfigItem serviceConfigItem = getServiceConfig(request.getCaseDetails()).get();
+
+        ProcessResult result = validator
+            .getValidation(request.getCaseDetails())
+            .map(exceptionRecord -> createNewCase(
+                exceptionRecord,
+                serviceConfigItem,
+                request.getCaseDetails().getId(),
+                request.isIgnoreWarnings(),
+                idamToken,
+                userId
+            ))
+            .mapError(Seq::asJava)
             .getOrElseGet(errors -> new ProcessResult(emptyList(), errors));
 
         if (!result.getWarnings().isEmpty()) {
-            log.warn("Warnings found during callback process:\n  - {}", String.join("\n  - ", result.getWarnings()));
+            log.warn(
+                "Warnings found for {} during callback process:\n  - {}",
+                serviceConfigItem.getService(),
+                String.join("\n  - ", result.getWarnings())
+            );
         }
 
         if (!result.getErrors().isEmpty()) {
-            log.error("Errors found during callback process:\n  - {}", String.join("\n  - ", result.getErrors()));
+            log.error(
+                "Errors found for {} during callback process:\n  - {}",
+                serviceConfigItem.getService(),
+                String.join("\n  - ", result.getErrors())
+            );
         }
 
         return result;
     }
 
-    private Validation<List<String>, Void> assertAllowToAccess(CaseDetails caseDetails, String eventId) {
+    private Validation<String, Void> assertAllowToAccess(CaseDetails caseDetails, String eventId) {
         return validator.mandatoryPrerequisites(
             () -> isCreateNewCaseEvent(eventId),
             () -> getServiceConfig(caseDetails).map(item -> null)
@@ -115,7 +125,7 @@ public class CreateCaseCallbackService {
             .getOrElse(Validation.invalid("Transformation URL is not configured"));
     }
 
-    private Validation<Seq<String>, ProcessResult> createNewCase(
+    private ProcessResult createNewCase(
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,
         long caseId,
@@ -138,10 +148,7 @@ public class CreateCaseCallbackService {
 
             if (!ignoreWarnings && !transformationResponse.warnings.isEmpty()) {
                 // do not log warnings
-                return Validation.valid(new ProcessResult(
-                    transformationResponse.warnings,
-                    emptyList()
-                ));
+                return new ProcessResult(transformationResponse.warnings, emptyList());
             }
 
             log.info(
@@ -166,23 +173,18 @@ public class CreateCaseCallbackService {
                 caseIdAsString
             );
 
-            return Validation.valid(
-                new ProcessResult(
-                    ImmutableMap.<String, Object>builder()
-                        .put(CASE_REFERENCE, Long.toString(newCaseId))
-                        .put(DISPLAY_WARNINGS, YesNoFieldValues.NO)
-                        .put(OCR_DATA_VALIDATION_WARNINGS, emptyList())
-                        .build()
-                )
+            return new ProcessResult(
+                ImmutableMap.<String, Object>builder()
+                    .put(CASE_REFERENCE, Long.toString(newCaseId))
+                    .put(DISPLAY_WARNINGS, YesNoFieldValues.NO)
+                    .put(OCR_DATA_VALIDATION_WARNINGS, emptyList())
+                    .build()
             );
         } catch (InvalidCaseDataException exception) {
             if (BAD_REQUEST.equals(exception.getStatus())) {
                 throw exception;
             } else {
-                return Validation.valid(new ProcessResult(
-                    exception.getResponse().warnings,
-                    exception.getResponse().errors
-                ));
+                return new ProcessResult(exception.getResponse().warnings, exception.getResponse().errors);
             }
         } catch (Exception exception) {
             log.error(
@@ -192,7 +194,7 @@ public class CreateCaseCallbackService {
                 exception
             );
 
-            return Validation.invalid(Array.of("Internal error. " + exception.getMessage()));
+            return new ProcessResult(emptyList(), singletonList("Internal error. " + exception.getMessage()));
         }
     }
 
