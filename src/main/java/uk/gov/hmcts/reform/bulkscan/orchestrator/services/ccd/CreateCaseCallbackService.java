@@ -26,6 +26,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import java.util.Map;
+
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -39,6 +41,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 public class CreateCaseCallbackService {
 
     private static final Logger log = LoggerFactory.getLogger(CreateCaseCallbackService.class);
+
+    private static final String EXCEPTION_RECORD_REFERENCE = "bulkScanCaseReference";
 
     private final CreateCaseValidator validator;
     private final ServiceConfigProvider serviceConfigProvider;
@@ -124,6 +128,7 @@ public class CreateCaseCallbackService {
             .getOrElse(Validation.invalid("Transformation URL is not configured"));
     }
 
+    @SuppressWarnings("unchecked")
     private ProcessResult createNewCase(
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,
@@ -154,6 +159,11 @@ public class CreateCaseCallbackService {
             log.info(
                 "Successfully transformed exception record for {} from exception record {}",
                 configItem.getService(),
+                exceptionRecord.id
+            );
+
+            checkBulkScanReferenceIsSet(
+                (Map<String, ?>) transformationResponse.caseCreationDetails.caseData,
                 exceptionRecord.id
             );
 
@@ -235,5 +245,21 @@ public class CreateCaseCallbackService {
                 .eventToken(eventResponse.getToken())
                 .build()
         ).getId();
+    }
+
+    private void checkBulkScanReferenceIsSet(Map<String, ?> caseData, String exceptionRecordId) {
+        if (!caseData.containsKey(EXCEPTION_RECORD_REFERENCE)) {
+            log.error(
+                "Transformation did not set '{}' with exception record id {}",
+                EXCEPTION_RECORD_REFERENCE,
+                exceptionRecordId
+            );
+        } else if (!caseData.get(EXCEPTION_RECORD_REFERENCE).equals(exceptionRecordId)) {
+            log.error(
+                "Transformation did not set exception record reference correctly. Actual: {}, expected: {}",
+                caseData.get(EXCEPTION_RECORD_REFERENCE),
+                exceptionRecordId
+            );
+        }
     }
 }
