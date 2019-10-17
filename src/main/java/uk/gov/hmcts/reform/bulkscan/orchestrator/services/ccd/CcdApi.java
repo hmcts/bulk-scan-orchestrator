@@ -155,6 +155,10 @@ public class CcdApi {
         return getCaseRefs(serviceConfig, caseTypeIdsStr, searchQuery);
     }
 
+    /**
+     * 'bulkScanCaseReference' is the reference which SSCS is using to map
+     * from which exception record service case was created
+     */
     public List<Long> getCaseRefsByBulkScanCaseReference(String bulkScanCaseReference, String service) {
         ServiceConfigItem serviceConfig = serviceConfigProvider.getConfig(service);
         final String caseTypeIdsStr = String.join(",", serviceConfig.getCaseTypeIds());
