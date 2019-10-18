@@ -114,12 +114,12 @@ class CreateCaseTest {
 
         assertThat(createdCase.getData().get("bulkScanCaseReference")).isNotNull();
         String bulkScanCaseReference = (String)createdCase.getData().get("bulkScanCaseReference");
+        assertThat(bulkScanCaseReference.equals(exceptionRecord.getId()));
 
-        List<Long> caseIds = ccdApi.getCaseRefsByBulkScanCaseReference(bulkScanCaseReference, "bulkscan");
-        assertThat(caseIds.size()).isEqualTo(1);
-        assertThat(caseIds.get(0)).isEqualTo(createdCase.getId());
-
-        Thread.sleep(2000L);
+        await("Case is ingested")
+            .atMost(60, TimeUnit.SECONDS)
+            .pollDelay(2, TimeUnit.SECONDS)
+            .until(() -> caseIngested(bulkScanCaseReference));
 
         // when
         // create case callback endpoint invoked second time
@@ -183,6 +183,10 @@ class CreateCaseTest {
             .post("/callback/create-new-case");
 
         return parseCcdCallbackResponse(response);
+    }
+
+    private boolean caseIngested(String bulkScanCaseReference) {
+        return ccdApi.getCaseRefsByBulkScanCaseReference(bulkScanCaseReference, "bulkscan").size() == 1;
     }
 
     private AboutToStartOrSubmitCallbackResponse parseCcdCallbackResponse(Response response) throws IOException {
