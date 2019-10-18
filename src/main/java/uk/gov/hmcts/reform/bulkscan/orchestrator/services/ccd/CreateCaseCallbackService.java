@@ -238,15 +238,14 @@ public class CreateCaseCallbackService {
                 exceptionRecord.getId()
             );
 
-            paymentsPublisher
-                .send(
-                    new UpdatePaymentsCommand(
-                        Long.toString(exceptionRecord.getId()),
-                        Long.toString(newCaseId),
-                        envelopeId,
-                        jurisdiction
-                    )
-                );
+            paymentsPublisher.send(
+                new UpdatePaymentsCommand(
+                    Long.toString(exceptionRecord.getId()),
+                    Long.toString(newCaseId),
+                    envelopeId,
+                    jurisdiction
+                )
+            );
         } else {
             log.info(
                 "Exception record has no payments, not sending update command. ER id: {}",
