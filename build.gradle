@@ -165,7 +165,7 @@ def versions = [
   junitPlatform     : '1.5.2',
 ]
 
-ext["rest-assured.version"] = '4.0.0'
+ext["rest-assured.version"] = '4.1.2'
 
 dependencyManagement {
   dependencies {
