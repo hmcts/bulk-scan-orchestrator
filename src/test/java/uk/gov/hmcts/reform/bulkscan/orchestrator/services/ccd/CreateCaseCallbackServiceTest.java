@@ -7,7 +7,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.CaseTransformationException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.InvalidCaseDataException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentType;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.TransformationErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseValidator;
@@ -15,12 +23,17 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessRe
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceNotConfiguredException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Collections.singletonList;
+import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -45,7 +58,16 @@ class CreateCaseCallbackServiceTest {
     private ServiceConfigProvider serviceConfigProvider;
 
     @Mock
-    private CaseCreationManager caseCreationManager;
+    private TransformationClient transformationClient;
+
+    @Mock
+    private AuthTokenGenerator s2sTokenGenerator;
+
+    @Mock
+    private CoreCaseDataApi coreCaseDataApi;
+
+    @Mock
+    private CcdApi ccdApi;
 
     private CreateCaseCallbackService service;
 
@@ -54,7 +76,10 @@ class CreateCaseCallbackServiceTest {
         service = new CreateCaseCallbackService(
             VALIDATOR,
             serviceConfigProvider,
-            caseCreationManager
+            transformationClient,
+            s2sTokenGenerator,
+            coreCaseDataApi,
+            ccdApi
         );
     }
 
@@ -216,6 +241,50 @@ class CreateCaseCallbackServiceTest {
             + " not allowed for the current journey classification "
             + SUPPLEMENTARY_EVIDENCE.name()
         );
+    }
+
+    @Test
+    void should_throw_InvalidCaseDataException_when_transformation_client_returns_422()
+        throws IOException, CaseTransformationException {
+        // given
+        when(s2sTokenGenerator.generate()).thenReturn(randomUUID().toString());
+        setUpTransformationUrl();
+        InvalidCaseDataException exception = new InvalidCaseDataException(
+            new HttpClientErrorException(HttpStatus.UNPROCESSABLE_ENTITY),
+            new TransformationErrorResponse(singletonList("error"), singletonList("warning"))
+        );
+        doThrow(exception)
+            .when(transformationClient)
+            .transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString());
+
+        Map<String, Object> data = new HashMap<>();
+        // putting 6 via `ImmutableMap` is available from Java 9
+        data.put("poBox", "12345");
+        data.put("journeyClassification", EXCEPTION.name());
+        data.put("formType", "Form1");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
+        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
+
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .id(CASE_ID)
+            .caseTypeId(CASE_TYPE_ID)
+            .jurisdiction("some jurisdiction")
+            .data(data)
+        );
+
+        // when
+        ProcessResult result = service.process(new CcdCallbackRequest(
+            EVENT_ID_CREATE_NEW_CASE,
+            caseDetails,
+            true
+        ), IDAM_TOKEN, USER_ID);
+
+        // then
+        assertThat(result.getModifiedFields()).isEmpty();
+        assertThat(result.getWarnings()).containsOnly("warning");
+        assertThat(result.getErrors()).containsOnly("error");
     }
 
     @Test
