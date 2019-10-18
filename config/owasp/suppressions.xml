@@ -122,7 +122,7 @@
     <cve>CVE-2019-17531</cve>
   </suppress>
 
-  <suppress until="2019-10-31">
+  <suppress>
     <notes><![CDATA[ file name: wiremock-standalone-2.18.0.jar: handlebars-4.0.5.js ]]></notes>
     <packageUrl regex="true">^pkg:javascript/handlebars\.js@.*$</packageUrl>
     <vulnerabilityName>A prototype pollution vulnerability in handlebars is exploitable if an attacker can control the template</vulnerabilityName>
