@@ -18,8 +18,11 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublisher;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.UpdatePaymentsCommand;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -27,6 +30,7 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.Map;
+import java.util.Objects;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -48,6 +52,7 @@ public class CreateCaseCallbackService {
     private final ServiceConfigProvider serviceConfigProvider;
     private final TransformationClient transformationClient;
     private final AuthTokenGenerator s2sTokenGenerator;
+    private final PaymentsPublisher paymentsPublisher;
     private final CoreCaseDataApi ccdApi;
 
     public CreateCaseCallbackService(
@@ -55,12 +60,14 @@ public class CreateCaseCallbackService {
         ServiceConfigProvider serviceConfigProvider,
         TransformationClient transformationClient,
         AuthTokenGenerator s2sTokenGenerator,
+        PaymentsPublisher paymentsPublisher,
         CoreCaseDataApi ccdApi
     ) {
         this.validator = validator;
         this.serviceConfigProvider = serviceConfigProvider;
         this.transformationClient = transformationClient;
         this.s2sTokenGenerator = s2sTokenGenerator;
+        this.paymentsPublisher = paymentsPublisher;
         this.ccdApi = ccdApi;
     }
 
@@ -80,14 +87,17 @@ public class CreateCaseCallbackService {
         // already validated in mandatory section ^
         ServiceConfigItem serviceConfigItem = getServiceConfig(request.getCaseDetails()).get();
 
+        CaseDetails exceptionRecordData = request.getCaseDetails();
+
         ProcessResult result = validator
-            .getValidation(request.getCaseDetails())
+            .getValidation(exceptionRecordData)
             .map(exceptionRecord -> createNewCase(
                 exceptionRecord,
                 serviceConfigItem,
                 request.isIgnoreWarnings(),
                 idamToken,
-                userId
+                userId,
+                exceptionRecordData
             ))
             .mapError(Seq::asJava)
             .getOrElseGet(errors -> new ProcessResult(emptyList(), errors));
@@ -134,7 +144,8 @@ public class CreateCaseCallbackService {
         ServiceConfigItem configItem,
         boolean ignoreWarnings,
         String idamToken,
-        String userId
+        String userId,
+        CaseDetails exceptionRecordData
     ) {
         log.info(
             "Start creating new case for {} from exception record {}",
@@ -182,6 +193,8 @@ public class CreateCaseCallbackService {
                 exceptionRecord.id
             );
 
+            handlePayments(exceptionRecordData, newCaseId);
+
             return new ProcessResult(
                 ImmutableMap.<String, Object>builder()
                     .put(CASE_REFERENCE, Long.toString(newCaseId))
@@ -204,6 +217,41 @@ public class CreateCaseCallbackService {
             );
 
             return new ProcessResult(emptyList(), singletonList("Internal error. " + exception.getMessage()));
+        }
+    }
+
+    private void handlePayments(CaseDetails exceptionRecord, long newCaseId) {
+
+        boolean containsPayments =
+            Objects.equals(
+                exceptionRecord.getData().get(ExceptionRecordFields.CONTAINS_PAYMENTS).toString(),
+                YesNoFieldValues.YES
+            );
+
+        if (containsPayments) {
+
+            String envelopeId = exceptionRecord.getData().get(ExceptionRecordFields.ENVELOPE_ID).toString();
+            String jurisdiction = exceptionRecord.getData().get(ExceptionRecordFields.PO_BOX_JURISDICTION).toString();
+
+            log.info(
+                "Sending payment update message. ER id: {}",
+                exceptionRecord.getId()
+            );
+
+            paymentsPublisher
+                .send(
+                    new UpdatePaymentsCommand(
+                        Long.toString(exceptionRecord.getId()),
+                        Long.toString(newCaseId),
+                        envelopeId,
+                        jurisdiction
+                    )
+                );
+        } else {
+            log.info(
+                "Exception record has no payments, not sending update command. ER id: {}",
+                exceptionRecord.getId()
+            );
         }
     }
 
