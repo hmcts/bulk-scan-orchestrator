@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
@@ -42,7 +43,9 @@ public class ExceptionRecordMapper {
             mapOcrData(envelope.ocrData),
             mapOcrDataWarnings(envelope.ocrDataValidationWarnings),
             envelope.ocrDataValidationWarnings.isEmpty() ? NO : YES,
-            envelope.id
+            envelope.id,
+            CollectionUtils.isEmpty(envelope.payments) ? NO : YES,
+            CollectionUtils.isEmpty(envelope.payments) ? NO : YES
         );
     }
 

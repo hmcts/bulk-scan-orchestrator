@@ -113,7 +113,6 @@ class PaymentsPublisherTest {
                 "er-ref",
                 "new-case-ref",
                 "envelope-id",
-                "service",
                 "jurisdiction"
             );
 
@@ -134,7 +133,6 @@ class PaymentsPublisherTest {
                     + "'exception_record_ref': 'er-ref',"
                     + "'new_case_ref': 'new-case-ref',"
                     + "'envelope_id': 'envelope-id',"
-                    + "'service': 'service',"
                     + "'jurisdiction': 'jurisdiction'"
                     + "}"
             ).replace("'", "\""),

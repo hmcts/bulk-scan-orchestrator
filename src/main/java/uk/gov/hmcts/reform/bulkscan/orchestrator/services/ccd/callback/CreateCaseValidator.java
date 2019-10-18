@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback;
 
 import io.vavr.collection.Array;
 import io.vavr.collection.Seq;
-import io.vavr.control.Either;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
 import org.slf4j.Logger;
@@ -24,10 +23,10 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.FORMATTER;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.getOcrData;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAnId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasDateField;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasFormType;
@@ -49,30 +48,30 @@ public class CreateCaseValidator {
      * Easy extension for more mandatory prerequisites - just flatmap next Validation.
      *
      * @param prerequisites Top level requirements failing fast
-     * @return Either singleton list of errors or green pass to proceed further
+     * @return Validation an error or green pass to proceed further
      */
     @SafeVarargs
-    public final Either<List<String>, Void> mandatoryPrerequisites(
+    public final Validation<String, Void> mandatoryPrerequisites(
         Supplier<Validation<String, Void>>... prerequisites
     ) {
         for (Supplier<Validation<String, Void>> prerequisite : prerequisites) {
-            Validation<List<String>, Void> requirement = prerequisite.get()
+            Validation<String, Void> requirement = prerequisite.get()
                 .mapError(error -> {
-                    log.warn("Validation error {}", error);
+                    log.warn("Validation error: {}", error);
 
-                    return singletonList(error);
+                    return error;
                 });
 
             if (requirement.isInvalid()) {
-                return requirement.toEither();
+                return requirement;
             }
         }
 
-        return Either.right(null);
+        return Validation.valid(null);
     }
 
     public Validation<Seq<String>, ExceptionRecord> getValidation(CaseDetails caseDetails) {
-
+        Validation<String, Long> exceptionRecordIdValidation = hasAnId(caseDetails);
         Validation<String, String> caseTypeIdValidation = hasCaseTypeId(caseDetails);
         Validation<String, String> poBoxValidation = hasPoBox(caseDetails);
         Validation<String, String> jurisdictionValidation = hasJurisdiction(caseDetails);
@@ -84,6 +83,7 @@ public class CreateCaseValidator {
         Validation<String, List<OcrDataField>> ocrDataFieldsValidation = getOcrDataFields(caseDetails);
 
         Seq<Validation<String, ?>> validations = Array.of(
+            exceptionRecordIdValidation,
             caseTypeIdValidation,
             poBoxValidation,
             jurisdictionValidation,
@@ -98,6 +98,7 @@ public class CreateCaseValidator {
         Seq<String> errors = getValidationErrors(validations);
         if (errors.isEmpty()) {
             return Validation.valid(new ExceptionRecord(
+                Long.toString(exceptionRecordIdValidation.get()),
                 caseTypeIdValidation.get(),
                 poBoxValidation.get(),
                 jurisdictionValidation.get(),
