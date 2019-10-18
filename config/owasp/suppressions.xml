@@ -67,6 +67,14 @@
 
   <suppress>
     <notes><![CDATA[
+   file name: wiremock-standalone-2.18.0.jar (shaded: com.fasterxml.jackson.core:jackson-databind:2.8.11)
+   ]]></notes>
+    <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-databind@.*$</packageUrl>
+    <vulnerabilityName>CVE-2019-17267</vulnerabilityName>
+  </suppress>
+
+  <suppress>
+    <notes><![CDATA[
        file name: wiremock-standalone-2..0.jar.
        This is only used for TESTING purposes.
    ]]></notes>
