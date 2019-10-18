@@ -224,7 +224,7 @@ public class CreateCaseCallbackService {
 
         boolean containsPayments =
             Objects.equals(
-                exceptionRecord.getData().get(ExceptionRecordFields.CONTAINS_PAYMENTS).toString(),
+                exceptionRecord.getData().get(ExceptionRecordFields.CONTAINS_PAYMENTS),
                 YesNoFieldValues.YES
             );
 
