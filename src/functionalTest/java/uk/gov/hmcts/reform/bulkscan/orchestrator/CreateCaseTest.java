@@ -115,8 +115,9 @@ class CreateCaseTest {
         assertThat(createdCase.getData().get("bulkScanCaseReference")).isNotNull();
         String bulkScanCaseReference = (String)createdCase.getData().get("bulkScanCaseReference");
 
-        assertThat(ccdApi.getCaseRefsByBulkScanCaseReference(bulkScanCaseReference, "bulkscan").size())
-            .isEqualTo(1);
+        List<Long> caseIds = ccdApi.getCaseRefsByBulkScanCaseReference(bulkScanCaseReference, "bulkscan");
+        assertThat(caseIds.size()).isEqualTo(1);
+        assertThat(caseIds.get(0)).isEqualTo(createdCase.getId());
 
         Thread.sleep(2000L);
 
@@ -128,8 +129,9 @@ class CreateCaseTest {
         // then
         // the same case is returned
         assertThat(caseCcdId2).isEqualTo(caseCcdId);
-        assertThat(ccdApi.getCaseRefsByBulkScanCaseReference(bulkScanCaseReference, "bulkscan").size())
-            .isEqualTo(1);
+        List<Long> caseIds2 = ccdApi.getCaseRefsByBulkScanCaseReference(bulkScanCaseReference, "bulkscan");
+        assertThat(caseIds2.size()).isEqualTo(1);
+        assertThat(caseIds2.get(0)).isEqualTo(createdCase.getId());
     }
 
     @Test
