@@ -549,7 +549,7 @@ class CreateCaseCallbackServiceTest {
         data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
         data.put(ExceptionRecordFields.CONTAINS_PAYMENTS, YesNoFieldValues.YES);
         data.put(ExceptionRecordFields.ENVELOPE_ID, envelopeId);
-        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION,jurisdiction);
+        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, jurisdiction);
 
         CaseDetails caseDetails =
             TestCaseBuilder
@@ -623,7 +623,7 @@ class CreateCaseCallbackServiceTest {
         data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
         data.put(ExceptionRecordFields.CONTAINS_PAYMENTS, YesNoFieldValues.NO); // no payments!
         data.put(ExceptionRecordFields.ENVELOPE_ID, envelopeId);
-        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION,jurisdiction);
+        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, jurisdiction);
 
         CaseDetails caseDetails =
             TestCaseBuilder
