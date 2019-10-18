@@ -580,6 +580,76 @@ class CreateCaseCallbackServiceTest {
         assertThat(cmd.getValue().jurisdiction).isEqualTo(jurisdiction);
     }
 
+    @Test
+    void should_not_send_payment_message_when_case_has_no_payments() throws Exception {
+        // given
+        setUpTransformationUrl();
+
+        given(transformationClient.transformExceptionRecord(any(),any(), any()))
+            .willReturn(
+                new SuccessfulTransformationResponse(
+                    new CaseCreationDetails(
+                        "some_case_type",
+                        "some_event_id",
+                        emptyMap()
+                    ),
+                    emptyList()
+                )
+            );
+
+        StartEventResponse startCcdEventResp = mock(StartEventResponse.class);
+
+        given(ccdApi.startForCaseworker(any(), any(), any(), any(), any(), any()))
+            .willReturn(startCcdEventResp);
+
+        Long newCaseId = 123L;
+        CaseDetails newCaseDetails = mock(CaseDetails.class);
+        doReturn(newCaseId).when(newCaseDetails).getId();
+
+        given(ccdApi.submitForCaseworker(any(), any(), any(), any(), any(), anyBoolean(), any()))
+            .willReturn(newCaseDetails);
+
+        Map<String, Object> data = new HashMap<>();
+
+        String envelopeId = "987";
+        String jurisdiction = "sample jurisdiction";
+
+        data.put("poBox", "12345");
+        data.put("journeyClassification", EXCEPTION.name());
+        data.put("formType", "A1");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
+        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
+        data.put(ExceptionRecordFields.CONTAINS_PAYMENTS, YesNoFieldValues.NO); // no payments!
+        data.put(ExceptionRecordFields.ENVELOPE_ID, envelopeId);
+        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION,jurisdiction);
+
+        CaseDetails caseDetails =
+            TestCaseBuilder
+                .createCaseWith(builder -> builder
+                    .id(CASE_ID)
+                    .caseTypeId(CASE_TYPE_ID)
+                    .jurisdiction("some jurisdiction")
+                    .data(data)
+                );
+
+        // when
+        ProcessResult result =
+            service
+                .process(
+                    new CcdCallbackRequest(EVENT_ID_CREATE_NEW_CASE, caseDetails, true),
+                    IDAM_TOKEN,
+                    USER_ID
+                );
+
+        // then
+        assertThat(result.getErrors()).isEmpty();
+        assertThat(result.getWarnings()).isEmpty();
+
+        verify(paymentsPublisher, never()).send(any());
+    }
+
     private void setUpTransformationUrl() {
         ServiceConfigItem configItem = new ServiceConfigItem();
         configItem.setTransformationUrl("url");
