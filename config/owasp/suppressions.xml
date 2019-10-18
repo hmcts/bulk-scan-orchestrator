@@ -114,7 +114,7 @@
     <cve>CVE-2019-16335</cve>
   </suppress>
 
-  <suppress>
+  <suppress until="2019-10-31">
     <notes><![CDATA[ file name: jackson-databind-2.9.10.jar ]]></notes>
     <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-databind@.*$</packageUrl>
     <cve>CVE-2019-16942</cve>
