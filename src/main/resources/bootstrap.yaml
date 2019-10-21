@@ -1,12 +1,23 @@
 spring:
   cloud:
     propertiesvolume:
-      enabled: true
-      prefixed: true
-      paths: /mnt/secrets/bulk-scan,/mnt/secrets/s2s
+      prefixed: false
+      paths: /mnt/secrets/bulk-scan
       aliases:
-        bulk-scan.idam-users-bulkscan-username: IDAM_USERS_BULKSCAN_USERNAME
-        bulk-scan.idam-users-bulkscan-password: IDAM_USERS_BULKSCAN_PASSWORD
-        bulk-scan.idam-client-secret: IDAM_CLIENT_SECRET
-        bulk-scan.payments-queue-send-connection-string: PAYMENTS_QUEUE_CONNECTION_STRING
-        s2s.microservicekey-bulk-scan-orchestrator: S2S_SECRET
+        idam-client-secret: IDAM_CLIENT_SECRET
+        s2s-secret-bulk-scan-orchestrator: S2S_SECRET
+        idam-users-bulkscan-username: IDAM_USERS_BULKSCAN_USERNAME
+        idam-users-bulkscan-password: IDAM_USERS_BULKSCAN_PASSWORD
+        idam-users-cmc-username: IDAM_USERS_CMC_USERNAME
+        idam-users-cmc-password: IDAM_USERS_CMC_PASSWORD
+        idam-users-div-username: IDAM_USERS_DIVORCE_USERNAME
+        idam-users-div-password: IDAM_USERS_DIVORCE_PASSWORD
+        idam-users-probate-username: IDAM_USERS_PROBATE_USERNAME
+        idam-users-probate-password: IDAM_USERS_PROBATE_PASSWORD
+        idam-users-sscs-username: IDAM_USERS_SSCS_USERNAME
+        idam-users-sscs-password: IDAM_USERS_SSCS_PASSWORD
+        envelopes-queue-listen-connection-string: ENVELOPES_QUEUE_CONNECTION_STRING
+        processed-envelopes-queue-send-connection-string: PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING
+        payments-queue-send-connection-string: PAYMENTS_QUEUE_CONNECTION_STRING
+        envelopes-queue-max-delivery-count: ENVELOPES_QUEUE_MAX_DELIVERY_COUNT
+        app-insights-instrumentation-key: azure.application-insights.instrumentation-key

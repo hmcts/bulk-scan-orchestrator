@@ -2,15 +2,4 @@ java:
   # Don't modify below here
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
-  environment:
-    APPINSIGHTS_INSTRUMENTATIONKEY: "00000000-0000-0000-0000-000000000000"
-    S2S_NAME: "bulk_scan_orchestrator"
-    S2S_URL: "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
-    IDAM_API_URL: "https://idam-api.aat.platform.hmcts.net"
-    IDAM_CLIENT_REDIRECT_URI: "https://bulk-scan-orchestrator-aat.service.core-compute-aat.internal/oauth2/callback"
-    CORE_CASE_DATA_API_URL: "http://ccd-data-store-api-aat.service.core-compute-aat.internal"
-    DOCUMENT_MANAGEMENT_URL: "http://dm-store-aat.service.core-compute-aat.internal"
-    QUEUE_READ_INTERVAL: "30000"
-    DELETE_ENVELOPES_DLQ_MESSAGES_ENABLED: "true"
-    DELETE_ENVELOPES_DLQ_MESSAGES_CRON: "0 * * * * *"
-    DELETE_ENVELOPES_DLQ_MESSAGES_TTL: "10s"
+  devApplicationInsightsInstrumentKey: "f666440f-43c0-4abb-9c20-2ce175a374f0"
