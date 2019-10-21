@@ -328,7 +328,7 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
-    void should_return_error_if_several_cases_exist_in_ccd_for_a_given_exception_record()
+    void should_return_error_if_multiple_cases_exist_in_ccd_for_a_given_exception_record()
         throws IOException, CaseTransformationException {
         // given
         setUpTransformationUrl();
