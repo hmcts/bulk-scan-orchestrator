@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -95,7 +94,6 @@ class CreateCaseTest {
     }
 
     @Test
-    @Disabled
     public void should_idempotently_create_case_from_valid_exception_record() throws Exception {
         // given
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/new-envelope-create-case-with-evidence.json");
@@ -180,7 +178,10 @@ class CreateCaseTest {
             .header(CcdCallbackController.USER_ID, ccdAuthenticator.getUserDetails().getId())
             .body(callbackRequest)
             .when()
-            .post("/callback/create-new-case");
+            .log().all()
+            .post("/callback/create-new-case")
+            .then().log().all()
+            .and().extract().response();
 
         return parseCcdCallbackResponse(response);
     }
