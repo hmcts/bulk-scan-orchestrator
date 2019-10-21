@@ -76,24 +76,6 @@ class CreateCaseTest {
     }
 
     @Test
-    // this test will go once the one below passes
-    public void should_create_case_from_valid_exception_record() throws Exception {
-        // given
-        CaseDetails exceptionRecord = createExceptionRecord("envelopes/new-envelope-create-case-with-evidence.json");
-
-        // when
-        AboutToStartOrSubmitCallbackResponse callbackResponse = invokeCallbackEndpoint(exceptionRecord);
-        String caseCcdId = getCaseCcdId(callbackResponse);
-
-        // then
-        CaseDetails createdCase = ccdApi.getCase(caseCcdId, exceptionRecord.getJurisdiction());
-        assertThat(createdCase.getCaseTypeId()).isEqualTo(BULK_SCANNED_CASE_TYPE);
-        assertThat(createdCase.getData().get("firstName")).isEqualTo("value1");
-        assertThat(createdCase.getData().get("lastName")).isEqualTo("value2");
-        assertThat(createdCase.getData().get("email")).isEqualTo("hello@test.com");
-    }
-
-    @Test
     public void should_idempotently_create_case_from_valid_exception_record() throws Exception {
         // given
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/new-envelope-create-case-with-evidence.json");
@@ -178,10 +160,7 @@ class CreateCaseTest {
             .header(CcdCallbackController.USER_ID, ccdAuthenticator.getUserDetails().getId())
             .body(callbackRequest)
             .when()
-            .log().all()
-            .post("/callback/create-new-case")
-            .then().log().all()
-            .and().extract().response();
+            .post("/callback/create-new-case");
 
         return parseCcdCallbackResponse(response);
     }
