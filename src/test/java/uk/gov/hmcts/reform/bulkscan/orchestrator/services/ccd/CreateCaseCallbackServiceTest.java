@@ -290,7 +290,8 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
-    void should_return_case_if_it_exists() throws IOException, CaseTransformationException {
+    void should_return_service_case_when_it_already_exists_in_ccd_for_a_given_exception_record()
+        throws IOException, CaseTransformationException {
         // given
         setUpTransformationUrl();
 
@@ -327,7 +328,8 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
-    void should_return_error_if_several_cases_exist() throws IOException, CaseTransformationException {
+    void should_return_error_if_several_cases_exist_in_ccd_for_a_given_exception_record()
+        throws IOException, CaseTransformationException {
         // given
         setUpTransformationUrl();
 
