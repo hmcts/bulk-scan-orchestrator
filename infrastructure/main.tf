@@ -164,3 +164,10 @@ data "azurerm_key_vault_secret" "payments_queue_send_conn_str" {
   key_vault_id = "${data.azurerm_key_vault.key_vault.id}"
   name         = "payments-queue-send-connection-string"
 }
+
+# Copy orchestrator s2s secret from s2s key vault to bulkscan key vault
+resource "azurerm_key_vault_secret" "bulk_scan_orchestrator_app_s2s_secret" {
+  name         = "s2s-secret-bulk-scan-orchestrator"
+  value        = "${data.azurerm_key_vault_secret.s2s_secret.value}"
+  key_vault_id = "${data.azurerm_key_vault.key_vault.id}"
+}
