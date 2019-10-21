@@ -43,6 +43,7 @@ class CreateCaseCallbackTest {
     @Test
     void should_create_case_if_classification_new_application_with_documents_and_ocr_data() {
         setUpTransformation(getTransformationResponseBody("ok-no-warnings.json"));
+        setUpCcdSearchEmptyResult(getCcdResponseBody("search-result-empty.json"));
         setUpCcdCreateCase(
             getCcdResponseBody("start-event.json"),
             getCcdResponseBody("sample-case.json")
@@ -80,6 +81,7 @@ class CreateCaseCallbackTest {
     @Test
     void should_not_create_case_if_request_specifies_to_not_ignore_warnings() {
         setUpTransformation(getTransformationResponseBody("ok-with-warnings.json"));
+        setUpCcdSearchEmptyResult(getCcdResponseBody("search-result-empty.json"));
 
         postWithBody(getRequestBody("valid-exception-warnings-flag-on.json"))
             .statusCode(OK.value())
@@ -90,6 +92,7 @@ class CreateCaseCallbackTest {
     @Test
     void should_create_case_if_classification_exception_with_documents_and_ocr_data() {
         setUpTransformation(getTransformationResponseBody("ok-no-warnings.json"));
+        setUpCcdSearchEmptyResult(getCcdResponseBody("search-result-empty.json"));
         setUpCcdCreateCase(
             getCcdResponseBody("start-event.json"),
             getCcdResponseBody("sample-case.json")
@@ -124,6 +127,13 @@ class CreateCaseCallbackTest {
 
     private void setUpTransformation(String responseBody) {
         givenThat(post("/transform-exception-record")
+            .withHeader("ServiceAuthorization", containing("Bearer"))
+            .willReturn(okJson(responseBody))
+        );
+    }
+
+    private void setUpCcdSearchEmptyResult(String responseBody) {
+        givenThat(post("/searchCases?ctid=Bulk_Scanned")
             .withHeader("ServiceAuthorization", containing("Bearer"))
             .willReturn(okJson(responseBody))
         );
