@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,6 +41,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_CREATE_NEW_CASE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
@@ -64,7 +66,10 @@ class CreateCaseCallbackServiceTest {
     private AuthTokenGenerator s2sTokenGenerator;
 
     @Mock
-    private CoreCaseDataApi ccdApi;
+    private CoreCaseDataApi coreCaseDataApi;
+
+    @Mock
+    private CcdApi ccdApi;
 
     private CreateCaseCallbackService service;
 
@@ -75,6 +80,7 @@ class CreateCaseCallbackServiceTest {
             serviceConfigProvider,
             transformationClient,
             s2sTokenGenerator,
+            coreCaseDataApi,
             ccdApi
         );
     }
@@ -281,6 +287,86 @@ class CreateCaseCallbackServiceTest {
         assertThat(result.getModifiedFields()).isEmpty();
         assertThat(result.getWarnings()).containsOnly("warning");
         assertThat(result.getErrors()).containsOnly("error");
+    }
+
+    @Test
+    void should_return_service_case_when_it_already_exists_in_ccd_for_a_given_exception_record()
+        throws IOException, CaseTransformationException {
+        // given
+        setUpTransformationUrl();
+
+        Map<String, Object> data = new HashMap<>();
+        // putting 6 via `ImmutableMap` is available from Java 9
+        data.put("poBox", "12345");
+        data.put("journeyClassification", EXCEPTION.name());
+        data.put("formType", "Form1");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
+        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
+
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .id(CASE_ID)
+            .caseTypeId(CASE_TYPE_ID)
+            .jurisdiction("some jurisdiction")
+            .data(data)
+        );
+        when(ccdApi.getCaseRefsByBulkScanCaseReference(Long.toString(CASE_ID), null))
+            .thenReturn(singletonList(345L));
+
+        // when
+        ProcessResult result = service.process(new CcdCallbackRequest(
+            EVENT_ID_CREATE_NEW_CASE,
+            caseDetails,
+            true
+        ), IDAM_TOKEN, USER_ID);
+
+        // then
+        assertThat(result.getModifiedFields().get(CASE_REFERENCE)).isEqualTo("345");
+        assertThat(result.getWarnings().isEmpty()).isTrue();
+        assertThat(result.getErrors().isEmpty()).isTrue();
+    }
+
+    @Test
+    void should_return_error_if_multiple_cases_exist_in_ccd_for_a_given_exception_record()
+        throws IOException, CaseTransformationException {
+        // given
+        setUpTransformationUrl();
+
+        Map<String, Object> data = new HashMap<>();
+        // putting 6 via `ImmutableMap` is available from Java 9
+        data.put("poBox", "12345");
+        data.put("journeyClassification", EXCEPTION.name());
+        data.put("formType", "Form1");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
+        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
+
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .id(CASE_ID)
+            .caseTypeId(CASE_TYPE_ID)
+            .jurisdiction("some jurisdiction")
+            .data(data)
+        );
+        when(ccdApi.getCaseRefsByBulkScanCaseReference(Long.toString(CASE_ID), null))
+            .thenReturn(asList(345L, 456L));
+
+        // when
+        ProcessResult result = service.process(new CcdCallbackRequest(
+            EVENT_ID_CREATE_NEW_CASE,
+            caseDetails,
+            true
+        ), IDAM_TOKEN, USER_ID);
+
+        // then
+
+        // then
+        assertThat(result.getModifiedFields()).isEmpty();
+        assertThat(result.getWarnings()).isEmpty();
+        assertThat(result.getErrors()).containsOnly(
+            "Multiple cases (345, 456) found for the given bulk scan case reference: 123"
+        );
     }
 
     @Test
