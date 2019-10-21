@@ -21,7 +21,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessRe
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublisher;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.IPaymentsPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.UpdatePaymentsCommand;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -52,7 +52,7 @@ public class CreateCaseCallbackService {
     private final ServiceConfigProvider serviceConfigProvider;
     private final TransformationClient transformationClient;
     private final AuthTokenGenerator s2sTokenGenerator;
-    private final PaymentsPublisher paymentsPublisher;
+    private final IPaymentsPublisher paymentsPublisher;
     private final CoreCaseDataApi ccdApi;
 
     public CreateCaseCallbackService(
@@ -60,7 +60,7 @@ public class CreateCaseCallbackService {
         ServiceConfigProvider serviceConfigProvider,
         TransformationClient transformationClient,
         AuthTokenGenerator s2sTokenGenerator,
-        PaymentsPublisher paymentsPublisher,
+        IPaymentsPublisher paymentsPublisher,
         CoreCaseDataApi ccdApi
     ) {
         this.validator = validator;
