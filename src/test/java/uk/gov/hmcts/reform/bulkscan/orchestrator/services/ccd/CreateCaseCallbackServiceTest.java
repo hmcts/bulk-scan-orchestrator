@@ -611,14 +611,14 @@ class CreateCaseCallbackServiceTest {
 
         StartEventResponse startCcdEventResp = mock(StartEventResponse.class);
 
-        given(ccdApi.startForCaseworker(any(), any(), any(), any(), any(), any()))
+        given(coreCaseDataApi.startForCaseworker(any(), any(), any(), any(), any(), any()))
             .willReturn(startCcdEventResp);
 
         Long newCaseId = 123L;
         CaseDetails newCaseDetails = mock(CaseDetails.class);
         doReturn(newCaseId).when(newCaseDetails).getId();
 
-        given(ccdApi.submitForCaseworker(any(), any(), any(), any(), any(), anyBoolean(), any()))
+        given(coreCaseDataApi.submitForCaseworker(any(), any(), any(), any(), any(), anyBoolean(), any()))
             .willReturn(newCaseDetails);
 
         Map<String, Object> data = new HashMap<>();
@@ -685,14 +685,14 @@ class CreateCaseCallbackServiceTest {
 
         StartEventResponse startCcdEventResp = mock(StartEventResponse.class);
 
-        given(ccdApi.startForCaseworker(any(), any(), any(), any(), any(), any()))
+        given(coreCaseDataApi.startForCaseworker(any(), any(), any(), any(), any(), any()))
             .willReturn(startCcdEventResp);
 
         Long newCaseId = 123L;
         CaseDetails newCaseDetails = mock(CaseDetails.class);
         doReturn(newCaseId).when(newCaseDetails).getId();
 
-        given(ccdApi.submitForCaseworker(any(), any(), any(), any(), any(), anyBoolean(), any()))
+        given(coreCaseDataApi.submitForCaseworker(any(), any(), any(), any(), any(), anyBoolean(), any()))
             .willReturn(newCaseDetails);
 
         Map<String, Object> data = new HashMap<>();

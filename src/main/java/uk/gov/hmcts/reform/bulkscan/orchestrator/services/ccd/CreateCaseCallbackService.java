@@ -148,7 +148,8 @@ public class CreateCaseCallbackService {
         ServiceConfigItem configItem,
         boolean ignoreWarnings,
         String idamToken,
-        String userId
+        String userId,
+        CaseDetails exceptionRecordData
     ) {
         List<Long> ids = ccdApi.getCaseRefsByBulkScanCaseReference(exceptionRecord.id, configItem.getService());
         if (ids.isEmpty()) {
@@ -157,7 +158,8 @@ public class CreateCaseCallbackService {
                 configItem,
                 ignoreWarnings,
                 idamToken,
-                userId
+                userId,
+                exceptionRecordData
             );
         } else if (ids.size() == 1) {
             return new ProcessResult(
