@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
@@ -15,28 +16,41 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.InvalidCa
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.TransformationErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceNotConfiguredException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublisher;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.UpdatePaymentsCommand;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -71,6 +85,9 @@ class CreateCaseCallbackServiceTest {
     @Mock
     private CcdApi ccdApi;
 
+    @Mock
+    private PaymentsPublisher paymentsPublisher;
+
     private CreateCaseCallbackService service;
 
     @BeforeEach
@@ -80,6 +97,7 @@ class CreateCaseCallbackServiceTest {
             serviceConfigProvider,
             transformationClient,
             s2sTokenGenerator,
+            paymentsPublisher,
             coreCaseDataApi,
             ccdApi
         );
@@ -572,6 +590,150 @@ class CreateCaseCallbackServiceTest {
             .element(0)
             .asString()
             .matches(match);
+    }
+
+    @Test
+    void should_send_payment_message_when_case_has_payments() throws Exception {
+        // given
+        setUpTransformationUrl();
+
+        given(transformationClient.transformExceptionRecord(any(),any(), any()))
+            .willReturn(
+                new SuccessfulTransformationResponse(
+                    new CaseCreationDetails(
+                        "some_case_type",
+                        "some_event_id",
+                        emptyMap()
+                    ),
+                    emptyList()
+                )
+            );
+
+        StartEventResponse startCcdEventResp = mock(StartEventResponse.class);
+
+        given(coreCaseDataApi.startForCaseworker(any(), any(), any(), any(), any(), any()))
+            .willReturn(startCcdEventResp);
+
+        Long newCaseId = 123L;
+        CaseDetails newCaseDetails = mock(CaseDetails.class);
+        doReturn(newCaseId).when(newCaseDetails).getId();
+
+        given(coreCaseDataApi.submitForCaseworker(any(), any(), any(), any(), any(), anyBoolean(), any()))
+            .willReturn(newCaseDetails);
+
+        Map<String, Object> data = new HashMap<>();
+
+        String envelopeId = "987";
+        String jurisdiction = "sample jurisdiction";
+
+        data.put("poBox", "12345");
+        data.put("journeyClassification", EXCEPTION.name());
+        data.put("formType", "A1");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
+        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
+        data.put(ExceptionRecordFields.CONTAINS_PAYMENTS, YesNoFieldValues.YES);
+        data.put(ExceptionRecordFields.ENVELOPE_ID, envelopeId);
+        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, jurisdiction);
+
+        CaseDetails caseDetails =
+            TestCaseBuilder
+                .createCaseWith(builder -> builder
+                    .id(CASE_ID)
+                    .caseTypeId(CASE_TYPE_ID)
+                    .jurisdiction("some jurisdiction")
+                    .data(data)
+                );
+
+        // when
+        ProcessResult result =
+            service
+                .process(
+                    new CcdCallbackRequest(EVENT_ID_CREATE_NEW_CASE, caseDetails, true),
+                    IDAM_TOKEN,
+                    USER_ID
+                );
+
+        assertThat(result.getErrors()).isEmpty();
+        assertThat(result.getWarnings()).isEmpty();
+
+        ArgumentCaptor<UpdatePaymentsCommand> cmd = ArgumentCaptor.forClass(UpdatePaymentsCommand.class);
+        verify(paymentsPublisher).send(cmd.capture());
+        assertThat(cmd.getValue().exceptionRecordRef).isEqualTo(Long.toString(CASE_ID));
+        assertThat(cmd.getValue().newCaseRef).isEqualTo(Long.toString(newCaseId));
+        assertThat(cmd.getValue().envelopeId).isEqualTo(envelopeId);
+        assertThat(cmd.getValue().jurisdiction).isEqualTo(jurisdiction);
+    }
+
+    @Test
+    void should_not_send_payment_message_when_case_has_no_payments() throws Exception {
+        // given
+        setUpTransformationUrl();
+
+        given(transformationClient.transformExceptionRecord(any(),any(), any()))
+            .willReturn(
+                new SuccessfulTransformationResponse(
+                    new CaseCreationDetails(
+                        "some_case_type",
+                        "some_event_id",
+                        emptyMap()
+                    ),
+                    emptyList()
+                )
+            );
+
+        StartEventResponse startCcdEventResp = mock(StartEventResponse.class);
+
+        given(coreCaseDataApi.startForCaseworker(any(), any(), any(), any(), any(), any()))
+            .willReturn(startCcdEventResp);
+
+        Long newCaseId = 123L;
+        CaseDetails newCaseDetails = mock(CaseDetails.class);
+        doReturn(newCaseId).when(newCaseDetails).getId();
+
+        given(coreCaseDataApi.submitForCaseworker(any(), any(), any(), any(), any(), anyBoolean(), any()))
+            .willReturn(newCaseDetails);
+
+        Map<String, Object> data = new HashMap<>();
+
+        String envelopeId = "987";
+        String jurisdiction = "sample jurisdiction";
+
+        data.put("poBox", "12345");
+        data.put("journeyClassification", EXCEPTION.name());
+        data.put("formType", "A1");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
+        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
+        data.put(ExceptionRecordFields.CONTAINS_PAYMENTS, YesNoFieldValues.NO); // no payments!
+        data.put(ExceptionRecordFields.ENVELOPE_ID, envelopeId);
+        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, jurisdiction);
+
+        CaseDetails caseDetails =
+            TestCaseBuilder
+                .createCaseWith(builder -> builder
+                    .id(CASE_ID)
+                    .caseTypeId(CASE_TYPE_ID)
+                    .jurisdiction("some jurisdiction")
+                    .data(data)
+                );
+
+        // when
+        ProcessResult result =
+            service
+                .process(
+                    new CcdCallbackRequest(EVENT_ID_CREATE_NEW_CASE, caseDetails, true),
+                    IDAM_TOKEN,
+                    USER_ID
+                );
+
+        // then
+        assertThat(result.getErrors()).isEmpty();
+        assertThat(result.getWarnings()).isEmpty();
+
+        verify(paymentsPublisher, never()).send(any());
     }
 
     private void setUpTransformationUrl() {
