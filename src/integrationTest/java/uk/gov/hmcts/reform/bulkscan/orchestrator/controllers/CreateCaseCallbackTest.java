@@ -124,6 +124,45 @@ class CreateCaseCallbackTest {
             .body("message", equalTo("Failed to create new case"));
     }
 
+    @ParameterizedTest
+    @EnumSource(
+        value = HttpStatus.class,
+        names = { "BAD_REQUEST", "UNPROCESSABLE_ENTITY", "INTERNAL_SERVER_ERROR" }
+    )
+    void should_respond_with_relevant_error_when_transformation_call_is_failing(HttpStatus responseStatus) {
+        setUpFailingTransformation(responseStatus);
+        setUpCcdSearchEmptyResult(getCcdResponseBody("search-result-empty.json"));
+
+        postWithBody(getRequestBody("valid-exception.json"))
+            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+            .body("message", equalTo("Failed to create new case"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        value = HttpStatus.class,
+        names = { "BAD_REQUEST", "UNPROCESSABLE_ENTITY" }
+    )
+    void should_respond_with_relevant_error_when_transformation_call_is_failing_with_correct_response_body(
+        HttpStatus responseStatus
+    ) {
+        String error = "Big Error";
+        String warning = "Big Warning";
+        setUpFailingTransformation(responseStatus, error, warning);
+        setUpCcdSearchEmptyResult(getCcdResponseBody("search-result-empty.json"));
+
+        if (responseStatus.equals(HttpStatus.BAD_REQUEST)) {
+            postWithBody(getRequestBody("valid-exception.json"))
+                .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .body("message", equalTo("Failed to transform exception record"));
+        } else {
+            postWithBody(getRequestBody("valid-exception.json"))
+                .statusCode(OK.value())
+                .body("errors", hasItem(error))
+                .body("warnings", hasItem(warning));
+        }
+    }
+
     @Test
     void should_respond_with_relevant_error_when_body_of_create_case_callback_is_empty() {
         postWithBody("{}".getBytes())
@@ -148,6 +187,23 @@ class CreateCaseCallbackTest {
         givenThat(post("/transform-exception-record")
             .withHeader("ServiceAuthorization", containing("Bearer"))
             .willReturn(okJson(responseBody))
+        );
+    }
+
+    private void setUpFailingTransformation(HttpStatus responseStatus) {
+        givenThat(post("/transform-exception-record")
+            .withHeader("ServiceAuthorization", containing("Bearer"))
+            .willReturn(aResponse().withStatus(responseStatus.value()))
+        );
+    }
+
+    private void setUpFailingTransformation(HttpStatus responseStatus, String error, String warning) {
+        givenThat(post("/transform-exception-record")
+            .withHeader("ServiceAuthorization", containing("Bearer"))
+            .willReturn(aResponse()
+                .withStatus(responseStatus.value())
+                .withBody("{\"errors\":[\"" + error + "\"],\"warnings\":[\"" + warning + "\"]}")
+            )
         );
     }
 

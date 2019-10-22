@@ -249,7 +249,7 @@ public class CreateCaseCallbackService {
             );
         } catch (InvalidCaseDataException exception) {
             if (BAD_REQUEST.equals(exception.getStatus())) {
-                throw exception;
+                throw new CallbackException("Failed to transform exception record", exception);
             } else {
                 return new ProcessResult(exception.getResponse().warnings, exception.getResponse().errors);
             }
