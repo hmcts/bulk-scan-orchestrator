@@ -93,6 +93,9 @@ public class CreateCaseCallbackService {
 
         CaseDetails exceptionRecordData = request.getCaseDetails();
 
+        // Extract exception record ID for logging reasons
+        String exceptionRecordId = validator.getCaseId(exceptionRecordData).getOrElse("UNKNOWN");
+
         ProcessResult result = validator
             .getValidation(exceptionRecordData)
             .map(exceptionRecord -> tryCreateNewCase(
@@ -108,8 +111,9 @@ public class CreateCaseCallbackService {
 
         if (!result.getWarnings().isEmpty()) {
             log.warn(
-                "Warnings found for {} during callback process: {}",
+                "Warnings found for {} exception record {} during callback process: {}",
                 serviceConfigItem.getService(),
+                exceptionRecordId,
                 result.getWarnings().size()
             );
         }
@@ -117,8 +121,9 @@ public class CreateCaseCallbackService {
         if (!result.getErrors().isEmpty()) {
             // no need to error - it's informational log. specific logs will be error'ed already
             log.warn(
-                "Errors found for {} during callback process: {}",
+                "Errors found for {} exception record {} during callback process: {}",
                 serviceConfigItem.getService(),
+                exceptionRecordId,
                 result.getErrors().size()
             );
         }

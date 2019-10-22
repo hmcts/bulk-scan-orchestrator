@@ -61,8 +61,12 @@ public class CreateCaseValidator {
         return Validation.valid(null);
     }
 
+    public Validation<String, String> getCaseId(CaseDetails caseDetails) {
+        return hasAnId(caseDetails).map(id -> Long.toString(id));
+    }
+
     public Validation<Seq<String>, ExceptionRecord> getValidation(CaseDetails caseDetails) {
-        Validation<String, Long> exceptionRecordIdValidation = hasAnId(caseDetails);
+        Validation<String, String> exceptionRecordIdValidation = getCaseId(caseDetails);
         Validation<String, String> caseTypeIdValidation = hasCaseTypeId(caseDetails);
         Validation<String, String> poBoxValidation = hasPoBox(caseDetails);
         Validation<String, String> jurisdictionValidation = hasJurisdiction(caseDetails);
@@ -89,7 +93,7 @@ public class CreateCaseValidator {
         Seq<String> errors = getValidationErrors(validations);
         if (errors.isEmpty()) {
             return Validation.valid(new ExceptionRecord(
-                Long.toString(exceptionRecordIdValidation.get()),
+                exceptionRecordIdValidation.get(),
                 caseTypeIdValidation.get(),
                 poBoxValidation.get(),
                 jurisdictionValidation.get(),
