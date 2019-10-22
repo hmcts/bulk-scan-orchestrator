@@ -2,13 +2,17 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers;
 
 import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
 
 import java.io.IOException;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
@@ -105,6 +109,21 @@ class CreateCaseCallbackTest {
             .body("data.caseReference", equalTo("1539007368674134")); // from sample-case.json
     }
 
+    @ParameterizedTest
+    @EnumSource(
+        value = HttpStatus.class,
+        names = { "BAD_REQUEST", "UNPROCESSABLE_ENTITY", "BAD_GATEWAY", "INTERNAL_SERVER_ERROR" }
+    )
+    void should_respond_with_relevant_error_when_ccd_call_is_failing(HttpStatus responseStatus) {
+        setUpTransformation(getTransformationResponseBody("ok-no-warnings.json"));
+        setUpCcdSearchEmptyResult(getCcdResponseBody("search-result-empty.json"));
+        setUpFailingCallToCcd(responseStatus);
+
+        postWithBody(getRequestBody("valid-exception.json"))
+            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+            .body("message", equalTo("Failed to create new case"));
+    }
+
     @Test
     void should_respond_with_relevant_error_when_body_of_create_case_callback_is_empty() {
         postWithBody("{}".getBytes())
@@ -160,6 +179,21 @@ class CreateCaseCallbackTest {
             )
                 .withHeader("ServiceAuthorization", containing("Bearer"))
                 .willReturn(okJson(submitResponseBody))
+        );
+    }
+
+    private void setUpFailingCallToCcd(HttpStatus responseStatus) {
+        givenThat(
+            get(
+                // values from config + initial request body
+                "/caseworkers/"
+                    + USER_ID
+                    + "/jurisdictions/BULKSCAN/case-types/123/event-triggers/"
+                    + EVENT_ID
+                    + "/token"
+            )
+            .withHeader("ServiceAuthorization", containing("Bearer"))
+            .willReturn(aResponse().withStatus(responseStatus.value()))
         );
     }
 
