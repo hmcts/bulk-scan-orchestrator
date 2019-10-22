@@ -34,7 +34,7 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 }
 
 withPipeline(type, product, component) {
-  after('test'){
+  before('functionalTest:aat'){
     // Vars needed for AKS testing
     env.S2S_NAME = 'bulk_scan_orchestrator'
     env.S2S_URL = 'http://rpe-service-auth-provider-aat.service.core-compute-aat.internal'
