@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -77,25 +76,6 @@ class CreateCaseTest {
     }
 
     @Test
-    // this test will go once the one below passes
-    public void should_create_case_from_valid_exception_record() throws Exception {
-        // given
-        CaseDetails exceptionRecord = createExceptionRecord("envelopes/new-envelope-create-case-with-evidence.json");
-
-        // when
-        AboutToStartOrSubmitCallbackResponse callbackResponse = invokeCallbackEndpoint(exceptionRecord);
-        String caseCcdId = getCaseCcdId(callbackResponse);
-
-        // then
-        CaseDetails createdCase = ccdApi.getCase(caseCcdId, exceptionRecord.getJurisdiction());
-        assertThat(createdCase.getCaseTypeId()).isEqualTo(BULK_SCANNED_CASE_TYPE);
-        assertThat(createdCase.getData().get("firstName")).isEqualTo("value1");
-        assertThat(createdCase.getData().get("lastName")).isEqualTo("value2");
-        assertThat(createdCase.getData().get("email")).isEqualTo("hello@test.com");
-    }
-
-    @Test
-    @Disabled
     public void should_idempotently_create_case_from_valid_exception_record() throws Exception {
         // given
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/new-envelope-create-case-with-evidence.json");
