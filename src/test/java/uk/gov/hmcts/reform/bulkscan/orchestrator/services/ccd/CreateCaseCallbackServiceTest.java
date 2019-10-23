@@ -83,7 +83,7 @@ class CreateCaseCallbackServiceTest {
     private CcdApi ccdApi;
 
     @Mock
-    private PaymentsProcessor paymentsProcessor;
+    private CcdCaseSubmitter ccdCaseSubmitter;
 
     private CreateCaseCallbackService service;
 
@@ -94,7 +94,7 @@ class CreateCaseCallbackServiceTest {
             serviceConfigProvider,
             transformationClient,
             s2sTokenGenerator,
-            paymentsProcessor,
+            ccdCaseSubmitter,
             coreCaseDataApi,
             ccdApi
         );
@@ -655,7 +655,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(result.getErrors()).isEmpty();
         assertThat(result.getWarnings()).isEmpty();
 
-        verify(paymentsProcessor).updatePayments(caseDetails, CASE_ID);
+        verify(ccdCaseSubmitter).createNewCase(caseDetails, CASE_ID);
     }
 
     @Test
