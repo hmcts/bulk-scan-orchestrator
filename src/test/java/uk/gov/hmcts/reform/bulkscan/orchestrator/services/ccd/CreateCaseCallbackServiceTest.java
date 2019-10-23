@@ -680,6 +680,7 @@ class CreateCaseCallbackServiceTest {
     @Test
     void should_create_new_case_for_exception_record_if_it_does_not_exist() {
         // given
+        when(serviceConfigProvider.getConfig(SERVICE)).thenReturn(configItem);
         when(ccdApi.getCaseRefsByBulkScanCaseReference(Long.toString(CASE_ID), SERVICE)).thenReturn(emptyList());
         ProcessResult processResult = new ProcessResult(
             ImmutableMap.<String, Object>builder()
@@ -733,6 +734,7 @@ class CreateCaseCallbackServiceTest {
     @Test
     void should_return_existing_case_for_exception_record() {
         // given
+        when(serviceConfigProvider.getConfig(SERVICE)).thenReturn(configItem);
         when(ccdApi.getCaseRefsByBulkScanCaseReference(Long.toString(CASE_ID), SERVICE))
             .thenReturn(asList(CASE_REFERENCE_1));
 
@@ -774,6 +776,7 @@ class CreateCaseCallbackServiceTest {
     @Test
     void should_return_error_if_multiple_cases_exist_for_exception_record() {
         // given
+        when(serviceConfigProvider.getConfig(SERVICE)).thenReturn(configItem);
         when(ccdApi.getCaseRefsByBulkScanCaseReference(Long.toString(CASE_ID), SERVICE))
             .thenReturn(asList(CASE_REFERENCE_1, CASE_REFERENCE_2));
 
