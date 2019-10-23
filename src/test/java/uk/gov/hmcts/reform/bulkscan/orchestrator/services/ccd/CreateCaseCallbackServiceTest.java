@@ -89,6 +89,9 @@ class CreateCaseCallbackServiceTest {
     @Mock
     private CcdCaseSubmitter ccdCaseSubmitter;
 
+    @Mock
+    private ServiceConfigItem configItem;
+
     private CreateCaseCallbackService service;
 
     private ExceptionRecord exceptionRecord;
@@ -104,6 +107,8 @@ class CreateCaseCallbackServiceTest {
             coreCaseDataApi,
             ccdApi
         );
+
+        when(configItem.getService()).thenReturn("service");
         exceptionRecord = getExceptionRecord();
     }
 
@@ -662,7 +667,14 @@ class CreateCaseCallbackServiceTest {
         assertThat(result.getErrors()).isEmpty();
         assertThat(result.getWarnings()).isEmpty();
 
-        verify(ccdCaseSubmitter).createNewCase(caseDetails, CASE_ID);
+        verify(ccdCaseSubmitter).createNewCase(
+            exceptionRecord,
+            configItem,
+            true,
+            IDAM_TOKEN,
+            USER_ID,
+            caseDetails
+        );
     }
 
     @Test
@@ -673,9 +685,6 @@ class CreateCaseCallbackServiceTest {
             ImmutableMap.<String, Object>builder()
                 .build()
         );
-        when(ccdCaseSubmitter
-            .createNewCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, caseDetails))
-            .thenReturn(processResult);
 
         setUpTransformationUrl();
 
@@ -683,7 +692,7 @@ class CreateCaseCallbackServiceTest {
 
         data.put("poBox", "12345");
         data.put("journeyClassification", EXCEPTION.name());
-        data.put("formType", null);
+        data.put("formType", "Form1");
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
@@ -695,6 +704,10 @@ class CreateCaseCallbackServiceTest {
             .jurisdiction("some jurisdiction")
             .data(data)
         );
+
+        when(ccdCaseSubmitter
+            .createNewCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, caseDetails))
+            .thenReturn(processResult);
 
         // when
         ProcessResult result =
@@ -729,7 +742,7 @@ class CreateCaseCallbackServiceTest {
 
         data.put("poBox", "12345");
         data.put("journeyClassification", EXCEPTION.name());
-        data.put("formType", null);
+        data.put("formType", "Form1");
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
@@ -770,7 +783,7 @@ class CreateCaseCallbackServiceTest {
 
         data.put("poBox", "12345");
         data.put("journeyClassification", EXCEPTION.name());
-        data.put("formType", null);
+        data.put("formType", "Form1");
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
