@@ -22,7 +22,7 @@ public class PaymentsProcessor {
         this.paymentsPublisher = paymentsPublisher;
     }
 
-    public void processPayments(Envelope envelope, Long ccdId, boolean isExceptionRecord) {
+    public void createPayments(Envelope envelope, Long ccdId, boolean isExceptionRecord) {
         if (envelope.payments != null && !envelope.payments.isEmpty()) {
             CreatePaymentsCommand cmd = new CreatePaymentsCommand(
                 envelope.id,
