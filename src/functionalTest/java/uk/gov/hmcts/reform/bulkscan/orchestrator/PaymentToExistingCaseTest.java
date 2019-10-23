@@ -8,15 +8,12 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublisher;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.CreatePaymentsCommand;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentData;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
@@ -50,19 +47,19 @@ class PaymentToExistingCaseTest {
 
         // when
         // message sent to payments queue
-        paymentsPublisher.send(
-            new CreatePaymentsCommand(
-                envelope.id,
-                Long.toString(caseDetails.getId()),
-                caseDetails.getJurisdiction(),
-                envelope.container,
-                envelope.poBox,
-                false,
-                envelope.payments.stream()
-                    .map(payment -> new PaymentData(payment.documentControlNumber))
-                    .collect(toList())
-            )
-        );
+        //paymentsPublisher.send(
+        //    new CreatePaymentsCommand(
+        //        envelope.id,
+        //        Long.toString(caseDetails.getId()),
+        //        caseDetails.getJurisdiction(),
+        //        envelope.container,
+        //        envelope.poBox,
+        //        false,
+        //        envelope.payments.stream()
+        //            .map(payment -> new PaymentData(payment.documentControlNumber))
+        //            .collect(toList())
+        //    )
+        //);
 
         //then
         await("Case is ingested")
