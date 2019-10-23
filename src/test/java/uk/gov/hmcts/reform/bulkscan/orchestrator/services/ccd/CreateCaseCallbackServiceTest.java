@@ -65,6 +65,9 @@ class CreateCaseCallbackServiceTest {
     private static final String USER_ID = "user-id";
     private static final String SERVICE = "service";
     private static final long CASE_ID = 123;
+    private static final String CASE_REFERENCE_KEY = "caseReference";
+    private static final Long CASE_REFERENCE_1 = 456L;
+    private static final long CASE_REFERENCE_2 = 567L;
     private static final String CASE_TYPE_ID = SERVICE + "_ExceptionRecord";
     private static final CreateCaseValidator VALIDATOR = new CreateCaseValidator();
 
