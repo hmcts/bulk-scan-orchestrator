@@ -665,12 +665,6 @@ class CreateCaseCallbackServiceTest {
         verify(ccdCaseSubmitter).createNewCase(caseDetails, CASE_ID);
     }
 
-    private void setUpTransformationUrl() {
-        ServiceConfigItem configItem = new ServiceConfigItem();
-        configItem.setTransformationUrl("url");
-        when(serviceConfigProvider.getConfig(SERVICE)).thenReturn(configItem);
-    }
-
     @Test
     void should_create_new_case_for_exception_record_if_it_does_not_exist() {
         // given
@@ -682,6 +676,25 @@ class CreateCaseCallbackServiceTest {
         when(ccdCaseSubmitter
             .createNewCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, caseDetails))
             .thenReturn(processResult);
+
+        setUpTransformationUrl();
+
+        Map<String, Object> data = new HashMap<>();
+
+        data.put("poBox", "12345");
+        data.put("journeyClassification", EXCEPTION.name());
+        data.put("formType", null);
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
+        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
+
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .id(CASE_ID)
+            .caseTypeId(CASE_TYPE_ID)
+            .jurisdiction("some jurisdiction")
+            .data(data)
+        );
 
         // when
         ProcessResult result =
@@ -710,6 +723,25 @@ class CreateCaseCallbackServiceTest {
         when(ccdApi.getCaseRefsByBulkScanCaseReference(Long.toString(CASE_ID), SERVICE))
             .thenReturn(asList(CASE_REFERENCE_1));
 
+        setUpTransformationUrl();
+
+        Map<String, Object> data = new HashMap<>();
+
+        data.put("poBox", "12345");
+        data.put("journeyClassification", EXCEPTION.name());
+        data.put("formType", null);
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
+        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
+
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .id(CASE_ID)
+            .caseTypeId(CASE_TYPE_ID)
+            .jurisdiction("some jurisdiction")
+            .data(data)
+        );
+
         // when
         ProcessResult result =
             service
@@ -731,6 +763,25 @@ class CreateCaseCallbackServiceTest {
         // given
         when(ccdApi.getCaseRefsByBulkScanCaseReference(Long.toString(CASE_ID), SERVICE))
             .thenReturn(asList(CASE_REFERENCE_1, CASE_REFERENCE_2));
+
+        setUpTransformationUrl();
+
+        Map<String, Object> data = new HashMap<>();
+
+        data.put("poBox", "12345");
+        data.put("journeyClassification", EXCEPTION.name());
+        data.put("formType", null);
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
+        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
+
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+            .id(CASE_ID)
+            .caseTypeId(CASE_TYPE_ID)
+            .jurisdiction("some jurisdiction")
+            .data(data)
+        );
 
         // when
         ProcessResult result =
@@ -763,5 +814,11 @@ class CreateCaseCallbackServiceTest {
             emptyList(),
             emptyList()
         );
+    }
+
+    private void setUpTransformationUrl() {
+        ServiceConfigItem configItem = new ServiceConfigItem();
+        configItem.setTransformationUrl("url");
+        when(serviceConfigProvider.getConfig(SERVICE)).thenReturn(configItem);
     }
 }
