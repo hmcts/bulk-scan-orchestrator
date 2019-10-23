@@ -30,7 +30,6 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
@@ -614,12 +613,12 @@ class AttachExceptionRecordToExistingCaseTest {
         );
         verifyRequestPattern(
             submittedScannedRecords(),
-            "$.data.scannedDocuments[0].fileName",
+            "$.data.scannedDocuments[0].value.fileName",
             WireMock.equalTo(DOCUMENT_FILENAME)
         );
         verifyRequestPattern(
             submittedScannedRecords(),
-            "$.data.scannedDocuments[1].fileName",
+            "$.data.scannedDocuments[1].value.fileName",
             WireMock.equalTo(EXCEPTION_RECORD_FILENAME)
         );
         verifyRequestPattern(
@@ -827,13 +826,11 @@ class AttachExceptionRecordToExistingCaseTest {
 
     private static Map<String, Object> document(String filename, String documentNumber) {
         return ImmutableMap.of(
-            "fileName", filename,
-            "id", UUID.randomUUID().toString(),
             "value", ImmutableMap.of(
+                "fileName", filename,
                 "controlNumber", documentNumber,
                 "someNumber", 3
-            ),
-            "someString", "someValue"
+            )
         );
     }
 

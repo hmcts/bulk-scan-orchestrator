@@ -256,7 +256,10 @@ public class AttachCaseCallbackService {
             ids -> throwDuplicateError(targetCaseCcdRef, ids)
         );
 
-        attachExceptionRecordReference(exceptionRecordDocuments, exceptionRecordId);
+        List<Map<String, Object>> newCaseDocuments = attachExceptionRecordReference(
+            exceptionRecordDocuments,
+            exceptionRecordId
+        );
 
         StartEventResponse event = ccdApi.startAttachScannedDocs(theCase, idamToken, userId);
 
@@ -264,8 +267,8 @@ public class AttachCaseCallbackService {
             theCase,
             idamToken,
             userId,
-            buildCaseData(exceptionRecordDocuments, targetCaseDocuments),
-            createEventSummary(theCase, exceptionRecordId, exceptionRecordDocuments),
+            buildCaseData(newCaseDocuments, targetCaseDocuments),
+            createEventSummary(theCase, exceptionRecordId, newCaseDocuments),
             event
         );
 
@@ -297,15 +300,24 @@ public class AttachCaseCallbackService {
     }
 
     @SuppressWarnings("unchecked")
-    private void attachExceptionRecordReference(
+    private List<Map<String, Object>> attachExceptionRecordReference(
         List<Map<String, Object>> exceptionDocuments,
         Long exceptionRecordReference
     ) {
-        exceptionDocuments.stream().map(doc -> {
-            Map<String, Object> document = new HashMap((Map<String, Object>)doc.get("value"));
-            document.put("exceptionRecordReference", String.valueOf(exceptionRecordReference));
-            return doc;
-        }).collect(toList());
+        return exceptionDocuments
+            .stream()
+            .map(document -> {
+                HashMap<String, Object> copiedDocumentContent =
+                    new HashMap<>((Map<String, Object>) document.get("value"));
+
+                copiedDocumentContent.put(
+                    "exceptionRecordReference",
+                    String.valueOf(exceptionRecordReference)
+                );
+
+                return ImmutableMap.<String, Object>of("value", copiedDocumentContent);
+            })
+            .collect(toList());
     }
 
     private void throwDuplicateError(String caseRef, Set<String> duplicateIds) {
