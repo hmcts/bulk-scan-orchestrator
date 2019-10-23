@@ -9,6 +9,7 @@ import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
 import com.github.tomakehurst.wiremock.matching.StringValuePattern;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
@@ -46,6 +48,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toSet;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -113,6 +116,7 @@ class AttachExceptionRecordToExistingCaseTest {
     private static final String EVENT_ID_ATTACH_TO_CASE = "attachToExistingCase";
     private static final String CLASSIFICATION_EXCEPTION = "EXCEPTION";
     private static final String CALLBACK_ATTACH_CASE_PATH = "/callback/attach_case";
+    private static final String ATTACH_TO_CASE_REFERENCE_FIELD_NAME = "attachToCaseReference";
 
     @LocalServerPort
     private int applicationPort;
@@ -140,15 +144,17 @@ class AttachExceptionRecordToExistingCaseTest {
     @DisplayName("Should successfully callback with correct information")
     @Test
     public void should_callback_with_correct_information_when_attaching_by_attachToCaseReference() {
+        CallbackRequest callbackRequest = exceptionRecordCallbackRequest(CASE_REF);
+
         ValidatableResponse response =
             given()
-                .body(exceptionRecordCallbackRequest(CASE_REF))
+                .body(callbackRequest)
                 .headers(userHeaders())
                 .post(CALLBACK_ATTACH_CASE_PATH)
                 .then()
                 .statusCode(200);
 
-        verifySuccessResponseWithAttachToCaseReference(response);
+        verifySuccessResponse(response, callbackRequest);
         verifyRequestedAttachingToCase();
     }
 
@@ -161,22 +167,22 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @Test
     public void should_callback_with_correct_information_when_attaching_by_ccd_search_case_reference() {
+        CallbackRequest callbackRequest = exceptionRecordCallbackRequest(
+            null,
+            CASE_REFERENCE_TYPE_CCD,
+            CASE_REF,
+            CASE_TYPE_EXCEPTION_RECORD
+        );
+
         ValidatableResponse response =
             given()
-                .body(
-                    exceptionRecordCallbackRequest(
-                        null,
-                        CASE_REFERENCE_TYPE_CCD,
-                        CASE_REF,
-                        CASE_TYPE_EXCEPTION_RECORD
-                    )
-                )
+                .body(callbackRequest)
                 .headers(userHeaders())
                 .post(CALLBACK_ATTACH_CASE_PATH)
                 .then()
                 .statusCode(200);
 
-        verifySuccessResponseWithAttachToCaseReference(response);
+        verifySuccessResponse(response, callbackRequest);
         verifyRequestedAttachingToCase();
     }
 
@@ -194,22 +200,22 @@ class AttachExceptionRecordToExistingCaseTest {
             )
         );
 
+        CallbackRequest callbackRequest = exceptionRecordCallbackRequest(
+            null,
+            CASE_REFERENCE_TYPE_EXTERNAL,
+            legacyId,
+            CASE_TYPE_EXCEPTION_RECORD
+        );
+
         ValidatableResponse response =
             given()
-                .body(
-                    exceptionRecordCallbackRequest(
-                        null,
-                        CASE_REFERENCE_TYPE_EXTERNAL,
-                        legacyId,
-                        CASE_TYPE_EXCEPTION_RECORD
-                    )
-                )
+                .body(callbackRequest)
                 .headers(userHeaders())
                 .post(CALLBACK_ATTACH_CASE_PATH)
                 .then()
                 .statusCode(200);
 
-        verifySuccessResponseWithAttachToCaseReference(response);
+        verifySuccessResponse(response, callbackRequest);
         verifyRequestedAttachingToCase();
     }
 
@@ -530,17 +536,18 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-    public void should_succeed_when_classification_is_exception_and_exception_record_does_not_include_ocr()
-        throws Exception {
+    public void should_succeed_when_classification_is_exception_and_exception_record_does_not_include_ocr() {
+        CallbackRequest callbackRequest = callbackRequestWith(EVENT_ID_ATTACH_TO_CASE, CLASSIFICATION_EXCEPTION, false);
+
         ValidatableResponse response =
             given()
-                .body(callbackRequestWith(EVENT_ID_ATTACH_TO_CASE, CLASSIFICATION_EXCEPTION, false))
+                .body(callbackRequest)
                 .headers(userHeaders())
                 .post(CALLBACK_ATTACH_CASE_PATH)
                 .then()
                 .statusCode(200);
 
-        verifySuccessResponseWithAttachToCaseReference(response);
+        verifySuccessResponse(response, callbackRequest);
         verifyRequestedAttachingToCase();
     }
 
@@ -637,7 +644,10 @@ class AttachExceptionRecordToExistingCaseTest {
         );
     }
 
-    private void verifySuccessResponseWithAttachToCaseReference(ValidatableResponse response) {
+    private void verifySuccessResponse(
+        ValidatableResponse response,
+        CallbackRequest request
+    ) {
         JsonPath responseJson = response.extract().jsonPath();
 
         assertThat(responseJson.getList(RESPONSE_FIELD_ERRORS)).isNullOrEmpty();
@@ -645,7 +655,13 @@ class AttachExceptionRecordToExistingCaseTest {
 
         Map<String, Object> responseData = responseJson.getMap(RESPONSE_FIELD_DATA);
         assertThat(responseData).isNotNull();
-        assertThat(responseData.get("attachToCaseReference")).isEqualTo(CASE_REF);
+        assertThat(responseData.get(ATTACH_TO_CASE_REFERENCE_FIELD_NAME)).isEqualTo(CASE_REF);
+
+        assertMapsAreEqualIgnoringFields(
+            responseData,
+            request.getCaseDetails().getData(),
+            ATTACH_TO_CASE_REFERENCE_FIELD_NAME
+        );
     }
 
     private CaseDetails exceptionRecord(String attachToCaseReference) {
@@ -848,5 +864,29 @@ class AttachExceptionRecordToExistingCaseTest {
         );
 
         return String.format(formatString, (Object[]) formatArgs);
+    }
+
+    private void assertMapsAreEqualIgnoringFields(
+        Map<String, Object> actual,
+        Map<String, Object> expected,
+        String... fieldsToIgnore
+    ) {
+        Set<String> ignoredFieldSet = Sets.newHashSet(fieldsToIgnore);
+
+        Set<Map.Entry<String, Object>> actualWithoutIgnoredFields = getFilteredFieldSet(actual, ignoredFieldSet);
+        Set<Map.Entry<String, Object>> expectedWithoutIgnoredFields = getFilteredFieldSet(expected, ignoredFieldSet);
+
+        assertThat(actualWithoutIgnoredFields).hasSameElementsAs(expectedWithoutIgnoredFields);
+    }
+
+    private Set<Map.Entry<String, Object>> getFilteredFieldSet(
+        Map<String, Object> fieldMap,
+        Set<String> fieldsToExclude
+    ) {
+        return fieldMap
+            .entrySet()
+            .stream()
+            .filter(e -> !fieldsToExclude.contains(e.getKey()))
+            .collect(toSet());
     }
 }
