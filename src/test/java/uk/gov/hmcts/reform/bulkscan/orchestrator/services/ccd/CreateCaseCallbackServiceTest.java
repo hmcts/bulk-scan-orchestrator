@@ -83,7 +83,7 @@ class CreateCaseCallbackServiceTest {
     private CcdApi ccdApi;
 
     @Mock
-    private PaymentsHandler paymentsHandler;
+    private PaymentsProcessor paymentsProcessor;
 
     private CreateCaseCallbackService service;
 
@@ -94,7 +94,7 @@ class CreateCaseCallbackServiceTest {
             serviceConfigProvider,
             transformationClient,
             s2sTokenGenerator,
-            paymentsHandler,
+            paymentsProcessor,
             coreCaseDataApi,
             ccdApi
         );
@@ -590,7 +590,7 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
-    void should_call_payments_handler_when_case_has_payments() throws Exception {
+    void should_call_payments_processor_when_case_has_payments() throws Exception {
         // given
         setUpTransformationUrl();
 
@@ -655,11 +655,11 @@ class CreateCaseCallbackServiceTest {
         assertThat(result.getErrors()).isEmpty();
         assertThat(result.getWarnings()).isEmpty();
 
-        verify(paymentsHandler).handleCasePayments(caseDetails, CASE_ID);
+        verify(paymentsProcessor).updatePayments(caseDetails, CASE_ID);
     }
 
     @Test
-    void should_call_payments_handler_when_case_has_no_payments() throws Exception {
+    void should_call_payments_processor_when_case_has_no_payments() throws Exception {
         // given
         setUpTransformationUrl();
 
@@ -725,7 +725,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(result.getErrors()).isEmpty();
         assertThat(result.getWarnings()).isEmpty();
 
-        verify(paymentsHandler).handleCasePayments(caseDetails, CASE_ID);
+        verify(paymentsProcessor).updatePayments(caseDetails, CASE_ID);
     }
 
     private void setUpTransformationUrl() {

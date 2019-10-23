@@ -50,7 +50,7 @@ public class CreateCaseCallbackService {
     private final ServiceConfigProvider serviceConfigProvider;
     private final TransformationClient transformationClient;
     private final AuthTokenGenerator s2sTokenGenerator;
-    private final PaymentsHandler paymentsHandler;
+    private final PaymentsProcessor paymentsProcessor;
     private final CoreCaseDataApi coreCaseDataApi;
     private final CcdApi ccdApi;
 
@@ -59,7 +59,7 @@ public class CreateCaseCallbackService {
         ServiceConfigProvider serviceConfigProvider,
         TransformationClient transformationClient,
         AuthTokenGenerator s2sTokenGenerator,
-        PaymentsHandler paymentsHandler,
+        PaymentsProcessor paymentsProcessor,
         CoreCaseDataApi coreCaseDataApi,
         CcdApi ccdApi
     ) {
@@ -67,7 +67,7 @@ public class CreateCaseCallbackService {
         this.serviceConfigProvider = serviceConfigProvider;
         this.transformationClient = transformationClient;
         this.s2sTokenGenerator = s2sTokenGenerator;
-        this.paymentsHandler = paymentsHandler;
+        this.paymentsProcessor = paymentsProcessor;
         this.coreCaseDataApi = coreCaseDataApi;
         this.ccdApi = ccdApi;
     }
@@ -234,7 +234,7 @@ public class CreateCaseCallbackService {
                 exceptionRecord.id
             );
 
-            paymentsHandler.handleCasePayments(exceptionRecordData, newCaseId);
+            paymentsProcessor.updatePayments(exceptionRecordData, newCaseId);
 
             return new ProcessResult(
                 ImmutableMap.<String, Object>builder()
