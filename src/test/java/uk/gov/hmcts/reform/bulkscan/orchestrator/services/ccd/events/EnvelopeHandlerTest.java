@@ -115,7 +115,7 @@ class EnvelopeHandlerTest {
         // then
         verify(this.createExceptionRecord).tryCreateFrom(envelope);
         verify(caseFinder, never()).findCase(any());
-        verify(paymentsProcessor).processPayments(envelope, THE_CASE.getId(), true);
+        verify(paymentsProcessor).createPayments(envelope, THE_CASE.getId(), true);
     }
 
 }
