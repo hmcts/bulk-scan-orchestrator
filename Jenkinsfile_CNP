@@ -35,13 +35,15 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 
 withPipeline(type, product, component) {
 
-  // Vars needed for AKS testing
-  env.S2S_NAME = 'bulk_scan_orchestrator'
-  env.S2S_URL = 'http://rpe-service-auth-provider-aat.service.core-compute-aat.internal'
-  env.DOCUMENT_MANAGEMENT_URL = 'http://dm-store-aat.service.core-compute-aat.internal'
-  env.CORE_CASE_DATA_API_URL = 'http://ccd-data-store-api-aat.service.core-compute-aat.internal'
-  env.IDAM_API_URL = 'https://idam-api.aat.platform.hmcts.net'
-  env.IDAM_CLIENT_REDIRECT_URI = 'https://bulk-scan-orchestrator-aat.service.core-compute-aat.internal/oauth2/callback'
+  after('akschartsinstall'){
+    // Vars needed for AKS testing
+    env.S2S_NAME = 'bulk_scan_orchestrator'
+    env.S2S_URL = 'http://rpe-service-auth-provider-aat.service.core-compute-aat.internal'
+    env.DOCUMENT_MANAGEMENT_URL = 'http://dm-store-aat.service.core-compute-aat.internal'
+    env.CORE_CASE_DATA_API_URL = 'http://ccd-data-store-api-aat.service.core-compute-aat.internal'
+    env.IDAM_API_URL = 'https://idam-api.aat.platform.hmcts.net'
+    env.IDAM_CLIENT_REDIRECT_URI = 'https://bulk-scan-orchestrator-aat.service.core-compute-aat.internal/oauth2/callback'
+  }
 
   before('smoketest:preview') {
     withAksClient('nonprod') {
