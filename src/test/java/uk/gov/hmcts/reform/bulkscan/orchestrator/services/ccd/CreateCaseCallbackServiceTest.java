@@ -735,6 +735,91 @@ class CreateCaseCallbackServiceTest {
         when(serviceConfigProvider.getConfig(SERVICE)).thenReturn(configItem);
     }
 
+    @Test
+    void should_create_new_case_for_exception_record_if_it_does_not_exist() {
+        // given
+        when(ccdApi.getCaseRefsByBulkScanCaseReference(Long.toString(CASE_ID), SERVICE)).thenReturn(emptyList());
+        ProcessResult processResult = new ProcessResult(
+            ImmutableMap.<String, Object>builder()
+                .build()
+        );
+        when(ccdCaseSubmitter
+            .createNewCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, caseDetails))
+            .thenReturn(processResult);
+
+        // when
+        ProcessResult res =
+            ccdCaseCreationManager.tryCreateNewCase(
+                exceptionRecord,
+                configItem,
+                true,
+                IDAM_TOKEN,
+                USER_ID,
+                caseDetails
+            );
+
+        // then
+        assertThat(res).isEqualTo(processResult);
+        verify(ccdCaseSubmitter).createNewCase(
+            exceptionRecord,
+            configItem,
+            true,
+            IDAM_TOKEN,
+            USER_ID,
+            caseDetails
+        );
+    }
+
+    @Test
+    void should_return_existing_case_for_exception_record() {
+        // given
+        when(ccdApi.getCaseRefsByBulkScanCaseReference(Long.toString(CASE_ID), SERVICE))
+            .thenReturn(asList(CASE_REFERENCE_1));
+
+        // when
+        ProcessResult res =
+            ccdCaseCreationManager.tryCreateNewCase(
+                exceptionRecord,
+                configItem,
+                true,
+                IDAM_TOKEN,
+                USER_ID,
+                caseDetails
+            );
+
+        // then
+        assertThat(res.getModifiedFields().containsKey(CASE_REFERENCE_KEY)).isEqualTo(true);
+        assertThat(res.getModifiedFields().get(CASE_REFERENCE_KEY))
+            .isEqualTo(Long.toString(CASE_REFERENCE_1));
+        verify(ccdCaseSubmitter, never()).createNewCase(any(), any(),anyBoolean(), anyString(), anyString(), any());
+    }
+
+    @Test
+    void should_return_error_if_multiple_cases_exist_for_exception_record() {
+        // given
+        when(ccdApi.getCaseRefsByBulkScanCaseReference(Long.toString(CASE_ID), SERVICE))
+            .thenReturn(asList(CASE_REFERENCE_1, CASE_REFERENCE_2));
+
+        // when
+        ProcessResult res =
+            ccdCaseCreationManager.tryCreateNewCase(
+                exceptionRecord,
+                configItem,
+                true,
+                IDAM_TOKEN,
+                USER_ID,
+                caseDetails
+            );
+
+        // then
+        assertThat(res.getModifiedFields()).isEmpty();
+        assertThat(res.getErrors()).containsOnly(
+            "Multiple cases (456, 567) found for the given bulk scan case reference: 123"
+        );
+        assertThat(res.getWarnings()).isEmpty();
+        verify(ccdCaseSubmitter, never()).createNewCase(any(), any(),anyBoolean(), anyString(), anyString(), any());
+    }
+
     private ExceptionRecord getExceptionRecord() {
         return new ExceptionRecord(
             Long.toString(CASE_ID),
