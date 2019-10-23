@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.time.LocalDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
@@ -732,5 +733,20 @@ class CreateCaseCallbackServiceTest {
         ServiceConfigItem configItem = new ServiceConfigItem();
         configItem.setTransformationUrl("url");
         when(serviceConfigProvider.getConfig(SERVICE)).thenReturn(configItem);
+    }
+
+    private ExceptionRecord getExceptionRecord() {
+        return new ExceptionRecord(
+            Long.toString(CASE_ID),
+            CASE_TYPE_ID,
+            "po_box",
+            "some jurisdiction",
+            EXCEPTION,
+            "form",
+            now(),
+            now(),
+            emptyList(),
+            emptyList()
+        );
     }
 }
