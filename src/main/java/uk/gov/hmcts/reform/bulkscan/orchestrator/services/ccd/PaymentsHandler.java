@@ -22,7 +22,7 @@ public class PaymentsHandler {
         this.paymentsPublisher = paymentsPublisher;
     }
 
-    public void handlePayments(CaseDetails exceptionRecord, long newCaseId) {
+    public void handleCasePayments(CaseDetails exceptionRecord, long newCaseId) {
 
         boolean containsPayments =
             Objects.equals(

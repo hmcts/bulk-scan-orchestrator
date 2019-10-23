@@ -234,7 +234,7 @@ public class CreateCaseCallbackService {
                 exceptionRecord.id
             );
 
-            paymentsHandler.handlePayments(exceptionRecordData, newCaseId);
+            paymentsHandler.handleCasePayments(exceptionRecordData, newCaseId);
 
             return new ProcessResult(
                 ImmutableMap.<String, Object>builder()

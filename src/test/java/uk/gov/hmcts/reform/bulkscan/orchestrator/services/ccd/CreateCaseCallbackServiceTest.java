@@ -655,7 +655,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(result.getErrors()).isEmpty();
         assertThat(result.getWarnings()).isEmpty();
 
-        verify(paymentsHandler).handlePayments(caseDetails, CASE_ID);
+        verify(paymentsHandler).handleCasePayments(caseDetails, CASE_ID);
     }
 
     @Test
@@ -725,7 +725,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(result.getErrors()).isEmpty();
         assertThat(result.getWarnings()).isEmpty();
 
-        verify(paymentsHandler).handlePayments(caseDetails, CASE_ID);
+        verify(paymentsHandler).handleCasePayments(caseDetails, CASE_ID);
     }
 
     private void setUpTransformationUrl() {

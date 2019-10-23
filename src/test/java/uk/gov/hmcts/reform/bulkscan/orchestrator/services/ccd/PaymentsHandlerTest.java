@@ -67,7 +67,7 @@ class PaymentsHandlerTest {
                 );
 
         // when
-        paymentsHandler.handlePayments(caseDetails, NEW_CASE_ID);
+        paymentsHandler.handleCasePayments(caseDetails, NEW_CASE_ID);
 
         // then
         ArgumentCaptor<UpdatePaymentsCommand> cmd = ArgumentCaptor.forClass(UpdatePaymentsCommand.class);
@@ -108,7 +108,7 @@ class PaymentsHandlerTest {
 
 
         // when
-        paymentsHandler.handlePayments(caseDetails,1L);
+        paymentsHandler.handleCasePayments(caseDetails, 1L);
 
         // then
         verify(paymentsPublisher, never()).send(any());
