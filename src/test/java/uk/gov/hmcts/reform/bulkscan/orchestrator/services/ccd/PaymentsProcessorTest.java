@@ -45,7 +45,7 @@ class PaymentsProcessorTest {
         ArgumentCaptor<CreatePaymentsCommand> cmdCaptor = ArgumentCaptor.forClass(CreatePaymentsCommand.class);
 
         // when
-        paymentsProcessor.createPayments(envelope, CCD_REFERENCE, true);
+        paymentsProcessor.createPayments(envelope, CCD_REFERENCE);
 
         // then
         verify(paymentsPublisher).send(cmdCaptor.capture());
@@ -70,7 +70,7 @@ class PaymentsProcessorTest {
         );
 
         // when
-        paymentsProcessor.createPayments(envelope, CCD_REFERENCE, true);
+        paymentsProcessor.createPayments(envelope, CCD_REFERENCE);
 
         // then
         verify(paymentsPublisher, never()).send(any(CreatePaymentsCommand.class));
@@ -87,7 +87,7 @@ class PaymentsProcessorTest {
         );
 
         // when
-        paymentsProcessor.createPayments(envelope, CCD_REFERENCE, true);
+        paymentsProcessor.createPayments(envelope, CCD_REFERENCE);
 
         // then
         verify(paymentsPublisher, never()).send(any(CreatePaymentsCommand.class));

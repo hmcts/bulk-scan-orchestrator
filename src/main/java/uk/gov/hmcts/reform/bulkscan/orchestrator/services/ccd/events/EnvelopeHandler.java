@@ -46,7 +46,7 @@ public class EnvelopeHandler {
             case NEW_APPLICATION:
                 Long ccdId = exceptionRecordCreator.tryCreateFrom(envelope);
 
-                paymentsProcessor.createPayments(envelope, ccdId, true);
+                paymentsProcessor.createPayments(envelope, ccdId);
 
                 break;
             default:
