@@ -359,6 +359,7 @@ class CreateCaseCallbackServiceTest {
         ), IDAM_TOKEN, USER_ID);
 
         // then
+        assertThat(result).isEqualTo(processResult);
         verify(ccdCaseSubmitter).createNewCase(
             any(ExceptionRecord.class),
             any(ServiceConfigItem.class),
