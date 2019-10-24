@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.CaseTransformationException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
@@ -19,11 +18,9 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceNotConfi
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.time.LocalDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -233,8 +230,7 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
-    void should_return_service_case_when_it_already_exists_in_ccd_for_a_given_exception_record()
-        throws IOException, CaseTransformationException {
+    void should_return_service_case_when_it_already_exists_in_ccd_for_a_given_exception_record() {
         // given
         setUpTransformationUrl();
 
@@ -271,8 +267,7 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
-    void should_return_existing_case_if_single_case_exist_in_ccd_for_a_given_exception_record()
-        throws IOException, CaseTransformationException {
+    void should_return_existing_case_if_single_case_exist_in_ccd_for_a_given_exception_record() {
         // given
         setUpTransformationUrl();
 
@@ -318,10 +313,9 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
-    void should_create_new_case_if_no_case_exist_in_ccd_for_a_given_exception_record()
-        throws IOException, CaseTransformationException {
+    void should_create_new_case_if_no_case_exist_in_ccd_for_a_given_exception_record() {
         // given
-        ServiceConfigItem configItem = setUpTransformationUrl();
+        setUpTransformationUrl();
 
         Map<String, Object> data = new HashMap<>();
         // putting 6 via `ImmutableMap` is available from Java 9
@@ -346,10 +340,15 @@ class CreateCaseCallbackServiceTest {
                 .build()
         );
 
-        ExceptionRecord exceptionRecord = getExceptionRecord();
-
         when(ccdCaseSubmitter
-            .createNewCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, caseDetails))
+            .createNewCase(
+                any(ExceptionRecord.class),
+                any(ServiceConfigItem.class),
+                anyBoolean(),
+                anyString(),
+                anyString(),
+                any(CaseDetails.class)
+            ))
             .thenReturn(processResult);
 
         // when
@@ -361,22 +360,20 @@ class CreateCaseCallbackServiceTest {
 
         // then
         verify(ccdCaseSubmitter).createNewCase(
-            exceptionRecord,
-            configItem,
-            true,
-            IDAM_TOKEN,
-            USER_ID,
-            caseDetails
+            any(ExceptionRecord.class),
+            any(ServiceConfigItem.class),
+            anyBoolean(),
+            anyString(),
+            anyString(),
+            any(CaseDetails.class)
         );
-        assertThat(result.getModifiedFields().containsKey("caseReference")).isEqualTo(true);
-        assertThat(result.getModifiedFields().get("caseReference")).isEqualTo("345");
+        assertThat(result.getModifiedFields()).isEmpty();
         assertThat(result.getWarnings()).isEmpty();
         assertThat(result.getErrors()).isEmpty();
     }
 
     @Test
-    void should_return_error_if_multiple_cases_exist_in_ccd_for_a_given_exception_record()
-        throws IOException, CaseTransformationException {
+    void should_return_error_if_multiple_cases_exist_in_ccd_for_a_given_exception_record() {
         // given
         setUpTransformationUrl();
 
@@ -627,25 +624,9 @@ class CreateCaseCallbackServiceTest {
             .matches(match);
     }
 
-    private ServiceConfigItem setUpTransformationUrl() {
+    private void setUpTransformationUrl() {
         ServiceConfigItem configItem = new ServiceConfigItem();
         configItem.setTransformationUrl("url");
         when(serviceConfigProvider.getConfig(SERVICE)).thenReturn(configItem);
-        return configItem;
-    }
-
-    private ExceptionRecord getExceptionRecord() {
-        return new ExceptionRecord(
-            Long.toString(CASE_ID),
-            CASE_TYPE_ID,
-            "po_box",
-            "some jurisdiction",
-            EXCEPTION,
-            "form",
-            now(),
-            now(),
-            emptyList(),
-            emptyList()
-        );
     }
 }
