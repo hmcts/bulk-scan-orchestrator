@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.time.LocalDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -317,10 +318,10 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
-    void should_create_case_if_no_case_exist_in_ccd_for_a_given_exception_record()
+    void should_create_new_case_if_no_case_exist_in_ccd_for_a_given_exception_record()
         throws IOException, CaseTransformationException {
         // given
-        setUpTransformationUrl();
+        ServiceConfigItem configItem = setUpTransformationUrl();
 
         Map<String, Object> data = new HashMap<>();
         // putting 6 via `ImmutableMap` is available from Java 9
@@ -344,6 +345,9 @@ class CreateCaseCallbackServiceTest {
             ImmutableMap.<String, Object>builder()
                 .build()
         );
+
+        ExceptionRecord exceptionRecord = getExceptionRecord();
+
         when(ccdCaseSubmitter
             .createNewCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, caseDetails))
             .thenReturn(processResult);
@@ -623,9 +627,25 @@ class CreateCaseCallbackServiceTest {
             .matches(match);
     }
 
-    private void setUpTransformationUrl() {
+    private ServiceConfigItem setUpTransformationUrl() {
         ServiceConfigItem configItem = new ServiceConfigItem();
         configItem.setTransformationUrl("url");
         when(serviceConfigProvider.getConfig(SERVICE)).thenReturn(configItem);
+        return configItem;
+    }
+
+    private ExceptionRecord getExceptionRecord() {
+        return new ExceptionRecord(
+            Long.toString(CASE_ID),
+            CASE_TYPE_ID,
+            "po_box",
+            "some jurisdiction",
+            EXCEPTION,
+            "form",
+            now(),
+            now(),
+            emptyList(),
+            emptyList()
+        );
     }
 }
