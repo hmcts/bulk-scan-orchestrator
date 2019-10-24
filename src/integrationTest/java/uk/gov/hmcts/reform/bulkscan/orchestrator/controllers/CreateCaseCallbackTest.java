@@ -22,7 +22,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.collection.IsMapWithSize.anEmptyMap;
 import static org.springframework.http.HttpStatus.OK;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_CREATE_NEW_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
@@ -43,6 +43,7 @@ class CreateCaseCallbackTest {
     @Test
     void should_create_case_if_classification_new_application_with_documents_and_ocr_data() {
         setUpTransformation(getTransformationResponseBody("ok-no-warnings.json"));
+        setUpCcdSearchEmptyResult(getCcdResponseBody("search-result-empty.json"));
         setUpCcdCreateCase(
             getCcdResponseBody("start-event.json"),
             getCcdResponseBody("sample-case.json")
@@ -52,7 +53,9 @@ class CreateCaseCallbackTest {
             .statusCode(OK.value())
             .body("errors", empty())
             .body("warnings", empty())
-            .body("data.caseReference", equalTo("1539007368674134")); // from sample-case.json
+            .body("data.caseReference", equalTo("1539007368674134")) // from sample-case.json
+            .body("data.displayWarnings", equalTo("No"))
+            .body("data.ocrDataValidationWarnings", empty());
     }
 
     @Test
@@ -61,8 +64,8 @@ class CreateCaseCallbackTest {
             .statusCode(OK.value())
             .body("errors", contains("Event " + EVENT_ID_CREATE_NEW_CASE + " not allowed "
                 + "for the current journey classification " + NEW_APPLICATION.name() + " without OCR"))
-            .body("warnings", nullValue())
-            .body("data", nullValue());
+            .body("warnings", empty())
+            .body("data", anEmptyMap());
     }
 
     @Test
@@ -71,13 +74,14 @@ class CreateCaseCallbackTest {
             .statusCode(OK.value())
             .body("errors", contains("Event " + EVENT_ID_CREATE_NEW_CASE + " not allowed "
                 + "for the current journey classification " + EXCEPTION.name() + " without OCR"))
-            .body("warnings", nullValue())
-            .body("data", nullValue());
+            .body("warnings", empty())
+            .body("data.", anEmptyMap());
     }
 
     @Test
     void should_not_create_case_if_request_specifies_to_not_ignore_warnings() {
         setUpTransformation(getTransformationResponseBody("ok-with-warnings.json"));
+        setUpCcdSearchEmptyResult(getCcdResponseBody("search-result-empty.json"));
 
         postWithBody(getRequestBody("valid-exception-warnings-flag-on.json"))
             .statusCode(OK.value())
@@ -88,6 +92,7 @@ class CreateCaseCallbackTest {
     @Test
     void should_create_case_if_classification_exception_with_documents_and_ocr_data() {
         setUpTransformation(getTransformationResponseBody("ok-no-warnings.json"));
+        setUpCcdSearchEmptyResult(getCcdResponseBody("search-result-empty.json"));
         setUpCcdCreateCase(
             getCcdResponseBody("start-event.json"),
             getCcdResponseBody("sample-case.json")
@@ -122,6 +127,13 @@ class CreateCaseCallbackTest {
 
     private void setUpTransformation(String responseBody) {
         givenThat(post("/transform-exception-record")
+            .withHeader("ServiceAuthorization", containing("Bearer"))
+            .willReturn(okJson(responseBody))
+        );
+    }
+
+    private void setUpCcdSearchEmptyResult(String responseBody) {
+        givenThat(post("/searchCases?ctid=Bulk_Scanned")
             .withHeader("ServiceAuthorization", containing("Bearer"))
             .willReturn(okJson(responseBody))
         );

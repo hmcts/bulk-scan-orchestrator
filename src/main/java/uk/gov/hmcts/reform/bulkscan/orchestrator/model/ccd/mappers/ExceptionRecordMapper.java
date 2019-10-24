@@ -44,6 +44,7 @@ public class ExceptionRecordMapper {
             mapOcrDataWarnings(envelope.ocrDataValidationWarnings),
             envelope.ocrDataValidationWarnings.isEmpty() ? NO : YES,
             envelope.id,
+            CollectionUtils.isEmpty(envelope.payments) ? NO : YES,
             CollectionUtils.isEmpty(envelope.payments) ? NO : YES
         );
     }

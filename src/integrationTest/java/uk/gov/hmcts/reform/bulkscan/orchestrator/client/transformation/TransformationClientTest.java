@@ -193,6 +193,7 @@ public class TransformationClientTest {
 
     private ExceptionRecord exceptionRecordRequestData() {
         return new ExceptionRecord(
+            "id",
             "some_case_type",
             "poBox",
             "BULKSCAN",

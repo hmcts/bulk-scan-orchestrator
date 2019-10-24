@@ -29,7 +29,7 @@
   </suppress>
   <suppress>
     <notes><![CDATA[No fix is available]]></notes>
-    <gav regex="true">^org\.springframework\.security:spring-security-crypto:5\.1\.6\.RELEASE$</gav>
+    <gav regex="true">^org\.springframework\.security:spring-security-crypto:5\.2\.0\.RELEASE$</gav>
     <cve>CVE-2018-1258</cve>
   </suppress>
 
@@ -63,6 +63,14 @@
    ]]></notes>
     <filePath regex="true">.*spring-cloud-contract-wiremock-2\.0\.2\.RELEASE\.jar</filePath>
     <cpe>cpe:/a:wiremock:wiremock:2.0.2.release</cpe>
+  </suppress>
+
+  <suppress>
+    <notes><![CDATA[
+   file name: wiremock-standalone-2.18.0.jar (shaded: com.fasterxml.jackson.core:jackson-databind:2.8.11)
+   ]]></notes>
+    <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-databind@.*$</packageUrl>
+    <vulnerabilityName>CVE-2019-17267</vulnerabilityName>
   </suppress>
 
   <suppress>
@@ -114,11 +122,12 @@
     <cve>CVE-2019-16335</cve>
   </suppress>
 
-  <suppress>
+  <suppress until="2019-10-31">
     <notes><![CDATA[ file name: jackson-databind-2.9.10.jar ]]></notes>
     <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-databind@.*$</packageUrl>
     <cve>CVE-2019-16942</cve>
     <cve>CVE-2019-16943</cve>
+    <cve>CVE-2019-17531</cve>
   </suppress>
 
   <suppress>

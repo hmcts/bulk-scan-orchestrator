@@ -11,6 +11,11 @@ public final class ExceptionRecordFields {
     public static final String SCANNED_DOCUMENTS = "scannedDocuments";
     public static final String EVIDENCE_HANDLED = "evidenceHandled";
     public static final String CASE_REFERENCE = "caseReference";
+    public static final String DISPLAY_WARNINGS = "displayWarnings";
+    public static final String OCR_DATA_VALIDATION_WARNINGS = "ocrDataValidationWarnings";
+    public static final String CONTAINS_PAYMENTS = "containsPayments";
+    public static final String ENVELOPE_ID = "envelopeId";
+    public static final String PO_BOX_JURISDICTION = "poBoxJurisdiction";
 
     private ExceptionRecordFields() {
         // hiding the constructor

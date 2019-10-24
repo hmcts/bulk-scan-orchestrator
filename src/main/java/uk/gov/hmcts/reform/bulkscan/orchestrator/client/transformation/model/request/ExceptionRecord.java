@@ -8,6 +8,8 @@ import java.util.List;
 
 public class ExceptionRecord {
 
+    public final String id;
+
     @JsonProperty("case_type_id")
     public final String caseTypeId;
 
@@ -36,6 +38,7 @@ public class ExceptionRecord {
     public final List<OcrDataField> ocrDataFields;
 
     public ExceptionRecord(
+        String id,
         String caseTypeId,
         String poBox,
         String poBoxJurisdiction,
@@ -46,6 +49,7 @@ public class ExceptionRecord {
         List<ScannedDocument> scannedDocuments,
         List<OcrDataField> ocrDataFields
     ) {
+        this.id = id;
         this.caseTypeId = caseTypeId;
         this.poBox = poBox;
         this.poBoxJurisdiction = poBoxJurisdiction;
