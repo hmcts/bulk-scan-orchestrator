@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
@@ -28,8 +27,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFi
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceNotConfiguredException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublisher;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.UpdatePaymentsCommand;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -86,7 +83,7 @@ class CreateCaseCallbackServiceTest {
     private CcdApi ccdApi;
 
     @Mock
-    private PaymentsPublisher paymentsPublisher;
+    private PaymentsProcessor paymentsProcessor;
 
     private CreateCaseCallbackService service;
 
@@ -97,7 +94,7 @@ class CreateCaseCallbackServiceTest {
             serviceConfigProvider,
             transformationClient,
             s2sTokenGenerator,
-            paymentsPublisher,
+            paymentsProcessor,
             coreCaseDataApi,
             ccdApi
         );
@@ -593,7 +590,7 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
-    void should_send_payment_message_when_case_has_payments() throws Exception {
+    void should_call_payments_processor_when_case_has_payments() throws Exception {
         // given
         setUpTransformationUrl();
 
@@ -658,16 +655,11 @@ class CreateCaseCallbackServiceTest {
         assertThat(result.getErrors()).isEmpty();
         assertThat(result.getWarnings()).isEmpty();
 
-        ArgumentCaptor<UpdatePaymentsCommand> cmd = ArgumentCaptor.forClass(UpdatePaymentsCommand.class);
-        verify(paymentsPublisher).send(cmd.capture());
-        assertThat(cmd.getValue().exceptionRecordRef).isEqualTo(Long.toString(CASE_ID));
-        assertThat(cmd.getValue().newCaseRef).isEqualTo(Long.toString(newCaseId));
-        assertThat(cmd.getValue().envelopeId).isEqualTo(envelopeId);
-        assertThat(cmd.getValue().jurisdiction).isEqualTo(jurisdiction);
+        verify(paymentsProcessor).updatePayments(caseDetails, CASE_ID);
     }
 
     @Test
-    void should_not_send_payment_message_when_case_has_no_payments() throws Exception {
+    void should_call_payments_processor_when_case_has_no_payments() throws Exception {
         // given
         setUpTransformationUrl();
 
@@ -733,7 +725,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(result.getErrors()).isEmpty();
         assertThat(result.getWarnings()).isEmpty();
 
-        verify(paymentsPublisher, never()).send(any());
+        verify(paymentsProcessor).updatePayments(caseDetails, CASE_ID);
     }
 
     private void setUpTransformationUrl() {
