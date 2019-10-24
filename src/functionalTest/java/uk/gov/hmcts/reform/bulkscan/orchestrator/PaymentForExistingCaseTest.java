@@ -15,7 +15,7 @@ import static java.util.Collections.emptyList;
 
 @SpringBootTest
 @ActiveProfiles("nosb") // no servicebus queue handler registration
-class PaymentToExistingCaseTest {
+class PaymentForExistingCaseTest {
 
     @Autowired
     private CcdApi ccdApi;
