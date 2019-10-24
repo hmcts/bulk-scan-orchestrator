@@ -340,6 +340,13 @@ class CreateCaseCallbackServiceTest {
         );
         when(ccdApi.getCaseRefsByBulkScanCaseReference(Long.toString(CASE_ID), null))
             .thenReturn(emptyList());
+        ProcessResult processResult = new ProcessResult(
+            ImmutableMap.<String, Object>builder()
+                .build()
+        );
+        when(ccdCaseSubmitter
+            .createNewCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, caseDetails))
+            .thenReturn(processResult);
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -350,12 +357,12 @@ class CreateCaseCallbackServiceTest {
 
         // then
         verify(ccdCaseSubmitter).createNewCase(
-            any(ExceptionRecord.class),
-            any(ServiceConfigItem.class),
-            anyBoolean(),
-            anyString(),
-            anyString(),
-            any(CaseDetails.class)
+            exceptionRecord,
+            configItem,
+            true,
+            IDAM_TOKEN,
+            USER_ID,
+            caseDetails
         );
         assertThat(result.getModifiedFields().containsKey("caseReference")).isEqualTo(true);
         assertThat(result.getModifiedFields().get("caseReference")).isEqualTo("345");
