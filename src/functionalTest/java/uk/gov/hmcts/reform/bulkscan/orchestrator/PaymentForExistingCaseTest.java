@@ -67,7 +67,7 @@ class PaymentForExistingCaseTest {
 
         // when
         String messageEnvelopeId = envelopeMessager.sendMessageFromFile(
-            "envelopes/new-envelope-with-evidence.json", // with payments dcn
+            "envelopes/new-envelope-with-evidence-no-payments.json", // with payments dcn
             "0000000000000000",
             null,
             randomPoBox,
@@ -85,7 +85,7 @@ class PaymentForExistingCaseTest {
         // envelope ID from the JSON resource representing the test message
         assertThat(caseDetails.getData().get("envelopeId")).isEqualTo(messageEnvelopeId);
         assertThat(getCaseDataForField(caseDetails, "awaitingPaymentDCNProcessing")).isEqualTo("Yes");
-        assertThat(getCaseDataForField(caseDetails, "containsPayments")).isEqualTo("Yes");
+        assertThat(getCaseDataForField(caseDetails, "containsPayments")).isEqualTo("No");
 
         //CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
 
@@ -102,13 +102,13 @@ class PaymentForExistingCaseTest {
                 "bulkscan",
                 randomPoBox.toString(),
                 false,
-                Arrays.asList(new PaymentData("dcn1"))
+                Arrays.asList(new PaymentData("154565768"))
             )
         );
 
         //then
         await("Case is updated")
-            .atMost(600, TimeUnit.SECONDS)
+            .atMost(180, TimeUnit.SECONDS)
             .pollDelay(1, TimeUnit.SECONDS)
             .until(() -> casePaymentStatusUpdated(caseDetails));
     }
