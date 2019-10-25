@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import com.google.common.collect.ImmutableMap;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CreateExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.IPaymentsPublisher;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.time.Duration;
@@ -32,8 +34,8 @@ class PaymentForExistingCaseTest {
     @Autowired
     private CcdCaseCreator ccdCaseCreator;
 
-    //@Autowired
-    //private PaymentsPublisher paymentsPublisher;
+    @Autowired
+    private IPaymentsPublisher paymentsPublisher;
 
     @Autowired
     private CaseSearcher caseSearcher;
@@ -45,6 +47,15 @@ class PaymentForExistingCaseTest {
     private DocumentManagementUploadService dmUploadService;
 
     private String dmUrl;
+
+    @BeforeEach
+    void setup() {
+
+        dmUrl = dmUploadService.uploadToDmStore(
+            "Certificate.pdf",
+            "documents/supplementary-evidence.pdf"
+        );
+    }
 
     @Test
     public void should_set_awaiting_payment_false_after_payment_sent() throws Exception {
@@ -62,7 +73,7 @@ class PaymentForExistingCaseTest {
 
         // then
         await("Exception record being created")
-            .atMost(60, TimeUnit.SECONDS)
+            .atMost(120, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
             .until(() -> findCasesByPoBox(randomPoBox).size() == 1);
 
@@ -82,11 +93,9 @@ class PaymentForExistingCaseTest {
         //        Long.toString(caseDetails.getId()),
         //        caseDetails.getJurisdiction(),
         //        envelope.container,
-        //        envelope.poBox,
+        //        randomPoBox,
         //        false,
-        //        envelope.payments.stream()
-        //            .map(payment -> new PaymentData(payment.documentControlNumber))
-        //            .collect(toList())
+        //        Arrays.asList(new PaymentData("dcn1"))
         //    )
         //);
 
