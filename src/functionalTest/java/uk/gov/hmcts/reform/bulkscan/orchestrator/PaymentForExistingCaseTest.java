@@ -66,8 +66,8 @@ class PaymentForExistingCaseTest {
         UUID randomPoBox = UUID.randomUUID();
 
         // when
-        envelopeMessager.sendMessageFromFile(
-            "envelopes/supplementary-evidence-envelope.json", // no payments
+        String messageEnvelopeId = envelopeMessager.sendMessageFromFile(
+            "envelopes/new-envelope-with-evidence.json", // with payments dcn
             "0000000000000000",
             null,
             randomPoBox,
@@ -75,13 +75,17 @@ class PaymentForExistingCaseTest {
         );
 
         // then
-        await("Exception record being created")
-            .atMost(120, TimeUnit.SECONDS)
+        await("Exception record should be created")
+            .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
             .until(() -> findCasesByPoBox(randomPoBox).size() == 1);
 
         CaseDetails caseDetails = findCasesByPoBox(randomPoBox).get(0);
-        assertThat(getCaseDataForField(caseDetails, "awaitingPaymentDCNProcessing")).isEqualTo("No");
+
+        // envelope ID from the JSON resource representing the test message
+        assertThat(caseDetails.getData().get("envelopeId")).isEqualTo(messageEnvelopeId);
+        assertThat(getCaseDataForField(caseDetails, "awaitingPaymentDCNProcessing")).isEqualTo("Yes");
+        assertThat(getCaseDataForField(caseDetails, "containsPayments")).isEqualTo("Yes");
 
         //CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
 
@@ -92,7 +96,7 @@ class PaymentForExistingCaseTest {
         // payment sent to payments queue
         paymentsPublisher.send(
             new CreatePaymentsCommand(
-                "envelope_id",
+                messageEnvelopeId,
                 Long.toString(caseDetails.getId()),
                 caseDetails.getJurisdiction(),
                 "bulkscan",
@@ -104,7 +108,7 @@ class PaymentForExistingCaseTest {
 
         //then
         await("Case is updated")
-            .atMost(300, TimeUnit.SECONDS)
+            .atMost(120, TimeUnit.SECONDS)
             .pollDelay(1, TimeUnit.SECONDS)
             .until(() -> casePaymentStatusUpdated(caseDetails));
     }
