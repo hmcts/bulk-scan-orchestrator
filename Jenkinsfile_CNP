@@ -20,7 +20,10 @@ def secrets = [
   'bulk-scan-${env}': [
     secret('idam-users-bulkscan-username', 'IDAM_USER_NAME'),
     secret('idam-users-bulkscan-password', 'IDAM_USER_PASSWORD'),
-    secret('idam-client-secret', 'IDAM_CLIENT_SECRET')
+    secret('idam-client-secret', 'IDAM_CLIENT_SECRET'),
+    secret('envelopes-queue-send-connection-string', 'ENVELOPES_QUEUE_WRITE_CONN_STRING'),
+    secret('envelopes-queue-listen-connection-string', 'ENVELOPES_QUEUE_READ_CONN_STRING'),
+    secret('payments-queue-send-connection-string', 'PAYMENTS_QUEUE_WRITE_CONN_STRING')
   ]
 ]
 
@@ -34,17 +37,19 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 }
 
 withPipeline(type, product, component) {
+
+  after('akschartsinstall'){
+    // Vars needed for AKS testing
+    env.S2S_NAME = 'bulk_scan_orchestrator'
+    env.S2S_URL = 'http://rpe-service-auth-provider-aat.service.core-compute-aat.internal'
+    env.DOCUMENT_MANAGEMENT_URL = 'http://dm-store-aat.service.core-compute-aat.internal'
+    env.CORE_CASE_DATA_API_URL = 'http://ccd-data-store-api-aat.service.core-compute-aat.internal'
+    env.IDAM_API_URL = 'https://idam-api.aat.platform.hmcts.net'
+    env.IDAM_CLIENT_REDIRECT_URI = 'https://bulk-scan-orchestrator-aat.service.core-compute-aat.internal/oauth2/callback'
+  }
+
   before('smoketest:preview') {
     withAksClient('nonprod') {
-
-      // Vars needed for AKS testing
-      env.S2S_NAME = 'bulk_scan_orchestrator'
-      env.S2S_URL = 'http://rpe-service-auth-provider-aat.service.core-compute-aat.internal'
-      env.DOCUMENT_MANAGEMENT_URL = 'http://dm-store-aat.service.core-compute-aat.internal'
-      env.CORE_CASE_DATA_API_URL = 'http://ccd-data-store-api-aat.service.core-compute-aat.internal'
-      env.IDAM_API_URL = 'https://idam-api.aat.platform.hmcts.net'
-      env.IDAM_CLIENT_REDIRECT_URI = 'https://bulk-scan-orchestrator-aat.service.core-compute-aat.internal/oauth2/callback'
-
       // Envelopes queue connection string is needed by the functional tests client.
       // The following code (as ugly as it looks!) gets it from the k8s cluster
       def dockerImage = new DockerImage(product, component, null, env.BRANCH_NAME, env.GIT_COMMIT)
@@ -69,6 +74,7 @@ withPipeline(type, product, component) {
   }
 
   enableDockerBuild()
+  enableAksStagingDeployment()
   installCharts()
   enableSlackNotifications(channel)
   loadVaultSecrets(secrets)

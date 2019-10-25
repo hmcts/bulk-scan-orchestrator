@@ -26,10 +26,12 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.joining;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isCreateNewCaseEvent;
@@ -48,19 +50,25 @@ public class CreateCaseCallbackService {
     private final ServiceConfigProvider serviceConfigProvider;
     private final TransformationClient transformationClient;
     private final AuthTokenGenerator s2sTokenGenerator;
-    private final CoreCaseDataApi ccdApi;
+    private final PaymentsProcessor paymentsProcessor;
+    private final CoreCaseDataApi coreCaseDataApi;
+    private final CcdApi ccdApi;
 
     public CreateCaseCallbackService(
         CreateCaseValidator validator,
         ServiceConfigProvider serviceConfigProvider,
         TransformationClient transformationClient,
         AuthTokenGenerator s2sTokenGenerator,
-        CoreCaseDataApi ccdApi
+        PaymentsProcessor paymentsProcessor,
+        CoreCaseDataApi coreCaseDataApi,
+        CcdApi ccdApi
     ) {
         this.validator = validator;
         this.serviceConfigProvider = serviceConfigProvider;
         this.transformationClient = transformationClient;
         this.s2sTokenGenerator = s2sTokenGenerator;
+        this.paymentsProcessor = paymentsProcessor;
+        this.coreCaseDataApi = coreCaseDataApi;
         this.ccdApi = ccdApi;
     }
 
@@ -80,14 +88,17 @@ public class CreateCaseCallbackService {
         // already validated in mandatory section ^
         ServiceConfigItem serviceConfigItem = getServiceConfig(request.getCaseDetails()).get();
 
+        CaseDetails exceptionRecordData = request.getCaseDetails();
+
         ProcessResult result = validator
-            .getValidation(request.getCaseDetails())
-            .map(exceptionRecord -> createNewCase(
+            .getValidation(exceptionRecordData)
+            .map(exceptionRecord -> tryCreateNewCase(
                 exceptionRecord,
                 serviceConfigItem,
                 request.isIgnoreWarnings(),
                 idamToken,
-                userId
+                userId,
+                exceptionRecordData
             ))
             .mapError(Seq::asJava)
             .getOrElseGet(errors -> new ProcessResult(emptyList(), errors));
@@ -128,13 +139,54 @@ public class CreateCaseCallbackService {
             .getOrElse(Validation.invalid("Transformation URL is not configured"));
     }
 
+    private ProcessResult tryCreateNewCase(
+        ExceptionRecord exceptionRecord,
+        ServiceConfigItem configItem,
+        boolean ignoreWarnings,
+        String idamToken,
+        String userId,
+        CaseDetails exceptionRecordData
+    ) {
+        List<Long> ids = ccdApi.getCaseRefsByBulkScanCaseReference(exceptionRecord.id, configItem.getService());
+        if (ids.isEmpty()) {
+            return createNewCase(
+                exceptionRecord,
+                configItem,
+                ignoreWarnings,
+                idamToken,
+                userId,
+                exceptionRecordData
+            );
+        } else if (ids.size() == 1) {
+            return new ProcessResult(
+                ImmutableMap.<String, Object>builder()
+                    .put(CASE_REFERENCE, Long.toString(ids.get(0)))
+                    .put(DISPLAY_WARNINGS, YesNoFieldValues.NO)
+                    .put(OCR_DATA_VALIDATION_WARNINGS, emptyList())
+                    .build()
+            );
+        } else {
+            return new ProcessResult(
+                emptyList(),
+                singletonList(
+                    String.format(
+                        "Multiple cases (%s) found for the given bulk scan case reference: %s",
+                        ids.stream().map(String::valueOf).collect(joining(", ")),
+                        exceptionRecord.id
+                    )
+                )
+            );
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private ProcessResult createNewCase(
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,
         boolean ignoreWarnings,
         String idamToken,
-        String userId
+        String userId,
+        CaseDetails exceptionRecordData
     ) {
         log.info(
             "Start creating new case for {} from exception record {}",
@@ -182,6 +234,8 @@ public class CreateCaseCallbackService {
                 exceptionRecord.id
             );
 
+            paymentsProcessor.updatePayments(exceptionRecordData, newCaseId);
+
             return new ProcessResult(
                 ImmutableMap.<String, Object>builder()
                     .put(CASE_REFERENCE, Long.toString(newCaseId))
@@ -214,7 +268,7 @@ public class CreateCaseCallbackService {
         ExceptionRecord exceptionRecord,
         CaseCreationDetails caseCreationDetails
     ) {
-        StartEventResponse eventResponse = ccdApi.startForCaseworker(
+        StartEventResponse eventResponse = coreCaseDataApi.startForCaseworker(
             idamToken,
             s2sToken,
             userId,
@@ -224,7 +278,7 @@ public class CreateCaseCallbackService {
             caseCreationDetails.eventId
         );
 
-        return ccdApi.submitForCaseworker(
+        return coreCaseDataApi.submitForCaseworker(
             idamToken,
             s2sToken,
             userId,

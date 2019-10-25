@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFi
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,7 +59,7 @@ public class AttachCaseCallbackService {
     /**
      * Attaches exception record to a case.
      *
-     * @return Either a map of fields that should be modified in CCD when processing was successful,
+     * @return Either exception record field map, when processing was successful,
      *         or the list of errors, in case of errors
      */
     public Either<List<String>, Map<String, Object>> process(
@@ -86,6 +87,9 @@ public class AttachCaseCallbackService {
 
         return getValidation(exceptionRecord, useSearchCaseReference, requesterIdamToken, requesterUserId)
             .map(this::tryAttachToCase)
+            .map(attachCaseResult ->
+                attachCaseResult.map(modifiedFields -> mergeCaseFields(exceptionRecord.getData(), modifiedFields))
+            )
             .getOrElseGet(errors -> Either.left(errors.toJavaList()));
     }
 
@@ -252,7 +256,10 @@ public class AttachCaseCallbackService {
             ids -> throwDuplicateError(targetCaseCcdRef, ids)
         );
 
-        attachExceptionRecordReference(exceptionRecordDocuments, exceptionRecordId);
+        List<Map<String, Object>> newCaseDocuments = attachExceptionRecordReference(
+            exceptionRecordDocuments,
+            exceptionRecordId
+        );
 
         StartEventResponse event = ccdApi.startAttachScannedDocs(theCase, idamToken, userId);
 
@@ -260,8 +267,8 @@ public class AttachCaseCallbackService {
             theCase,
             idamToken,
             userId,
-            buildCaseData(exceptionRecordDocuments, targetCaseDocuments),
-            createEventSummary(theCase, exceptionRecordId, exceptionRecordDocuments),
+            buildCaseData(newCaseDocuments, targetCaseDocuments),
+            createEventSummary(theCase, exceptionRecordId, newCaseDocuments),
             event
         );
 
@@ -293,15 +300,24 @@ public class AttachCaseCallbackService {
     }
 
     @SuppressWarnings("unchecked")
-    private void attachExceptionRecordReference(
+    private List<Map<String, Object>> attachExceptionRecordReference(
         List<Map<String, Object>> exceptionDocuments,
         Long exceptionRecordReference
     ) {
-        exceptionDocuments.stream().map(doc -> {
-            Map<String, Object> document = (Map<String, Object>) doc.get("value");
-            document.put("exceptionRecordReference", String.valueOf(exceptionRecordReference));
-            return doc;
-        }).collect(toList());
+        return exceptionDocuments
+            .stream()
+            .map(document -> {
+                HashMap<String, Object> copiedDocumentContent =
+                    new HashMap<>((Map<String, Object>) document.get("value"));
+
+                copiedDocumentContent.put(
+                    "exceptionRecordReference",
+                    String.valueOf(exceptionRecordReference)
+                );
+
+                return ImmutableMap.<String, Object>of("value", copiedDocumentContent);
+            })
+            .collect(toList());
     }
 
     private void throwDuplicateError(String caseRef, Set<String> duplicateIds) {
@@ -364,5 +380,15 @@ public class AttachCaseCallbackService {
             this.idamToken = idamToken;
             this.userId = userId;
         }
+    }
+
+    private Map<String, Object> mergeCaseFields(
+        Map<String, Object> originalFields,
+        Map<String, Object> modifiedFields
+    ) {
+        Map<String, Object> merged = new HashMap<>();
+        merged.putAll(originalFields);
+        merged.putAll(modifiedFields);
+        return merged;
     }
 }
