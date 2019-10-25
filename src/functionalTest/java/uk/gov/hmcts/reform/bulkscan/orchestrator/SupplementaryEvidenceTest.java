@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import com.google.common.base.Strings;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -45,6 +46,7 @@ class SupplementaryEvidenceTest {
     private DocumentManagementUploadService dmUploadService;
 
     @Test
+    @Disabled
     public void should_attach_supplementary_evidence_to_the_case_with_no_evidence_docs() throws Exception {
         //given
         String dmUrl = dmUploadService.uploadToDmStore("Evidence2.pdf", "documents/supplementary-evidence.pdf");
@@ -68,6 +70,7 @@ class SupplementaryEvidenceTest {
     }
 
     @Test
+    @Disabled
     public void should_attach_supplementary_evidence_to_the_case_with_existing_evidence_docs() throws Exception {
         //given
         String dmUrlOriginal = dmUploadService.uploadToDmStore("original.pdf", "documents/supplementary-evidence.pdf");
@@ -98,6 +101,7 @@ class SupplementaryEvidenceTest {
     }
 
     @Test
+    @Disabled
     public void should_be_able_to_attach_supplementary_evidence_to_case_by_legacy_id() throws Exception {
         //given
         String dmUrl = dmUploadService.uploadToDmStore("Evidence2.pdf", "documents/supplementary-evidence.pdf");

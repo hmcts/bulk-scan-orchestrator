@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
@@ -35,6 +36,7 @@ public class CleanupDlqMessagesTest {
     private EnvelopeMessager envelopeMessager;
 
     @Test
+    @Disabled
     public void testCleanupDlqTask() throws Exception {
         // when
         // Sending more than 1 invalid message so that we can make sure the dlq messages are completed

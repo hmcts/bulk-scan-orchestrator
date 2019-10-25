@@ -13,9 +13,12 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CreateExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.IPaymentsPublisher;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.CreatePaymentsCommand;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentData;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -86,24 +89,24 @@ class PaymentForExistingCaseTest {
         //assertThat(caseDetails.getData().get("awaitingPaymentDCNProcessing")).isEqualTo("Yes");
 
         // when
-        // message sent to payments queue
-        //paymentsPublisher.send(
-        //    new CreatePaymentsCommand(
-        //        envelope.id,
-        //        Long.toString(caseDetails.getId()),
-        //        caseDetails.getJurisdiction(),
-        //        envelope.container,
-        //        randomPoBox,
-        //        false,
-        //        Arrays.asList(new PaymentData("dcn1"))
-        //    )
-        //);
+        // payment sent to payments queue
+        paymentsPublisher.send(
+            new CreatePaymentsCommand(
+                "envelope_id",
+                Long.toString(caseDetails.getId()),
+                caseDetails.getJurisdiction(),
+                "bulkscan",
+                randomPoBox.toString(),
+                false,
+                Arrays.asList(new PaymentData("dcn1"))
+            )
+        );
 
         //then
-        //await("Case is updated")
-        //    .atMost(60, TimeUnit.SECONDS)
-        //    .pollDelay(1, TimeUnit.SECONDS)
-        //    .until(() -> casePaymentStatusUpdated(caseDetails));
+        await("Case is updated")
+            .atMost(300, TimeUnit.SECONDS)
+            .pollDelay(1, TimeUnit.SECONDS)
+            .until(() -> casePaymentStatusUpdated(caseDetails));
     }
 
     private Boolean casePaymentStatusUpdated(CaseDetails caseDetails) {

@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,7 @@ class ExceptionRecordCreationTest {
 
     @DisplayName("Should create ExceptionRecord when provided/requested supplementary evidence is not present")
     @Test
+    @Disabled
     public void create_exception_record_from_supplementary_evidence() throws Exception {
         // given
         UUID randomPoBox = UUID.randomUUID();
@@ -78,6 +80,7 @@ class ExceptionRecordCreationTest {
 
     @DisplayName("Should create ExceptionRecord when classification is NEW_APPLICATION")
     @Test
+    @Disabled
     public void should_create_exception_record_for_new_application() throws Exception {
         // given
         UUID randomPoBox = UUID.randomUUID();
@@ -115,6 +118,7 @@ class ExceptionRecordCreationTest {
 
     @DisplayName("Should create ExceptionRecord when provided/requested case reference is invalid")
     @Test
+    @Disabled
     public void create_exception_record_for_invalid_case_reference() throws Exception {
         // given
         UUID randomPoBox = UUID.randomUUID();
