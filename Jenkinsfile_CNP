@@ -20,7 +20,10 @@ def secrets = [
   'bulk-scan-${env}': [
     secret('idam-users-bulkscan-username', 'IDAM_USER_NAME'),
     secret('idam-users-bulkscan-password', 'IDAM_USER_PASSWORD'),
-    secret('idam-client-secret', 'IDAM_CLIENT_SECRET')
+    secret('idam-client-secret', 'IDAM_CLIENT_SECRET'),
+    secret('envelopes-queue-send-connection-string', 'ENVELOPES_QUEUE_WRITE_CONN_STRING'),
+    secret('envelopes-queue-listen-connection-string', 'ENVELOPES_QUEUE_READ_CONN_STRING'),
+    secret('payments-queue-send-connection-string', 'PAYMENTS_QUEUE_WRITE_CONN_STRING')
   ]
 ]
 
