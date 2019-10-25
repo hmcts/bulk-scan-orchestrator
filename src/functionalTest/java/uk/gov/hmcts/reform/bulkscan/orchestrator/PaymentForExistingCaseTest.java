@@ -13,12 +13,14 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CreateExceptionRecord;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
-import java.time.Instant;
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
-import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getCaseDataForField;
 
 @SpringBootTest
 @ActiveProfiles("nosb") // no servicebus queue handler registration
@@ -46,10 +48,31 @@ class PaymentForExistingCaseTest {
 
     @Test
     public void should_set_awaiting_payment_false_after_payment_sent() throws Exception {
-        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
+        // given
+        UUID randomPoBox = UUID.randomUUID();
+
+        // when
+        envelopeMessager.sendMessageFromFile(
+            "envelopes/supplementary-evidence-envelope.json", // no payments
+            "0000000000000000",
+            null,
+            randomPoBox,
+            dmUrl
+        );
+
+        // then
+        await("Exception record being created")
+            .atMost(60, TimeUnit.SECONDS)
+            .pollInterval(Duration.ofSeconds(5))
+            .until(() -> findCasesByPoBox(randomPoBox).size() == 1);
+
+        CaseDetails caseDetails = findCasesByPoBox(randomPoBox).get(0);
+        assertThat(getCaseDataForField(caseDetails, "awaitingPaymentDCNProcessing")).isEqualTo("No");
+
+        //CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
 
         // given
-        assertThat(caseDetails.getData().get("awaitingPaymentDCNProcessing")).isEqualTo("Yes");
+        //assertThat(caseDetails.getData().get("awaitingPaymentDCNProcessing")).isEqualTo("Yes");
 
         // when
         // message sent to payments queue
