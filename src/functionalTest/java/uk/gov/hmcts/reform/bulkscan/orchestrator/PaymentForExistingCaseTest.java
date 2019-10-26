@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import com.google.common.collect.ImmutableMap;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,11 +18,13 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.pay
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getCaseDataForField;
@@ -51,17 +53,17 @@ class PaymentForExistingCaseTest {
 
     private String dmUrl;
 
-    @BeforeEach
-    void setup() {
-
-        dmUrl = dmUploadService.uploadToDmStore(
-            "Certificate.pdf",
-            "documents/supplementary-evidence.pdf"
-        );
-    }
+    //@BeforeEach
+    //void setup() {
+    //    dmUrl = dmUploadService.uploadToDmStore(
+    //        "Certificate.pdf",
+    //        "documents/supplementary-evidence.pdf"
+    //    );
+    //}
 
     @Test
-    public void should_set_awaiting_payment_false_after_payment_sent() throws Exception {
+    @Disabled
+    public void should_set_awaiting_payment_false() throws Exception {
         // given
         UUID randomPoBox = UUID.randomUUID();
 
@@ -85,7 +87,7 @@ class PaymentForExistingCaseTest {
         // envelope ID from the JSON resource representing the test message
         assertThat(caseDetails.getData().get("envelopeId")).isEqualTo(messageEnvelopeId);
         assertThat(getCaseDataForField(caseDetails, "awaitingPaymentDCNProcessing")).isEqualTo("Yes");
-        assertThat(getCaseDataForField(caseDetails, "containsPayments")).isEqualTo("No");
+        assertThat(getCaseDataForField(caseDetails, "containsPayments")).isEqualTo("Yes");
 
         //CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
 
@@ -101,6 +103,41 @@ class PaymentForExistingCaseTest {
                 caseDetails.getJurisdiction(),
                 "bulkscan",
                 randomPoBox.toString(),
+                false,
+                Arrays.asList(new PaymentData("154565768"))
+            )
+        );
+
+        //then
+        await("Case is updated")
+            .atMost(180, TimeUnit.SECONDS)
+            .pollDelay(1, TimeUnit.SECONDS)
+            .until(() -> casePaymentStatusUpdated(caseDetails));
+    }
+
+    @Test
+    @Disabled
+    public void should_set_awaiting_payment_false_after_payment_sent() throws Exception {
+        // given
+        CaseDetails caseDetails = ccdCaseCreator.createCase(
+            emptyList()
+            , Instant.now()
+            , ImmutableMap.of(
+                //"poBox", "some"
+              )
+        );
+
+        assertThat(caseDetails.getData().get("awaitingPaymentDCNProcessing")).isEqualTo("Yes");
+
+        // when
+        // payment sent to payments queue
+        paymentsPublisher.send(
+            new CreatePaymentsCommand(
+                "envelope_id",
+                Long.toString(caseDetails.getId()),
+                caseDetails.getJurisdiction(),
+                "bulkscan",
+                "po_box",
                 false,
                 Arrays.asList(new PaymentData("154565768"))
             )

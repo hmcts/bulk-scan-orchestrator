@@ -33,7 +33,6 @@ public class CcdCaseCreator {
 
     private final CcdAuthenticatorFactory ccdAuthenticatorFactory;
     private final CoreCaseDataApi coreCaseDataApi;
-
     private final SupplementaryEvidenceMapper supplementaryEvidenceMapper;
 
     public CcdCaseCreator(
@@ -55,11 +54,7 @@ public class CcdCaseCreator {
         return createCase(legacyId, documents, deliveryDate, dataMap);
     }
 
-    public CaseDetails createCase(String legacyId, List<Document> documents, Instant deliveryDate) {
-        return createCase(legacyId, documents, deliveryDate, emptyMap());
-    }
-
-    public CaseDetails createCase(
+    private CaseDetails createCase(
         String legacyId,
         List<Document> documents,
         Instant deliveryDate,

@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import io.restassured.RestAssured;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -92,7 +91,6 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-    @Disabled
     public void should_attach_exception_record_to_the_existing_case_with_no_evidence() throws Exception {
         //given
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
@@ -111,7 +109,6 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-    @Disabled
     public void should_attach_exception_record_to_the_existing_case_with_evidence_documents() throws Exception {
         //given
         CaseDetails caseDetails =
@@ -137,19 +134,16 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-    @Disabled
     public void should_attach_exception_record_to_case_by_legacy_id() throws Exception {
         verifyExceptionRecordAttachesToCase(EXTERNAL_CASE_REFERENCE);
     }
 
     @Test
-    @Disabled
     public void should_attach_exception_record_to_case_by_ccd_search_case_reference() throws Exception {
         verifyExceptionRecordAttachesToCase(CCD_CASE_REFERENCE);
     }
 
     @Test
-    @Disabled
     public void should_attach_exception_record_to_case_by_attach_to_case_reference() throws Exception {
         verifyExceptionRecordAttachesToCase(null);
     }
