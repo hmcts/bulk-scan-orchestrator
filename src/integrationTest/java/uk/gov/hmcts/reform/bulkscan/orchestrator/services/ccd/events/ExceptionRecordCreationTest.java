@@ -50,6 +50,7 @@ class ExceptionRecordCreationTest {
 
     @BeforeEach
     void before() {
+        WireMock.reset();
         givenThat(get(GET_CASE_URL).willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())));
 
         givenThat(get(CASE_EVENT_TRIGGER_START_URL).willReturn(aResponse().withBody(

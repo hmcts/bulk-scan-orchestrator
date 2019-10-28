@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.microsoft.azure.servicebus.IMessageReceiver;
 import com.microsoft.azure.servicebus.Message;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,10 @@ class SupplementaryEvidenceCreatorTest {
     @Autowired
     private EnvelopeEventProcessor envelopeEventProcessor;
 
+    @BeforeEach
+    void before() {
+        WireMock.reset();
+    }
 
     @DisplayName("Should call ccd to attach supplementary evidence for caseworker")
     @Test
