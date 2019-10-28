@@ -26,7 +26,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.GET_CASE_URL;
 
 @IntegrationTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class SupplementaryEvidenceCreatorTest {
 
     private static final Message MOCK_MESSAGE = new Message(fileContentAsString(
