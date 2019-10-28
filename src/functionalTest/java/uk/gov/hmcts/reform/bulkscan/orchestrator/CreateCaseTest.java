@@ -129,6 +129,7 @@ class CreateCaseTest {
         AboutToStartOrSubmitCallbackResponse response = invokeCallbackEndpoint(exceptionRecord);
 
         // then
+        assertThat(response.getErrors()).isEmpty();
         assertThat(response.getData()).isNotNull();
         assertThat(response.getData().get(DISPLAY_WARNINGS_FIELD)).isEqualTo("No");
         assertThat(response.getData().get(OCR_DATA_VALIDATION_WARNINGS_FIELD)).asList().isEmpty();
@@ -179,6 +180,7 @@ class CreateCaseTest {
     }
 
     private String getCaseCcdId(AboutToStartOrSubmitCallbackResponse callbackResponse) {
+        assertThat(callbackResponse.getErrors()).isEmpty();
         assertThat(callbackResponse.getData()).isNotNull();
         assertThat(callbackResponse.getData().containsKey(CASE_REFERENCE)).isTrue();
         return (String) callbackResponse.getData().get(CASE_REFERENCE);
