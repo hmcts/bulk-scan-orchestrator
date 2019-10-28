@@ -38,11 +38,6 @@ class SupplementaryEvidenceCreatorTest {
     @Autowired
     private EnvelopeEventProcessor envelopeEventProcessor;
 
-    @BeforeEach
-    void before() {
-        WireMock.reset();
-    }
-
     @DisplayName("Should call ccd to attach supplementary evidence for caseworker")
     @Test
     void should_call_ccd_to_attach_supplementary_evidence_for_caseworker() throws Exception {
