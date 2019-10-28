@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -8,6 +9,8 @@ import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -17,6 +20,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.google.common.io.Resources.getResource;
 import static com.google.common.io.Resources.toByteArray;
 import static io.restassured.RestAssured.given;
+import static java.util.Collections.emptyList;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
@@ -41,7 +45,7 @@ class CreateCaseCallbackTest {
     int serverPort;
 
     @Test
-    void should_create_case_if_classification_new_application_with_documents_and_ocr_data() {
+    void should_create_case_if_classification_new_application_with_documents_and_ocr_data() throws IOException {
         setUpTransformation(getTransformationResponseBody("ok-no-warnings.json"));
         setUpCcdSearchEmptyResult(getCcdResponseBody("search-result-empty.json"));
         setUpCcdCreateCase(
@@ -49,13 +53,21 @@ class CreateCaseCallbackTest {
             getCcdResponseBody("sample-case.json")
         );
 
-        postWithBody(getRequestBody("valid-new-application-with-ocr.json"))
+        byte[] requestBody = getRequestBody("valid-new-application-with-ocr.json");
+
+        postWithBody(requestBody)
             .statusCode(OK.value())
             .body("errors", empty())
             .body("warnings", empty())
-            .body("data.caseReference", equalTo("1539007368674134")) // from sample-case.json
-            .body("data.displayWarnings", equalTo("No"))
-            .body("data.ocrDataValidationWarnings", empty());
+            .body(
+                "data",
+                equalTo(
+                    expectedResponseExceptionRecordFields(
+                        requestBody,
+                        "1539007368674134" // from sample-case.json
+                    )
+                )
+            );
     }
 
     @Test
@@ -90,7 +102,7 @@ class CreateCaseCallbackTest {
     }
 
     @Test
-    void should_create_case_if_classification_exception_with_documents_and_ocr_data() {
+    void should_create_case_if_classification_exception_with_documents_and_ocr_data() throws IOException {
         setUpTransformation(getTransformationResponseBody("ok-no-warnings.json"));
         setUpCcdSearchEmptyResult(getCcdResponseBody("search-result-empty.json"));
         setUpCcdCreateCase(
@@ -98,11 +110,21 @@ class CreateCaseCallbackTest {
             getCcdResponseBody("sample-case.json")
         );
 
-        postWithBody(getRequestBody("valid-exception.json"))
+        byte[] requestBody = getRequestBody("valid-exception.json");
+
+        postWithBody(requestBody)
             .statusCode(OK.value())
             .body("errors", empty())
             .body("warnings", empty())
-            .body("data.caseReference", equalTo("1539007368674134")); // from sample-case.json
+            .body(
+                "data",
+                equalTo(
+                    expectedResponseExceptionRecordFields(
+                        requestBody,
+                        "1539007368674134" // from sample-case.json
+                    )
+                )
+            );
     }
 
     @Test
@@ -149,8 +171,8 @@ class CreateCaseCallbackTest {
                     + EVENT_ID
                     + "/token"
             )
-            .withHeader("ServiceAuthorization", containing("Bearer"))
-            .willReturn(okJson(startResponseBody))
+                .withHeader("ServiceAuthorization", containing("Bearer"))
+                .willReturn(okJson(startResponseBody))
         );
 
         givenThat(
@@ -191,5 +213,22 @@ class CreateCaseCallbackTest {
             .body(body)
             .post("http://localhost:" + serverPort + "/callback/create-new-case")
             .then();
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> expectedResponseExceptionRecordFields(
+        byte[] callbackRequestBody,
+        String caseReference
+    ) throws IOException {
+        Map<String, Object> requestBodyAsMap = new ObjectMapper().readValue(callbackRequestBody, Map.class);
+        Map<String, Object> caseDetails = (Map<String, Object>) requestBodyAsMap.get("case_details");
+        Map<String, Object> originalFields = (Map<String, Object>) caseDetails.get("case_data");
+
+        Map<String, Object> expectedFields = new HashMap<>(originalFields);
+        expectedFields.put("displayWarnings", "No");
+        expectedFields.put("ocrDataValidationWarnings", emptyList());
+        expectedFields.put("caseReference", caseReference);
+
+        return expectedFields;
     }
 }

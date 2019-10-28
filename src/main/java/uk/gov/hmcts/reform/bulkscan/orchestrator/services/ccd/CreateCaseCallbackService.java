@@ -160,6 +160,7 @@ public class CreateCaseCallbackService {
         } else if (ids.size() == 1) {
             return new ProcessResult(
                 ImmutableMap.<String, Object>builder()
+                    .putAll(exceptionRecordData.getData())
                     .put(CASE_REFERENCE, Long.toString(ids.get(0)))
                     .put(DISPLAY_WARNINGS, YesNoFieldValues.NO)
                     .put(OCR_DATA_VALIDATION_WARNINGS, emptyList())
@@ -238,6 +239,7 @@ public class CreateCaseCallbackService {
 
             return new ProcessResult(
                 ImmutableMap.<String, Object>builder()
+                    .putAll(exceptionRecordData.getData())
                     .put(CASE_REFERENCE, Long.toString(newCaseId))
                     .put(DISPLAY_WARNINGS, YesNoFieldValues.NO)
                     .put(OCR_DATA_VALIDATION_WARNINGS, emptyList())

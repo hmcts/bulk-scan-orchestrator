@@ -299,7 +299,7 @@ class CreateCaseCallbackServiceTest {
         ), IDAM_TOKEN, USER_ID);
 
         // then
-        assertThat(result.getModifiedFields()).isEmpty();
+        assertThat(result.getExceptionRecordData()).isEmpty();
         assertThat(result.getWarnings()).containsOnly("warning");
         assertThat(result.getErrors()).containsOnly("error");
     }
@@ -337,7 +337,7 @@ class CreateCaseCallbackServiceTest {
         ), IDAM_TOKEN, USER_ID);
 
         // then
-        assertThat(result.getModifiedFields().get(CASE_REFERENCE)).isEqualTo("345");
+        assertThat(result.getExceptionRecordData().get(CASE_REFERENCE)).isEqualTo("345");
         assertThat(result.getWarnings().isEmpty()).isTrue();
         assertThat(result.getErrors().isEmpty()).isTrue();
     }
@@ -377,7 +377,7 @@ class CreateCaseCallbackServiceTest {
         // then
 
         // then
-        assertThat(result.getModifiedFields()).isEmpty();
+        assertThat(result.getExceptionRecordData()).isEmpty();
         assertThat(result.getWarnings()).isEmpty();
         assertThat(result.getErrors()).containsOnly(
             "Multiple cases (345, 456) found for the given bulk scan case reference: 123"
@@ -594,7 +594,7 @@ class CreateCaseCallbackServiceTest {
         // given
         setUpTransformationUrl();
 
-        given(transformationClient.transformExceptionRecord(any(),any(), any()))
+        given(transformationClient.transformExceptionRecord(any(), any(), any()))
             .willReturn(
                 new SuccessfulTransformationResponse(
                     new CaseCreationDetails(
@@ -663,7 +663,7 @@ class CreateCaseCallbackServiceTest {
         // given
         setUpTransformationUrl();
 
-        given(transformationClient.transformExceptionRecord(any(),any(), any()))
+        given(transformationClient.transformExceptionRecord(any(), any(), any()))
             .willReturn(
                 new SuccessfulTransformationResponse(
                     new CaseCreationDetails(
