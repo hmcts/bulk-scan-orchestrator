@@ -114,7 +114,3 @@ feign:
     config:
       core-case-data-api:
         loggerLevel: ${CCD_LOG_LEVEL:none}
-
-logging:
-  level:
-    ROOT: DEBUG
