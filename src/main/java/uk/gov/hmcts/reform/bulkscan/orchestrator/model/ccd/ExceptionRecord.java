@@ -47,6 +47,10 @@ public class ExceptionRecord implements CaseData {
     @JsonProperty("containsPayments")
     public final String containsPayments;
 
+    // Case reference received to attach the scanned documents received
+    @JsonProperty("envelopeCaseReference")
+    public final String envelopeCaseReference;
+
     public ExceptionRecord(
         String classification,
         String poBox,
@@ -60,7 +64,8 @@ public class ExceptionRecord implements CaseData {
         String displayWarnings,
         String envelopeId,
         String awaitingPaymentDcnProcessing,
-        String containsPayments
+        String containsPayments,
+        String envelopeCaseReference
     ) {
         this.classification = classification;
         this.poBox = poBox;
@@ -75,5 +80,6 @@ public class ExceptionRecord implements CaseData {
         this.envelopeId = envelopeId;
         this.awaitingPaymentDcnProcessing = awaitingPaymentDcnProcessing;
         this.containsPayments = containsPayments;
+        this.envelopeCaseReference = envelopeCaseReference;
     }
 }
