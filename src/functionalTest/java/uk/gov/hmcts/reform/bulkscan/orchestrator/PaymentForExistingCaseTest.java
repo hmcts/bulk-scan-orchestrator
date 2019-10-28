@@ -7,8 +7,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseSearcher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ExceptionRecordCreator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.PaymentsMessageSender;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.IPaymentsPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.CreatePaymentsCommand;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentData;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -33,7 +33,7 @@ class PaymentForExistingCaseTest {
     private ExceptionRecordCreator exceptionRecordCreator;
 
     @Autowired
-    private IPaymentsPublisher paymentsPublisher;
+    private PaymentsMessageSender paymentsMessageSender;
 
     @Autowired
     private CaseSearcher caseSearcher;
@@ -49,9 +49,9 @@ class PaymentForExistingCaseTest {
 
         // when
         // payment sent to payments queue
-        paymentsPublisher.send(
+        paymentsMessageSender.send(
             new CreatePaymentsCommand(
-                "envelope_id",
+                "some_envelope_id",
                 Long.toString(caseDetails.getId()),
                 caseDetails.getJurisdiction(),
                 "bulkscan",

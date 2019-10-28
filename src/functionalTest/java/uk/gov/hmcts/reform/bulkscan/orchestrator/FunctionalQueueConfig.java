@@ -26,10 +26,21 @@ public class FunctionalQueueConfig {
     @Value("${queue.envelopes.read-connection-string}")
     private String queueReadConnectionString;
 
-    @Bean
+    @Value("${queue.payments.write-connection-string}")
+    private String paymentsQueueWriteConnectionString;
+
+    @Bean("envelopes")
     public QueueClient testWriteClient() throws ServiceBusException, InterruptedException {
         return new QueueClient(
             new ConnectionStringBuilder(queueWriteConnectionString),
+            ReceiveMode.PEEKLOCK
+        );
+    }
+
+    @Bean("payments")
+    public QueueClient paymentsWriteClient() throws ServiceBusException, InterruptedException {
+        return new QueueClient(
+            new ConnectionStringBuilder(paymentsQueueWriteConnectionString),
             ReceiveMode.PEEKLOCK
         );
     }
