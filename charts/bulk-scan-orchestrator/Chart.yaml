@@ -1,4 +1,5 @@
 name: bulk-scan-orchestrator
+apiVersion: v1
 home: https://github.com/hmcts/bulk-scan-orchestrator
 version: 0.1.9
 description: HMCTS Bulk scan orchestrator service
