@@ -55,7 +55,7 @@ class PaymentForExistingCaseTest {
                 Long.toString(caseDetails.getId()),
                 caseDetails.getJurisdiction(),
                 "bulkscan",
-                "po_box",
+                "12625",
                 true,
                 asList(new PaymentData("154565768"))
             )
