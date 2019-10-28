@@ -67,6 +67,7 @@ class ExceptionRecordMapperTest {
             .containsExactlyElementsOf(envelope.ocrDataValidationWarnings);
 
         assertThat(exceptionRecord.envelopeId).isEqualTo(envelope.id);
+        assertThat(exceptionRecord.envelopeCaseReference).isEqualTo(envelope.caseRef);
     }
 
     @Test
@@ -117,6 +118,18 @@ class ExceptionRecordMapperTest {
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
 
         assertThat(exceptionRecord.envelopeId).isEqualTo(envelope.id);
+    }
+
+    @Test
+    public void mapEnvelope_sets_envelope_case_ref_to_exception_record() {
+        //given
+        Envelope envelope = envelope(1, null, null, emptyList());
+
+        // when
+        ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
+
+        // then
+        assertThat(exceptionRecord.envelopeCaseReference).isEqualTo(envelope.caseRef);
     }
 
     @Test
