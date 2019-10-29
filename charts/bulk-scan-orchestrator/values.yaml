@@ -38,3 +38,7 @@ java:
         - envelopes-queue-max-delivery-count
         - app-insights-instrumentation-key
   image: hmctspublic.azurecr.io/bulk-scan/orchestrator:latest
+
+bso:
+  servicebus:
+    enabled: false

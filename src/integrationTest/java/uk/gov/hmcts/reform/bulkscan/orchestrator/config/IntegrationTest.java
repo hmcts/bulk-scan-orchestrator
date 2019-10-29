@@ -30,5 +30,5 @@ import java.lang.annotation.Target;
 @AutoConfigureWireMock
 @ActiveProfiles({"integration","nosb"}) // no servicebus queue handler registration
 @ContextConfiguration(initializers = IntegrationTestInitializer.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public @interface IntegrationTest {}
