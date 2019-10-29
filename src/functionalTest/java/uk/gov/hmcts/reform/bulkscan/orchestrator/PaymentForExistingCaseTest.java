@@ -51,13 +51,13 @@ class PaymentForExistingCaseTest {
         // payment sent to payments queue
         paymentsMessageSender.send(
             new CreatePaymentsCommand(
-                "some_envelope_id",
+                "some_envelope_id_1",
                 Long.toString(caseDetails.getId()),
                 caseDetails.getJurisdiction(),
                 "bulkscan",
                 "12625",
                 true,
-                asList(new PaymentData("154565768"))
+                asList(new PaymentData("154565769"))
             )
         );
 
