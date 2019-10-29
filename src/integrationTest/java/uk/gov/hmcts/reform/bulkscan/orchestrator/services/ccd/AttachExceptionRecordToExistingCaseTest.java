@@ -122,6 +122,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @BeforeEach
     public void before() throws JsonProcessingException {
+        WireMock.reset();
         givenThat(ccdStartEvent().willReturn(okJson(MAPPER.writeValueAsString(START_EVENT_RESPONSE))));
         mockCaseSearchByCcdId(CASE_REF, okJson(MAPPER.writeValueAsString(CASE_DETAILS)));
         givenThat(ccdSubmitEvent().willReturn(okJson(MAPPER.writeValueAsString(CASE_DETAILS))));
