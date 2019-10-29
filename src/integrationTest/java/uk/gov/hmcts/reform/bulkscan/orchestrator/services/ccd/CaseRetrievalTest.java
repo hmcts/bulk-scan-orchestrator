@@ -48,6 +48,7 @@ class CaseRetrievalTest {
 
     @BeforeEach
     public void setUp() {
+        WireMock.reset();
         ccdApi = new CcdApi(coreCaseDataApi, authenticatorFactory, serviceConfigProvider);
     }
 
