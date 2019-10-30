@@ -1,0 +1,32 @@
+{
+  "id": "0192",
+  "case_ref": "1539007368674134",
+  "po_box": "BULKSCAN PO BOX",
+  "jurisdiction": "BULKSCAN",
+  "container": "bulkscan",
+  "classification": "SUPPLEMENTARY_EVIDENCE_WITH_OCR",
+  "zip_file_name": "zip-file-test.zip",
+  "delivery_date": "2018-01-01T12:34:56.123Z",
+  "opening_date": "2018-01-01T12:34:56.123Z",
+  "documents": [
+    {
+      "file_name": "testfilename",
+      "control_number": "1234",
+      "type": "other",
+      "subtype": "testSubtype",
+      "scanned_at": "2018-01-01T12:34:56.123Z",
+      "uuid": "ee69aee8-1a33-40dd-9af9-d90da1b104babc"
+    }
+  ],
+  "ocr_data": [
+    {
+      "metadata_field_name": "field1",
+      "metadata_field_value": "value1"
+    },
+    {
+      "metadata_field_name": "field2",
+      "metadata_field_value": "value2"
+    }
+  ],
+  "ocr_data_validation_warnings": []
+}
