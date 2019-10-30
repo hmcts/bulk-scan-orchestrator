@@ -67,6 +67,7 @@ class ExceptionRecordMapperTest {
             .containsExactlyElementsOf(envelope.ocrDataValidationWarnings);
 
         assertThat(exceptionRecord.envelopeId).isEqualTo(envelope.id);
+        assertThat(exceptionRecord.envelopeCaseReference).isEqualTo(envelope.caseRef);
     }
 
     @Test
@@ -149,6 +150,19 @@ class ExceptionRecordMapperTest {
         assertThat(exceptionRecord.awaitingPaymentDcnProcessing).isEqualTo("No");
         assertThat(exceptionRecord.containsPayments).isEqualTo("No");
     }
+
+    @Test
+    public void mapEnvelope_sets_envelope_case_ref_to_exception_record() {
+        //given
+        Envelope envelope = envelope(1, null, null, emptyList());
+
+        // when
+        ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
+
+        // then
+        assertThat(exceptionRecord.envelopeCaseReference).isEqualTo(envelope.caseRef);
+    }
+
 
     private Envelope envelopeWithJurisdiction(String jurisdiction) {
         return envelope(Classification.NEW_APPLICATION, jurisdiction, "1231231232312765");
