@@ -189,7 +189,7 @@ public class CreateCaseCallbackService {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"squid:S2139", "unchecked"}) // squid for exception handle + logging
     private ProcessResult createNewCase(
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,
@@ -274,6 +274,7 @@ public class CreateCaseCallbackService {
         }
     }
 
+    @SuppressWarnings("squid:S2139") // exception handle + logging
     private long createNewCaseInCcd(
         String idamToken,
         String s2sToken,
