@@ -793,17 +793,60 @@ class CreateCaseCallbackServiceTest {
             .updatePayments(any(), anyLong());
 
         // when
-        ProcessResult result =
+        CallbackException exception = catchThrowableOfType(() ->
             service
                 .process(
                     new CcdCallbackRequest(EVENT_ID_CREATE_NEW_CASE, caseDetails, true),
                     IDAM_TOKEN,
                     USER_ID
+                ),
+            CallbackException.class
+        );
+
+        // then
+        assertThat(exception.getMessage()).isEqualTo("Payment references cannot be processed. Please try again later");
+        assertThat(exception.getCause()).isInstanceOf(PaymentsPublishingException.class);
+    }
+
+    @Test
+    void should_return_warning_if_payments_have_not_been_processed_yet() throws Exception {
+        // given
+        setUpTransformationUrl();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("poBox", "12345");
+        data.put("journeyClassification", EXCEPTION.name());
+        data.put("formType", "A1");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
+        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
+        data.put(ExceptionRecordFields.CONTAINS_PAYMENTS, YesNoFieldValues.YES);
+        data.put(ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING, YesNoFieldValues.YES);
+        data.put(ExceptionRecordFields.ENVELOPE_ID, "987");
+        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, "sample jurisdiction");
+
+        CaseDetails caseDetails =
+            TestCaseBuilder
+                .createCaseWith(builder -> builder
+                    .id(CASE_ID)
+                    .caseTypeId(CASE_TYPE_ID)
+                    .jurisdiction("some jurisdiction")
+                    .data(data)
+                );
+
+        // when
+        ProcessResult result =
+            service
+                .process(
+                    new CcdCallbackRequest(EVENT_ID_CREATE_NEW_CASE, caseDetails, false),
+                    IDAM_TOKEN,
+                    USER_ID
                 );
 
         // then
-        assertThat(result.getErrors()).containsExactly("Internal error. " + paymentException.getMessage());
-        assertThat(result.getWarnings()).isEmpty();
+        assertThat(result.getWarnings())
+            .containsExactly("Payments for this Exception Record have not been processed yet");
     }
 
     private void setUpTransformationUrl() {

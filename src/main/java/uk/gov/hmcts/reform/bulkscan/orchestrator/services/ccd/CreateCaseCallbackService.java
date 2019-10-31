@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCas
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -37,6 +39,7 @@ import static java.util.stream.Collectors.joining;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isCreateNewCaseEvent;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.DISPLAY_WARNINGS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.OCR_DATA_VALIDATION_WARNINGS;
@@ -156,39 +159,51 @@ public class CreateCaseCallbackService {
         String userId,
         CaseDetails exceptionRecordData
     ) {
-        List<Long> ids = ccdApi.getCaseRefsByBulkScanCaseReference(exceptionRecord.id, configItem.getService());
-        if (ids.isEmpty()) {
-            return createNewCase(
-                exceptionRecord,
-                configItem,
-                ignoreWarnings,
-                idamToken,
-                userId,
-                exceptionRecordData
-            );
-        } else if (ids.size() == 1) {
+        boolean awaitsPaymentProcessing = Optional
+            .ofNullable(exceptionRecordData.getData().get(AWAITING_PAYMENT_DCN_PROCESSING))
+            .map(awaiting -> awaiting.toString().equals(YesNoFieldValues.YES))
+            .orElse(false);
+
+        if (awaitsPaymentProcessing && !ignoreWarnings) {
             return new ProcessResult(
-                ImmutableMap.<String, Object>builder()
-                    .put(CASE_REFERENCE, Long.toString(ids.get(0)))
-                    .put(DISPLAY_WARNINGS, YesNoFieldValues.NO)
-                    .put(OCR_DATA_VALIDATION_WARNINGS, emptyList())
-                    .build()
+                singletonList("Payments for this Exception Record have not been processed yet"),
+                emptyList()
             );
         } else {
-            return new ProcessResult(
-                emptyList(),
-                singletonList(
-                    String.format(
-                        "Multiple cases (%s) found for the given bulk scan case reference: %s",
-                        ids.stream().map(String::valueOf).collect(joining(", ")),
-                        exceptionRecord.id
+            List<Long> ids = ccdApi.getCaseRefsByBulkScanCaseReference(exceptionRecord.id, configItem.getService());
+            if (ids.isEmpty()) {
+                return createNewCase(
+                    exceptionRecord,
+                    configItem,
+                    ignoreWarnings,
+                    idamToken,
+                    userId,
+                    exceptionRecordData
+                );
+            } else if (ids.size() == 1) {
+                return new ProcessResult(
+                    ImmutableMap.<String, Object>builder()
+                        .put(CASE_REFERENCE, Long.toString(ids.get(0)))
+                        .put(DISPLAY_WARNINGS, YesNoFieldValues.NO)
+                        .put(OCR_DATA_VALIDATION_WARNINGS, emptyList())
+                        .build()
+                );
+            } else {
+                return new ProcessResult(
+                    emptyList(),
+                    singletonList(
+                        String.format(
+                            "Multiple cases (%s) found for the given bulk scan case reference: %s",
+                            ids.stream().map(String::valueOf).collect(joining(", ")),
+                            exceptionRecord.id
+                        )
                     )
-                )
-            );
+                );
+            }
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"squid:S2139", "unchecked"}) // squid for exception handle + logging
     private ProcessResult createNewCase(
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,
@@ -258,12 +273,22 @@ public class CreateCaseCallbackService {
             } else {
                 return new ProcessResult(exception.getResponse().warnings, exception.getResponse().errors);
             }
+        } catch (PaymentsPublishingException exception) {
+            log.error(
+                "Failed to send update to payment processor for {} exception record {}",
+                configItem.getService(),
+                exceptionRecord.id,
+                exception
+            );
+
+            throw new CallbackException("Payment references cannot be processed. Please try again later", exception);
         } catch (Exception exception) {
             // log happens individually to cover transformation/ccd cases
             throw new CallbackException("Failed to create new case", exception);
         }
     }
 
+    @SuppressWarnings("squid:S2139") // exception handle + logging
     private long createNewCaseInCcd(
         String idamToken,
         String s2sToken,
