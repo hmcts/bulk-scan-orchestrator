@@ -233,10 +233,12 @@ class CreateCaseCallbackServiceTest {
 
         // then
         assertThat(result.getWarnings()).isEmpty();
-        assertThat(result.getErrors()).containsOnly("Event " + EVENT_ID_CREATE_NEW_CASE
-            + " not allowed for the current journey classification "
-            + NEW_APPLICATION.name()
-            + " without OCR"
+        assertThat(result.getErrors()).containsOnly(
+            String.format(
+                "Event %s not allowed for the current journey classification %s without OCR",
+                EVENT_ID_CREATE_NEW_CASE,
+                NEW_APPLICATION.name()
+            )
         );
     }
 
@@ -271,10 +273,12 @@ class CreateCaseCallbackServiceTest {
 
         // then
         assertThat(result.getWarnings()).isEmpty();
-        assertThat(result.getErrors()).containsOnly("Event "
-            + EVENT_ID_CREATE_NEW_CASE
-            + " not allowed for the current journey classification "
-            + SUPPLEMENTARY_EVIDENCE.name()
+        assertThat(result.getErrors()).containsOnly(
+            String.format(
+                "Event %s not allowed for the current journey classification %s",
+                EVENT_ID_CREATE_NEW_CASE,
+                SUPPLEMENTARY_EVIDENCE.name()
+            )
         );
     }
 
@@ -323,8 +327,7 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
-    void should_return_service_case_when_it_already_exists_in_ccd_for_a_given_exception_record()
-        throws IOException, CaseTransformationException {
+    void should_return_service_case_when_it_already_exists_in_ccd_for_a_given_exception_record() throws Exception {
         // given
         setUpTransformationUrl();
 
@@ -361,8 +364,7 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
-    void should_return_error_if_multiple_cases_exist_in_ccd_for_a_given_exception_record()
-        throws IOException, CaseTransformationException {
+    void should_return_error_if_multiple_cases_exist_in_ccd_for_a_given_exception_record() throws Exception {
         // given
         setUpTransformationUrl();
 
@@ -612,7 +614,7 @@ class CreateCaseCallbackServiceTest {
         // given
         setUpTransformationUrl();
 
-        given(transformationClient.transformExceptionRecord(any(),any(), any()))
+        given(transformationClient.transformExceptionRecord(any(), any(), any()))
             .willReturn(
                 new SuccessfulTransformationResponse(
                     new CaseCreationDetails(
@@ -638,9 +640,6 @@ class CreateCaseCallbackServiceTest {
 
         Map<String, Object> data = new HashMap<>();
 
-        String envelopeId = "987";
-        String jurisdiction = "sample jurisdiction";
-
         data.put("poBox", "12345");
         data.put("journeyClassification", EXCEPTION.name());
         data.put("formType", "A1");
@@ -649,8 +648,8 @@ class CreateCaseCallbackServiceTest {
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
         data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
         data.put(ExceptionRecordFields.CONTAINS_PAYMENTS, YesNoFieldValues.YES);
-        data.put(ExceptionRecordFields.ENVELOPE_ID, envelopeId);
-        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, jurisdiction);
+        data.put(ExceptionRecordFields.ENVELOPE_ID, "987");
+        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, "sample jurisdiction");
 
         CaseDetails caseDetails =
             TestCaseBuilder
@@ -681,7 +680,7 @@ class CreateCaseCallbackServiceTest {
         // given
         setUpTransformationUrl();
 
-        given(transformationClient.transformExceptionRecord(any(),any(), any()))
+        given(transformationClient.transformExceptionRecord(any(), any(), any()))
             .willReturn(
                 new SuccessfulTransformationResponse(
                     new CaseCreationDetails(
@@ -698,17 +697,13 @@ class CreateCaseCallbackServiceTest {
         given(coreCaseDataApi.startForCaseworker(any(), any(), any(), any(), any(), any()))
             .willReturn(startCcdEventResp);
 
-        Long newCaseId = 123L;
         CaseDetails newCaseDetails = mock(CaseDetails.class);
-        doReturn(newCaseId).when(newCaseDetails).getId();
+        doReturn(123L).when(newCaseDetails).getId();
 
         given(coreCaseDataApi.submitForCaseworker(any(), any(), any(), any(), any(), anyBoolean(), any()))
             .willReturn(newCaseDetails);
 
         Map<String, Object> data = new HashMap<>();
-
-        String envelopeId = "987";
-        String jurisdiction = "sample jurisdiction";
 
         data.put("poBox", "12345");
         data.put("journeyClassification", EXCEPTION.name());
@@ -718,8 +713,8 @@ class CreateCaseCallbackServiceTest {
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
         data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
         data.put(ExceptionRecordFields.CONTAINS_PAYMENTS, YesNoFieldValues.NO); // no payments!
-        data.put(ExceptionRecordFields.ENVELOPE_ID, envelopeId);
-        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, jurisdiction);
+        data.put(ExceptionRecordFields.ENVELOPE_ID, "987");
+        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, "sample jurisdiction");
 
         CaseDetails caseDetails =
             TestCaseBuilder
