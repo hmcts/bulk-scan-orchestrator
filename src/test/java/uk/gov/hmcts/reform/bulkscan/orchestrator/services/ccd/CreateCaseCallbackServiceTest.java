@@ -793,17 +793,19 @@ class CreateCaseCallbackServiceTest {
             .updatePayments(any(), anyLong());
 
         // when
-        ProcessResult result =
+        CallbackException exception = catchThrowableOfType(() ->
             service
                 .process(
                     new CcdCallbackRequest(EVENT_ID_CREATE_NEW_CASE, caseDetails, true),
                     IDAM_TOKEN,
                     USER_ID
-                );
+                ),
+            CallbackException.class
+        );
 
         // then
-        assertThat(result.getErrors()).containsExactly("Internal error. " + paymentException.getMessage());
-        assertThat(result.getWarnings()).isEmpty();
+        assertThat(exception.getMessage()).isEqualTo("Payment references cannot be processed");
+        assertThat(exception.getCause()).isInstanceOf(PaymentsPublishingException.class);
     }
 
     private void setUpTransformationUrl() {
