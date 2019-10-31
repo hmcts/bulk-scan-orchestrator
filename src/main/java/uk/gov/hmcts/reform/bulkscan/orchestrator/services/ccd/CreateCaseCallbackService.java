@@ -159,7 +159,7 @@ public class CreateCaseCallbackService {
         CaseDetails exceptionRecordData
     ) {
         boolean awaitsPaymentProcessing = Optional
-            .of(exceptionRecordData.getData().get(AWAITING_PAYMENT_DCN_PROCESSING))
+            .ofNullable(exceptionRecordData.getData().get(AWAITING_PAYMENT_DCN_PROCESSING))
             .map(awaiting -> awaiting.toString().equals(YesNoFieldValues.YES))
             .orElse(false);
 
