@@ -51,6 +51,8 @@ public class CreateCaseCallbackService {
 
     private static final String EXCEPTION_RECORD_REFERENCE = "bulkScanCaseReference";
 
+    private static final String AWAITING_PAYMENTS_MESSAGE = "Payments for this Exception Record have not been processed yet";
+
     private final CreateCaseValidator validator;
     private final ServiceConfigProvider serviceConfigProvider;
     private final TransformationClient transformationClient;
@@ -164,11 +166,10 @@ public class CreateCaseCallbackService {
             .map(awaiting -> awaiting.toString().equals(YesNoFieldValues.YES))
             .orElse(false);
 
-        if (awaitsPaymentProcessing && !ignoreWarnings) {
-            return new ProcessResult(
-                singletonList("Payments for this Exception Record have not been processed yet"),
-                emptyList()
-            );
+        if (awaitsPaymentProcessing && configItem.allowCreatingCaseBeforePaymentsAreProcessed() && !ignoreWarnings) {
+            return new ProcessResult(singletonList(AWAITING_PAYMENTS_MESSAGE), emptyList());
+        } else if (awaitsPaymentProcessing && !configItem.allowCreatingCaseBeforePaymentsAreProcessed()) {
+            return new ProcessResult(emptyList(), singletonList(AWAITING_PAYMENTS_MESSAGE));
         } else {
             List<Long> ids = ccdApi.getCaseRefsByBulkScanCaseReference(exceptionRecord.id, configItem.getService());
             if (ids.isEmpty()) {
