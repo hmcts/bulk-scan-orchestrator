@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.res
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.TransformationErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFi
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceNotConfiguredException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -41,8 +43,10 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doReturn;
@@ -102,15 +106,17 @@ class CreateCaseCallbackServiceTest {
 
     @Test
     void should_not_allow_to_process_callback_in_case_wrong_event_id_is_received() {
-        ProcessResult result = service.process(new CcdCallbackRequest(
-            "some event",
-            null,
-            true
-        ), IDAM_TOKEN, USER_ID);
+        CallbackException callbackException = catchThrowableOfType(() ->
+            service.process(new CcdCallbackRequest(
+                "some event",
+                null,
+                true
+            ), IDAM_TOKEN, USER_ID),
+            CallbackException.class
+        );
 
-        assertThat(result.getWarnings()).isEmpty();
-        assertThat(result.getErrors())
-            .containsOnly("The some event event is not supported. Please contact service team");
+        assertThat(callbackException.getCause()).isNull();
+        assertThat(callbackException).hasMessage("The some event event is not supported. Please contact service team");
         verify(serviceConfigProvider, never()).getConfig(anyString());
     }
 
@@ -120,14 +126,17 @@ class CreateCaseCallbackServiceTest {
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.id(1L));
 
         // when
-        ProcessResult result = service.process(new CcdCallbackRequest(
-            EVENT_ID_CREATE_NEW_CASE,
-            caseDetails,
-            true
-        ), IDAM_TOKEN, USER_ID);
+        CallbackException callbackException = catchThrowableOfType(() ->
+            service.process(new CcdCallbackRequest(
+                EVENT_ID_CREATE_NEW_CASE,
+                caseDetails,
+                true
+            ), IDAM_TOKEN, USER_ID),
+            CallbackException.class
+        );
 
-        assertThat(result.getWarnings()).isEmpty();
-        assertThat(result.getErrors()).containsOnly("No case type ID supplied");
+        assertThat(callbackException.getCause()).isNull();
+        assertThat(callbackException).hasMessage("No case type ID supplied");
         verify(serviceConfigProvider, never()).getConfig(anyString());
     }
 
@@ -137,15 +146,18 @@ class CreateCaseCallbackServiceTest {
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(""));
 
         // when
-        ProcessResult result = service.process(new CcdCallbackRequest(
-            EVENT_ID_CREATE_NEW_CASE,
-            caseDetails,
-            true
-        ), IDAM_TOKEN, USER_ID);
+        CallbackException callbackException = catchThrowableOfType(() ->
+            service.process(new CcdCallbackRequest(
+                EVENT_ID_CREATE_NEW_CASE,
+                caseDetails,
+                true
+            ), IDAM_TOKEN, USER_ID),
+            CallbackException.class
+        );
 
         // then
-        assertThat(result.getWarnings()).isEmpty();
-        assertThat(result.getErrors()).containsOnly("Case type ID () has invalid format");
+        assertThat(callbackException.getCause()).isNull();
+        assertThat(callbackException).hasMessage("Case type ID () has invalid format");
         verify(serviceConfigProvider, never()).getConfig(anyString());
     }
 
@@ -156,15 +168,18 @@ class CreateCaseCallbackServiceTest {
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(CASE_TYPE_ID));
 
         // when
-        ProcessResult result = service.process(new CcdCallbackRequest(
-            EVENT_ID_CREATE_NEW_CASE,
-            caseDetails,
-            true
-        ), IDAM_TOKEN, USER_ID);
+        CallbackException callbackException = catchThrowableOfType(() ->
+            service.process(new CcdCallbackRequest(
+                EVENT_ID_CREATE_NEW_CASE,
+                caseDetails,
+                true
+            ), IDAM_TOKEN, USER_ID),
+            CallbackException.class
+        );
 
         // then
-        assertThat(result.getWarnings()).isEmpty();
-        assertThat(result.getErrors()).containsOnly("oh no");
+        assertThat(callbackException.getCause()).isNull();
+        assertThat(callbackException).hasMessage("oh no");
     }
 
     @Test
@@ -174,15 +189,18 @@ class CreateCaseCallbackServiceTest {
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(CASE_TYPE_ID));
 
         // when
-        ProcessResult result = service.process(new CcdCallbackRequest(
-            EVENT_ID_CREATE_NEW_CASE,
-            caseDetails,
-            true
-        ), IDAM_TOKEN, USER_ID);
+        CallbackException callbackException = catchThrowableOfType(() ->
+            service.process(new CcdCallbackRequest(
+                EVENT_ID_CREATE_NEW_CASE,
+                caseDetails,
+                true
+            ), IDAM_TOKEN, USER_ID),
+            CallbackException.class
+        );
 
         // then
-        assertThat(result.getWarnings()).isEmpty();
-        assertThat(result.getErrors()).containsOnly("Transformation URL is not configured");
+        assertThat(callbackException.getCause()).isNull();
+        assertThat(callbackException).hasMessage("Transformation URL is not configured");
     }
 
     @Test
@@ -215,10 +233,12 @@ class CreateCaseCallbackServiceTest {
 
         // then
         assertThat(result.getWarnings()).isEmpty();
-        assertThat(result.getErrors()).containsOnly("Event " + EVENT_ID_CREATE_NEW_CASE
-            + " not allowed for the current journey classification "
-            + NEW_APPLICATION.name()
-            + " without OCR"
+        assertThat(result.getErrors()).containsOnly(
+            String.format(
+                "Event %s not allowed for the current journey classification %s without OCR",
+                EVENT_ID_CREATE_NEW_CASE,
+                NEW_APPLICATION.name()
+            )
         );
     }
 
@@ -253,10 +273,12 @@ class CreateCaseCallbackServiceTest {
 
         // then
         assertThat(result.getWarnings()).isEmpty();
-        assertThat(result.getErrors()).containsOnly("Event "
-            + EVENT_ID_CREATE_NEW_CASE
-            + " not allowed for the current journey classification "
-            + SUPPLEMENTARY_EVIDENCE.name()
+        assertThat(result.getErrors()).containsOnly(
+            String.format(
+                "Event %s not allowed for the current journey classification %s",
+                EVENT_ID_CREATE_NEW_CASE,
+                SUPPLEMENTARY_EVIDENCE.name()
+            )
         );
     }
 
@@ -305,8 +327,7 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
-    void should_return_service_case_when_it_already_exists_in_ccd_for_a_given_exception_record()
-        throws IOException, CaseTransformationException {
+    void should_return_service_case_when_it_already_exists_in_ccd_for_a_given_exception_record() throws Exception {
         // given
         setUpTransformationUrl();
 
@@ -343,8 +364,7 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
-    void should_return_error_if_multiple_cases_exist_in_ccd_for_a_given_exception_record()
-        throws IOException, CaseTransformationException {
+    void should_return_error_if_multiple_cases_exist_in_ccd_for_a_given_exception_record() throws Exception {
         // given
         setUpTransformationUrl();
 
@@ -594,7 +614,7 @@ class CreateCaseCallbackServiceTest {
         // given
         setUpTransformationUrl();
 
-        given(transformationClient.transformExceptionRecord(any(),any(), any()))
+        given(transformationClient.transformExceptionRecord(any(), any(), any()))
             .willReturn(
                 new SuccessfulTransformationResponse(
                     new CaseCreationDetails(
@@ -620,9 +640,6 @@ class CreateCaseCallbackServiceTest {
 
         Map<String, Object> data = new HashMap<>();
 
-        String envelopeId = "987";
-        String jurisdiction = "sample jurisdiction";
-
         data.put("poBox", "12345");
         data.put("journeyClassification", EXCEPTION.name());
         data.put("formType", "A1");
@@ -631,8 +648,8 @@ class CreateCaseCallbackServiceTest {
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
         data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
         data.put(ExceptionRecordFields.CONTAINS_PAYMENTS, YesNoFieldValues.YES);
-        data.put(ExceptionRecordFields.ENVELOPE_ID, envelopeId);
-        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, jurisdiction);
+        data.put(ExceptionRecordFields.ENVELOPE_ID, "987");
+        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, "sample jurisdiction");
 
         CaseDetails caseDetails =
             TestCaseBuilder
@@ -663,7 +680,7 @@ class CreateCaseCallbackServiceTest {
         // given
         setUpTransformationUrl();
 
-        given(transformationClient.transformExceptionRecord(any(),any(), any()))
+        given(transformationClient.transformExceptionRecord(any(), any(), any()))
             .willReturn(
                 new SuccessfulTransformationResponse(
                     new CaseCreationDetails(
@@ -680,17 +697,13 @@ class CreateCaseCallbackServiceTest {
         given(coreCaseDataApi.startForCaseworker(any(), any(), any(), any(), any(), any()))
             .willReturn(startCcdEventResp);
 
-        Long newCaseId = 123L;
         CaseDetails newCaseDetails = mock(CaseDetails.class);
-        doReturn(newCaseId).when(newCaseDetails).getId();
+        doReturn(123L).when(newCaseDetails).getId();
 
         given(coreCaseDataApi.submitForCaseworker(any(), any(), any(), any(), any(), anyBoolean(), any()))
             .willReturn(newCaseDetails);
 
         Map<String, Object> data = new HashMap<>();
-
-        String envelopeId = "987";
-        String jurisdiction = "sample jurisdiction";
 
         data.put("poBox", "12345");
         data.put("journeyClassification", EXCEPTION.name());
@@ -700,8 +713,8 @@ class CreateCaseCallbackServiceTest {
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
         data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
         data.put(ExceptionRecordFields.CONTAINS_PAYMENTS, YesNoFieldValues.NO); // no payments!
-        data.put(ExceptionRecordFields.ENVELOPE_ID, envelopeId);
-        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, jurisdiction);
+        data.put(ExceptionRecordFields.ENVELOPE_ID, "987");
+        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, "sample jurisdiction");
 
         CaseDetails caseDetails =
             TestCaseBuilder
@@ -726,6 +739,71 @@ class CreateCaseCallbackServiceTest {
         assertThat(result.getWarnings()).isEmpty();
 
         verify(paymentsProcessor).updatePayments(caseDetails, CASE_ID);
+    }
+
+    @Test
+    void should_return_error_if_publishing_payment_command_failed() throws Exception {
+        // given
+        setUpTransformationUrl();
+
+        given(transformationClient.transformExceptionRecord(any(), any(), any()))
+            .willReturn(
+                new SuccessfulTransformationResponse(
+                    new CaseCreationDetails("some_case_type", "some_event_id", emptyMap()),
+                    emptyList()
+                )
+            );
+
+        StartEventResponse startCcdEventResp = mock(StartEventResponse.class);
+
+        given(coreCaseDataApi.startForCaseworker(any(), any(), any(), any(), any(), any()))
+            .willReturn(startCcdEventResp);
+
+        Long newCaseId = 123L;
+        CaseDetails newCaseDetails = mock(CaseDetails.class);
+        doReturn(newCaseId).when(newCaseDetails).getId();
+
+        given(coreCaseDataApi.submitForCaseworker(any(), any(), any(), any(), any(), anyBoolean(), any()))
+            .willReturn(newCaseDetails);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("poBox", "12345");
+        data.put("journeyClassification", EXCEPTION.name());
+        data.put("formType", "A1");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
+        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
+        data.put(ExceptionRecordFields.CONTAINS_PAYMENTS, YesNoFieldValues.YES);
+        data.put(ExceptionRecordFields.ENVELOPE_ID, "987");
+        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, "sample jurisdiction");
+
+        CaseDetails caseDetails =
+            TestCaseBuilder
+                .createCaseWith(builder -> builder
+                    .id(CASE_ID)
+                    .caseTypeId(CASE_TYPE_ID)
+                    .jurisdiction("some jurisdiction")
+                    .data(data)
+                );
+
+        PaymentsPublishingException paymentException = new PaymentsPublishingException("Error message", null);
+        doThrow(paymentException)
+            .when(paymentsProcessor)
+            .updatePayments(any(), anyLong());
+
+        // when
+        ProcessResult result =
+            service
+                .process(
+                    new CcdCallbackRequest(EVENT_ID_CREATE_NEW_CASE, caseDetails, true),
+                    IDAM_TOKEN,
+                    USER_ID
+                );
+
+        // then
+        assertThat(result.getErrors()).containsExactly("Internal error. " + paymentException.getMessage());
+        assertThat(result.getWarnings()).isEmpty();
     }
 
     private void setUpTransformationUrl() {
