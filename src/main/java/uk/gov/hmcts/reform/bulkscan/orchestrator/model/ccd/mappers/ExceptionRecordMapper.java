@@ -46,7 +46,8 @@ public class ExceptionRecordMapper {
             envelope.id,
             CollectionUtils.isEmpty(envelope.payments) ? NO : YES,
             CollectionUtils.isEmpty(envelope.payments) ? NO : YES,
-            envelope.caseRef
+            envelope.caseRef,
+            envelope.legacyCaseRef
         );
     }
 

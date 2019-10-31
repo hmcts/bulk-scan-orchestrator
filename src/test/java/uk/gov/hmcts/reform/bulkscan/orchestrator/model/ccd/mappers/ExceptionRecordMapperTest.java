@@ -68,6 +68,7 @@ class ExceptionRecordMapperTest {
 
         assertThat(exceptionRecord.envelopeId).isEqualTo(envelope.id);
         assertThat(exceptionRecord.envelopeCaseReference).isEqualTo(envelope.caseRef);
+        assertThat(exceptionRecord.envelopeLegacyCaseReference).isEqualTo(envelope.legacyCaseRef);
     }
 
     @Test
@@ -121,7 +122,7 @@ class ExceptionRecordMapperTest {
     }
 
     @Test
-    public void mapEnvelope_sets_envelope_case_ref_to_exception_record() {
+    public void mapEnvelope_sets_envelope_case_reference_fields_to_exception_record() {
         //given
         Envelope envelope = envelope(1, null, null, emptyList());
 
@@ -130,6 +131,7 @@ class ExceptionRecordMapperTest {
 
         // then
         assertThat(exceptionRecord.envelopeCaseReference).isEqualTo(envelope.caseRef);
+        assertThat(exceptionRecord.envelopeLegacyCaseReference).isEqualTo(envelope.legacyCaseRef);
     }
 
     @Test
