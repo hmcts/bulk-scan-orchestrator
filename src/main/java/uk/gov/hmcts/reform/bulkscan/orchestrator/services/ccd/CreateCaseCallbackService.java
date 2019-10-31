@@ -267,7 +267,7 @@ public class CreateCaseCallbackService {
                 exception
             );
 
-            throw new CallbackException("Payment references cannot be processed", exception);
+            throw new CallbackException("Payment references cannot be processed. Please try again later", exception);
         } catch (Exception exception) {
             // log happens individually to cover transformation/ccd cases
             throw new CallbackException("Failed to create new case", exception);

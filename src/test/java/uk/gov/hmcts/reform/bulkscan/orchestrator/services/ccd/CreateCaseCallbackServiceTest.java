@@ -804,7 +804,7 @@ class CreateCaseCallbackServiceTest {
         );
 
         // then
-        assertThat(exception.getMessage()).isEqualTo("Payment references cannot be processed");
+        assertThat(exception.getMessage()).isEqualTo("Payment references cannot be processed. Please try again later");
         assertThat(exception.getCause()).isInstanceOf(PaymentsPublishingException.class);
     }
 
