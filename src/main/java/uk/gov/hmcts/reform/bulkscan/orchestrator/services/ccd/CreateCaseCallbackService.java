@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCas
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -202,7 +203,7 @@ public class CreateCaseCallbackService {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"squid:S2139", "unchecked"}) // squid for exception handle + logging
     private ProcessResult createNewCase(
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,
@@ -272,12 +273,22 @@ public class CreateCaseCallbackService {
             } else {
                 return new ProcessResult(exception.getResponse().warnings, exception.getResponse().errors);
             }
+        } catch (PaymentsPublishingException exception) {
+            log.error(
+                "Failed to send update to payment processor for {} exception record {}",
+                configItem.getService(),
+                exceptionRecord.id,
+                exception
+            );
+
+            throw new CallbackException("Payment references cannot be processed. Please try again later", exception);
         } catch (Exception exception) {
             // log happens individually to cover transformation/ccd cases
             throw new CallbackException("Failed to create new case", exception);
         }
     }
 
+    @SuppressWarnings("squid:S2139") // exception handle + logging
     private long createNewCaseInCcd(
         String idamToken,
         String s2sToken,
