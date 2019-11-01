@@ -217,17 +217,10 @@ class CreateCaseCallbackServiceTest {
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
 
-        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
-            .id(CASE_ID)
-            .caseTypeId(CASE_TYPE_ID)
-            .jurisdiction("some jurisdiction")
-            .data(data)
-        );
-
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
             EVENT_ID_CREATE_NEW_CASE,
-            caseDetails,
+            caseDetails(data),
             true
         ), IDAM_TOKEN, USER_ID);
 
@@ -247,27 +240,13 @@ class CreateCaseCallbackServiceTest {
         // given
         setUpTransformationUrl();
 
-        Map<String, Object> data = new HashMap<>();
-        // putting 6 via `ImmutableMap` is available from Java 9
-        data.put("poBox", "12345");
+        Map<String, Object> data = basicCaseData();
         data.put("journeyClassification", SUPPLEMENTARY_EVIDENCE.name());
-        data.put("formType", "Form1");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
-        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
-
-        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
-            .id(CASE_ID)
-            .caseTypeId(CASE_TYPE_ID)
-            .jurisdiction("some jurisdiction")
-            .data(data)
-        );
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
             EVENT_ID_CREATE_NEW_CASE,
-            caseDetails,
+            caseDetails(data),
             true
         ), IDAM_TOKEN, USER_ID);
 
@@ -296,32 +275,15 @@ class CreateCaseCallbackServiceTest {
             .when(transformationClient)
             .transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString());
 
-        Map<String, Object> data = new HashMap<>();
-        // putting 6 via `ImmutableMap` is available from Java 9
-        data.put("poBox", "12345");
-        data.put("journeyClassification", EXCEPTION.name());
-        data.put("formType", "Form1");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
-        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
-
-        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
-            .id(CASE_ID)
-            .caseTypeId(CASE_TYPE_ID)
-            .jurisdiction("some jurisdiction")
-            .data(data)
-        );
-
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
             EVENT_ID_CREATE_NEW_CASE,
-            caseDetails,
+            caseDetails(basicCaseData()),
             true
         ), IDAM_TOKEN, USER_ID);
 
         // then
-        assertThat(result.getModifiedFields()).isEmpty();
+        assertThat(result.getExceptionRecordData()).isEmpty();
         assertThat(result.getWarnings()).containsOnly("warning");
         assertThat(result.getErrors()).containsOnly("error");
     }
@@ -331,34 +293,18 @@ class CreateCaseCallbackServiceTest {
         // given
         setUpTransformationUrl();
 
-        Map<String, Object> data = new HashMap<>();
-        // putting 6 via `ImmutableMap` is available from Java 9
-        data.put("poBox", "12345");
-        data.put("journeyClassification", EXCEPTION.name());
-        data.put("formType", "Form1");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
-        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
-
-        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
-            .id(CASE_ID)
-            .caseTypeId(CASE_TYPE_ID)
-            .jurisdiction("some jurisdiction")
-            .data(data)
-        );
         when(ccdApi.getCaseRefsByBulkScanCaseReference(Long.toString(CASE_ID), null))
             .thenReturn(singletonList(345L));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
             EVENT_ID_CREATE_NEW_CASE,
-            caseDetails,
+            caseDetails(basicCaseData()),
             true
         ), IDAM_TOKEN, USER_ID);
 
         // then
-        assertThat(result.getModifiedFields().get(CASE_REFERENCE)).isEqualTo("345");
+        assertThat(result.getExceptionRecordData().get(CASE_REFERENCE)).isEqualTo("345");
         assertThat(result.getWarnings().isEmpty()).isTrue();
         assertThat(result.getErrors().isEmpty()).isTrue();
     }
@@ -368,36 +314,20 @@ class CreateCaseCallbackServiceTest {
         // given
         setUpTransformationUrl();
 
-        Map<String, Object> data = new HashMap<>();
-        // putting 6 via `ImmutableMap` is available from Java 9
-        data.put("poBox", "12345");
-        data.put("journeyClassification", EXCEPTION.name());
-        data.put("formType", "Form1");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
-        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
-
-        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
-            .id(CASE_ID)
-            .caseTypeId(CASE_TYPE_ID)
-            .jurisdiction("some jurisdiction")
-            .data(data)
-        );
         when(ccdApi.getCaseRefsByBulkScanCaseReference(Long.toString(CASE_ID), null))
             .thenReturn(asList(345L, 456L));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
             EVENT_ID_CREATE_NEW_CASE,
-            caseDetails,
+            caseDetails(basicCaseData()),
             true
         ), IDAM_TOKEN, USER_ID);
 
         // then
 
         // then
-        assertThat(result.getModifiedFields()).isEmpty();
+        assertThat(result.getExceptionRecordData()).isEmpty();
         assertThat(result.getWarnings()).isEmpty();
         assertThat(result.getErrors()).containsOnly(
             "Multiple cases (345, 456) found for the given bulk scan case reference: 123"
@@ -409,21 +339,10 @@ class CreateCaseCallbackServiceTest {
         // given
         setUpTransformationUrl();
 
-        Map<String, Object> data = new HashMap<>();
-        // putting 6 via `ImmutableMap` is available from Java 9
-        data.put("poBox", "12345");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("formType", "Form1");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
-        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
+        Map<String, Object> data = basicCaseData();
+        data.remove("journeyClassification");
 
-        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
-            .id(CASE_ID)
-            .caseTypeId(CASE_TYPE_ID)
-            .jurisdiction("some jurisdiction")
-            .data(data)
-        );
+        CaseDetails caseDetails = caseDetails(data);
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -442,22 +361,10 @@ class CreateCaseCallbackServiceTest {
         // given
         setUpTransformationUrl();
 
-        Map<String, Object> data = new HashMap<>();
-
-        data.put("poBox", "12345");
+        Map<String, Object> data = basicCaseData();
         data.put("journeyClassification", "EXCEPTIONS");
-        data.put("formType", "Form1");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "filename"));
-        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
 
-        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
-            .id(CASE_ID)
-            .caseTypeId(CASE_TYPE_ID)
-            .jurisdiction("some jurisdiction")
-            .data(data)
-        );
+        CaseDetails caseDetails = caseDetails(data);
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -577,22 +484,10 @@ class CreateCaseCallbackServiceTest {
         // given
         setUpTransformationUrl();
 
-        Map<String, Object> data = new HashMap<>();
-
-        data.put("poBox", "12345");
-        data.put("journeyClassification", EXCEPTION.name());
+        Map<String, Object> data = basicCaseData();
         data.put("formType", null);
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
-        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
 
-        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
-            .id(CASE_ID)
-            .caseTypeId(CASE_TYPE_ID)
-            .jurisdiction("some jurisdiction")
-            .data(data)
-        );
+        CaseDetails caseDetails = caseDetails(data);
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -638,27 +533,10 @@ class CreateCaseCallbackServiceTest {
         given(coreCaseDataApi.submitForCaseworker(any(), any(), any(), any(), any(), anyBoolean(), any()))
             .willReturn(newCaseDetails);
 
-        Map<String, Object> data = new HashMap<>();
+        Map<String, Object> data = basicCaseData();
+        data.put(ExceptionRecordFields.CONTAINS_PAYMENTS, YesNoFieldValues.YES); // has payments!
 
-        data.put("poBox", "12345");
-        data.put("journeyClassification", EXCEPTION.name());
-        data.put("formType", "A1");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
-        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
-        data.put(ExceptionRecordFields.CONTAINS_PAYMENTS, YesNoFieldValues.YES);
-        data.put(ExceptionRecordFields.ENVELOPE_ID, "987");
-        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, "sample jurisdiction");
-
-        CaseDetails caseDetails =
-            TestCaseBuilder
-                .createCaseWith(builder -> builder
-                    .id(CASE_ID)
-                    .caseTypeId(CASE_TYPE_ID)
-                    .jurisdiction("some jurisdiction")
-                    .data(data)
-                );
+        CaseDetails caseDetails = caseDetails(data);
 
         // when
         ProcessResult result =
@@ -703,27 +581,10 @@ class CreateCaseCallbackServiceTest {
         given(coreCaseDataApi.submitForCaseworker(any(), any(), any(), any(), any(), anyBoolean(), any()))
             .willReturn(newCaseDetails);
 
-        Map<String, Object> data = new HashMap<>();
-
-        data.put("poBox", "12345");
-        data.put("journeyClassification", EXCEPTION.name());
-        data.put("formType", "A1");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
-        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
+        Map<String, Object> data = basicCaseData();
         data.put(ExceptionRecordFields.CONTAINS_PAYMENTS, YesNoFieldValues.NO); // no payments!
-        data.put(ExceptionRecordFields.ENVELOPE_ID, "987");
-        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, "sample jurisdiction");
 
-        CaseDetails caseDetails =
-            TestCaseBuilder
-                .createCaseWith(builder -> builder
-                    .id(CASE_ID)
-                    .caseTypeId(CASE_TYPE_ID)
-                    .jurisdiction("some jurisdiction")
-                    .data(data)
-                );
+        CaseDetails caseDetails = caseDetails(data);
 
         // when
         ProcessResult result =
@@ -766,26 +627,7 @@ class CreateCaseCallbackServiceTest {
         given(coreCaseDataApi.submitForCaseworker(any(), any(), any(), any(), any(), anyBoolean(), any()))
             .willReturn(newCaseDetails);
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("poBox", "12345");
-        data.put("journeyClassification", EXCEPTION.name());
-        data.put("formType", "A1");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
-        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
-        data.put(ExceptionRecordFields.CONTAINS_PAYMENTS, YesNoFieldValues.YES);
-        data.put(ExceptionRecordFields.ENVELOPE_ID, "987");
-        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, "sample jurisdiction");
-
-        CaseDetails caseDetails =
-            TestCaseBuilder
-                .createCaseWith(builder -> builder
-                    .id(CASE_ID)
-                    .caseTypeId(CASE_TYPE_ID)
-                    .jurisdiction("some jurisdiction")
-                    .data(data)
-                );
+        CaseDetails caseDetails = caseDetails(basicCaseData());
 
         PaymentsPublishingException paymentException = new PaymentsPublishingException("Error message", null);
         doThrow(paymentException)
@@ -813,33 +655,14 @@ class CreateCaseCallbackServiceTest {
         // given
         setUpTransformationUrl();
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("poBox", "12345");
-        data.put("journeyClassification", EXCEPTION.name());
-        data.put("formType", "A1");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
-        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
-        data.put(ExceptionRecordFields.CONTAINS_PAYMENTS, YesNoFieldValues.YES);
+        Map<String, Object> data = basicCaseData();
         data.put(ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING, YesNoFieldValues.YES);
-        data.put(ExceptionRecordFields.ENVELOPE_ID, "987");
-        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, "sample jurisdiction");
-
-        CaseDetails caseDetails =
-            TestCaseBuilder
-                .createCaseWith(builder -> builder
-                    .id(CASE_ID)
-                    .caseTypeId(CASE_TYPE_ID)
-                    .jurisdiction("some jurisdiction")
-                    .data(data)
-                );
 
         // when
         ProcessResult result =
             service
                 .process(
-                    new CcdCallbackRequest(EVENT_ID_CREATE_NEW_CASE, caseDetails, false),
+                    new CcdCallbackRequest(EVENT_ID_CREATE_NEW_CASE, caseDetails(data), false),
                     IDAM_TOKEN,
                     USER_ID
                 );
@@ -853,5 +676,29 @@ class CreateCaseCallbackServiceTest {
         ServiceConfigItem configItem = new ServiceConfigItem();
         configItem.setTransformationUrl("url");
         when(serviceConfigProvider.getConfig(SERVICE)).thenReturn(configItem);
+    }
+
+    private Map<String, Object> basicCaseData() {
+        Map<String, Object> data = new HashMap<>();
+        data.put("poBox", "12345");
+        data.put("journeyClassification", EXCEPTION.name());
+        data.put("formType", "A1");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
+        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
+        data.put(ExceptionRecordFields.CONTAINS_PAYMENTS, YesNoFieldValues.YES);
+        data.put(ExceptionRecordFields.ENVELOPE_ID, "987");
+        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, "sample jurisdiction");
+        return data;
+    }
+
+    private CaseDetails caseDetails(Map<String, Object> data) {
+        return TestCaseBuilder.createCaseWith(builder -> builder
+            .id(CASE_ID)
+            .caseTypeId(CASE_TYPE_ID)
+            .jurisdiction("some jurisdiction")
+            .data(data)
+        );
     }
 }

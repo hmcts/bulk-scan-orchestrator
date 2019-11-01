@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import io.vavr.collection.Seq;
 import io.vavr.control.Either;
 import io.vavr.control.Validation;
@@ -386,8 +387,10 @@ public class AttachCaseCallbackService {
         Map<String, Object> originalFields,
         Map<String, Object> modifiedFields
     ) {
-        Map<String, Object> merged = new HashMap<>();
-        merged.putAll(originalFields);
+        Map<String, Object> merged = new HashMap<>(
+            Maps.difference(originalFields, modifiedFields).entriesOnlyOnLeft()
+        );
+
         merged.putAll(modifiedFields);
         return merged;
     }
