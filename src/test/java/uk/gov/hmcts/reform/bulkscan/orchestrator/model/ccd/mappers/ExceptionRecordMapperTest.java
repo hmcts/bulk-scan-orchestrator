@@ -22,6 +22,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.JURSIDICTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 
 class ExceptionRecordMapperTest {
@@ -131,6 +132,19 @@ class ExceptionRecordMapperTest {
 
         // then
         assertThat(exceptionRecord.envelopeCaseReference).isEqualTo(envelope.caseRef);
+        assertThat(exceptionRecord.envelopeLegacyCaseReference).isEqualTo(envelope.legacyCaseRef);
+    }
+
+    @Test
+    public void mapEnvelope_sets_envelope_case_reference_as_null_in_exception_record() {
+        //given
+        Envelope envelope = envelope(Classification.SUPPLEMENTARY_EVIDENCE, JURSIDICTION, "  ");
+
+        // when
+        ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
+
+        // then
+        assertThat(exceptionRecord.envelopeCaseReference).isNull();
         assertThat(exceptionRecord.envelopeLegacyCaseReference).isEqualTo(envelope.legacyCaseRef);
     }
 
