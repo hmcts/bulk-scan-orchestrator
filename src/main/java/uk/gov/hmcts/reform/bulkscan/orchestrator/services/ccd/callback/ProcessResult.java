@@ -11,26 +11,26 @@ import static java.util.Collections.emptyMap;
  */
 public class ProcessResult {
 
-    private final Map<String, Object> modifiedFields;
+    private final Map<String, Object> exceptionRecordData;
 
     private final List<String> warnings;
 
     private final List<String> errors;
 
-    public ProcessResult(Map<String, Object> modifiedFields) {
-        this.modifiedFields = modifiedFields;
+    public ProcessResult(Map<String, Object> exceptionRecordData) {
+        this.exceptionRecordData = exceptionRecordData;
         this.warnings = emptyList();
         this.errors = emptyList();
     }
 
     public ProcessResult(List<String> warnings, List<String> errors) {
-        this.modifiedFields = emptyMap();
+        this.exceptionRecordData = emptyMap();
         this.warnings = warnings;
         this.errors = errors;
     }
 
-    public Map<String, Object> getModifiedFields() {
-        return modifiedFields;
+    public Map<String, Object> getExceptionRecordData() {
+        return exceptionRecordData;
     }
 
     public List<String> getWarnings() {
