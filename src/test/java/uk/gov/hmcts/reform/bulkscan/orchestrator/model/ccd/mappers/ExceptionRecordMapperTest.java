@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdKeyValue;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.CcdCaseReferenceType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
@@ -22,7 +23,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.JURSIDICTION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.CASE_LEGACY_ID;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 
 class ExceptionRecordMapperTest {
@@ -133,19 +135,36 @@ class ExceptionRecordMapperTest {
         // then
         assertThat(exceptionRecord.envelopeCaseReference).isEqualTo(envelope.caseRef);
         assertThat(exceptionRecord.envelopeLegacyCaseReference).isEqualTo(envelope.legacyCaseRef);
+        assertThat(exceptionRecord.displayCaseReferenceType).isEqualTo(CcdCaseReferenceType.ALL.name());
     }
 
     @Test
-    public void mapEnvelope_sets_envelope_case_reference_as_null_in_exception_record() {
+    public void mapEnvelope_sets_case_reference_type_when_legacy_case_reference_value_is_not_provided() {
         //given
-        Envelope envelope = envelope(Classification.SUPPLEMENTARY_EVIDENCE, JURSIDICTION, "  ");
+        Envelope envelope = envelope(CASE_REF, null);
+
+        // when
+        ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
+
+        // then
+        assertThat(exceptionRecord.envelopeCaseReference).isEqualTo(CASE_REF);
+        assertThat(exceptionRecord.envelopeLegacyCaseReference).isEqualTo(null);
+        assertThat(exceptionRecord.displayCaseReferenceType).isEqualTo(CcdCaseReferenceType.CASE_REFERENCE.name());
+    }
+
+    @Test
+    public void mapEnvelope_sets_case_reference_type_when_case_reference_value_is_not_provided() {
+        //given
+        Envelope envelope = envelope(null, CASE_LEGACY_ID);
 
         // when
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
 
         // then
         assertThat(exceptionRecord.envelopeCaseReference).isNull();
-        assertThat(exceptionRecord.envelopeLegacyCaseReference).isEqualTo(envelope.legacyCaseRef);
+        assertThat(exceptionRecord.envelopeLegacyCaseReference).isEqualTo(CASE_LEGACY_ID);
+        assertThat(exceptionRecord.displayCaseReferenceType)
+            .isEqualTo(CcdCaseReferenceType.LEGACY_CASE_REFERENCE.name());
     }
 
     @Test
