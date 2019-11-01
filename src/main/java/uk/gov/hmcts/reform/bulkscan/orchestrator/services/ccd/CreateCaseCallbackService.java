@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import feign.FeignException;
 import io.vavr.collection.Seq;
 import io.vavr.control.Try;
@@ -182,11 +183,10 @@ public class CreateCaseCallbackService {
                 );
             } else if (ids.size() == 1) {
                 return new ProcessResult(
-                    ImmutableMap.<String, Object>builder()
-                        .put(CASE_REFERENCE, Long.toString(ids.get(0)))
-                        .put(DISPLAY_WARNINGS, YesNoFieldValues.NO)
-                        .put(OCR_DATA_VALIDATION_WARNINGS, emptyList())
-                        .build()
+                    prepareResultExceptionRecord(
+                        exceptionRecordData.getData(),
+                        ids.get(0)
+                    )
                 );
             } else {
                 return new ProcessResult(
@@ -261,11 +261,7 @@ public class CreateCaseCallbackService {
             paymentsProcessor.updatePayments(exceptionRecordData, newCaseId);
 
             return new ProcessResult(
-                ImmutableMap.<String, Object>builder()
-                    .put(CASE_REFERENCE, Long.toString(newCaseId))
-                    .put(DISPLAY_WARNINGS, YesNoFieldValues.NO)
-                    .put(OCR_DATA_VALIDATION_WARNINGS, emptyList())
-                    .build()
+                prepareResultExceptionRecord(exceptionRecordData.getData(), newCaseId)
             );
         } catch (InvalidCaseDataException exception) {
             if (BAD_REQUEST.equals(exception.getStatus())) {
@@ -364,5 +360,19 @@ public class CreateCaseCallbackService {
                 exceptionRecordId
             );
         }
+    }
+
+    private Map<String, Object> prepareResultExceptionRecord(Map<String, Object> originalFields, Long caseReference) {
+        Map<String, Object> fieldsToUpdate =
+            ImmutableMap.<String, Object>builder()
+                .put(CASE_REFERENCE, Long.toString(caseReference))
+                .put(DISPLAY_WARNINGS, YesNoFieldValues.NO)
+                .put(OCR_DATA_VALIDATION_WARNINGS, emptyList())
+                .build();
+
+        return ImmutableMap.<String, Object>builder()
+            .putAll(Maps.difference(originalFields, fieldsToUpdate).entriesOnlyOnLeft())
+            .putAll(fieldsToUpdate)
+            .build();
     }
 }
