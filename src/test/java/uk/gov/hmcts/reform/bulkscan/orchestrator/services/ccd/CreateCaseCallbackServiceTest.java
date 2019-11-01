@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
@@ -62,6 +64,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("checkstyle:LineLength")
 class CreateCaseCallbackServiceTest {
 
     private static final String IDAM_TOKEN = "idam-token";
@@ -650,10 +653,19 @@ class CreateCaseCallbackServiceTest {
         assertThat(exception.getCause()).isInstanceOf(PaymentsPublishingException.class);
     }
 
-    @Test
-    void should_return_warning_if_payments_have_not_been_processed_yet() throws Exception {
+    @ParameterizedTest(name = "Allowed to proceed: {0}. User ignores warnings: {1}")
+    @CsvSource({
+        "false, false",
+        "false, true",
+        "true, false",
+        // {true, true} case tested separately - no warnings or errors are returned
+    })
+    void should_return_either_a_warning_or_error_when_payment_are_not_processed_based_on_service_config(
+        boolean isAllowedToProceed,
+        boolean ignoresWarnings
+    ) {
         // given
-        setUpTransformationUrl();
+        setUpServiceConfig("https://localhost", isAllowedToProceed);
 
         Map<String, Object> data = basicCaseData();
         data.put(ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING, YesNoFieldValues.YES);
@@ -662,19 +674,74 @@ class CreateCaseCallbackServiceTest {
         ProcessResult result =
             service
                 .process(
-                    new CcdCallbackRequest(EVENT_ID_CREATE_NEW_CASE, caseDetails(data), false),
+                    new CcdCallbackRequest(EVENT_ID_CREATE_NEW_CASE, caseDetails(data), ignoresWarnings),
                     IDAM_TOKEN,
                     USER_ID
                 );
 
         // then
-        assertThat(result.getWarnings())
-            .containsExactly("Payments for this Exception Record have not been processed yet");
+        if (isAllowedToProceed) {
+            assertThat(result.getErrors()).isEmpty();
+            assertThat(result.getWarnings()).containsExactly(CreateCaseCallbackService.AWAITING_PAYMENTS_MESSAGE);
+        } else {
+            assertThat(result.getErrors()).containsExactly(CreateCaseCallbackService.AWAITING_PAYMENTS_MESSAGE);
+            assertThat(result.getWarnings()).isEmpty();
+        }
+    }
+
+    @Test
+    void should_allow_creating_case_when_payments_are_not_present_but_user_is_allowed_to_proceed_and_ignores_warnings() throws Exception {
+        // given
+        setUpServiceConfig("https://localhost", true); // allowed to create case despite pending payments
+
+        given(transformationClient.transformExceptionRecord(any(), any(), any()))
+            .willReturn(
+                new SuccessfulTransformationResponse(
+                    new CaseCreationDetails(
+                        "some_case_type",
+                        "some_event_id",
+                        emptyMap()
+                    ),
+                    emptyList()
+                )
+            );
+
+        given(coreCaseDataApi.startForCaseworker(any(), any(), any(), any(), any(), any()))
+            .willReturn(mock(StartEventResponse.class));
+
+        CaseDetails newCaseDetails = mock(CaseDetails.class);
+        doReturn(123L).when(newCaseDetails).getId();
+
+        given(coreCaseDataApi.submitForCaseworker(any(), any(), any(), any(), any(), anyBoolean(), any()))
+            .willReturn(newCaseDetails);
+
+        Map<String, Object> data = basicCaseData();
+        data.put(ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING, YesNoFieldValues.YES);
+
+        // when
+        ProcessResult result =
+            service
+                .process(
+                    new CcdCallbackRequest(EVENT_ID_CREATE_NEW_CASE, caseDetails(data), true), // ignore warnings
+                    IDAM_TOKEN,
+                    USER_ID
+                );
+
+        // then
+        assertThat(result.getErrors()).isEmpty();
+        assertThat(result.getWarnings()).isEmpty();
     }
 
     private void setUpTransformationUrl() {
         ServiceConfigItem configItem = new ServiceConfigItem();
         configItem.setTransformationUrl("url");
+        when(serviceConfigProvider.getConfig(SERVICE)).thenReturn(configItem);
+    }
+
+    private void setUpServiceConfig(String transformationUrl, boolean allowCreatingCaseBeforePaymentsAreProcessed) {
+        ServiceConfigItem configItem = new ServiceConfigItem();
+        configItem.setTransformationUrl(transformationUrl);
+        configItem.setAllowCreatingCaseBeforePaymentsAreProcessed(allowCreatingCaseBeforePaymentsAreProcessed);
         when(serviceConfigProvider.getConfig(SERVICE)).thenReturn(configItem);
     }
 

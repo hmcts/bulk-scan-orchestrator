@@ -52,7 +52,7 @@ public class CreateCaseCallbackService {
 
     private static final String EXCEPTION_RECORD_REFERENCE = "bulkScanCaseReference";
 
-    private static final String AWAITING_PAYMENTS_MESSAGE = "Payments for this Exception Record have not been processed yet";
+    public static final String AWAITING_PAYMENTS_MESSAGE = "Payments for this Exception Record have not been processed yet";
 
     private final CreateCaseValidator validator;
     private final ServiceConfigProvider serviceConfigProvider;
