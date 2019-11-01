@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.env
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentMapper.getLocalDateTime;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentMapper.mapDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues.NO;
@@ -46,8 +47,8 @@ public class ExceptionRecordMapper {
             envelope.id,
             CollectionUtils.isEmpty(envelope.payments) ? NO : YES,
             CollectionUtils.isEmpty(envelope.payments) ? NO : YES,
-            envelope.caseRef,
-            envelope.legacyCaseRef
+            isBlank(envelope.caseRef) ? null : envelope.caseRef,
+            isBlank(envelope.legacyCaseRef) ? null : envelope.legacyCaseRef
         );
     }
 
