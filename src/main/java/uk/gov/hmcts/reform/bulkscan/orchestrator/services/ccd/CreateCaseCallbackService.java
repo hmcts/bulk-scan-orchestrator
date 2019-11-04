@@ -32,24 +32,27 @@ public class CreateCaseCallbackService {
 
     private static final Logger log = LoggerFactory.getLogger(CreateCaseCallbackService.class);
 
+    public static final String AWAITING_PAYMENTS_MESSAGE =
+        "Payments for this Exception Record have not been processed yet";
+
     private final CreateCaseValidator validator;
     private final ServiceConfigProvider serviceConfigProvider;
     private final CcdApi ccdApi;
-    private final CcdCaseSubmitter ccdCaseSubmitter;
-    private final ExceptionRecordProvider exceptionRecordProvider;
+    private final CcdNewCaseCreator ccdNewCaseCreator;
+    private final ExceptionRecordFinalizer exceptionRecordFinalizer;
 
     public CreateCaseCallbackService(
         CreateCaseValidator validator,
         ServiceConfigProvider serviceConfigProvider,
         CcdApi ccdApi,
-        CcdCaseSubmitter ccdCaseSubmitter,
-        ExceptionRecordProvider exceptionRecordProvider
+        CcdNewCaseCreator ccdNewCaseCreator,
+        ExceptionRecordFinalizer exceptionRecordFinalizer
     ) {
         this.validator = validator;
         this.serviceConfigProvider = serviceConfigProvider;
         this.ccdApi = ccdApi;
-        this.ccdCaseSubmitter = ccdCaseSubmitter;
-        this.exceptionRecordProvider = exceptionRecordProvider;
+        this.ccdNewCaseCreator = ccdNewCaseCreator;
+        this.exceptionRecordFinalizer = exceptionRecordFinalizer;
     }
 
     /**
@@ -139,15 +142,14 @@ public class CreateCaseCallbackService {
             .map(awaiting -> awaiting.toString().equals(YesNoFieldValues.YES))
             .orElse(false);
 
-        if (awaitsPaymentProcessing && !ignoreWarnings) {
-            return new ProcessResult(
-                singletonList("Payments for this Exception Record have not been processed yet"),
-                emptyList()
-            );
+        if (awaitsPaymentProcessing && configItem.allowCreatingCaseBeforePaymentsAreProcessed() && !ignoreWarnings) {
+            return new ProcessResult(singletonList(AWAITING_PAYMENTS_MESSAGE), emptyList());
+        } else if (awaitsPaymentProcessing && !configItem.allowCreatingCaseBeforePaymentsAreProcessed()) {
+            return new ProcessResult(emptyList(), singletonList(AWAITING_PAYMENTS_MESSAGE));
         } else {
             List<Long> ids = ccdApi.getCaseRefsByBulkScanCaseReference(exceptionRecord.id, configItem.getService());
             if (ids.isEmpty()) {
-                return ccdCaseSubmitter.createNewCase(
+                return ccdNewCaseCreator.createNewCase(
                     exceptionRecord,
                     configItem,
                     ignoreWarnings,
@@ -157,7 +159,7 @@ public class CreateCaseCallbackService {
                 );
             } else if (ids.size() == 1) {
                 return new ProcessResult(
-                    exceptionRecordProvider.prepareResultExceptionRecord(
+                    exceptionRecordFinalizer.finalizeExceptionRecord(
                         exceptionRecordData.getData(),
                         ids.get(0)
                     )

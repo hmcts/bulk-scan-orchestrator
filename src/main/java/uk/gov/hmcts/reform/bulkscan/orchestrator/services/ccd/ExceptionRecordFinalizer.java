@@ -13,9 +13,9 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.OCR_DATA_VALIDATION_WARNINGS;
 
 @Service
-public class ExceptionRecordProvider {
+public class ExceptionRecordFinalizer {
 
-    public Map<String, Object> prepareResultExceptionRecord(
+    public Map<String, Object> finalizeExceptionRecord(
         Map<String, Object> originalFields,
         Long caseReference
     ) {

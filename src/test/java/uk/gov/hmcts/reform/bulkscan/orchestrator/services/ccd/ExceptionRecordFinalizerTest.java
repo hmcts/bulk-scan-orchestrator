@@ -14,14 +14,14 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.OCR_DATA_VALIDATION_WARNINGS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues.NO;
 
-class ExceptionRecordProviderTest {
+class ExceptionRecordFinalizerTest {
 
-    public static final long CASE = 100L;
-    private ExceptionRecordProvider exceptionRecordProvider;
+    private static final long CASE_ID = 100L;
+    private ExceptionRecordFinalizer exceptionRecordFinalizer;
 
     @BeforeEach
     void setUp() {
-        exceptionRecordProvider = new ExceptionRecordProvider();
+        exceptionRecordFinalizer = new ExceptionRecordFinalizer();
     }
 
     @Test
@@ -31,11 +31,11 @@ class ExceptionRecordProviderTest {
         originalValues.put("field1", "value1");
 
         // when
-        Map<String,Object> res = exceptionRecordProvider.prepareResultExceptionRecord(originalValues, CASE);
+        Map<String,Object> res = exceptionRecordFinalizer.finalizeExceptionRecord(originalValues, CASE_ID);
 
         // then
         assertThat(res.get("field1")).isEqualTo("value1");
-        assertThat(res.get(ExceptionRecordFields.CASE_REFERENCE)).isEqualTo(Long.toString(CASE));
+        assertThat(res.get(ExceptionRecordFields.CASE_REFERENCE)).isEqualTo(Long.toString(CASE_ID));
         assertThat(res.get(DISPLAY_WARNINGS)).isEqualTo(NO);
         assertThat(res.get(OCR_DATA_VALIDATION_WARNINGS)).isEqualTo(emptyList());
     }
@@ -50,11 +50,11 @@ class ExceptionRecordProviderTest {
         originalValues.put(OCR_DATA_VALIDATION_WARNINGS, asList("value4"));
 
         // when
-        Map<String,Object> res = exceptionRecordProvider.prepareResultExceptionRecord(originalValues, CASE);
+        Map<String,Object> res = exceptionRecordFinalizer.finalizeExceptionRecord(originalValues, CASE_ID);
 
         // then
         assertThat(res.get("field1")).isEqualTo("value1");
-        assertThat(res.get(ExceptionRecordFields.CASE_REFERENCE)).isEqualTo(Long.toString(CASE));
+        assertThat(res.get(ExceptionRecordFields.CASE_REFERENCE)).isEqualTo(Long.toString(CASE_ID));
         assertThat(res.get(DISPLAY_WARNINGS)).isEqualTo(NO);
         assertThat(res.get(OCR_DATA_VALIDATION_WARNINGS)).isEqualTo(emptyList());
     }

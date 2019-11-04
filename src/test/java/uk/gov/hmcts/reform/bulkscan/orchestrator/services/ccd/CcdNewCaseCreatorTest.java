@@ -48,7 +48,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 
 @ExtendWith(MockitoExtension.class)
-class CcdCaseSubmitterTest {
+class CcdNewCaseCreatorTest {
 
     private static final String IDAM_TOKEN = "idam-token";
     private static final String USER_ID = "user-id";
@@ -69,18 +69,18 @@ class CcdCaseSubmitterTest {
     private CoreCaseDataApi coreCaseDataApi;
 
     @Mock
-    private ExceptionRecordProvider exceptionRecordProvider;
+    private ExceptionRecordFinalizer exceptionRecordFinalizer;
 
-    private CcdCaseSubmitter ccdCaseSubmitter;
+    private CcdNewCaseCreator ccdNewCaseCreator;
 
     @BeforeEach
     void setUp() {
-        ccdCaseSubmitter = new CcdCaseSubmitter(
+        ccdNewCaseCreator = new CcdNewCaseCreator(
             transformationClient,
             s2sTokenGenerator,
             paymentsProcessor,
             coreCaseDataApi,
-            exceptionRecordProvider
+            exceptionRecordFinalizer
         );
     }
 
@@ -153,7 +153,7 @@ class CcdCaseSubmitterTest {
 
         // when
         ProcessResult result =
-            ccdCaseSubmitter
+            ccdNewCaseCreator
                 .createNewCase(
                     exceptionRecord,
                     configItem,
@@ -166,7 +166,7 @@ class CcdCaseSubmitterTest {
         assertThat(result.getErrors()).isEmpty();
         assertThat(result.getWarnings()).isEmpty();
 
-        verify(exceptionRecordProvider).prepareResultExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer).finalizeExceptionRecord(anyMap(), anyLong());
         verify(paymentsProcessor).updatePayments(caseDetails, CASE_ID);
     }
 
@@ -239,7 +239,7 @@ class CcdCaseSubmitterTest {
 
         // when
         ProcessResult result =
-            ccdCaseSubmitter
+            ccdNewCaseCreator
                 .createNewCase(
                     exceptionRecord,
                     configItem,
@@ -253,9 +253,9 @@ class CcdCaseSubmitterTest {
         assertThat(result.getErrors()).isEmpty();
         assertThat(result.getWarnings()).isEmpty();
 
-        verify(exceptionRecordProvider).prepareResultExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer).finalizeExceptionRecord(anyMap(), anyLong());
         verify(paymentsProcessor).updatePayments(caseDetails, CASE_ID);
-        verify(exceptionRecordProvider).prepareResultExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer).finalizeExceptionRecord(anyMap(), anyLong());
     }
 
     @Test
@@ -305,7 +305,7 @@ class CcdCaseSubmitterTest {
         );
 
         // when
-        ProcessResult result = ccdCaseSubmitter.createNewCase(
+        ProcessResult result = ccdNewCaseCreator.createNewCase(
             exceptionRecord,
             configItem,
             true,
@@ -319,6 +319,6 @@ class CcdCaseSubmitterTest {
         assertThat(result.getWarnings()).containsOnly("warning");
         assertThat(result.getErrors()).containsOnly("error");
 
-        verify(exceptionRecordProvider, never()).prepareResultExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
     }
 }

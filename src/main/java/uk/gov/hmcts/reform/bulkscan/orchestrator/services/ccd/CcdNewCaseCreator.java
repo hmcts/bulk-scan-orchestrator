@@ -26,8 +26,8 @@ import static java.util.Collections.emptyList;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Service
-public class CcdCaseSubmitter {
-    private static final Logger log = LoggerFactory.getLogger(CcdCaseSubmitter.class);
+public class CcdNewCaseCreator {
+    private static final Logger log = LoggerFactory.getLogger(CcdNewCaseCreator.class);
 
     private static final String EXCEPTION_RECORD_REFERENCE = "bulkScanCaseReference";
 
@@ -35,20 +35,20 @@ public class CcdCaseSubmitter {
     private final AuthTokenGenerator s2sTokenGenerator;
     private final PaymentsProcessor paymentsProcessor;
     private final CoreCaseDataApi coreCaseDataApi;
-    private final ExceptionRecordProvider exceptionRecordProvider;
+    private final ExceptionRecordFinalizer exceptionRecordFinalizer;
 
-    public CcdCaseSubmitter(
+    public CcdNewCaseCreator(
         TransformationClient transformationClient,
         AuthTokenGenerator s2sTokenGenerator,
         PaymentsProcessor paymentsProcessor,
         CoreCaseDataApi coreCaseDataApi,
-        ExceptionRecordProvider exceptionRecordProvider
+        ExceptionRecordFinalizer exceptionRecordFinalizer
     ) {
         this.transformationClient = transformationClient;
         this.s2sTokenGenerator = s2sTokenGenerator;
         this.paymentsProcessor = paymentsProcessor;
         this.coreCaseDataApi = coreCaseDataApi;
-        this.exceptionRecordProvider = exceptionRecordProvider;
+        this.exceptionRecordFinalizer = exceptionRecordFinalizer;
     }
 
     @SuppressWarnings({"squid:S2139", "unchecked"}) // squid for exception handle + logging
@@ -109,7 +109,7 @@ public class CcdCaseSubmitter {
             paymentsProcessor.updatePayments(exceptionRecordData, newCaseId);
 
             return new ProcessResult(
-                exceptionRecordProvider.prepareResultExceptionRecord(exceptionRecordData.getData(), newCaseId)
+                exceptionRecordFinalizer.finalizeExceptionRecord(exceptionRecordData.getData(), newCaseId)
             );
         } catch (InvalidCaseDataException exception) {
             if (BAD_REQUEST.equals(exception.getStatus())) {

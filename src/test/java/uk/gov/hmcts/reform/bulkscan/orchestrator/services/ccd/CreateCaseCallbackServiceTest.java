@@ -5,11 +5,12 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentType;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
@@ -20,18 +21,21 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFi
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceNotConfiguredException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -42,6 +46,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("checkstyle:LineLength")
 class CreateCaseCallbackServiceTest {
 
     private static final String IDAM_TOKEN = "idam-token";
@@ -55,25 +60,13 @@ class CreateCaseCallbackServiceTest {
     private ServiceConfigProvider serviceConfigProvider;
 
     @Mock
-    private TransformationClient transformationClient;
-
-    @Mock
-    private AuthTokenGenerator s2sTokenGenerator;
-
-    @Mock
-    private CoreCaseDataApi coreCaseDataApi;
-
-    @Mock
     private CcdApi ccdApi;
 
     @Mock
-    private PaymentsProcessor paymentsProcessor;
+    private CcdNewCaseCreator ccdNewCaseCreator;
 
     @Mock
-    private CcdCaseSubmitter ccdCaseSubmitter;
-
-    @Mock
-    private ExceptionRecordProvider exceptionRecordProvider;
+    private ExceptionRecordFinalizer exceptionRecordFinalizer;
 
     private CreateCaseCallbackService service;
 
@@ -83,8 +76,8 @@ class CreateCaseCallbackServiceTest {
             VALIDATOR,
             serviceConfigProvider,
             ccdApi,
-            ccdCaseSubmitter,
-            exceptionRecordProvider
+            ccdNewCaseCreator,
+            exceptionRecordFinalizer
         );
     }
 
@@ -103,7 +96,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException).hasMessage("The some event event is not supported. Please contact service team");
 
         verify(serviceConfigProvider, never()).getConfig(anyString());
-        verify(exceptionRecordProvider, never()).prepareResultExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
     }
 
     @Test
@@ -125,7 +118,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException).hasMessage("No case type ID supplied");
 
         verify(serviceConfigProvider, never()).getConfig(anyString());
-        verify(exceptionRecordProvider, never()).prepareResultExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
     }
 
     @Test
@@ -148,7 +141,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException).hasMessage("Case type ID () has invalid format");
 
         verify(serviceConfigProvider, never()).getConfig(anyString());
-        verify(exceptionRecordProvider, never()).prepareResultExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
     }
 
     @Test
@@ -171,7 +164,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException.getCause()).isNull();
         assertThat(callbackException).hasMessage("oh no");
 
-        verify(exceptionRecordProvider, never()).prepareResultExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
     }
 
     @Test
@@ -194,7 +187,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException.getCause()).isNull();
         assertThat(callbackException).hasMessage("Transformation URL is not configured");
 
-        verify(exceptionRecordProvider, never()).prepareResultExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
     }
 
     @Test
@@ -228,7 +221,7 @@ class CreateCaseCallbackServiceTest {
             )
         );
 
-        verify(exceptionRecordProvider, never()).prepareResultExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
     }
 
     @Test
@@ -256,7 +249,7 @@ class CreateCaseCallbackServiceTest {
             )
         );
 
-        verify(exceptionRecordProvider, never()).prepareResultExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
     }
 
     @Test
@@ -283,7 +276,7 @@ class CreateCaseCallbackServiceTest {
             "Multiple cases (345, 456) found for the given bulk scan case reference: 123"
         );
 
-        verify(exceptionRecordProvider, never()).prepareResultExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
     }
 
     @Test
@@ -307,7 +300,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(result.getWarnings()).isEmpty();
         assertThat(result.getErrors()).containsOnly("Missing journeyClassification");
 
-        verify(exceptionRecordProvider, never()).prepareResultExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
     }
 
     @Test
@@ -331,7 +324,7 @@ class CreateCaseCallbackServiceTest {
             "Invalid journeyClassification. Error: No enum constant " + Classification.class.getName() + ".EXCEPTIONS"
         );
 
-        verify(exceptionRecordProvider, never()).prepareResultExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
     }
 
     @Test
@@ -379,7 +372,7 @@ class CreateCaseCallbackServiceTest {
             "Invalid scannedDocuments format. Error: No enum constant " + DocumentType.class.getName() + ".OTHERS"
         );
 
-        verify(exceptionRecordProvider, never()).prepareResultExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
     }
 
     @Test
@@ -436,7 +429,7 @@ class CreateCaseCallbackServiceTest {
             .asString()
             .matches(match);
 
-        verify(exceptionRecordProvider, never()).prepareResultExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
     }
 
     @Test
@@ -463,13 +456,22 @@ class CreateCaseCallbackServiceTest {
             .asString()
             .matches(match);
 
-        verify(exceptionRecordProvider, never()).prepareResultExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
     }
 
-    @Test
-    void should_return_warning_if_payments_have_not_been_processed_yet() throws Exception {
+    @ParameterizedTest(name = "Allowed to proceed: {0}. User ignores warnings: {1}")
+    @CsvSource({
+        "false, false",
+        "false, true",
+        "true, false",
+        // {true, true} case tested separately - no warnings or errors are returned
+    })
+    void should_return_either_a_warning_or_error_when_payment_are_not_processed_based_on_service_config(
+        boolean isAllowedToProceed,
+        boolean ignoresWarnings
+    ) {
         // given
-        setUpTransformationUrl();
+        setUpServiceConfig("https://localhost", isAllowedToProceed);
 
         Map<String, Object> data = basicCaseData();
         data.put(ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING, YesNoFieldValues.YES);
@@ -478,21 +480,62 @@ class CreateCaseCallbackServiceTest {
         ProcessResult result =
             service
                 .process(
-                    new CcdCallbackRequest(EVENT_ID_CREATE_NEW_CASE, caseDetails(data), false),
+                    new CcdCallbackRequest(EVENT_ID_CREATE_NEW_CASE, caseDetails(data), ignoresWarnings),
                     IDAM_TOKEN,
                     USER_ID
                 );
 
         // then
-        assertThat(result.getWarnings())
-            .containsExactly("Payments for this Exception Record have not been processed yet");
+        if (isAllowedToProceed) {
+            assertThat(result.getErrors()).isEmpty();
+            assertThat(result.getWarnings()).containsExactly(CreateCaseCallbackService.AWAITING_PAYMENTS_MESSAGE);
+        } else {
+            assertThat(result.getErrors()).containsExactly(CreateCaseCallbackService.AWAITING_PAYMENTS_MESSAGE);
+            assertThat(result.getWarnings()).isEmpty();
+        }
+    }
 
-        verify(exceptionRecordProvider, never()).prepareResultExceptionRecord(anyMap(), anyLong());
+    @Test
+    void should_allow_creating_case_when_payments_are_not_present_but_user_is_allowed_to_proceed_and_ignores_warnings() throws Exception {
+        // given
+        setUpServiceConfig("https://localhost", true); // allowed to create case despite pending payments
+
+        Map<String, Object> data = basicCaseData();
+        data.put(ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING, YesNoFieldValues.YES);
+
+        given(ccdNewCaseCreator.createNewCase(
+            any(ExceptionRecord.class),
+            any(ServiceConfigItem.class),
+            anyBoolean(),
+            anyString(),
+            anyString(),
+            any(CaseDetails.class)
+        )).willReturn(new ProcessResult(emptyList(), emptyList()));
+
+        // when
+        ProcessResult result =
+            service
+                .process(
+                    new CcdCallbackRequest(EVENT_ID_CREATE_NEW_CASE, caseDetails(data), true), // ignore warnings
+                    IDAM_TOKEN,
+                    USER_ID
+                );
+
+        // then
+        assertThat(result.getErrors()).isEmpty();
+        assertThat(result.getWarnings()).isEmpty();
     }
 
     private void setUpTransformationUrl() {
         ServiceConfigItem configItem = new ServiceConfigItem();
         configItem.setTransformationUrl("url");
+        when(serviceConfigProvider.getConfig(SERVICE)).thenReturn(configItem);
+    }
+
+    private void setUpServiceConfig(String transformationUrl, boolean allowCreatingCaseBeforePaymentsAreProcessed) {
+        ServiceConfigItem configItem = new ServiceConfigItem();
+        configItem.setTransformationUrl(transformationUrl);
+        configItem.setAllowCreatingCaseBeforePaymentsAreProcessed(allowCreatingCaseBeforePaymentsAreProcessed);
         when(serviceConfigProvider.getConfig(SERVICE)).thenReturn(configItem);
     }
 
