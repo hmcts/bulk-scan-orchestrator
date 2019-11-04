@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdKeyValue;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ExceptionRecord;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.CcdCaseReferenceType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.OcrDataField;
 
@@ -14,7 +13,6 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentMapper.getLocalDateTime;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentMapper.mapDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues.NO;
@@ -49,9 +47,10 @@ public class ExceptionRecordMapper {
             envelope.id,
             CollectionUtils.isEmpty(envelope.payments) ? NO : YES,
             CollectionUtils.isEmpty(envelope.payments) ? NO : YES,
-            isBlank(envelope.caseRef) ? null : envelope.caseRef,
-            isBlank(envelope.legacyCaseRef) ? null : envelope.legacyCaseRef,
-            setDisplayCaseReferenceType(envelope.caseRef, envelope.legacyCaseRef)
+            envelope.caseRef,
+            envelope.legacyCaseRef,
+            isBlank(envelope.caseRef) ? NO : YES,
+            isBlank(envelope.legacyCaseRef) ? NO : YES
         );
     }
 
@@ -73,16 +72,4 @@ public class ExceptionRecordMapper {
             .collect(toList());
     }
 
-    private String setDisplayCaseReferenceType(String caseRef, String legacyCaseRef) {
-        if (isNotBlank(caseRef) && isNotBlank(legacyCaseRef)) {
-            return CcdCaseReferenceType.ALL.name();
-        }
-        if (isNotBlank(caseRef)) {
-            return CcdCaseReferenceType.CASE_REFERENCE.name();
-        }
-        if (isNotBlank(legacyCaseRef)) {
-            return CcdCaseReferenceType.LEGACY_CASE_REFERENCE.name();
-        }
-        return null;
-    }
 }

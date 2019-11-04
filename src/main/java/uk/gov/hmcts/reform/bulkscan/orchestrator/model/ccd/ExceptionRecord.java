@@ -55,9 +55,13 @@ public class ExceptionRecord implements CaseData {
     @JsonProperty("envelopeLegacyCaseReference")
     public final String envelopeLegacyCaseReference;
 
-    // Hidden field which derives the type of case reference to display on attach exception record to case page
-    @JsonProperty("displayCaseReferenceType")
-    public final String displayCaseReferenceType;
+    // Yes/No field indicating to show or hide envelope case reference
+    @JsonProperty("showEnvelopeCaseReference")
+    public final String showEnvelopeCaseReference;
+
+    // Yes/No field indicating to show or hide envelope legacy case reference
+    @JsonProperty("showEnvelopeLegacyCaseReference")
+    public final String showEnvelopeLegacyCaseReference;
 
     public ExceptionRecord(
         String classification,
@@ -75,7 +79,8 @@ public class ExceptionRecord implements CaseData {
         String containsPayments,
         String envelopeCaseReference,
         String envelopeLegacyCaseReference,
-        String displayCaseReferenceType
+        String showEnvelopeCaseReference,
+        String showEnvelopeLegacyCaseReference
     ) {
         this.classification = classification;
         this.poBox = poBox;
@@ -92,6 +97,7 @@ public class ExceptionRecord implements CaseData {
         this.containsPayments = containsPayments;
         this.envelopeCaseReference = envelopeCaseReference;
         this.envelopeLegacyCaseReference = envelopeLegacyCaseReference;
-        this.displayCaseReferenceType = displayCaseReferenceType;
+        this.showEnvelopeCaseReference = showEnvelopeCaseReference;
+        this.showEnvelopeLegacyCaseReference = showEnvelopeLegacyCaseReference;
     }
 }
