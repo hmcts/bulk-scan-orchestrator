@@ -15,7 +15,6 @@ java:
     DELETE_ENVELOPES_DLQ_MESSAGES_ENABLED: "true"
     DELETE_ENVELOPES_DLQ_MESSAGES_CRON: "0 * * * * *"
     DELETE_ENVELOPES_DLQ_MESSAGES_TTL: "10s"
-    CCD_LOG_LEVEL: "full"
   keyVaults:
     bulk-scan:
       resourceGroup: bulk-scan

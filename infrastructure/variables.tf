@@ -79,7 +79,3 @@ variable "transformation_url_probate" {
   default = ""
 }
 
-variable "ccd-feign-logging" {
-  description = "Temporary debug"
-  default     = "none" // same as spring config
-}
