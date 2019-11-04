@@ -110,8 +110,3 @@ task:
   check-jurisdiction-log-in:
     check-validity-duration: PT5M # only ensure this often that no log-in attempt is rejected by IDAM
 
-feign:
-  client:
-    config:
-      core-case-data-api:
-        loggerLevel: ${CCD_LOG_LEVEL:none}
