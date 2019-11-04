@@ -18,6 +18,8 @@ public class ServiceConfigItem {
 
     private List<String> caseTypeIds;
 
+    private boolean allowCreatingCaseBeforePaymentsAreProcessed = false;
+
     // region getters & setters
 
     public String getService() {
@@ -50,6 +52,14 @@ public class ServiceConfigItem {
 
     public void setCaseTypeIds(List<String> caseTypeIds) {
         this.caseTypeIds = caseTypeIds;
+    }
+
+    public boolean allowCreatingCaseBeforePaymentsAreProcessed() {
+        return allowCreatingCaseBeforePaymentsAreProcessed;
+    }
+
+    public void setAllowCreatingCaseBeforePaymentsAreProcessed(boolean allowCreatingCaseBeforePaymentsAreProcessed) {
+        this.allowCreatingCaseBeforePaymentsAreProcessed = allowCreatingCaseBeforePaymentsAreProcessed;
     }
 
     // endregion

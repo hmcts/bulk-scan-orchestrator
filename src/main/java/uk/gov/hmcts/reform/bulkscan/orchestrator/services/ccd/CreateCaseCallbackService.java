@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import feign.FeignException;
 import io.vavr.collection.Seq;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
@@ -16,10 +18,12 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.res
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -28,6 +32,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -35,6 +40,7 @@ import static java.util.stream.Collectors.joining;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isCreateNewCaseEvent;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.DISPLAY_WARNINGS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.OCR_DATA_VALIDATION_WARNINGS;
@@ -45,6 +51,9 @@ public class CreateCaseCallbackService {
     private static final Logger log = LoggerFactory.getLogger(CreateCaseCallbackService.class);
 
     private static final String EXCEPTION_RECORD_REFERENCE = "bulkScanCaseReference";
+
+    public static final String AWAITING_PAYMENTS_MESSAGE =
+        "Payments for this Exception Record have not been processed yet";
 
     private final CreateCaseValidator validator;
     private final ServiceConfigProvider serviceConfigProvider;
@@ -75,20 +84,24 @@ public class CreateCaseCallbackService {
     /**
      * Create case record from exception case record.
      *
-     * @return Either list of errors or map of changes - new case reference
+     * @return ProcessResult map of changes or list of errors/warnings
      */
     public ProcessResult process(CcdCallbackRequest request, String idamToken, String userId) {
         Validation<String, Void> canAccess = assertAllowToAccess(request.getCaseDetails(), request.getEventId());
 
         if (canAccess.isInvalid()) {
-            // log happens in assertion method
-            return new ProcessResult(emptyList(), singletonList(canAccess.getError()));
+            log.warn("Validation error: {}", canAccess.getError());
+
+            throw new CallbackException(canAccess.getError());
         }
 
         // already validated in mandatory section ^
         ServiceConfigItem serviceConfigItem = getServiceConfig(request.getCaseDetails()).get();
 
         CaseDetails exceptionRecordData = request.getCaseDetails();
+
+        // Extract exception record ID for logging reasons
+        String exceptionRecordId = validator.getCaseId(exceptionRecordData).getOrElse("UNKNOWN");
 
         ProcessResult result = validator
             .getValidation(exceptionRecordData)
@@ -105,17 +118,20 @@ public class CreateCaseCallbackService {
 
         if (!result.getWarnings().isEmpty()) {
             log.warn(
-                "Warnings found for {} during callback process:\n  - {}",
+                "Warnings found for {} exception record {} during callback process: {}",
                 serviceConfigItem.getService(),
-                String.join("\n  - ", result.getWarnings())
+                exceptionRecordId,
+                result.getWarnings().size()
             );
         }
 
         if (!result.getErrors().isEmpty()) {
-            log.error(
-                "Errors found for {} during callback process:\n  - {}",
+            // no need to error - it's informational log. specific logs will be error'ed already
+            log.warn(
+                "Errors found for {} exception record {} during callback process: {}",
                 serviceConfigItem.getService(),
-                String.join("\n  - ", result.getErrors())
+                exceptionRecordId,
+                result.getErrors().size()
             );
         }
 
@@ -147,39 +163,49 @@ public class CreateCaseCallbackService {
         String userId,
         CaseDetails exceptionRecordData
     ) {
-        List<Long> ids = ccdApi.getCaseRefsByBulkScanCaseReference(exceptionRecord.id, configItem.getService());
-        if (ids.isEmpty()) {
-            return createNewCase(
-                exceptionRecord,
-                configItem,
-                ignoreWarnings,
-                idamToken,
-                userId,
-                exceptionRecordData
-            );
-        } else if (ids.size() == 1) {
-            return new ProcessResult(
-                ImmutableMap.<String, Object>builder()
-                    .put(CASE_REFERENCE, Long.toString(ids.get(0)))
-                    .put(DISPLAY_WARNINGS, YesNoFieldValues.NO)
-                    .put(OCR_DATA_VALIDATION_WARNINGS, emptyList())
-                    .build()
-            );
+        boolean awaitsPaymentProcessing = Optional
+            .ofNullable(exceptionRecordData.getData().get(AWAITING_PAYMENT_DCN_PROCESSING))
+            .map(awaiting -> awaiting.toString().equals(YesNoFieldValues.YES))
+            .orElse(false);
+
+        if (awaitsPaymentProcessing && configItem.allowCreatingCaseBeforePaymentsAreProcessed() && !ignoreWarnings) {
+            return new ProcessResult(singletonList(AWAITING_PAYMENTS_MESSAGE), emptyList());
+        } else if (awaitsPaymentProcessing && !configItem.allowCreatingCaseBeforePaymentsAreProcessed()) {
+            return new ProcessResult(emptyList(), singletonList(AWAITING_PAYMENTS_MESSAGE));
         } else {
-            return new ProcessResult(
-                emptyList(),
-                singletonList(
-                    String.format(
-                        "Multiple cases (%s) found for the given bulk scan case reference: %s",
-                        ids.stream().map(String::valueOf).collect(joining(", ")),
-                        exceptionRecord.id
+            List<Long> ids = ccdApi.getCaseRefsByBulkScanCaseReference(exceptionRecord.id, configItem.getService());
+            if (ids.isEmpty()) {
+                return createNewCase(
+                    exceptionRecord,
+                    configItem,
+                    ignoreWarnings,
+                    idamToken,
+                    userId,
+                    exceptionRecordData
+                );
+            } else if (ids.size() == 1) {
+                return new ProcessResult(
+                    prepareResultExceptionRecord(
+                        exceptionRecordData.getData(),
+                        ids.get(0)
                     )
-                )
-            );
+                );
+            } else {
+                return new ProcessResult(
+                    emptyList(),
+                    singletonList(
+                        String.format(
+                            "Multiple cases (%s) found for the given bulk scan case reference: %s",
+                            ids.stream().map(String::valueOf).collect(joining(", ")),
+                            exceptionRecord.id
+                        )
+                    )
+                );
+            }
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"squid:S2139", "unchecked"}) // squid for exception handle + logging
     private ProcessResult createNewCase(
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,
@@ -237,30 +263,30 @@ public class CreateCaseCallbackService {
             paymentsProcessor.updatePayments(exceptionRecordData, newCaseId);
 
             return new ProcessResult(
-                ImmutableMap.<String, Object>builder()
-                    .put(CASE_REFERENCE, Long.toString(newCaseId))
-                    .put(DISPLAY_WARNINGS, YesNoFieldValues.NO)
-                    .put(OCR_DATA_VALIDATION_WARNINGS, emptyList())
-                    .build()
+                prepareResultExceptionRecord(exceptionRecordData.getData(), newCaseId)
             );
         } catch (InvalidCaseDataException exception) {
             if (BAD_REQUEST.equals(exception.getStatus())) {
-                throw exception;
+                throw new CallbackException("Failed to transform exception record", exception);
             } else {
                 return new ProcessResult(exception.getResponse().warnings, exception.getResponse().errors);
             }
-        } catch (Exception exception) {
+        } catch (PaymentsPublishingException exception) {
             log.error(
-                "Failed to create exception for service {} and exception record {}",
+                "Failed to send update to payment processor for {} exception record {}",
                 configItem.getService(),
                 exceptionRecord.id,
                 exception
             );
 
-            return new ProcessResult(emptyList(), singletonList("Internal error. " + exception.getMessage()));
+            throw new CallbackException("Payment references cannot be processed. Please try again later", exception);
+        } catch (Exception exception) {
+            // log happens individually to cover transformation/ccd cases
+            throw new CallbackException("Failed to create new case", exception);
         }
     }
 
+    @SuppressWarnings("squid:S2139") // exception handle + logging
     private long createNewCaseInCcd(
         String idamToken,
         String s2sToken,
@@ -268,37 +294,58 @@ public class CreateCaseCallbackService {
         ExceptionRecord exceptionRecord,
         CaseCreationDetails caseCreationDetails
     ) {
-        StartEventResponse eventResponse = coreCaseDataApi.startForCaseworker(
-            idamToken,
-            s2sToken,
-            userId,
-            exceptionRecord.poBoxJurisdiction,
-            caseCreationDetails.caseTypeId,
-            // when onboarding remind services to not configure about to submit callback for this event
-            caseCreationDetails.eventId
-        );
+        try {
+            StartEventResponse eventResponse = coreCaseDataApi.startForCaseworker(
+                idamToken,
+                s2sToken,
+                userId,
+                exceptionRecord.poBoxJurisdiction,
+                caseCreationDetails.caseTypeId,
+                // when onboarding remind services to not configure about to submit callback for this event
+                caseCreationDetails.eventId
+            );
 
-        return coreCaseDataApi.submitForCaseworker(
-            idamToken,
-            s2sToken,
-            userId,
-            exceptionRecord.poBoxJurisdiction,
-            caseCreationDetails.caseTypeId,
-            true,
-            CaseDataContent
-                .builder()
-                .caseReference(exceptionRecord.id)
-                .data(caseCreationDetails.caseData)
-                .event(Event
+            return coreCaseDataApi.submitForCaseworker(
+                idamToken,
+                s2sToken,
+                userId,
+                exceptionRecord.poBoxJurisdiction,
+                caseCreationDetails.caseTypeId,
+                true,
+                CaseDataContent
                     .builder()
-                    .id(eventResponse.getEventId())
-                    .summary("Case created")
-                    .description("Case created from exception record ref " + exceptionRecord.id)
+                    .caseReference(exceptionRecord.id)
+                    .data(caseCreationDetails.caseData)
+                    .event(Event
+                        .builder()
+                        .id(eventResponse.getEventId())
+                        .summary("Case created")
+                        .description("Case created from exception record ref " + exceptionRecord.id)
+                        .build()
+                    )
+                    .eventToken(eventResponse.getToken())
                     .build()
-                )
-                .eventToken(eventResponse.getToken())
-                .build()
-        ).getId();
+            ).getId();
+        } catch (FeignException exception) {
+            log.error(
+                "Failed to create new case for {} jurisdiction from exception record {}. Service response: {}",
+                exceptionRecord.poBoxJurisdiction,
+                exceptionRecord.id,
+                exception.contentUTF8(),
+                exception
+            );
+
+            throw exception;
+        } catch (Exception exception) {
+            log.error(
+                "Failed to create new case for {} jurisdiction from exception record {}",
+                exceptionRecord.poBoxJurisdiction,
+                exceptionRecord.id,
+                exception
+            );
+
+            throw exception;
+        }
     }
 
     private void checkBulkScanReferenceIsSet(Map<String, ?> caseData, String exceptionRecordId) {
@@ -315,5 +362,19 @@ public class CreateCaseCallbackService {
                 exceptionRecordId
             );
         }
+    }
+
+    private Map<String, Object> prepareResultExceptionRecord(Map<String, Object> originalFields, Long caseReference) {
+        Map<String, Object> fieldsToUpdate =
+            ImmutableMap.<String, Object>builder()
+                .put(CASE_REFERENCE, Long.toString(caseReference))
+                .put(DISPLAY_WARNINGS, YesNoFieldValues.NO)
+                .put(OCR_DATA_VALIDATION_WARNINGS, emptyList())
+                .build();
+
+        return ImmutableMap.<String, Object>builder()
+            .putAll(Maps.difference(originalFields, fieldsToUpdate).entriesOnlyOnLeft())
+            .putAll(fieldsToUpdate)
+            .build();
     }
 }

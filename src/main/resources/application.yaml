@@ -72,6 +72,7 @@ service-config:
       jurisdiction: PROBATE
       transformation-url: ${TRANSFORMATION_URL_PROBATE}
       case-type-ids: []
+      allow-creating-case-before-payments-are-processed: true
 
     - service: divorce
       jurisdiction: DIVORCE

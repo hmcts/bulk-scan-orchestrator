@@ -137,6 +137,23 @@ class ExceptionRecordCreationTest {
             });
     }
 
+    @DisplayName("Should create exception record for supplementary evidence with ocr case type")
+    @Test
+    void should_create_exception_record_for_supplementary_evidence_with_ocr() throws Exception {
+        given(messageReceiver.receive()).willReturn(messageFromFile("supplementary-evidence-with-ocr-example.json"));
+
+        envelopeEventProcessor.processNextMessage();
+
+        await()
+            .atMost(30, TimeUnit.SECONDS)
+            .ignoreExceptions()
+            .until(() -> {
+                WireMock.verify(postRequestedFor(urlPathEqualTo(CASE_SUBMIT_URL)));
+
+                return true;
+            });
+    }
+
     private Message messageFromFile(String fileName) {
         return new Message(fileContentAsString("servicebus/message/" + fileName));
     }

@@ -67,7 +67,7 @@ public class CcdCallbackController {
 
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
-                .data(result.getModifiedFields())
+                .data(result.getExceptionRecordData())
                 .warnings(result.getWarnings())
                 .errors(result.getErrors())
                 .build();

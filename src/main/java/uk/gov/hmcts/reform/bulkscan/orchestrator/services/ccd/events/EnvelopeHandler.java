@@ -40,6 +40,7 @@ public class EnvelopeHandler {
                 }
 
                 break;
+            case SUPPLEMENTARY_EVIDENCE_WITH_OCR:
             case EXCEPTION:
                 exceptionRecordCreator.tryCreateFrom(envelope);
                 break;

@@ -25,6 +25,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
 @ExtendWith(MockitoExtension.class)
 class EnvelopeHandlerTest {
@@ -116,6 +117,18 @@ class EnvelopeHandlerTest {
         verify(this.createExceptionRecord).tryCreateFrom(envelope);
         verify(caseFinder, never()).findCase(any());
         verify(paymentsProcessor).createPayments(envelope, THE_CASE.getId());
+    }
+
+    @Test
+    void should_call_CreateExceptionRecord_for_supplementary_evidence_with_ocr_classification() {
+        // given
+        Envelope envelope = envelope(SUPPLEMENTARY_EVIDENCE_WITH_OCR, JURSIDICTION, CASE_REF);
+
+        // when
+        envelopeHandler.handleEnvelope(envelope);
+
+        // then
+        verify(this.createExceptionRecord).tryCreateFrom(envelope);
     }
 
 }

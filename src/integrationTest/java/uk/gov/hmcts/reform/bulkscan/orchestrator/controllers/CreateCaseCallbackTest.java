@@ -1,14 +1,21 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
@@ -17,6 +24,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.google.common.io.Resources.getResource;
 import static com.google.common.io.Resources.toByteArray;
 import static io.restassured.RestAssured.given;
+import static java.util.Collections.emptyList;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
@@ -41,7 +49,7 @@ class CreateCaseCallbackTest {
     int serverPort;
 
     @Test
-    void should_create_case_if_classification_new_application_with_documents_and_ocr_data() {
+    void should_create_case_if_classification_new_application_with_documents_and_ocr_data() throws IOException {
         setUpTransformation(getTransformationResponseBody("ok-no-warnings.json"));
         setUpCcdSearchEmptyResult(getCcdResponseBody("search-result-empty.json"));
         setUpCcdCreateCase(
@@ -49,13 +57,21 @@ class CreateCaseCallbackTest {
             getCcdResponseBody("sample-case.json")
         );
 
-        postWithBody(getRequestBody("valid-new-application-with-ocr.json"))
+        byte[] requestBody = getRequestBody("valid-new-application-with-ocr.json");
+
+        postWithBody(requestBody)
             .statusCode(OK.value())
             .body("errors", empty())
             .body("warnings", empty())
-            .body("data.caseReference", equalTo("1539007368674134")) // from sample-case.json
-            .body("data.displayWarnings", equalTo("No"))
-            .body("data.ocrDataValidationWarnings", empty());
+            .body(
+                "data",
+                equalTo(
+                    expectedResponseExceptionRecordFields(
+                        requestBody,
+                        "1539007368674134" // from sample-case.json
+                    )
+                )
+            );
     }
 
     @Test
@@ -90,7 +106,7 @@ class CreateCaseCallbackTest {
     }
 
     @Test
-    void should_create_case_if_classification_exception_with_documents_and_ocr_data() {
+    void should_create_case_if_classification_exception_with_documents_and_ocr_data() throws IOException {
         setUpTransformation(getTransformationResponseBody("ok-no-warnings.json"));
         setUpCcdSearchEmptyResult(getCcdResponseBody("search-result-empty.json"));
         setUpCcdCreateCase(
@@ -98,11 +114,75 @@ class CreateCaseCallbackTest {
             getCcdResponseBody("sample-case.json")
         );
 
-        postWithBody(getRequestBody("valid-exception.json"))
+        byte[] requestBody = getRequestBody("valid-exception.json");
+
+        postWithBody(requestBody)
             .statusCode(OK.value())
             .body("errors", empty())
             .body("warnings", empty())
-            .body("data.caseReference", equalTo("1539007368674134")); // from sample-case.json
+            .body(
+                "data",
+                equalTo(
+                    expectedResponseExceptionRecordFields(
+                        requestBody,
+                        "1539007368674134" // from sample-case.json
+                    )
+                )
+            );
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        value = HttpStatus.class,
+        names = { "BAD_REQUEST", "UNPROCESSABLE_ENTITY", "BAD_GATEWAY", "INTERNAL_SERVER_ERROR" }
+    )
+    void should_respond_with_relevant_error_when_ccd_call_is_failing(HttpStatus responseStatus) {
+        setUpTransformation(getTransformationResponseBody("ok-no-warnings.json"));
+        setUpCcdSearchEmptyResult(getCcdResponseBody("search-result-empty.json"));
+        setUpFailingCallToCcd(responseStatus);
+
+        postWithBody(getRequestBody("valid-exception.json"))
+            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+            .body("message", equalTo("Failed to create new case"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        value = HttpStatus.class,
+        names = { "BAD_REQUEST", "UNPROCESSABLE_ENTITY", "INTERNAL_SERVER_ERROR" }
+    )
+    void should_respond_with_relevant_error_when_transformation_call_is_failing(HttpStatus responseStatus) {
+        setUpFailingTransformation(responseStatus);
+        setUpCcdSearchEmptyResult(getCcdResponseBody("search-result-empty.json"));
+
+        postWithBody(getRequestBody("valid-exception.json"))
+            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+            .body("message", equalTo("Failed to create new case"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        value = HttpStatus.class,
+        names = { "BAD_REQUEST", "UNPROCESSABLE_ENTITY" }
+    )
+    void should_respond_with_relevant_error_when_transformation_call_is_failing_with_correct_response_body(
+        HttpStatus responseStatus
+    ) {
+        String error = "Big Error";
+        String warning = "Big Warning";
+        setUpFailingTransformation(responseStatus, error, warning);
+        setUpCcdSearchEmptyResult(getCcdResponseBody("search-result-empty.json"));
+
+        if (responseStatus.equals(HttpStatus.BAD_REQUEST)) {
+            postWithBody(getRequestBody("valid-exception.json"))
+                .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .body("message", equalTo("Failed to transform exception record"));
+        } else {
+            postWithBody(getRequestBody("valid-exception.json"))
+                .statusCode(OK.value())
+                .body("errors", hasItem(error))
+                .body("warnings", hasItem(warning));
+        }
     }
 
     @Test
@@ -132,6 +212,23 @@ class CreateCaseCallbackTest {
         );
     }
 
+    private void setUpFailingTransformation(HttpStatus responseStatus) {
+        givenThat(post("/transform-exception-record")
+            .withHeader("ServiceAuthorization", containing("Bearer"))
+            .willReturn(aResponse().withStatus(responseStatus.value()))
+        );
+    }
+
+    private void setUpFailingTransformation(HttpStatus responseStatus, String error, String warning) {
+        givenThat(post("/transform-exception-record")
+            .withHeader("ServiceAuthorization", containing("Bearer"))
+            .willReturn(aResponse()
+                .withStatus(responseStatus.value())
+                .withBody("{\"errors\":[\"" + error + "\"],\"warnings\":[\"" + warning + "\"]}")
+            )
+        );
+    }
+
     private void setUpCcdSearchEmptyResult(String responseBody) {
         givenThat(post("/searchCases?ctid=Bulk_Scanned")
             .withHeader("ServiceAuthorization", containing("Bearer"))
@@ -149,8 +246,8 @@ class CreateCaseCallbackTest {
                     + EVENT_ID
                     + "/token"
             )
-            .withHeader("ServiceAuthorization", containing("Bearer"))
-            .willReturn(okJson(startResponseBody))
+                .withHeader("ServiceAuthorization", containing("Bearer"))
+                .willReturn(okJson(startResponseBody))
         );
 
         givenThat(
@@ -160,6 +257,21 @@ class CreateCaseCallbackTest {
             )
                 .withHeader("ServiceAuthorization", containing("Bearer"))
                 .willReturn(okJson(submitResponseBody))
+        );
+    }
+
+    private void setUpFailingCallToCcd(HttpStatus responseStatus) {
+        givenThat(
+            get(
+                // values from config + initial request body
+                "/caseworkers/"
+                    + USER_ID
+                    + "/jurisdictions/BULKSCAN/case-types/123/event-triggers/"
+                    + EVENT_ID
+                    + "/token"
+            )
+            .withHeader("ServiceAuthorization", containing("Bearer"))
+            .willReturn(aResponse().withStatus(responseStatus.value()))
         );
     }
 
@@ -191,5 +303,22 @@ class CreateCaseCallbackTest {
             .body(body)
             .post("http://localhost:" + serverPort + "/callback/create-new-case")
             .then();
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> expectedResponseExceptionRecordFields(
+        byte[] callbackRequestBody,
+        String caseReference
+    ) throws IOException {
+        Map<String, Object> requestBodyAsMap = new ObjectMapper().readValue(callbackRequestBody, Map.class);
+        Map<String, Object> caseDetails = (Map<String, Object>) requestBodyAsMap.get("case_details");
+        Map<String, Object> originalFields = (Map<String, Object>) caseDetails.get("case_data");
+
+        Map<String, Object> expectedFields = new HashMap<>(originalFields);
+        expectedFields.put("displayWarnings", "No");
+        expectedFields.put("ocrDataValidationWarnings", emptyList());
+        expectedFields.put("caseReference", caseReference);
+
+        return expectedFields;
     }
 }
