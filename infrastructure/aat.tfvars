@@ -7,5 +7,3 @@ delete_envelopes_dlq_messages_enabled = "true"
 # Run the dlq scheduler every minute
 delete_envelopes_dlq_messages_cron = "0 * * * * *"
 delete_envelopes_dlq_messages_ttl = "10s"
-
-ccd-feign-logging = "full"
