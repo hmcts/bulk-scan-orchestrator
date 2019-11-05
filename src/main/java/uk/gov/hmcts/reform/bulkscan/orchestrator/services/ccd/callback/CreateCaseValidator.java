@@ -4,8 +4,6 @@ import io.vavr.collection.Array;
 import io.vavr.collection.Seq;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentUrl;
@@ -37,8 +35,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 @Component
 public class CreateCaseValidator {
 
-    private static final Logger log = LoggerFactory.getLogger(CreateCaseValidator.class);
-
     public CreateCaseValidator() {
         // empty constructor
     }
@@ -55,12 +51,7 @@ public class CreateCaseValidator {
         Supplier<Validation<String, Void>>... prerequisites
     ) {
         for (Supplier<Validation<String, Void>> prerequisite : prerequisites) {
-            Validation<String, Void> requirement = prerequisite.get()
-                .mapError(error -> {
-                    log.warn("Validation error: {}", error);
-
-                    return error;
-                });
+            Validation<String, Void> requirement = prerequisite.get();
 
             if (requirement.isInvalid()) {
                 return requirement;
@@ -70,8 +61,12 @@ public class CreateCaseValidator {
         return Validation.valid(null);
     }
 
+    public Validation<String, String> getCaseId(CaseDetails caseDetails) {
+        return hasAnId(caseDetails).map(id -> Long.toString(id));
+    }
+
     public Validation<Seq<String>, ExceptionRecord> getValidation(CaseDetails caseDetails) {
-        Validation<String, Long> exceptionRecordIdValidation = hasAnId(caseDetails);
+        Validation<String, String> exceptionRecordIdValidation = getCaseId(caseDetails);
         Validation<String, String> caseTypeIdValidation = hasCaseTypeId(caseDetails);
         Validation<String, String> poBoxValidation = hasPoBox(caseDetails);
         Validation<String, String> jurisdictionValidation = hasJurisdiction(caseDetails);
@@ -98,7 +93,7 @@ public class CreateCaseValidator {
         Seq<String> errors = getValidationErrors(validations);
         if (errors.isEmpty()) {
             return Validation.valid(new ExceptionRecord(
-                Long.toString(exceptionRecordIdValidation.get()),
+                exceptionRecordIdValidation.get(),
                 caseTypeIdValidation.get(),
                 poBoxValidation.get(),
                 jurisdictionValidation.get(),

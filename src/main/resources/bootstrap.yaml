@@ -6,16 +6,16 @@ spring:
       aliases:
         idam-client-secret: IDAM_CLIENT_SECRET
         s2s-secret-bulk-scan-orchestrator: S2S_SECRET
-        idam-users-bulkscan-username: IDAM_USERS_BULKSCAN_USERNAME
-        idam-users-bulkscan-password: IDAM_USERS_BULKSCAN_PASSWORD
-        idam-users-cmc-username: IDAM_USERS_CMC_USERNAME
-        idam-users-cmc-password: IDAM_USERS_CMC_PASSWORD
-        idam-users-div-username: IDAM_USERS_DIVORCE_USERNAME
-        idam-users-div-password: IDAM_USERS_DIVORCE_PASSWORD
-        idam-users-probate-username: IDAM_USERS_PROBATE_USERNAME
-        idam-users-probate-password: IDAM_USERS_PROBATE_PASSWORD
-        idam-users-sscs-username: IDAM_USERS_SSCS_USERNAME
-        idam-users-sscs-password: IDAM_USERS_SSCS_PASSWORD
+        idam-users-bulkscan-username: idam.users.bulkscan.username
+        idam-users-bulkscan-password: idam.users.bulkscan.password
+        idam-users-cmc-username: idam.users.cmc.username
+        idam-users-cmc-password: idam.users.cmc.password
+        idam-users-div-username: idam.users.divorce.username
+        idam-users-div-password: idam.users.divorce.password
+        idam-users-probate-username: idam.users.probate.username
+        idam-users-probate-password: idam.users.probate.password
+        idam-users-sscs-username: idam.users.sscs.username
+        idam-users-sscs-password: idam.users.sscs.password
         envelopes-queue-listen-connection-string: ENVELOPES_QUEUE_CONNECTION_STRING
         processed-envelopes-queue-send-connection-string: PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING
         payments-queue-send-connection-string: PAYMENTS_QUEUE_CONNECTION_STRING

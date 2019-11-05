@@ -16,6 +16,7 @@ public final class ExceptionRecordFields {
     public static final String CONTAINS_PAYMENTS = "containsPayments";
     public static final String ENVELOPE_ID = "envelopeId";
     public static final String PO_BOX_JURISDICTION = "poBoxJurisdiction";
+    public static final String AWAITING_PAYMENT_DCN_PROCESSING = "awaitingPaymentDCNProcessing";
 
     private ExceptionRecordFields() {
         // hiding the constructor

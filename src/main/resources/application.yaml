@@ -63,6 +63,7 @@ service-config:
       transformation-url: ${TRANSFORMATION_URL_BULKSCAN}
       case-type-ids:
         - Bulk_Scanned
+      allow-creating-case-before-payments-are-processed: true
 
     - service: sscs
       jurisdiction: SSCS
@@ -72,6 +73,7 @@ service-config:
       jurisdiction: PROBATE
       transformation-url: ${TRANSFORMATION_URL_PROBATE}
       case-type-ids: []
+      allow-creating-case-before-payments-are-processed: true
 
     - service: divorce
       jurisdiction: DIVORCE
@@ -109,8 +111,3 @@ task:
   check-jurisdiction-log-in:
     check-validity-duration: PT5M # only ensure this often that no log-in attempt is rejected by IDAM
 
-feign:
-  client:
-    config:
-      core-case-data-api:
-        loggerLevel: ${CCD_LOG_LEVEL:none}

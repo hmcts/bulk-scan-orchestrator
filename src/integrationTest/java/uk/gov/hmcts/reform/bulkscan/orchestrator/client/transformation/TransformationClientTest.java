@@ -131,6 +131,31 @@ public class TransformationClientTest {
     }
 
     @Test
+    public void should_throw_case_transformation_exception_when_unable_to_process_body() {
+        // given
+        String s2sToken = randomUUID().toString();
+        stubFor(
+            post(urlPathMatching(TRANSFORM_EXCEPTION_RECORD_URL))
+                .withHeader("ServiceAuthorization", equalTo(s2sToken))
+                .willReturn(aResponse().withBody(new byte[]{}).withStatus(400)));
+
+        // when
+        Throwable throwable = catchThrowable(
+            () -> client.transformExceptionRecord(url(), exceptionRecordRequestData(), s2sToken)
+        );
+
+        // then
+        assertThat(throwable).isInstanceOf(CaseTransformationException.class);
+
+        // and
+        CaseTransformationException exception = (CaseTransformationException) throwable;
+
+        assertThat(exception.getStatus()).isEqualTo(BAD_REQUEST);
+        assertThat(exception.getResponse()).contains("No content to map due to end-of-input"); // because byte[]{}
+        assertThat(exception.getResponseRawBody()).isEmpty();
+    }
+
+    @Test
     public void should_throw_exception_for_unauthorised_service_auth_header() {
         // given
         stubFor(

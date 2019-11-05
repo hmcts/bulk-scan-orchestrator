@@ -39,7 +39,7 @@ public class TransformationClient {
         String baseUrl,
         ExceptionRecord exceptionRecord,
         String s2sToken
-    ) throws IOException, CaseTransformationException {
+    ) throws CaseTransformationException {
         HttpHeaders headers = new HttpHeaders();
         headers.add("ServiceAuthorization", s2sToken);
 
@@ -58,19 +58,30 @@ public class TransformationClient {
             );
         } catch (HttpStatusCodeException ex) {
             log.error(
-                "Failed to transform Exception Record to case data for case type {} ",
+                "Failed to transform Exception Record to case data for case type {} and id {}",
                 exceptionRecord.caseTypeId,
+                exceptionRecord.id,
                 ex
             );
 
             if (ex.getStatusCode().equals(UNPROCESSABLE_ENTITY) || ex.getStatusCode().equals(BAD_REQUEST)) {
-                throw new InvalidCaseDataException(
-                    ex,
-                    objectMapper.readValue(ex.getResponseBodyAsByteArray(), TransformationErrorResponse.class)
-                );
+                tryParseResponseBodyAndThrow(ex);
             }
 
             throw new CaseTransformationException(ex, ex.getResponseBodyAsString());
+        }
+    }
+
+    private void tryParseResponseBodyAndThrow(HttpStatusCodeException exception) throws CaseTransformationException {
+        try {
+            TransformationErrorResponse errorResponse = objectMapper.readValue(
+                exception.getResponseBodyAsByteArray(),
+                TransformationErrorResponse.class
+            );
+
+            throw new InvalidCaseDataException(exception, errorResponse);
+        } catch (IOException ioException) {
+            throw new CaseTransformationException(exception, ioException.getMessage());
         }
     }
 }
