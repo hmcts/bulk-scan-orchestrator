@@ -6,16 +6,21 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdKeyValue;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.OcrDataField;
 
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentMapper.getLocalDateTime;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentMapper.mapDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues.NO;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues.YES;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
 @Component
 public class ExceptionRecordMapper {
@@ -46,8 +51,20 @@ public class ExceptionRecordMapper {
             envelope.id,
             CollectionUtils.isEmpty(envelope.payments) ? NO : YES,
             CollectionUtils.isEmpty(envelope.payments) ? NO : YES,
-            envelope.caseRef
+            isBlank(envelope.caseRef) ? null : envelope.caseRef,
+            isBlank(envelope.legacyCaseRef) ? null : envelope.legacyCaseRef,
+            setDisplayCaseReferenceFlag(envelope.caseRef, envelope.classification),
+            setDisplayCaseReferenceFlag(envelope.legacyCaseRef, envelope.classification)
         );
+    }
+
+    private String setDisplayCaseReferenceFlag(String caseRef, Classification classification) {
+        if (isNotBlank(caseRef) && (SUPPLEMENTARY_EVIDENCE.equals(classification)
+            || SUPPLEMENTARY_EVIDENCE_WITH_OCR.equals(classification))
+        ) {
+            return YES;
+        }
+        return NO;
     }
 
     private List<CcdCollectionElement<CcdKeyValue>> mapOcrData(List<OcrDataField> ocrData) {
