@@ -30,7 +30,7 @@ public class ExceptionRecordMapper {
     private final String contextPath;
 
     // Display Envelope case references for the specified classifications
-    EnumSet<Classification> allowedClassifications = EnumSet.of(
+    private static final EnumSet<Classification> allowedClassifications = EnumSet.of(
         SUPPLEMENTARY_EVIDENCE,
         SUPPLEMENTARY_EVIDENCE_WITH_OCR
     );
