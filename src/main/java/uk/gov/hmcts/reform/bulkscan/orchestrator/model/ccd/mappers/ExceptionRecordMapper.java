@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.env
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.OcrDataField;
 
+import java.util.EnumSet;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -27,6 +28,12 @@ public class ExceptionRecordMapper {
 
     private final String documentManagementUrl;
     private final String contextPath;
+
+    // Display Envelope case references for the specified classifications
+    EnumSet<Classification> allowedClassifications = EnumSet.of(
+        SUPPLEMENTARY_EVIDENCE,
+        SUPPLEMENTARY_EVIDENCE_WITH_OCR
+    );
 
     public ExceptionRecordMapper(
         @Value("${document_management.url}") final String documentManagementUrl,
@@ -59,9 +66,7 @@ public class ExceptionRecordMapper {
     }
 
     private String setDisplayCaseReferenceFlag(String caseRef, Classification classification) {
-        if (isNotBlank(caseRef) && (SUPPLEMENTARY_EVIDENCE.equals(classification)
-            || SUPPLEMENTARY_EVIDENCE_WITH_OCR.equals(classification))
-        ) {
+        if (isNotBlank(caseRef) && allowedClassifications.contains(classification)) {
             return YES;
         }
         return NO;
