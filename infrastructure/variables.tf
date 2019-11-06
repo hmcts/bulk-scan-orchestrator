@@ -79,3 +79,6 @@ variable "transformation_url_probate" {
   default = ""
 }
 
+variable "enable_ase" {
+  default = false
+}

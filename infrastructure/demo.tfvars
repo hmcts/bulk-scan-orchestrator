@@ -3,3 +3,5 @@ idam_client_redirect_uri = "https://bulk-scan-orchestrator-demo.service.core-com
 supported_jurisdictions = ["SSCS", "BULKSCAN", "DIVORCE", "PROBATE", "CMC"]
 
 transformation_url_probate = "http://probate-back-office-demo.service.core-compute-demo.internal"
+
+enable_ase = true
