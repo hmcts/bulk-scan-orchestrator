@@ -63,7 +63,7 @@ service-config:
       transformation-url: ${TRANSFORMATION_URL_BULKSCAN}
       case-type-ids:
         - Bulk_Scanned
-      allow-creating-case-before-payments-are-processed: true
+      allow-creating-case-before-payments-are-processed: false
 
     - service: sscs
       jurisdiction: SSCS
