@@ -146,7 +146,7 @@ class ExceptionRecordCreationTest {
 
         // when
         String envelopeId = envelopeMessager.sendMessageFromFile(
-            "envelopes/supplementary-evidence-with-ocr-envelope.json", // no payments
+            "envelopes/supplementary-evidence-with-ocr-envelope.json",
             envelopeCaseRef,
             null,
             null,
@@ -160,10 +160,11 @@ class ExceptionRecordCreationTest {
             .until(() -> findCasesByEnvelopeId(envelopeId).size() == 1);
 
         CaseDetails exceptionRecord = findCasesByEnvelopeId(envelopeId).get(0);
-        assertThat(getCaseDataForField(exceptionRecord, "journeyClassification")).isEqualTo("SUPPLEMENTARY_EVIDENCE_WITH_OCR");
+        assertThat(getCaseDataForField(exceptionRecord, "journeyClassification"))
+            .isEqualTo("SUPPLEMENTARY_EVIDENCE_WITH_OCR");
         assertThat(getOcrData(exceptionRecord)).isEqualTo(expectedOcrData);
         assertThat(getCaseDataForField(exceptionRecord, "envelopeCaseReference")).isEqualTo(envelopeCaseRef);
-        assertThat(getCaseDataForField(exceptionRecord, "envelopeLegacyCaseReference")).isNull();
+        assertThat(getCaseDataForField(exceptionRecord, "envelopeLegacyCaseReference")).isEmpty();
     }
 
     private List<CaseDetails> findCasesByPoBox(UUID poBox) {
