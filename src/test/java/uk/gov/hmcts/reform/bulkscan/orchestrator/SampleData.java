@@ -184,6 +184,26 @@ public class SampleData {
         );
     }
 
+    public static Envelope envelope(String caseRef, String legacyCaseRef, Classification classification) {
+        return new Envelope(
+            ENVELOPE_ID,
+            caseRef,
+            legacyCaseRef,
+            PO_BOX,
+            JURSIDICTION,
+            CONTAINER,
+            "zip-file-test.zip",
+            FORM_TYPE,
+            Instant.now(),
+            Instant.now(),
+            classification,
+            documents(1),
+            ImmutableList.of(new Payment("dcn1")),
+            ImmutableList.of(new OcrDataField("fieldName1", "value1")),
+            asList("warning 1", "warning 2")
+        );
+    }
+
     private static List<Document> documents(int numberOfDocuments) {
         return Stream.iterate(1, i -> i + 1)
             .map(index ->
