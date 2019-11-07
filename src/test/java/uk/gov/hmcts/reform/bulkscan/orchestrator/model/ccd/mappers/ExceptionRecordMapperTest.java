@@ -67,6 +67,10 @@ class ExceptionRecordMapperTest {
             .containsExactlyElementsOf(envelope.ocrDataValidationWarnings);
 
         assertThat(exceptionRecord.envelopeId).isEqualTo(envelope.id);
+        assertThat(exceptionRecord.envelopeCaseReference).isEqualTo(envelope.caseRef);
+        assertThat(exceptionRecord.envelopeLegacyCaseReference).isEqualTo(envelope.legacyCaseRef);
+        assertThat(exceptionRecord.showEnvelopeCaseReference).isEqualTo("No"); // for "New Application"
+        assertThat(exceptionRecord.showEnvelopeLegacyCaseReference).isEqualTo("No"); // for "New Application"
     }
 
     @Test
@@ -148,6 +152,36 @@ class ExceptionRecordMapperTest {
         //then
         assertThat(exceptionRecord.awaitingPaymentDcnProcessing).isEqualTo("No");
         assertThat(exceptionRecord.containsPayments).isEqualTo("No");
+    }
+
+    @Test
+    public void mapEnvelope_sets_display_case_reference_fields_to_no_when_envelope_case_reference_values_are_null() {
+        //given
+        Envelope envelope = envelope(null, null, Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR);
+
+        // when
+        ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
+
+        // then
+        assertThat(exceptionRecord.envelopeCaseReference).isNull();
+        assertThat(exceptionRecord.envelopeLegacyCaseReference).isNull();
+        assertThat(exceptionRecord.showEnvelopeCaseReference).isEqualTo("No");
+        assertThat(exceptionRecord.showEnvelopeLegacyCaseReference).isEqualTo("No");
+    }
+
+    @Test
+    public void mapEnvelope_sets_display_case_reference_fields_to_yes_when_envelope_case_reference_values_exist() {
+        //given
+        Envelope envelope = envelope("CASE_123", "LEGACY_CASE_123", Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR);
+
+        // when
+        ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
+
+        // then
+        assertThat(exceptionRecord.envelopeCaseReference).isEqualTo("CASE_123");
+        assertThat(exceptionRecord.envelopeLegacyCaseReference).isEqualTo("LEGACY_CASE_123");
+        assertThat(exceptionRecord.showEnvelopeCaseReference).isEqualTo("Yes");
+        assertThat(exceptionRecord.showEnvelopeLegacyCaseReference).isEqualTo("Yes");
     }
 
     private Envelope envelopeWithJurisdiction(String jurisdiction) {
