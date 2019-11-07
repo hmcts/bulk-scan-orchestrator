@@ -163,8 +163,8 @@ class ExceptionRecordMapperTest {
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
 
         // then
-        assertThat(exceptionRecord.envelopeCaseReference).isNull();
-        assertThat(exceptionRecord.envelopeLegacyCaseReference).isNull();
+        assertThat(exceptionRecord.envelopeCaseReference).isEmpty();
+        assertThat(exceptionRecord.envelopeLegacyCaseReference).isEmpty();
         assertThat(exceptionRecord.showEnvelopeCaseReference).isEqualTo("No");
         assertThat(exceptionRecord.showEnvelopeLegacyCaseReference).isEqualTo("No");
     }
