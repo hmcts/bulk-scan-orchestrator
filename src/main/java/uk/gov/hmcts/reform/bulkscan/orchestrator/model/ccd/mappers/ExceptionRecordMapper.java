@@ -58,7 +58,7 @@ public class ExceptionRecordMapper {
             envelope.id,
             CollectionUtils.isEmpty(envelope.payments) ? NO : YES,
             CollectionUtils.isEmpty(envelope.payments) ? NO : YES,
-            // Setting the value as "", as null values are causing issues when used in ImmutableMap
+            // Setting the values as "", as null values are not supported by ImmutableMap
             isBlank(envelope.caseRef) ? "" : envelope.caseRef,
             isBlank(envelope.legacyCaseRef) ? "" : envelope.legacyCaseRef,
             setDisplayCaseReferenceFlag(envelope.caseRef, envelope.classification),
