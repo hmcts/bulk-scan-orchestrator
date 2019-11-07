@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigPr
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Collections.emptyList;
@@ -172,12 +173,12 @@ public class CreateCaseCallbackService {
                     exceptionRecordData
                 );
             } else if (ids.size() == 1) {
-                return new ProcessResult(
+                final Map<String, Object> finalizedExceptionRecordData =
                     exceptionRecordFinalizer.finalizeExceptionRecord(
                         exceptionRecordData.getData(),
                         ids.get(0)
-                    )
-                );
+                    );
+                return new ProcessResult(finalizedExceptionRecordData);
             } else {
                 return new ProcessResult(
                     emptyList(),

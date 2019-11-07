@@ -305,6 +305,30 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
+    void should_return_existing_case_if_it_exists_in_ccd_for_a_given_exception_record() throws Exception {
+        // given
+        setUpTransformationUrl();
+
+        when(ccdApi.getCaseRefsByBulkScanCaseReference(Long.toString(CASE_ID), null))
+            .thenReturn(asList(345L));
+        Map<String, Object> caseData = basicCaseData();
+
+        // when
+        ProcessResult result = service.process(new CcdCallbackRequest(
+            EVENT_ID_CREATE_NEW_CASE,
+            caseDetails(caseData),
+            true
+        ), IDAM_TOKEN, USER_ID);
+
+        // then
+        assertThat(result.getExceptionRecordData()).isEmpty();
+        assertThat(result.getWarnings()).isEmpty();
+        assertThat(result.getErrors()).isEmpty();
+
+        verify(exceptionRecordFinalizer).finalizeExceptionRecord(caseData, 345L);
+    }
+
+    @Test
     void should_return_error_if_multiple_cases_exist_in_ccd_for_a_given_exception_record() throws Exception {
         // given
         setUpTransformationUrl();
@@ -318,8 +342,6 @@ class CreateCaseCallbackServiceTest {
             caseDetails(basicCaseData()),
             true
         ), IDAM_TOKEN, USER_ID);
-
-        // then
 
         // then
         assertThat(result.getExceptionRecordData()).isEmpty();
