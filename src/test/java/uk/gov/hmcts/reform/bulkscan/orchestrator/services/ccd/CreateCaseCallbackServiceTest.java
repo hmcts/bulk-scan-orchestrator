@@ -312,6 +312,9 @@ class CreateCaseCallbackServiceTest {
         when(ccdApi.getCaseRefsByBulkScanCaseReference(Long.toString(CASE_ID), null))
             .thenReturn(asList(345L));
         Map<String, Object> caseData = basicCaseData();
+        Map<String, Object> finalizedCaseData = new HashMap<>();
+        when(exceptionRecordFinalizer.finalizeExceptionRecord(caseData, 345L))
+            .thenReturn(finalizedCaseData);
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -321,7 +324,7 @@ class CreateCaseCallbackServiceTest {
         ), IDAM_TOKEN, USER_ID);
 
         // then
-        assertThat(result.getExceptionRecordData()).isEmpty();
+        assertThat(result.getExceptionRecordData()).isEqualTo(finalizedCaseData);
         assertThat(result.getWarnings()).isEmpty();
         assertThat(result.getErrors()).isEmpty();
 
