@@ -38,7 +38,9 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasIdamToken;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasUserId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isCreateNewCaseEvent;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.CASE_REFERENCE;
@@ -87,7 +89,12 @@ public class CreateCaseCallbackService {
      * @return ProcessResult map of changes or list of errors/warnings
      */
     public ProcessResult process(CcdCallbackRequest request, String idamToken, String userId) {
-        Validation<String, Void> canAccess = assertAllowToAccess(request.getCaseDetails(), request.getEventId());
+        Validation<String, Void> canAccess = assertAllowToAccess(
+            request.getCaseDetails(),
+            request.getEventId(),
+            idamToken,
+            userId
+        );
 
         if (canAccess.isInvalid()) {
             log.warn("Validation error: {}", canAccess.getError());
@@ -138,10 +145,17 @@ public class CreateCaseCallbackService {
         return result;
     }
 
-    private Validation<String, Void> assertAllowToAccess(CaseDetails caseDetails, String eventId) {
+    private Validation<String, Void> assertAllowToAccess(
+        CaseDetails caseDetails,
+        String eventId,
+        String idamToken,
+        String userId
+    ) {
         return validator.mandatoryPrerequisites(
             () -> isCreateNewCaseEvent(eventId),
-            () -> getServiceConfig(caseDetails).map(item -> null)
+            () -> getServiceConfig(caseDetails).map(item -> null),
+            () -> hasIdamToken(idamToken).map(item -> null),
+            () -> hasUserId(userId).map(item -> null)
         );
     }
 
