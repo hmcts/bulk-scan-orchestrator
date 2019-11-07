@@ -30,7 +30,7 @@ public class ExceptionRecordMapper {
     private final String contextPath;
 
     // Display Envelope case references for the specified classifications
-    private static final EnumSet<Classification> allowedClassifications = EnumSet.of(
+    private static final EnumSet<Classification> ALLOWED_CLASSIFICATIONS = EnumSet.of(
         SUPPLEMENTARY_EVIDENCE,
         SUPPLEMENTARY_EVIDENCE_WITH_OCR
     );
@@ -66,7 +66,7 @@ public class ExceptionRecordMapper {
     }
 
     private String setDisplayCaseReferenceFlag(String caseRef, Classification classification) {
-        if (isNotBlank(caseRef) && allowedClassifications.contains(classification)) {
+        if (isNotBlank(caseRef) && ALLOWED_CLASSIFICATIONS.contains(classification)) {
             return YES;
         }
         return NO;
