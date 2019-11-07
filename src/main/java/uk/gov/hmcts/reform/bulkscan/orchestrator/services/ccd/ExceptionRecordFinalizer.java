@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -10,6 +9,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFi
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toMap;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.DISPLAY_WARNINGS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.OCR_DATA_VALIDATION_WARNINGS;
@@ -29,15 +29,11 @@ public class ExceptionRecordFinalizer {
                 .put(OCR_DATA_VALIDATION_WARNINGS, emptyList())
                 .build();
 
-        originalFields.entrySet().stream()
-            .forEach(e -> log.info("orig: {}: {}", e.getKey(), e.getValue()));
-        fieldsToUpdate.entrySet().stream()
-            .forEach(e -> log.info("upd: {}: {}", e.getKey(), e.getValue()));
-        Maps.difference(originalFields, fieldsToUpdate).entriesOnlyOnLeft().entrySet().stream()
-            .forEach(e -> log.info("diff: {}: {}", e.getKey(), e.getValue()));
-        return ImmutableMap.<String, Object>builder()
-            .putAll(Maps.difference(originalFields, fieldsToUpdate).entriesOnlyOnLeft())
-            .putAll(fieldsToUpdate)
-            .build();
+        Map<String, Object> finalizedMap = originalFields.entrySet().stream()
+            .filter(e -> !fieldsToUpdate.containsKey(e.getKey()))
+            .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+        finalizedMap.putAll(fieldsToUpdate);
+
+        return finalizedMap;
     }
 }
