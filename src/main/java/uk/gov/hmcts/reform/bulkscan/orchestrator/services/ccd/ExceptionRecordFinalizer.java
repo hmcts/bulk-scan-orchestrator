@@ -30,11 +30,11 @@ public class ExceptionRecordFinalizer {
                 .build();
 
         originalFields.entrySet().stream()
-            .forEach(e -> log.info("orig: " + e.getKey() + ": " +  e.getValue()));
+            .forEach(e -> log.info("orig: {}: {}", e.getKey(), e.getValue()));
         fieldsToUpdate.entrySet().stream()
-            .forEach(e -> log.info("upd: " + e.getKey() + ": " +  e.getValue()));
+            .forEach(e -> log.info("upd: {}: {}", e.getKey(), e.getValue()));
         Maps.difference(originalFields, fieldsToUpdate).entriesOnlyOnLeft().entrySet().stream()
-            .forEach(e -> log.info("diff: " + e.getKey() + ": " +  e.getValue()));
+            .forEach(e -> log.info("diff: {}: {}", e.getKey(), e.getValue()));
         return ImmutableMap.<String, Object>builder()
             .putAll(Maps.difference(originalFields, fieldsToUpdate).entriesOnlyOnLeft())
             .putAll(fieldsToUpdate)
