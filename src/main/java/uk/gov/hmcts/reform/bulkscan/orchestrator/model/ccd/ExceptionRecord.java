@@ -47,6 +47,22 @@ public class ExceptionRecord implements CaseData {
     @JsonProperty("containsPayments")
     public final String containsPayments;
 
+    // Case reference received to attach the scanned documents received
+    @JsonProperty("envelopeCaseReference")
+    public final String envelopeCaseReference;
+
+    // Legacy case reference received to attach the scanned documents received
+    @JsonProperty("envelopeLegacyCaseReference")
+    public final String envelopeLegacyCaseReference;
+
+    // Yes/No field indicating to show or hide envelope case reference
+    @JsonProperty("showEnvelopeCaseReference")
+    public final String showEnvelopeCaseReference;
+
+    // Yes/No field indicating to show or hide envelope legacy case reference
+    @JsonProperty("showEnvelopeLegacyCaseReference")
+    public final String showEnvelopeLegacyCaseReference;
+
     public ExceptionRecord(
         String classification,
         String poBox,
@@ -60,7 +76,11 @@ public class ExceptionRecord implements CaseData {
         String displayWarnings,
         String envelopeId,
         String awaitingPaymentDcnProcessing,
-        String containsPayments
+        String containsPayments,
+        String envelopeCaseReference,
+        String envelopeLegacyCaseReference,
+        String showEnvelopeCaseReference,
+        String showEnvelopeLegacyCaseReference
     ) {
         this.classification = classification;
         this.poBox = poBox;
@@ -75,5 +95,9 @@ public class ExceptionRecord implements CaseData {
         this.envelopeId = envelopeId;
         this.awaitingPaymentDcnProcessing = awaitingPaymentDcnProcessing;
         this.containsPayments = containsPayments;
+        this.envelopeCaseReference = envelopeCaseReference;
+        this.envelopeLegacyCaseReference = envelopeLegacyCaseReference;
+        this.showEnvelopeCaseReference = showEnvelopeCaseReference;
+        this.showEnvelopeLegacyCaseReference = showEnvelopeLegacyCaseReference;
     }
 }
