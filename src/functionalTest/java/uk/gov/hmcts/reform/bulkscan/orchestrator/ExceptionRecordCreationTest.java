@@ -135,12 +135,53 @@ class ExceptionRecordCreationTest {
             .until(() -> findCasesByPoBox(randomPoBox).size() == 1);
     }
 
+    @DisplayName("Should create ExceptionRecord when classification is SUPPLEMENTARY_EVIDENCE_WITH_OCR")
+    @Test
+    void create_exception_record_for_supplementary_evidence_with_ocr() throws Exception {
+        //given
+        String envelopeCaseRef = "1539860706648396";
+        Map<String, String> expectedOcrData = ImmutableMap.of(
+            "first_name", "value1", "last_name", "value2", "email", "hello@test.com"
+        );
+
+        // when
+        String envelopeId = envelopeMessager.sendMessageFromFile(
+            "envelopes/supplementary-evidence-with-ocr-envelope.json", // no payments
+            envelopeCaseRef,
+            null,
+            null,
+            dmUrl
+        );
+
+        // then
+        await("Exception record being created")
+            .atMost(60, TimeUnit.SECONDS)
+            .pollInterval(Duration.ofSeconds(5))
+            .until(() -> findCasesByEnvelopeId(envelopeId).size() == 1);
+
+        CaseDetails exceptionRecord = findCasesByEnvelopeId(envelopeId).get(0);
+        assertThat(getCaseDataForField(exceptionRecord, "journeyClassification")).isEqualTo("SUPPLEMENTARY_EVIDENCE_WITH_OCR");
+        assertThat(getOcrData(exceptionRecord)).isEqualTo(expectedOcrData);
+        assertThat(getCaseDataForField(exceptionRecord, "envelopeCaseReference")).isEqualTo(envelopeCaseRef);
+        assertThat(getCaseDataForField(exceptionRecord, "envelopeLegacyCaseReference")).isNull();
+    }
+
     private List<CaseDetails> findCasesByPoBox(UUID poBox) {
         return caseSearcher.search(
             SampleData.JURSIDICTION,
             SampleData.CONTAINER.toUpperCase() + "_" + CreateExceptionRecord.CASE_TYPE,
             ImmutableMap.of(
                 "case.poBox", poBox.toString()
+            )
+        );
+    }
+
+    private List<CaseDetails> findCasesByEnvelopeId(String envelopeId) {
+        return caseSearcher.search(
+            SampleData.JURSIDICTION,
+            SampleData.CONTAINER.toUpperCase() + "_" + CreateExceptionRecord.CASE_TYPE,
+            ImmutableMap.of(
+                "case.envelopeId", envelopeId
             )
         );
     }
