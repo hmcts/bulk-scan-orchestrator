@@ -220,7 +220,6 @@ class CcdNewCaseCreatorTest {
 
         verify(exceptionRecordFinalizer).finalizeExceptionRecord(anyMap(), anyLong());
         verify(paymentsProcessor).updatePayments(caseDetails, CASE_ID);
-        verify(exceptionRecordFinalizer).finalizeExceptionRecord(anyMap(), anyLong());
     }
 
     @Test
