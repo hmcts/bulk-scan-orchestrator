@@ -58,8 +58,9 @@ public class ExceptionRecordMapper {
             envelope.id,
             CollectionUtils.isEmpty(envelope.payments) ? NO : YES,
             CollectionUtils.isEmpty(envelope.payments) ? NO : YES,
-            isBlank(envelope.caseRef) ? null : envelope.caseRef,
-            isBlank(envelope.legacyCaseRef) ? null : envelope.legacyCaseRef,
+            // Setting the values as "", as null values are not supported by ImmutableMap
+            isBlank(envelope.caseRef) ? "" : envelope.caseRef,
+            isBlank(envelope.legacyCaseRef) ? "" : envelope.legacyCaseRef,
             setDisplayCaseReferenceFlag(envelope.caseRef, envelope.classification),
             setDisplayCaseReferenceFlag(envelope.legacyCaseRef, envelope.classification)
         );
