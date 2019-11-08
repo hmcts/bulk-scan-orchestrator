@@ -103,7 +103,8 @@ module "bulk-scan-orchestrator" {
   instance_size                   = "${local.sku_size}"
   java_container_version          = "9.0"
 
-  app_settings = "${merge(local.core_app_settings, local.users_usernames_settings, local.users_passwords_settings)}"
+  app_settings                    = "${merge(local.core_app_settings, local.users_usernames_settings, local.users_passwords_settings)}"
+  enable_ase                      = "${var.enable_ase}"
 }
 
 data "azurerm_key_vault" "key_vault" {
