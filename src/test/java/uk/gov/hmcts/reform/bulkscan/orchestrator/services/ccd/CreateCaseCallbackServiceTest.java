@@ -29,6 +29,7 @@ import java.util.Map;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -333,25 +334,20 @@ class CreateCaseCallbackServiceTest {
 
     @Test
     void should_return_error_if_multiple_cases_exist_in_ccd_for_a_given_exception_record() throws Exception {
-        // given
         setUpTransformationUrl();
 
         when(ccdApi.getCaseRefsByBulkScanCaseReference(Long.toString(CASE_ID), null))
             .thenReturn(asList(345L, 456L));
 
-        // when
-        ProcessResult result = service.process(new CcdCallbackRequest(
-            EVENT_ID_CREATE_NEW_CASE,
-            caseDetails(basicCaseData()),
-            true
-        ), IDAM_TOKEN, USER_ID);
-
-        // then
-        assertThat(result.getExceptionRecordData()).isEmpty();
-        assertThat(result.getWarnings()).isEmpty();
-        assertThat(result.getErrors()).containsOnly(
-            "Multiple cases (345, 456) found for the given bulk scan case reference: 123"
-        );
+        assertThatThrownBy(
+            () -> service.process(new CcdCallbackRequest(
+                EVENT_ID_CREATE_NEW_CASE,
+                caseDetails(basicCaseData()),
+                true
+            ), IDAM_TOKEN, USER_ID)
+        )
+            .isInstanceOf(MultipleCasesFoundException.class)
+            .hasMessage("Multiple cases (345, 456) found for the given bulk scan case reference: 123");
 
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
     }
