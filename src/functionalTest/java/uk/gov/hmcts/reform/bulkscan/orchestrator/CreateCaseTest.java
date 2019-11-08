@@ -38,10 +38,6 @@ import static org.awaitility.Awaitility.await;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.BULK_SCANNED_CASE_TYPE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_CREATE_NEW_CASE;
 
-// remove once master build is green
-@Disabled(
-    "Incompatible version in AAT makes this suite un-passable until the fix which is currently in master is deployed"
-)
 @SpringBootTest
 @ActiveProfiles("nosb") // no servicebus queue handler registration
 class CreateCaseTest {
