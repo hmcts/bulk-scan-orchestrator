@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
@@ -15,6 +17,7 @@ public class CaseSearcher {
     private final CcdAuthenticatorFactory factory;
 
     private final CoreCaseDataApi coreCaseDataApi;
+    private static final Logger log = LoggerFactory.getLogger(CaseSearcher.class);
 
     public CaseSearcher(CcdAuthenticatorFactory factory, CoreCaseDataApi coreCaseDataApi) {
         this.factory = factory;
