@@ -799,6 +799,7 @@ class CreateCaseCallbackServiceTest {
 
     private Map<String, Object> basicCaseData() {
         Map<String, Object> data = new HashMap<>();
+        data.put("envelopeLegacyCaseReference", null);
         data.put("poBox", "12345");
         data.put("journeyClassification", EXCEPTION.name());
         data.put("formType", "A1");
