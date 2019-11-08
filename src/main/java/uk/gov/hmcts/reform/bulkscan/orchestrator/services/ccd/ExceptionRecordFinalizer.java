@@ -28,7 +28,9 @@ public class ExceptionRecordFinalizer {
 
         Map<String, Object> finalizedMap = new HashMap<>();
         for (String key: originalFields.keySet()) {
-            finalizedMap.put(key, originalFields.get(key));
+            if (!fieldsToUpdate.containsKey(key)) {
+                finalizedMap.put(key, originalFields.get(key));
+            }
         }
         finalizedMap.putAll(fieldsToUpdate);
 
