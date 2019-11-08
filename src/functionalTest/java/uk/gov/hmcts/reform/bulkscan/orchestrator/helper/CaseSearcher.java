@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 
+import feign.FeignException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
@@ -15,6 +18,7 @@ public class CaseSearcher {
     private final CcdAuthenticatorFactory factory;
 
     private final CoreCaseDataApi coreCaseDataApi;
+    private static final Logger log = LoggerFactory.getLogger(CaseSearcher.class);
 
     public CaseSearcher(CcdAuthenticatorFactory factory, CoreCaseDataApi coreCaseDataApi) {
         this.factory = factory;
@@ -29,13 +33,18 @@ public class CaseSearcher {
         // not including in try catch to fast fail the method
         CcdAuthenticator authenticator = factory.createForJurisdiction(jurisdiction);
 
-        return coreCaseDataApi.searchForCaseworker(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
-            jurisdiction,
-            caseTypeId,
-            searchCriteria
-        );
+        try {
+            return coreCaseDataApi.searchForCaseworker(
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                authenticator.getUserDetails().getId(),
+                jurisdiction,
+                caseTypeId,
+                searchCriteria
+            );
+        } catch(FeignException ex) {
+            log.info(new String(ex.content()));
+            throw ex;
+        }
     }
 }
