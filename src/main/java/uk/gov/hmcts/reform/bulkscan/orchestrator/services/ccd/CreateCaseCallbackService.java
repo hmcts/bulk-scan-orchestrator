@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import feign.FeignException;
 import io.vavr.collection.Seq;
 import io.vavr.control.Try;
@@ -30,6 +29,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -386,9 +386,14 @@ public class CreateCaseCallbackService {
                 .put(OCR_DATA_VALIDATION_WARNINGS, emptyList())
                 .build();
 
-        return ImmutableMap.<String, Object>builder()
-            .putAll(Maps.difference(originalFields, fieldsToUpdate).entriesOnlyOnLeft())
-            .putAll(fieldsToUpdate)
-            .build();
+        Map<String, Object> finalizedMap = new HashMap<>();
+        for (String key: originalFields.keySet()) {
+            if (!fieldsToUpdate.containsKey(key)) {
+                finalizedMap.put(key, originalFields.get(key));
+            }
+        }
+        finalizedMap.putAll(fieldsToUpdate);
+
+        return finalizedMap;
     }
 }
