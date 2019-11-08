@@ -42,7 +42,7 @@ public class CaseSearcher {
                 caseTypeId,
                 searchCriteria
             );
-        } catch(FeignException ex) {
+        } catch (FeignException ex) {
             log.info(new String(ex.content()));
             throw ex;
         }
