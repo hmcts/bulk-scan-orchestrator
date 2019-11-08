@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 
-import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -33,18 +32,13 @@ public class CaseSearcher {
         // not including in try catch to fast fail the method
         CcdAuthenticator authenticator = factory.createForJurisdiction(jurisdiction);
 
-        try {
-            return coreCaseDataApi.searchForCaseworker(
-                authenticator.getUserToken(),
-                authenticator.getServiceToken(),
-                authenticator.getUserDetails().getId(),
-                jurisdiction,
-                caseTypeId,
-                searchCriteria
-            );
-        } catch (FeignException ex) {
-            log.info(new String(ex.content()));
-            throw ex;
-        }
+        return coreCaseDataApi.searchForCaseworker(
+            authenticator.getUserToken(),
+            authenticator.getServiceToken(),
+            authenticator.getUserDetails().getId(),
+            jurisdiction,
+            caseTypeId,
+            searchCriteria
+        );
     }
 }

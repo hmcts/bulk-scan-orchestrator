@@ -44,6 +44,31 @@ class ExceptionRecordFinalizerTest {
     }
 
     @Test
+    void should_handle_null_values() {
+        // given
+        Map<String, Object> originalValues = new HashMap<>();
+        originalValues.put("field1", "value1");
+        originalValues.put("field2", null);
+
+        // when
+        Map<String,Object> res = exceptionRecordFinalizer.finalizeExceptionRecord(originalValues, CASE_ID);
+
+        // then
+        assertThat(res).containsOnlyKeys(
+            "field1",
+            "field2",
+            CASE_REFERENCE,
+            DISPLAY_WARNINGS,
+            OCR_DATA_VALIDATION_WARNINGS
+        );
+        assertThat(res.get("field1")).isEqualTo("value1");
+        assertThat(res.get("field2")).isEqualTo(null);
+        assertThat(res.get(CASE_REFERENCE)).isEqualTo(Long.toString(CASE_ID));
+        assertThat(res.get(DISPLAY_WARNINGS)).isEqualTo(NO);
+        assertThat(res.get(OCR_DATA_VALIDATION_WARNINGS)).isEqualTo(emptyList());
+    }
+
+    @Test
     void should_replace_values() {
         // given
         Map<String, Object> originalValues = new HashMap<>();
