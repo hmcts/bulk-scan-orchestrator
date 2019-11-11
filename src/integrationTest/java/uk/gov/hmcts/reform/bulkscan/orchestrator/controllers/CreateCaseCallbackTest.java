@@ -208,7 +208,7 @@ class CreateCaseCallbackTest {
 
     @Test
     void should_respond_with_relevant_error_when_multiple_cases_exist_for_given_exception_record() {
-        setUpCcdSearchResult(getCcdResponseBody("search-result-empty.json"));
+        setUpCcdSearchResult(getCcdResponseBody("search-result-multiple.json"));
 
         postWithBody(getRequestBody("valid-exception.json"))
                 .statusCode(INTERNAL_SERVER_ERROR.value());
