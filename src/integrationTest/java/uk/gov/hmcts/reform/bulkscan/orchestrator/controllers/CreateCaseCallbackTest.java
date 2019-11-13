@@ -31,6 +31,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.collection.IsMapWithSize.anEmptyMap;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_CREATE_NEW_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
@@ -51,7 +52,7 @@ class CreateCaseCallbackTest {
     @Test
     void should_create_case_if_classification_new_application_with_documents_and_ocr_data() throws IOException {
         setUpTransformation(getTransformationResponseBody("ok-no-warnings.json"));
-        setUpCcdSearchEmptyResult(getCcdResponseBody("search-result-empty.json"));
+        setUpCcdSearchResult(getCcdResponseBody("search-result-empty.json"));
         setUpCcdCreateCase(
             getCcdResponseBody("start-event.json"),
             getCcdResponseBody("sample-case.json")
@@ -97,7 +98,7 @@ class CreateCaseCallbackTest {
     @Test
     void should_not_create_case_if_request_specifies_to_not_ignore_warnings() {
         setUpTransformation(getTransformationResponseBody("ok-with-warnings.json"));
-        setUpCcdSearchEmptyResult(getCcdResponseBody("search-result-empty.json"));
+        setUpCcdSearchResult(getCcdResponseBody("search-result-empty.json"));
 
         postWithBody(getRequestBody("valid-exception-warnings-flag-on.json"))
             .statusCode(OK.value())
@@ -108,7 +109,7 @@ class CreateCaseCallbackTest {
     @Test
     void should_create_case_if_classification_exception_with_documents_and_ocr_data() throws IOException {
         setUpTransformation(getTransformationResponseBody("ok-no-warnings.json"));
-        setUpCcdSearchEmptyResult(getCcdResponseBody("search-result-empty.json"));
+        setUpCcdSearchResult(getCcdResponseBody("search-result-empty.json"));
         setUpCcdCreateCase(
             getCcdResponseBody("start-event.json"),
             getCcdResponseBody("sample-case.json")
@@ -134,11 +135,11 @@ class CreateCaseCallbackTest {
     @ParameterizedTest
     @EnumSource(
         value = HttpStatus.class,
-        names = { "BAD_REQUEST", "UNPROCESSABLE_ENTITY", "BAD_GATEWAY", "INTERNAL_SERVER_ERROR" }
+        names = {"BAD_REQUEST", "UNPROCESSABLE_ENTITY", "BAD_GATEWAY", "INTERNAL_SERVER_ERROR"}
     )
     void should_respond_with_relevant_error_when_ccd_call_is_failing(HttpStatus responseStatus) {
         setUpTransformation(getTransformationResponseBody("ok-no-warnings.json"));
-        setUpCcdSearchEmptyResult(getCcdResponseBody("search-result-empty.json"));
+        setUpCcdSearchResult(getCcdResponseBody("search-result-empty.json"));
         setUpFailingCallToCcd(responseStatus);
 
         postWithBody(getRequestBody("valid-exception.json"))
@@ -149,11 +150,11 @@ class CreateCaseCallbackTest {
     @ParameterizedTest
     @EnumSource(
         value = HttpStatus.class,
-        names = { "BAD_REQUEST", "UNPROCESSABLE_ENTITY", "INTERNAL_SERVER_ERROR" }
+        names = {"BAD_REQUEST", "UNPROCESSABLE_ENTITY", "INTERNAL_SERVER_ERROR"}
     )
     void should_respond_with_relevant_error_when_transformation_call_is_failing(HttpStatus responseStatus) {
         setUpFailingTransformation(responseStatus);
-        setUpCcdSearchEmptyResult(getCcdResponseBody("search-result-empty.json"));
+        setUpCcdSearchResult(getCcdResponseBody("search-result-empty.json"));
 
         postWithBody(getRequestBody("valid-exception.json"))
             .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
@@ -163,7 +164,7 @@ class CreateCaseCallbackTest {
     @ParameterizedTest
     @EnumSource(
         value = HttpStatus.class,
-        names = { "BAD_REQUEST", "UNPROCESSABLE_ENTITY" }
+        names = {"BAD_REQUEST", "UNPROCESSABLE_ENTITY"}
     )
     void should_respond_with_relevant_error_when_transformation_call_is_failing_with_correct_response_body(
         HttpStatus responseStatus
@@ -171,7 +172,7 @@ class CreateCaseCallbackTest {
         String error = "Big Error";
         String warning = "Big Warning";
         setUpFailingTransformation(responseStatus, error, warning);
-        setUpCcdSearchEmptyResult(getCcdResponseBody("search-result-empty.json"));
+        setUpCcdSearchResult(getCcdResponseBody("search-result-empty.json"));
 
         if (responseStatus.equals(HttpStatus.BAD_REQUEST)) {
             postWithBody(getRequestBody("valid-exception.json"))
@@ -205,6 +206,18 @@ class CreateCaseCallbackTest {
             ));
     }
 
+    @Test
+    void should_respond_with_relevant_error_when_multiple_cases_exist_for_given_exception_record() {
+        setUpCcdSearchResult(getCcdResponseBody("search-result-multiple.json"));
+
+        postWithBody(getRequestBody("valid-exception.json"))
+            .statusCode(INTERNAL_SERVER_ERROR.value())
+            .body("message",
+                // 1539007368674134 - case id from valid-exception.json
+                // 354, 456 - case ids from search-result-multiple.json
+                equalTo("Multiple cases (354, 456) found for the given bulk scan case reference: 1539007368674134"));
+    }
+
     private void setUpTransformation(String responseBody) {
         givenThat(post("/transform-exception-record")
             .withHeader("ServiceAuthorization", containing("Bearer"))
@@ -229,7 +242,7 @@ class CreateCaseCallbackTest {
         );
     }
 
-    private void setUpCcdSearchEmptyResult(String responseBody) {
+    private void setUpCcdSearchResult(String responseBody) {
         givenThat(post("/searchCases?ctid=Bulk_Scanned")
             .withHeader("ServiceAuthorization", containing("Bearer"))
             .willReturn(okJson(responseBody))
@@ -270,8 +283,8 @@ class CreateCaseCallbackTest {
                     + EVENT_ID
                     + "/token"
             )
-            .withHeader("ServiceAuthorization", containing("Bearer"))
-            .willReturn(aResponse().withStatus(responseStatus.value()))
+                .withHeader("ServiceAuthorization", containing("Bearer"))
+                .willReturn(aResponse().withStatus(responseStatus.value()))
         );
     }
 

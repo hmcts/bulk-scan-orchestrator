@@ -180,16 +180,13 @@ public class CreateCaseCallbackService {
                     );
                 return new ProcessResult(finalizedExceptionRecordData);
             } else {
-                return new ProcessResult(
-                    emptyList(),
-                    singletonList(
-                        String.format(
-                            "Multiple cases (%s) found for the given bulk scan case reference: %s",
-                            ids.stream().map(String::valueOf).collect(joining(", ")),
-                            exceptionRecord.id
-                        )
-                    )
+                String msg = String.format(
+                    "Multiple cases (%s) found for the given bulk scan case reference: %s",
+                    ids.stream().map(String::valueOf).collect(joining(", ")),
+                    exceptionRecord.id
                 );
+                log.error(msg);
+                throw new MultipleCasesFoundException(msg);
             }
         }
     }
