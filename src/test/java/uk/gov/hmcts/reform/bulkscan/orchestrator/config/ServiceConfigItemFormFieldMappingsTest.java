@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ServiceConfigItemFormFieldMappingsTest {
 
@@ -89,7 +90,7 @@ class ServiceConfigItemFormFieldMappingsTest {
     }
 
     @Test
-    void should_handle_multiple_ocr_field_names_for_form_type() {
+    void should_fail_on_multiple_ocr_field_names_for_form_type() {
         // given
         FormFieldMapping formFieldMapping1 = new FormFieldMapping();
         formFieldMapping1.setFormType(FORM_1);
@@ -101,16 +102,11 @@ class ServiceConfigItemFormFieldMappingsTest {
         formFieldMapping3.setFormType(FORM_2);
         formFieldMapping3.setOcrField(FIELD_3);
 
-        configItem.setFormTypeToSurnameOcrFieldMappings(
-            asList(formFieldMapping1, formFieldMapping2, formFieldMapping3)
-        );
-
         // when
-        final String fieldName1 = configItem.getSurnameOcrFieldName(FORM_1);
-        final String fieldName2 = configItem.getSurnameOcrFieldName(FORM_2);
-
-        // then
-        assertThat(fieldName1).isEqualTo(FIELD_1);
-        assertThat(fieldName2).isEqualTo(FIELD_2);
+        assertThatThrownBy(
+            () -> configItem.setFormTypeToSurnameOcrFieldMappings(
+                asList(formFieldMapping1, formFieldMapping2, formFieldMapping3)
+            )
+        ).hasMessage("Form type form2 has multiple mappings to surname fields.");
     }
 }

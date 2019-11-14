@@ -62,5 +62,3 @@ service-config:
           ocrField: lastName
         - formType: form2
           ocrField: surname
-        - formType: form2
-          ocrField: nickName

@@ -83,11 +83,9 @@ public class ServiceConfigItem {
                 (map, mapping) -> {
                     String formType = mapping.getFormType();
                     if (map.containsKey(formType)) {
-                        log.error(
-                            "Form type {} has multiple mappings to surname fields. Using first one: {}",
-                            formType,
-                            map.get(formType)
-                        );
+                        String msg = String.format("Form type %s has multiple mappings to surname fields.", formType);
+                        log.error(msg);
+                        throw new InvalidConfigurationException(msg);
                     } else {
                         map.put(formType, mapping.getOcrField());
                     }
