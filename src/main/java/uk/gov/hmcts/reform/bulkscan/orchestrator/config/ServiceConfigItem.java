@@ -8,10 +8,6 @@ import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
 
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
-
 public class ServiceConfigItem {
 
     private static final Logger log = LoggerFactory.getLogger(ServiceConfigItem.class);
@@ -80,20 +76,24 @@ public class ServiceConfigItem {
     }
 
     public void setFormTypeToSurnameOcrFieldMappings(List<FormFieldMapping> formTypeToSurnameOcrFieldMappings) {
-        this.formTypeToSurnameOcrFieldMappings = formTypeToSurnameOcrFieldMappings.stream()
-            .collect(groupingBy(FormFieldMapping::getFormType, toList()))
-            .entrySet().stream()
-            .collect(toMap(
-                e -> e.getKey(),
-                e -> {
-                    if (e.getValue().size() > 1) {
-                        log.error("Form type {} has {} mappings to surname fields",
-                            e.getKey(),
-                            e.getValue().size());
+        this.formTypeToSurnameOcrFieldMappings = formTypeToSurnameOcrFieldMappings
+            .stream()
+            .collect(
+                HashMap::new,
+                (map, mapping) -> {
+                    String formType = mapping.getFormType();
+                    if (map.containsKey(formType)) {
+                        log.error(
+                            "Form type {} has multiple mappings to surname fields. Using first one: {}",
+                            formType,
+                            map.get(formType)
+                        );
+                    } else {
+                        map.put(formType, mapping.getOcrField());
                     }
-                    return e.getValue().get(0).getOcrField();
-                }
-            ));
+                },
+                HashMap::putAll
+            );
     }
 
     // endregion

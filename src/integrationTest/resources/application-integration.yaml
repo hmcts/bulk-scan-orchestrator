@@ -58,12 +58,9 @@ service-config:
       case-type-ids:
         - Bulk_Scanned
       form-type-to-surname-ocr-field-mappings:
-        - form-field-mapping:
-          formType: form1
+        - formType: form1
           ocrField: lastName
-        - form-field-mapping:
-          formType: form2
+        - formType: form2
           ocrField: surname
-        - form-field-mapping:
-          formType: form2
+        - formType: form2
           ocrField: nickName
