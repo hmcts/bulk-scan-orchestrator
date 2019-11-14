@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
@@ -30,7 +31,7 @@ public class ServiceConfigItem {
 
     private boolean allowCreatingCaseBeforePaymentsAreProcessed = false;
 
-    private Map<String, String> surnameMappings;
+    private Map<String, String> formTypeToSurnameOcrFieldMappings = new HashMap<>();
 
     // region getters & setters
 
@@ -74,12 +75,12 @@ public class ServiceConfigItem {
         this.allowCreatingCaseBeforePaymentsAreProcessed = allowCreatingCaseBeforePaymentsAreProcessed;
     }
 
-    public String getSurnameMapping(String formType) {
-        return surnameMappings.get(formType);
+    public String getSurnameOcrFieldName(String formType) {
+        return formTypeToSurnameOcrFieldMappings.get(formType);
     }
 
-    public void setSurnameMappings(List<FormFieldMapping> surnameMappings) {
-        this.surnameMappings = surnameMappings.stream()
+    public void setFormTypeToSurnameOcrFieldMappings(List<FormFieldMapping> formTypeToSurnameOcrFieldMappings) {
+        this.formTypeToSurnameOcrFieldMappings = formTypeToSurnameOcrFieldMappings.stream()
             .collect(groupingBy(FormFieldMapping::getFormType, toList()))
             .entrySet().stream()
             .collect(toMap(

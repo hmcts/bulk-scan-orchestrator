@@ -15,11 +15,11 @@ class ServiceConfigTest {
     private ServiceConfigProvider serviceConfigProvider;
 
     @Test
-    public void getCase_should_call_ccd_to_retrieve_the_case_by_ccd_id() {
+    public void serviceConfigItem_should_store_form_type_to_ocr_field_name_mappings() {
         ServiceConfigItem configItem = serviceConfigProvider.getConfig(TEST_SERVICE_NAME);
 
         //form types and field names are defined in application-integration.yaml
-        assertThat(configItem.getSurnameMapping("form1")).isEqualTo("lastName");
-        assertThat(configItem.getSurnameMapping("form2")).isEqualTo("surname");
+        assertThat(configItem.getSurnameOcrFieldName("form1")).isEqualTo("lastName");
+        assertThat(configItem.getSurnameOcrFieldName("form2")).isEqualTo("surname");
     }
 }
