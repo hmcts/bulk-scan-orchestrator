@@ -1,9 +1,19 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
+import java.util.Map;
 import javax.validation.constraints.NotNull;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+
 public class ServiceConfigItem {
+
+    private static final Logger log = LoggerFactory.getLogger(ServiceConfigItem.class);
 
     @NotNull
     private String service;
@@ -19,6 +29,8 @@ public class ServiceConfigItem {
     private List<String> caseTypeIds;
 
     private boolean allowCreatingCaseBeforePaymentsAreProcessed = false;
+
+    private Map<String, String> surnameMappings;
 
     // region getters & setters
 
@@ -60,6 +72,27 @@ public class ServiceConfigItem {
 
     public void setAllowCreatingCaseBeforePaymentsAreProcessed(boolean allowCreatingCaseBeforePaymentsAreProcessed) {
         this.allowCreatingCaseBeforePaymentsAreProcessed = allowCreatingCaseBeforePaymentsAreProcessed;
+    }
+
+    public String getSurnameMapping(String formType) {
+        return surnameMappings.get(formType);
+    }
+
+    public void setSurnameMappings(List<FormFieldMapping> surnameMappings) {
+        this.surnameMappings = surnameMappings.stream()
+            .collect(groupingBy(FormFieldMapping::getFormType, toList()))
+            .entrySet().stream()
+            .collect(toMap(
+                e -> e.getKey(),
+                e -> {
+                    if (e.getValue().size() > 1) {
+                        log.error("Form type {} has {} mappings to surname fields",
+                            e.getKey(),
+                            e.getValue().size());
+                    }
+                    return e.getValue().get(0).getOcrField();
+                }
+            ));
     }
 
     // endregion

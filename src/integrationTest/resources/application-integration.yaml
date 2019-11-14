@@ -57,3 +57,13 @@ service-config:
       transformation-url: *wiremock
       case-type-ids:
         - Bulk_Scanned
+      surname-mappings:
+        - form-field-mapping:
+          formType: form1
+          ocrField: lastName
+        - form-field-mapping:
+          formType: form2
+          ocrField: surname
+        - form-field-mapping:
+          formType: form2
+          ocrField: nickName
