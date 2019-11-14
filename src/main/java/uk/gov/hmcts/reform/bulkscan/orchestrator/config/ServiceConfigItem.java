@@ -90,19 +90,6 @@ public class ServiceConfigItem {
                     }
                 )
             );
-//                HashMap::new,
-//                (map, mapping) -> {
-//                    String formType = mapping.getFormType();
-//                    if (map.containsKey(formType)) {
-//                        String msg = String.format("Form type %s has multiple mappings to surname fields.", formType);
-//                        log.error(msg);
-//                        throw new InvalidConfigurationException(msg);
-//                    } else {
-//                        map.put(formType, mapping.getOcrField());
-//                    }
-//                },
-//                HashMap::putAll
-//            );
     }
 
     // endregion
