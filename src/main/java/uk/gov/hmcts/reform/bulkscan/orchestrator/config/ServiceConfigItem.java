@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
 
+import static java.util.stream.Collectors.toMap;
+
 public class ServiceConfigItem {
 
     private static final Logger log = LoggerFactory.getLogger(ServiceConfigItem.class);
@@ -76,22 +78,31 @@ public class ServiceConfigItem {
     }
 
     public void setFormTypeToSurnameOcrFieldMappings(List<FormFieldMapping> formTypeToSurnameOcrFieldMappings) {
-        this.formTypeToSurnameOcrFieldMappings = formTypeToSurnameOcrFieldMappings
-            .stream()
+        this.formTypeToSurnameOcrFieldMappings = formTypeToSurnameOcrFieldMappings.stream()
             .collect(
-                HashMap::new,
-                (map, mapping) -> {
-                    String formType = mapping.getFormType();
-                    if (map.containsKey(formType)) {
-                        String msg = String.format("Form type %s has multiple mappings to surname fields.", formType);
-                        log.error(msg);
-                        throw new InvalidConfigurationException(msg);
-                    } else {
-                        map.put(formType, mapping.getOcrField());
+                toMap(
+                    FormFieldMapping::getFormType,
+                    FormFieldMapping::getOcrField,
+                    (v1, v2) -> {
+                        throw new InvalidConfigurationException(
+                            String.format("Form type has multiple mappings to surname fields %s, %s.", v1, v2)
+                        );
                     }
-                },
-                HashMap::putAll
+                )
             );
+//                HashMap::new,
+//                (map, mapping) -> {
+//                    String formType = mapping.getFormType();
+//                    if (map.containsKey(formType)) {
+//                        String msg = String.format("Form type %s has multiple mappings to surname fields.", formType);
+//                        log.error(msg);
+//                        throw new InvalidConfigurationException(msg);
+//                    } else {
+//                        map.put(formType, mapping.getOcrField());
+//                    }
+//                },
+//                HashMap::putAll
+//            );
     }
 
     // endregion

@@ -25,9 +25,6 @@ class ServiceConfigItemFormFieldMappingsTest {
     @Test
     void should_return_null_if_mappings_not_set() {
         // given
-        FormFieldMapping formFieldMapping1 = new FormFieldMapping();
-        formFieldMapping1.setFormType(FORM_1);
-        formFieldMapping1.setOcrField(FIELD_1);
 
         // when
         final String fieldName1 = configItem.getSurnameOcrFieldName(FORM_1);
@@ -107,6 +104,6 @@ class ServiceConfigItemFormFieldMappingsTest {
             () -> configItem.setFormTypeToSurnameOcrFieldMappings(
                 asList(formFieldMapping1, formFieldMapping2, formFieldMapping3)
             )
-        ).hasMessage("Form type form2 has multiple mappings to surname fields.");
+        ).hasMessage("Form type has multiple mappings to surname fields field2, field3.");
     }
 }
