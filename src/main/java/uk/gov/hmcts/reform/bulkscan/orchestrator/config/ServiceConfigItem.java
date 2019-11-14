@@ -1,9 +1,18 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.validation.constraints.NotNull;
 
+import static java.util.stream.Collectors.toMap;
+
 public class ServiceConfigItem {
+
+    private static final Logger log = LoggerFactory.getLogger(ServiceConfigItem.class);
 
     @NotNull
     private String service;
@@ -19,6 +28,8 @@ public class ServiceConfigItem {
     private List<String> caseTypeIds;
 
     private boolean allowCreatingCaseBeforePaymentsAreProcessed = false;
+
+    private Map<String, String> formTypeToSurnameOcrFieldMappings = new HashMap<>();
 
     // region getters & setters
 
@@ -60,6 +71,25 @@ public class ServiceConfigItem {
 
     public void setAllowCreatingCaseBeforePaymentsAreProcessed(boolean allowCreatingCaseBeforePaymentsAreProcessed) {
         this.allowCreatingCaseBeforePaymentsAreProcessed = allowCreatingCaseBeforePaymentsAreProcessed;
+    }
+
+    public String getSurnameOcrFieldName(String formType) {
+        return formTypeToSurnameOcrFieldMappings.get(formType);
+    }
+
+    public void setFormTypeToSurnameOcrFieldMappings(List<FormFieldMapping> formTypeToSurnameOcrFieldMappings) {
+        this.formTypeToSurnameOcrFieldMappings = formTypeToSurnameOcrFieldMappings.stream()
+            .collect(
+                toMap(
+                    FormFieldMapping::getFormType,
+                    FormFieldMapping::getOcrField,
+                    (v1, v2) -> {
+                        throw new InvalidConfigurationException(
+                            String.format("Form type has multiple mappings to surname fields %s, %s.", v1, v2)
+                        );
+                    }
+                )
+            );
     }
 
     // endregion
