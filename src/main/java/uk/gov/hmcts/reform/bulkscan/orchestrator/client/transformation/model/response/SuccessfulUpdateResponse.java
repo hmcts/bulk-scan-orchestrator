@@ -4,17 +4,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
-public class SuccessfulTransformationResponse {
+public class SuccessfulUpdateResponse {
 
-    public final ResponseCaseDetails caseCreationDetails;
+    public final ResponseCaseDetails caseDetails;
 
     public final List<String> warnings;
 
-    public SuccessfulTransformationResponse(
-        @JsonProperty("case_creation_details") ResponseCaseDetails caseCreationDetails,
+    public SuccessfulUpdateResponse(
+        @JsonProperty("case_details") ResponseCaseDetails caseDetails,
         @JsonProperty("warnings") List<String> warnings
     ) {
-        this.caseCreationDetails = caseCreationDetails;
+        this.caseDetails = caseDetails;
         this.warnings = warnings;
     }
 }

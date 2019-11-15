@@ -7,21 +7,21 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.DocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.ResponseCaseDetails;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.forbidden;
-import static com.github.tomakehurst.wiremock.client.WireMock.matching;
-import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.serverError;
@@ -38,32 +38,32 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
 @IntegrationTest
-public class TransformationClientTest {
+public class UpdateClientTest {
 
-    private static final String TRANSFORM_EXCEPTION_RECORD_URL = "/transform-exception-record";
+    private static final String UPDATE_CASE_URL = "/update-case";
 
     @Autowired
-    private TransformationClient client;
+    private UpdateClient client;
 
     @Autowired
     private Options wiremockOptions;
 
     @Test
-    public void should_return_case_details_for_successful_transformation() throws Exception {
+    public void should_return_case_details_for_successful_update() throws Exception {
 
         // given
         String s2sToken = randomUUID().toString();
 
         stubFor(
-            post(urlPathMatching(TRANSFORM_EXCEPTION_RECORD_URL))
+            post(urlPathMatching(UPDATE_CASE_URL))
                 .withHeader("ServiceAuthorization", equalTo(s2sToken))
-                .withRequestBody(matchingJsonPath("scanned_documents[0].type", matching("[a-z]+")))
                 .willReturn(okJson(successResponse().toString()))
         );
 
         // when
-        SuccessfulTransformationResponse response = client.transformExceptionRecord(
+        SuccessfulUpdateResponse response = client.updateCase(
             url(),
+            existingCase(),
             exceptionRecordRequestData(),
             s2sToken
         );
@@ -71,11 +71,11 @@ public class TransformationClientTest {
         // then
         assertThat(response).isNotNull();
         assertThat(response.warnings).isEmpty();
-        ResponseCaseDetails caseCreationDetails = response.caseCreationDetails;
-        assertThat(caseCreationDetails).isNotNull();
-        assertThat(caseCreationDetails.caseTypeId).isEqualTo("some_case_type");
-        assertThat(caseCreationDetails.eventId).isEqualTo("createCase");
-        assertThat(caseCreationDetails.caseData).isNotNull();
+        ResponseCaseDetails caseDetails = response.caseDetails;
+        assertThat(caseDetails).isNotNull();
+        assertThat(caseDetails.caseTypeId).isEqualTo("some_case_type");
+        assertThat(caseDetails.eventId).isEqualTo("updateCase");
+        assertThat(caseDetails.caseData).isNotNull();
     }
 
     @Test
@@ -83,13 +83,13 @@ public class TransformationClientTest {
         // given
         String s2sToken = randomUUID().toString();
         stubFor(
-            post(urlPathMatching(TRANSFORM_EXCEPTION_RECORD_URL))
+            post(urlPathMatching(UPDATE_CASE_URL))
                 .withHeader("ServiceAuthorization", equalTo(s2sToken))
                 .willReturn(aResponse().withBody(errorResponse().toString()).withStatus(422)));
 
         // when
         Throwable throwable = catchThrowable(
-            () -> client.transformExceptionRecord(url(), exceptionRecordRequestData(), s2sToken)
+            () -> client.updateCase(url(), existingCase(), exceptionRecordRequestData(), s2sToken)
         );
 
         // then
@@ -109,13 +109,13 @@ public class TransformationClientTest {
         // given
         String s2sToken = randomUUID().toString();
         stubFor(
-            post(urlPathMatching(TRANSFORM_EXCEPTION_RECORD_URL))
+            post(urlPathMatching(UPDATE_CASE_URL))
                 .withHeader("ServiceAuthorization", equalTo(s2sToken))
                 .willReturn(aResponse().withBody(invalidDataResponse().toString()).withStatus(400)));
 
         // when
         Throwable throwable = catchThrowable(
-            () -> client.transformExceptionRecord(url(), exceptionRecordRequestData(), s2sToken)
+            () -> client.updateCase(url(), existingCase(), exceptionRecordRequestData(), s2sToken)
         );
 
         // then
@@ -135,13 +135,13 @@ public class TransformationClientTest {
         // given
         String s2sToken = randomUUID().toString();
         stubFor(
-            post(urlPathMatching(TRANSFORM_EXCEPTION_RECORD_URL))
+            post(urlPathMatching(UPDATE_CASE_URL))
                 .withHeader("ServiceAuthorization", equalTo(s2sToken))
                 .willReturn(aResponse().withBody(new byte[]{}).withStatus(400)));
 
         // when
         Throwable throwable = catchThrowable(
-            () -> client.transformExceptionRecord(url(), exceptionRecordRequestData(), s2sToken)
+            () -> client.updateCase(url(), existingCase(), exceptionRecordRequestData(), s2sToken)
         );
 
         // then
@@ -159,12 +159,12 @@ public class TransformationClientTest {
     public void should_throw_exception_for_unauthorised_service_auth_header() {
         // given
         stubFor(
-            post(urlPathMatching(TRANSFORM_EXCEPTION_RECORD_URL))
+            post(urlPathMatching(UPDATE_CASE_URL))
                 .willReturn(forbidden().withBody("Calling service is not authorised")));
 
         // when
         Throwable throwable = catchThrowable(
-            () -> client.transformExceptionRecord(url(), exceptionRecordRequestData(), randomUUID().toString())
+            () -> client.updateCase(url(), existingCase(), exceptionRecordRequestData(), randomUUID().toString())
         );
 
         // then
@@ -178,12 +178,12 @@ public class TransformationClientTest {
     public void should_throw_exception_for_invalid_service_auth_header() {
         // given
         stubFor(
-            post(urlPathMatching(TRANSFORM_EXCEPTION_RECORD_URL))
+            post(urlPathMatching(UPDATE_CASE_URL))
                 .willReturn(unauthorized().withBody("Invalid S2S token")));
 
         // when
         Throwable throwable = catchThrowable(
-            () -> client.transformExceptionRecord(url(), exceptionRecordRequestData(), randomUUID().toString())
+            () -> client.updateCase(url(), existingCase(), exceptionRecordRequestData(), randomUUID().toString())
         );
 
         // then
@@ -197,12 +197,12 @@ public class TransformationClientTest {
     public void should_throw_exception_for_server_exception() {
         // given
         stubFor(
-            post(urlPathMatching(TRANSFORM_EXCEPTION_RECORD_URL))
+            post(urlPathMatching(UPDATE_CASE_URL))
                 .willReturn(serverError().withBody("Internal Server error")));
 
         // when
         Throwable throwable = catchThrowable(
-            () -> client.transformExceptionRecord(url(), exceptionRecordRequestData(), randomUUID().toString())
+            () -> client.updateCase(url(), existingCase(), exceptionRecordRequestData(), randomUUID().toString())
         );
 
         // then
@@ -214,6 +214,10 @@ public class TransformationClientTest {
 
     private String url() {
         return "http://localhost:" + wiremockOptions.portNumber();
+    }
+
+    private CaseDetails existingCase() {
+        return SampleData.THE_CASE;
     }
 
     private ExceptionRecord exceptionRecordRequestData() {
@@ -248,9 +252,9 @@ public class TransformationClientTest {
 
     private JSONObject successResponse() throws JSONException {
         return new JSONObject()
-            .put("case_creation_details", new JSONObject()
+            .put("case_details", new JSONObject()
                 .put("case_type_id", "some_case_type")
-                .put("event_id", "createCase")
+                .put("event_id", "updateCase")
                 .put(
                     "case_data",
                     new JSONObject()

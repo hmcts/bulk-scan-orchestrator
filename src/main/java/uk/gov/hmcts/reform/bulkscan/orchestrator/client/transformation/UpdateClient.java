@@ -9,26 +9,30 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.CaseUpdate;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExistingCaseDetails;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulUpdateResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
 @Component
-public class TransformationClient extends ServiceClient {
+public class UpdateClient extends ServiceClient {
 
-    private static final Logger log = LoggerFactory.getLogger(TransformationClient.class);
+    private static final Logger log = LoggerFactory.getLogger(UpdateClient.class);
 
-    public TransformationClient(
+    public UpdateClient(
         RestTemplate restTemplate,
         ObjectMapper objectMapper
     ) {
         super(restTemplate, objectMapper);
     }
 
-    public SuccessfulTransformationResponse transformExceptionRecord(
+    public SuccessfulUpdateResponse updateCase(
         String baseUrl,
+        CaseDetails existingCase,
         ExceptionRecord exceptionRecord,
         String s2sToken
     ) throws CaseClientServiceException {
@@ -38,21 +42,26 @@ public class TransformationClient extends ServiceClient {
         String url =
             UriComponentsBuilder
                 .fromHttpUrl(baseUrl)
-                .path("/transform-exception-record")
+                .path("/update-case")
                 .build()
                 .toString();
 
+        ExistingCaseDetails existingCaseDetails = new ExistingCaseDetails(
+            existingCase.getCaseTypeId(),
+            existingCase.getData()
+        );
+        CaseUpdate caseUpdate = new CaseUpdate(exceptionRecord, existingCaseDetails);
         try {
             return restTemplate.postForObject(
                 url,
-                new HttpEntity<>(exceptionRecord, headers),
-                SuccessfulTransformationResponse.class
+                new HttpEntity<>(caseUpdate, headers),
+                SuccessfulUpdateResponse.class
             );
         } catch (HttpStatusCodeException ex) {
             log.error(
-                "Failed to transform Exception Record to case data for case type {} and id {}",
-                exceptionRecord.caseTypeId,
-                exceptionRecord.id,
+                "Failed to update Case for case type {} and id {}",
+                existingCase.getCaseTypeId(),
+                existingCase.getId(),
                 ex
             );
 

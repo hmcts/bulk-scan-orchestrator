@@ -8,13 +8,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.CaseTransformationException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.CaseClientServiceException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.InvalidCaseDataException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.ClientServiceErrorResponse;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.ResponseCaseDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.TransformationErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
@@ -93,7 +93,7 @@ class CcdNewCaseCreatorTest {
         given(transformationClient.transformExceptionRecord(any(),any(), any()))
             .willReturn(
                 new SuccessfulTransformationResponse(
-                    new CaseCreationDetails(
+                    new ResponseCaseDetails(
                         "some_case_type",
                         "some_event_id",
                         emptyMap()
@@ -160,7 +160,7 @@ class CcdNewCaseCreatorTest {
         given(transformationClient.transformExceptionRecord(any(),any(), any()))
             .willReturn(
                 new SuccessfulTransformationResponse(
-                    new CaseCreationDetails(
+                    new ResponseCaseDetails(
                         "some_case_type",
                         "some_event_id",
                         emptyMap()
@@ -224,13 +224,13 @@ class CcdNewCaseCreatorTest {
 
     @Test
     void should_throw_InvalidCaseDataException_when_transformation_client_returns_422()
-        throws IOException, CaseTransformationException {
+        throws IOException, CaseClientServiceException {
         // given
         when(s2sTokenGenerator.generate()).thenReturn(randomUUID().toString());
         //setUpTransformationUrl();
         InvalidCaseDataException exception = new InvalidCaseDataException(
             new HttpClientErrorException(HttpStatus.UNPROCESSABLE_ENTITY),
-            new TransformationErrorResponse(singletonList("error"), singletonList("warning"))
+            new ClientServiceErrorResponse(singletonList("error"), singletonList("warning"))
         );
         doThrow(exception)
             .when(transformationClient)
@@ -275,7 +275,7 @@ class CcdNewCaseCreatorTest {
         given(transformationClient.transformExceptionRecord(any(), any(), any()))
             .willReturn(
                 new SuccessfulTransformationResponse(
-                    new CaseCreationDetails("some_case_type", "some_event_id", emptyMap()),
+                    new ResponseCaseDetails("some_case_type", "some_event_id", emptyMap()),
                     emptyList()
                 )
             );
