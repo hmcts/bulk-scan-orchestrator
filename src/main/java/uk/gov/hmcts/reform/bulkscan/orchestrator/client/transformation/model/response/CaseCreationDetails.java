@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.re
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class ResponseCaseDetails {
+public class CaseCreationDetails {
 
     public final String caseTypeId;
 
@@ -10,7 +10,7 @@ public class ResponseCaseDetails {
 
     public final Object caseData;
 
-    public ResponseCaseDetails(
+    public CaseCreationDetails(
         @JsonProperty("case_type_id") String caseTypeId,
         @JsonProperty("event_id") String eventId,
         @JsonProperty("case_data") Object caseData

@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.req
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ScannedDocument;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.ResponseCaseDetails;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
@@ -71,7 +71,7 @@ public class TransformationClientTest {
         // then
         assertThat(response).isNotNull();
         assertThat(response.warnings).isEmpty();
-        ResponseCaseDetails caseCreationDetails = response.caseCreationDetails;
+        CaseCreationDetails caseCreationDetails = response.caseCreationDetails;
         assertThat(caseCreationDetails).isNotNull();
         assertThat(caseCreationDetails.caseTypeId).isEqualTo("some_case_type");
         assertThat(caseCreationDetails.eventId).isEqualTo("createCase");

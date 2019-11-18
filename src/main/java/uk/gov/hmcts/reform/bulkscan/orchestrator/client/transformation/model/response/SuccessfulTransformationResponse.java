@@ -6,12 +6,12 @@ import java.util.List;
 
 public class SuccessfulTransformationResponse {
 
-    public final ResponseCaseDetails caseCreationDetails;
+    public final CaseCreationDetails caseCreationDetails;
 
     public final List<String> warnings;
 
     public SuccessfulTransformationResponse(
-        @JsonProperty("case_creation_details") ResponseCaseDetails caseCreationDetails,
+        @JsonProperty("case_creation_details") CaseCreationDetails caseCreationDetails,
         @JsonProperty("warnings") List<String> warnings
     ) {
         this.caseCreationDetails = caseCreationDetails;

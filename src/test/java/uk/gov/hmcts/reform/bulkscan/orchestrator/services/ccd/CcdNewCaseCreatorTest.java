@@ -12,8 +12,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.CaseClien
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.InvalidCaseDataException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.ClientServiceErrorResponse;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.ResponseCaseDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
@@ -93,7 +93,7 @@ class CcdNewCaseCreatorTest {
         given(transformationClient.transformExceptionRecord(any(),any(), any()))
             .willReturn(
                 new SuccessfulTransformationResponse(
-                    new ResponseCaseDetails(
+                    new CaseCreationDetails(
                         "some_case_type",
                         "some_event_id",
                         emptyMap()
@@ -160,7 +160,7 @@ class CcdNewCaseCreatorTest {
         given(transformationClient.transformExceptionRecord(any(),any(), any()))
             .willReturn(
                 new SuccessfulTransformationResponse(
-                    new ResponseCaseDetails(
+                    new CaseCreationDetails(
                         "some_case_type",
                         "some_event_id",
                         emptyMap()
@@ -275,7 +275,7 @@ class CcdNewCaseCreatorTest {
         given(transformationClient.transformExceptionRecord(any(), any(), any()))
             .willReturn(
                 new SuccessfulTransformationResponse(
-                    new ResponseCaseDetails("some_case_type", "some_event_id", emptyMap()),
+                    new CaseCreationDetails("some_case_type", "some_event_id", emptyMap()),
                     emptyList()
                 )
             );
