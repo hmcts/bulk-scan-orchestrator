@@ -153,7 +153,7 @@ public class CreateCaseValidator {
         Map<String, String> ccdUrl = (Map<String, String>) document.get("url");
         return new ScannedDocument(
             DocumentType.valueOf(((String) document.get("type")).toUpperCase()),
-            (String) document.get("subType"),
+            (String) document.get("subtype"),
             new DocumentUrl(
                 ccdUrl.get("document_url"),
                 ccdUrl.get("document_binary_url"),
