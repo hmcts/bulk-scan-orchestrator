@@ -36,7 +36,7 @@ public class TransformationClient {
         String baseUrl,
         ExceptionRecord exceptionRecord,
         String s2sToken
-    ) throws CaseTransformationException {
+    ) throws CaseClientServiceException {
         HttpHeaders headers = new HttpHeaders();
         headers.add("ServiceAuthorization", s2sToken);
 
@@ -65,7 +65,7 @@ public class TransformationClient {
                 serviceResponseParser.tryParseResponseBodyAndThrow(ex);
             }
 
-            throw new CaseTransformationException(ex, ex.getResponseBodyAsString());
+            throw new CaseClientServiceException(ex, ex.getResponseBodyAsString());
         }
     }
 }

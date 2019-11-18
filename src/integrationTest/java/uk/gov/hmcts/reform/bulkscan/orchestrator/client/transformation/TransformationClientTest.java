@@ -145,10 +145,10 @@ public class TransformationClientTest {
         );
 
         // then
-        assertThat(throwable).isInstanceOf(CaseTransformationException.class);
+        assertThat(throwable).isInstanceOf(CaseClientServiceException.class);
 
         // and
-        CaseTransformationException exception = (CaseTransformationException) throwable;
+        CaseClientServiceException exception = (CaseClientServiceException) throwable;
 
         assertThat(exception.getStatus()).isEqualTo(BAD_REQUEST);
         assertThat(exception.getResponse()).contains("No content to map due to end-of-input"); // because byte[]{}
@@ -168,8 +168,8 @@ public class TransformationClientTest {
         );
 
         // then
-        assertThat(throwable).isInstanceOf(CaseTransformationException.class);
-        CaseTransformationException response = (CaseTransformationException) throwable;
+        assertThat(throwable).isInstanceOf(CaseClientServiceException.class);
+        CaseClientServiceException response = (CaseClientServiceException) throwable;
         assertThat(response.getStatus()).isEqualTo(HttpStatus.FORBIDDEN);
         assertThat(response.getResponse()).contains("Calling service is not authorised");
     }
@@ -187,8 +187,8 @@ public class TransformationClientTest {
         );
 
         // then
-        assertThat(throwable).isInstanceOf(CaseTransformationException.class);
-        CaseTransformationException response = (CaseTransformationException) throwable;
+        assertThat(throwable).isInstanceOf(CaseClientServiceException.class);
+        CaseClientServiceException response = (CaseClientServiceException) throwable;
         assertThat(response.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(response.getResponse()).contains("Invalid S2S token");
     }
@@ -206,8 +206,8 @@ public class TransformationClientTest {
         );
 
         // then
-        assertThat(throwable).isInstanceOf(CaseTransformationException.class);
-        CaseTransformationException response = (CaseTransformationException) throwable;
+        assertThat(throwable).isInstanceOf(CaseClientServiceException.class);
+        CaseClientServiceException response = (CaseClientServiceException) throwable;
         assertThat(response.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(response.getResponse()).contains("Internal Server error");
     }
