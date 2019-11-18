@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceClient;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 
@@ -22,14 +22,14 @@ public class TransformationClient {
 
     private final RestTemplate restTemplate;
 
-    private final ServiceClient serviceClient;
+    private final ServiceResponseParser serviceResponseParser;
 
     public TransformationClient(
         RestTemplate restTemplate,
-        ServiceClient serviceClient
+        ServiceResponseParser serviceResponseParser
     ) {
         this.restTemplate = restTemplate;
-        this.serviceClient = serviceClient;
+        this.serviceResponseParser = serviceResponseParser;
     }
 
     public SuccessfulTransformationResponse transformExceptionRecord(
@@ -62,7 +62,7 @@ public class TransformationClient {
             );
 
             if (ex.getStatusCode().equals(UNPROCESSABLE_ENTITY) || ex.getStatusCode().equals(BAD_REQUEST)) {
-                serviceClient.tryParseResponseBodyAndThrow(ex);
+                serviceResponseParser.tryParseResponseBodyAndThrow(ex);
             }
 
             throw new CaseTransformationException(ex, ex.getResponseBodyAsString());

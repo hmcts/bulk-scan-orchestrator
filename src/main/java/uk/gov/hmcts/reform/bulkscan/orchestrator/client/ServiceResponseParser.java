@@ -10,11 +10,11 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.res
 import java.io.IOException;
 
 @Component
-public class ServiceClient {
+public class ServiceResponseParser {
 
     protected final ObjectMapper objectMapper;
 
-    protected ServiceClient(
+    protected ServiceResponseParser(
         ObjectMapper objectMapper
     ) {
         this.objectMapper = objectMapper;
