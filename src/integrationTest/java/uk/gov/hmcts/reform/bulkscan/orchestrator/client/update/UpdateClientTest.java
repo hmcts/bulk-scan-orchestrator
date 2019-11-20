@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUr
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.InvalidCaseDataException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.InvalidCaseDataException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.update.model.response.CaseUpdateDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.update.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
@@ -80,7 +80,7 @@ public class UpdateClientTest {
     }
 
     @Test
-    public void should_throw_invalid_data_exception_for_unprocessable_entity_response() throws Exception {
+    public void should_throw_invalid_case_data_exception_for_unprocessable_entity_response() throws Exception {
         // given
         String s2sToken = randomUUID().toString();
         stubFor(
@@ -102,7 +102,7 @@ public class UpdateClientTest {
     }
 
     @Test
-    public void should_throw_invalid_data_exception_for_bad_request() throws Exception {
+    public void should_throw_invalid_case_data_exception_for_bad_request() throws Exception {
         // given
         String s2sToken = randomUUID().toString();
         stubFor(
@@ -124,7 +124,7 @@ public class UpdateClientTest {
     }
 
     @Test
-    public void should_throw_case_transformation_exception_when_unable_to_process_body() {
+    public void should_throw_case_client_service_exception_when_unable_to_process_body() {
         // given
         String s2sToken = randomUUID().toString();
         stubFor(

@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.CaseClientServiceException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.InvalidCaseDataException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.InvalidCaseDataException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;

@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.InvalidCaseDataException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.InvalidCaseDataException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
