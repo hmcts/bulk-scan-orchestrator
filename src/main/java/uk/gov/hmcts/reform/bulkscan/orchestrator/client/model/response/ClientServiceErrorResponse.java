@@ -1,15 +1,15 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
-public class TransformationErrorResponse {
+public class ClientServiceErrorResponse {
 
     public final List<String> errors;
     public final List<String> warnings;
 
-    public TransformationErrorResponse(
+    public ClientServiceErrorResponse(
         @JsonProperty("errors") List<String> errors,
         @JsonProperty("warnings") List<String> warnings
     ) {
