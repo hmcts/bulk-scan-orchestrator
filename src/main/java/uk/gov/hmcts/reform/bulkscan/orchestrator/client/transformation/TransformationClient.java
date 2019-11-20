@@ -8,8 +8,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.CaseClientServiceException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
