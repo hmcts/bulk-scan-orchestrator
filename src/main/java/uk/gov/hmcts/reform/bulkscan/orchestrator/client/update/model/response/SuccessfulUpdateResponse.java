@@ -11,7 +11,7 @@ public class SuccessfulUpdateResponse {
     public final List<String> warnings;
 
     public SuccessfulUpdateResponse(
-        @JsonProperty("case_details") CaseUpdateDetails caseDetails,
+        @JsonProperty("case_update_details") CaseUpdateDetails caseDetails,
         @JsonProperty("warnings") List<String> warnings
     ) {
         this.caseDetails = caseDetails;
