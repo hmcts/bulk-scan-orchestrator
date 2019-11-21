@@ -61,6 +61,7 @@ service-config:
     - service: bulkscan # service name corresponds to the name of the container in Blob Storage
       jurisdiction: BULKSCAN
       transformation-url: ${TRANSFORMATION_URL_BULKSCAN}
+      update-url: ${UPDATE_URL_BULKSCAN}
       case-type-ids:
         - Bulk_Scanned
       allow-creating-case-before-payments-are-processed: true
@@ -72,6 +73,7 @@ service-config:
     - service: probate
       jurisdiction: PROBATE
       transformation-url: ${TRANSFORMATION_URL_PROBATE}
+      update-url: ${UPDATE_URL_PROBATE}
       case-type-ids: []
       allow-creating-case-before-payments-are-processed: true
 
