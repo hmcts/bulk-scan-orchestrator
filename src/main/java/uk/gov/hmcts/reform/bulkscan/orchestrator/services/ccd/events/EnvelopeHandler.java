@@ -36,24 +36,25 @@ public class EnvelopeHandler {
                 if (caseDetailsFound.isPresent()) {
                     evidenceAttacher.attach(envelope, caseDetailsFound.get());
                 } else {
-                    exceptionRecordCreator.tryCreateFrom(envelope);
+                    createExceptionRecord(envelope);
                 }
 
                 break;
             case SUPPLEMENTARY_EVIDENCE_WITH_OCR:
             case EXCEPTION:
-                exceptionRecordCreator.tryCreateFrom(envelope);
-                break;
             case NEW_APPLICATION:
-                Long ccdId = exceptionRecordCreator.tryCreateFrom(envelope);
-
-                paymentsProcessor.createPayments(envelope, ccdId);
-
+                createExceptionRecord(envelope);
                 break;
             default:
                 throw new UnknownClassificationException(
                     "Cannot determine CCD action for envelope - unknown classification: " + envelope.classification
                 );
         }
+    }
+
+    private void createExceptionRecord(Envelope envelope) {
+        Long ccdId = exceptionRecordCreator.tryCreateFrom(envelope);
+
+        paymentsProcessor.createPayments(envelope, ccdId);
     }
 }
