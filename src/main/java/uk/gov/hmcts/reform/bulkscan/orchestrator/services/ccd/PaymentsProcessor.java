@@ -18,21 +18,20 @@ import static java.util.stream.Collectors.toList;
 
 @Service
 public class PaymentsProcessor {
-    private static final Logger LOG = LoggerFactory.getLogger(PaymentsProcessor.class);
+
+    private static final Logger log = LoggerFactory.getLogger(PaymentsProcessor.class);
 
     private final IPaymentsPublisher paymentsPublisher;
 
-    public PaymentsProcessor(
-        IPaymentsPublisher paymentsPublisher
-    ) {
+    public PaymentsProcessor(IPaymentsPublisher paymentsPublisher) {
         this.paymentsPublisher = paymentsPublisher;
     }
 
-    public void createPayments(Envelope envelope, Long ccdId) {
+    public void createPayments(Envelope envelope, Long caseId) {
         if (envelope.payments != null && !envelope.payments.isEmpty()) {
             CreatePaymentsCommand cmd = new CreatePaymentsCommand(
                 envelope.id,
-                Long.toString(ccdId),
+                Long.toString(caseId),
                 envelope.jurisdiction,
                 envelope.container,
                 envelope.poBox,
@@ -42,14 +41,18 @@ public class PaymentsProcessor {
                     .collect(toList())
             );
 
-            LOG.info("Started processing payments for case with CCD reference {}", cmd.ccdReference);
+            log.info("Started processing payments for case with CCD reference {}", cmd.ccdReference);
             paymentsPublisher.send(cmd);
-            LOG.info("Finished processing payments for case with CCD reference {}", cmd.ccdReference);
+            log.info("Finished processing payments for case with CCD reference {}", cmd.ccdReference);
+        } else {
+            log.info(
+                "Envelope has no payments, not sending create command. Envelope id: {}",
+                envelope.id
+            );
         }
     }
 
     public void updatePayments(CaseDetails exceptionRecord, long newCaseId) {
-
         boolean containsPayments =
             Objects.equals(
                 exceptionRecord.getData().get(ExceptionRecordFields.CONTAINS_PAYMENTS),
@@ -60,10 +63,7 @@ public class PaymentsProcessor {
             String envelopeId = exceptionRecord.getData().get(ExceptionRecordFields.ENVELOPE_ID).toString();
             String jurisdiction = exceptionRecord.getData().get(ExceptionRecordFields.PO_BOX_JURISDICTION).toString();
 
-            LOG.info(
-                "Sending payment update message. ER id: {}",
-                exceptionRecord.getId()
-            );
+            log.info("Sending payment update message. ER id: {}", exceptionRecord.getId());
 
             paymentsPublisher.send(
                 new UpdatePaymentsCommand(
@@ -73,8 +73,10 @@ public class PaymentsProcessor {
                     jurisdiction
                 )
             );
+            log.info("Finished sending payment update message. ER id: {}", exceptionRecord.getId());
+
         } else {
-            LOG.info(
+            log.info(
                 "Exception record has no payments, not sending update command. ER id: {}",
                 exceptionRecord.getId()
             );
