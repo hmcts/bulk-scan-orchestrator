@@ -84,24 +84,28 @@ class EnvelopeHandlerTest {
         // given
         Envelope envelope = envelope(SUPPLEMENTARY_EVIDENCE, JURSIDICTION, CASE_REF);
         given(caseFinder.findCase(envelope)).willReturn(Optional.empty()); // case not found
+        given(createExceptionRecord.tryCreateFrom(envelope)).willReturn(THE_CASE.getId());
 
         // when
         envelopeHandler.handleEnvelope(envelope);
 
         // then
         verify(this.createExceptionRecord).tryCreateFrom(envelope);
+        verify(paymentsProcessor).createPayments(envelope, THE_CASE.getId());
     }
 
     @Test
     void should_call_CreateExceptionRecord_for_exception_classification() {
         // given
         Envelope envelope = envelope(EXCEPTION, JURSIDICTION, CASE_REF);
+        given(createExceptionRecord.tryCreateFrom(envelope)).willReturn(THE_CASE.getId());
 
         // when
         envelopeHandler.handleEnvelope(envelope);
 
         // then
         verify(this.createExceptionRecord).tryCreateFrom(envelope);
+        verify(paymentsProcessor).createPayments(envelope, THE_CASE.getId());
     }
 
     @Test
@@ -123,12 +127,14 @@ class EnvelopeHandlerTest {
     void should_call_CreateExceptionRecord_for_supplementary_evidence_with_ocr_classification() {
         // given
         Envelope envelope = envelope(SUPPLEMENTARY_EVIDENCE_WITH_OCR, JURSIDICTION, CASE_REF);
+        given(createExceptionRecord.tryCreateFrom(envelope)).willReturn(THE_CASE.getId());
 
         // when
         envelopeHandler.handleEnvelope(envelope);
 
         // then
         verify(this.createExceptionRecord).tryCreateFrom(envelope);
+        verify(paymentsProcessor).createPayments(envelope, THE_CASE.getId());
     }
 
 }
