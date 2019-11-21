@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.client.update;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate;
 
 import com.github.tomakehurst.wiremock.core.Options;
 import org.json.JSONArray;
@@ -15,8 +15,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUr
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.update.model.response.CaseUpdateDetails;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.update.model.response.SuccessfulUpdateResponse;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.CaseUpdateDetails;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -40,12 +40,12 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
 @IntegrationTest
-public class UpdateClientTest {
+public class CaseUpdateClientTest {
 
     private static final String UPDATE_CASE_URL = "/update-case";
 
     @Autowired
-    private UpdateClient client;
+    private CaseUpdateClient client;
 
     @Autowired
     private Options wiremockOptions;

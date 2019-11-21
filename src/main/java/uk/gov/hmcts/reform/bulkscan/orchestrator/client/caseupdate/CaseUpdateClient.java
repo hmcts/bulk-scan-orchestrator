@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.client.update;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,24 +11,24 @@ import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.CaseClientServiceException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.update.model.request.CaseUpdate;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.update.model.request.ExistingCaseDetails;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.update.model.response.SuccessfulUpdateResponse;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdate;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.ExistingCaseDetails;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
 @Component
-public class UpdateClient {
+public class CaseUpdateClient {
 
-    private static final Logger log = LoggerFactory.getLogger(UpdateClient.class);
+    private static final Logger log = LoggerFactory.getLogger(CaseUpdateClient.class);
 
     private final RestTemplate restTemplate;
 
     private final ServiceResponseParser serviceResponseParser;
 
-    public UpdateClient(
+    public CaseUpdateClient(
         RestTemplate restTemplate,
         ServiceResponseParser serviceResponseParser
     ) {

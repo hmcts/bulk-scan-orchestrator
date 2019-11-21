@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.client.update.model.request;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
