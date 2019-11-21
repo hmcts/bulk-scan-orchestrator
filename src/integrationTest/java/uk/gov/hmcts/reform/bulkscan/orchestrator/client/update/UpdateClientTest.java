@@ -238,7 +238,7 @@ public class UpdateClientTest {
 
     private JSONObject successResponse() throws JSONException {
         return new JSONObject()
-            .put("case_details", new JSONObject()
+            .put("case_update_details", new JSONObject()
                 .put("case_type_id", "some_case_type")
                 .put("event_id", "updateCase")
                 .put(
