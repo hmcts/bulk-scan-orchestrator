@@ -18,21 +18,20 @@ import static java.util.stream.Collectors.toList;
 
 @Service
 public class PaymentsProcessor {
+
     private static final Logger LOG = LoggerFactory.getLogger(PaymentsProcessor.class);
 
     private final IPaymentsPublisher paymentsPublisher;
 
-    public PaymentsProcessor(
-        IPaymentsPublisher paymentsPublisher
-    ) {
+    public PaymentsProcessor(IPaymentsPublisher paymentsPublisher) {
         this.paymentsPublisher = paymentsPublisher;
     }
 
-    public void createPayments(Envelope envelope, Long ccdId) {
+    public void createPayments(Envelope envelope, Long caseId) {
         if (envelope.payments != null && !envelope.payments.isEmpty()) {
             CreatePaymentsCommand cmd = new CreatePaymentsCommand(
                 envelope.id,
-                Long.toString(ccdId),
+                Long.toString(caseId),
                 envelope.jurisdiction,
                 envelope.container,
                 envelope.poBox,
@@ -44,12 +43,15 @@ public class PaymentsProcessor {
 
             LOG.info("Started processing payments for case with CCD reference {}", cmd.ccdReference);
             paymentsPublisher.send(cmd);
-            LOG.info("Finished processing payments for case with CCD reference {}", cmd.ccdReference);
+        } else {
+            LOG.info(
+                "Envelope has no payments, not sending create command. Envelope id: {}",
+                envelope.id
+            );
         }
     }
 
     public void updatePayments(CaseDetails exceptionRecord, long newCaseId) {
-
         boolean containsPayments =
             Objects.equals(
                 exceptionRecord.getData().get(ExceptionRecordFields.CONTAINS_PAYMENTS),
@@ -60,10 +62,7 @@ public class PaymentsProcessor {
             String envelopeId = exceptionRecord.getData().get(ExceptionRecordFields.ENVELOPE_ID).toString();
             String jurisdiction = exceptionRecord.getData().get(ExceptionRecordFields.PO_BOX_JURISDICTION).toString();
 
-            LOG.info(
-                "Sending payment update message. ER id: {}",
-                exceptionRecord.getId()
-            );
+            LOG.info("Sending payment update message. ER id: {}", exceptionRecord.getId());
 
             paymentsPublisher.send(
                 new UpdatePaymentsCommand(
