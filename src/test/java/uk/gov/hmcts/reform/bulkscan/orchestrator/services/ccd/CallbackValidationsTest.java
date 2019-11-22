@@ -26,6 +26,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBui
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.createCaseWith;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.document;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.OCR_DATA;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
 @SuppressWarnings("checkstyle:LineLength")
 class CallbackValidationsTest {
@@ -199,8 +200,8 @@ class CallbackValidationsTest {
         return new Object[][]{
             {"Invalid journey classification", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, "invalid_classification"))), false, "Invalid journey classification invalid_classification"},
             {"Valid journey classification(supplementary evidence)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, "SUPPLEMENTARY_EVIDENCE"))), true, null},
-            {"Valid journey classification(supplementary evidence with ocr)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, "SUPPLEMENTARY_EVIDENCE_WITH_OCR", OCR_DATA, asList(ImmutableMap.of("f1", "v1"))))), true, null},
-            {"Valid journey classification(supplementary evidence with ocr ocr empty)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, "SUPPLEMENTARY_EVIDENCE_WITH_OCR", OCR_DATA, emptyList()))), false, "The 'attach to case' event is not supported for supplementary evidence with OCR but not containing OCR data"},
+            {"Valid journey classification(supplementary evidence with ocr)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, SUPPLEMENTARY_EVIDENCE_WITH_OCR.name(), OCR_DATA, asList(ImmutableMap.of("f1", "v1"))))), true, null},
+            {"Valid journey classification(supplementary evidence with ocr ocr empty)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, SUPPLEMENTARY_EVIDENCE_WITH_OCR.name(), OCR_DATA, emptyList()))), false, "The 'attach to case' event is not supported for supplementary evidence with OCR but not containing OCR data"},
             {"Valid journey classification(exception without ocr)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, CLASSIFICATION_EXCEPTION))), true, null},
             {"Valid journey classification(exception with empty ocr list)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, CLASSIFICATION_EXCEPTION, OCR_DATA, emptyList()))), true, null},
             {"Invalid action-Valid journey classification(exception with ocr)", createCaseWith(b -> b.data(caseDataWithOcr())), false, "The 'attach to case' event is not supported for exception records with OCR"}
