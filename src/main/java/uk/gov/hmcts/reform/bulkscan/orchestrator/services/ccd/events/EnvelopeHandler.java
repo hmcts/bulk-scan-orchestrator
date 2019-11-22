@@ -34,7 +34,9 @@ public class EnvelopeHandler {
                 Optional<CaseDetails> caseDetailsFound = caseFinder.findCase(envelope);
 
                 if (caseDetailsFound.isPresent()) {
-                    evidenceAttacher.attach(envelope, caseDetailsFound.get());
+                    CaseDetails existingCase = caseDetailsFound.get();
+                    evidenceAttacher.attach(envelope, existingCase);
+                    paymentsProcessor.createPayments(envelope, existingCase.getId(), false);
                 } else {
                     createExceptionRecord(envelope);
                 }
@@ -55,6 +57,6 @@ public class EnvelopeHandler {
     private void createExceptionRecord(Envelope envelope) {
         Long ccdId = exceptionRecordCreator.tryCreateFrom(envelope);
 
-        paymentsProcessor.createPayments(envelope, ccdId);
+        paymentsProcessor.createPayments(envelope, ccdId, true);
     }
 }
