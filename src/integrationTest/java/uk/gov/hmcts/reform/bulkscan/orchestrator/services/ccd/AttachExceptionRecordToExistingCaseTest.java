@@ -57,6 +57,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_EXCEPTION_RECORD;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURISDICTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.CcdCallbackController.USER_ID;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
 @IntegrationTest
 class AttachExceptionRecordToExistingCaseTest {
@@ -549,6 +550,50 @@ class AttachExceptionRecordToExistingCaseTest {
 
         verifySuccessResponse(response, callbackRequest);
         verifyRequestedAttachingToCase();
+    }
+
+    @Test
+    public void should_succeed_when_classification_is_supplementary_evidence_with_ocr() {
+        CallbackRequest callbackRequest =
+            callbackRequestWith(
+                EVENT_ID_ATTACH_TO_CASE,
+                SUPPLEMENTARY_EVIDENCE_WITH_OCR.name(),
+                true
+            );
+
+        ValidatableResponse response =
+            given()
+                .body(callbackRequest)
+                .headers(userHeaders())
+                .post(CALLBACK_ATTACH_CASE_PATH)
+                .then()
+                .statusCode(200);
+
+        verifySuccessResponse(response, callbackRequest);
+        verifyRequestedAttachingToCase();
+    }
+
+    @Test
+    public void should_fail_when_classification_is_supplementary_evidence_with_ocr_does_not_include_ocr() {
+        CallbackRequest callbackRequest =
+            callbackRequestWith(
+                EVENT_ID_ATTACH_TO_CASE,
+                SUPPLEMENTARY_EVIDENCE_WITH_OCR.name(),
+                false
+            );
+
+        ValidatableResponse response =
+            given()
+                .body(callbackRequest)
+                .headers(userHeaders())
+                .post(CALLBACK_ATTACH_CASE_PATH)
+                .then()
+                .statusCode(200)
+                .body(
+                    RESPONSE_FIELD_ERRORS,
+                    hasItem("The 'attach to case' event is not supported for supplementary evidence with OCR "
+                        + "but not containing OCR data")
+        );
     }
 
     private CallbackRequest attachToCaseRequest(String attachToCaseReference) {
