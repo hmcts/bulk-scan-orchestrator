@@ -77,6 +77,7 @@ class EnvelopeHandlerTest {
 
         // then
         verify(attachDocsToSupplementaryEvidence).attach(envelope, caseDetails);
+        verify(paymentsProcessor).createPayments(envelope, caseDetails.getId(), false);
     }
 
     @Test
@@ -91,7 +92,7 @@ class EnvelopeHandlerTest {
 
         // then
         verify(this.createExceptionRecord).tryCreateFrom(envelope);
-        verify(paymentsProcessor).createPayments(envelope, THE_CASE.getId());
+        verify(paymentsProcessor).createPayments(envelope, THE_CASE.getId(), true);
     }
 
     @Test
@@ -105,7 +106,7 @@ class EnvelopeHandlerTest {
 
         // then
         verify(this.createExceptionRecord).tryCreateFrom(envelope);
-        verify(paymentsProcessor).createPayments(envelope, THE_CASE.getId());
+        verify(paymentsProcessor).createPayments(envelope, THE_CASE.getId(), true);
     }
 
     @Test
@@ -120,7 +121,7 @@ class EnvelopeHandlerTest {
         // then
         verify(this.createExceptionRecord).tryCreateFrom(envelope);
         verify(caseFinder, never()).findCase(any());
-        verify(paymentsProcessor).createPayments(envelope, THE_CASE.getId());
+        verify(paymentsProcessor).createPayments(envelope, THE_CASE.getId(), true);
     }
 
     @Test
@@ -134,7 +135,7 @@ class EnvelopeHandlerTest {
 
         // then
         verify(this.createExceptionRecord).tryCreateFrom(envelope);
-        verify(paymentsProcessor).createPayments(envelope, THE_CASE.getId());
+        verify(paymentsProcessor).createPayments(envelope, THE_CASE.getId(), true);
     }
 
 }

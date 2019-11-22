@@ -27,7 +27,7 @@ public class PaymentsProcessor {
         this.paymentsPublisher = paymentsPublisher;
     }
 
-    public void createPayments(Envelope envelope, Long caseId) {
+    public void createPayments(Envelope envelope, Long caseId, boolean isExceptionRecord) {
         if (envelope.payments != null && !envelope.payments.isEmpty()) {
             CreatePaymentsCommand cmd = new CreatePaymentsCommand(
                 envelope.id,
@@ -35,7 +35,7 @@ public class PaymentsProcessor {
                 envelope.jurisdiction,
                 envelope.container,
                 envelope.poBox,
-                true,
+                isExceptionRecord,
                 envelope.payments.stream()
                     .map(payment -> new PaymentData(payment.documentControlNumber))
                     .collect(toList())
