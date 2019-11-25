@@ -58,12 +58,16 @@ public class ServiceConfigItem {
         return transformationUrl;
     }
 
+    public void setTransformationUrl(String transformationUrl) {
+        this.transformationUrl = transformationUrl;
+    }
+
     public String getUpdateUrl() {
         return updateUrl;
     }
 
-    public void setTransformationUrl(String transformationUrl) {
-        this.transformationUrl = transformationUrl;
+    public void setUpdateUrl(String updateUrl) {
+        this.updateUrl = updateUrl;
     }
 
     public List<String> getCaseTypeIds() {

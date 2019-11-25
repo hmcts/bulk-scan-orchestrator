@@ -282,17 +282,6 @@ public class AttachCaseCallbackService {
             exceptionRecord.getId()
         );
 
-        StartEventResponse event = ccdApi.startAttachScannedDocs(theCase, idamToken, userId);
-
-        ccdApi.attachExceptionRecord(
-            theCase,
-            idamToken,
-            userId,
-            buildCaseData(newCaseDocuments, targetCaseDocuments),
-            createEventSummary(theCase, exceptionRecord.getId(), newCaseDocuments),
-            event
-        );
-
         Validation<Seq<String>, ExceptionRecord> validationResult =
             createCaseValidator.getValidation(exceptionRecord);
         if (validationResult.isValid()
@@ -306,9 +295,24 @@ public class AttachCaseCallbackService {
                 userId,
                 theCase
             );
-        }
+        } else {
+            StartEventResponse event = ccdApi.startAttachScannedDocs(theCase, idamToken, userId);
 
-        log.info("Attached exception record '{}' to case with CCD ID '{}'", exceptionRecord.getId(), targetCaseCcdRef);
+            ccdApi.attachExceptionRecord(
+                theCase,
+                idamToken,
+                userId,
+                buildCaseData(newCaseDocuments, targetCaseDocuments),
+                createEventSummary(theCase, exceptionRecord.getId(), newCaseDocuments),
+                event
+            );
+
+            log.info(
+                "Attached exception record '{}' to case with CCD ID '{}'",
+                exceptionRecord.getId(),
+                targetCaseCcdRef
+            );
+        }
     }
 
     private Map<String, Object> buildCaseData(
