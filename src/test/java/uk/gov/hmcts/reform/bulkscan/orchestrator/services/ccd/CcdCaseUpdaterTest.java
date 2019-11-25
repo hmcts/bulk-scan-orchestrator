@@ -18,7 +18,7 @@ class CcdCaseUpdaterTest {
     private AuthTokenGenerator authTokenGenerator;
 
     @Mock
-    private CoreCaseDataApi coreCaseDataApi ;
+    private CoreCaseDataApi coreCaseDataApi;
 
     @Mock
     private ExceptionRecordFinalizer exceptionRecordFinalizer;
