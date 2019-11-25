@@ -181,7 +181,8 @@ public class CcdCaseUpdater {
             ).getId();
         } catch (FeignException exception) {
             log.error(
-                "Failed to update case for {} jurisdiction with case ID {} from exception record {}. Service response: {}",
+                "Failed to update case for {} jurisdiction with case ID {} from exception record {}. "
+                    + "Service response: {}",
                 exceptionRecord.poBoxJurisdiction,
                 existingCase.getId(),
                 exceptionRecord.id,
