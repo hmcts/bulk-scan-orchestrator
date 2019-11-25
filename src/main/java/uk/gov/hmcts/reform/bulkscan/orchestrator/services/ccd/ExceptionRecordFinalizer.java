@@ -13,6 +13,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.OCR_DATA_VALIDATION_WARNINGS;
 
 @Service
+// TODO rename to ResponseFinalizer
 public class ExceptionRecordFinalizer {
 
     public Map<String, Object> finalizeExceptionRecord(

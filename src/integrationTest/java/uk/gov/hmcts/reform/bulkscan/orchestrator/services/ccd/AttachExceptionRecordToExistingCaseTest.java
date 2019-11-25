@@ -582,18 +582,17 @@ class AttachExceptionRecordToExistingCaseTest {
                 false
             );
 
-        ValidatableResponse response =
-            given()
-                .body(callbackRequest)
-                .headers(userHeaders())
-                .post(CALLBACK_ATTACH_CASE_PATH)
-                .then()
-                .statusCode(200)
-                .body(
-                    RESPONSE_FIELD_ERRORS,
-                    hasItem("The 'attach to case' event is not supported for supplementary evidence with OCR "
-                        + "but not containing OCR data")
-        );
+        given()
+            .body(callbackRequest)
+            .headers(userHeaders())
+            .post(CALLBACK_ATTACH_CASE_PATH)
+            .then()
+            .statusCode(200)
+            .body(
+                RESPONSE_FIELD_ERRORS,
+                hasItem("The 'attach to case' event is not supported for supplementary evidence with OCR "
+                    + "but not containing OCR data")
+            );
     }
 
     private CallbackRequest attachToCaseRequest(String attachToCaseReference) {

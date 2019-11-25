@@ -4,12 +4,17 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.vavr.collection.Seq;
 import io.vavr.control.Either;
+import io.vavr.control.Try;
 import io.vavr.control.Validation;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
@@ -24,8 +29,8 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.canBeAttachedToCase;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAScannedRecord;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAnId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAttachToCaseReference;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasIdamToken;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJurisdiction;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasSearchCaseReference;
@@ -51,10 +56,24 @@ public class AttachCaseCallbackService {
 
     private static final Logger log = LoggerFactory.getLogger(AttachCaseCallbackService.class);
 
+    private final ServiceConfigProvider serviceConfigProvider;
+
     private final CcdApi ccdApi;
 
-    public AttachCaseCallbackService(CcdApi ccdApi) {
+    private final CreateCaseValidator createCaseValidator;
+
+    private final CcdCaseUpdater ccdCaseUpdater;
+
+    public AttachCaseCallbackService(
+        ServiceConfigProvider serviceConfigProvider,
+        CcdApi ccdApi,
+        CreateCaseValidator createCaseValidator,
+        CcdCaseUpdater ccdCaseUpdater
+    ) {
+        this.serviceConfigProvider = serviceConfigProvider;
         this.ccdApi = ccdApi;
+        this.createCaseValidator = createCaseValidator;
+        this.ccdCaseUpdater = ccdCaseUpdater;
     }
 
     /**
@@ -114,7 +133,7 @@ public class AttachCaseCallbackService {
                 hasServiceNameInCaseTypeId(exceptionRecord),
                 caseReferenceTypeValidation,
                 caseReferenceValidation,
-                hasAnId(exceptionRecord),
+                hasId(exceptionRecord),
                 hasAScannedRecord(exceptionRecord),
                 hasIdamToken(requesterIdamToken),
                 hasUserId(requesterUserId)
@@ -136,7 +155,7 @@ public class AttachCaseCallbackService {
         try {
             log.info(
                 "Attaching exception record '{}' to a case by reference type '{}' and reference '{}'",
-                event.exceptionRecordId,
+                event.exceptionRecord.getId(),
                 event.targetCaseRefType,
                 event.targetCaseRef
             );
@@ -144,7 +163,7 @@ public class AttachCaseCallbackService {
             Map<String, Object> result = attachToCase(event);
             log.info(
                 "Successfully attached exception record {} to case {}",
-                event.exceptionRecordId,
+                event.exceptionRecord.getId(),
                 event.targetCaseRef
             );
             return Either.right(result);
@@ -157,7 +176,7 @@ public class AttachCaseCallbackService {
         ) {
             log.warn(
                 "Validation error when attaching ER {} in {} to case {}",
-                event.exceptionRecordId,
+                event.exceptionRecord.getId(),
                 event.exceptionRecordJurisdiction,
                 event.targetCaseRef,
                 exc
@@ -167,7 +186,7 @@ public class AttachCaseCallbackService {
         } catch (Exception exc) {
             log.error(
                 "Error attaching ER {} in {} to case {}",
-                event.exceptionRecordId,
+                event.exceptionRecord.getId(),
                 event.exceptionRecordJurisdiction,
                 event.targetCaseRef,
                 exc
@@ -186,7 +205,7 @@ public class AttachCaseCallbackService {
                 event.exceptionRecordJurisdiction,
                 event.targetCaseRef,
                 event.exceptionRecordDocuments,
-                event.exceptionRecordId,
+                event.exceptionRecord,
                 event.idamToken,
                 event.userId
             );
@@ -207,14 +226,14 @@ public class AttachCaseCallbackService {
                 "Found case with CCD ID '{}' for legacy ID '{}' (attaching exception record '{}')",
                 targetCaseCcdId,
                 event.targetCaseRef,
-                event.exceptionRecordId
+                event.exceptionRecord.getId()
             );
 
             attachCaseByCcdId(
                 event.exceptionRecordJurisdiction,
                 targetCaseCcdId,
                 event.exceptionRecordDocuments,
-                event.exceptionRecordId,
+                event.exceptionRecord,
                 event.idamToken,
                 event.userId
             );
@@ -239,16 +258,16 @@ public class AttachCaseCallbackService {
         String exceptionRecordJurisdiction,
         String targetCaseCcdRef,
         List<Map<String, Object>> exceptionRecordDocuments,
-        Long exceptionRecordId,
+        CaseDetails exceptionRecord,
         String idamToken,
         String userId
     ) {
-        log.info("Attaching exception record '{}' to a case by CCD ID '{}'", exceptionRecordId, targetCaseCcdRef);
+        log.info("Attaching exception record '{}' to a case by CCD ID '{}'", exceptionRecord.getId(), targetCaseCcdRef);
 
         CaseDetails theCase = ccdApi.getCase(targetCaseCcdRef, exceptionRecordJurisdiction);
         List<Map<String, Object>> targetCaseDocuments = getScannedDocuments(theCase);
 
-        verifyExceptionRecordIsNotAttachedToCase(exceptionRecordJurisdiction, exceptionRecordId);
+        verifyExceptionRecordIsNotAttachedToCase(exceptionRecordJurisdiction, exceptionRecord.getId());
 
         //This is done so exception record does not change state if there is a document error
         checkForDuplicatesOrElse(
@@ -259,7 +278,7 @@ public class AttachCaseCallbackService {
 
         List<Map<String, Object>> newCaseDocuments = attachExceptionRecordReference(
             exceptionRecordDocuments,
-            exceptionRecordId
+            exceptionRecord.getId()
         );
 
         StartEventResponse event = ccdApi.startAttachScannedDocs(theCase, idamToken, userId);
@@ -269,11 +288,25 @@ public class AttachCaseCallbackService {
             idamToken,
             userId,
             buildCaseData(newCaseDocuments, targetCaseDocuments),
-            createEventSummary(theCase, exceptionRecordId, newCaseDocuments),
+            createEventSummary(theCase, exceptionRecord.getId(), newCaseDocuments),
             event
         );
 
-        log.info("Attached exception record '{}' to case with CCD ID '{}'", exceptionRecordId, targetCaseCcdRef);
+        Validation<Seq<String>, ExceptionRecord> validationResult =
+            createCaseValidator.getValidation(exceptionRecord);
+        if (validationResult.isValid()) {
+            ServiceConfigItem serviceConfigItem = getServiceConfig(exceptionRecord).get();
+            ccdCaseUpdater.updateCase(
+                validationResult.get(),
+                serviceConfigItem,
+                true,
+                idamToken,
+                userId,
+                theCase
+            );
+        }
+
+        log.info("Attached exception record '{}' to case with CCD ID '{}'", exceptionRecord.getId(), targetCaseCcdRef);
     }
 
     private Map<String, Object> buildCaseData(
@@ -357,7 +390,7 @@ public class AttachCaseCallbackService {
         public final String service;
         public final String targetCaseRef;
         public final String targetCaseRefType;
-        public final Long exceptionRecordId;
+        public final CaseDetails exceptionRecord;
         public final List<Map<String, Object>> exceptionRecordDocuments;
         public final String idamToken;
         public final String userId;
@@ -367,7 +400,7 @@ public class AttachCaseCallbackService {
             String service,
             String targetCaseRefType,
             String targetCaseRef,
-            Long exceptionRecordId,
+            CaseDetails exceptionRecord,
             List<Map<String, Object>> exceptionRecordDocuments,
             String idamToken,
             String userId
@@ -376,7 +409,7 @@ public class AttachCaseCallbackService {
             this.service = service;
             this.targetCaseRefType = targetCaseRefType;
             this.targetCaseRef = targetCaseRef;
-            this.exceptionRecordId = exceptionRecordId;
+            this.exceptionRecord = exceptionRecord;
             this.exceptionRecordDocuments = exceptionRecordDocuments;
             this.idamToken = idamToken;
             this.userId = userId;
@@ -393,5 +426,15 @@ public class AttachCaseCallbackService {
 
         merged.putAll(modifiedFields);
         return merged;
+    }
+
+    private Validation<String, ServiceConfigItem> getServiceConfig(CaseDetails caseDetails) {
+        return hasServiceNameInCaseTypeId(caseDetails).flatMap(service -> Try
+            .of(() -> serviceConfigProvider.getConfig(service))
+            .toValidation()
+            .mapError(Throwable::getMessage)
+        )
+            .filter(item -> !com.google.common.base.Strings.isNullOrEmpty(item.getTransformationUrl()))
+            .getOrElse(Validation.invalid("Transformation URL is not configured"));
     }
 }
