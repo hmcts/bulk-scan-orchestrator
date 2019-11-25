@@ -258,6 +258,17 @@ class CallbackValidationsTest {
         );
     }
 
+    @Test
+    void noIdTest() {
+        checkValidation(
+            createCaseWith(b -> b.id(null)),
+            false,
+            null,
+            CallbackValidations::hasId,
+            "Exception case has no Id"
+        );
+    }
+
     private static Object[][] idamTokenTestParams() {
         return new Object[][]{
             {"null idam token", null, false, NO_IDAM_TOKEN_RECEIVED_ERROR},

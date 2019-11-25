@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import java.util.Map;
 
 import static com.microsoft.applicationinsights.core.dependencies.io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
 @Service
@@ -58,8 +59,9 @@ public class CcdCaseUpdater {
         CaseDetails existingCase
     ) {
         log.info(
-            "Start creating new case for {} from exception record {}",
+            "Start updating case for {} with case ID {} from exception record {}",
             configItem.getService(),
+            existingCase.getId(),
             exceptionRecord.id
         );
 
@@ -67,7 +69,7 @@ public class CcdCaseUpdater {
             String s2sToken = s2sTokenGenerator.generate();
 
             SuccessfulUpdateResponse updateResponse = caseUpdateClient.updateCase(
-                configItem.getTransformationUrl(),
+                configItem.getUpdateUrl(),
                 existingCase,
                 exceptionRecord,
                 s2sToken
@@ -79,9 +81,9 @@ public class CcdCaseUpdater {
             }
 
             log.info(
-                "Successfully updated case {} for {} from exception record {}",
-                existingCase.getId(),
+                "Successfully updated case for {} with case ID {} from exception record {}",
                 configItem.getService(),
+                existingCase.getId(),
                 exceptionRecord.id
             );
 
@@ -96,11 +98,11 @@ public class CcdCaseUpdater {
                 userId,
                 exceptionRecord,
                 updateResponse.caseDetails,
-                existingCase.getCaseTypeId()
+                existingCase
             );
 
             log.info(
-                "Successfully created new case for {} with case ID {} from exception record {}",
+                "Successfully updated case for {} with case ID {} from exception record {}",
                 configItem.getService(),
                 existingCase.getId(),
                 exceptionRecord.id
@@ -125,8 +127,8 @@ public class CcdCaseUpdater {
 
             throw new CallbackException("Payment references cannot be processed. Please try again later", exception);
         } catch (Exception exception) {
-            // log happens individually to cover transformation/ccd cases
-            throw new CallbackException("Failed to create new case", exception);
+            // log happens individually to cover update/ccd cases
+            throw new CallbackException("Failed to update case", exception);
         }
     }
 
@@ -137,7 +139,7 @@ public class CcdCaseUpdater {
         String userId,
         ExceptionRecord exceptionRecord,
         CaseUpdateDetails caseUpdateDetails,
-        String caseTypeId
+        CaseDetails existingCase
     ) {
         try {
             StartEventResponse eventResponse = coreCaseDataApi.startForCaseworker(
@@ -145,7 +147,7 @@ public class CcdCaseUpdater {
                 s2sToken,
                 userId,
                 exceptionRecord.poBoxJurisdiction,
-                caseTypeId,
+                existingCase.getCaseTypeId(),
                 // when onboarding remind services to not configure about to submit callback for this event
                 caseUpdateDetails.eventId
             );
@@ -155,7 +157,7 @@ public class CcdCaseUpdater {
                 s2sToken,
                 userId,
                 exceptionRecord.poBoxJurisdiction,
-                caseTypeId,
+                existingCase.getCaseTypeId(),
                 true,
                 CaseDataContent
                     .builder()
@@ -164,8 +166,14 @@ public class CcdCaseUpdater {
                     .event(Event
                         .builder()
                         .id(eventResponse.getEventId())
-                        .summary("Case created")
-                        .description("Case created from exception record ref " + exceptionRecord.id)
+                        .summary("Case updated")
+                        .description(
+                            format(
+                                "Case with case ID %s updated from exception record ref %s",
+                                existingCase.getId(),
+                                exceptionRecord.id
+                            )
+                        )
                         .build()
                     )
                     .eventToken(eventResponse.getToken())
@@ -173,8 +181,9 @@ public class CcdCaseUpdater {
             ).getId();
         } catch (FeignException exception) {
             log.error(
-                "Failed to create new case for {} jurisdiction from exception record {}. Service response: {}",
+                "Failed to update case for {} jurisdiction with case ID {} from exception record {}. Service response: {}",
                 exceptionRecord.poBoxJurisdiction,
+                existingCase.getId(),
                 exceptionRecord.id,
                 exception.contentUTF8(),
                 exception
@@ -183,8 +192,9 @@ public class CcdCaseUpdater {
             throw exception;
         } catch (Exception exception) {
             log.error(
-                "Failed to create new case for {} jurisdiction from exception record {}",
+                "Failed to update case for {} jurisdiction with case ID {} from exception record {}",
                 exceptionRecord.poBoxJurisdiction,
+                existingCase.getId(),
                 exceptionRecord.id,
                 exception
             );
@@ -196,13 +206,13 @@ public class CcdCaseUpdater {
     private void checkBulkScanReferenceIsSet(Map<String, ?> caseData, String exceptionRecordId) {
         if (!caseData.containsKey(EXCEPTION_RECORD_REFERENCE)) {
             log.error(
-                "Transformation did not set '{}' with exception record id {}",
+                "Update did not set '{}' with exception record id {}",
                 EXCEPTION_RECORD_REFERENCE,
                 exceptionRecordId
             );
         } else if (!caseData.get(EXCEPTION_RECORD_REFERENCE).equals(exceptionRecordId)) {
             log.error(
-                "Transformation did not set exception record reference correctly. Actual: {}, expected: {}",
+                "Update did not set exception record reference correctly. Actual: {}, expected: {}",
                 caseData.get(EXCEPTION_RECORD_REFERENCE),
                 exceptionRecordId
             );
