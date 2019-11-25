@@ -270,6 +270,17 @@ class CallbackValidationsTest {
     }
 
     @Test
+    void caseIdNoCaseDetailsTest() {
+        checkValidation(
+            null,
+            false,
+            1L,
+            CallbackValidations::hasAnId,
+            "Exception case has no Id"
+        );
+    }
+
+    @Test
     void noIdTest() {
         checkValidation(
             createCaseWith(b -> b.id(null)),
@@ -289,6 +300,17 @@ class CallbackValidationsTest {
             caseDetails,
             CallbackValidations::hasId,
             null
+        );
+    }
+
+    @Test
+    void idNoCaseDetailsTest() {
+        checkValidation(
+            null,
+            false,
+            null,
+            CallbackValidations::hasId,
+            "Exception case has no Id"
         );
     }
 
