@@ -199,12 +199,9 @@ public class AttachCaseCallbackService {
     private Map<String, Object> attachToCase(AttachToCaseEventData event) {
         String targetCaseCcdId;
 
-        log.error("---------------001");
         if (EXTERNAL_CASE_REFERENCE.equals(event.targetCaseRefType)) {
-            log.error("---------------002");
             targetCaseCcdId = attachCaseByLegacyId(event);
         } else {
-            log.error("---------------003");
             attachCaseByCcdId(
                 event.exceptionRecordJurisdiction,
                 event.targetCaseRef,
@@ -224,7 +221,6 @@ public class AttachCaseCallbackService {
         List<Long> targetCaseCcdIds = ccdApi.getCaseRefsByLegacyId(event.targetCaseRef, event.service);
 
         if (targetCaseCcdIds.size() == 1) {
-            log.error("---------------004");
             String targetCaseCcdId = targetCaseCcdIds.get(0).toString();
 
             log.info(
@@ -267,7 +263,6 @@ public class AttachCaseCallbackService {
         String idamToken,
         String userId
     ) {
-        log.error("---------------005");
         log.info("Attaching exception record '{}' to a case by CCD ID '{}'", exceptionRecord.getId(), targetCaseCcdRef);
 
         CaseDetails theCase = ccdApi.getCase(targetCaseCcdRef, exceptionRecordJurisdiction);
@@ -287,12 +282,10 @@ public class AttachCaseCallbackService {
             exceptionRecord.getId()
         );
 
-        log.error("---------------1");
         Validation<Seq<String>, ExceptionRecord> validationResult =
             createCaseValidator.getValidation(exceptionRecord);
         if (validationResult.isValid()
             && validationResult.get().journeyClassification == SUPPLEMENTARY_EVIDENCE_WITH_OCR) {
-            log.error("---------------2");
             ServiceConfigItem serviceConfigItem = getServiceConfig(exceptionRecord).get();
             ccdCaseUpdater.updateCase(
                 validationResult.get(),
@@ -301,9 +294,7 @@ public class AttachCaseCallbackService {
                 userId,
                 theCase
             );
-            log.error("---------------2-1");
         } else {
-            log.error("---------------3");
             StartEventResponse event = ccdApi.startAttachScannedDocs(theCase, idamToken, userId);
 
             ccdApi.attachExceptionRecord(
@@ -315,7 +306,6 @@ public class AttachCaseCallbackService {
                 event
             );
 
-            log.error("---------------3-1");
             log.info(
                 "Attached exception record '{}' to case with CCD ID '{}'",
                 exceptionRecord.getId(),
