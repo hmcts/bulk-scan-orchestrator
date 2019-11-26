@@ -30,6 +30,7 @@ public final class CallbackValidations {
     private static final String CASE_TYPE_ID_SUFFIX = "_ExceptionRecord";
 
     private static final String CLASSIFICATION_SUPPLEMENTARY_EVIDENCE = "SUPPLEMENTARY_EVIDENCE";
+    private static final String CLASSIFICATION_SUPPLEMENTARY_EVIDENCE_WITH_OCR = "SUPPLEMENTARY_EVIDENCE_WITH_OCR";
     private static final String CLASSIFICATION_EXCEPTION = "EXCEPTION";
 
     private static final Logger log = LoggerFactory.getLogger(CallbackValidations.class);
@@ -149,6 +150,15 @@ public final class CallbackValidations {
                     switch (classification) {
                         case CLASSIFICATION_SUPPLEMENTARY_EVIDENCE:
                             return Validation.<String, Void>valid(null);
+                        case CLASSIFICATION_SUPPLEMENTARY_EVIDENCE_WITH_OCR:
+                            return hasOcr(theCase)
+                                ? Validation.<String, Void>valid(null)
+                                : Validation.<String, Void>invalid(
+                                format(
+                                    "The 'attach to case' event is not supported for supplementary evidence with OCR "
+                                        + "but not containing OCR data"
+                                )
+                            );
                         case CLASSIFICATION_EXCEPTION:
                             return !hasOcr(theCase)
                                 ? Validation.<String, Void>valid(null)
