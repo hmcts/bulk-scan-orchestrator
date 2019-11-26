@@ -34,6 +34,14 @@ class CcdCaseUpdaterTest {
     }
 
     @Test
-    void updateCase() {
+    void should_update_case() {
+        // given
+
+
+        // when
+        ccdCaseUpdater.updateCase();
+
+        // then
+
     }
 }
