@@ -91,6 +91,11 @@ public class CcdApi {
                 theCase.getCaseTypeId()
             );
         } catch (FeignException e) {
+            log.error(
+                "Failed attaching scanned documets. Service response: {}",
+                e.contentUTF8(),
+                e
+            );
             throw new CcdCallException(
                 format("Internal Error: start event call failed case: %s Error: %s", caseRef, e.status()), e
             );
@@ -102,6 +107,11 @@ public class CcdApi {
         try {
             return retrieveCase(caseRef, jurisdiction);
         } catch (FeignException e) {
+            log.error(
+                "Failed attaching scanned documets. Service response: {}",
+                e.contentUTF8(),
+                e
+            );
             switch (e.status()) {
                 case 404:
                     throw new CaseNotFoundException("Could not find case: " + caseRef, e);
@@ -191,6 +201,11 @@ public class CcdApi {
                 Event.builder().summary(eventSummary).id(event.getEventId()).build()
             );
         } catch (FeignException e) {
+            log.error(
+                "Failed attaching exception record. Service response: {}",
+                e.contentUTF8(),
+                e
+            );
             throw new CcdCallException(
                 format("Internal Error: submitting attach file event failed case: %s Error: %s", caseRef, e.status()),
                 e
