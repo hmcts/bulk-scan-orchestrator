@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
+import feign.FeignException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.respons
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -21,6 +23,8 @@ import java.util.HashMap;
 
 import static java.time.LocalDateTime.now;
 import static java.util.Collections.emptyList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -124,5 +128,125 @@ class CcdCaseUpdaterTest {
 
         // then
 
+    }
+
+    @Test
+    void should_update_case_handle_feign_exception() throws Exception {
+        // given
+        given(configItem.getService()).willReturn("Service");
+        given(existingCase.getId()).willReturn(1L);
+        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
+        given(configItem.getUpdateUrl()).willReturn("url");
+        given(authTokenGenerator.generate()).willReturn("token");
+        caseUpdateDetails = new CaseUpdateDetails("event_id", new HashMap<String, String>());
+        successfulUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, new ArrayList<>());
+        exceptionRecord = new ExceptionRecord(
+            "1",
+            "caseTypeId",
+            "12345",
+            "some jurisdiction",
+            SUPPLEMENTARY_EVIDENCE_WITH_OCR,
+            "Form1",
+            now(),
+            now(),
+            emptyList(),
+            emptyList()
+        );
+        given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
+            .willReturn(successfulUpdateResponse);
+        given(eventResponse.getEventId()).willReturn("eventId");
+        given(eventResponse.getToken()).willReturn("token");
+        given(coreCaseDataApi.startForCaseworker(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString()))
+            .willReturn(eventResponse);
+        given(coreCaseDataApi.submitForCaseworker(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyBoolean(),
+            any(CaseDataContent.class)
+        )).willThrow(new FeignException.BadRequest("Msg", "Body".getBytes()));
+
+        // when
+        CallbackException callbackException = catchThrowableOfType(() ->
+            ccdCaseUpdater.updateCase(
+                exceptionRecord,
+                configItem,
+                "idamToken",
+                "userId",
+                existingCase
+            ),
+            CallbackException.class
+        );
+
+        // then
+        assertThat(callbackException.getMessage()).isEqualTo("Failed to update case");
+    }
+
+    @Test
+    void should_update_case_handle_exception() throws Exception {
+        // given
+        given(configItem.getService()).willReturn("Service");
+        given(existingCase.getId()).willReturn(1L);
+        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
+        given(configItem.getUpdateUrl()).willReturn("url");
+        given(authTokenGenerator.generate()).willReturn("token");
+        caseUpdateDetails = new CaseUpdateDetails("event_id", new HashMap<String, String>());
+        successfulUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, new ArrayList<>());
+        exceptionRecord = new ExceptionRecord(
+            "1",
+            "caseTypeId",
+            "12345",
+            "some jurisdiction",
+            SUPPLEMENTARY_EVIDENCE_WITH_OCR,
+            "Form1",
+            now(),
+            now(),
+            emptyList(),
+            emptyList()
+        );
+        given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
+            .willReturn(successfulUpdateResponse);
+        given(eventResponse.getEventId()).willReturn("eventId");
+        given(eventResponse.getToken()).willReturn("token");
+        given(coreCaseDataApi.startForCaseworker(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString()))
+            .willReturn(eventResponse);
+        given(coreCaseDataApi.submitForCaseworker(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyBoolean(),
+            any(CaseDataContent.class)
+        )).willThrow(new RuntimeException("Msg"));
+
+        // when
+        CallbackException callbackException = catchThrowableOfType(() ->
+            ccdCaseUpdater.updateCase(
+                exceptionRecord,
+                configItem,
+                "idamToken",
+                "userId",
+                existingCase
+            ),
+            CallbackException.class
+        );
+
+        // then
+        assertThat(callbackException.getMessage()).isEqualTo("Failed to update case");
     }
 }
