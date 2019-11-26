@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
+import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -45,28 +46,37 @@ class AttachDocsToSupplementaryEvidence {
 
             CcdAuthenticator authenticator = ccdApi.authenticateJurisdiction(envelope.jurisdiction);
 
-            StartEventResponse startEventResp = ccdApi.startEvent(
-                authenticator,
-                envelope.jurisdiction,
-                existingCase.getCaseTypeId(),
-                existingCase.getId().toString(),
-                EVENT_TYPE_ID
-            );
+            try {
+                StartEventResponse startEventResp = ccdApi.startEvent(
+                    authenticator,
+                    envelope.jurisdiction,
+                    existingCase.getCaseTypeId(),
+                    existingCase.getId().toString(),
+                    EVENT_TYPE_ID
+                );
 
-            log.info(
-                "Started event in CCD for envelope ID: {}. File name: {}. Case ref: {}",
-                envelope.id,
-                envelope.zipFileName,
-                existingCase.getId()
-            );
+                log.info(
+                    "Started event in CCD for envelope ID: {}. File name: {}. Case ref: {}",
+                    envelope.id,
+                    envelope.zipFileName,
+                    existingCase.getId()
+                );
 
-            ccdApi.submitEvent(
-                authenticator,
-                envelope.jurisdiction,
-                existingCase.getCaseTypeId(),
-                existingCase.getId().toString(),
-                buildCaseDataContent(envelope, startEventResp)
-            );
+                ccdApi.submitEvent(
+                    authenticator,
+                    envelope.jurisdiction,
+                    existingCase.getCaseTypeId(),
+                    existingCase.getId().toString(),
+                    buildCaseDataContent(envelope, startEventResp)
+                );
+            } catch (FeignException e) {
+                log.error(
+                    "Failed attaching supplementary evidence. Service response: {}",
+                    e.contentUTF8(),
+                    e
+                );
+                throw e;
+            }
 
             log.info(
                 "Attached documents from envelope to case. Case ID: {}, envelope ID: {}",

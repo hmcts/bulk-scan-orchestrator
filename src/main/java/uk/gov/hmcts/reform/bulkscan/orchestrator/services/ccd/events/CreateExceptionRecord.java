@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
+import feign.FeignException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,33 +68,42 @@ public class CreateExceptionRecord {
         CcdAuthenticator authenticator = ccdApi.authenticateJurisdiction(envelope.jurisdiction);
         String caseTypeId = envelope.container.toUpperCase(Locale.getDefault()) + "_" + CASE_TYPE;
 
-        StartEventResponse startEventResponse = ccdApi.startEvent(
-            authenticator,
-            envelope.jurisdiction,
-            caseTypeId,
-            null,
-            EVENT_TYPE_ID
-        );
+        try {
+            StartEventResponse startEventResponse = ccdApi.startEvent(
+                authenticator,
+                envelope.jurisdiction,
+                caseTypeId,
+                null,
+                EVENT_TYPE_ID
+            );
 
-        log.info("Started event for envelope ID: {}. File name: {}", envelope.id, envelope.zipFileName);
+            log.info("Started event for envelope ID: {}. File name: {}", envelope.id, envelope.zipFileName);
 
-        CaseDetails caseDetails = ccdApi.submitEvent(
-            authenticator,
-            envelope.jurisdiction,
-            caseTypeId,
-            null,
-            buildCaseDataContent(envelope, startEventResponse.getToken())
-        );
+            CaseDetails caseDetails = ccdApi.submitEvent(
+                authenticator,
+                envelope.jurisdiction,
+                caseTypeId,
+                null,
+                buildCaseDataContent(envelope, startEventResponse.getToken())
+            );
 
-        log.info(
-            "Created Exception Record. Envelope ID: {}, file name: {}, case ID: {}, case type: {}",
-            envelope.id,
-            envelope.zipFileName,
-            caseDetails.getId(),
-            caseTypeId
-        );
+            log.info(
+                "Created Exception Record. Envelope ID: {}, file name: {}, case ID: {}, case type: {}",
+                envelope.id,
+                envelope.zipFileName,
+                caseDetails.getId(),
+                caseTypeId
+            );
 
-        return caseDetails.getId();
+            return caseDetails.getId();
+        } catch (FeignException e) {
+            log.error(
+                "Failed creating exception record. Service response: {}",
+                e.contentUTF8(),
+                e
+            );
+            throw e;
+        }
     }
 
     private CaseDataContent buildCaseDataContent(Envelope envelope, String startEventResponseToken) {

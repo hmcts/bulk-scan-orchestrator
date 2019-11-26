@@ -92,7 +92,7 @@ public class CcdApi {
             );
         } catch (FeignException e) {
             log.error(
-                "Failed attaching scanned documets. Service response: {}",
+                "Failed attaching scanned documents. Service response: {}",
                 e.contentUTF8(),
                 e
             );
@@ -271,8 +271,9 @@ public class CcdApi {
         String caseRef,
         String eventTypeId
     ) {
-        return caseRef == null
-            ? feignCcdApi.startForCaseworker(
+        try {
+            return caseRef == null
+                ? feignCcdApi.startForCaseworker(
                 authenticator.getUserToken(),
                 authenticator.getServiceToken(),
                 authenticator.getUserDetails().getId(),
@@ -280,7 +281,7 @@ public class CcdApi {
                 caseTypeId,
                 eventTypeId
             )
-            : feignCcdApi.startEventForCaseWorker(
+                : feignCcdApi.startEventForCaseWorker(
                 authenticator.getUserToken(),
                 authenticator.getServiceToken(),
                 authenticator.getUserDetails().getId(),
@@ -289,6 +290,14 @@ public class CcdApi {
                 caseRef,
                 eventTypeId
             );
+        } catch (FeignException e) {
+            log.error(
+                "Failed starting event. Service response: {}",
+                e.contentUTF8(),
+                e
+            );
+            throw e;
+        }
     }
 
     public CaseDetails submitEvent(

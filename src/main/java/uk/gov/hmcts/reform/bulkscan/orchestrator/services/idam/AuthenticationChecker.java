@@ -53,9 +53,10 @@ public class AuthenticationChecker {
             return new JurisdictionConfigurationStatus(jurisdiction, true);
         } catch (FeignException e) {
             log.error(
-                "An error occurred while authenticating {} jurisdiction with {} username",
+                "An error occurred while authenticating {} jurisdiction with {} username. Service response: {}",
                 jurisdiction,
                 credential.getUsername(),
+                e.contentUTF8(),
                 e
             );
 
