@@ -78,7 +78,9 @@ service-config:
 
     - service: divorce
       jurisdiction: DIVORCE
+      transformation-url: ${TRANSFORMATION_URL_DIVORCE}
       case-type-ids: []
+      allow-creating-case-before-payments-are-processed: true
 
     - service: finrem
       jurisdiction: DIVORCE

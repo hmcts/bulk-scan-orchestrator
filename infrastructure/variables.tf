@@ -79,6 +79,10 @@ variable "transformation_url_probate" {
   default = ""
 }
 
+variable "transformation_url_divorce" {
+  default = ""
+}
+
 variable "update_url_bulkscan" {
   default = "http://bulk-scan-sample-app-aat.service.core-compute-aat.internal"
 }
