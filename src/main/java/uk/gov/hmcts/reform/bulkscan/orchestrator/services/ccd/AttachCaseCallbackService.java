@@ -290,7 +290,6 @@ public class AttachCaseCallbackService {
             ccdCaseUpdater.updateCase(
                 validationResult.get(),
                 serviceConfigItem,
-                true,
                 idamToken,
                 userId,
                 theCase

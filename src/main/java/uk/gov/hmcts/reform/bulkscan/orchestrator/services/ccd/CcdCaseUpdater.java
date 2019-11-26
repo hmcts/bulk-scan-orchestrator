@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.respons
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -22,9 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.Map;
 
-import static com.microsoft.applicationinsights.core.dependencies.io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static java.lang.String.format;
-import static java.util.Collections.emptyList;
 
 @Service
 public class CcdCaseUpdater {
@@ -50,10 +47,9 @@ public class CcdCaseUpdater {
     }
 
     @SuppressWarnings({"squid:S2139", "unchecked"}) // squid for exception handle + logging
-    public ProcessResult updateCase(
+    public void updateCase(
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,
-        boolean ignoreWarnings,
         String idamToken,
         String userId,
         CaseDetails existingCase
@@ -74,11 +70,6 @@ public class CcdCaseUpdater {
                 exceptionRecord,
                 s2sToken
             );
-
-            if (!ignoreWarnings && !updateResponse.warnings.isEmpty()) {
-                // do not log warnings
-                return new ProcessResult(updateResponse.warnings, emptyList());
-            }
 
             log.info(
                 "Successfully updated case for {} with case ID {} from exception record {}",
@@ -107,16 +98,8 @@ public class CcdCaseUpdater {
                 existingCase.getId(),
                 exceptionRecord.id
             );
-
-            return new ProcessResult(
-                exceptionRecordFinalizer.finalizeExceptionRecord(existingCase.getData(), existingCase.getId())
-            );
         } catch (InvalidCaseDataException exception) {
-            if (BAD_REQUEST.equals(exception.getStatus())) {
-                throw new CallbackException("Failed to update case", exception);
-            } else {
-                return new ProcessResult(exception.getResponse().warnings, exception.getResponse().errors);
-            }
+            throw new CallbackException("Failed to update case", exception);
         } catch (PaymentsPublishingException exception) {
             log.error(
                 "Failed to send update to payment processor for {} exception record {}",
