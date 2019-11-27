@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.respons
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import static java.time.LocalDateTime.now;
 import static java.util.Collections.emptyList;
@@ -27,6 +29,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
@@ -56,6 +60,9 @@ class CcdCaseUpdaterTest {
 
     @Mock
     private StartEventResponse eventResponse;
+
+    @Mock
+    private Map<String, Object> originalFields;
 
     private ExceptionRecord exceptionRecord;
 
@@ -116,9 +123,10 @@ class CcdCaseUpdaterTest {
             anyBoolean(),
             any(CaseDataContent.class)
         )).willReturn(CaseDetails.builder().id(1L).build());
+        given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong())).willReturn(originalFields);
 
         // when
-        ccdCaseUpdater.updateCase(
+        ProcessResult res = ccdCaseUpdater.updateCase(
             exceptionRecord,
             configItem,
             true,
@@ -128,7 +136,9 @@ class CcdCaseUpdaterTest {
         );
 
         // then
-
+        assertThat(res.getErrors()).isEmpty();
+        assertThat(res.getWarnings()).isEmpty();
+        assertThat(res.getExceptionRecordData()).isEqualTo(originalFields);
     }
 
     @Test

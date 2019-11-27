@@ -10,7 +10,7 @@ public class ExceptionHandlingUtil {
     private ExceptionHandlingUtil() {
         //
     }
-    
+
     public static ProcessResult handleGenericException(Exception exception, String msg) {
         // log happens individually to cover update/ccd cases
         throw new CallbackException(msg, exception);
