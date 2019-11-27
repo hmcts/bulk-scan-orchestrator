@@ -5,4 +5,4 @@ dependencies:
   - name: servicebus
     version: ~0.2.2
     repository: '@hmctspublic'
-    condition: bso.servicebus.enabled
+    condition: servicebus.enabled
