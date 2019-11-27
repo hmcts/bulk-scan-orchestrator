@@ -6,11 +6,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
+import sun.nio.cs.ext.ISO_8859_11;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.InvalidCaseDataException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.CaseUpdateClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.CaseUpdateDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
@@ -19,11 +25,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import static java.time.LocalDateTime.now;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
@@ -64,6 +70,9 @@ class CcdCaseUpdaterTest {
     @Mock
     private Map<String, Object> originalFields;
 
+    @Mock
+    private ClientServiceErrorResponse clientServiceErrorResponse;
+
     private ExceptionRecord exceptionRecord;
 
     private SuccessfulUpdateResponse successfulUpdateResponse;
@@ -71,7 +80,7 @@ class CcdCaseUpdaterTest {
     private CaseUpdateDetails caseUpdateDetails;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         ccdCaseUpdater = new CcdCaseUpdater(
             caseUpdateClient,
             authTokenGenerator,
@@ -80,16 +89,21 @@ class CcdCaseUpdaterTest {
         );
 
         caseUpdateDetails = new CaseUpdateDetails("event_id", new HashMap<String, String>());
-        successfulUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, new ArrayList<>());
         exceptionRecord = getExceptionRecord();
 
         given(configItem.getService()).willReturn("Service");
         given(existingCase.getId()).willReturn(1L);
-        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
         given(configItem.getUpdateUrl()).willReturn("url");
         given(authTokenGenerator.generate()).willReturn("token");
+    }
+
+    @Test
+    void should_update_case() throws Exception {
+        // given
+        successfulUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
             .willReturn(successfulUpdateResponse);
+        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
         given(eventResponse.getEventId()).willReturn("eventId");
         given(eventResponse.getToken()).willReturn("token");
         given(coreCaseDataApi.startForCaseworker(
@@ -100,11 +114,6 @@ class CcdCaseUpdaterTest {
             anyString(),
             anyString()))
             .willReturn(eventResponse);
-    }
-
-    @Test
-    void should_update_case() {
-        // given
         given(coreCaseDataApi.submitForCaseworker(
             anyString(),
             anyString(),
@@ -133,8 +142,133 @@ class CcdCaseUpdaterTest {
     }
 
     @Test
-    void should_update_case_handle_feign_exception() {
+    void should_update_case_ignore_warnings() throws Exception {
         // given
+        successfulUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, asList("warning1"));
+        given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
+            .willReturn(successfulUpdateResponse);
+        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
+        given(eventResponse.getEventId()).willReturn("eventId");
+        given(eventResponse.getToken()).willReturn("token");
+        given(coreCaseDataApi.startForCaseworker(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString()))
+            .willReturn(eventResponse);
+        given(coreCaseDataApi.submitForCaseworker(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyBoolean(),
+            any(CaseDataContent.class)
+        )).willReturn(CaseDetails.builder().id(1L).build());
+        given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong())).willReturn(originalFields);
+
+        // when
+        ProcessResult res = ccdCaseUpdater.updateCase(
+            exceptionRecord,
+            configItem,
+            true,
+            "idamToken",
+            "userId",
+            existingCase
+        );
+
+        // then
+        assertThat(res.getErrors()).isEmpty();
+        assertThat(res.getWarnings()).isEmpty();
+        assertThat(res.getExceptionRecordData()).isEqualTo(originalFields);
+    }
+
+    @Test
+    void should_update_case_not_ignore_warnings() throws Exception {
+        // given
+        successfulUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, asList("warning1"));
+        given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
+            .willReturn(successfulUpdateResponse);
+
+        // when
+        ProcessResult res = ccdCaseUpdater.updateCase(
+            exceptionRecord,
+            configItem,
+            false,
+            "idamToken",
+            "userId",
+            existingCase
+        );
+
+        // then
+        assertThat(res.getErrors()).isEmpty();
+        assertThat(res.getWarnings()).containsOnly("warning1");
+        assertThat(res.getExceptionRecordData()).isEmpty();
+    }
+
+    @Test
+    void should_update_case_pass_if_no_warnings() throws Exception {
+        // given
+        successfulUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
+        given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
+            .willReturn(successfulUpdateResponse);
+        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
+        given(eventResponse.getEventId()).willReturn("eventId");
+        given(eventResponse.getToken()).willReturn("token");
+        given(coreCaseDataApi.startForCaseworker(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString()))
+            .willReturn(eventResponse);
+        given(coreCaseDataApi.submitForCaseworker(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyBoolean(),
+            any(CaseDataContent.class)
+        )).willReturn(CaseDetails.builder().id(1L).build());
+        given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong())).willReturn(originalFields);
+
+        // when
+        ProcessResult res = ccdCaseUpdater.updateCase(
+            exceptionRecord,
+            configItem,
+            false,
+            "idamToken",
+            "userId",
+            existingCase
+        );
+
+        // then
+        assertThat(res.getErrors()).isEmpty();
+        assertThat(res.getWarnings()).isEmpty();
+        assertThat(res.getExceptionRecordData()).isEqualTo(originalFields);
+    }
+
+    @Test
+    void should_update_case_handle_feign_exception() throws Exception {
+        // given
+        successfulUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
+        given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
+            .willReturn(successfulUpdateResponse);
+        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
+        given(eventResponse.getEventId()).willReturn("eventId");
+        given(eventResponse.getToken()).willReturn("token");
+        given(coreCaseDataApi.startForCaseworker(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString()))
+            .willReturn(eventResponse);
         given(coreCaseDataApi.submitForCaseworker(
             anyString(),
             anyString(),
@@ -163,8 +297,74 @@ class CcdCaseUpdaterTest {
     }
 
     @Test
-    void should_update_case_handle_exception() {
+    void should_update_case_handle_invalid_case_data_exception() throws Exception {
         // given
+        successfulUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
+        given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
+            .willReturn(successfulUpdateResponse);
+        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
+        given(eventResponse.getEventId()).willReturn("eventId");
+        given(eventResponse.getToken()).willReturn("token");
+        given(coreCaseDataApi.startForCaseworker(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString()))
+            .willReturn(eventResponse);
+        given(coreCaseDataApi.submitForCaseworker(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyBoolean(),
+            any(CaseDataContent.class)
+        )).willThrow(new InvalidCaseDataException(
+            HttpClientErrorException.create(
+                HttpStatus.BAD_REQUEST,
+                "",
+                HttpHeaders.EMPTY,
+                "".getBytes(),
+                new ISO_8859_11()
+            ),
+            clientServiceErrorResponse));
+
+        // when
+        CallbackException callbackException = catchThrowableOfType(() ->
+            ccdCaseUpdater.updateCase(
+                exceptionRecord,
+                configItem,
+                true,
+                "idamToken",
+                "userId",
+                existingCase
+            ),
+            CallbackException.class
+        );
+
+        // then
+        assertThat(callbackException.getMessage()).isEqualTo("Failed to update case");
+    }
+
+    @Test
+    void should_update_case_handle_exception() throws Exception {
+        // given
+        successfulUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
+        given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
+            .willReturn(successfulUpdateResponse);
+        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
+        given(eventResponse.getEventId()).willReturn("eventId");
+        given(eventResponse.getToken()).willReturn("token");
+        given(coreCaseDataApi.startForCaseworker(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString()))
+            .willReturn(eventResponse);
         given(coreCaseDataApi.submitForCaseworker(
             anyString(),
             anyString(),
