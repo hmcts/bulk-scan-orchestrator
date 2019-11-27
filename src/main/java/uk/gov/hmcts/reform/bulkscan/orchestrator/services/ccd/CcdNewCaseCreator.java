@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Service
 public class CcdNewCaseCreator {
@@ -112,11 +111,10 @@ public class CcdNewCaseCreator {
                 exceptionRecordFinalizer.finalizeExceptionRecord(exceptionRecordData.getData(), newCaseId)
             );
         } catch (InvalidCaseDataException exception) {
-            if (BAD_REQUEST.equals(exception.getStatus())) {
-                throw new CallbackException("Failed to transform exception record", exception);
-            } else {
-                return new ProcessResult(exception.getResponse().warnings, exception.getResponse().errors);
-            }
+            return ExceptionHandlingUtil.handleInvalidCaseDataException(
+                exception,
+                "Failed to transform exception record"
+            );
         } catch (PaymentsPublishingException exception) {
             log.error(
                 "Failed to send update to payment processor for {} exception record {}",
@@ -127,8 +125,7 @@ public class CcdNewCaseCreator {
 
             throw new CallbackException("Payment references cannot be processed. Please try again later", exception);
         } catch (Exception exception) {
-            // log happens individually to cover transformation/ccd cases
-            throw new CallbackException("Failed to create new case", exception);
+            return ExceptionHandlingUtil.handleGenericException(exception, "Failed to create new case");
         }
     }
 

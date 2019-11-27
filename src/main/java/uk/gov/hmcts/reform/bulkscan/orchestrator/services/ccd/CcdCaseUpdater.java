@@ -11,9 +11,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.respons
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -24,7 +22,6 @@ import java.util.Map;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Service
 public class CcdCaseUpdater {
@@ -93,6 +90,7 @@ public class CcdCaseUpdater {
             );
 
             updateCaseInCcd(
+                ignoreWarnings,
                 idamToken,
                 s2sToken,
                 userId,
@@ -112,28 +110,15 @@ public class CcdCaseUpdater {
                 exceptionRecordFinalizer.finalizeExceptionRecord(existingCase.getData(), existingCase.getId())
             );
         } catch (InvalidCaseDataException exception) {
-            if (BAD_REQUEST.equals(exception.getStatus())) {
-                throw new CallbackException("Failed to update case", exception);
-            } else {
-                return new ProcessResult(exception.getResponse().warnings, exception.getResponse().errors);
-            }
-        } catch (PaymentsPublishingException exception) {
-            log.error(
-                "Failed to send update to payment processor for {} exception record {}",
-                configItem.getService(),
-                exceptionRecord.id,
-                exception
-            );
-
-            throw new CallbackException("Payment references cannot be processed. Please try again later", exception);
+            return ExceptionHandlingUtil.handleInvalidCaseDataException(exception, "Failed to update case");
         } catch (Exception exception) {
-            // log happens individually to cover update/ccd cases
-            throw new CallbackException("Failed to update case", exception);
+            return ExceptionHandlingUtil.handleGenericException(exception, "Failed to update case");
         }
     }
 
     @SuppressWarnings("squid:S2139") // exception handle + logging
     private long updateCaseInCcd(
+        boolean ignoreWarnings,
         String idamToken,
         String s2sToken,
         String userId,
@@ -158,7 +143,7 @@ public class CcdCaseUpdater {
                 userId,
                 exceptionRecord.poBoxJurisdiction,
                 existingCase.getCaseTypeId(),
-                true,
+                ignoreWarnings,
                 CaseDataContent
                     .builder()
                     .caseReference(exceptionRecord.id)

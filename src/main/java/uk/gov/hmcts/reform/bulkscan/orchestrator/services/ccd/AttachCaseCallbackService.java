@@ -107,12 +107,14 @@ public class AttachCaseCallbackService {
         boolean useSearchCaseReference = isSearchCaseReferenceTypePresent(request.getCaseDetails());
 
         return getValidation(
-            request.getCaseDetails(),
+            request,
             useSearchCaseReference,
-            request.isIgnoreWarnings(),
             idamToken,
             userId
-        ).map(this::tryAttachToCase)
+        ).map(ev -> {
+            ev.setIgnoreWarnings(request.isIgnoreWarnings());
+            return tryAttachToCase(ev);
+        })
             .map(attachCaseResult ->
                 attachCaseResult.map(
                     modifiedFields -> mergeCaseFields(request.getCaseDetails().getData(), modifiedFields)
@@ -122,28 +124,27 @@ public class AttachCaseCallbackService {
     }
 
     private Validation<Seq<String>, AttachToCaseEventData> getValidation(
-        CaseDetails exceptionRecord,
+        CcdCallbackRequest request,
         boolean useSearchCaseReference,
-        boolean ignoreWarnings,
         String requesterIdamToken,
         String requesterUserId
     ) {
         Validation<String, String> caseReferenceTypeValidation = useSearchCaseReference
-            ? hasSearchCaseReferenceType(exceptionRecord)
+            ? hasSearchCaseReferenceType(request.getCaseDetails())
             : valid(CCD_CASE_REFERENCE);
 
         Validation<String, String> caseReferenceValidation = useSearchCaseReference
-            ? hasSearchCaseReference(exceptionRecord)
-            : hasAttachToCaseReference(exceptionRecord);
+            ? hasSearchCaseReference(request.getCaseDetails())
+            : hasAttachToCaseReference(request.getCaseDetails());
 
         return Validation
             .combine(
-                hasJurisdiction(exceptionRecord),
-                hasServiceNameInCaseTypeId(exceptionRecord),
+                hasJurisdiction(request.getCaseDetails()),
+                hasServiceNameInCaseTypeId(request.getCaseDetails()),
                 caseReferenceTypeValidation,
                 caseReferenceValidation,
-                hasId(exceptionRecord),
-                hasAScannedRecord(exceptionRecord),
+                hasId(request.getCaseDetails()),
+                hasAScannedRecord(request.getCaseDetails()),
                 hasIdamToken(requesterIdamToken),
                 hasUserId(requesterUserId)
             )
@@ -409,7 +410,7 @@ public class AttachCaseCallbackService {
         final String targetCaseRefType;
         final CaseDetails exceptionRecord;
         final List<Map<String, Object>> exceptionRecordDocuments;
-        boolean ignoreWarnings = true;
+        boolean ignoreWarnings;
         final String idamToken;
         final String userId;
 
@@ -433,6 +434,7 @@ public class AttachCaseCallbackService {
             this.userId = userId;
         }
 
+        // cannot have more than 8 parameters in constructor, need to use setter
         public void setIgnoreWarnings(boolean ignoreWarnings) {
             this.ignoreWarnings = ignoreWarnings;
         }
