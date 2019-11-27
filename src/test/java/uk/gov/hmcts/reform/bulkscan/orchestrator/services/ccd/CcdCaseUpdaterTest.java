@@ -121,6 +121,7 @@ class CcdCaseUpdaterTest {
         ccdCaseUpdater.updateCase(
             exceptionRecord,
             configItem,
+            true,
             "idamToken",
             "userId",
             existingCase
@@ -179,6 +180,7 @@ class CcdCaseUpdaterTest {
             ccdCaseUpdater.updateCase(
                 exceptionRecord,
                 configItem,
+                true,
                 "idamToken",
                 "userId",
                 existingCase
@@ -239,6 +241,7 @@ class CcdCaseUpdaterTest {
             ccdCaseUpdater.updateCase(
                 exceptionRecord,
                 configItem,
+                true,
                 "idamToken",
                 "userId",
                 existingCase
