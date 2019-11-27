@@ -574,33 +574,6 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-    public void should_succeed_when_classification_is_supplementary_evidence_with_ocr_and_valid_exception_record() {
-        Map<String, Object> data = getCaseData(SUPPLEMENTARY_EVIDENCE_WITH_OCR.name(), true);
-        data.put("poBox", "12345");
-        data.put("formType", "Form1");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
-        CaseDetails caseDetails = getCaseDetails(data);
-        CallbackRequest callbackRequest = CallbackRequest
-            .builder()
-            .caseDetails(caseDetails)
-            .eventId(EVENT_ID_ATTACH_TO_CASE)
-            .build();
-
-        ValidatableResponse response =
-            given()
-                .body(callbackRequest)
-                .headers(userHeaders())
-                .post(CALLBACK_ATTACH_CASE_PATH)
-                .then()
-                .statusCode(200);
-
-        //verifySuccessResponse(response, callbackRequest);
-        //verifyRequestedAttachingToCase();
-    }
-
-    @Test
     public void should_fail_when_classification_is_supplementary_evidence_with_ocr_does_not_include_ocr() {
         CallbackRequest callbackRequest =
             callbackRequestWith(
@@ -609,17 +582,18 @@ class AttachExceptionRecordToExistingCaseTest {
                 false
             );
 
-        given()
-            .body(callbackRequest)
-            .headers(userHeaders())
-            .post(CALLBACK_ATTACH_CASE_PATH)
-            .then()
-            .statusCode(200)
-            .body(
-                RESPONSE_FIELD_ERRORS,
-                hasItem("The 'attach to case' event is not supported for supplementary evidence with OCR "
-                    + "but not containing OCR data")
-            );
+        ValidatableResponse response =
+            given()
+                .body(callbackRequest)
+                .headers(userHeaders())
+                .post(CALLBACK_ATTACH_CASE_PATH)
+                .then()
+                .statusCode(200)
+                .body(
+                    RESPONSE_FIELD_ERRORS,
+                    hasItem("The 'attach to case' event is not supported for supplementary evidence with OCR "
+                        + "but not containing OCR data")
+                );
     }
 
     private CallbackRequest attachToCaseRequest(String attachToCaseReference) {
@@ -874,21 +848,6 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     private CaseDetails exceptionRecordWith(String classification, boolean includeOcr) {
-        Map<String, Object> caseData = getCaseData(classification, includeOcr);
-
-        return getCaseDetails(caseData);
-    }
-
-    private CaseDetails getCaseDetails(Map<String, Object> caseData) {
-        return CaseDetails.builder()
-            .jurisdiction(JURISDICTION)
-            .id(EXCEPTION_RECORD_ID)
-            .caseTypeId(CASE_TYPE_EXCEPTION_RECORD)
-            .data(caseData)
-            .build();
-    }
-
-    private Map<String, Object> getCaseData(String classification, boolean includeOcr) {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put("journeyClassification", classification);
 
@@ -902,7 +861,13 @@ class AttachExceptionRecordToExistingCaseTest {
 
         caseData.put("scannedDocuments", ImmutableList.of(EXCEPTION_RECORD_DOC));
         caseData.put("attachToCaseReference", CASE_REF);
-        return caseData;
+
+        return CaseDetails.builder()
+            .jurisdiction(JURISDICTION)
+            .id(EXCEPTION_RECORD_ID)
+            .caseTypeId(CASE_TYPE_EXCEPTION_RECORD)
+            .data(caseData)
+            .build();
     }
 
     private static Map<String, Object> document(String filename, String documentNumber) {
