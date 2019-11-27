@@ -71,37 +71,23 @@ class CcdCaseUpdaterTest {
     private CaseUpdateDetails caseUpdateDetails;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         ccdCaseUpdater = new CcdCaseUpdater(
             caseUpdateClient,
             authTokenGenerator,
             coreCaseDataApi,
             exceptionRecordFinalizer
         );
-    }
 
-    @Test
-    void should_update_case() throws Exception {
-        // given
+        caseUpdateDetails = new CaseUpdateDetails("event_id", new HashMap<String, String>());
+        successfulUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, new ArrayList<>());
+        exceptionRecord = getExceptionRecord();
+
         given(configItem.getService()).willReturn("Service");
         given(existingCase.getId()).willReturn(1L);
         given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
         given(configItem.getUpdateUrl()).willReturn("url");
         given(authTokenGenerator.generate()).willReturn("token");
-        caseUpdateDetails = new CaseUpdateDetails("event_id", new HashMap<String, String>());
-        successfulUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, new ArrayList<>());
-        exceptionRecord = new ExceptionRecord(
-            "1",
-            "caseTypeId",
-            "12345",
-            "some jurisdiction",
-            SUPPLEMENTARY_EVIDENCE_WITH_OCR,
-            "Form1",
-            now(),
-            now(),
-            emptyList(),
-            emptyList()
-        );
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
             .willReturn(successfulUpdateResponse);
         given(eventResponse.getEventId()).willReturn("eventId");
@@ -114,6 +100,11 @@ class CcdCaseUpdaterTest {
             anyString(),
             anyString()))
             .willReturn(eventResponse);
+    }
+
+    @Test
+    void should_update_case() {
+        // given
         given(coreCaseDataApi.submitForCaseworker(
             anyString(),
             anyString(),
@@ -142,39 +133,8 @@ class CcdCaseUpdaterTest {
     }
 
     @Test
-    void should_update_case_handle_feign_exception() throws Exception {
+    void should_update_case_handle_feign_exception() {
         // given
-        given(configItem.getService()).willReturn("Service");
-        given(existingCase.getId()).willReturn(1L);
-        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
-        given(configItem.getUpdateUrl()).willReturn("url");
-        given(authTokenGenerator.generate()).willReturn("token");
-        caseUpdateDetails = new CaseUpdateDetails("event_id", new HashMap<String, String>());
-        successfulUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, new ArrayList<>());
-        exceptionRecord = new ExceptionRecord(
-            "1",
-            "caseTypeId",
-            "12345",
-            "some jurisdiction",
-            SUPPLEMENTARY_EVIDENCE_WITH_OCR,
-            "Form1",
-            now(),
-            now(),
-            emptyList(),
-            emptyList()
-        );
-        given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
-            .willReturn(successfulUpdateResponse);
-        given(eventResponse.getEventId()).willReturn("eventId");
-        given(eventResponse.getToken()).willReturn("token");
-        given(coreCaseDataApi.startForCaseworker(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString()))
-            .willReturn(eventResponse);
         given(coreCaseDataApi.submitForCaseworker(
             anyString(),
             anyString(),
@@ -203,39 +163,8 @@ class CcdCaseUpdaterTest {
     }
 
     @Test
-    void should_update_case_handle_exception() throws Exception {
+    void should_update_case_handle_exception() {
         // given
-        given(configItem.getService()).willReturn("Service");
-        given(existingCase.getId()).willReturn(1L);
-        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
-        given(configItem.getUpdateUrl()).willReturn("url");
-        given(authTokenGenerator.generate()).willReturn("token");
-        caseUpdateDetails = new CaseUpdateDetails("event_id", new HashMap<String, String>());
-        successfulUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, new ArrayList<>());
-        exceptionRecord = new ExceptionRecord(
-            "1",
-            "caseTypeId",
-            "12345",
-            "some jurisdiction",
-            SUPPLEMENTARY_EVIDENCE_WITH_OCR,
-            "Form1",
-            now(),
-            now(),
-            emptyList(),
-            emptyList()
-        );
-        given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
-            .willReturn(successfulUpdateResponse);
-        given(eventResponse.getEventId()).willReturn("eventId");
-        given(eventResponse.getToken()).willReturn("token");
-        given(coreCaseDataApi.startForCaseworker(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString()))
-            .willReturn(eventResponse);
         given(coreCaseDataApi.submitForCaseworker(
             anyString(),
             anyString(),
@@ -261,5 +190,20 @@ class CcdCaseUpdaterTest {
 
         // then
         assertThat(callbackException.getMessage()).isEqualTo("Failed to update case");
+    }
+
+    private ExceptionRecord getExceptionRecord() {
+        return new ExceptionRecord(
+            "1",
+            "caseTypeId",
+            "12345",
+            "some jurisdiction",
+            SUPPLEMENTARY_EVIDENCE_WITH_OCR,
+            "Form1",
+            now(),
+            now(),
+            emptyList(),
+            emptyList()
+        );
     }
 }
