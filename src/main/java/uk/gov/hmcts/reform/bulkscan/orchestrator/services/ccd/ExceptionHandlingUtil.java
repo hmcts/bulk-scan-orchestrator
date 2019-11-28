@@ -6,19 +6,19 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessRe
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
-public class ExceptionHandlingUtil {
+final class ExceptionHandlingUtil {
     private ExceptionHandlingUtil() {
         //
     }
 
-    public static ProcessResult handleGenericException(Exception exception, String msg) {
+    static CallbackException handleGenericException(Exception exception, String msg) {
         // log happens individually to cover update/ccd cases
-        throw new CallbackException(msg, exception);
+        return new CallbackException(msg, exception);
     }
 
-    public static ProcessResult handleInvalidCaseDataException(InvalidCaseDataException exception, String msg) {
+    static ProcessResult handleInvalidCaseDataException(InvalidCaseDataException exception, String msg) {
         if (BAD_REQUEST.equals(exception.getStatus())) {
-            return handleGenericException(exception, msg);
+            throw handleGenericException(exception, msg);
         } else {
             return new ProcessResult(exception.getResponse().warnings, exception.getResponse().errors);
         }

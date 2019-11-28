@@ -22,6 +22,8 @@ import java.util.Map;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.ExceptionHandlingUtil.handleGenericException;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.ExceptionHandlingUtil.handleInvalidCaseDataException;
 
 @Service
 public class CcdCaseUpdater {
@@ -56,7 +58,7 @@ public class CcdCaseUpdater {
         CaseDetails existingCase
     ) {
         log.info(
-            "Start updating case for {} with case ID {} from exception record {}",
+            "Start updating case for service {} with case ID {} from exception record {}",
             configItem.getService(),
             existingCase.getId(),
             exceptionRecord.id
@@ -78,7 +80,7 @@ public class CcdCaseUpdater {
             }
 
             log.info(
-                "Successfully updated case for {} with case ID {} from exception record {}",
+                "Successfully called service {} update endpoint with case ID {} from exception record {}",
                 configItem.getService(),
                 existingCase.getId(),
                 exceptionRecord.id
@@ -100,7 +102,7 @@ public class CcdCaseUpdater {
             );
 
             log.info(
-                "Successfully updated case for {} with case ID {} from exception record {}",
+                "Successfully updated case for service {} with case ID {} from exception record {}",
                 configItem.getService(),
                 existingCase.getId(),
                 exceptionRecord.id
@@ -110,9 +112,9 @@ public class CcdCaseUpdater {
                 exceptionRecordFinalizer.finalizeExceptionRecord(existingCase.getData(), existingCase.getId())
             );
         } catch (InvalidCaseDataException exception) {
-            return ExceptionHandlingUtil.handleInvalidCaseDataException(exception, "Failed to update case");
+            return handleInvalidCaseDataException(exception, "Failed to update case");
         } catch (Exception exception) {
-            return ExceptionHandlingUtil.handleGenericException(exception, "Failed to update case");
+            throw handleGenericException(exception, "Failed to update case");
         }
     }
 
@@ -154,7 +156,7 @@ public class CcdCaseUpdater {
                         .summary("Case updated")
                         .description(
                             format(
-                                "Case with case ID %s updated from exception record ref %s",
+                                "Case with case ID %s updated based on exception record ref %s",
                                 existingCase.getId(),
                                 exceptionRecord.id
                             )

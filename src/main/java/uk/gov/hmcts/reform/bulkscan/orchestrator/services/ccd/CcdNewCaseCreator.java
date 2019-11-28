@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.ExceptionHandlingUtil.handleGenericException;
 
 @Service
 public class CcdNewCaseCreator {
@@ -125,7 +126,7 @@ public class CcdNewCaseCreator {
 
             throw new CallbackException("Payment references cannot be processed. Please try again later", exception);
         } catch (Exception exception) {
-            return ExceptionHandlingUtil.handleGenericException(exception, "Failed to create new case");
+            throw handleGenericException(exception, "Failed to create new case");
         }
     }
 
