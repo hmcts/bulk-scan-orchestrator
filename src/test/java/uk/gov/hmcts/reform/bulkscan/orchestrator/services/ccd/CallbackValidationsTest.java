@@ -258,6 +258,62 @@ class CallbackValidationsTest {
         );
     }
 
+    @Test
+    void caseIdTest() {
+        checkValidation(
+            createCaseWith(b -> b.id(1L)),
+            true,
+            1L,
+            CallbackValidations::hasAnId,
+            null
+        );
+    }
+
+    @Test
+    void caseIdNoCaseDetailsTest() {
+        checkValidation(
+            null,
+            false,
+            1L,
+            CallbackValidations::hasAnId,
+            "Exception case has no Id"
+        );
+    }
+
+    @Test
+    void noIdTest() {
+        checkValidation(
+            createCaseWith(b -> b.id(null)),
+            false,
+            null,
+            CallbackValidations::hasId,
+            "Exception case has no Id"
+        );
+    }
+
+    @Test
+    void idTest() {
+        CaseDetails caseDetails = createCaseWith(b -> b.id(1L));
+        checkValidation(
+            caseDetails,
+            true,
+            caseDetails,
+            CallbackValidations::hasId,
+            null
+        );
+    }
+
+    @Test
+    void idNoCaseDetailsTest() {
+        checkValidation(
+            null,
+            false,
+            null,
+            CallbackValidations::hasId,
+            "Exception case has no Id"
+        );
+    }
+
     private static Object[][] idamTokenTestParams() {
         return new Object[][]{
             {"null idam token", null, false, NO_IDAM_TOKEN_RECEIVED_ERROR},
