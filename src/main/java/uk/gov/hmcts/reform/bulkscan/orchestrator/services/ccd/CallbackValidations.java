@@ -113,6 +113,14 @@ public final class CallbackValidations {
     }
 
     @Nonnull
+    public static Validation<String, CaseDetails> hasId(CaseDetails theCase) {
+        return theCase != null
+            && theCase.getId() != null
+            ? valid(theCase)
+            : invalid("Exception case has no Id");
+    }
+
+    @Nonnull
     static Validation<String, String> hasServiceNameInCaseTypeId(CaseDetails theCase) {
         return Optional
             .ofNullable(theCase)
@@ -163,7 +171,7 @@ public final class CallbackValidations {
                             return !hasOcr(theCase)
                                 ? Validation.<String, Void>valid(null)
                                 : Validation.<String, Void>invalid(
-                                    format("The 'attach to case' event is not supported for exception records with OCR")
+                                format("The 'attach to case' event is not supported for exception records with OCR")
                             );
                         default:
                             return Validation.<String, Void>invalid(
