@@ -118,8 +118,6 @@ public final class CallbackValidations {
     @Nonnull
     public static Validation<Seq<String>, CaseDetails> hasValidData(
         boolean useSearchCaseReference,
-        String requesterIdamToken,
-        String requesterUserId,
         CaseDetails theCase
     ) {
         Validation<String, String> caseReferenceTypeValidation = useSearchCaseReference
@@ -132,8 +130,6 @@ public final class CallbackValidations {
         Validation<String, String> serviceNameInCaseTypeIdValidation = hasServiceNameInCaseTypeId(theCase);
         Validation<String, Long> idValidation = hasAnId(theCase);
         Validation<String, List<Map<String, Object>>> scannedRecordValidation = hasAScannedRecord(theCase);
-        Validation<String, String> idamTokenValidation = hasIdamToken(requesterIdamToken);
-        Validation<String, String> userIdValidation = hasUserId(requesterUserId);
 
         Seq<Validation<String, ?>> validations = Array.of(
             caseReferenceTypeValidation,
@@ -141,9 +137,7 @@ public final class CallbackValidations {
             jurisdictionValidation,
             serviceNameInCaseTypeIdValidation,
             idValidation,
-            scannedRecordValidation,
-            idamTokenValidation,
-            userIdValidation
+            scannedRecordValidation
         );
 
         Seq<String> errors = validations

@@ -292,12 +292,12 @@ class CallbackValidationsTest {
                 .jurisdiction("BULKSCAN")
         );
         Validation<Seq<String>, CaseDetails> res =
-            CallbackValidations.hasValidData(true, "idamToken", "userId", caseDetails);
+            CallbackValidations.hasValidData(true, caseDetails);
         assertThat(res.isValid()).isEqualTo(false);
     }
 
     @Test
-    void hasValidDataTest() {
+    void hasValidData_use_search_case_reference_true() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put("searchCaseReferenceType", "ccdCaseReference");
         caseData.put("searchCaseReference", "12345");
@@ -311,7 +311,26 @@ class CallbackValidationsTest {
                 .data(caseData)
         );
         Validation<Seq<String>, CaseDetails> res =
-            CallbackValidations.hasValidData(true, "idamToken", "userId", caseDetails);
+            CallbackValidations.hasValidData(true, caseDetails);
+        assertThat(res.isValid()).isEqualTo(true);
+    }
+
+    @Test
+    void hasValidData_use_search_case_reference_false() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("searchCaseReferenceType", "ccdCaseReference");
+        caseData.put("searchCaseReference", "12345");
+        caseData.put("scannedDocuments", document("https://url", "fileName.pdf"));
+
+        CaseDetails caseDetails = createCaseWith(
+            b -> b
+                .id(1L)
+                .caseTypeId("SERVICE_ExceptionRecord")
+                .jurisdiction("BULKSCAN")
+                .data(caseData)
+        );
+        Validation<Seq<String>, CaseDetails> res =
+            CallbackValidations.hasValidData(true, caseDetails);
         assertThat(res.isValid()).isEqualTo(true);
     }
 
