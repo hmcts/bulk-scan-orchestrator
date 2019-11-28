@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
+import io.vavr.collection.Array;
+import io.vavr.collection.Seq;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
 import org.apache.commons.collections4.CollectionUtils;
@@ -21,6 +23,7 @@ import javax.annotation.Nonnull;
 import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
 import static java.lang.String.format;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.CCD_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
@@ -113,11 +116,43 @@ public final class CallbackValidations {
     }
 
     @Nonnull
-    public static Validation<String, CaseDetails> hasId(CaseDetails theCase) {
-        return theCase != null
-            && theCase.getId() != null
-            ? valid(theCase)
-            : invalid("Exception case has no Id");
+    public static Validation<Seq<String>, CaseDetails> hasValidData(
+        boolean useSearchCaseReference,
+        String requesterIdamToken,
+        String requesterUserId,
+        CaseDetails theCase
+    ) {
+        Validation<String, String> caseReferenceTypeValidation = useSearchCaseReference
+            ? hasSearchCaseReferenceType(theCase)
+            : valid(CCD_CASE_REFERENCE);
+        Validation<String, String> caseReferenceValidation = useSearchCaseReference
+            ? hasSearchCaseReference(theCase)
+            : hasAttachToCaseReference(theCase);
+        Validation<String, String> jurisdictionValidation = hasJurisdiction(theCase);
+        Validation<String, String> serviceNameInCaseTypeIdValidation = hasServiceNameInCaseTypeId(theCase);
+        Validation<String, Long> idValidation = hasAnId(theCase);
+        Validation<String, List<Map<String, Object>>> scannedRecordValidation = hasAScannedRecord(theCase);
+        Validation<String, String> idamTokenValidation = hasIdamToken(requesterIdamToken);
+        Validation<String, String> userIdValidation = hasUserId(requesterUserId);
+
+        Seq<Validation<String, ?>> validations = Array.of(
+            caseReferenceTypeValidation,
+            caseReferenceValidation,
+            jurisdictionValidation,
+            serviceNameInCaseTypeIdValidation,
+            idValidation,
+            scannedRecordValidation,
+            idamTokenValidation,
+            userIdValidation
+        );
+
+        Seq<String> errors = validations
+            .filter(Validation::isInvalid)
+            .map(Validation::getError);
+        if (errors.isEmpty()) {
+            return Validation.valid(theCase);
+        }
+        return Validation.invalid(errors);
     }
 
     @Nonnull

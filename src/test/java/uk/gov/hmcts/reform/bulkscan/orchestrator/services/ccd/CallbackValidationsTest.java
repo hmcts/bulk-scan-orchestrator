@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import io.vavr.collection.Seq;
 import io.vavr.control.Validation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -16,6 +18,7 @@ import java.util.function.Function;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithAttachReference;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithCcdSearchCaseReference;
@@ -281,37 +284,35 @@ class CallbackValidationsTest {
     }
 
     @Test
-    void noIdTest() {
-        checkValidation(
-            createCaseWith(b -> b.id(null)),
-            false,
-            null,
-            CallbackValidations::hasId,
-            "Exception case has no Id"
+    void hasInvalidDataTest() {
+        CaseDetails caseDetails = createCaseWith(
+            b -> b
+                .id(null)
+                .caseTypeId("SERVICE_ExceptionRecord")
+                .jurisdiction("BULKSCAN")
         );
+        Validation<Seq<String>, CaseDetails> res =
+            CallbackValidations.hasValidData (true, "idamToken", "userId", caseDetails);
+        assertThat(res.isValid()).isEqualTo(false);
     }
 
     @Test
-    void idTest() {
-        CaseDetails caseDetails = createCaseWith(b -> b.id(1L));
-        checkValidation(
-            caseDetails,
-            true,
-            caseDetails,
-            CallbackValidations::hasId,
-            null
-        );
-    }
+    void hasValidDataTest() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("searchCaseReferenceType", "ccdCaseReference");
+        caseData.put("searchCaseReference", "12345");
+        caseData.put("scannedDocuments", document("https://url", "fileName.pdf"));
 
-    @Test
-    void idNoCaseDetailsTest() {
-        checkValidation(
-            null,
-            false,
-            null,
-            CallbackValidations::hasId,
-            "Exception case has no Id"
+        CaseDetails caseDetails = createCaseWith(
+            b -> b
+                .id(1L)
+                .caseTypeId("SERVICE_ExceptionRecord")
+                .jurisdiction("BULKSCAN")
+                .data(caseData)
         );
+        Validation<Seq<String>, CaseDetails> res =
+            CallbackValidations.hasValidData (true, "idamToken", "userId", caseDetails);
+        assertThat(res.isValid()).isEqualTo(true);
     }
 
     private static Object[][] idamTokenTestParams() {
