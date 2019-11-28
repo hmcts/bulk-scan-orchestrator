@@ -25,6 +25,11 @@ public class ServiceConfigItem {
      */
     private String transformationUrl;
 
+    /**
+     * URL to an endpoint that handles update existing case upon exception record to a service specific case.
+     */
+    private String updateUrl;
+
     private List<String> caseTypeIds;
 
     private boolean allowCreatingCaseBeforePaymentsAreProcessed = false;
@@ -55,6 +60,14 @@ public class ServiceConfigItem {
 
     public void setTransformationUrl(String transformationUrl) {
         this.transformationUrl = transformationUrl;
+    }
+
+    public String getUpdateUrl() {
+        return updateUrl;
+    }
+
+    public void setUpdateUrl(String updateUrl) {
+        this.updateUrl = updateUrl;
     }
 
     public List<String> getCaseTypeIds() {
