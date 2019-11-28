@@ -292,7 +292,7 @@ class CallbackValidationsTest {
                 .jurisdiction("BULKSCAN")
         );
         Validation<Seq<String>, CaseDetails> res =
-            CallbackValidations.hasValidData (true, "idamToken", "userId", caseDetails);
+            CallbackValidations.hasValidData(true, "idamToken", "userId", caseDetails);
         assertThat(res.isValid()).isEqualTo(false);
     }
 
@@ -311,7 +311,7 @@ class CallbackValidationsTest {
                 .data(caseData)
         );
         Validation<Seq<String>, CaseDetails> res =
-            CallbackValidations.hasValidData (true, "idamToken", "userId", caseDetails);
+            CallbackValidations.hasValidData(true, "idamToken", "userId", caseDetails);
         assertThat(res.isValid()).isEqualTo(true);
     }
 
