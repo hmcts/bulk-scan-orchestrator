@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.respons
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -22,8 +23,7 @@ import java.util.Map;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.ExceptionHandlingUtil.handleGenericException;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.ExceptionHandlingUtil.handleInvalidCaseDataException;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Service
 public class CcdCaseUpdater {
@@ -112,9 +112,13 @@ public class CcdCaseUpdater {
                 exceptionRecordFinalizer.finalizeExceptionRecord(existingCase.getData(), existingCase.getId())
             );
         } catch (InvalidCaseDataException exception) {
-            return handleInvalidCaseDataException(exception, "Failed to update case");
+            if (BAD_REQUEST.equals(exception.getStatus())) {
+                throw new CallbackException("Failed to update case", exception);
+            } else {
+                return new ProcessResult(exception.getResponse().warnings, exception.getResponse().errors);
+            }
         } catch (Exception exception) {
-            throw handleGenericException(exception, "Failed to update case");
+            throw new CallbackException("Failed to update case", exception);
         }
     }
 
