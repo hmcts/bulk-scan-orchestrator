@@ -292,8 +292,14 @@ class CallbackValidationsTest {
                 .jurisdiction("BULKSCAN")
         );
         Validation<Seq<String>, CaseDetails> res =
-            CallbackValidations.hasValidData(true, caseDetails);
+            CallbackValidations.hasValidDetailsForAttachingToCase(true, caseDetails);
         assertThat(res.isValid()).isEqualTo(false);
+        assertThat(res.getError()).containsExactlyInAnyOrder(
+            "No case reference type supplied",
+            "Cannot validate case reference due to the lack of valid case reference type",
+            "Exception case has no Id",
+            "There were no documents in exception record"
+        );
     }
 
     @Test
@@ -311,15 +317,14 @@ class CallbackValidationsTest {
                 .data(caseData)
         );
         Validation<Seq<String>, CaseDetails> res =
-            CallbackValidations.hasValidData(true, caseDetails);
+            CallbackValidations.hasValidDetailsForAttachingToCase(true, caseDetails);
         assertThat(res.isValid()).isEqualTo(true);
     }
 
     @Test
-    void hasValidData_use_search_case_reference_false() {
+    void hasValidData_use_search_case_reference_true_no_search_reference() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put("searchCaseReferenceType", "ccdCaseReference");
-        caseData.put("searchCaseReference", "12345");
         caseData.put("scannedDocuments", document("https://url", "fileName.pdf"));
 
         CaseDetails caseDetails = createCaseWith(
@@ -330,8 +335,64 @@ class CallbackValidationsTest {
                 .data(caseData)
         );
         Validation<Seq<String>, CaseDetails> res =
-            CallbackValidations.hasValidData(true, caseDetails);
+            CallbackValidations.hasValidDetailsForAttachingToCase(true, caseDetails);
+        assertThat(res.isValid()).isEqualTo(false);
+    }
+
+    @Test
+    void hasValidData_use_search_case_reference_false_attach_valid() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("ccdCaseReference", "ccdCaseReference");
+        caseData.put("attachToCaseReference", "1234234393");
+        caseData.put("scannedDocuments", document("https://url", "fileName.pdf"));
+
+        CaseDetails caseDetails = createCaseWith(
+            b -> b
+                .id(1L)
+                .caseTypeId("SERVICE_ExceptionRecord")
+                .jurisdiction("BULKSCAN")
+                .data(caseData)
+        );
+        Validation<Seq<String>, CaseDetails> res =
+            CallbackValidations.hasValidDetailsForAttachingToCase(false, caseDetails);
         assertThat(res.isValid()).isEqualTo(true);
+    }
+
+    @Test
+    void hasValidData_use_search_case_reference_false_attach_missing() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("ccdCaseReference", "ccdCaseReference");
+        caseData.put("scannedDocuments", document("https://url", "fileName.pdf"));
+
+        CaseDetails caseDetails = createCaseWith(
+            b -> b
+                .id(1L)
+                .caseTypeId("SERVICE_ExceptionRecord")
+                .jurisdiction("BULKSCAN")
+                .data(caseData)
+        );
+        Validation<Seq<String>, CaseDetails> res =
+            CallbackValidations.hasValidDetailsForAttachingToCase(false, caseDetails);
+        assertThat(res.isValid()).isEqualTo(false);
+    }
+
+    @Test
+    void hasValidData_use_search_case_reference_false_attach_invalid() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("ccdCaseReference", "ccdCaseReference");
+        caseData.put("attachToCaseReference", 1L);
+        caseData.put("scannedDocuments", document("https://url", "fileName.pdf"));
+
+        CaseDetails caseDetails = createCaseWith(
+            b -> b
+                .id(1L)
+                .caseTypeId("SERVICE_ExceptionRecord")
+                .jurisdiction("BULKSCAN")
+                .data(caseData)
+        );
+        Validation<Seq<String>, CaseDetails> res =
+            CallbackValidations.hasValidDetailsForAttachingToCase(false, caseDetails);
+        assertThat(res.isValid()).isEqualTo(false);
     }
 
     private static Object[][] idamTokenTestParams() {

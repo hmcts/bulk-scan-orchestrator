@@ -116,7 +116,7 @@ public final class CallbackValidations {
     }
 
     @Nonnull
-    public static Validation<Seq<String>, CaseDetails> hasValidData(
+    public static Validation<Seq<String>, CaseDetails> hasValidDetailsForAttachingToCase(
         boolean useSearchCaseReference,
         CaseDetails theCase
     ) {
