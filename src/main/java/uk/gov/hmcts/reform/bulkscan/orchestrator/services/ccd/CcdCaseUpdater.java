@@ -6,14 +6,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.InvalidCaseDataException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.CaseUpdateClient;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.CaseUpdateDetails;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -22,121 +20,113 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.Map;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.ExceptionHandlingUtil.handleGenericException;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.ExceptionHandlingUtil.handleInvalidCaseDataException;
 
 @Service
-public class CcdNewCaseCreator {
-    private static final Logger log = LoggerFactory.getLogger(CcdNewCaseCreator.class);
+public class CcdCaseUpdater {
+    private static final Logger log = LoggerFactory.getLogger(CcdCaseUpdater.class);
 
     private static final String EXCEPTION_RECORD_REFERENCE = "bulkScanCaseReference";
 
-    private final TransformationClient transformationClient;
+    private final CaseUpdateClient caseUpdateClient;
     private final AuthTokenGenerator s2sTokenGenerator;
-    private final PaymentsProcessor paymentsProcessor;
     private final CoreCaseDataApi coreCaseDataApi;
     private final ExceptionRecordFinalizer exceptionRecordFinalizer;
 
-    public CcdNewCaseCreator(
-        TransformationClient transformationClient,
+    public CcdCaseUpdater(
+        CaseUpdateClient caseUpdateClient,
         AuthTokenGenerator s2sTokenGenerator,
-        PaymentsProcessor paymentsProcessor,
         CoreCaseDataApi coreCaseDataApi,
         ExceptionRecordFinalizer exceptionRecordFinalizer
     ) {
-        this.transformationClient = transformationClient;
+        this.caseUpdateClient = caseUpdateClient;
         this.s2sTokenGenerator = s2sTokenGenerator;
-        this.paymentsProcessor = paymentsProcessor;
         this.coreCaseDataApi = coreCaseDataApi;
         this.exceptionRecordFinalizer = exceptionRecordFinalizer;
     }
 
     @SuppressWarnings({"squid:S2139", "unchecked"}) // squid for exception handle + logging
-    public ProcessResult createNewCase(
+    public ProcessResult updateCase(
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,
         boolean ignoreWarnings,
         String idamToken,
         String userId,
-        CaseDetails exceptionRecordData
+        CaseDetails existingCase
     ) {
         log.info(
-            "Start creating new case for {} from exception record {}",
+            "Start updating case for service {} with case ID {} from exception record {}",
             configItem.getService(),
+            existingCase.getId(),
             exceptionRecord.id
         );
 
         try {
             String s2sToken = s2sTokenGenerator.generate();
 
-            SuccessfulTransformationResponse transformationResponse = transformationClient.transformExceptionRecord(
-                configItem.getTransformationUrl(),
+            SuccessfulUpdateResponse updateResponse = caseUpdateClient.updateCase(
+                configItem.getUpdateUrl(),
+                existingCase,
                 exceptionRecord,
                 s2sToken
             );
 
-            if (!ignoreWarnings && !transformationResponse.warnings.isEmpty()) {
+            if (!ignoreWarnings && !updateResponse.warnings.isEmpty()) {
                 // do not log warnings
-                return new ProcessResult(transformationResponse.warnings, emptyList());
+                return new ProcessResult(updateResponse.warnings, emptyList());
             }
 
             log.info(
-                "Successfully transformed exception record for {} from exception record {}",
+                "Successfully called service {} update endpoint with case ID {} from exception record {}",
                 configItem.getService(),
+                existingCase.getId(),
                 exceptionRecord.id
             );
 
             checkBulkScanReferenceIsSet(
-                (Map<String, ?>) transformationResponse.caseCreationDetails.caseData,
+                (Map<String, ?>) updateResponse.caseDetails.caseData,
                 exceptionRecord.id
             );
 
-            long newCaseId = createNewCaseInCcd(
+            updateCaseInCcd(
+                ignoreWarnings,
                 idamToken,
                 s2sToken,
                 userId,
                 exceptionRecord,
-                transformationResponse.caseCreationDetails
+                updateResponse.caseDetails,
+                existingCase
             );
 
             log.info(
-                "Successfully created new case for {} with case ID {} from exception record {}",
+                "Successfully updated case for service {} with case ID {} from exception record {}",
                 configItem.getService(),
-                newCaseId,
+                existingCase.getId(),
                 exceptionRecord.id
             );
 
-            paymentsProcessor.updatePayments(exceptionRecordData, newCaseId);
-
             return new ProcessResult(
-                exceptionRecordFinalizer.finalizeExceptionRecord(exceptionRecordData.getData(), newCaseId)
+                exceptionRecordFinalizer.finalizeExceptionRecord(existingCase.getData(), existingCase.getId())
             );
         } catch (InvalidCaseDataException exception) {
-            return ExceptionHandlingUtil.handleInvalidCaseDataException(
-                exception,
-                "Failed to transform exception record"
-            );
-        } catch (PaymentsPublishingException exception) {
-            log.error(
-                "Failed to send update to payment processor for {} exception record {}",
-                configItem.getService(),
-                exceptionRecord.id,
-                exception
-            );
-
-            throw new CallbackException("Payment references cannot be processed. Please try again later", exception);
+            return handleInvalidCaseDataException(exception, "Failed to update case");
         } catch (Exception exception) {
-            throw handleGenericException(exception, "Failed to create new case");
+            throw handleGenericException(exception, "Failed to update case");
         }
     }
 
     @SuppressWarnings("squid:S2139") // exception handle + logging
-    private long createNewCaseInCcd(
+    private long updateCaseInCcd(
+        boolean ignoreWarnings,
         String idamToken,
         String s2sToken,
         String userId,
         ExceptionRecord exceptionRecord,
-        CaseCreationDetails caseCreationDetails
+        CaseUpdateDetails caseUpdateDetails,
+        CaseDetails existingCase
     ) {
         try {
             StartEventResponse eventResponse = coreCaseDataApi.startForCaseworker(
@@ -144,9 +134,9 @@ public class CcdNewCaseCreator {
                 s2sToken,
                 userId,
                 exceptionRecord.poBoxJurisdiction,
-                caseCreationDetails.caseTypeId,
+                existingCase.getCaseTypeId(),
                 // when onboarding remind services to not configure about to submit callback for this event
-                caseCreationDetails.eventId
+                caseUpdateDetails.eventId
             );
 
             return coreCaseDataApi.submitForCaseworker(
@@ -154,17 +144,23 @@ public class CcdNewCaseCreator {
                 s2sToken,
                 userId,
                 exceptionRecord.poBoxJurisdiction,
-                caseCreationDetails.caseTypeId,
-                true,
+                existingCase.getCaseTypeId(),
+                ignoreWarnings,
                 CaseDataContent
                     .builder()
                     .caseReference(exceptionRecord.id)
-                    .data(caseCreationDetails.caseData)
+                    .data(caseUpdateDetails.caseData)
                     .event(Event
                         .builder()
                         .id(eventResponse.getEventId())
-                        .summary("Case created")
-                        .description("Case created from exception record ref " + exceptionRecord.id)
+                        .summary("Case updated")
+                        .description(
+                            format(
+                                "Case with case ID %s updated based on exception record ref %s",
+                                existingCase.getId(),
+                                exceptionRecord.id
+                            )
+                        )
                         .build()
                     )
                     .eventToken(eventResponse.getToken())
@@ -172,8 +168,10 @@ public class CcdNewCaseCreator {
             ).getId();
         } catch (FeignException exception) {
             log.error(
-                "Failed to create new case for {} jurisdiction from exception record {}. Service response: {}",
+                "Failed to update case for {} jurisdiction with case ID {} from exception record {}. "
+                    + "Service response: {}",
                 exceptionRecord.poBoxJurisdiction,
+                existingCase.getId(),
                 exceptionRecord.id,
                 exception.contentUTF8(),
                 exception
@@ -182,8 +180,9 @@ public class CcdNewCaseCreator {
             throw exception;
         } catch (Exception exception) {
             log.error(
-                "Failed to create new case for {} jurisdiction from exception record {}",
+                "Failed to update case for {} jurisdiction with case ID {} from exception record {}",
                 exceptionRecord.poBoxJurisdiction,
+                existingCase.getId(),
                 exceptionRecord.id,
                 exception
             );
@@ -195,13 +194,13 @@ public class CcdNewCaseCreator {
     private void checkBulkScanReferenceIsSet(Map<String, ?> caseData, String exceptionRecordId) {
         if (!caseData.containsKey(EXCEPTION_RECORD_REFERENCE)) {
             log.error(
-                "Transformation did not set '{}' with exception record id {}",
+                "Update did not set '{}' with exception record id {}",
                 EXCEPTION_RECORD_REFERENCE,
                 exceptionRecordId
             );
         } else if (!caseData.get(EXCEPTION_RECORD_REFERENCE).equals(exceptionRecordId)) {
             log.error(
-                "Transformation did not set exception record reference correctly. Actual: {}, expected: {}",
+                "Update did not set exception record reference correctly. Actual: {}, expected: {}",
                 caseData.get(EXCEPTION_RECORD_REFERENCE),
                 exceptionRecordId
             );
