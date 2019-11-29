@@ -284,15 +284,17 @@ class CallbackValidationsTest {
     }
 
     @Test
-    void hasInvalidDataTest() {
+    void hasValidData_should_fail_if_case_details_missing() {
         CaseDetails caseDetails = createCaseWith(
             b -> b
                 .id(null)
                 .caseTypeId("SERVICE_ExceptionRecord")
                 .jurisdiction("BULKSCAN")
         );
+
         Validation<Seq<String>, CaseDetails> res =
             CallbackValidations.hasValidDetailsForAttachingToCase(true, caseDetails);
+
         assertThat(res.isValid()).isEqualTo(false);
         assertThat(res.getError()).containsExactlyInAnyOrder(
             "No case reference type supplied",
@@ -303,7 +305,7 @@ class CallbackValidationsTest {
     }
 
     @Test
-    void hasValidData_use_search_case_reference_true() {
+    void hasValidData_should_pass_if_all_field_present_and_use_search_case_reference_true() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put("searchCaseReferenceType", "ccdCaseReference");
         caseData.put("searchCaseReference", "12345");
@@ -316,13 +318,15 @@ class CallbackValidationsTest {
                 .jurisdiction("BULKSCAN")
                 .data(caseData)
         );
+
         Validation<Seq<String>, CaseDetails> res =
             CallbackValidations.hasValidDetailsForAttachingToCase(true, caseDetails);
+
         assertThat(res.isValid()).isEqualTo(true);
     }
 
     @Test
-    void hasValidData_use_search_case_reference_true_no_search_reference() {
+    void hasValidData_should_fail_if_use_search_case_reference_true_no_search_reference_and_all_other_field_present() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put("searchCaseReferenceType", "ccdCaseReference");
         caseData.put("scannedDocuments", document("https://url", "fileName.pdf"));
@@ -334,13 +338,18 @@ class CallbackValidationsTest {
                 .jurisdiction("BULKSCAN")
                 .data(caseData)
         );
+
         Validation<Seq<String>, CaseDetails> res =
             CallbackValidations.hasValidDetailsForAttachingToCase(true, caseDetails);
+
         assertThat(res.isValid()).isEqualTo(false);
+        assertThat(res.getError()).containsExactly(
+            "No case reference supplied"
+        );
     }
 
     @Test
-    void hasValidData_use_search_case_reference_false_attach_valid() {
+    void hasValidData_should_pass_if_use_search_case_reference_false_attach_valid_and_all_other_fields_present() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put("ccdCaseReference", "ccdCaseReference");
         caseData.put("attachToCaseReference", "1234234393");
@@ -353,13 +362,15 @@ class CallbackValidationsTest {
                 .jurisdiction("BULKSCAN")
                 .data(caseData)
         );
+
         Validation<Seq<String>, CaseDetails> res =
             CallbackValidations.hasValidDetailsForAttachingToCase(false, caseDetails);
+
         assertThat(res.isValid()).isEqualTo(true);
     }
 
     @Test
-    void hasValidData_use_search_case_reference_false_attach_missing() {
+    void hasValidData_should_fail_if_use_search_case_reference_false_attach_missing_and_all_other_fields_present() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put("ccdCaseReference", "ccdCaseReference");
         caseData.put("scannedDocuments", document("https://url", "fileName.pdf"));
@@ -371,13 +382,18 @@ class CallbackValidationsTest {
                 .jurisdiction("BULKSCAN")
                 .data(caseData)
         );
+
         Validation<Seq<String>, CaseDetails> res =
             CallbackValidations.hasValidDetailsForAttachingToCase(false, caseDetails);
+
         assertThat(res.isValid()).isEqualTo(false);
+        assertThat(res.getError()).containsExactly(
+            "No case reference supplied"
+        );
     }
 
     @Test
-    void hasValidData_use_search_case_reference_false_attach_invalid() {
+    void hasValidData_should_fail_if_use_search_case_reference_false_attach_invalid_and_all_other_fields_present() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put("ccdCaseReference", "ccdCaseReference");
         caseData.put("attachToCaseReference", 1L);
@@ -393,6 +409,9 @@ class CallbackValidationsTest {
         Validation<Seq<String>, CaseDetails> res =
             CallbackValidations.hasValidDetailsForAttachingToCase(false, caseDetails);
         assertThat(res.isValid()).isEqualTo(false);
+        assertThat(res.getError()).containsExactlyInAnyOrder(
+            "Invalid case reference: '1'"
+        );
     }
 
     private static Object[][] idamTokenTestParams() {
