@@ -24,6 +24,7 @@ import java.util.Map;
 
 import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.ExceptionHandlingUtil.handleGenericException;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.ExceptionHandlingUtil.handleInvalidCaseDataException;
 
 @Service
 public class CcdNewCaseCreator {
@@ -112,7 +113,7 @@ public class CcdNewCaseCreator {
                 exceptionRecordFinalizer.finalizeExceptionRecord(exceptionRecordData.getData(), newCaseId)
             );
         } catch (InvalidCaseDataException exception) {
-            return ExceptionHandlingUtil.handleInvalidCaseDataException(
+            return handleInvalidCaseDataException(
                 exception,
                 "Failed to transform exception record"
             );

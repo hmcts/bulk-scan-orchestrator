@@ -4,6 +4,7 @@ import feign.FeignException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.BDDMockito.BDDMyOngoingStubbing;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
@@ -75,7 +76,8 @@ class CcdCaseUpdaterTest {
 
     private ExceptionRecord exceptionRecord;
 
-    private SuccessfulUpdateResponse successfulUpdateResponse;
+    private SuccessfulUpdateResponse noWarningsUpdateResponse;
+    private SuccessfulUpdateResponse warningsUpdateResponse;
 
     private CaseUpdateDetails caseUpdateDetails;
 
@@ -91,6 +93,9 @@ class CcdCaseUpdaterTest {
         caseUpdateDetails = new CaseUpdateDetails("event_id", new HashMap<String, String>());
         exceptionRecord = getExceptionRecord();
 
+        noWarningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
+        warningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, asList("warning1"));
+
         given(configItem.getService()).willReturn("Service");
         given(existingCase.getId()).willReturn(1L);
         given(configItem.getUpdateUrl()).willReturn("url");
@@ -98,31 +103,12 @@ class CcdCaseUpdaterTest {
     }
 
     @Test
-    void should_update_case() throws Exception {
+    void updateCase_should_if_no_warnings() throws Exception {
         // given
-        successfulUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
-            .willReturn(successfulUpdateResponse);
-        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
-        given(eventResponse.getEventId()).willReturn("eventId");
-        given(eventResponse.getToken()).willReturn("token");
-        given(coreCaseDataApi.startForCaseworker(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString()))
-            .willReturn(eventResponse);
-        given(coreCaseDataApi.submitForCaseworker(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyBoolean(),
-            any(CaseDataContent.class)
-        )).willReturn(CaseDetails.builder().id(1L).build());
+            .willReturn(noWarningsUpdateResponse);
+        initMockData();
+        prepareMockForSubmissionForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
         given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong())).willReturn(originalFields);
 
         // when
@@ -142,31 +128,12 @@ class CcdCaseUpdaterTest {
     }
 
     @Test
-    void should_update_case_ignore_warnings() throws Exception {
+    void updateCase_should_ignore_warnings() throws Exception {
         // given
-        successfulUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, asList("warning1"));
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
-            .willReturn(successfulUpdateResponse);
-        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
-        given(eventResponse.getEventId()).willReturn("eventId");
-        given(eventResponse.getToken()).willReturn("token");
-        given(coreCaseDataApi.startForCaseworker(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString()))
-            .willReturn(eventResponse);
-        given(coreCaseDataApi.submitForCaseworker(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyBoolean(),
-            any(CaseDataContent.class)
-        )).willReturn(CaseDetails.builder().id(1L).build());
+            .willReturn(noWarningsUpdateResponse);
+        initMockData();
+        prepareMockForSubmissionForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
         given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong())).willReturn(originalFields);
 
         // when
@@ -186,11 +153,10 @@ class CcdCaseUpdaterTest {
     }
 
     @Test
-    void should_update_case_not_ignore_warnings() throws Exception {
+    void updateCase_should_not_ignore_warnings() throws Exception {
         // given
-        successfulUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, asList("warning1"));
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
-            .willReturn(successfulUpdateResponse);
+            .willReturn(warningsUpdateResponse);
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
@@ -209,31 +175,12 @@ class CcdCaseUpdaterTest {
     }
 
     @Test
-    void should_update_case_pass_if_no_warnings() throws Exception {
+    void updateCase_should_pass_if_no_warnings() throws Exception {
         // given
-        successfulUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
-            .willReturn(successfulUpdateResponse);
-        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
-        given(eventResponse.getEventId()).willReturn("eventId");
-        given(eventResponse.getToken()).willReturn("token");
-        given(coreCaseDataApi.startForCaseworker(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString()))
-            .willReturn(eventResponse);
-        given(coreCaseDataApi.submitForCaseworker(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyBoolean(),
-            any(CaseDataContent.class)
-        )).willReturn(CaseDetails.builder().id(1L).build());
+            .willReturn(noWarningsUpdateResponse);
+        initMockData();
+        prepareMockForSubmissionForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
         given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong())).willReturn(originalFields);
 
         // when
@@ -253,31 +200,13 @@ class CcdCaseUpdaterTest {
     }
 
     @Test
-    void should_update_case_handle_feign_exception() throws Exception {
+    void updateCase_should_handle_feign_exception() throws Exception {
         // given
-        successfulUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
+        noWarningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
-            .willReturn(successfulUpdateResponse);
-        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
-        given(eventResponse.getEventId()).willReturn("eventId");
-        given(eventResponse.getToken()).willReturn("token");
-        given(coreCaseDataApi.startForCaseworker(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString()))
-            .willReturn(eventResponse);
-        given(coreCaseDataApi.submitForCaseworker(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyBoolean(),
-            any(CaseDataContent.class)
-        )).willThrow(new FeignException.BadRequest("Msg", "Body".getBytes()));
+            .willReturn(noWarningsUpdateResponse);
+        initMockData();
+        prepareMockForSubmissionForCaseWorker().willThrow(new FeignException.BadRequest("Msg", "Body".getBytes()));
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -297,31 +226,13 @@ class CcdCaseUpdaterTest {
     }
 
     @Test
-    void should_update_case_handle_invalid_case_data_exception() throws Exception {
+    void updateCase_should_handle_invalid_case_data_exception() throws Exception {
         // given
-        successfulUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
+        noWarningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
-            .willReturn(successfulUpdateResponse);
-        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
-        given(eventResponse.getEventId()).willReturn("eventId");
-        given(eventResponse.getToken()).willReturn("token");
-        given(coreCaseDataApi.startForCaseworker(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString()))
-            .willReturn(eventResponse);
-        given(coreCaseDataApi.submitForCaseworker(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyBoolean(),
-            any(CaseDataContent.class)
-        )).willThrow(new InvalidCaseDataException(
+            .willReturn(noWarningsUpdateResponse);
+        initMockData();
+        prepareMockForSubmissionForCaseWorker().willThrow(new InvalidCaseDataException(
             HttpClientErrorException.create(
                 HttpStatus.BAD_REQUEST,
                 "",
@@ -349,31 +260,13 @@ class CcdCaseUpdaterTest {
     }
 
     @Test
-    void should_update_case_handle_exception() throws Exception {
+    void updateCase_should_handle_exception() throws Exception {
         // given
-        successfulUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
+        noWarningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
-            .willReturn(successfulUpdateResponse);
-        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
-        given(eventResponse.getEventId()).willReturn("eventId");
-        given(eventResponse.getToken()).willReturn("token");
-        given(coreCaseDataApi.startForCaseworker(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString()))
-            .willReturn(eventResponse);
-        given(coreCaseDataApi.submitForCaseworker(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyBoolean(),
-            any(CaseDataContent.class)
-        )).willThrow(new RuntimeException("Msg"));
+            .willReturn(noWarningsUpdateResponse);
+        initMockData();
+        prepareMockForSubmissionForCaseWorker().willThrow(new RuntimeException("Msg"));
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -390,6 +283,32 @@ class CcdCaseUpdaterTest {
 
         // then
         assertThat(callbackException.getMessage()).isEqualTo("Failed to update case");
+    }
+
+    private BDDMyOngoingStubbing<CaseDetails> prepareMockForSubmissionForCaseWorker() {
+        return given(coreCaseDataApi.submitForCaseworker(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyBoolean(),
+            any(CaseDataContent.class)
+        ));
+    }
+
+    private void initMockData() {
+        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
+        given(eventResponse.getEventId()).willReturn("eventId");
+        given(eventResponse.getToken()).willReturn("token");
+        given(coreCaseDataApi.startForCaseworker(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString()))
+            .willReturn(eventResponse);
     }
 
     private ExceptionRecord getExceptionRecord() {
