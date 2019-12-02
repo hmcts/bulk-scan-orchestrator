@@ -78,7 +78,8 @@ public class CcdCaseUpdater {
             }
 
             log.info(
-                "Successfully called service {} update endpoint with case ID {} from exception record {}",
+                "Successfully called case update endpoint of service {} to update case with case ID {} "
+                    + "based on exception record ref {}",
                 configItem.getService(),
                 existingCase.getId(),
                 exceptionRecord.id
@@ -95,7 +96,7 @@ public class CcdCaseUpdater {
             );
 
             log.info(
-                "Successfully updated case for service {} with case ID {} from exception record {}",
+                "Successfully updated case for service {} with case ID {} based on exception record ref {}",
                 configItem.getService(),
                 existingCase.getId(),
                 exceptionRecord.id
