@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.CaseClientServiceException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.InvalidCaseDataException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.UnprocessableEntityException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
@@ -223,12 +223,12 @@ class CcdNewCaseCreatorTest {
     }
 
     @Test
-    void should_throw_InvalidCaseDataException_when_transformation_client_returns_422()
+    void should_throw_UnprocessableEntityException_when_transformation_client_returns_422()
         throws IOException, CaseClientServiceException {
         // given
         when(s2sTokenGenerator.generate()).thenReturn(randomUUID().toString());
         //setUpTransformationUrl();
-        InvalidCaseDataException exception = new InvalidCaseDataException(
+        UnprocessableEntityException exception = new UnprocessableEntityException(
             new HttpClientErrorException(HttpStatus.UNPROCESSABLE_ENTITY),
             new ClientServiceErrorResponse(singletonList("error"), singletonList("warning"))
         );

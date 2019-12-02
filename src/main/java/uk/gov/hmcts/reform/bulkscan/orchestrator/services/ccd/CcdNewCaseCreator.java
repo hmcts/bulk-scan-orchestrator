@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.InvalidCaseDataException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.UnprocessableEntityException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
@@ -23,7 +24,6 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Service
 public class CcdNewCaseCreator {
@@ -112,11 +112,9 @@ public class CcdNewCaseCreator {
                 exceptionRecordFinalizer.finalizeExceptionRecord(exceptionRecordData.getData(), newCaseId)
             );
         } catch (InvalidCaseDataException exception) {
-            if (BAD_REQUEST.equals(exception.getStatus())) {
-                throw new CallbackException("Failed to transform exception record", exception);
-            } else {
-                return new ProcessResult(exception.getResponse().warnings, exception.getResponse().errors);
-            }
+            throw new CallbackException("Failed to transform exception record", exception);
+        } catch (UnprocessableEntityException exception) {
+            return new ProcessResult(exception.getResponse().warnings, exception.getResponse().errors);
         } catch (PaymentsPublishingException exception) {
             log.error(
                 "Failed to send update to payment processor for {} exception record {}",

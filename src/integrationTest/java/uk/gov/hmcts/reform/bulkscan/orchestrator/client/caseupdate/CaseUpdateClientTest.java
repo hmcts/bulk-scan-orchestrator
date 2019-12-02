@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.CaseClientServiceException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.InvalidCaseDataException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.UnprocessableEntityException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.CaseUpdateDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
@@ -80,7 +81,7 @@ public class CaseUpdateClientTest {
     }
 
     @Test
-    public void should_throw_invalid_case_data_exception_for_unprocessable_entity_response() throws Exception {
+    public void should_throw_unprocessable_entity_exception_for_unprocessable_entity_response() throws Exception {
         // given
         String s2sToken = randomUUID().toString();
         stubFor(
@@ -89,9 +90,9 @@ public class CaseUpdateClientTest {
                 .willReturn(aResponse().withBody(errorResponse().toString()).withStatus(422)));
 
         // when
-        InvalidCaseDataException exception = catchThrowableOfType(
+        UnprocessableEntityException exception = catchThrowableOfType(
             () -> client.updateCase(url(), existingCase(), exceptionRecordRequestData(), s2sToken),
-            InvalidCaseDataException.class
+            UnprocessableEntityException.class
         );
 
         // then
