@@ -27,8 +27,6 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 public class CcdCaseUpdater {
     private static final Logger log = LoggerFactory.getLogger(CcdCaseUpdater.class);
 
-    private static final String EXCEPTION_RECORD_REFERENCE = "bulkScanCaseReference";
-
     private final CaseUpdateClient caseUpdateClient;
     private final AuthTokenGenerator s2sTokenGenerator;
     private final CoreCaseDataApi coreCaseDataApi;
