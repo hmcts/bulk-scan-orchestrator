@@ -256,7 +256,9 @@ class CcdCaseUpdaterTest {
         );
 
         // then
-        assertThat(callbackException.getMessage()).isEqualTo("Failed to update case");
+        assertThat(callbackException.getMessage())
+            .isEqualTo("Case Update API returned an error response with status 400 BAD_REQUEST "
+                + "from service Service when updating case with case ID 1 based on exception record ref 1");
     }
 
     @Test

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.CaseClientServiceException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.InvalidCaseDataException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.UnprocessableEntityException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
@@ -81,7 +82,7 @@ public class TransformationClientTest {
     }
 
     @Test
-    public void should_throw_invalid_data_exception_for_unprocessable_entity_response() throws Exception {
+    public void should_throw_unprocessable_entity_exception_for_unprocessable_entity_response() throws Exception {
         // given
         String s2sToken = randomUUID().toString();
         stubFor(
@@ -90,9 +91,9 @@ public class TransformationClientTest {
                 .willReturn(aResponse().withBody(errorResponse().toString()).withStatus(UNPROCESSABLE_ENTITY.value())));
 
         // when
-        InvalidCaseDataException exception = catchThrowableOfType(
+        UnprocessableEntityException exception = catchThrowableOfType(
             () -> client.transformExceptionRecord(url(), exceptionRecordRequestData(), s2sToken),
-            InvalidCaseDataException.class
+            UnprocessableEntityException.class
         );
 
         // then

@@ -7,6 +7,9 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientSer
 
 import java.io.IOException;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
+
 @Component
 public class ServiceResponseParser {
 
@@ -25,7 +28,11 @@ public class ServiceResponseParser {
                 ClientServiceErrorResponse.class
             );
 
-            throw new InvalidCaseDataException(exception, errorResponse);
+            if (exception.getStatusCode().equals(BAD_REQUEST)) {
+                throw new InvalidCaseDataException(exception, errorResponse);
+            } else if (exception.getStatusCode().equals(UNPROCESSABLE_ENTITY)) {
+                throw new UnprocessableEntityException(exception, errorResponse);
+            }
         } catch (IOException ioException) {
             throw new CaseClientServiceException(exception, ioException.getMessage());
         }
