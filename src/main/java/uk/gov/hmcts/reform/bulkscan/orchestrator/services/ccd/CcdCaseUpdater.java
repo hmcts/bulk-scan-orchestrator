@@ -19,8 +19,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
-import java.util.Map;
-
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -83,11 +81,6 @@ public class CcdCaseUpdater {
                 "Successfully called service {} update endpoint with case ID {} from exception record {}",
                 configItem.getService(),
                 existingCase.getId(),
-                exceptionRecord.id
-            );
-
-            checkBulkScanReferenceIsSet(
-                (Map<String, ?>) updateResponse.caseDetails.caseData,
                 exceptionRecord.id
             );
 
@@ -157,7 +150,7 @@ public class CcdCaseUpdater {
                     .event(Event
                         .builder()
                         .id(eventResponse.getEventId())
-                        .summary("Case updated")
+                        .summary(format("Case updated, case ID %s", existingCase.getId()))
                         .description(
                             format(
                                 "Case with case ID %s updated based on exception record ref %s",
@@ -192,22 +185,6 @@ public class CcdCaseUpdater {
             );
 
             throw exception;
-        }
-    }
-
-    private void checkBulkScanReferenceIsSet(Map<String, ?> caseData, String exceptionRecordId) {
-        if (!caseData.containsKey(EXCEPTION_RECORD_REFERENCE)) {
-            log.error(
-                "Update did not set '{}' with exception record id {}",
-                EXCEPTION_RECORD_REFERENCE,
-                exceptionRecordId
-            );
-        } else if (!caseData.get(EXCEPTION_RECORD_REFERENCE).equals(exceptionRecordId)) {
-            log.error(
-                "Update did not set exception record reference correctly. Actual: {}, expected: {}",
-                caseData.get(EXCEPTION_RECORD_REFERENCE),
-                exceptionRecordId
-            );
         }
     }
 }
