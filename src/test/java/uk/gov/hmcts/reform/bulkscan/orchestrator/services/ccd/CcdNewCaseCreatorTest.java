@@ -5,11 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.CaseClientServiceException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.UnprocessableEntityException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
@@ -25,7 +23,6 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,6 +60,9 @@ class CcdNewCaseCreatorTest {
     private TransformationClient transformationClient;
 
     @Mock
+    private ServiceResponseParser serviceResponseParser;
+
+    @Mock
     private AuthTokenGenerator s2sTokenGenerator;
 
     @Mock
@@ -76,10 +76,14 @@ class CcdNewCaseCreatorTest {
 
     private CcdNewCaseCreator ccdNewCaseCreator;
 
+    @Mock
+    private HttpClientErrorException.UnprocessableEntity unprocessableEntity;
+
     @BeforeEach
     void setUp() {
         ccdNewCaseCreator = new CcdNewCaseCreator(
             transformationClient,
+            serviceResponseParser,
             s2sTokenGenerator,
             paymentsProcessor,
             coreCaseDataApi,
@@ -223,16 +227,12 @@ class CcdNewCaseCreatorTest {
     }
 
     @Test
-    void should_throw_UnprocessableEntityException_when_transformation_client_returns_422()
-        throws IOException, CaseClientServiceException {
+    void should_throw_UnprocessableEntityException_when_transformation_client_returns_422() {
         // given
         when(s2sTokenGenerator.generate()).thenReturn(randomUUID().toString());
-        //setUpTransformationUrl();
-        UnprocessableEntityException exception = new UnprocessableEntityException(
-            new HttpClientErrorException(HttpStatus.UNPROCESSABLE_ENTITY),
-            new ClientServiceErrorResponse(singletonList("error"), singletonList("warning"))
-        );
-        doThrow(exception)
+        given(serviceResponseParser.parseResponseBody(unprocessableEntity))
+            .willReturn(new ClientServiceErrorResponse(singletonList("error"), singletonList("warning")));
+        doThrow(unprocessableEntity)
             .when(transformationClient)
             .transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString());
 

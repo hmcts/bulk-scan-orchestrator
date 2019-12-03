@@ -4,10 +4,14 @@ import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.CaseClientServiceException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.InvalidCaseDataException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.UnprocessableEntityException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
@@ -32,6 +36,7 @@ public class CcdNewCaseCreator {
     private static final String EXCEPTION_RECORD_REFERENCE = "bulkScanCaseReference";
 
     private final TransformationClient transformationClient;
+    private final ServiceResponseParser serviceResponseParser;
     private final AuthTokenGenerator s2sTokenGenerator;
     private final PaymentsProcessor paymentsProcessor;
     private final CoreCaseDataApi coreCaseDataApi;
@@ -39,12 +44,13 @@ public class CcdNewCaseCreator {
 
     public CcdNewCaseCreator(
         TransformationClient transformationClient,
-        AuthTokenGenerator s2sTokenGenerator,
+        ServiceResponseParser serviceResponseParser, AuthTokenGenerator s2sTokenGenerator,
         PaymentsProcessor paymentsProcessor,
         CoreCaseDataApi coreCaseDataApi,
         ExceptionRecordFinalizer exceptionRecordFinalizer
     ) {
         this.transformationClient = transformationClient;
+        this.serviceResponseParser = serviceResponseParser;
         this.s2sTokenGenerator = s2sTokenGenerator;
         this.paymentsProcessor = paymentsProcessor;
         this.coreCaseDataApi = coreCaseDataApi;
@@ -111,10 +117,18 @@ public class CcdNewCaseCreator {
             return new ProcessResult(
                 exceptionRecordFinalizer.finalizeExceptionRecord(exceptionRecordData.getData(), newCaseId)
             );
-        } catch (InvalidCaseDataException exception) {
-            throw new CallbackException("Failed to transform exception record", exception);
-        } catch (UnprocessableEntityException exception) {
-            return new ProcessResult(exception.getResponse().warnings, exception.getResponse().errors);
+        } catch (HttpClientErrorException.BadRequest exception) {
+            ClientServiceErrorResponse errorResponse = serviceResponseParser.parseResponseBody(exception);
+            InvalidCaseDataException clientException =
+                new InvalidCaseDataException(exception, errorResponse);
+            throw new CallbackException("Failed to transform exception record", clientException);
+        } catch (HttpClientErrorException.UnprocessableEntity exception) {
+            ClientServiceErrorResponse errorResponse = serviceResponseParser.parseResponseBody(exception);
+            return new ProcessResult(errorResponse.warnings, errorResponse.errors);
+        } catch (HttpStatusCodeException ex) {
+            CaseClientServiceException clientException =
+                new CaseClientServiceException(ex, ex.getResponseBodyAsString());
+            throw new CallbackException("Failed to create new case", clientException);
         } catch (PaymentsPublishingException exception) {
             log.error(
                 "Failed to send update to payment processor for {} exception record {}",

@@ -150,9 +150,25 @@ class CreateCaseCallbackTest {
     @ParameterizedTest
     @EnumSource(
         value = HttpStatus.class,
-        names = {"BAD_REQUEST", "UNPROCESSABLE_ENTITY", "INTERNAL_SERVER_ERROR"}
+        names = {"BAD_REQUEST", "UNPROCESSABLE_ENTITY"}
     )
     void should_respond_with_relevant_error_when_transformation_call_is_failing(HttpStatus responseStatus) {
+        setUpFailingTransformation(responseStatus);
+        setUpCcdSearchResult(getCcdResponseBody("search-result-empty.json"));
+
+        postWithBody(getRequestBody("valid-exception.json"))
+            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+            .body("message", equalTo("Failed to parse response"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        value = HttpStatus.class,
+        names = {"INTERNAL_SERVER_ERROR"}
+    )
+    void should_respond_with_relevant_error_when_transformation_call_is_failing_with_internal_server_error(
+        HttpStatus responseStatus
+    ) {
         setUpFailingTransformation(responseStatus);
         setUpCcdSearchResult(getCcdResponseBody("search-result-empty.json"));
 

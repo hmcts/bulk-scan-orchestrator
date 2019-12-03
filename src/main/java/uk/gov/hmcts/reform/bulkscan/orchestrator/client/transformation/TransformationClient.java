@@ -8,13 +8,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.CaseClientServiceException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
-
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
 @Component
 public class TransformationClient {
@@ -23,21 +18,17 @@ public class TransformationClient {
 
     private final RestTemplate restTemplate;
 
-    private final ServiceResponseParser serviceResponseParser;
-
     public TransformationClient(
-        RestTemplate restTemplate,
-        ServiceResponseParser serviceResponseParser
+        RestTemplate restTemplate
     ) {
         this.restTemplate = restTemplate;
-        this.serviceResponseParser = serviceResponseParser;
     }
 
     public SuccessfulTransformationResponse transformExceptionRecord(
         String baseUrl,
         ExceptionRecord exceptionRecord,
         String s2sToken
-    ) throws CaseClientServiceException {
+    ) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("ServiceAuthorization", s2sToken);
 
@@ -62,11 +53,7 @@ public class TransformationClient {
                 ex
             );
 
-            if (ex.getStatusCode().equals(UNPROCESSABLE_ENTITY) || ex.getStatusCode().equals(BAD_REQUEST)) {
-                serviceResponseParser.tryParseResponseBodyAndThrow(ex);
-            }
-
-            throw new CaseClientServiceException(ex, ex.getResponseBodyAsString());
+            throw ex;
         }
     }
 }
