@@ -820,9 +820,6 @@ class AttachExceptionRecordToExistingCaseTest {
         return getRequestedFor(urlEqualTo(START_EVENT_URL));
     }
 
-    private CallbackRequest exceptionRecordCallbackRequest() {
-        return exceptionRecordCallbackRequest(CASE_REF);
-    }
     private CallbackRequest exceptionRecordCallbackRequestWithPayment() {
         return exceptionRecordCallbackRequest(
             CASE_REF,
@@ -833,6 +830,11 @@ class AttachExceptionRecordToExistingCaseTest {
             true
         );
     }
+
+    private CallbackRequest exceptionRecordCallbackRequest() {
+        return exceptionRecordCallbackRequest(CASE_REF);
+    }
+
     private CallbackRequest exceptionRecordCallbackRequest(String caseReference) {
         return exceptionRecordCallbackRequest(
             caseReference,
