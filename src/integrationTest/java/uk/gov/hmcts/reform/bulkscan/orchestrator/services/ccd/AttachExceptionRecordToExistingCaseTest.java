@@ -56,6 +56,7 @@ import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.willThrow;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
@@ -619,7 +620,11 @@ class AttachExceptionRecordToExistingCaseTest {
             .post(CALLBACK_ATTACH_CASE_PATH)
             .then()
             .statusCode(500)
-            .body("$", equalTo("{}"));
+            .body("timestamp", notNullValue())
+            .body("status", equalTo("500"))
+            .body("error", equalTo("Internal Server"))
+            .body("message", equalTo("Payment failed"))
+            .body("path", equalTo("/callback/attach_case"));
     }
 
     private CallbackRequest attachToCaseRequest(String attachToCaseReference) {
