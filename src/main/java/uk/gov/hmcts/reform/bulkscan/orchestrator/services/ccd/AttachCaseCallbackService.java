@@ -53,8 +53,11 @@ public class AttachCaseCallbackService {
 
     private final CcdApi ccdApi;
 
-    public AttachCaseCallbackService(CcdApi ccdApi) {
+    private final PaymentsProcessor paymentsProcessor;
+
+    public AttachCaseCallbackService(CcdApi ccdApi, PaymentsProcessor paymentsProcessor) {
         this.ccdApi = ccdApi;
+        this.paymentsProcessor = paymentsProcessor;
     }
 
     /**
@@ -86,12 +89,19 @@ public class AttachCaseCallbackService {
         }
         boolean useSearchCaseReference = isSearchCaseReferenceTypePresent(exceptionRecord);
 
-        return getValidation(exceptionRecord, useSearchCaseReference, requesterIdamToken, requesterUserId)
+        Either<List<String>, Map<String, Object>> result = getValidation(exceptionRecord, useSearchCaseReference, requesterIdamToken, requesterUserId)
             .map(this::tryAttachToCase)
             .map(attachCaseResult ->
                 attachCaseResult.map(modifiedFields -> mergeCaseFields(exceptionRecord.getData(), modifiedFields))
             )
             .getOrElseGet(errors -> Either.left(errors.toJavaList()));
+
+        if (result.isRight()) {
+            String targetCaseCcdId = (String) result.get().get(ATTACH_TO_CASE_REFERENCE);
+            paymentsProcessor.updatePayments(exceptionRecord, Long.valueOf(targetCaseCcdId));
+        }
+
+        return result;
     }
 
     private Validation<Seq<String>, AttachToCaseEventData> getValidation(
@@ -264,17 +274,19 @@ public class AttachCaseCallbackService {
 
         StartEventResponse event = ccdApi.startAttachScannedDocs(theCase, idamToken, userId);
 
+        Map<String, Object> newCaseData = buildCaseData(newCaseDocuments, targetCaseDocuments);
+
         ccdApi.attachExceptionRecord(
             theCase,
             idamToken,
             userId,
-            buildCaseData(newCaseDocuments, targetCaseDocuments),
+            newCaseData,
             createEventSummary(theCase, exceptionRecordId, newCaseDocuments),
             event
         );
 
-        log.info("Attached exception record '{}' to case with CCD ID '{}'", exceptionRecordId, targetCaseCcdRef);
     }
+
 
     private Map<String, Object> buildCaseData(
         List<Map<String, Object>> exceptionDocuments,
