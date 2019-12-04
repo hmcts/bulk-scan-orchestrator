@@ -621,7 +621,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .then()
             .statusCode(500)
             .body("timestamp", notNullValue())
-            .body("status", equalTo("500"))
+            .body("status", equalTo(500))
             .body("error", equalTo("Internal Server"))
             .body("message", equalTo("Payment failed"))
             .body("path", equalTo("/callback/attach_case"));
