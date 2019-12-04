@@ -4,13 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 
 import java.io.IOException;
 
 @Component
 public class ServiceResponseParser {
 
-    protected final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     protected ServiceResponseParser(
         ObjectMapper objectMapper
@@ -18,16 +19,16 @@ public class ServiceResponseParser {
         this.objectMapper = objectMapper;
     }
 
-    public void tryParseResponseBodyAndThrow(HttpStatusCodeException exception) throws CaseClientServiceException {
+    public ClientServiceErrorResponse parseResponseBody(HttpStatusCodeException exception) {
         try {
             ClientServiceErrorResponse errorResponse = objectMapper.readValue(
                 exception.getResponseBodyAsByteArray(),
                 ClientServiceErrorResponse.class
             );
 
-            throw new InvalidCaseDataException(exception, errorResponse);
+            return errorResponse;
         } catch (IOException ioException) {
-            throw new CaseClientServiceException(exception, ioException.getMessage());
+            throw new CallbackException("Failed to parse response", ioException);
         }
     }
 }

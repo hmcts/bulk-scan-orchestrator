@@ -144,21 +144,59 @@ class CreateCaseCallbackTest {
 
         postWithBody(getRequestBody("valid-exception.json"))
             .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
-            .body("message", equalTo("Failed to create new case"));
+            // 1539007368674134 is from valid-exception.json
+            .body("message", equalTo("Failed to create new case for exception record with Id 1539007368674134"));
     }
 
     @ParameterizedTest
     @EnumSource(
         value = HttpStatus.class,
-        names = {"BAD_REQUEST", "UNPROCESSABLE_ENTITY", "INTERNAL_SERVER_ERROR"}
+        names = {"BAD_REQUEST"}
     )
-    void should_respond_with_relevant_error_when_transformation_call_is_failing(HttpStatus responseStatus) {
+    void should_respond_with_relevant_error_when_transformation_call_is_failing_with_bad_request(
+        HttpStatus responseStatus
+    ) {
         setUpFailingTransformation(responseStatus);
         setUpCcdSearchResult(getCcdResponseBody("search-result-empty.json"));
 
         postWithBody(getRequestBody("valid-exception.json"))
             .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
-            .body("message", equalTo("Failed to create new case"));
+            // 1539007368674134 is from valid-exception.json
+            .body("message", equalTo("Failed to transform exception record with Id 1539007368674134"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        value = HttpStatus.class,
+        names = {"UNPROCESSABLE_ENTITY"}
+    )
+    void should_respond_with_relevant_error_when_transformation_call_is_failing_with_unprocessable_entity(
+        HttpStatus responseStatus
+    ) {
+        setUpFailingTransformation(responseStatus);
+        setUpCcdSearchResult(getCcdResponseBody("search-result-empty.json"));
+
+        postWithBody(getRequestBody("valid-exception.json"))
+            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+            // 1539007368674134 is from valid-exception.json
+            .body("message", equalTo("Failed to parse response"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        value = HttpStatus.class,
+        names = {"INTERNAL_SERVER_ERROR"}
+    )
+    void should_respond_with_relevant_error_when_transformation_call_is_failing_with_internal_server_error(
+        HttpStatus responseStatus
+    ) {
+        setUpFailingTransformation(responseStatus);
+        setUpCcdSearchResult(getCcdResponseBody("search-result-empty.json"));
+
+        postWithBody(getRequestBody("valid-exception.json"))
+            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+            // 1539007368674134 is from valid-exception.json
+            .body("message", equalTo("Failed to create new case for exception record with Id 1539007368674134"));
     }
 
     @ParameterizedTest
@@ -177,7 +215,8 @@ class CreateCaseCallbackTest {
         if (responseStatus.equals(HttpStatus.BAD_REQUEST)) {
             postWithBody(getRequestBody("valid-exception.json"))
                 .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .body("message", equalTo("Failed to transform exception record"));
+                // 1539007368674134 is from valid-exception.json
+                .body("message", equalTo("Failed to transform exception record with Id 1539007368674134"));
         } else {
             postWithBody(getRequestBody("valid-exception.json"))
                 .statusCode(OK.value())

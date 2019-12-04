@@ -7,8 +7,11 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.CaseClientServiceException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.InvalidCaseDataException;
+import org.springframework.web.client.HttpClientErrorException.BadRequest;
+import org.springframework.web.client.HttpClientErrorException.Forbidden;
+import org.springframework.web.client.HttpClientErrorException.Unauthorized;
+import org.springframework.web.client.HttpClientErrorException.UnprocessableEntity;
+import org.springframework.web.client.HttpServerErrorException.InternalServerError;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
@@ -81,7 +84,7 @@ public class TransformationClientTest {
     }
 
     @Test
-    public void should_throw_invalid_data_exception_for_unprocessable_entity_response() throws Exception {
+    public void should_throw_unprocessable_entity_exception_for_unprocessable_entity_response() throws Exception {
         // given
         String s2sToken = randomUUID().toString();
         stubFor(
@@ -90,16 +93,16 @@ public class TransformationClientTest {
                 .willReturn(aResponse().withBody(errorResponse().toString()).withStatus(UNPROCESSABLE_ENTITY.value())));
 
         // when
-        InvalidCaseDataException exception = catchThrowableOfType(
+        UnprocessableEntity exception = catchThrowableOfType(
             () -> client.transformExceptionRecord(url(), exceptionRecordRequestData(), s2sToken),
-            InvalidCaseDataException.class
+            UnprocessableEntity.class
         );
 
         // then
-        assertThat(exception.getStatus()).isEqualTo(UNPROCESSABLE_ENTITY);
-        assertThat(exception.getResponse()).isNotNull();
-        assertThat(exception.getResponse().errors).isNotEmpty();
-        assertThat(exception.getResponse().warnings).isNotEmpty();
+        assertThat(exception.getMessage()).isEqualTo("422 Unprocessable Entity");
+        assertThat(exception.getStatusCode()).isEqualTo(UNPROCESSABLE_ENTITY);
+        assertThat(exception.getResponseBodyAsString())
+            .isEqualTo("{\"warnings\":[\"field2 is missing\"],\"errors\":[\"field1 is missing\"]}");
     }
 
     @Test
@@ -112,16 +115,14 @@ public class TransformationClientTest {
                 .willReturn(aResponse().withBody(invalidDataResponse().toString()).withStatus(BAD_REQUEST.value())));
 
         // when
-        InvalidCaseDataException exception = catchThrowableOfType(
+        BadRequest exception = catchThrowableOfType(
             () -> client.transformExceptionRecord(url(), exceptionRecordRequestData(), s2sToken),
-            InvalidCaseDataException.class
+            BadRequest.class
         );
 
         // then
-        assertThat(exception.getStatus()).isEqualTo(BAD_REQUEST);
-        assertThat(exception.getResponse()).isNotNull();
-        assertThat(exception.getResponse().errors).isNotEmpty();
-        assertThat(exception.getResponse().warnings).isNull();
+        assertThat(exception.getStatusCode()).isEqualTo(BAD_REQUEST);
+        assertThat(exception.getResponseBodyAsString()).isEqualTo("{\"errors\":[\"field1 is missing\"]}");
     }
 
     @Test
@@ -134,15 +135,14 @@ public class TransformationClientTest {
                 .willReturn(aResponse().withBody(new byte[]{}).withStatus(BAD_REQUEST.value())));
 
         // when
-        CaseClientServiceException exception = catchThrowableOfType(
+        BadRequest exception = catchThrowableOfType(
             () -> client.transformExceptionRecord(url(), exceptionRecordRequestData(), s2sToken),
-            CaseClientServiceException.class
+            BadRequest.class
         );
 
         // then
-        assertThat(exception.getStatus()).isEqualTo(BAD_REQUEST);
-        assertThat(exception.getResponse()).contains("No content to map due to end-of-input"); // because byte[]{}
-        assertThat(exception.getResponseRawBody()).isEmpty();
+        assertThat(exception.getStatusCode()).isEqualTo(BAD_REQUEST);
+        assertThat(exception.getResponseBodyAsString()).isEqualTo(""); // because byte[]{}
     }
 
     @Test
@@ -153,14 +153,14 @@ public class TransformationClientTest {
                 .willReturn(forbidden().withBody("Calling service is not authorised")));
 
         // when
-        CaseClientServiceException exception = catchThrowableOfType(
+        Forbidden exception = catchThrowableOfType(
             () -> client.transformExceptionRecord(url(), exceptionRecordRequestData(), randomUUID().toString()),
-            CaseClientServiceException.class
+            Forbidden.class
         );
 
         // then
-        assertThat(exception.getStatus()).isEqualTo(HttpStatus.FORBIDDEN);
-        assertThat(exception.getResponse()).contains("Calling service is not authorised");
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(exception.getResponseBodyAsString()).contains("Calling service is not authorised");
     }
 
     @Test
@@ -171,14 +171,13 @@ public class TransformationClientTest {
                 .willReturn(unauthorized().withBody("Invalid S2S token")));
 
         // when
-        CaseClientServiceException exception = catchThrowableOfType(
+        Unauthorized exception = catchThrowableOfType(
             () -> client.transformExceptionRecord(url(), exceptionRecordRequestData(), randomUUID().toString()),
-            CaseClientServiceException.class
+            Unauthorized.class
         );
 
         // then
-        assertThat(exception.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED);
-        assertThat(exception.getResponse()).contains("Invalid S2S token");
+        assertThat(exception.getResponseBodyAsString()).isEqualTo("Invalid S2S token");
     }
 
     @Test
@@ -189,14 +188,14 @@ public class TransformationClientTest {
                 .willReturn(serverError().withBody("Internal Server error")));
 
         // when
-        CaseClientServiceException exception = catchThrowableOfType(
+        InternalServerError exception = catchThrowableOfType(
             () -> client.transformExceptionRecord(url(), exceptionRecordRequestData(), randomUUID().toString()),
-            CaseClientServiceException.class
+            InternalServerError.class
         );
 
         // then
-        assertThat(exception.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-        assertThat(exception.getResponse()).contains("Internal Server error");
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(exception.getResponseBodyAsString()).contains("Internal Server error");
     }
 
     private String url() {
