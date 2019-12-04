@@ -19,8 +19,11 @@ import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.server.LocalServerPort;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.IPaymentsPublisher;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -51,6 +54,8 @@ import static java.util.stream.Collectors.toSet;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.willThrow;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_SUBMIT_URL;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_BULK_SCAN;
@@ -120,6 +125,9 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @LocalServerPort
     private int applicationPort;
+
+    @Autowired
+    private IPaymentsPublisher paymentsPublisher;
 
     @BeforeEach
     public void before() throws JsonProcessingException {
@@ -596,6 +604,22 @@ class AttachExceptionRecordToExistingCaseTest {
         );
     }
 
+    @Test
+    public void should_fail_with_the_correct_error_when_payments_fails() {
+        CallbackRequest callbackRequest = exceptionRecordCallbackRequestWithPayment();
+
+        willThrow(new PaymentsPublishingException("Payment failed", new Exception("connection")))
+            .given(paymentsPublisher).send(any());
+
+        given()
+            .body(callbackRequest)
+            .headers(userHeaders())
+            .post(CALLBACK_ATTACH_CASE_PATH)
+            .then()
+            .statusCode(200)
+            .body(RESPONSE_FIELD_ERRORS, hasItem("Payment reference can not be processed. Please try again later"));
+    }
+
     private CallbackRequest attachToCaseRequest(String attachToCaseReference) {
         return attachToCaseRequest(attachToCaseReference, null, null, EXCEPTION_RECORD_DOC);
     }
@@ -611,7 +635,8 @@ class AttachExceptionRecordToExistingCaseTest {
             searchCaseReferenceType,
             searchCaseReference,
             CASE_TYPE_EXCEPTION_RECORD,
-            document
+            document,
+            false
         );
     }
 
@@ -623,7 +648,8 @@ class AttachExceptionRecordToExistingCaseTest {
         Map<String, Object> scannedDocument,
         String attachToCaseReference,
         String searchCaseReferenceType,
-        String searchCaseReference
+        String searchCaseReference,
+        boolean containsPayment
     ) {
         Map<String, Object> exceptionData =
             Maps.newHashMap("scannedDocuments", ImmutableList.of(scannedDocument));
@@ -638,6 +664,10 @@ class AttachExceptionRecordToExistingCaseTest {
 
         if (searchCaseReference != null) {
             exceptionData.put("searchCaseReference", searchCaseReference);
+        }
+
+        if (containsPayment) {
+            exceptionData.put("containsPayments", "Yes");
         }
 
         exceptionData.put("journeyClassification", "SUPPLEMENTARY_EVIDENCE");
@@ -715,7 +745,8 @@ class AttachExceptionRecordToExistingCaseTest {
             null,
             null,
             CASE_TYPE_EXCEPTION_RECORD,
-            EXCEPTION_RECORD_DOC
+            EXCEPTION_RECORD_DOC,
+            false
         );
     }
 
@@ -724,7 +755,8 @@ class AttachExceptionRecordToExistingCaseTest {
         String searchCaseReferenceType,
         String searchCaseReference,
         String caseTypeId,
-        Map<String, Object> document
+        Map<String, Object> document,
+        boolean containsPayment
     ) {
         return CaseDetails.builder()
             .jurisdiction(JURISDICTION)
@@ -735,7 +767,8 @@ class AttachExceptionRecordToExistingCaseTest {
                     document,
                     attachToCaseReference,
                     searchCaseReferenceType,
-                    searchCaseReference
+                    searchCaseReference,
+                    containsPayment
                 )
             ).build();
     }
@@ -787,14 +820,24 @@ class AttachExceptionRecordToExistingCaseTest {
     private CallbackRequest exceptionRecordCallbackRequest() {
         return exceptionRecordCallbackRequest(CASE_REF);
     }
-
+    private CallbackRequest exceptionRecordCallbackRequestWithPayment() {
+        return exceptionRecordCallbackRequest(
+            CASE_REF,
+            null,
+            null,
+            CASE_TYPE_EXCEPTION_RECORD,
+            EXCEPTION_RECORD_DOC,
+            true
+        );
+    }
     private CallbackRequest exceptionRecordCallbackRequest(String caseReference) {
         return exceptionRecordCallbackRequest(
             caseReference,
             null,
             null,
             CASE_TYPE_EXCEPTION_RECORD,
-            EXCEPTION_RECORD_DOC
+            EXCEPTION_RECORD_DOC,
+            false
         );
     }
 
@@ -809,7 +852,8 @@ class AttachExceptionRecordToExistingCaseTest {
             searchCaseReferenceType,
             searchCaseReference,
             caseTypeId,
-            EXCEPTION_RECORD_DOC
+            EXCEPTION_RECORD_DOC,
+            false
         );
     }
 
@@ -818,7 +862,8 @@ class AttachExceptionRecordToExistingCaseTest {
         String searchCaseReferenceType,
         String searchCaseReference,
         String caseTypeId,
-        Map<String, Object> document
+        Map<String, Object> document,
+        boolean containsPayment
     ) {
         return CallbackRequest
             .builder()
@@ -828,7 +873,8 @@ class AttachExceptionRecordToExistingCaseTest {
                     searchCaseReferenceType,
                     searchCaseReference,
                     caseTypeId,
-                    document
+                    document,
+                    containsPayment
                 )
             )
             .eventId("attachToExistingCase")
