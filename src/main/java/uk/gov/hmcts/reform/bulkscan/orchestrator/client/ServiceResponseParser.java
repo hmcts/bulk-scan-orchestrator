@@ -11,7 +11,7 @@ import java.io.IOException;
 @Component
 public class ServiceResponseParser {
 
-    protected final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     protected ServiceResponseParser(
         ObjectMapper objectMapper
@@ -28,9 +28,7 @@ public class ServiceResponseParser {
 
             return errorResponse;
         } catch (IOException ioException) {
-            CaseClientServiceException clientException =
-                new CaseClientServiceException(exception, ioException.getMessage());
-            throw new CallbackException("Failed to parse response", clientException);
+            throw new CallbackException("Failed to parse response", ioException);
         }
     }
 }

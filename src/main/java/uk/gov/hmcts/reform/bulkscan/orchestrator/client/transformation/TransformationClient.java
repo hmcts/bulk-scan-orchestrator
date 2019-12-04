@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
@@ -39,21 +38,10 @@ public class TransformationClient {
                 .build()
                 .toString();
 
-        try {
-            return restTemplate.postForObject(
-                url,
-                new HttpEntity<>(exceptionRecord, headers),
-                SuccessfulTransformationResponse.class
-            );
-        } catch (HttpStatusCodeException ex) {
-            log.error(
-                "Failed to transform Exception Record to case data for case type {} and id {}",
-                exceptionRecord.caseTypeId,
-                exceptionRecord.id,
-                ex
-            );
-
-            throw ex;
-        }
+        return restTemplate.postForObject(
+            url,
+            new HttpEntity<>(exceptionRecord, headers),
+            SuccessfulTransformationResponse.class
+        );
     }
 }

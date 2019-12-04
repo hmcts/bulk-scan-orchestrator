@@ -4,11 +4,9 @@ import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.HttpClientErrorException.BadRequest;
+import org.springframework.web.client.HttpClientErrorException.UnprocessableEntity;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.CaseClientServiceException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.InvalidCaseDataException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
@@ -27,6 +25,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.Map;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
 @Service
@@ -112,18 +111,14 @@ public class CcdNewCaseCreator {
             return new ProcessResult(
                 exceptionRecordFinalizer.finalizeExceptionRecord(exceptionRecordData.getData(), newCaseId)
             );
-        } catch (HttpClientErrorException.BadRequest exception) {
-            ClientServiceErrorResponse errorResponse = serviceResponseParser.parseResponseBody(exception);
-            InvalidCaseDataException clientException =
-                new InvalidCaseDataException(exception, errorResponse);
-            throw new CallbackException("Failed to transform exception record", clientException);
-        } catch (HttpClientErrorException.UnprocessableEntity exception) {
+        } catch (BadRequest exception) {
+            throw new CallbackException(
+                format("Failed to transform exception record with Id %s", exceptionRecord.id),
+                exception
+            );
+        } catch (UnprocessableEntity exception) {
             ClientServiceErrorResponse errorResponse = serviceResponseParser.parseResponseBody(exception);
             return new ProcessResult(errorResponse.warnings, errorResponse.errors);
-        } catch (HttpStatusCodeException ex) {
-            CaseClientServiceException clientException =
-                new CaseClientServiceException(ex, ex.getResponseBodyAsString());
-            throw new CallbackException("Failed to create new case", clientException);
         } catch (PaymentsPublishingException exception) {
             log.error(
                 "Failed to send update to payment processor for {} exception record {}",
@@ -135,7 +130,10 @@ public class CcdNewCaseCreator {
             throw new CallbackException("Payment references cannot be processed. Please try again later", exception);
         } catch (Exception exception) {
             // log happens individually to cover transformation/ccd cases
-            throw new CallbackException("Failed to create new case", exception);
+            throw new CallbackException(
+                format("Failed to create new case for exception record with Id %s", exceptionRecord.id),
+                exception
+            );
         }
     }
 
