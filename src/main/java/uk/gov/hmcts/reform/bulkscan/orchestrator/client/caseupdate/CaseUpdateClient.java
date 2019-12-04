@@ -16,9 +16,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.respons
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
-
 @Component
 public class CaseUpdateClient {
 
@@ -71,11 +68,7 @@ public class CaseUpdateClient {
                 ex
             );
 
-            if (ex.getStatusCode().equals(UNPROCESSABLE_ENTITY) || ex.getStatusCode().equals(BAD_REQUEST)) {
-                serviceResponseParser.tryParseResponseBodyAndThrow(ex);
-            }
-
-            throw new CaseClientServiceException(ex, ex.getResponseBodyAsString());
+            throw ex;
         }
     }
 }

@@ -7,12 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito.BDDMyOngoingStubbing;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.client.HttpClientErrorException;
-import sun.nio.cs.ext.ISO_8859_11;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.InvalidCaseDataException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.CaseUpdateClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.CaseUpdateDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
@@ -51,6 +47,9 @@ class CcdCaseUpdaterTest {
     private CaseUpdateClient caseUpdateClient;
 
     @Mock
+    private ServiceResponseParser serviceResponseParser;
+
+    @Mock
     private AuthTokenGenerator authTokenGenerator;
 
     @Mock
@@ -85,6 +84,7 @@ class CcdCaseUpdaterTest {
     void setUp() {
         ccdCaseUpdater = new CcdCaseUpdater(
             caseUpdateClient,
+            serviceResponseParser,
             authTokenGenerator,
             coreCaseDataApi,
             exceptionRecordFinalizer
@@ -222,43 +222,8 @@ class CcdCaseUpdaterTest {
         );
 
         // then
-        assertThat(callbackException.getMessage()).isEqualTo("Failed to update case");
-    }
-
-    @Test
-    void updateCase_should_handle_invalid_case_data_exception() throws Exception {
-        // given
-        noWarningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
-        given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
-            .willReturn(noWarningsUpdateResponse);
-        initMockData();
-        prepareMockForSubmissionForCaseWorker().willThrow(new InvalidCaseDataException(
-            HttpClientErrorException.create(
-                HttpStatus.BAD_REQUEST,
-                "",
-                HttpHeaders.EMPTY,
-                "".getBytes(),
-                new ISO_8859_11()
-            ),
-            clientServiceErrorResponse));
-
-        // when
-        CallbackException callbackException = catchThrowableOfType(() ->
-                ccdCaseUpdater.updateCase(
-                    exceptionRecord,
-                    configItem,
-                    true,
-                    "idamToken",
-                    "userId",
-                    existingCase
-                ),
-            CallbackException.class
-        );
-
-        // then
         assertThat(callbackException.getMessage())
-            .isEqualTo("Case Update API returned an error response with status 400 BAD_REQUEST "
-                + "from service Service when updating case with case ID 1 based on exception record ref 1");
+            .isEqualTo("Failed to update case for Service service with case Id 1 based on exception record 1");
     }
 
     @Test
@@ -284,7 +249,8 @@ class CcdCaseUpdaterTest {
         );
 
         // then
-        assertThat(callbackException.getMessage()).isEqualTo("Failed to update case");
+        assertThat(callbackException.getMessage())
+            .isEqualTo("Failed to update case for Service service with case Id 1 based on exception record 1");
     }
 
     private BDDMyOngoingStubbing<CaseDetails> prepareMockForSubmissionForCaseWorker() {

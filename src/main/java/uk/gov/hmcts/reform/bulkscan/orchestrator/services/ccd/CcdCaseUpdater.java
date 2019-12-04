@@ -4,14 +4,16 @@ import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException.BadRequest;
+import org.springframework.web.client.HttpClientErrorException.UnprocessableEntity;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.CaseClientServiceException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.InvalidCaseDataException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.UnprocessableEntityException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.CaseUpdateClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.CaseUpdateDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
@@ -29,17 +31,19 @@ public class CcdCaseUpdater {
     private static final Logger log = LoggerFactory.getLogger(CcdCaseUpdater.class);
 
     private final CaseUpdateClient caseUpdateClient;
+    private final ServiceResponseParser serviceResponseParser;
     private final AuthTokenGenerator s2sTokenGenerator;
     private final CoreCaseDataApi coreCaseDataApi;
     private final ExceptionRecordFinalizer exceptionRecordFinalizer;
 
     public CcdCaseUpdater(
         CaseUpdateClient caseUpdateClient,
-        AuthTokenGenerator s2sTokenGenerator,
+        ServiceResponseParser serviceResponseParser, AuthTokenGenerator s2sTokenGenerator,
         CoreCaseDataApi coreCaseDataApi,
         ExceptionRecordFinalizer exceptionRecordFinalizer
     ) {
         this.caseUpdateClient = caseUpdateClient;
+        this.serviceResponseParser = serviceResponseParser;
         this.s2sTokenGenerator = s2sTokenGenerator;
         this.coreCaseDataApi = coreCaseDataApi;
         this.exceptionRecordFinalizer = exceptionRecordFinalizer;
@@ -55,7 +59,7 @@ public class CcdCaseUpdater {
         CaseDetails existingCase
     ) {
         log.info(
-            "Start updating case for service {} with case ID {} from exception record {}",
+            "Start updating case for service {} with case Id {} from exception record {}",
             configItem.getService(),
             existingCase.getId(),
             exceptionRecord.id
@@ -68,7 +72,7 @@ public class CcdCaseUpdater {
                 getUpdatedCaseFromService(exceptionRecord, configItem, existingCase, s2sToken);
 
             log.info(
-                "Successfully called case update endpoint of service {} to update case with case ID {} "
+                "Successfully called case update endpoint of service {} to update case with case Id {} "
                     + "based on exception record ref {}",
                 configItem.getService(),
                 existingCase.getId(),
@@ -94,22 +98,30 @@ public class CcdCaseUpdater {
                     exceptionRecordFinalizer.finalizeExceptionRecord(existingCase.getData(), existingCase.getId())
                 );
             }
-        } catch (InvalidCaseDataException exception) {
+        } catch (BadRequest exception) {
             throw new CallbackException(
                 format(
-                    "Case Update API returned an error response with status %s from service %s "
-                        + "when updating case with case ID %s based on exception record ref %s",
-                    exception.getStatus(),
+                    "Failed to call %s service Case Update API to update case with case Id %s "
+                        + "based on exception record %s",
                     configItem.getService(),
                     existingCase.getId(),
                     exceptionRecord.id
                 ),
                 exception
             );
-        } catch (UnprocessableEntityException exception) {
-            return new ProcessResult(exception.getResponse().warnings, exception.getResponse().errors);
+        } catch (UnprocessableEntity exception) {
+            ClientServiceErrorResponse errorResponse = serviceResponseParser.parseResponseBody(exception);
+            return new ProcessResult(errorResponse.warnings, errorResponse.errors);
         } catch (Exception exception) {
-            throw new CallbackException("Failed to update case", exception);
+            throw new CallbackException(
+                format(
+                    "Failed to update case for %s service with case Id %s based on exception record %s",
+                    configItem.getService(),
+                    existingCase.getId(),
+                    exceptionRecord.id
+                ),
+                exception
+            );
         }
     }
 
@@ -160,14 +172,14 @@ public class CcdCaseUpdater {
             );
 
             log.info(
-                "Successfully updated case for service {} with case ID {} based on exception record ref {}",
+                "Successfully updated case for service {} with case Id {} based on exception record ref {}",
                 service,
                 existingCase.getId(),
                 exceptionRecord.id
             );
         } catch (FeignException exception) {
             log.error(
-                "Failed to update case for {} jurisdiction with case ID {} from exception record {}. "
+                "Failed to update case for {} jurisdiction with case Id {} based on exception record with Id {}. "
                     + "Service response: {}",
                 exceptionRecord.poBoxJurisdiction,
                 existingCase.getId(),
@@ -179,7 +191,7 @@ public class CcdCaseUpdater {
             throw exception;
         } catch (Exception exception) {
             log.error(
-                "Failed to update case for {} jurisdiction with case ID {} from exception record {}",
+                "Failed to update case for {} jurisdiction with case Id {} based on exception record with Id {}",
                 exceptionRecord.poBoxJurisdiction,
                 existingCase.getId(),
                 exceptionRecord.id,
@@ -213,10 +225,10 @@ public class CcdCaseUpdater {
         return Event
             .builder()
             .id(eventResponse.getEventId())
-            .summary(format("Case updated, case ID %s", existingCase.getId()))
+            .summary(format("Case updated, case Id %s", existingCase.getId()))
             .description(
                 format(
-                    "Case with case ID %s updated based on exception record ref %s",
+                    "Case with case Id %s updated based on exception record ref %s",
                     existingCase.getId(),
                     exceptionRecord.id
                 )
