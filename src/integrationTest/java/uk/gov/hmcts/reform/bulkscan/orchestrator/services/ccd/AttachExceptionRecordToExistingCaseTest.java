@@ -59,6 +59,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.doNothing;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_SUBMIT_URL;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_BULK_SCAN;
@@ -605,6 +606,24 @@ class AttachExceptionRecordToExistingCaseTest {
                     hasItem("The 'attach to case' event is not supported for supplementary evidence with OCR "
                         + "but not containing OCR data")
         );
+    }
+
+    @Test
+    public void should_callback_with_correct_information_when_attaching_by_attachToCaseReference_with_payment() {
+        CallbackRequest callbackRequest = exceptionRecordCallbackRequestWithPayment();
+
+        doNothing().when(paymentsPublisher).send(any());
+
+        ValidatableResponse response =
+            given()
+                .body(callbackRequest)
+                .headers(userHeaders())
+                .post(CALLBACK_ATTACH_CASE_PATH)
+                .then()
+                .statusCode(200);
+
+        verifySuccessResponse(response, callbackRequest);
+        verifyRequestedAttachingToCase();
     }
 
     @Test
