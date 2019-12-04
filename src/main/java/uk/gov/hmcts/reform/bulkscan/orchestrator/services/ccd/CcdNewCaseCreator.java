@@ -86,11 +86,6 @@ public class CcdNewCaseCreator {
                 exceptionRecord.id
             );
 
-            checkBulkScanReferenceIsSet(
-                (Map<String, ?>) transformationResponse.caseCreationDetails.caseData,
-                exceptionRecord.id
-            );
-
             long newCaseId = createNewCaseInCcd(
                 idamToken,
                 s2sToken,
@@ -159,7 +154,9 @@ public class CcdNewCaseCreator {
                 CaseDataContent
                     .builder()
                     .caseReference(exceptionRecord.id)
-                    .data(caseCreationDetails.caseData)
+                    .data(caseDataWithExceptionRecordId(
+                        caseCreationDetails.caseData, exceptionRecord.id
+                    )) // set bulk scan case reference
                     .event(Event
                         .builder()
                         .id(eventResponse.getEventId())
@@ -192,19 +189,10 @@ public class CcdNewCaseCreator {
         }
     }
 
-    private void checkBulkScanReferenceIsSet(Map<String, ?> caseData, String exceptionRecordId) {
-        if (!caseData.containsKey(EXCEPTION_RECORD_REFERENCE)) {
-            log.error(
-                "Transformation did not set '{}' with exception record id {}",
-                EXCEPTION_RECORD_REFERENCE,
-                exceptionRecordId
-            );
-        } else if (!caseData.get(EXCEPTION_RECORD_REFERENCE).equals(exceptionRecordId)) {
-            log.error(
-                "Transformation did not set exception record reference correctly. Actual: {}, expected: {}",
-                caseData.get(EXCEPTION_RECORD_REFERENCE),
-                exceptionRecordId
-            );
-        }
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> caseDataWithExceptionRecordId(Object caseData, String exceptionRecordId) {
+        Map<String, Object> data = (Map<String, Object>) caseData;
+        data.put(EXCEPTION_RECORD_REFERENCE, exceptionRecordId);
+        return data;
     }
 }

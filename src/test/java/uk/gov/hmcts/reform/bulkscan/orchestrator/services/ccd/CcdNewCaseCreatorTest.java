@@ -31,7 +31,6 @@ import java.util.Map;
 
 import static java.time.LocalDateTime.now;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -90,13 +89,13 @@ class CcdNewCaseCreatorTest {
     @Test
     void should_call_payments_handler_when_case_has_payments() throws Exception {
         // given
-        given(transformationClient.transformExceptionRecord(any(),any(), any()))
+        given(transformationClient.transformExceptionRecord(any(), any(), any()))
             .willReturn(
                 new SuccessfulTransformationResponse(
                     new CaseCreationDetails(
                         "some_case_type",
                         "some_event_id",
-                        emptyMap()
+                        basicCaseData()
                     ),
                     emptyList()
                 )
@@ -117,23 +116,7 @@ class CcdNewCaseCreatorTest {
         ServiceConfigItem configItem = getConfigItem();
         ExceptionRecord exceptionRecord = getExceptionRecord();
 
-        Map<String, Object> data = new HashMap<>();
-
-        String envelopeId = "987";
-        String jurisdiction = "sample jurisdiction";
-
-        data.put("poBox", "12345");
-        data.put("journeyClassification", EXCEPTION.name());
-        data.put("formType", "A1");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
-        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
-        data.put(ExceptionRecordFields.CONTAINS_PAYMENTS, YesNoFieldValues.YES);
-        data.put(ExceptionRecordFields.ENVELOPE_ID, envelopeId);
-        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, jurisdiction);
-
-        CaseDetails caseDetails = getCaseDetails(data);
+        CaseDetails caseDetails = getCaseDetails(basicCaseData());
 
         // when
         ProcessResult result =
@@ -163,7 +146,7 @@ class CcdNewCaseCreatorTest {
                     new CaseCreationDetails(
                         "some_case_type",
                         "some_event_id",
-                        emptyMap()
+                        basicCaseData()
                     ),
                     emptyList()
                 )
@@ -275,7 +258,7 @@ class CcdNewCaseCreatorTest {
         given(transformationClient.transformExceptionRecord(any(), any(), any()))
             .willReturn(
                 new SuccessfulTransformationResponse(
-                    new CaseCreationDetails("some_case_type", "some_event_id", emptyMap()),
+                    new CaseCreationDetails("some_case_type", "some_event_id", basicCaseData()),
                     emptyList()
                 )
             );
