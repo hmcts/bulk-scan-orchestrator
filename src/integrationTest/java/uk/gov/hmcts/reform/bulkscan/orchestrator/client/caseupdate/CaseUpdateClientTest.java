@@ -131,7 +131,7 @@ public class CaseUpdateClientTest {
         stubFor(
             post(urlPathMatching(UPDATE_CASE_URL))
                 .withHeader("ServiceAuthorization", equalTo(s2sToken))
-                .willReturn(aResponse().withBody(new byte[]{}).withStatus(400)));
+                .willReturn(aResponse().withBody("bad response".getBytes()).withStatus(400)));
 
         // when
         BadRequest exception = catchThrowableOfType(
@@ -141,7 +141,7 @@ public class CaseUpdateClientTest {
 
         // then
         assertThat(exception.getStatusCode()).isEqualTo(BAD_REQUEST);
-        assertThat(exception.getResponseBodyAsString()).isEqualTo(""); // because byte[]{}
+        assertThat(exception.getResponseBodyAsString()).isEqualTo("bad response"); // because byte[]{}
     }
 
     @Test
