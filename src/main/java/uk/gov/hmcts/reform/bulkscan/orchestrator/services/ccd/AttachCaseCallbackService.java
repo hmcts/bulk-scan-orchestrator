@@ -49,6 +49,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 public class AttachCaseCallbackService {
 
     public static final String INTERNAL_ERROR_MSG = "An error occurred";
+    public static final String PAYMENT_ERROR_MSG = "Payment reference can not be processed. Please try again later";
 
     private static final Logger log = LoggerFactory.getLogger(AttachCaseCallbackService.class);
 
@@ -176,7 +177,7 @@ public class AttachCaseCallbackService {
                 exceptionRecord.getId(),
                 exception
             );
-            return Either.left(singletonList(INTERNAL_ERROR_MSG));
+            return Either.left(singletonList(PAYMENT_ERROR_MSG));
         }catch (Exception exc) {
             log.error(
                 "Error attaching ER {} in {} to case {}",
