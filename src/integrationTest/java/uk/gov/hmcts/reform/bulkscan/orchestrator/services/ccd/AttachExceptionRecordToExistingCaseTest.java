@@ -54,6 +54,7 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.willThrow;
@@ -617,8 +618,8 @@ class AttachExceptionRecordToExistingCaseTest {
             .headers(userHeaders())
             .post(CALLBACK_ATTACH_CASE_PATH)
             .then()
-            .statusCode(200)
-            .body(RESPONSE_FIELD_ERRORS, hasItem("Payment reference can not be processed. Please try again later"));
+            .statusCode(500)
+            .body("$", equalTo("{}"));
     }
 
     private CallbackRequest attachToCaseRequest(String attachToCaseReference) {

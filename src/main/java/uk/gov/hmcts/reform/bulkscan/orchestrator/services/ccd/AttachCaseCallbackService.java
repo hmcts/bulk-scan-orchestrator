@@ -170,14 +170,6 @@ public class AttachCaseCallbackService {
             );
             return Either.left(singletonList(exc.getMessage()));
 
-        } catch (PaymentsPublishingException exception) {
-            log.error(
-                "Failed to send update to payment processor for {} exception record {}",
-                event.exceptionRecordJurisdiction,
-                exceptionRecord.getId(),
-                exception
-            );
-            return Either.left(singletonList(PAYMENT_ERROR_MSG));
         } catch (Exception exc) {
             log.error(
                 "Error attaching ER {} in {} to case {}",
