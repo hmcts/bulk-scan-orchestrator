@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException.BadRequest;
 import org.springframework.web.client.HttpClientErrorException.UnprocessableEntity;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.CaseClientServiceException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.CaseUpdateClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.CaseUpdateDetails;
@@ -38,7 +37,8 @@ public class CcdCaseUpdater {
 
     public CcdCaseUpdater(
         CaseUpdateClient caseUpdateClient,
-        ServiceResponseParser serviceResponseParser, AuthTokenGenerator s2sTokenGenerator,
+        ServiceResponseParser serviceResponseParser,
+        AuthTokenGenerator s2sTokenGenerator,
         CoreCaseDataApi coreCaseDataApi,
         ExceptionRecordFinalizer exceptionRecordFinalizer
     ) {
@@ -68,8 +68,12 @@ public class CcdCaseUpdater {
         try {
             String s2sToken = s2sTokenGenerator.generate();
 
-            SuccessfulUpdateResponse updateResponse =
-                getUpdatedCaseFromService(exceptionRecord, configItem, existingCase, s2sToken);
+            SuccessfulUpdateResponse updateResponse = caseUpdateClient.updateCase(
+                configItem.getUpdateUrl(),
+                existingCase,
+                exceptionRecord,
+                s2sToken
+            );
 
             log.info(
                 "Successfully called case update endpoint of service {} to update case with case Id {} "
@@ -123,20 +127,6 @@ public class CcdCaseUpdater {
                 exception
             );
         }
-    }
-
-    private SuccessfulUpdateResponse getUpdatedCaseFromService(
-        ExceptionRecord exceptionRecord,
-        ServiceConfigItem configItem,
-        CaseDetails existingCase,
-        String s2sToken
-    ) throws CaseClientServiceException {
-        return caseUpdateClient.updateCase(
-            configItem.getUpdateUrl(),
-            existingCase,
-            exceptionRecord,
-            s2sToken
-        );
     }
 
     @SuppressWarnings("squid:S2139") // exception handle + logging
