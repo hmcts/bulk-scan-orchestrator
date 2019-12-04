@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.server.LocalServerPort;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.IPaymentsPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -608,7 +609,7 @@ class AttachExceptionRecordToExistingCaseTest {
     public void should_fail_with_the_correct_error_when_payments_fails() {
         CallbackRequest callbackRequest = exceptionRecordCallbackRequestWithPayment();
 
-        willThrow(new PaymentsPublishingException("Payment failed", new Exception("connection")))
+        willThrow(new PaymentsPublishingException("Payment failed", new RuntimeException("connection")))
             .given(paymentsPublisher).send(any());
 
         given()
@@ -668,6 +669,8 @@ class AttachExceptionRecordToExistingCaseTest {
 
         if (containsPayment) {
             exceptionData.put("containsPayments", "Yes");
+            exceptionData.put(ExceptionRecordFields.ENVELOPE_ID, "21321931312-32121-312112");
+            exceptionData.put(ExceptionRecordFields.PO_BOX_JURISDICTION, "sample jurisdiction");
         }
 
         exceptionData.put("journeyClassification", "SUPPLEMENTARY_EVIDENCE");
