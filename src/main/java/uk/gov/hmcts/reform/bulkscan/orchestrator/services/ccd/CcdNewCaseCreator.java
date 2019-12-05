@@ -81,7 +81,11 @@ public class CcdNewCaseCreator {
             );
 
             if (!ignoreWarnings && !transformationResponse.warnings.isEmpty()) {
-                // do not log warnings
+                log.info(
+                    "Returned warnings after transforming exception record for {} from exception record {}",
+                    configItem.getService(),
+                    exceptionRecord.id
+                );
                 return new ProcessResult(transformationResponse.warnings, emptyList());
             }
 

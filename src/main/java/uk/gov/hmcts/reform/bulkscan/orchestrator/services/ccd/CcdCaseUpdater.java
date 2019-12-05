@@ -49,7 +49,6 @@ public class CcdCaseUpdater {
         this.exceptionRecordFinalizer = exceptionRecordFinalizer;
     }
 
-    @SuppressWarnings({"squid:S2139", "unchecked"}) // squid for exception handle + logging
     public ProcessResult updateCase(
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,
@@ -84,7 +83,13 @@ public class CcdCaseUpdater {
             );
 
             if (!ignoreWarnings && !updateResponse.warnings.isEmpty()) {
-                // do not log warnings
+                log.info(
+                    "Returned warnings after calling case update endpoint of service {} to update case with case Id {} "
+                        + "based on exception record ref {}",
+                    configItem.getService(),
+                    existingCase.getId(),
+                    exceptionRecord.id
+                );
                 return new ProcessResult(updateResponse.warnings, emptyList());
             } else {
                 updateCaseInCcd(
@@ -129,7 +134,6 @@ public class CcdCaseUpdater {
         }
     }
 
-    @SuppressWarnings("squid:S2139") // exception handle + logging
     private void updateCaseInCcd(
         String service,
         boolean ignoreWarnings,
