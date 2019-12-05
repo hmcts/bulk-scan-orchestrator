@@ -99,14 +99,13 @@ public class AttachCaseCallbackService {
 
     }
 
-    private void processPayment(Either<List<String>, Map<String, Object>> result , CaseDetails exceptionRecord){
-      if(result.isRight() && result.get()!=null){
-          Long caseId = Long.valueOf((String) result.get().get(ATTACH_TO_CASE_REFERENCE));
-          log.info("Call update payment processor, caseId {}", caseId);
-          paymentsProcessor.updatePayments(exceptionRecord , caseId);
-      }
+    private void processPayment(Either<List<String>, Map<String, Object>> result, CaseDetails exceptionRecord) {
+        if (result.isRight() && result.get() != null) {
+            Long caseId = Long.valueOf((String) result.get().get(ATTACH_TO_CASE_REFERENCE));
+            log.info("Call update payment processor, caseId {}", caseId);
+            paymentsProcessor.updatePayments(exceptionRecord, caseId);
+        }
     }
-
 
     private Validation<Seq<String>, AttachToCaseEventData> getValidation(
         CaseDetails exceptionRecord,
