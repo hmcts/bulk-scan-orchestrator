@@ -299,7 +299,6 @@ public class AttachCaseCallbackService {
 
         paymentsProcessor.updatePayments(exceptionRecord, theCase.getId());
 
-        log.info("Exception record attached, exception id {}, case id {}",   theCase.getId(), exceptionRecord.getId());
     }
 
     private Map<String, Object> buildCaseData(

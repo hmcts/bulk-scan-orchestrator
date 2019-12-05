@@ -60,10 +60,11 @@ public class PaymentsProcessor {
             );
 
         if (containsPayments) {
+
+            log.info("Contains Payments, send payment update message. ER id: {}", exceptionRecord.getId());
+
             String envelopeId = exceptionRecord.getData().get(ExceptionRecordFields.ENVELOPE_ID).toString();
             String jurisdiction = exceptionRecord.getData().get(ExceptionRecordFields.PO_BOX_JURISDICTION).toString();
-
-            log.info("Sending payment update message. ER id: {}", exceptionRecord.getId());
 
             paymentsPublisher.send(
                 new UpdatePaymentsCommand(
