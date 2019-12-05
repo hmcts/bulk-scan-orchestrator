@@ -99,7 +99,10 @@ public class AttachCaseCallbackService {
 
     }
 
-    private void processPayment(Either<List<String>, Map<String, Object>> attachCaseResult, CaseDetails exceptionRecord) {
+    private void processPayment(
+        Either<List<String>, Map<String, Object>> attachCaseResult,
+        CaseDetails exceptionRecord
+    ) {
         attachCaseResult.forEach(result -> {
             Long caseId = Long.valueOf((String) result.get(ATTACH_TO_CASE_REFERENCE));
             paymentsProcessor.updatePayments(exceptionRecord, caseId);
