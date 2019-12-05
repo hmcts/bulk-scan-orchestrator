@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static java.lang.String.format;
@@ -203,7 +204,7 @@ public class CcdNewCaseCreator {
 
     @SuppressWarnings("unchecked")
     private Map<String, Object> caseDataWithExceptionRecordId(Object caseData, String exceptionRecordId) {
-        Map<String, Object> data = (Map<String, Object>) caseData;
+        Map<String, Object> data = new HashMap((Map<String, Object>) caseData);
         data.put(EXCEPTION_RECORD_REFERENCE, exceptionRecordId);
         return data;
     }
