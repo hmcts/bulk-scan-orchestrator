@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
@@ -49,7 +48,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 public class AttachCaseCallbackService {
 
     public static final String INTERNAL_ERROR_MSG = "An error occurred";
-    public static final String PAYMENT_ERROR_MSG = "Payment reference can not be processed. Please try again later";
 
     private static final Logger log = LoggerFactory.getLogger(AttachCaseCallbackService.class);
 
@@ -92,13 +90,23 @@ public class AttachCaseCallbackService {
         boolean useSearchCaseReference = isSearchCaseReferenceTypePresent(exceptionRecord);
 
         return getValidation(exceptionRecord, useSearchCaseReference, requesterIdamToken, requesterUserId)
-            .map(event -> tryAttachToCase(event, exceptionRecord))
+            .map(this::tryAttachToCase)
             .map(attachCaseResult ->
                 attachCaseResult.map(modifiedFields -> mergeCaseFields(exceptionRecord.getData(), modifiedFields))
             )
+            .peek(result -> processPayment(result, exceptionRecord))
             .getOrElseGet(errors -> Either.left(errors.toJavaList()));
 
     }
+
+    private void processPayment(Either<List<String>, Map<String, Object>> result , CaseDetails exceptionRecord){
+      if(result.isRight() && result.get()!=null){
+          Long caseId = Long.valueOf((String) result.get().get(ATTACH_TO_CASE_REFERENCE));
+          log.info("Call update payment processor, caseId {}", caseId);
+          paymentsProcessor.updatePayments(exceptionRecord , caseId);
+      }
+    }
+
 
     private Validation<Seq<String>, AttachToCaseEventData> getValidation(
         CaseDetails exceptionRecord,
@@ -137,7 +145,7 @@ public class AttachCaseCallbackService {
      *         or the list of errors, in case of errors
      */
     private Either<List<String>, Map<String, Object>> tryAttachToCase(
-        AttachToCaseEventData event, CaseDetails exceptionRecord
+        AttachToCaseEventData event
     ) {
         try {
             log.info(
@@ -147,7 +155,7 @@ public class AttachCaseCallbackService {
                 event.targetCaseRef
             );
 
-            Map<String, Object> result = attachToCase(event, exceptionRecord);
+            Map<String, Object> result = attachToCase(event);
             log.info(
                 "Successfully attached exception record {} to case {}",
                 event.exceptionRecordId,
@@ -170,14 +178,6 @@ public class AttachCaseCallbackService {
             );
             return Either.left(singletonList(exc.getMessage()));
 
-        } catch (PaymentsPublishingException exception) {
-            log.error(
-                "Failed to send update to payment processor for {} exception record {}",
-                event.exceptionRecordJurisdiction,
-                exceptionRecord.getId(),
-                exception
-            );
-            throw exception;
         } catch (Exception exc) {
             log.error(
                 "Error attaching ER {} in {} to case {}",
@@ -190,11 +190,11 @@ public class AttachCaseCallbackService {
         }
     }
 
-    private Map<String, Object> attachToCase(AttachToCaseEventData event, CaseDetails exceptionRecord) {
+    private Map<String, Object> attachToCase(AttachToCaseEventData event) {
         String targetCaseCcdId;
 
         if (EXTERNAL_CASE_REFERENCE.equals(event.targetCaseRefType)) {
-            targetCaseCcdId = attachCaseByLegacyId(event, exceptionRecord);
+            targetCaseCcdId = attachCaseByLegacyId(event);
         } else {
             attachCaseByCcdId(
                 event.exceptionRecordJurisdiction,
@@ -202,8 +202,7 @@ public class AttachCaseCallbackService {
                 event.exceptionRecordDocuments,
                 event.exceptionRecordId,
                 event.idamToken,
-                event.userId,
-                exceptionRecord
+                event.userId
             );
 
             targetCaseCcdId = event.targetCaseRef;
@@ -212,7 +211,7 @@ public class AttachCaseCallbackService {
         return ImmutableMap.of(ATTACH_TO_CASE_REFERENCE, targetCaseCcdId);
     }
 
-    private String attachCaseByLegacyId(AttachToCaseEventData event, CaseDetails exceptionRecord) {
+    private String attachCaseByLegacyId(AttachToCaseEventData event) {
         List<Long> targetCaseCcdIds = ccdApi.getCaseRefsByLegacyId(event.targetCaseRef, event.service);
 
         if (targetCaseCcdIds.size() == 1) {
@@ -231,8 +230,7 @@ public class AttachCaseCallbackService {
                 event.exceptionRecordDocuments,
                 event.exceptionRecordId,
                 event.idamToken,
-                event.userId,
-                exceptionRecord
+                event.userId
             );
 
             return targetCaseCcdId;
@@ -257,8 +255,7 @@ public class AttachCaseCallbackService {
         List<Map<String, Object>> exceptionRecordDocuments,
         Long exceptionRecordId,
         String idamToken,
-        String userId,
-        CaseDetails exceptionRecord
+        String userId
     ) {
         log.info("Attaching exception record '{}' to a case by CCD ID '{}'", exceptionRecordId, targetCaseCcdRef);
 
@@ -281,28 +278,17 @@ public class AttachCaseCallbackService {
 
         StartEventResponse event = ccdApi.startAttachScannedDocs(theCase, idamToken, userId);
 
-        Map<String, Object> newCaseData = buildCaseData(newCaseDocuments, targetCaseDocuments);
-
         ccdApi.attachExceptionRecord(
             theCase,
             idamToken,
             userId,
-            newCaseData,
+            buildCaseData(newCaseDocuments, targetCaseDocuments),
             createEventSummary(theCase, exceptionRecordId, newCaseDocuments),
             event
         );
 
-        log.info(
-            "Successfully attach Exception Record with ID {} to case with id {}",
-            theCase.getId(),
-            exceptionRecord.getId()
-        );
-
-        paymentsProcessor.updatePayments(exceptionRecord, theCase.getId());
-
-        log.info("Exception record attached, exception id {}, case id {}",   theCase.getId(), exceptionRecord.getId());
+        log.info("Attached exception record '{}' to case with CCD ID '{}'", exceptionRecordId, targetCaseCcdRef);
     }
-
 
     private Map<String, Object> buildCaseData(
         List<Map<String, Object>> exceptionDocuments,
