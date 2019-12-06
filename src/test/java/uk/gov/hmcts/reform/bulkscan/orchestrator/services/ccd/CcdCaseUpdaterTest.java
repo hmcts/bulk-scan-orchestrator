@@ -36,10 +36,13 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_UPDATE_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
 @ExtendWith(MockitoExtension.class)
 class CcdCaseUpdaterTest {
+
+    private static final String EXISTING_CASE_ID = "existing_case_id";
 
     private CcdCaseUpdater ccdCaseUpdater;
 
@@ -97,7 +100,6 @@ class CcdCaseUpdaterTest {
         warningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, asList("warning1"));
 
         given(configItem.getService()).willReturn("Service");
-        given(existingCase.getId()).willReturn(1L);
         given(configItem.getUpdateUrl()).willReturn("url");
         given(authTokenGenerator.generate()).willReturn("token");
     }
@@ -107,8 +109,9 @@ class CcdCaseUpdaterTest {
         // given
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
             .willReturn(noWarningsUpdateResponse);
+        initResponseMockData();
         initMockData();
-        prepareMockForSubmissionForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
+        prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
         given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong())).willReturn(originalFields);
 
         // when
@@ -118,7 +121,8 @@ class CcdCaseUpdaterTest {
             true,
             "idamToken",
             "userId",
-            existingCase
+            EXISTING_CASE_ID,
+            EVENT_ID_UPDATE_CASE
         );
 
         // then
@@ -132,8 +136,9 @@ class CcdCaseUpdaterTest {
         // given
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
             .willReturn(noWarningsUpdateResponse);
+        initResponseMockData();
         initMockData();
-        prepareMockForSubmissionForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
+        prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
         given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong())).willReturn(originalFields);
 
         // when
@@ -143,7 +148,8 @@ class CcdCaseUpdaterTest {
             true,
             "idamToken",
             "userId",
-            existingCase
+            EXISTING_CASE_ID,
+            EVENT_ID_UPDATE_CASE
         );
 
         // then
@@ -157,6 +163,7 @@ class CcdCaseUpdaterTest {
         // given
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
             .willReturn(warningsUpdateResponse);
+        initMockData();
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
@@ -165,7 +172,8 @@ class CcdCaseUpdaterTest {
             false,
             "idamToken",
             "userId",
-            existingCase
+            EXISTING_CASE_ID,
+            EVENT_ID_UPDATE_CASE
         );
 
         // then
@@ -179,8 +187,9 @@ class CcdCaseUpdaterTest {
         // given
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
             .willReturn(noWarningsUpdateResponse);
+        initResponseMockData();
         initMockData();
-        prepareMockForSubmissionForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
+        prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
         given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong())).willReturn(originalFields);
 
         // when
@@ -190,7 +199,8 @@ class CcdCaseUpdaterTest {
             false,
             "idamToken",
             "userId",
-            existingCase
+            EXISTING_CASE_ID,
+            EVENT_ID_UPDATE_CASE
         );
 
         // then
@@ -206,7 +216,7 @@ class CcdCaseUpdaterTest {
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
             .willReturn(noWarningsUpdateResponse);
         initMockData();
-        prepareMockForSubmissionForCaseWorker().willThrow(new FeignException.BadRequest("Msg", "Body".getBytes()));
+        prepareMockForSubmissionEventForCaseWorker().willThrow(new FeignException.BadRequest("Msg", "Body".getBytes()));
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -216,24 +226,22 @@ class CcdCaseUpdaterTest {
                     true,
                     "idamToken",
                     "userId",
-                    existingCase
+                    EXISTING_CASE_ID,
+                    EVENT_ID_UPDATE_CASE
                 ),
             CallbackException.class
         );
 
         // then
         assertThat(callbackException.getMessage())
-            .isEqualTo("Failed to update case for Service service with case Id 1 based on exception record 1");
+            .isEqualTo("Failed to update case for Service service with case Id existing_case_id "
+                + "based on exception record 1");
     }
 
     @Test
     void updateCase_should_handle_exception() throws Exception {
         // given
         noWarningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
-        given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
-            .willReturn(noWarningsUpdateResponse);
-        initMockData();
-        prepareMockForSubmissionForCaseWorker().willThrow(new RuntimeException("Msg"));
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -243,17 +251,19 @@ class CcdCaseUpdaterTest {
                     true,
                     "idamToken",
                     "userId",
-                    existingCase
+                    EXISTING_CASE_ID,
+                    EVENT_ID_UPDATE_CASE
                 ),
             CallbackException.class
         );
 
         // then
         assertThat(callbackException.getMessage())
-            .isEqualTo("Failed to update case for Service service with case Id 1 based on exception record 1");
+            .isEqualTo("Failed to update case for Service service with case Id existing_case_id "
+                + "based on exception record 1");
     }
 
-    private BDDMyOngoingStubbing<CaseDetails> prepareMockForSubmissionForCaseWorker() {
+    private BDDMyOngoingStubbing<CaseDetails> prepareMockForSubmissionEventForCaseWorker() {
         return given(coreCaseDataApi.submitForCaseworker(
             anyString(),
             anyString(),
@@ -266,10 +276,9 @@ class CcdCaseUpdaterTest {
     }
 
     private void initMockData() {
-        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
-        given(eventResponse.getEventId()).willReturn("eventId");
-        given(eventResponse.getToken()).willReturn("token");
-        given(coreCaseDataApi.startForCaseworker(
+        given(eventResponse.getCaseDetails()).willReturn(existingCase);
+        given(coreCaseDataApi.startEventForCaseWorker(
+            anyString(),
             anyString(),
             anyString(),
             anyString(),
@@ -277,6 +286,12 @@ class CcdCaseUpdaterTest {
             anyString(),
             anyString()))
             .willReturn(eventResponse);
+    }
+
+    private void initResponseMockData() {
+        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
+        given(eventResponse.getEventId()).willReturn(EVENT_ID_UPDATE_CASE);
+        given(eventResponse.getToken()).willReturn("token");
     }
 
     private ExceptionRecord getExceptionRecord() {

@@ -13,6 +13,7 @@ public final class EventIdValidator {
 
     private static final String EVENT_ID_ATTACH_TO_CASE = "attachToExistingCase";
     public static final String EVENT_ID_CREATE_NEW_CASE = "createNewCase";
+    public static final String EVENT_ID_UPDATE_CASE = "updateCase";
 
     private EventIdValidator() {
         // utility class constructor

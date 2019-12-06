@@ -55,21 +55,32 @@ public class CcdCaseUpdater {
         boolean ignoreWarnings,
         String idamToken,
         String userId,
-        CaseDetails existingCase
+        String existingCaseId,
+        String eventId
     ) {
         log.info(
             "Start updating case for service {} with case Id {} from exception record {}",
             configItem.getService(),
-            existingCase.getId(),
+            existingCaseId,
             exceptionRecord.id
         );
 
         try {
             String s2sToken = s2sTokenGenerator.generate();
 
+            StartEventResponse eventResponse = coreCaseDataApi.startEventForCaseWorker(
+                idamToken,
+                s2sToken,
+                userId,
+                exceptionRecord.poBoxJurisdiction,
+                exceptionRecord.caseTypeId,
+                existingCaseId,
+                eventId
+            );
+
             SuccessfulUpdateResponse updateResponse = caseUpdateClient.updateCase(
                 configItem.getUpdateUrl(),
-                existingCase,
+                eventResponse.getCaseDetails(),
                 exceptionRecord,
                 s2sToken
             );
@@ -78,7 +89,7 @@ public class CcdCaseUpdater {
                 "Successfully called case update endpoint of service {} to update case with case Id {} "
                     + "based on exception record ref {}",
                 configItem.getService(),
-                existingCase.getId(),
+                existingCaseId,
                 exceptionRecord.id
             );
 
@@ -87,7 +98,7 @@ public class CcdCaseUpdater {
                     "Returned warnings after calling case update endpoint of service {} to update case with case Id {} "
                         + "based on exception record ref {}",
                     configItem.getService(),
-                    existingCase.getId(),
+                    existingCaseId,
                     exceptionRecord.id
                 );
                 return new ProcessResult(updateResponse.warnings, emptyList());
@@ -100,11 +111,14 @@ public class CcdCaseUpdater {
                     userId,
                     exceptionRecord,
                     updateResponse.caseDetails,
-                    existingCase
+                    eventResponse
                 );
 
                 return new ProcessResult(
-                    exceptionRecordFinalizer.finalizeExceptionRecord(existingCase.getData(), existingCase.getId())
+                    exceptionRecordFinalizer.finalizeExceptionRecord(
+                        eventResponse.getCaseDetails().getData(),
+                        eventResponse.getCaseDetails().getId()
+                    )
                 );
             }
         } catch (BadRequest exception) {
@@ -113,7 +127,7 @@ public class CcdCaseUpdater {
                     "Failed to call %s service Case Update API to update case with case Id %s "
                         + "based on exception record %s",
                     configItem.getService(),
-                    existingCase.getId(),
+                    existingCaseId,
                     exceptionRecord.id
                 ),
                 exception
@@ -126,7 +140,7 @@ public class CcdCaseUpdater {
                 format(
                     "Failed to update case for %s service with case Id %s based on exception record %s",
                     configItem.getService(),
-                    existingCase.getId(),
+                    existingCaseId,
                     exceptionRecord.id
                 ),
                 exception
@@ -142,27 +156,19 @@ public class CcdCaseUpdater {
         String userId,
         ExceptionRecord exceptionRecord,
         CaseUpdateDetails caseUpdateDetails,
-        CaseDetails existingCase
+        StartEventResponse eventResponse
     ) {
-        try {
-            StartEventResponse eventResponse = coreCaseDataApi.startForCaseworker(
-                idamToken,
-                s2sToken,
-                userId,
-                exceptionRecord.poBoxJurisdiction,
-                existingCase.getCaseTypeId(),
-                // when onboarding remind services to not configure about to submit callback for this event
-                caseUpdateDetails.eventId
-            );
+        CaseDetails existingCase = eventResponse.getCaseDetails();
 
+        try {
             coreCaseDataApi.submitForCaseworker(
                 idamToken,
                 s2sToken,
                 userId,
                 exceptionRecord.poBoxJurisdiction,
-                existingCase.getCaseTypeId(),
+                eventResponse.getCaseDetails().getCaseTypeId(),
                 ignoreWarnings,
-                getCaseDataContent(exceptionRecord, caseUpdateDetails, existingCase, eventResponse)
+                getCaseDataContent(exceptionRecord, caseUpdateDetails, eventResponse)
             );
 
             log.info(
@@ -199,31 +205,30 @@ public class CcdCaseUpdater {
     private CaseDataContent getCaseDataContent(
         ExceptionRecord exceptionRecord,
         CaseUpdateDetails caseUpdateDetails,
-        CaseDetails existingCase,
         StartEventResponse eventResponse
     ) {
         return CaseDataContent
             .builder()
             .caseReference(exceptionRecord.id)
             .data(caseUpdateDetails.caseData)
-            .event(getEvent(exceptionRecord, existingCase, eventResponse))
+            .event(getEvent(exceptionRecord, eventResponse.getCaseDetails().getId(), eventResponse.getEventId()))
             .eventToken(eventResponse.getToken())
             .build();
     }
 
     private Event getEvent(
         ExceptionRecord exceptionRecord,
-        CaseDetails existingCase,
-        StartEventResponse eventResponse
+        Long existingCaseId,
+        String eventId
     ) {
         return Event
             .builder()
-            .id(eventResponse.getEventId())
-            .summary(format("Case updated, case Id %s", existingCase.getId()))
+            .id(eventId)
+            .summary(format("Case updated, case Id %s", existingCaseId))
             .description(
                 format(
                     "Case with case Id %s updated based on exception record ref %s",
-                    existingCase.getId(),
+                    existingCaseId,
                     exceptionRecord.id
                 )
             )
