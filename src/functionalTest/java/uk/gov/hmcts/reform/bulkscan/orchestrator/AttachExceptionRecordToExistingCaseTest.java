@@ -149,8 +149,24 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-    public void should_attach_exception_record_to_case_by_ccd_search_case_reference_and_payment() throws Exception {
-        verifyExceptionRecordAttachesToCaseWithPayment(CCD_CASE_REFERENCE);
+    public void should_attach_exception_record_to_case_by_search_case_reference_and_payment() throws Exception {
+        //given
+        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
+
+        CaseDetails exceptionRecord =
+            createExceptionRecord("envelopes/supplementary-evidence-envelope-with-payment.json");
+
+        // when
+        invokeCallbackEndpoint(caseDetails, exceptionRecord, null, true);
+
+        //then
+        await("Exception record is attached to the case")
+            .atMost(60, TimeUnit.SECONDS)
+            .pollDelay(2, TimeUnit.SECONDS)
+            .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 1));
+
+        verifyExistingCaseIsUpdatedWithExceptionRecordData(caseDetails, exceptionRecord, 1);
+
     }
 
     /**
@@ -171,25 +187,6 @@ class AttachExceptionRecordToExistingCaseTest {
 
         // when
         invokeCallbackEndpoint(caseDetails, exceptionRecord, searchCaseReferenceType);
-
-        //then
-        await("Exception record is attached to the case")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollDelay(2, TimeUnit.SECONDS)
-            .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 1));
-
-        verifyExistingCaseIsUpdatedWithExceptionRecordData(caseDetails, exceptionRecord, 1);
-    }
-
-    private void verifyExceptionRecordAttachesToCaseWithPayment(String searchCaseReferenceType) throws Exception {
-        //given
-        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
-
-        CaseDetails exceptionRecord =
-            createExceptionRecord("envelopes/supplementary-evidence-envelope-with-payment.json");
-
-        // when
-        invokeCallbackEndpoint(caseDetails, exceptionRecord, searchCaseReferenceType, true);
 
         //then
         await("Exception record is attached to the case")
