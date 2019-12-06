@@ -65,7 +65,7 @@ class AttachDocsToSupplementaryEvidence {
                 existingCase.getId()
             );
 
-            ccdApi.submitEvent(
+            ccdApi.submitEventForExistingCase(
                 authenticator,
                 envelope.jurisdiction,
                 existingCase.getCaseTypeId(),
