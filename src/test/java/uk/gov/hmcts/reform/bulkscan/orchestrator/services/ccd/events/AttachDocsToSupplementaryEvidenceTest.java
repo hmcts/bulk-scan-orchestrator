@@ -66,7 +66,7 @@ class AttachDocsToSupplementaryEvidenceTest {
         given(startEventResponse.getCaseDetails().getData()).willReturn(ccdData);
 
         given(ccdApi.startEvent(any(), any(), any(), any(), any())).willReturn(startEventResponse);
-        given(ccdApi.submitEvent(any(), any(), any(), any(), any())).willReturn(caseDetails);
+        given(ccdApi.submitEventForExistingCase(any(), any(), any(), any(), any())).willReturn(caseDetails);
 
         String caseId = "1539007368674134";
         given(caseDetails.getId()).willReturn(Long.parseLong(caseId));
@@ -88,7 +88,7 @@ class AttachDocsToSupplementaryEvidenceTest {
         );
         ArgumentCaptor<CaseDataContent> caseDataContentCaptor = ArgumentCaptor.forClass(CaseDataContent.class);
 
-        verify(ccdApi).submitEvent(
+        verify(ccdApi).submitEventForExistingCase(
             eq(AUTH_DETAILS),
             eq(envelope.jurisdiction),
             eq(CASE_TYPE_ID),
