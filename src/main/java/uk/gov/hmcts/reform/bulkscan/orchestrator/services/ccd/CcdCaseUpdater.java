@@ -29,23 +29,23 @@ import static java.util.Collections.emptyList;
 public class CcdCaseUpdater {
     private static final Logger log = LoggerFactory.getLogger(CcdCaseUpdater.class);
 
-    private final CaseUpdateClient caseUpdateClient;
-    private final ServiceResponseParser serviceResponseParser;
     private final AuthTokenGenerator s2sTokenGenerator;
     private final CoreCaseDataApi coreCaseDataApi;
+    private final CaseUpdateClient caseUpdateClient;
+    private final ServiceResponseParser serviceResponseParser;
     private final ExceptionRecordFinalizer exceptionRecordFinalizer;
 
     public CcdCaseUpdater(
-        CaseUpdateClient caseUpdateClient,
-        ServiceResponseParser serviceResponseParser,
         AuthTokenGenerator s2sTokenGenerator,
         CoreCaseDataApi coreCaseDataApi,
+        CaseUpdateClient caseUpdateClient,
+        ServiceResponseParser serviceResponseParser,
         ExceptionRecordFinalizer exceptionRecordFinalizer
     ) {
-        this.caseUpdateClient = caseUpdateClient;
-        this.serviceResponseParser = serviceResponseParser;
         this.s2sTokenGenerator = s2sTokenGenerator;
         this.coreCaseDataApi = coreCaseDataApi;
+        this.caseUpdateClient = caseUpdateClient;
+        this.serviceResponseParser = serviceResponseParser;
         this.exceptionRecordFinalizer = exceptionRecordFinalizer;
     }
 
@@ -68,7 +68,7 @@ public class CcdCaseUpdater {
         try {
             String s2sToken = s2sTokenGenerator.generate();
 
-            StartEventResponse eventResponse = coreCaseDataApi.startEventForCaseWorker(
+            StartEventResponse startEvent = coreCaseDataApi.startEventForCaseWorker(
                 idamToken,
                 s2sToken,
                 userId,
@@ -78,9 +78,11 @@ public class CcdCaseUpdater {
                 eventId
             );
 
+            final CaseDetails existingCase = startEvent.getCaseDetails();
+
             SuccessfulUpdateResponse updateResponse = caseUpdateClient.updateCase(
                 configItem.getUpdateUrl(),
-                eventResponse.getCaseDetails(),
+                existingCase,
                 exceptionRecord,
                 s2sToken
             );
@@ -89,7 +91,7 @@ public class CcdCaseUpdater {
                 "Successfully called case update endpoint of service {} to update case with case Id {} "
                     + "based on exception record ref {}",
                 configItem.getService(),
-                existingCaseId,
+                existingCase.getId(),
                 exceptionRecord.id
             );
 
@@ -98,7 +100,7 @@ public class CcdCaseUpdater {
                     "Returned warnings after calling case update endpoint of service {} to update case with case Id {} "
                         + "based on exception record ref {}",
                     configItem.getService(),
-                    existingCaseId,
+                    existingCase.getId(),
                     exceptionRecord.id
                 );
                 return new ProcessResult(updateResponse.warnings, emptyList());
@@ -111,13 +113,13 @@ public class CcdCaseUpdater {
                     userId,
                     exceptionRecord,
                     updateResponse.caseDetails,
-                    eventResponse
+                    startEvent
                 );
 
                 return new ProcessResult(
                     exceptionRecordFinalizer.finalizeExceptionRecord(
-                        eventResponse.getCaseDetails().getData(),
-                        eventResponse.getCaseDetails().getId()
+                        existingCase.getData(),
+                        existingCase.getId()
                     )
                 );
             }
@@ -156,9 +158,9 @@ public class CcdCaseUpdater {
         String userId,
         ExceptionRecord exceptionRecord,
         CaseUpdateDetails caseUpdateDetails,
-        StartEventResponse eventResponse
+        StartEventResponse startEvent
     ) {
-        CaseDetails existingCase = eventResponse.getCaseDetails();
+        CaseDetails existingCase = startEvent.getCaseDetails();
 
         try {
             coreCaseDataApi.submitForCaseworker(
@@ -166,9 +168,9 @@ public class CcdCaseUpdater {
                 s2sToken,
                 userId,
                 exceptionRecord.poBoxJurisdiction,
-                eventResponse.getCaseDetails().getCaseTypeId(),
+                startEvent.getCaseDetails().getCaseTypeId(),
                 ignoreWarnings,
-                getCaseDataContent(exceptionRecord, caseUpdateDetails, eventResponse)
+                getCaseDataContent(exceptionRecord, caseUpdateDetails, startEvent)
             );
 
             log.info(
@@ -205,14 +207,14 @@ public class CcdCaseUpdater {
     private CaseDataContent getCaseDataContent(
         ExceptionRecord exceptionRecord,
         CaseUpdateDetails caseUpdateDetails,
-        StartEventResponse eventResponse
+        StartEventResponse startEvent
     ) {
         return CaseDataContent
             .builder()
             .caseReference(exceptionRecord.id)
             .data(caseUpdateDetails.caseData)
-            .event(getEvent(exceptionRecord, eventResponse.getCaseDetails().getId(), eventResponse.getEventId()))
-            .eventToken(eventResponse.getToken())
+            .event(getEvent(exceptionRecord, startEvent.getCaseDetails().getId(), startEvent.getEventId()))
+            .eventToken(startEvent.getToken())
             .build();
     }
 

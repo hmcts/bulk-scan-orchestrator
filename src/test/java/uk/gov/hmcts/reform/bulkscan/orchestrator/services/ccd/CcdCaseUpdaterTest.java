@@ -86,10 +86,10 @@ class CcdCaseUpdaterTest {
     @BeforeEach
     void setUp() {
         ccdCaseUpdater = new CcdCaseUpdater(
-            caseUpdateClient,
-            serviceResponseParser,
             authTokenGenerator,
             coreCaseDataApi,
+            caseUpdateClient,
+            serviceResponseParser,
             exceptionRecordFinalizer
         );
 
