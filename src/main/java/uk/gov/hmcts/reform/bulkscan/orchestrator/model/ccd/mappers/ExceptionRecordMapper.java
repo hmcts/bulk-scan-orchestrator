@@ -130,7 +130,7 @@ public class ExceptionRecordMapper {
                 envelope.jurisdiction
             );
         }
-        LOGGER.info( "Surname found {} " , surnameList.get(0) );
+        LOGGER.info("Surname found {} ", surnameList.get(0));
 
         return surnameList.get(0);
     }
