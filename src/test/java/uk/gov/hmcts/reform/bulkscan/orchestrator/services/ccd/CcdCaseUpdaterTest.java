@@ -100,13 +100,13 @@ class CcdCaseUpdaterTest {
         warningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, asList("warning1"));
 
         given(configItem.getService()).willReturn("Service");
-        given(configItem.getUpdateUrl()).willReturn("url");
         given(authTokenGenerator.generate()).willReturn("token");
     }
 
     @Test
     void updateCase_should_if_no_warnings() throws Exception {
         // given
+        given(configItem.getUpdateUrl()).willReturn("url");
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
             .willReturn(noWarningsUpdateResponse);
         initResponseMockData();
@@ -134,6 +134,7 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_ignore_warnings() throws Exception {
         // given
+        given(configItem.getUpdateUrl()).willReturn("url");
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
             .willReturn(noWarningsUpdateResponse);
         initResponseMockData();
@@ -161,6 +162,7 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_not_ignore_warnings() throws Exception {
         // given
+        given(configItem.getUpdateUrl()).willReturn("url");
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
             .willReturn(warningsUpdateResponse);
         initMockData();
@@ -185,6 +187,7 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_pass_if_no_warnings() throws Exception {
         // given
+        given(configItem.getUpdateUrl()).willReturn("url");
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
             .willReturn(noWarningsUpdateResponse);
         initResponseMockData();
