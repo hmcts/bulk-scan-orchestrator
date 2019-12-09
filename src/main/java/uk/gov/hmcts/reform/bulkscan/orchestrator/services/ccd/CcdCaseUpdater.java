@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException.BadRequest;
+import org.springframework.web.client.HttpClientErrorException.Conflict;
 import org.springframework.web.client.HttpClientErrorException.UnprocessableEntity;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR;
 
@@ -137,6 +139,17 @@ public class CcdCaseUpdater {
         } catch (UnprocessableEntity exception) {
             ClientServiceErrorResponse errorResponse = serviceResponseParser.parseResponseBody(exception);
             return new ProcessResult(errorResponse.warnings, errorResponse.errors);
+        } catch (Conflict exception) {
+            String msg = format(
+                "Failed to update case for %s service with case Id %s based on exception record %s "
+                    + "because it has been updated in the meantime",
+                configItem.getService(),
+                existingCaseId,
+                exceptionRecord.id
+            );
+            log.error(msg);
+            ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(asList(msg), emptyList());
+            return new ProcessResult(errorResponse.warnings, errorResponse.errors);
         } catch (Exception exception) {
             throw new CallbackException(
                 format(
@@ -180,27 +193,16 @@ public class CcdCaseUpdater {
                 exceptionRecord.id
             );
         } catch (FeignException exception) {
-            log.error(
-                "Failed to update case for {} jurisdiction with case Id {} based on exception record with Id {}. "
-                    + "Service response: {}",
+            String msg = format(
+                "Failed to update case for %s jurisdiction with case Id %s based on exception record with Id %s. "
+                    + "Service response: %s",
                 exceptionRecord.poBoxJurisdiction,
                 existingCase.getId(),
                 exceptionRecord.id,
-                exception.contentUTF8(),
-                exception
-            );
+                exception.contentUTF8());
+            log.error(msg, exception);
 
-            throw exception;
-        } catch (Exception exception) {
-            log.error(
-                "Failed to update case for {} jurisdiction with case Id {} based on exception record with Id {}",
-                exceptionRecord.poBoxJurisdiction,
-                existingCase.getId(),
-                exceptionRecord.id,
-                exception
-            );
-
-            throw exception;
+            throw new RuntimeException(msg);
         }
     }
 
@@ -229,8 +231,7 @@ public class CcdCaseUpdater {
             .summary(format("Case updated, case Id %s", existingCaseId))
             .description(
                 format(
-                    "Case with case Id %s updated based on exception record ref %s",
-                    existingCaseId,
+                    "Case updated based on exception record ref %s",
                     exceptionRecord.id
                 )
             )

@@ -211,10 +211,50 @@ class CcdCaseUpdaterTest {
     }
 
     @Test
+    void updateCase_should_handle_conflict_response_from_ccd_api() {
+        // given
+        given(configItem.getUpdateUrl()).willReturn("url");
+        given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
+            .willReturn(noWarningsUpdateResponse);
+        initResponseMockData();
+        initMockData();
+        given(coreCaseDataApi.submitForCaseworker(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyBoolean(),
+            any(CaseDataContent.class)
+        )).willThrow(HttpClientErrorException.create(
+            HttpStatus.CONFLICT,
+            "conflict message",
+            null,
+            null,
+            null
+        ));
+
+        // when
+        ProcessResult res = ccdCaseUpdater.updateCase(
+            exceptionRecord,
+            configItem,
+            true,
+            "idamToken",
+            "userId",
+            EXISTING_CASE_ID
+        );
+
+        // then
+        assertThat(res.getErrors()).containsExactlyInAnyOrder("Failed to update case for Service service "
+            + "with case Id existing_case_id based on exception record 1 because it has been updated in the meantime");
+        assertThat(res.getWarnings()).isEmpty();
+    }
+
+    @Test
     void updateCase_should_handle_feign_exception() {
         // given
         noWarningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
-        given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
+        given(caseUpdateClient.updateCase(anyString(), any(CaseDetails.class), any(ExceptionRecord.class), anyString()))
             .willReturn(noWarningsUpdateResponse);
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willThrow(new FeignException.BadRequest("Msg", "Body".getBytes()));
@@ -322,7 +362,15 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_handle_exception() {
         // given
-        noWarningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
+        given(coreCaseDataApi.startEventForCaseWorker(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString()))
+            .willThrow(new RuntimeException());
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
