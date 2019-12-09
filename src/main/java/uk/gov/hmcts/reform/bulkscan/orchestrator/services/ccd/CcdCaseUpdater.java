@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR;
 
 @Service
 public class CcdCaseUpdater {
@@ -55,8 +56,7 @@ public class CcdCaseUpdater {
         boolean ignoreWarnings,
         String idamToken,
         String userId,
-        String existingCaseId,
-        String eventId
+        String existingCaseId
     ) {
         log.info(
             "Start updating case for service {} with case Id {} from exception record {}",
@@ -75,7 +75,7 @@ public class CcdCaseUpdater {
                 exceptionRecord.poBoxJurisdiction,
                 exceptionRecord.caseTypeId,
                 existingCaseId,
-                eventId
+                EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR
             );
 
             final CaseDetails existingCase = startEvent.getCaseDetails();

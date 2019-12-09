@@ -123,8 +123,7 @@ class CcdCaseUpdaterTest {
             true,
             "idamToken",
             "userId",
-            EXISTING_CASE_ID,
-            EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR
+            EXISTING_CASE_ID
         );
 
         // then
@@ -151,8 +150,7 @@ class CcdCaseUpdaterTest {
             true,
             "idamToken",
             "userId",
-            EXISTING_CASE_ID,
-            EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR
+            EXISTING_CASE_ID
         );
 
         // then
@@ -176,8 +174,7 @@ class CcdCaseUpdaterTest {
             false,
             "idamToken",
             "userId",
-            EXISTING_CASE_ID,
-            EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR
+            EXISTING_CASE_ID
         );
 
         // then
@@ -204,8 +201,7 @@ class CcdCaseUpdaterTest {
             false,
             "idamToken",
             "userId",
-            EXISTING_CASE_ID,
-            EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR
+            EXISTING_CASE_ID
         );
 
         // then
@@ -231,8 +227,7 @@ class CcdCaseUpdaterTest {
                     true,
                     "idamToken",
                     "userId",
-                    EXISTING_CASE_ID,
-                    EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR
+                    EXISTING_CASE_ID
                 ),
             CallbackException.class
         );
@@ -270,8 +265,7 @@ class CcdCaseUpdaterTest {
                     true,
                     "idamToken",
                     "userId",
-                    EXISTING_CASE_ID,
-                    EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR
+                    EXISTING_CASE_ID
                 ),
             CallbackException.class
         );
@@ -317,8 +311,7 @@ class CcdCaseUpdaterTest {
             true,
             "idamToken",
             "userId",
-            EXISTING_CASE_ID,
-            EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR
+            EXISTING_CASE_ID
         );
 
         // then
@@ -339,8 +332,7 @@ class CcdCaseUpdaterTest {
                     true,
                     "idamToken",
                     "userId",
-                    EXISTING_CASE_ID,
-                    EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR
+                    EXISTING_CASE_ID
                 ),
             CallbackException.class
         );
