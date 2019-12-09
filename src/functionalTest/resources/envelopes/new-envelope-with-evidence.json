@@ -26,6 +26,10 @@
     {
       "metadata_field_name": "field2",
       "metadata_field_value": "value2"
+    },
+    {
+      "metadata_field_name": "field_surname",
+      "metadata_field_value": "surnameXXXX"
     }
   ],
   "ocr_data_validation_warnings": [

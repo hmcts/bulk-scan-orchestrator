@@ -102,7 +102,10 @@ class ExceptionRecordCreationTest {
         assertThat(caseDetails.getCaseTypeId()).isEqualTo("BULKSCAN_ExceptionRecord");
         assertThat(caseDetails.getJurisdiction()).isEqualTo("BULKSCAN");
 
-        Map<String, String> expectedOcrData = ImmutableMap.of("field1", "value1", "field2", "value2");
+        Map<String, String> expectedOcrData = ImmutableMap.of("field1", "value1",
+            "field2", "value2",
+            "field_surname","surnameXXXX"
+        );
         assertThat(getOcrData(caseDetails)).isEqualTo(expectedOcrData);
 
         List<String> expectedOcrDataWarnings = Arrays.asList("warning 1", "warning 2");
@@ -112,7 +115,7 @@ class ExceptionRecordCreationTest {
         assertThat(caseDetails.getData().get("envelopeId")).isEqualTo(messageEnvelopeId);
         assertThat(getCaseDataForField(caseDetails, "awaitingPaymentDCNProcessing")).isEqualTo("Yes");
         assertThat(getCaseDataForField(caseDetails, "containsPayments")).isEqualTo("Yes");
-        assertThat(getCaseDataForField(caseDetails, "surname")).isNull();
+        assertThat(getCaseDataForField(caseDetails, "surname")).isEqualTo("surnameXXXX");
     }
 
     @DisplayName("Should create ExceptionRecord when provided/requested case reference is invalid")
@@ -145,8 +148,7 @@ class ExceptionRecordCreationTest {
         Map<String, String> expectedOcrData = ImmutableMap.of(
             "first_name", "value1",
             "last_name", "value2",
-            "email", "hello@test.com",
-            "field_surname","surnameXXXX"
+            "email", "hello@test.com"
         );
 
         // when
@@ -170,7 +172,7 @@ class ExceptionRecordCreationTest {
         assertThat(getOcrData(exceptionRecord)).isEqualTo(expectedOcrData);
         assertThat(getCaseDataForField(exceptionRecord, "envelopeCaseReference")).isEqualTo(envelopeCaseRef);
         assertThat(getCaseDataForField(exceptionRecord, "envelopeLegacyCaseReference")).isEmpty();
-        assertThat(getCaseDataForField(exceptionRecord, "surname")).isEqualTo("surnameXXXX");
+
     }
 
     private List<CaseDetails> findCasesByPoBox(UUID poBox) {
