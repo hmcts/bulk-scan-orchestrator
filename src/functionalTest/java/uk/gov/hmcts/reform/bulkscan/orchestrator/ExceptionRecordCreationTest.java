@@ -74,6 +74,7 @@ class ExceptionRecordCreationTest {
         CaseDetails caseDetails = findCasesByPoBox(randomPoBox).get(0);
         assertThat(getCaseDataForField(caseDetails, "awaitingPaymentDCNProcessing")).isEqualTo("No");
         assertThat(getCaseDataForField(caseDetails, "containsPayments")).isEqualTo("No");
+        assertThat(getCaseDataForField(caseDetails, "surname")).isNull();
     }
 
     @DisplayName("Should create ExceptionRecord when classification is NEW_APPLICATION")
@@ -111,6 +112,7 @@ class ExceptionRecordCreationTest {
         assertThat(caseDetails.getData().get("envelopeId")).isEqualTo(messageEnvelopeId);
         assertThat(getCaseDataForField(caseDetails, "awaitingPaymentDCNProcessing")).isEqualTo("Yes");
         assertThat(getCaseDataForField(caseDetails, "containsPayments")).isEqualTo("Yes");
+        assertThat(getCaseDataForField(caseDetails, "surname")).isNull();
     }
 
     @DisplayName("Should create ExceptionRecord when provided/requested case reference is invalid")
@@ -165,6 +167,7 @@ class ExceptionRecordCreationTest {
         assertThat(getOcrData(exceptionRecord)).isEqualTo(expectedOcrData);
         assertThat(getCaseDataForField(exceptionRecord, "envelopeCaseReference")).isEqualTo(envelopeCaseRef);
         assertThat(getCaseDataForField(exceptionRecord, "envelopeLegacyCaseReference")).isEmpty();
+        assertThat(getCaseDataForField(exceptionRecord, "surname")).isEqualTo("surnameXXXX");
     }
 
     private List<CaseDetails> findCasesByPoBox(UUID poBox) {

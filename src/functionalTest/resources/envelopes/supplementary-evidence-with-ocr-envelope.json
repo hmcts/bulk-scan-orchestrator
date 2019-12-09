@@ -31,6 +31,10 @@
     {
       "metadata_field_name": "email",
       "metadata_field_value": "hello@test.com"
+    },
+    {
+      "metadata_field_name": "last_name",
+      "metadata_field_value": "surnameXXXX"
     }
   ],
   "ocr_data_validation_warnings": [

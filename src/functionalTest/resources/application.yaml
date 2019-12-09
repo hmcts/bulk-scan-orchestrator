@@ -61,3 +61,6 @@ service-config:
       jurisdiction: BULKSCAN
       case-type-ids:
         - Bulk_Scanned
+      form-type-to-surname-ocr-field-mappings:
+        - formType: B123
+          ocrField: last_name
