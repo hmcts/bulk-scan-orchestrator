@@ -94,7 +94,7 @@ class CreateCaseTest {
 
         assertThat(createdCase.getData().get("bulkScanCaseReference")).isNotNull();
         String bulkScanCaseReference = (String)createdCase.getData().get("bulkScanCaseReference");
-        assertThat(bulkScanCaseReference.equals(exceptionRecord.getId()));
+        assertThat(bulkScanCaseReference.equals(String.valueOf(exceptionRecord.getId())));
 
         await("Case is ingested")
             .atMost(2, TimeUnit.SECONDS)

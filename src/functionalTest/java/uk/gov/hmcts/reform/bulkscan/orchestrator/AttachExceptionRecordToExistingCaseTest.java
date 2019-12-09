@@ -148,6 +148,27 @@ class AttachExceptionRecordToExistingCaseTest {
         verifyExceptionRecordAttachesToCase(null);
     }
 
+    @Test
+    public void should_attach_exception_record_to_case_by_search_case_reference_and_payment() throws Exception {
+        //given
+        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
+
+        CaseDetails exceptionRecord =
+            createExceptionRecord("envelopes/supplementary-evidence-envelope-with-payment.json");
+
+        // when
+        invokeCallbackEndpoint(caseDetails, exceptionRecord, null, true);
+
+        //then
+        await("Exception record is attached to the case")
+            .atMost(60, TimeUnit.SECONDS)
+            .pollDelay(2, TimeUnit.SECONDS)
+            .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 1));
+
+        verifyExistingCaseIsUpdatedWithExceptionRecordData(caseDetails, exceptionRecord, 1);
+
+    }
+
     /**
      * Checks if the service allows for attaching an exception record to a case using given
      * reference type - CCD ID, external ID or no type provided.
@@ -190,10 +211,20 @@ class AttachExceptionRecordToExistingCaseTest {
         CaseDetails exceptionRecord,
         String searchCaseReferenceType
     ) {
+        invokeCallbackEndpoint(targetCaseDetails, exceptionRecord, searchCaseReferenceType, false);
+    }
+
+    private void invokeCallbackEndpoint(
+        CaseDetails targetCaseDetails,
+        CaseDetails exceptionRecord,
+        String searchCaseReferenceType,
+        boolean containPayments
+    ) {
         Map<String, Object> exceptionRecordDataWithSearchFields = exceptionRecordDataWithSearchFields(
             targetCaseDetails,
             exceptionRecord,
-            searchCaseReferenceType
+            searchCaseReferenceType,
+            containPayments
         );
 
         CaseDetails exceptionRecordWithSearchFields =
@@ -226,7 +257,8 @@ class AttachExceptionRecordToExistingCaseTest {
     private Map<String, Object> exceptionRecordDataWithSearchFields(
         CaseDetails targetCaseDetails,
         CaseDetails exceptionRecord,
-        String searchCaseReferenceType
+        String searchCaseReferenceType,
+        boolean containPayments
     ) {
         Map<String, Object> exceptionRecordData = new HashMap<>(exceptionRecord.getData());
 
@@ -240,6 +272,12 @@ class AttachExceptionRecordToExistingCaseTest {
                 : targetCaseDetails.getId().toString();
 
             exceptionRecordData.put("searchCaseReference", searchCaseReference);
+        }
+
+        if (containPayments) {
+            exceptionRecordData.put("containsPayments", "Yes");
+            exceptionRecordData.put("envelopeId", "21321931312-32121-312112");
+            exceptionRecordData.put("poBoxJurisdiction", "sample jurisdiction");
         }
 
         return exceptionRecordData;

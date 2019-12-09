@@ -5,11 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.CaseClientServiceException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.InvalidCaseDataException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
@@ -25,13 +23,11 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import static java.time.LocalDateTime.now;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -63,6 +59,9 @@ class CcdNewCaseCreatorTest {
     private TransformationClient transformationClient;
 
     @Mock
+    private ServiceResponseParser serviceResponseParser;
+
+    @Mock
     private AuthTokenGenerator s2sTokenGenerator;
 
     @Mock
@@ -76,10 +75,14 @@ class CcdNewCaseCreatorTest {
 
     private CcdNewCaseCreator ccdNewCaseCreator;
 
+    @Mock
+    private HttpClientErrorException.UnprocessableEntity unprocessableEntity;
+
     @BeforeEach
     void setUp() {
         ccdNewCaseCreator = new CcdNewCaseCreator(
             transformationClient,
+            serviceResponseParser,
             s2sTokenGenerator,
             paymentsProcessor,
             coreCaseDataApi,
@@ -90,13 +93,13 @@ class CcdNewCaseCreatorTest {
     @Test
     void should_call_payments_handler_when_case_has_payments() throws Exception {
         // given
-        given(transformationClient.transformExceptionRecord(any(),any(), any()))
+        given(transformationClient.transformExceptionRecord(any(), any(), any()))
             .willReturn(
                 new SuccessfulTransformationResponse(
                     new CaseCreationDetails(
                         "some_case_type",
                         "some_event_id",
-                        emptyMap()
+                        basicCaseData()
                     ),
                     emptyList()
                 )
@@ -117,23 +120,7 @@ class CcdNewCaseCreatorTest {
         ServiceConfigItem configItem = getConfigItem();
         ExceptionRecord exceptionRecord = getExceptionRecord();
 
-        Map<String, Object> data = new HashMap<>();
-
-        String envelopeId = "987";
-        String jurisdiction = "sample jurisdiction";
-
-        data.put("poBox", "12345");
-        data.put("journeyClassification", EXCEPTION.name());
-        data.put("formType", "A1");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
-        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
-        data.put(ExceptionRecordFields.CONTAINS_PAYMENTS, YesNoFieldValues.YES);
-        data.put(ExceptionRecordFields.ENVELOPE_ID, envelopeId);
-        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, jurisdiction);
-
-        CaseDetails caseDetails = getCaseDetails(data);
+        CaseDetails caseDetails = getCaseDetails(basicCaseData());
 
         // when
         ProcessResult result =
@@ -163,7 +150,7 @@ class CcdNewCaseCreatorTest {
                     new CaseCreationDetails(
                         "some_case_type",
                         "some_event_id",
-                        emptyMap()
+                        basicCaseData()
                     ),
                     emptyList()
                 )
@@ -223,16 +210,12 @@ class CcdNewCaseCreatorTest {
     }
 
     @Test
-    void should_throw_InvalidCaseDataException_when_transformation_client_returns_422()
-        throws IOException, CaseClientServiceException {
+    void should_throw_UnprocessableEntityException_when_transformation_client_returns_422() {
         // given
         when(s2sTokenGenerator.generate()).thenReturn(randomUUID().toString());
-        //setUpTransformationUrl();
-        InvalidCaseDataException exception = new InvalidCaseDataException(
-            new HttpClientErrorException(HttpStatus.UNPROCESSABLE_ENTITY),
-            new ClientServiceErrorResponse(singletonList("error"), singletonList("warning"))
-        );
-        doThrow(exception)
+        given(serviceResponseParser.parseResponseBody(unprocessableEntity))
+            .willReturn(new ClientServiceErrorResponse(singletonList("error"), singletonList("warning")));
+        doThrow(unprocessableEntity)
             .when(transformationClient)
             .transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString());
 
@@ -275,7 +258,7 @@ class CcdNewCaseCreatorTest {
         given(transformationClient.transformExceptionRecord(any(), any(), any()))
             .willReturn(
                 new SuccessfulTransformationResponse(
-                    new CaseCreationDetails("some_case_type", "some_event_id", emptyMap()),
+                    new CaseCreationDetails("some_case_type", "some_event_id", basicCaseData()),
                     emptyList()
                 )
             );
