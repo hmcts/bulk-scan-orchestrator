@@ -253,7 +253,8 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_handle_feign_exception() {
         // given
-        noWarningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
+        initResponseMockData();
+        given(configItem.getUpdateUrl()).willReturn("url");
         given(caseUpdateClient.updateCase(anyString(), any(CaseDetails.class), any(ExceptionRecord.class), anyString()))
             .willReturn(noWarningsUpdateResponse);
         initMockData();
@@ -276,6 +277,7 @@ class CcdCaseUpdaterTest {
         assertThat(callbackException.getMessage())
             .isEqualTo("Failed to update case for Service service with case Id existing_case_id "
                 + "based on exception record 1");
+        assertThat(callbackException.getCause().getMessage()).isEqualTo("Service response: Body");
     }
 
     @Test

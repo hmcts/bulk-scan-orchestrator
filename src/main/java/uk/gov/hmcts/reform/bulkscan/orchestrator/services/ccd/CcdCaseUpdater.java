@@ -193,14 +193,15 @@ public class CcdCaseUpdater {
                 exceptionRecord.id
             );
         } catch (FeignException exception) {
-            String msg = format(
-                "Failed to update case for %s jurisdiction with case Id %s based on exception record with Id %s. "
-                    + "Service response: %s",
+            String msg = format("Service response: %s", exception.contentUTF8());
+            log.error(
+                "Failed to update case for {} jurisdiction with case Id {} based on exception record with Id {}. {}",
                 exceptionRecord.poBoxJurisdiction,
                 existingCase.getId(),
                 exceptionRecord.id,
-                exception.contentUTF8());
-            log.error(msg, exception);
+                msg,
+                exception
+            );
 
             throw new RuntimeException(msg);
         }
