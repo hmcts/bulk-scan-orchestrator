@@ -33,7 +33,7 @@
       "metadata_field_value": "hello@test.com"
     },
     {
-      "metadata_field_name": "last_name",
+      "metadata_field_name": "field_surname",
       "metadata_field_value": "surnameXXXX"
     }
   ],

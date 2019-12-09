@@ -143,7 +143,10 @@ class ExceptionRecordCreationTest {
         //given
         String envelopeCaseRef = "1539860706648396";
         Map<String, String> expectedOcrData = ImmutableMap.of(
-            "first_name", "value1", "last_name", "value2", "email", "hello@test.com"
+            "first_name", "value1",
+            "last_name", "value2",
+            "email", "hello@test.com",
+            "field_surname","surnameXXXX"
         );
 
         // when
