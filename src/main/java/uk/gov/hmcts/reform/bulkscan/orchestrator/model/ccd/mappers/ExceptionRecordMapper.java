@@ -102,6 +102,7 @@ public class ExceptionRecordMapper {
 
     private String extractSurnameFromOcrData(Envelope envelope) {
         if (CollectionUtils.isEmpty(envelope.ocrData)) {
+            LOGGER.info("Surname set to null");
             return null;
         }
 
