@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.QueueProcessingReadinessChecker;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.LogInAttemptRejectedException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeEventProcessor;
 
@@ -17,21 +18,34 @@ public class EnvelopesQueueConsumeTask {
 
     private final EnvelopeEventProcessor envelopeEventProcessor;
     private final QueueProcessingReadinessChecker processingReadinessChecker;
+    private final ServiceConfigProvider serviceConfigProvider;
 
     public EnvelopesQueueConsumeTask(
         EnvelopeEventProcessor envelopeEventProcessor,
-        QueueProcessingReadinessChecker processingReadinessChecker
+        QueueProcessingReadinessChecker processingReadinessChecker,
+        ServiceConfigProvider serviceConfigProvider
     ) {
         this.envelopeEventProcessor = envelopeEventProcessor;
         this.processingReadinessChecker = processingReadinessChecker;
+        this.serviceConfigProvider = serviceConfigProvider;
     }
 
     @Scheduled(fixedDelay = 1000)
     public void consumeMessages() {
         log.info("Started the job consuming envelope messages");
 
+        String surnameOcrFieldName = "";
+        if (serviceConfigProvider != null) {
+            surnameOcrFieldName = serviceConfigProvider.getConfig("bulkscan")
+                .getSurnameOcrFieldName("B123");
+            try {
+                log.info("xxxxxx isReadyForConsumingMessages{}", isReadyForConsumingMessages());
+            } catch (LogInAttemptRejectedException e) {
+                e.printStackTrace();
+            }
+        }
+        log.info("yyyyyy surnameOcrFieldName{}", surnameOcrFieldName);
         try {
-            log.info("xxxxxx isReadyForConsumingMessages{}", isReadyForConsumingMessages());
             boolean queueMayHaveMessages = true;
 
             while (queueMayHaveMessages && isReadyForConsumingMessages()) {
