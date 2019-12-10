@@ -81,7 +81,6 @@ public class CreateExceptionRecord {
             authenticator,
             envelope.jurisdiction,
             caseTypeId,
-            null,
             buildCaseDataContent(envelope, startEventResponse.getToken())
         );
 
