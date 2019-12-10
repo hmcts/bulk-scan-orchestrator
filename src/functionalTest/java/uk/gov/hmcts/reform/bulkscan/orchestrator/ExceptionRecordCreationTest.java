@@ -105,11 +105,10 @@ class ExceptionRecordCreationTest {
         CaseDetails caseDetails = findCasesByPoBox(randomPoBox).get(0);
 
         LOG.info(
-            "PoBox :{},caseDetails ID:{}, getCaseTypeId:{}, data {}",
+            "PoBox :{},caseDetails ID:{}, getCaseTypeId:{}",
             randomPoBox,
             caseDetails.getId(),
-            caseDetails.getCaseTypeId(),
-            caseDetails.getData()
+            caseDetails.getCaseTypeId()
         );
         // envelope ID from the JSON resource representing the test message
         assertThat(caseDetails.getData().get("envelopeId")).isEqualTo(messageEnvelopeId);
