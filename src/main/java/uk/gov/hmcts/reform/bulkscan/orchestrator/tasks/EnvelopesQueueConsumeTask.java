@@ -42,10 +42,9 @@ public class EnvelopesQueueConsumeTask {
         log.info("yyyyyy surnameOcrFieldName{}", surnameOcrFieldName);
         try {
             boolean queueMayHaveMessages = true;
-            boolean readyForConsumingMessages = isReadyForConsumingMessages();
-            log.info("xxxxxx isReadyForConsumingMessages{}", readyForConsumingMessages);
 
-            while (queueMayHaveMessages && readyForConsumingMessages) {
+
+            while (queueMayHaveMessages && isReadyForConsumingMessages()) {
                 queueMayHaveMessages = envelopeEventProcessor.processNextMessage();
             }
 
