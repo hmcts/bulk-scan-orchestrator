@@ -8,8 +8,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.CaseClientServiceException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdate;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.ExistingCaseDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
@@ -23,14 +21,10 @@ public class CaseUpdateClient {
 
     private final RestTemplate restTemplate;
 
-    private final ServiceResponseParser serviceResponseParser;
-
     public CaseUpdateClient(
-        RestTemplate restTemplate,
-        ServiceResponseParser serviceResponseParser
+        RestTemplate restTemplate
     ) {
         this.restTemplate = restTemplate;
-        this.serviceResponseParser = serviceResponseParser;
     }
 
     public SuccessfulUpdateResponse updateCase(
@@ -38,7 +32,7 @@ public class CaseUpdateClient {
         CaseDetails existingCase,
         ExceptionRecord exceptionRecord,
         String s2sToken
-    ) throws CaseClientServiceException {
+    ) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("ServiceAuthorization", s2sToken);
 
