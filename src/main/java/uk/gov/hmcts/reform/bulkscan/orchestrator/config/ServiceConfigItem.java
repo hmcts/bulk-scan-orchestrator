@@ -87,9 +87,6 @@ public class ServiceConfigItem {
     }
 
     public String getSurnameOcrFieldName(String formType) {
-        log.info("service config formType  {},formTypeToSurnameOcrFieldMappings {}",
-            formType, formTypeToSurnameOcrFieldMappings.get(formType));
-
         return formTypeToSurnameOcrFieldMappings.get(formType);
     }
 

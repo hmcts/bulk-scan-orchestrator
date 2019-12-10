@@ -31,8 +31,7 @@ public class EnvelopesQueueConsumeTaskTest {
     public void setUp() throws LogInAttemptRejectedException {
         queueConsumeTask = new EnvelopesQueueConsumeTask(
             envelopeEventProcessor,
-            processingReadinessChecker,
-            null
+            processingReadinessChecker
         );
 
         given(processingReadinessChecker.isNoLogInAttemptRejectedByIdam()).willReturn(true);
