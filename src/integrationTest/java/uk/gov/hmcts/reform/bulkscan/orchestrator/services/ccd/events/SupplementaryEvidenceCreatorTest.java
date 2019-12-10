@@ -27,7 +27,6 @@ import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.BDDMockito.given;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.fileContentAsString;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_EVENT_URL;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_SEARCH_URL;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_SUBMIT_URL;
@@ -50,7 +49,7 @@ class SupplementaryEvidenceCreatorTest {
     @Autowired
     private EnvelopeEventProcessor envelopeEventProcessor;
 
-    private static final String CREATE_ExCEPTION_RECORD_SUBMIT_URL = Environment.CASE_SUBMIT_URL
+    private static final String CREATE_EXCEPTION_RECORD_SUBMIT_URL = Environment.CASE_SUBMIT_URL
         .replace(CASE_TYPE_BULK_SCAN, CASE_TYPE_EXCEPTION_RECORD);
 
     private static final String CREATE_EXCEPTION_START_EVENT_URL = Environment.CASE_EVENT_TRIGGER_START_URL
@@ -67,6 +66,7 @@ class SupplementaryEvidenceCreatorTest {
 
     @BeforeEach
     void before() throws Exception {
+        WireMock.reset();
         givenThat(get(GET_CASE_URL).willReturn(aResponse().withBody(MOCK_RESPONSE)));
         given(messageReceiver.receive()).willReturn(MOCK_MESSAGE).willReturn(null);
     }
@@ -83,7 +83,7 @@ class SupplementaryEvidenceCreatorTest {
             .pollInterval(2, TimeUnit.SECONDS)
             .ignoreExceptions()
             .until(() -> {
-                WireMock.verify(postRequestedFor(urlPathEqualTo(CASE_EVENT_URL)));
+                WireMock.verify(postRequestedFor(urlPathEqualTo(Environment.CASE_EVENT_URL)));
 
                 return true;
             });
@@ -104,7 +104,7 @@ class SupplementaryEvidenceCreatorTest {
             .atMost(60, TimeUnit.SECONDS)
             .ignoreExceptions()
             .until(() -> {
-                WireMock.verify(postRequestedFor(urlPathEqualTo(CREATE_ExCEPTION_RECORD_SUBMIT_URL)));
+                WireMock.verify(postRequestedFor(urlPathEqualTo(CREATE_EXCEPTION_RECORD_SUBMIT_URL)));
                 return true;
             });
     }
@@ -124,7 +124,7 @@ class SupplementaryEvidenceCreatorTest {
             .atMost(60, TimeUnit.SECONDS)
             .ignoreExceptions()
             .until(() -> {
-                WireMock.verify(postRequestedFor(urlPathEqualTo(CREATE_ExCEPTION_RECORD_SUBMIT_URL)));
+                WireMock.verify(postRequestedFor(urlPathEqualTo(CREATE_EXCEPTION_RECORD_SUBMIT_URL)));
                 return true;
             });
     }
@@ -154,7 +154,6 @@ class SupplementaryEvidenceCreatorTest {
             .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
             .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(MOCKED_S2S_TOKEN_SIG));
     }
-
 
     private MappingBuilder exceptionRecordCcdStartEvent() {
         return get(CREATE_EXCEPTION_START_EVENT_URL)
