@@ -38,17 +38,14 @@ public class EnvelopesQueueConsumeTask {
         if (serviceConfigProvider != null) {
             surnameOcrFieldName = serviceConfigProvider.getConfig("bulkscan")
                 .getSurnameOcrFieldName("B123");
-            try {
-                log.info("xxxxxx isReadyForConsumingMessages{}", isReadyForConsumingMessages());
-            } catch (LogInAttemptRejectedException e) {
-                e.printStackTrace();
-            }
         }
         log.info("yyyyyy surnameOcrFieldName{}", surnameOcrFieldName);
         try {
             boolean queueMayHaveMessages = true;
+            boolean readyForConsumingMessages = isReadyForConsumingMessages();
+            log.info("xxxxxx isReadyForConsumingMessages{}", readyForConsumingMessages);
 
-            while (queueMayHaveMessages && isReadyForConsumingMessages()) {
+            while (queueMayHaveMessages && readyForConsumingMessages) {
                 queueMayHaveMessages = envelopeEventProcessor.processNextMessage();
             }
 
