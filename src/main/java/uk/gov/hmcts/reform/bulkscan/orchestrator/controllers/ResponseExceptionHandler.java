@@ -18,7 +18,8 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<ErrorResponse> handleInternalException(Exception exception) {
-        log.error(exception.getMessage(), exception);
+        log.error("Unhandled exception. Returning 500 response to client", exception);
+
         return status(INTERNAL_SERVER_ERROR).body(new ErrorResponse(exception.getMessage()));
     }
 
