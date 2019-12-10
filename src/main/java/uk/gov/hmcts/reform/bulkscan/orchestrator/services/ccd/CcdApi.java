@@ -258,50 +258,57 @@ public class CcdApi {
     ) {
         return caseRef == null
             ? feignCcdApi.startForCaseworker(
-                authenticator.getUserToken(),
-                authenticator.getServiceToken(),
-                authenticator.getUserDetails().getId(),
-                jurisdiction,
-                caseTypeId,
-                eventTypeId
-            )
+            authenticator.getUserToken(),
+            authenticator.getServiceToken(),
+            authenticator.getUserDetails().getId(),
+            jurisdiction,
+            caseTypeId,
+            eventTypeId
+        )
             : feignCcdApi.startEventForCaseWorker(
-                authenticator.getUserToken(),
-                authenticator.getServiceToken(),
-                authenticator.getUserDetails().getId(),
-                jurisdiction,
-                caseTypeId,
-                caseRef,
-                eventTypeId
-            );
+            authenticator.getUserToken(),
+            authenticator.getServiceToken(),
+            authenticator.getUserDetails().getId(),
+            jurisdiction,
+            caseTypeId,
+            caseRef,
+            eventTypeId
+        );
     }
 
     public CaseDetails submitEvent(
         CcdAuthenticator authenticator,
         String jurisdiction,
         String caseTypeId,
+        CaseDataContent caseDataContent
+    ) {
+        return feignCcdApi.submitForCaseworker(
+            authenticator.getUserToken(),
+            authenticator.getServiceToken(),
+            authenticator.getUserDetails().getId(),
+            jurisdiction,
+            caseTypeId,
+            true,
+            caseDataContent
+        );
+    }
+
+    public CaseDetails submitEventForExistingCase(
+        CcdAuthenticator authenticator,
+        String jurisdiction,
+        String caseTypeId,
         String caseRef,
         CaseDataContent caseDataContent
     ) {
-        return caseRef == null
-            ? feignCcdApi.submitForCaseworker(
-                authenticator.getUserToken(),
-                authenticator.getServiceToken(),
-                authenticator.getUserDetails().getId(),
-                jurisdiction,
-                caseTypeId,
-                true,
-                caseDataContent
-            )
-            : feignCcdApi.submitEventForCaseWorker(
-                authenticator.getUserToken(),
-                authenticator.getServiceToken(),
-                authenticator.getUserDetails().getId(),
-                jurisdiction,
-                caseTypeId,
-                caseRef,
-                true,
-                caseDataContent
-            );
+        return feignCcdApi.submitEventForCaseWorker(
+            authenticator.getUserToken(),
+            authenticator.getServiceToken(),
+            authenticator.getUserDetails().getId(),
+            jurisdiction,
+            caseTypeId,
+            caseRef,
+            true,
+            caseDataContent
+        );
     }
 }
