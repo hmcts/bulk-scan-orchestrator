@@ -34,6 +34,7 @@ public class EnvelopesQueueConsumeTask {
             boolean queueMayHaveMessages = true;
 
             while (queueMayHaveMessages && isReadyForConsumingMessages()) {
+                log.info("running,,,,,,  ");
                 queueMayHaveMessages = envelopeEventProcessor.processNextMessage();
             }
 
@@ -48,7 +49,9 @@ public class EnvelopesQueueConsumeTask {
 
     private boolean isReadyForConsumingMessages() throws LogInAttemptRejectedException {
         // TODO: add S2S and IDAM health checks
-        return processingReadinessChecker.isNoLogInAttemptRejectedByIdam();
+        boolean noLogInAttemptRejectedByIdam = processingReadinessChecker.isNoLogInAttemptRejectedByIdam();
+        log.info("isReadyForConsumingMessages  {} ", noLogInAttemptRejectedByIdam);
+        return noLogInAttemptRejectedByIdam;
     }
 
     private void logTaskError(Exception exception) {
