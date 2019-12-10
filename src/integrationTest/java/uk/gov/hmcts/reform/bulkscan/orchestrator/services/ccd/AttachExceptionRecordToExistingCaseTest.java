@@ -254,8 +254,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .headers(userHeaders())
             .post(CALLBACK_ATTACH_CASE_PATH)
             .then()
-            .statusCode(200)
-            .body(RESPONSE_FIELD_ERRORS, hasItem(AttachCaseCallbackService.INTERNAL_ERROR_MSG));
+            .statusCode(500);
     }
 
     @DisplayName("Should fail correctly if document is duplicate or document is already attached")
