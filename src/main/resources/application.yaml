@@ -67,6 +67,9 @@ service-config:
       case-type-ids:
         - Bulk_Scanned
       allow-creating-case-before-payments-are-processed: true
+      form-type-to-surname-ocr-field-mappings:
+        - formType: B123
+          ocrField: field_surname
 
     - service: sscs
       jurisdiction: SSCS
