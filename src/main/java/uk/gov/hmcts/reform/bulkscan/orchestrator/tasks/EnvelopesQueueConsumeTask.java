@@ -31,6 +31,7 @@ public class EnvelopesQueueConsumeTask {
         log.info("Started the job consuming envelope messages");
 
         try {
+            log.info("xxxxxx isReadyForConsumingMessages{}", isReadyForConsumingMessages());
             boolean queueMayHaveMessages = true;
 
             while (queueMayHaveMessages && isReadyForConsumingMessages()) {
