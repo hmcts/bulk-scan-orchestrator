@@ -103,6 +103,15 @@ class ExceptionRecordCreationTest {
             .until(() -> findCasesByPoBox(randomPoBox).size() == 1);
 
         CaseDetails caseDetails = findCasesByPoBox(randomPoBox).get(0);
+
+        LOG.info(
+            "PoBox :{},caseDetails ID:{}, getCaseTypeId:{}",
+            randomPoBox,
+            caseDetails.getId(),
+            caseDetails.getCaseTypeId()
+        );
+        // envelope ID from the JSON resource representing the test message
+        assertThat(caseDetails.getData().get("envelopeId")).isEqualTo(messageEnvelopeId);
         assertThat(caseDetails.getCaseTypeId()).isEqualTo("BULKSCAN_ExceptionRecord");
         assertThat(caseDetails.getJurisdiction()).isEqualTo("BULKSCAN");
 
@@ -111,12 +120,9 @@ class ExceptionRecordCreationTest {
             "field_surname","surnameXXXX"
         );
         assertThat(getOcrData(caseDetails)).isEqualTo(expectedOcrData);
-
         List<String> expectedOcrDataWarnings = Arrays.asList("warning 1", "warning 2");
         assertThat(getOcrDataValidationWarnings(caseDetails)).isEqualTo(expectedOcrDataWarnings);
 
-        // envelope ID from the JSON resource representing the test message
-        assertThat(caseDetails.getData().get("envelopeId")).isEqualTo(messageEnvelopeId);
         assertThat(getCaseDataForField(caseDetails, "awaitingPaymentDCNProcessing")).isEqualTo("Yes");
         assertThat(getCaseDataForField(caseDetails, "containsPayments")).isEqualTo("Yes");
         assertThat(getCaseDataForField(caseDetails, "surname")).isEqualTo("surnameXXXX");
@@ -149,6 +155,9 @@ class ExceptionRecordCreationTest {
     void create_exception_record_for_supplementary_evidence_with_ocr() throws Exception {
         //given
         String envelopeCaseRef = "1539860706648396";
+        Map<String, String> expectedOcrData = ImmutableMap.of(
+            "first_name", "value1", "last_name", "value2", "email", "hello@test.com"
+        );
 
         // when
         String envelopeId = envelopeMessager.sendMessageFromFile(
@@ -166,15 +175,8 @@ class ExceptionRecordCreationTest {
             .until(() -> findCasesByEnvelopeId(envelopeId).size() == 1);
 
         CaseDetails exceptionRecord = findCasesByEnvelopeId(envelopeId).get(0);
-
-        LOG.info("exceptionRecord ID:{}, getCaseTypeId:{}", exceptionRecord.getId(), exceptionRecord.getCaseTypeId());
-
         assertThat(getCaseDataForField(exceptionRecord, "journeyClassification"))
             .isEqualTo("SUPPLEMENTARY_EVIDENCE_WITH_OCR");
-
-        Map<String, String> expectedOcrData = ImmutableMap.of(
-            "first_name", "value1", "last_name", "value2", "email", "hello@test.com"
-        );
         assertThat(getOcrData(exceptionRecord)).isEqualTo(expectedOcrData);
         assertThat(getCaseDataForField(exceptionRecord, "envelopeCaseReference")).isEqualTo(envelopeCaseRef);
     }
