@@ -266,7 +266,7 @@ public class CcdApi {
         );
     }
 
-    public StartEventResponse startEventForExistingCase(
+    public StartEventResponse startEventForAttachScannedDocs(
         CcdAuthenticator authenticator,
         String jurisdiction,
         String caseTypeId,
@@ -316,7 +316,7 @@ public class CcdApi {
         );
     }
 
-    public CaseDetails submitEventForExistingCase(
+    public CaseDetails submitEventForAttachScannedDocs(
         CcdAuthenticator authenticator,
         String jurisdiction,
         String caseTypeId,

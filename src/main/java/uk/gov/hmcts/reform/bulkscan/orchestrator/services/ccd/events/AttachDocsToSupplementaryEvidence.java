@@ -51,7 +51,7 @@ class AttachDocsToSupplementaryEvidence {
             try {
                 CcdAuthenticator authenticator = ccdApi.authenticateJurisdiction(envelope.jurisdiction);
 
-                StartEventResponse startEventResp = ccdApi.startEventForExistingCase(
+                StartEventResponse startEventResp = ccdApi.startEventForAttachScannedDocs(
                     authenticator,
                     envelope.jurisdiction,
                     existingCase.getCaseTypeId(),
@@ -66,7 +66,7 @@ class AttachDocsToSupplementaryEvidence {
                     existingCase.getId()
                 );
 
-                ccdApi.submitEventForExistingCase(
+                ccdApi.submitEventForAttachScannedDocs(
                     authenticator,
                     envelope.jurisdiction,
                     existingCase.getCaseTypeId(),
