@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.env
 
 import java.util.EnumSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -101,6 +100,6 @@ public class ExceptionRecordMapper {
     }
 
     private String extractSurnameFromOcrData(Envelope envelope) {
-            return "surnameXXXX";
+        return "surnameXXXX";
     }
 }
