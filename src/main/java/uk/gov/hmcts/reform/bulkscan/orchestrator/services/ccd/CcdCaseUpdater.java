@@ -4,7 +4,6 @@ import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException.BadRequest;
 import org.springframework.web.client.HttpClientErrorException.Conflict;
 import org.springframework.web.client.HttpClientErrorException.UnprocessableEntity;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -125,17 +124,6 @@ public class CcdCaseUpdater {
                     )
                 );
             }
-        } catch (BadRequest exception) {
-            throw new CallbackException(
-                format(
-                    "Failed to call %s service Case Update API to update case with case Id %s "
-                        + "based on exception record %s",
-                    configItem.getService(),
-                    existingCaseId,
-                    exceptionRecord.id
-                ),
-                exception
-            );
         } catch (UnprocessableEntity exception) {
             ClientServiceErrorResponse errorResponse = serviceResponseParser.parseResponseBody(exception);
             return new ProcessResult(errorResponse.warnings, errorResponse.errors);

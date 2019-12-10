@@ -281,7 +281,7 @@ class CcdCaseUpdaterTest {
     }
 
     @Test
-    void updateCase_should_handle_bad_request() {
+    void updateCase_should_handle_bad_request_from_start_event() {
         // given
         given(coreCaseDataApi.startEventForCaseWorker(
             anyString(),
@@ -314,7 +314,7 @@ class CcdCaseUpdaterTest {
 
         // then
         assertThat(callbackException.getMessage())
-            .isEqualTo("Failed to call Service service Case Update API to update case with case Id existing_case_id "
+            .isEqualTo("Failed to update case for Service service with case Id existing_case_id "
                 + "based on exception record 1");
         assertThat(callbackException.getCause().getMessage()).isEqualTo("400 bad request message");
         assertThat(callbackException.getCause() instanceof HttpClientErrorException).isTrue();
