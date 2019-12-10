@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -29,6 +31,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor
 @SpringBootTest
 @ActiveProfiles("nosb")  // no servicebus queue handler registration
 class ExceptionRecordCreationTest {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ExceptionRecordCreationTest.class);
 
     @Autowired
     private CaseSearcher caseSearcher;
@@ -145,9 +149,6 @@ class ExceptionRecordCreationTest {
     void create_exception_record_for_supplementary_evidence_with_ocr() throws Exception {
         //given
         String envelopeCaseRef = "1539860706648396";
-        Map<String, String> expectedOcrData = ImmutableMap.of(
-            "first_name", "value1", "last_name", "value2", "email", "hello@test.com"
-        );
 
         // when
         String envelopeId = envelopeMessager.sendMessageFromFile(
@@ -165,11 +166,17 @@ class ExceptionRecordCreationTest {
             .until(() -> findCasesByEnvelopeId(envelopeId).size() == 1);
 
         CaseDetails exceptionRecord = findCasesByEnvelopeId(envelopeId).get(0);
+
+        LOG.info("exceptionRecord ID:{}, getCaseTypeId:{}", exceptionRecord.getId(), exceptionRecord.getCaseTypeId());
+
         assertThat(getCaseDataForField(exceptionRecord, "journeyClassification"))
             .isEqualTo("SUPPLEMENTARY_EVIDENCE_WITH_OCR");
+
+        Map<String, String> expectedOcrData = ImmutableMap.of(
+            "first_name", "value1", "last_name", "value2", "email", "hello@test.com"
+        );
         assertThat(getOcrData(exceptionRecord)).isEqualTo(expectedOcrData);
         assertThat(getCaseDataForField(exceptionRecord, "envelopeCaseReference")).isEqualTo(envelopeCaseRef);
-        assertThat(getCaseDataForField(exceptionRecord, "envelopeLegacyCaseReference")).isEmpty();
     }
 
     private List<CaseDetails> findCasesByPoBox(UUID poBox) {
