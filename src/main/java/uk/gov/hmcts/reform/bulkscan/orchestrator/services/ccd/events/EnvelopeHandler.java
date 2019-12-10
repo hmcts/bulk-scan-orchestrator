@@ -35,12 +35,15 @@ public class EnvelopeHandler {
 
                 if (caseDetailsFound.isPresent()) {
                     CaseDetails existingCase = caseDetailsFound.get();
-                    evidenceAttacher.attach(envelope, existingCase);
-                    paymentsProcessor.createPayments(envelope, existingCase.getId(), false);
+                    boolean docsAttached = evidenceAttacher.attach(envelope, existingCase);
+                    if (docsAttached) {
+                        paymentsProcessor.createPayments(envelope, existingCase.getId(), false);
+                    } else {
+                        createExceptionRecord(envelope);
+                    }
                 } else {
                     createExceptionRecord(envelope);
                 }
-
                 break;
             case SUPPLEMENTARY_EVIDENCE_WITH_OCR:
             case EXCEPTION:
