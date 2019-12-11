@@ -31,6 +31,8 @@ public class CcdApi {
 
     public static final Logger log = LoggerFactory.getLogger(CcdApi.class);
 
+    public static final String EVENT_ID_ATTACH_SCANNED_DOCS = "attachScannedDocs";
+
     public static final String SEARCH_BY_LEGACY_ID_QUERY_FORMAT =
         "{\"query\": { \"match_phrase\" : { \"alias.previousServiceCaseReference\" : \"%s\" }}}";
 
@@ -72,7 +74,7 @@ public class CcdApi {
             jurisdiction,
             caseTypeId,
             caseRef,
-            "attachScannedDocs"
+            EVENT_ID_ATTACH_SCANNED_DOCS
         );
     }
 
@@ -82,7 +84,7 @@ public class CcdApi {
         try {
             //TODO We don't need to login here as we just need the service token
             CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(theCase.getJurisdiction());
-            return startAttachScannedDocs(
+            StartEventResponse response = startAttachScannedDocs(
                 caseRef,
                 authenticator.getServiceToken(),
                 idamToken,
@@ -90,6 +92,18 @@ public class CcdApi {
                 theCase.getJurisdiction(),
                 theCase.getCaseTypeId()
             );
+
+            log.info(
+                "Started event to attach docs to case. "
+                    + "Event ID: {}. Case ID: {}. Case type: {}. Jurisdiction: {}. Case state: {}",
+                EVENT_ID_ATTACH_SCANNED_DOCS,
+                caseRef,
+                theCase.getCaseTypeId(),
+                theCase.getJurisdiction(),
+                theCase.getState()
+            );
+
+            return response;
         } catch (FeignException e) {
             throw new CcdCallException(
                 format("Internal Error: start event call failed case: %s Error: %s", caseRef, e.status()), e
