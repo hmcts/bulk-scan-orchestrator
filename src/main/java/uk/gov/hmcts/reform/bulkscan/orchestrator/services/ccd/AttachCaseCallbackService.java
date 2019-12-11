@@ -92,7 +92,7 @@ public class AttachCaseCallbackService {
         String requesterIdamToken,
         String requesterUserId,
         String eventId,
-        boolean ignoreWarnings
+        Boolean ignoreWarnings
     ) {
         Validation<String, Void> eventIdValidation = isAttachToCaseEvent(eventId);
 
