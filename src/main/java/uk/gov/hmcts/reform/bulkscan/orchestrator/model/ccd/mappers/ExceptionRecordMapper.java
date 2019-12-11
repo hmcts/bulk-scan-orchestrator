@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.env
 
 import java.util.EnumSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -108,11 +107,15 @@ public class ExceptionRecordMapper {
         String surnameOcrFieldName = serviceConfigProvider.getConfig(envelope.container)
             .getSurnameOcrFieldName(envelope.formType);
 
-        List<String> surnameList = envelope.ocrData.stream().filter(ocrData -> ocrData.name.equals(surnameOcrFieldName))
-            .map(ocrData -> ocrData.value).collect(Collectors.toList());
+        List<String> surnameList = envelope.ocrData
+            .stream()
+            .filter(ocrData -> ocrData.name.equals(surnameOcrFieldName))
+            .map(ocrData -> ocrData.value)
+            .collect(toList());
         if (surnameList.size() == 0) {
             LOGGER.info(
-                "Surname not found in OCR data. Surname Ocr Field Name:{}. Envelope id:{},Case Ref:{},Jurisdiction:{}",
+                "Surname not found in OCR data. "
+                    + "Surname Ocr Field Name: {}. Envelope id: {}, Case Ref: {}, Jurisdiction: {}",
                 surnameOcrFieldName,
                 envelope.id,
                 envelope.caseRef,
@@ -121,8 +124,8 @@ public class ExceptionRecordMapper {
             return null;
         } else if (surnameList.size() > 1) {
             LOGGER.info(
-                "Surname found {} times in OCR data."
-                    + "Surname Ocr Field Name:{} Envelope id:{},Case Ref:{},Jurisdiction:{}",
+                "Surname found {} times in OCR data. "
+                    + "Surname Ocr Field Name: {}, Envelope id: {}, Case Ref: {}, Jurisdiction: {}",
                 surnameList.size(),
                 surnameOcrFieldName,
                 envelope.id,

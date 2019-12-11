@@ -115,7 +115,8 @@ class ExceptionRecordCreationTest {
         assertThat(caseDetails.getCaseTypeId()).isEqualTo("BULKSCAN_ExceptionRecord");
         assertThat(caseDetails.getJurisdiction()).isEqualTo("BULKSCAN");
 
-        Map<String, String> expectedOcrData = ImmutableMap.of("field1", "value1",
+        Map<String, String> expectedOcrData = ImmutableMap.of(
+            "field1", "value1",
             "field2", "value2",
             "field_surname","surnameXXXX"
         );
