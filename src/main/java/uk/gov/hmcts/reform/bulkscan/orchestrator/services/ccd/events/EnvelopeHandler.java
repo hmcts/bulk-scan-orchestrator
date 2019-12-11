@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseFinder;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.PaymentsProcessor;
@@ -10,6 +12,8 @@ import java.util.Optional;
 
 @Service
 public class EnvelopeHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(EnvelopeHandler.class);
 
     private final AttachDocsToSupplementaryEvidence evidenceAttacher;
     private final CreateExceptionRecord exceptionRecordCreator;
@@ -39,6 +43,11 @@ public class EnvelopeHandler {
                     if (docsAttached) {
                         paymentsProcessor.createPayments(envelope, existingCase.getId(), false);
                     } else {
+                        log.info(
+                            "Creating exception record as supplementary evidence failed for envelope {} case {}",
+                            envelope.id,
+                            existingCase.getId()
+                        );
                         createExceptionRecord(envelope);
                     }
                 } else {
