@@ -75,7 +75,10 @@ class AttachExceptionRecordToExistingCaseTest {
 
     private static final String CASE_URL = CASE_SUBMIT_URL + "/" + CASE_REF;
 
-    private static final String START_EVENT_URL = CASE_URL + "/event-triggers/attachScannedDocs/token";
+    private static final String START_ATTACH_SCANNED_DOCS_EVENT_URL =
+        CASE_URL + "/event-triggers/attachScannedDocs/token";
+    private static final String START_ATTACH_SCANNED_DOCS_WITH_OCR_EVENT_URL =
+        CASE_URL + "/event-triggers/attachScannedDocsWithOcr/token";
     // see WireMock mapping json files
     private static final String MOCKED_IDAM_TOKEN_SIG = "q6hDG0Z1Qbinwtl8TgeDrAVV0LlCTRtbQqBYoMjd03k";
     private static final String MOCKED_S2S_TOKEN_SIG =
@@ -110,7 +113,13 @@ class AttachExceptionRecordToExistingCaseTest {
         EXCEPTION_RECORD_DOCUMENT_NUMBER
     );
 
-    private static final StartEventResponse START_EVENT_RESPONSE = StartEventResponse
+    private static final StartEventResponse START_ATTACH_SCANNED_DOCS_EVENT_RESPONSE = StartEventResponse
+        .builder()
+        .eventId(EVENT_ID)
+        .token(EVENT_TOKEN)
+        .build();
+
+    private static final StartEventResponse START_ATTACH_SCANNED_DOCS_WITH_OCR_EVENT_RESPONSE = StartEventResponse
         .builder()
         .eventId(EVENT_ID)
         .token(EVENT_TOKEN)
@@ -121,9 +130,12 @@ class AttachExceptionRecordToExistingCaseTest {
     private static final String RESPONSE_FIELD_WARNINGS = "warnings";
     private static final String RESPONSE_FIELD_DATA = "data";
     private static final String EVENT_ID_ATTACH_TO_CASE = "attachToExistingCase";
+    private static final String EVENT_ID_ATTACH_TO_CASE_WITH_OCR = "attachToExistingCaseWithOcr";
     private static final String CLASSIFICATION_EXCEPTION = "EXCEPTION";
     private static final String CALLBACK_ATTACH_CASE_PATH = "/callback/attach_case";
     private static final String ATTACH_TO_CASE_REFERENCE_FIELD_NAME = "attachToCaseReference";
+    private static final String CLASSIFICATION_SUPPLEMENTARY_EVIDENCE = "SUPPLEMENTARY_EVIDENCE";
+    private static final String CLASSIFICATION_SUPPLEMENTARY_EVIDENCE_WITH_OCR = "SUPPLEMENTARY_EVIDENCE_WITH_OCR";
 
     @LocalServerPort
     private int applicationPort;
@@ -134,7 +146,10 @@ class AttachExceptionRecordToExistingCaseTest {
     @BeforeEach
     public void before() throws JsonProcessingException {
         WireMock.reset();
-        givenThat(ccdStartEvent().willReturn(okJson(MAPPER.writeValueAsString(START_EVENT_RESPONSE))));
+        givenThat(ccdStartAttachScannedDocsEvent()
+            .willReturn(okJson(MAPPER.writeValueAsString(START_ATTACH_SCANNED_DOCS_EVENT_RESPONSE))));
+        givenThat(ccdStartAttachScannedDocsWithOcrEvent()
+            .willReturn(okJson(MAPPER.writeValueAsString(START_ATTACH_SCANNED_DOCS_WITH_OCR_EVENT_RESPONSE))));
         mockCaseSearchByCcdId(CASE_REF, okJson(MAPPER.writeValueAsString(CASE_DETAILS)));
         givenThat(ccdSubmitEvent().willReturn(okJson(MAPPER.writeValueAsString(CASE_DETAILS))));
 
@@ -247,7 +262,7 @@ class AttachExceptionRecordToExistingCaseTest {
     @DisplayName("Should fail with the correct error when start event api call fails")
     @Test
     public void should_fail_with_the_correct_error_when_start_event_api_call_fails() {
-        givenThat(ccdStartEvent().willReturn(status(404)));
+        givenThat(ccdStartAttachScannedDocsEvent().willReturn(status(404)));
 
         given()
             .body(exceptionRecordCallbackRequest())
@@ -510,7 +525,7 @@ class AttachExceptionRecordToExistingCaseTest {
     @Test
     public void should_fail_when_callback_request_has_invalid_event_id() throws Exception {
         given()
-            .body(callbackRequestWith("invalid_event_id", "supplementary_evidence", false))
+            .body(callbackRequestWith("invalid_event_id", CLASSIFICATION_SUPPLEMENTARY_EVIDENCE, false))
             .headers(userHeaders())
             .post(CALLBACK_ATTACH_CASE_PATH)
             .then()
@@ -544,6 +559,33 @@ class AttachExceptionRecordToExistingCaseTest {
                 RESPONSE_FIELD_ERRORS,
                 hasItem("The 'attach to case' event is not supported for exception records with OCR")
             );
+    }
+
+    @Test
+    public void should_succeed_when_classification_is_supplementary_evidence_with_ocr_and_valid_exception_record() {
+        Map<String, Object> data = getCaseData(CLASSIFICATION_SUPPLEMENTARY_EVIDENCE_WITH_OCR, true);
+        data.put("poBox", "12345");
+        data.put("formType", "Form1");
+        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
+        data.put("openingDate", "2019-09-06T15:30:04.000Z");
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
+        CaseDetails caseDetails = getCaseDetails(data);
+        CallbackRequest callbackRequest = CallbackRequest
+            .builder()
+            .caseDetails(caseDetails)
+            .eventId(EVENT_ID_ATTACH_TO_CASE)
+            .build();
+
+        ValidatableResponse response =
+            given()
+                .body(callbackRequest)
+                .headers(userHeaders())
+                .post(CALLBACK_ATTACH_CASE_PATH)
+                .then()
+                .statusCode(200);
+
+        //verifySuccessResponse(response, callbackRequest);
+        //verifyRequestedAttachingToCase();
     }
 
     @Test
@@ -824,8 +866,14 @@ class AttachExceptionRecordToExistingCaseTest {
             .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(MOCKED_S2S_TOKEN_SIG));
     }
 
-    private MappingBuilder ccdStartEvent() {
-        return get(START_EVENT_URL)
+    private MappingBuilder ccdStartAttachScannedDocsEvent() {
+        return get(START_ATTACH_SCANNED_DOCS_EVENT_URL)
+            .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
+            .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(MOCKED_S2S_TOKEN_SIG));
+    }
+
+    private MappingBuilder ccdStartAttachScannedDocsWithOcrEvent() {
+        return get(START_ATTACH_SCANNED_DOCS_WITH_OCR_EVENT_URL)
             .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
             .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(MOCKED_S2S_TOKEN_SIG));
     }
@@ -835,7 +883,7 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     private RequestPatternBuilder startEventRequest() {
-        return getRequestedFor(urlEqualTo(START_EVENT_URL));
+        return getRequestedFor(urlEqualTo(START_ATTACH_SCANNED_DOCS_EVENT_URL));
     }
 
     private CallbackRequest exceptionRecordCallbackRequestWithPayment() {
@@ -914,6 +962,32 @@ class AttachExceptionRecordToExistingCaseTest {
             .caseDetails(exceptionRecordWith(classification, includeOcr))
             .eventId(eventId)
             .build();
+    }
+
+    private CaseDetails getCaseDetails(Map<String, Object> caseData) {
+        return CaseDetails.builder()
+            .jurisdiction(JURISDICTION)
+            .id(EXCEPTION_RECORD_ID)
+            .caseTypeId(CASE_TYPE_EXCEPTION_RECORD)
+            .data(caseData)
+            .build();
+    }
+
+    private Map<String, Object> getCaseData(String classification, boolean includeOcr) {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("journeyClassification", classification);
+
+        if (includeOcr) {
+            caseData.put("scanOCRData", singletonList(
+                ImmutableMap.of("first_name", "John")
+            ));
+        } else {
+            caseData.put("scanOCRData", emptyList());
+        }
+
+        caseData.put("scannedDocuments", ImmutableList.of(EXCEPTION_RECORD_DOC));
+        caseData.put("attachToCaseReference", CASE_REF);
+        return caseData;
     }
 
     private CaseDetails exceptionRecordWith(String classification, boolean includeOcr) {
