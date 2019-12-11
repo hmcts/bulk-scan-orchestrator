@@ -185,7 +185,7 @@ public class AttachCaseCallbackService {
                 event.targetCaseRef,
                 exc
             );
-            return Either.left(singletonList(INTERNAL_ERROR_MSG));
+            throw exc;
         }
     }
 
