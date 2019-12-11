@@ -283,19 +283,17 @@ public class CcdApi {
                 caseRef,
                 eventTypeId
             );
+        } catch (FeignException.NotFound e) {
+            throw new UnableToAttachDocumentsException(
+                String.format(
+                    "Attach documents start event failed for case type: %s and case ref: %s", caseTypeId, caseRef
+                ),
+                e
+            );
         } catch (FeignException e) {
-            if (e.status() == 404) {
-                throw new UnableToAttachDocumentsException(
-                    String.format(
-                        "Attach documents start event failed for case type: %s and case ref: %s", caseTypeId, caseRef
-                    ),
-                    e
-                );
-            } else {
-                throw new CcdCallException(
-                    String.format("Could not attach documents for case ref: %s Error: %s", caseRef, e.status()), e
-                );
-            }
+            throw new CcdCallException(
+                String.format("Could not attach documents for case ref: %s Error: %s", caseRef, e.status()), e
+            );
         }
     }
 
@@ -334,19 +332,17 @@ public class CcdApi {
                 true,
                 caseDataContent
             );
+        } catch (FeignException.NotFound e) {
+            throw new UnableToAttachDocumentsException(
+                String.format(
+                    "Attach documents submit failed for case type: %s and case ref: %s", caseTypeId, caseRef
+                ),
+                e
+            );
         } catch (FeignException e) {
-            if (e.status() == 404) {
-                throw new UnableToAttachDocumentsException(
-                    String.format(
-                        "Attach documents submit failed for case type: %s and case ref: %s", caseTypeId, caseRef
-                    ),
-                    e
-                );
-            } else {
-                throw new CcdCallException(
-                    String.format("Could not attach documents for case ref: %s Error: %s", caseRef, e.status()), e
-                );
-            }
+            throw new CcdCallException(
+                String.format("Could not attach documents for case ref: %s Error: %s", caseRef, e.status()), e
+            );
         }
     }
 }

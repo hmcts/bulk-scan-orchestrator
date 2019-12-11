@@ -36,6 +36,8 @@ class AttachDocsToSupplementaryEvidence {
 
     /**
      * Attaches documents from given envelope to existing case.
+     *
+     * @return true when attaching documents to existing case is successful, otherwise false
      */
     public boolean attach(Envelope envelope, CaseDetails existingCase) {
         if (mapper.getDocsToAdd(getDocuments(existingCase), envelope.documents).isEmpty()) {
