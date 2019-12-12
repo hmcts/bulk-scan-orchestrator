@@ -29,9 +29,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 @Component
 public class ExceptionRecordMapper {
 
-    private final String documentManagementUrl;
-    private final String contextPath;
-    private final ServiceConfigProvider serviceConfigProvider;
     private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionRecordMapper.class);
 
     // Display Envelope case references for the specified classifications
@@ -39,6 +36,10 @@ public class ExceptionRecordMapper {
         SUPPLEMENTARY_EVIDENCE,
         SUPPLEMENTARY_EVIDENCE_WITH_OCR
     );
+
+    private final String documentManagementUrl;
+    private final String contextPath;
+    private final ServiceConfigProvider serviceConfigProvider;
 
     public ExceptionRecordMapper(
         @Value("${document_management.url}") final String documentManagementUrl,
@@ -123,7 +124,7 @@ public class ExceptionRecordMapper {
             );
             return null;
         } else if (surnameList.size() > 1) {
-            LOGGER.info(
+            LOGGER.error(
                 "Surname found {} times in OCR data. "
                     + "Surname Ocr Field Name: {}, Envelope id: {}, Case Ref: {}, Jurisdiction: {}",
                 surnameList.size(),

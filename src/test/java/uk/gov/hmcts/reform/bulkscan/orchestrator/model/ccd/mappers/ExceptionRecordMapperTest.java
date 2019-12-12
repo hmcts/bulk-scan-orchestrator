@@ -50,7 +50,7 @@ class ExceptionRecordMapperTest {
     @Test
     public void mapEnvelope_maps_all_fields_correctly() {
         // given
-        Envelope envelope = envelopeWithSurname(2);
+        Envelope envelope = envelopeWithSurname("surname1");
 
         // when
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
@@ -203,7 +203,7 @@ class ExceptionRecordMapperTest {
     }
 
     @Test
-    public void mapEnvelope_surname_should_null_when_no_surname_data_in_ocr() {
+    public void mapEnvelope_sets_surname_null_when_no_surname_data_in_ocr() {
         //given
         Envelope envelope = envelope("CASE_123", "LEGACY_CASE_123", Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR);
         // when

@@ -104,12 +104,6 @@ class ExceptionRecordCreationTest {
 
         CaseDetails caseDetails = findCasesByPoBox(randomPoBox).get(0);
 
-        LOG.info(
-            "PoBox :{},caseDetails ID:{}, getCaseTypeId:{}",
-            randomPoBox,
-            caseDetails.getId(),
-            caseDetails.getCaseTypeId()
-        );
         // envelope ID from the JSON resource representing the test message
         assertThat(caseDetails.getData().get("envelopeId")).isEqualTo(messageEnvelopeId);
         assertThat(caseDetails.getCaseTypeId()).isEqualTo("BULKSCAN_ExceptionRecord");
@@ -118,7 +112,7 @@ class ExceptionRecordCreationTest {
         Map<String, String> expectedOcrData = ImmutableMap.of(
             "field1", "value1",
             "field2", "value2",
-            "field_surname","surnameXXXX"
+            "field_surname", "surnameXXXX"
         );
         assertThat(getOcrData(caseDetails)).isEqualTo(expectedOcrData);
         List<String> expectedOcrDataWarnings = Arrays.asList("warning 1", "warning 2");
@@ -180,6 +174,7 @@ class ExceptionRecordCreationTest {
             .isEqualTo("SUPPLEMENTARY_EVIDENCE_WITH_OCR");
         assertThat(getOcrData(exceptionRecord)).isEqualTo(expectedOcrData);
         assertThat(getCaseDataForField(exceptionRecord, "envelopeCaseReference")).isEqualTo(envelopeCaseRef);
+        assertThat(getCaseDataForField(exceptionRecord, "envelopeLegacyCaseReference")).isEmpty();
     }
 
     private List<CaseDetails> findCasesByPoBox(UUID poBox) {
