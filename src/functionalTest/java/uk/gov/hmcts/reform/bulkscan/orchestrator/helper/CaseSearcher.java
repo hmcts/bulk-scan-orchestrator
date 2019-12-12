@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CreateExceptionRecord;
@@ -27,10 +28,10 @@ public class CaseSearcher {
         this.coreCaseDataApi = coreCaseDataApi;
     }
 
-    public Optional<CaseDetails> findExceptionRecord(String jurisdiction, String poBox) {
+    public Optional<CaseDetails> findExceptionRecord(String poBox) {
         return search(
-            jurisdiction,
-            jurisdiction + "_" + CreateExceptionRecord.CASE_TYPE,
+            SampleData.JURSIDICTION,
+            SampleData.JURSIDICTION + "_" + CreateExceptionRecord.CASE_TYPE,
             ImmutableMap.of("case.poBox", poBox)
         ).stream().findFirst();
     }

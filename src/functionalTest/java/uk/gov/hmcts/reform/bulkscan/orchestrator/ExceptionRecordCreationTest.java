@@ -69,15 +69,9 @@ class ExceptionRecordCreationTest {
         await("Exception record being created")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
-            .until(() -> caseSearcher.findExceptionRecord(
-                SampleData.JURSIDICTION,
-                randomPoBox.toString()
-            ).isPresent());
+            .until(() -> caseSearcher.findExceptionRecord(randomPoBox.toString()).isPresent());
 
-        CaseDetails caseDetails = caseSearcher.findExceptionRecord(
-            SampleData.JURSIDICTION,
-            randomPoBox.toString()
-        ).get();
+        CaseDetails caseDetails = caseSearcher.findExceptionRecord(randomPoBox.toString()).get();
         assertThat(getCaseDataForField(caseDetails, "awaitingPaymentDCNProcessing")).isEqualTo("No");
         assertThat(getCaseDataForField(caseDetails, "containsPayments")).isEqualTo("No");
     }
@@ -101,14 +95,9 @@ class ExceptionRecordCreationTest {
         await("Exception record should be created")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
-            .until(() ->
-                caseSearcher.findExceptionRecord(SampleData.JURSIDICTION, randomPoBox.toString()).isPresent()
-            );
+            .until(() -> caseSearcher.findExceptionRecord(randomPoBox.toString()).isPresent());
 
-        CaseDetails caseDetails = caseSearcher.findExceptionRecord(
-            SampleData.JURSIDICTION,
-            randomPoBox.toString()
-        ).get();
+        CaseDetails caseDetails = caseSearcher.findExceptionRecord(randomPoBox.toString()).get();
 
         assertThat(caseDetails.getCaseTypeId()).isEqualTo("BULKSCAN_ExceptionRecord");
         assertThat(caseDetails.getJurisdiction()).isEqualTo("BULKSCAN");
@@ -144,9 +133,7 @@ class ExceptionRecordCreationTest {
         await("Exception record being created")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
-            .until(() ->
-                caseSearcher.findExceptionRecord(SampleData.JURSIDICTION, randomPoBox.toString()).isPresent()
-            );
+            .until(() -> caseSearcher.findExceptionRecord(randomPoBox.toString()).isPresent());
     }
 
     @DisplayName("Should create ExceptionRecord when classification is SUPPLEMENTARY_EVIDENCE_WITH_OCR")
