@@ -71,7 +71,6 @@ public class CreateExceptionRecord {
             authenticator,
             envelope.jurisdiction,
             caseTypeId,
-            null,
             EVENT_TYPE_ID
         );
 

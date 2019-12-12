@@ -87,6 +87,7 @@ service-config:
       case-type-ids:
         - DIVORCE
         - DIVORCE_NOTICE_OF_ACTING
+      transformation-url: ${TRANSFORMATION_URL_DIVORCE}
 
     - service: finrem
       jurisdiction: DIVORCE
