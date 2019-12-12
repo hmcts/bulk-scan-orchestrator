@@ -59,6 +59,7 @@ service-config:
   # These mappings are used by Bulk Scan to determine which case type IDs to search across
   # when looking for a service case (by its legacy ID, ID of related exception record, etc).
   # Those CTIDs that are not present here, will not be included in the search.
+  # If case type ID list is empty, no case can be found for the service, except when sought for by CCD ID.
   services:
     - service: bulkscan # service name corresponds to the name of the container in Blob Storage
       jurisdiction: BULKSCAN
