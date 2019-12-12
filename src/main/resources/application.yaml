@@ -75,16 +75,24 @@ service-config:
     - service: probate
       jurisdiction: PROBATE
       transformation-url: ${TRANSFORMATION_URL_PROBATE}
-      case-type-ids: []
+      case-type-ids:
+        - GrantOfRepresentation
+        - Caveat
+        - StandingSearch
+        - WillLodgement
       allow-creating-case-before-payments-are-processed: true
 
     - service: divorce
       jurisdiction: DIVORCE
-      case-type-ids: []
+      case-type-ids:
+        - DIVORCE
+        - DIVORCE_NOTICE_OF_ACTING
 
     - service: finrem
       jurisdiction: DIVORCE
-      case-type-ids: []
+      case-type-ids:
+        - FinancialRemedyMVP2
+        - FinancialRemedyContested
 
     - service: cmc
       jurisdiction: CMC
