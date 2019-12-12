@@ -63,6 +63,7 @@ class EnvelopeHandlerTest {
         // given
         Envelope envelope = envelope(SUPPLEMENTARY_EVIDENCE, JURSIDICTION, CASE_REF);
         given(caseFinder.findCase(envelope)).willReturn(Optional.of(caseDetails));
+        given(attachDocsToSupplementaryEvidence.attach(envelope, caseDetails)).willReturn(true);
 
         // when
         envelopeHandler.handleEnvelope(envelope);
@@ -126,6 +127,23 @@ class EnvelopeHandlerTest {
         envelopeHandler.handleEnvelope(envelope);
 
         // then
+        verify(createExceptionRecord).tryCreateFrom(envelope);
+        verify(paymentsProcessor).createPayments(envelope, CASE_ID, true);
+    }
+
+    @Test
+    void should_call_CreateExceptionRecord_when_documents_attachment_fails_for_supplementary_evidence() {
+        // given
+        Envelope envelope = envelope(SUPPLEMENTARY_EVIDENCE, JURSIDICTION, CASE_REF);
+        given(caseFinder.findCase(envelope)).willReturn(Optional.of(caseDetails));
+        given(attachDocsToSupplementaryEvidence.attach(envelope, caseDetails)).willReturn(false);
+        given(createExceptionRecord.tryCreateFrom(envelope)).willReturn(CASE_ID);
+
+        // when
+        envelopeHandler.handleEnvelope(envelope);
+
+        // then
+        verify(attachDocsToSupplementaryEvidence).attach(envelope, caseDetails);
         verify(createExceptionRecord).tryCreateFrom(envelope);
         verify(paymentsProcessor).createPayments(envelope, CASE_ID, true);
     }

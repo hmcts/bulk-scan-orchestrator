@@ -102,7 +102,7 @@ public class ExceptionRecordCreatorTest {
     }
 
     private void setupCcdApi() {
-        given(ccdApi.startEvent(any(), any(), any(), any(), any()))
+        given(ccdApi.startEvent(any(), any(), any(), any()))
             .willReturn(mock(StartEventResponse.class));
 
         CaseDetails caseDetails = mock(CaseDetails.class);
