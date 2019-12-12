@@ -168,12 +168,9 @@ class ExceptionRecordCreationTest {
     }
 
     private List<CaseDetails> findCasesByPoBox(UUID poBox) {
-        return caseSearcher.search(
+        return caseSearcher.findExceptionRecordByPoBox(
             SampleData.JURSIDICTION,
-            SampleData.CONTAINER.toUpperCase() + "_" + CreateExceptionRecord.CASE_TYPE,
-            ImmutableMap.of(
-                "case.poBox", poBox.toString()
-            )
+            poBox.toString()
         );
     }
 

@@ -202,13 +202,6 @@ class CreateCaseTest {
     }
 
     private Optional<CaseDetails> lookUpExceptionRecord(UUID poBox) {
-        List<CaseDetails> caseDetailsList = caseSearcher.search(
-            SampleData.JURSIDICTION,
-            SampleData.JURSIDICTION + "_" + CreateExceptionRecord.CASE_TYPE,
-            ImmutableMap.of(
-                "case.poBox", poBox.toString()
-            )
-        );
-        return caseDetailsList.stream().findFirst();
+        return caseSearcher.findExceptionRecordByPoBox(SampleData.JURSIDICTION, poBox.toString()).stream().findFirst();
     }
 }

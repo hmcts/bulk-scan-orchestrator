@@ -297,14 +297,10 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     private Optional<CaseDetails> lookUpExceptionRecord(UUID randomPoBox) {
-        List<CaseDetails> caseDetailsList = caseSearcher.search(
-            SampleData.JURSIDICTION,
-            SampleData.JURSIDICTION + "_" + CreateExceptionRecord.CASE_TYPE,
-            ImmutableMap.of(
-                "case.poBox", randomPoBox.toString()
-            )
-        );
-        return caseDetailsList.stream().findFirst();
+        return caseSearcher
+            .findExceptionRecordByPoBox(SampleData.JURSIDICTION, randomPoBox.toString())
+            .stream()
+            .findFirst();
     }
 
     private Boolean isExceptionRecordAttachedToTheCase(CaseDetails caseDetails, int expectedScannedDocsSize) {
