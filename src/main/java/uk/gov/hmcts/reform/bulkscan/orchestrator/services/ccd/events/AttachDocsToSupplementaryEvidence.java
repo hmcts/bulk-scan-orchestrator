@@ -62,10 +62,12 @@ class AttachDocsToSupplementaryEvidence {
                 );
 
                 log.info(
-                    "Started event in CCD for envelope ID: {}. File name: {}. Case ref: {}",
+                    "Started event in CCD to attach exception record to case. "
+                        + "Envelope ID: {}. File name: {}. Case ref: {}. Case state: {}",
                     envelope.id,
                     envelope.zipFileName,
-                    existingCase.getId()
+                    existingCase.getId(),
+                    existingCase.getState()
                 );
 
                 ccdApi.submitEventForAttachScannedDocs(
