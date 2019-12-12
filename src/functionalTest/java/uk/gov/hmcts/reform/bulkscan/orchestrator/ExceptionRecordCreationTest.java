@@ -69,12 +69,12 @@ class ExceptionRecordCreationTest {
         await("Exception record being created")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
-            .until(() -> caseSearcher.findExceptionRecordByPoBox(
+            .until(() -> caseSearcher.findExceptionRecord(
                 SampleData.JURSIDICTION,
                 randomPoBox.toString()
             ).isPresent());
 
-        CaseDetails caseDetails = caseSearcher.findExceptionRecordByPoBox(
+        CaseDetails caseDetails = caseSearcher.findExceptionRecord(
             SampleData.JURSIDICTION,
             randomPoBox.toString()
         ).get();
@@ -102,10 +102,10 @@ class ExceptionRecordCreationTest {
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
             .until(() ->
-                caseSearcher.findExceptionRecordByPoBox(SampleData.JURSIDICTION, randomPoBox.toString()).isPresent()
+                caseSearcher.findExceptionRecord(SampleData.JURSIDICTION, randomPoBox.toString()).isPresent()
             );
 
-        CaseDetails caseDetails = caseSearcher.findExceptionRecordByPoBox(
+        CaseDetails caseDetails = caseSearcher.findExceptionRecord(
             SampleData.JURSIDICTION,
             randomPoBox.toString()
         ).get();
@@ -145,7 +145,7 @@ class ExceptionRecordCreationTest {
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
             .until(() ->
-                caseSearcher.findExceptionRecordByPoBox(SampleData.JURSIDICTION, randomPoBox.toString()).isPresent()
+                caseSearcher.findExceptionRecord(SampleData.JURSIDICTION, randomPoBox.toString()).isPresent()
             );
     }
 

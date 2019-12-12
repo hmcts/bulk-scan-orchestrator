@@ -27,7 +27,7 @@ public class CaseSearcher {
         this.coreCaseDataApi = coreCaseDataApi;
     }
 
-    public Optional<CaseDetails> findExceptionRecordByPoBox(String jurisdiction, String poBox) {
+    public Optional<CaseDetails> findExceptionRecord(String jurisdiction, String poBox) {
         return search(
             jurisdiction,
             jurisdiction + "_" + CreateExceptionRecord.CASE_TYPE,

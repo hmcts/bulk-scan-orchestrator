@@ -193,10 +193,10 @@ class CreateCaseTest {
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
             .until(() ->
-                caseSearcher.findExceptionRecordByPoBox(SampleData.JURSIDICTION, poBox.toString()).isPresent()
+                caseSearcher.findExceptionRecord(SampleData.JURSIDICTION, poBox.toString()).isPresent()
             );
 
-        return caseSearcher.findExceptionRecordByPoBox(SampleData.JURSIDICTION, poBox.toString()).get();
+        return caseSearcher.findExceptionRecord(SampleData.JURSIDICTION, poBox.toString()).get();
     }
 
 }

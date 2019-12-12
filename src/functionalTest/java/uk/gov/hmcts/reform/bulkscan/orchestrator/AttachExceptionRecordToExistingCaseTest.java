@@ -288,9 +288,9 @@ class AttachExceptionRecordToExistingCaseTest {
         await("Exception record is created")
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
-            .until(() -> caseSearcher.findExceptionRecordByPoBox(SampleData.JURSIDICTION, poBox.toString()).isPresent());
+            .until(() -> caseSearcher.findExceptionRecord(SampleData.JURSIDICTION, poBox.toString()).isPresent());
 
-        return caseSearcher.findExceptionRecordByPoBox(SampleData.JURSIDICTION, poBox.toString()).get();
+        return caseSearcher.findExceptionRecord(SampleData.JURSIDICTION, poBox.toString()).get();
     }
 
     private Boolean isExceptionRecordAttachedToTheCase(CaseDetails caseDetails, int expectedScannedDocsSize) {
