@@ -13,7 +13,7 @@ def component = "orchestrator"
 def channel = '#bsp-build-notices'
 GradleBuilder builder = new GradleBuilder(this, product)
 
-def secrets = [
+def nonPrSecrets = [
   's2s-${env}': [
     secret('microservicekey-bulk-scan-orchestrator', 'S2S_SECRET')
   ],
@@ -26,7 +26,16 @@ def secrets = [
     secret('payments-queue-send-connection-string', 'PAYMENTS_QUEUE_WRITE_CONN_STRING')
   ]
 ]
-
+def prSecrets = [
+  's2s-${env}': [
+    secret('microservicekey-bulk-scan-orchestrator', 'S2S_SECRET')
+  ],
+  'bulk-scan-${env}': [
+    secret('idam-users-bulkscan-username', 'IDAM_USER_NAME'),
+    secret('idam-users-bulkscan-password', 'IDAM_USER_PASSWORD'),
+    secret('idam-client-secret', 'IDAM_CLIENT_SECRET')
+  ]
+]
 static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
   [ $class: 'AzureKeyVaultSecret',
     secretType: 'Secret',
@@ -78,5 +87,11 @@ withPipeline(type, product, component) {
   installCharts()
   disableLegacyDeployment()
   enableSlackNotifications(channel)
-  loadVaultSecrets(secrets)
+
+  onPR() {
+    loadVaultSecrets(prSecrets)
+  }
+  onNonPR() {
+    loadVaultSecrets(nonPrSecrets)
+  }
 }
