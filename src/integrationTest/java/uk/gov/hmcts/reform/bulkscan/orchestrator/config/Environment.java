@@ -30,6 +30,7 @@ public final class Environment {
     public static final String CASE_EVENT_URL = CASE_URL + "/events";
     public static final String CASE_SUBMIT_URL = CASE_TYPE_URL + "/cases";
     public static final String CASE_EVENT_TRIGGER_START_URL = CASE_TYPE_URL + "/event-triggers/createException/token";
+    public static final String ATTACH_DOCS_START_EVENT_URL = CASE_URL + "/event-triggers/attachScannedDocs/token";
 
     private Environment() {
         // utility class construct

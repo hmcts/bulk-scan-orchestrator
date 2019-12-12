@@ -36,8 +36,10 @@ class AttachDocsToSupplementaryEvidence {
 
     /**
      * Attaches documents from given envelope to existing case.
+     *
+     * @return true when attaching documents to existing case is successful, otherwise false
      */
-    public void attach(Envelope envelope, CaseDetails existingCase) {
+    public boolean attach(Envelope envelope, CaseDetails existingCase) {
         if (mapper.getDocsToAdd(getDocuments(existingCase), envelope.documents).isEmpty()) {
             log.warn("Envelope {} has no new documents. CCD Case {} not updated", envelope.id, existingCase.getId());
         } else {
@@ -48,39 +50,50 @@ class AttachDocsToSupplementaryEvidence {
                 existingCase.getCaseTypeId()
             );
 
-            CcdAuthenticator authenticator = ccdApi.authenticateJurisdiction(envelope.jurisdiction);
+            try {
+                CcdAuthenticator authenticator = ccdApi.authenticateJurisdiction(envelope.jurisdiction);
 
-            StartEventResponse startEventResp = ccdApi.startEvent(
-                authenticator,
-                envelope.jurisdiction,
-                existingCase.getCaseTypeId(),
-                existingCase.getId().toString(),
-                EVENT_TYPE_ID
-            );
+                StartEventResponse startEventResp = ccdApi.startEventForAttachScannedDocs(
+                    authenticator,
+                    envelope.jurisdiction,
+                    existingCase.getCaseTypeId(),
+                    existingCase.getId().toString(),
+                    EVENT_TYPE_ID
+                );
 
-            log.info(
-                "Started event in CCD to attach exception record to case. "
-                    + "Envelope ID: {}. File name: {}. Case ref: {}. Case state: {}",
-                envelope.id,
-                envelope.zipFileName,
-                existingCase.getId(),
-                existingCase.getState()
-            );
+                log.info(
+                    "Started event in CCD to attach exception record to case. "
+                        + "Envelope ID: {}. File name: {}. Case ref: {}. Case state: {}",
+                    envelope.id,
+                    envelope.zipFileName,
+                    existingCase.getId(),
+                    existingCase.getState()
+                );
 
-            ccdApi.submitEventForExistingCase(
-                authenticator,
-                envelope.jurisdiction,
-                existingCase.getCaseTypeId(),
-                existingCase.getId().toString(),
-                buildCaseDataContent(envelope, startEventResp)
-            );
+                ccdApi.submitEventForAttachScannedDocs(
+                    authenticator,
+                    envelope.jurisdiction,
+                    existingCase.getCaseTypeId(),
+                    existingCase.getId().toString(),
+                    buildCaseDataContent(envelope, startEventResp)
+                );
 
-            log.info(
-                "Attached documents from envelope to case. Case ID: {}, envelope ID: {}",
-                existingCase.getId(),
-                envelope.id
-            );
+                log.info(
+                    "Attached documents from envelope to case. Case ID: {}, envelope ID: {}",
+                    existingCase.getId(),
+                    envelope.id
+                );
+            } catch (UnableToAttachDocumentsException e) {
+                log.error(
+                    "Failed to attach documents from envelope to case. Case Type: {}, Case ID: {}, envelope ID: {}",
+                    existingCase.getCaseTypeId(),
+                    existingCase.getId(),
+                    envelope.id
+                );
+                return false;
+            }
         }
+        return true;
     }
 
     private CaseDataContent buildCaseDataContent(Envelope envelope, StartEventResponse startEventResponse) {
