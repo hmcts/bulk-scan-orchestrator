@@ -178,7 +178,7 @@ dependencyManagement {
       entry 'bcprov-jdk15on'
     }
     // solves: CVE-2016-4977, CVE-2018-15758
-    dependencySet(group: 'org.springframework.security', version: '1.0.8.RELEASE') {
+    dependencySet(group: 'org.springframework.security', version: '1.0.9.RELEASE') {
       entry 'spring-security-rsa'
     }
     // align with jupiter version
