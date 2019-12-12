@@ -57,8 +57,8 @@ idam:
 service-config:
   # Services and all their case type IDs, excluding exception records.
   # These mappings are used by Bulk Scan to determine which case type IDs to search across
-  # when looking for a case by its legacy ID. Those CTIDs that are not present here, will
-  # not be included in the search.
+  # when looking for a service case (by its legacy ID, ID of related exception record, etc).
+  # Those CTIDs that are not present here, will not be included in the search.
   services:
     - service: bulkscan # service name corresponds to the name of the container in Blob Storage
       jurisdiction: BULKSCAN
