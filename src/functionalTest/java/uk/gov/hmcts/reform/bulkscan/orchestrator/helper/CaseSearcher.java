@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class CaseSearcher {
@@ -26,12 +27,12 @@ public class CaseSearcher {
         this.coreCaseDataApi = coreCaseDataApi;
     }
 
-    public List<CaseDetails> findExceptionRecordByPoBox(String jurisdiction, String poBox) {
+    public Optional<CaseDetails> findExceptionRecordByPoBox(String jurisdiction, String poBox) {
         return search(
             jurisdiction,
             jurisdiction + "_" + CreateExceptionRecord.CASE_TYPE,
             ImmutableMap.of("case.poBox", poBox)
-        );
+        ).stream().findFirst();
     }
 
     public List<CaseDetails> search(
