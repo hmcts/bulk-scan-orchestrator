@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.UnableToAttachDocumentsException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -253,27 +254,47 @@ public class CcdApi {
         CcdAuthenticator authenticator,
         String jurisdiction,
         String caseTypeId,
+        String eventTypeId
+    ) {
+        return feignCcdApi.startForCaseworker(
+            authenticator.getUserToken(),
+            authenticator.getServiceToken(),
+            authenticator.getUserDetails().getId(),
+            jurisdiction,
+            caseTypeId,
+            eventTypeId
+        );
+    }
+
+    public StartEventResponse startEventForAttachScannedDocs(
+        CcdAuthenticator authenticator,
+        String jurisdiction,
+        String caseTypeId,
         String caseRef,
         String eventTypeId
     ) {
-        return caseRef == null
-            ? feignCcdApi.startForCaseworker(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
-            jurisdiction,
-            caseTypeId,
-            eventTypeId
-        )
-            : feignCcdApi.startEventForCaseWorker(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
-            jurisdiction,
-            caseTypeId,
-            caseRef,
-            eventTypeId
-        );
+        try {
+            return feignCcdApi.startEventForCaseWorker(
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                authenticator.getUserDetails().getId(),
+                jurisdiction,
+                caseTypeId,
+                caseRef,
+                eventTypeId
+            );
+        } catch (FeignException.NotFound e) {
+            throw new UnableToAttachDocumentsException(
+                String.format(
+                    "Attach documents start event failed for case type: %s and case ref: %s", caseTypeId, caseRef
+                ),
+                e
+            );
+        } catch (FeignException e) {
+            throw new CcdCallException(
+                String.format("Could not attach documents for case ref: %s Error: %s", caseRef, e.status()), e
+            );
+        }
     }
 
     public CaseDetails submitEvent(
@@ -293,22 +314,35 @@ public class CcdApi {
         );
     }
 
-    public CaseDetails submitEventForExistingCase(
+    public CaseDetails submitEventForAttachScannedDocs(
         CcdAuthenticator authenticator,
         String jurisdiction,
         String caseTypeId,
         String caseRef,
         CaseDataContent caseDataContent
     ) {
-        return feignCcdApi.submitEventForCaseWorker(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
-            jurisdiction,
-            caseTypeId,
-            caseRef,
-            true,
-            caseDataContent
-        );
+        try {
+            return feignCcdApi.submitEventForCaseWorker(
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                authenticator.getUserDetails().getId(),
+                jurisdiction,
+                caseTypeId,
+                caseRef,
+                true,
+                caseDataContent
+            );
+        } catch (FeignException.NotFound e) {
+            throw new UnableToAttachDocumentsException(
+                String.format(
+                    "Attach documents submit failed for case type: %s and case ref: %s", caseTypeId, caseRef
+                ),
+                e
+            );
+        } catch (FeignException e) {
+            throw new CcdCallException(
+                String.format("Could not attach documents for case ref: %s Error: %s", caseRef, e.status()), e
+            );
+        }
     }
 }

@@ -84,6 +84,7 @@ service-config:
     - service: divorce
       jurisdiction: DIVORCE
       case-type-ids: []
+      transformation-url: ${TRANSFORMATION_URL_DIVORCE}
 
     - service: finrem
       jurisdiction: DIVORCE
