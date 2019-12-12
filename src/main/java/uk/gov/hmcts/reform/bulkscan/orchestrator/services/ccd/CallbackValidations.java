@@ -27,6 +27,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
 public final class CallbackValidations {
 
@@ -276,6 +277,42 @@ public final class CallbackValidations {
         if ((EXCEPTION.equals(classification) || NEW_APPLICATION.equals(classification)) && !hasOcr(theCase)) {
             return invalid(format(
                 "Event createNewCase not allowed for the current journey classification %s without OCR",
+                classification
+            ));
+        }
+
+        return valid(classification);
+    }
+
+    public static Validation<String, Classification> hasJourneyClassificationForAttachToCase(CaseDetails theCase) {
+        Optional<String> classificationOption = getJourneyClassification(theCase);
+
+        return classificationOption
+            .map(classification -> Try.of(() -> Classification.valueOf(classification)))
+            .map(Try::toValidation)
+            .map(validation -> validation
+                .mapError(throwable -> "Invalid journeyClassification. Error: " + throwable.getMessage())
+                .flatMap(classification -> validateClassificationForAttachToCase(classification, theCase))
+            )
+            .orElse(invalid("Missing journeyClassification"));
+    }
+
+    private static Validation<String, Classification> validateClassificationForAttachToCase(
+        Classification classification,
+        CaseDetails theCase
+    ) {
+        if (!EXCEPTION.equals(classification)
+            && !SUPPLEMENTARY_EVIDENCE.equals(classification)
+            && !SUPPLEMENTARY_EVIDENCE_WITH_OCR.equals(classification)) {
+            return invalid(format(
+                "The current journey classification %s is not allowed for attaching to case",
+                classification
+            ));
+        }
+
+        if (SUPPLEMENTARY_EVIDENCE_WITH_OCR.equals(classification) && !hasOcr(theCase)) {
+            return invalid(format(
+                "The current journey classification %s is not allowed without OCR",
                 classification
             ));
         }
