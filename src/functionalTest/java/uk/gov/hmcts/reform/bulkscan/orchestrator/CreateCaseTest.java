@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,7 +18,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CreateExceptionRecord;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -27,7 +25,6 @@ import uk.gov.hmcts.reform.logging.appinsights.SyntheticHeaders;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -195,20 +192,9 @@ class CreateCaseTest {
         await("Exception record is created")
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
-            .until(() -> lookUpExceptionRecord(poBox).isPresent());
+            .until(() -> caseSearcher.findExceptionRecord(poBox.toString()).isPresent());
 
-        CaseDetails caseDetails = lookUpExceptionRecord(poBox).get();
-        return caseDetails;
+        return caseSearcher.findExceptionRecord(poBox.toString()).get();
     }
 
-    private Optional<CaseDetails> lookUpExceptionRecord(UUID poBox) {
-        List<CaseDetails> caseDetailsList = caseSearcher.search(
-            SampleData.JURSIDICTION,
-            SampleData.JURSIDICTION + "_" + CreateExceptionRecord.CASE_TYPE,
-            ImmutableMap.of(
-                "case.poBox", poBox.toString()
-            )
-        );
-        return caseDetailsList.stream().findFirst();
-    }
 }

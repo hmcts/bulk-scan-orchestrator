@@ -1,16 +1,19 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadService;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseSearcher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CreateExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -34,6 +37,9 @@ class SupplementaryEvidenceTest {
 
     @Autowired
     private CcdApi ccdApi;
+
+    @Autowired
+    private CaseSearcher caseSearcher;
 
     @Autowired
     private CcdCaseCreator ccdCaseCreator;
@@ -127,6 +133,52 @@ class SupplementaryEvidenceTest {
             .until(() -> hasCaseBeenUpdatedWithSupplementaryEvidence(caseDetails, 1));
     }
 
+    @Test
+    public void should_create_exception_record_when_fails_to_attach_documents_to_the_case() throws Exception {
+        //given
+        // create an exception record
+        CaseDetails exceptionRecord = createExceptionRecord();
+
+        String dmUrl = dmUploadService.uploadToDmStore("Evidence2.pdf", "documents/supplementary-evidence.pdf");
+
+        // when
+        // try attaching documents to the BULKSCAN_ExceptionRecord case type
+        // for which attachScannedDocs event is not configured
+        String envelopeId = envelopeMessager.sendMessageFromFile(
+            "envelopes/supplementary-evidence-envelope-with-payment.json",
+            String.valueOf(exceptionRecord.getId()),
+            null,
+            randomUUID(),
+            dmUrl
+        );
+
+        // then
+        await("Created new Exception record as attachScannedDocs event failed for BULKSCAN_ExceptionRecord case type")
+            .atMost(60, TimeUnit.SECONDS)
+            .pollInterval(Duration.ofSeconds(2))
+            .until(() -> findCasesByEnvelopeId(envelopeId).size() == 1);
+    }
+
+    private CaseDetails createExceptionRecord() throws Exception {
+        String dmUrl = dmUploadService.uploadToDmStore("Evidence1.pdf", "documents/supplementary-evidence.pdf");
+
+        String envelopeId = envelopeMessager.sendMessageFromFile(
+            "envelopes/supplementary-evidence-envelope.json", // no payments
+            "0000000000000000",
+            null,
+            randomUUID(),
+            dmUrl
+        );
+
+        // then
+        await("Created new Exception record")
+            .atMost(60, TimeUnit.SECONDS)
+            .pollInterval(Duration.ofSeconds(5))
+            .until(() -> findCasesByEnvelopeId(envelopeId).size() == 1);
+
+        return findCasesByEnvelopeId(envelopeId).get(0);
+    }
+
     private boolean hasCaseBeenUpdatedWithSupplementaryEvidence(
         CaseDetails caseDetails, int excpectedScannedDocuments
     ) {
@@ -140,5 +192,15 @@ class SupplementaryEvidenceTest {
 
         List<ScannedDocument> updatedScannedDocuments = getScannedDocuments(updatedCaseDetails);
         return updatedScannedDocuments.size() == excpectedScannedDocuments && evidenceHandled.equals("No");
+    }
+
+    private List<CaseDetails> findCasesByEnvelopeId(String envelopeId) {
+        return caseSearcher.search(
+            SampleData.JURSIDICTION,
+            SampleData.CONTAINER.toUpperCase() + "_" + CreateExceptionRecord.CASE_TYPE,
+            ImmutableMap.of(
+                "case.envelopeId", envelopeId
+            )
+        );
     }
 }
