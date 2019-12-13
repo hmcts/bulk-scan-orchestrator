@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.vavr.collection.Seq;
 import io.vavr.control.Either;
-import io.vavr.control.Try;
 import io.vavr.control.Validation;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
@@ -301,16 +300,24 @@ public class AttachCaseCallbackService {
             hasJourneyClassificationForAttachToCase(exceptionRecordData);
         if (classificationValidation.isValid()) {
             if (SUPPLEMENTARY_EVIDENCE_WITH_OCR == classificationValidation.get()) {
-                ServiceConfigItem serviceConfigItem = getServiceConfig(exceptionRecordData);
-                ExceptionRecord exceptionRecord = exceptionRecordValidator.getValidation(exceptionRecordData).get();
-                ccdCaseUpdater.updateCase(
-                    exceptionRecord,
-                    serviceConfigItem,
-                    ignoreWarnings,
-                    idamToken,
-                    userId,
-                    targetCaseCcdRef
-                );
+                Validation<String, String> serviceNameValidationResult =
+                    hasServiceNameInCaseTypeId(exceptionRecordData);
+                if (serviceNameValidationResult.isValid()) {
+                    ServiceConfigItem serviceConfigItem =
+                        serviceConfigProvider.getConfig(serviceNameValidationResult.get());
+                    ExceptionRecord exceptionRecord = exceptionRecordValidator.getValidation(exceptionRecordData).get();
+
+                    ccdCaseUpdater.updateCase(
+                        exceptionRecord,
+                        serviceConfigItem,
+                        ignoreWarnings,
+                        idamToken,
+                        userId,
+                        targetCaseCcdRef
+                    );
+                } else {
+                    throw new CallbackException(serviceNameValidationResult.getError());
+                }
             } else {
                 verifyExceptionRecordIsNotAttachedToCase(exceptionRecordJurisdiction, exceptionRecordId);
 
@@ -470,15 +477,5 @@ public class AttachCaseCallbackService {
 
         merged.putAll(modifiedFields);
         return merged;
-    }
-
-    private ServiceConfigItem getServiceConfig(CaseDetails caseDetails) {
-        return hasServiceNameInCaseTypeId(caseDetails).flatMap(service -> Try
-            .of(() -> serviceConfigProvider.getConfig(service))
-            .toValidation()
-            .mapError(Throwable::getMessage)
-        )
-            .filter(item -> !com.google.common.base.Strings.isNullOrEmpty(item.getUpdateUrl()))
-            .getOrElseThrow(() -> new CallbackException("Update URL is not configured")).get();
     }
 }
