@@ -51,7 +51,7 @@ class ExceptionRecordMapperTest {
     public void mapEnvelope_maps_all_fields_correctly() {
         // given
         Envelope envelope = envelope(
-            1,
+            2,
             ImmutableList.of(new Payment("dcn1")),
             ImmutableList.of(
                 new OcrDataField("fieldName1", "value1"),
