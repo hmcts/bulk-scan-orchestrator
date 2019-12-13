@@ -15,6 +15,6 @@ class RootControllerTest {
     void call_to_root_endpoint_should_result_with_204_response() {
         given().get("http://localhost:" + serverPort + "/")
             .then()
-            .statusCode(204);
+            .statusCode(200);
     }
 }
