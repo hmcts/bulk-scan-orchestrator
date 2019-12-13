@@ -130,18 +130,6 @@ public class SampleData {
         }
     }
 
-    public static Envelope envelopeWithSurname(String surname) {
-        return envelope(
-            1,
-            ImmutableList.of(new Payment("dcn1")),
-            ImmutableList.of(
-                new OcrDataField("fieldName1", "value1"),
-                new OcrDataField("field_surname", surname)
-            ),
-            asList("warning 1", "warning 2")
-        );
-    }
-
     public static Envelope envelope(int numberOfDocuments) {
         return envelope(
             numberOfDocuments,

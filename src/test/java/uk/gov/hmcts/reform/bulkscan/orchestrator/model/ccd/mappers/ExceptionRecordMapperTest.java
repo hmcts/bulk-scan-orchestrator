@@ -22,13 +22,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelopeWithSurname;
 
 class ExceptionRecordMapperTest {
 
@@ -50,7 +50,15 @@ class ExceptionRecordMapperTest {
     @Test
     public void mapEnvelope_maps_all_fields_correctly() {
         // given
-        Envelope envelope = envelopeWithSurname("surname1");
+        Envelope envelope = envelope(
+            1,
+            ImmutableList.of(new Payment("dcn1")),
+            ImmutableList.of(
+                new OcrDataField("fieldName1", "value1"),
+                new OcrDataField("field_surname", "surname1")
+            ),
+            asList("warning 1", "warning 2")
+        );
 
         // when
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
@@ -211,6 +219,26 @@ class ExceptionRecordMapperTest {
 
         // then
         assertThat(exceptionRecord.surname).isNull();
+    }
+
+    @Test
+    public void mapEnvelope_sets_first_surname_when_multiple_surname_data_in_ocr() {
+        //given
+        Envelope envelope = envelope(
+            1,
+            ImmutableList.of(new Payment("dcn1")),
+            ImmutableList.of(
+                new OcrDataField("fieldName1", "value1"),
+                new OcrDataField("field_surname", "surname_a"),
+                new OcrDataField("field_surname", "surname_1"),
+                new OcrDataField("field_surname", "surname_2")
+            ),
+            asList("warning 1", "warning 2")
+        );        // when
+        ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
+
+        // then
+        assertThat(exceptionRecord.surname).isEqualTo("surname_a");
     }
 
     private Envelope envelopeWithJurisdiction(String jurisdiction) {
