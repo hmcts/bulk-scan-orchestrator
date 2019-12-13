@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
-import com.google.common.collect.ImmutableMap;
 import io.restassured.RestAssured;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +19,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CreateExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -30,7 +28,6 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -291,20 +288,9 @@ class AttachExceptionRecordToExistingCaseTest {
         await("Exception record is created")
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
-            .until(() -> lookUpExceptionRecord(poBox).isPresent());
+            .until(() -> caseSearcher.findExceptionRecord(poBox.toString()).isPresent());
 
-        return lookUpExceptionRecord(poBox).get();
-    }
-
-    private Optional<CaseDetails> lookUpExceptionRecord(UUID randomPoBox) {
-        List<CaseDetails> caseDetailsList = caseSearcher.search(
-            SampleData.JURSIDICTION,
-            SampleData.JURSIDICTION + "_" + CreateExceptionRecord.CASE_TYPE,
-            ImmutableMap.of(
-                "case.poBox", randomPoBox.toString()
-            )
-        );
-        return caseDetailsList.stream().findFirst();
+        return caseSearcher.findExceptionRecord(poBox.toString()).get();
     }
 
     private Boolean isExceptionRecordAttachedToTheCase(CaseDetails caseDetails, int expectedScannedDocsSize) {
