@@ -79,6 +79,16 @@ public class CcdCaseUpdater {
                 EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR
             );
 
+            log.info(
+                "Started CCD event to update case. "
+                    + "Event ID: {}. Case ID: {}. Exception record ID: {}. Case type: {}. Case state: {}",
+                startEvent.getEventId(),
+                existingCaseId,
+                exceptionRecord.id,
+                startEvent.getCaseDetails().getCaseTypeId(),
+                startEvent.getCaseDetails().getState()
+            );
+
             final CaseDetails existingCase = startEvent.getCaseDetails();
 
             SuccessfulUpdateResponse updateResponse = caseUpdateClient.updateCase(
