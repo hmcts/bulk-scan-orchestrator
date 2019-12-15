@@ -23,6 +23,7 @@ import javax.annotation.Nonnull;
 import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.CCD_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
@@ -36,6 +37,9 @@ public final class CallbackValidations {
     private static final String CLASSIFICATION_SUPPLEMENTARY_EVIDENCE = "SUPPLEMENTARY_EVIDENCE";
     private static final String CLASSIFICATION_SUPPLEMENTARY_EVIDENCE_WITH_OCR = "SUPPLEMENTARY_EVIDENCE_WITH_OCR";
     private static final String CLASSIFICATION_EXCEPTION = "EXCEPTION";
+
+    private static final List<Classification> VALID_CLASSIFICATIONS_FOR_ATTACH_TO_CASE =
+        asList(EXCEPTION, SUPPLEMENTARY_EVIDENCE, SUPPLEMENTARY_EVIDENCE_WITH_OCR);
 
     private static final Logger log = LoggerFactory.getLogger(CallbackValidations.class);
 
@@ -301,9 +305,7 @@ public final class CallbackValidations {
         Classification classification,
         CaseDetails theCase
     ) {
-        if (!EXCEPTION.equals(classification)
-            && !SUPPLEMENTARY_EVIDENCE.equals(classification)
-            && !SUPPLEMENTARY_EVIDENCE_WITH_OCR.equals(classification)) {
+        if (!VALID_CLASSIFICATIONS_FOR_ATTACH_TO_CASE.contains(classification)) {
             return invalid(format(
                 "The current journey classification %s is not allowed for attaching to case",
                 classification
