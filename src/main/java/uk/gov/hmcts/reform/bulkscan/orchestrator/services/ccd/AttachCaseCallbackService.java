@@ -355,6 +355,8 @@ public class AttachCaseCallbackService {
 
                 paymentsProcessor.updatePayments(exceptionRecordData, theCase.getId());
             }
+        } else {
+            throw new CallbackException(classificationValidation.getError());
         }
     }
 
