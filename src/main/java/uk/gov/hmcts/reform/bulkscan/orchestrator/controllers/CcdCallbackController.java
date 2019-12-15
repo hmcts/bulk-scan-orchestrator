@@ -54,8 +54,8 @@ public class CcdCallbackController {
                     callback.getEventId(),
                     callback.isIgnoreWarnings()
                 )
-                .map(modifiedFields -> okResponse(modifiedFields))
-                .getOrElseGet(errors -> errorResponse(errors));
+                .map(this::okResponse)
+                .getOrElseGet(this::errorResponse);
         } else {
             return errorResponse(ImmutableList.of("Internal Error: callback or case details were empty"));
         }
@@ -82,7 +82,11 @@ public class CcdCallbackController {
     }
 
     private AboutToStartOrSubmitCallbackResponse okResponse(Map<String, Object> modifiedFields) {
-        return AboutToStartOrSubmitCallbackResponse.builder().data(modifiedFields).errors(emptyList()).build();
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(modifiedFields)
+            .errors(emptyList())
+            .warnings(emptyList())
+            .build();
     }
 
     private AboutToStartOrSubmitCallbackResponse errorResponse(List<String> errors) {
