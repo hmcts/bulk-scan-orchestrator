@@ -57,8 +57,9 @@ idam:
 service-config:
   # Services and all their case type IDs, excluding exception records.
   # These mappings are used by Bulk Scan to determine which case type IDs to search across
-  # when looking for a case by its legacy ID. Those CTIDs that are not present here, will
-  # not be included in the search.
+  # when looking for a service case (by its legacy ID, ID of related exception record, etc).
+  # Those CTIDs that are not present here, will not be included in the search.
+  # If case type ID list is empty, no case can be found for the service, except when sought for by CCD ID.
   services:
     - service: bulkscan # service name corresponds to the name of the container in Blob Storage
       jurisdiction: BULKSCAN
@@ -75,17 +76,25 @@ service-config:
     - service: probate
       jurisdiction: PROBATE
       transformation-url: ${TRANSFORMATION_URL_PROBATE}
-      case-type-ids: []
+      case-type-ids:
+        - GrantOfRepresentation
+        - Caveat
+        - StandingSearch
+        - WillLodgement
       allow-creating-case-before-payments-are-processed: true
 
     - service: divorce
       jurisdiction: DIVORCE
-      case-type-ids: []
+      case-type-ids:
+        - DIVORCE
+        - DIVORCE_NOTICE_OF_ACTING
       transformation-url: ${TRANSFORMATION_URL_DIVORCE}
 
     - service: finrem
       jurisdiction: DIVORCE
-      case-type-ids: []
+      case-type-ids:
+        - FinancialRemedyMVP2
+        - FinancialRemedyContested
 
     - service: cmc
       jurisdiction: CMC
