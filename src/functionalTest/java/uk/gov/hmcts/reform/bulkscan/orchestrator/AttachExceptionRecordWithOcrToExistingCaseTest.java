@@ -55,6 +55,7 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
 
     @Disabled
     @Test
+    @SuppressWarnings("unchecked")
     void should_update_case_with_ocr() throws Exception {
         //given
         CaseDetails existingCase = ccdCaseCreator.createCase(emptyList(), now());
