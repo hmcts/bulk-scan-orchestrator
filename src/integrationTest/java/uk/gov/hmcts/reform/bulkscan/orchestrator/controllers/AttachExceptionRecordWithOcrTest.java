@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers;
 
+import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.ValidatableResponse;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
@@ -18,13 +20,16 @@ import java.util.Set;
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
+import static com.github.tomakehurst.wiremock.client.WireMock.notFound;
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.serverError;
 import static com.google.common.io.Resources.getResource;
 import static com.google.common.io.Resources.toByteArray;
 import static io.restassured.RestAssured.given;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
 
@@ -58,15 +63,12 @@ class AttachExceptionRecordWithOcrTest {
     @LocalServerPort
     int serverPort;
 
+    @DisplayName("Should successfully callback with correct information")
     @Test
-    void should_update_case_with_ocr_data() throws Exception {
+    void should_update_case_with_ocr_data() {
         setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
-        setUpCcdUpdateCaseEvents(
-            getResponseBody("ccd-start-event-for-case-worker.json"),
-            getResponseBody("ccd-submit-event-for-case-worker.json")
-        );
-
-        byte[] requestBody = getRequestBody("valid-supplementary-evidence-with-ocr.json");
+        ccdStartEvent(okJson(getResponseBody("ccd-start-event-for-case-worker.json")));
+        ccdSubmitEvent(okJson(getResponseBody("ccd-submit-event-for-case-worker.json")));
 
         Map<String, Object> caseData = new HashMap<>();
         caseData.put("poBox","PO 12345");
@@ -74,10 +76,46 @@ class AttachExceptionRecordWithOcrTest {
         caseData.put("formType","B123");
         caseData.put("attachToCaseReference","1539007368674134");
 
+        byte[] requestBody = getRequestBody("valid-supplementary-evidence-with-ocr.json");
+
         ValidatableResponse response = postWithBody(requestBody)
             .statusCode(OK.value());
 
         verifySuccessResponse(response, caseData);
+    }
+
+    @DisplayName("Should fail with the correct error when submit api call fails")
+    @Test
+    public void should_fail_with_the_correct_error_when_submit_api_call_fails() {
+        setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
+        ccdStartEvent(okJson(getResponseBody("ccd-start-event-for-case-worker.json")));
+        ccdSubmitEvent(serverError());
+
+        byte[] requestBody = getRequestBody("valid-supplementary-evidence-with-ocr.json");
+
+        postWithBody(requestBody).statusCode(INTERNAL_SERVER_ERROR.value());
+    }
+
+    @DisplayName("Should fail with the correct error when start event api call fails")
+    @Test
+    public void should_fail_with_the_correct_error_when_start_event_api_call_fails() {
+        setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
+        ccdStartEvent(notFound());
+
+        byte[] requestBody = getRequestBody("valid-supplementary-evidence-with-ocr.json");
+
+        postWithBody(requestBody).statusCode(INTERNAL_SERVER_ERROR.value());
+    }
+
+    @DisplayName("Should fail correctly if ccd is down")
+    @Test
+    public void should_fail_correctly_if_ccd_is_down() {
+        setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
+        ccdStartEvent(serverError());
+
+        byte[] requestBody = getRequestBody("valid-supplementary-evidence-with-ocr.json");
+
+        postWithBody(requestBody).statusCode(INTERNAL_SERVER_ERROR.value());
     }
 
     private void verifySuccessResponse(
@@ -135,7 +173,7 @@ class AttachExceptionRecordWithOcrTest {
         );
     }
 
-    private void setUpCcdUpdateCaseEvents(String startResponseBody, String submitResponseBody) {
+    private void ccdStartEvent(ResponseDefinitionBuilder response) {
         givenThat(
             get(
               "/caseworkers/" + USER_ID
@@ -146,9 +184,11 @@ class AttachExceptionRecordWithOcrTest {
                 + "/token"
             )
                 .withHeader("ServiceAuthorization", containing("Bearer"))
-                .willReturn(okJson(startResponseBody))
+                .willReturn(response)
         );
+    }
 
+    private void ccdSubmitEvent(ResponseDefinitionBuilder response) {
         givenThat(
             post(
                 // values from config + initial request body
@@ -158,7 +198,7 @@ class AttachExceptionRecordWithOcrTest {
                     + "/cases?ignore-warning=true"
             )
                 .withHeader("ServiceAuthorization", containing("Bearer"))
-                .willReturn(okJson(submitResponseBody))
+                .willReturn(response)
         );
     }
 
