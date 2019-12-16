@@ -159,16 +159,14 @@ public final class CallbackValidations {
                             return hasOcr(theCase)
                                 ? Validation.<String, Void>valid(null)
                                 : Validation.<String, Void>invalid(
-                                format(
                                     "The 'attach to case' event is not supported for supplementary evidence with OCR "
                                         + "but not containing OCR data"
-                                )
                             );
                         case CLASSIFICATION_EXCEPTION:
                             return !hasOcr(theCase)
                                 ? Validation.<String, Void>valid(null)
                                 : Validation.<String, Void>invalid(
-                                format("The 'attach to case' event is not supported for exception records with OCR")
+                                "The 'attach to case' event is not supported for exception records with OCR"
                             );
                         default:
                             return Validation.<String, Void>invalid(
