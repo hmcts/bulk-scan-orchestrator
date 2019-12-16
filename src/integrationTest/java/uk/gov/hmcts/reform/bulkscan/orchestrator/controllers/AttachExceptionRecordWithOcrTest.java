@@ -29,6 +29,7 @@ import static com.google.common.io.Resources.toByteArray;
 import static io.restassured.RestAssured.given;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
@@ -67,14 +68,14 @@ class AttachExceptionRecordWithOcrTest {
     @Test
     void should_update_case_with_ocr_data() {
         setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
-        ccdStartEvent(okJson(getResponseBody("ccd-start-event-for-case-worker.json")));
-        ccdSubmitEvent(okJson(getResponseBody("ccd-submit-event-for-case-worker.json")));
+        setUpCcdStartEvent(okJson(getResponseBody("ccd-start-event-for-case-worker.json")));
+        setUpCcdSubmitEvent(okJson(getResponseBody("ccd-submit-event-for-case-worker.json")));
 
         Map<String, Object> caseData = new HashMap<>();
-        caseData.put("poBox","PO 12345");
-        caseData.put("journeyClassification","SUPPLEMENTARY_EVIDENCE_WITH_OCR");
-        caseData.put("formType","B123");
-        caseData.put("attachToCaseReference","1539007368674134");
+        caseData.put("poBox", "PO 12345");
+        caseData.put("journeyClassification", "SUPPLEMENTARY_EVIDENCE_WITH_OCR");
+        caseData.put("formType", "B123");
+        caseData.put("attachToCaseReference", "1539007368674134");
 
         byte[] requestBody = getRequestBody("valid-supplementary-evidence-with-ocr.json");
 
@@ -88,19 +89,33 @@ class AttachExceptionRecordWithOcrTest {
     @Test
     public void should_fail_with_the_correct_error_when_submit_api_call_fails() {
         setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
-        ccdStartEvent(okJson(getResponseBody("ccd-start-event-for-case-worker.json")));
-        ccdSubmitEvent(serverError());
+        setUpCcdStartEvent(okJson(getResponseBody("ccd-start-event-for-case-worker.json")));
+        setUpCcdSubmitEvent(serverError());
 
         byte[] requestBody = getRequestBody("valid-supplementary-evidence-with-ocr.json");
 
         postWithBody(requestBody).statusCode(INTERNAL_SERVER_ERROR.value());
     }
 
+    @DisplayName("Should fail with the correct error when wrong classification")
+    @Test
+    public void should_fail_with_the_correct_error_when_classification_is_wrong() {
+        setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
+        setUpCcdStartEvent(okJson(getResponseBody("ccd-start-event-for-case-worker.json")));
+        setUpCcdSubmitEvent(serverError());
+
+        byte[] requestBody = getRequestBody("wrong-classification.json");
+
+        postWithBody(requestBody)
+            .statusCode(200)
+            .body(RESPONSE_FIELD_ERRORS, hasItem("Invalid journey classification NEW_APPLICATION"));
+    }
+
     @DisplayName("Should fail with the correct error when start event api call fails")
     @Test
     public void should_fail_with_the_correct_error_when_start_event_api_call_fails() {
         setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
-        ccdStartEvent(notFound());
+        setUpCcdStartEvent(notFound());
 
         byte[] requestBody = getRequestBody("valid-supplementary-evidence-with-ocr.json");
 
@@ -111,7 +126,7 @@ class AttachExceptionRecordWithOcrTest {
     @Test
     public void should_fail_correctly_if_ccd_is_down() {
         setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
-        ccdStartEvent(serverError());
+        setUpCcdStartEvent(serverError());
 
         byte[] requestBody = getRequestBody("valid-supplementary-evidence-with-ocr.json");
 
@@ -173,7 +188,7 @@ class AttachExceptionRecordWithOcrTest {
         );
     }
 
-    private void ccdStartEvent(ResponseDefinitionBuilder response) {
+    private void setUpCcdStartEvent(ResponseDefinitionBuilder response) {
         givenThat(
             get(
               "/caseworkers/" + USER_ID
@@ -188,7 +203,7 @@ class AttachExceptionRecordWithOcrTest {
         );
     }
 
-    private void ccdSubmitEvent(ResponseDefinitionBuilder response) {
+    private void setUpCcdSubmitEvent(ResponseDefinitionBuilder response) {
         givenThat(
             post(
                 // values from config + initial request body

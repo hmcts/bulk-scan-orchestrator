@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import io.vavr.collection.Seq;
 import io.vavr.control.Validation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,7 +9,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -18,7 +16,6 @@ import java.util.function.Function;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithAttachReference;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithCcdSearchCaseReference;
@@ -280,137 +277,6 @@ class CallbackValidationsTest {
             1L,
             CallbackValidations::hasAnId,
             "Exception case has no Id"
-        );
-    }
-
-    @Test
-    void hasValidData_should_fail_if_case_details_missing() {
-        CaseDetails caseDetails = createCaseWith(
-            b -> b
-                .id(null)
-                .caseTypeId("SERVICE_ExceptionRecord")
-                .jurisdiction("BULKSCAN")
-        );
-
-        Validation<Seq<String>, CaseDetails> res =
-            CallbackValidations.hasValidDetailsForAttachingToCase(true, caseDetails);
-
-        assertThat(res.isValid()).isEqualTo(false);
-        assertThat(res.getError()).containsExactlyInAnyOrder(
-            "No case reference type supplied",
-            "Cannot validate case reference due to the lack of valid case reference type",
-            "Exception case has no Id",
-            "There were no documents in exception record"
-        );
-    }
-
-    @Test
-    void hasValidData_should_pass_if_all_field_present_and_use_search_case_reference_true() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put("searchCaseReferenceType", "ccdCaseReference");
-        caseData.put("searchCaseReference", "12345");
-        caseData.put("scannedDocuments", document("https://url", "fileName.pdf"));
-
-        CaseDetails caseDetails = createCaseWith(
-            b -> b
-                .id(1L)
-                .caseTypeId("SERVICE_ExceptionRecord")
-                .jurisdiction("BULKSCAN")
-                .data(caseData)
-        );
-
-        Validation<Seq<String>, CaseDetails> res =
-            CallbackValidations.hasValidDetailsForAttachingToCase(true, caseDetails);
-
-        assertThat(res.isValid()).isEqualTo(true);
-    }
-
-    @Test
-    void hasValidData_should_fail_if_use_search_case_reference_true_no_search_reference_and_all_other_field_present() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put("searchCaseReferenceType", "ccdCaseReference");
-        caseData.put("scannedDocuments", document("https://url", "fileName.pdf"));
-
-        CaseDetails caseDetails = createCaseWith(
-            b -> b
-                .id(1L)
-                .caseTypeId("SERVICE_ExceptionRecord")
-                .jurisdiction("BULKSCAN")
-                .data(caseData)
-        );
-
-        Validation<Seq<String>, CaseDetails> res =
-            CallbackValidations.hasValidDetailsForAttachingToCase(true, caseDetails);
-
-        assertThat(res.isValid()).isEqualTo(false);
-        assertThat(res.getError()).containsExactly(
-            "No case reference supplied"
-        );
-    }
-
-    @Test
-    void hasValidData_should_pass_if_use_search_case_reference_false_attach_valid_and_all_other_fields_present() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put("ccdCaseReference", "ccdCaseReference");
-        caseData.put("attachToCaseReference", "1234234393");
-        caseData.put("scannedDocuments", document("https://url", "fileName.pdf"));
-
-        CaseDetails caseDetails = createCaseWith(
-            b -> b
-                .id(1L)
-                .caseTypeId("SERVICE_ExceptionRecord")
-                .jurisdiction("BULKSCAN")
-                .data(caseData)
-        );
-
-        Validation<Seq<String>, CaseDetails> res =
-            CallbackValidations.hasValidDetailsForAttachingToCase(false, caseDetails);
-
-        assertThat(res.isValid()).isEqualTo(true);
-    }
-
-    @Test
-    void hasValidData_should_fail_if_use_search_case_reference_false_attach_missing_and_all_other_fields_present() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put("ccdCaseReference", "ccdCaseReference");
-        caseData.put("scannedDocuments", document("https://url", "fileName.pdf"));
-
-        CaseDetails caseDetails = createCaseWith(
-            b -> b
-                .id(1L)
-                .caseTypeId("SERVICE_ExceptionRecord")
-                .jurisdiction("BULKSCAN")
-                .data(caseData)
-        );
-
-        Validation<Seq<String>, CaseDetails> res =
-            CallbackValidations.hasValidDetailsForAttachingToCase(false, caseDetails);
-
-        assertThat(res.isValid()).isEqualTo(false);
-        assertThat(res.getError()).containsExactly(
-            "No case reference supplied"
-        );
-    }
-
-    @Test
-    void hasValidData_should_fail_if_use_search_case_reference_false_attach_invalid_and_all_other_fields_present() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put("ccdCaseReference", "ccdCaseReference");
-        caseData.put("attachToCaseReference", 1L);
-        caseData.put("scannedDocuments", document("https://url", "fileName.pdf"));
-
-        CaseDetails caseDetails = createCaseWith(
-            b -> b
-                .id(1L)
-                .caseTypeId("SERVICE_ExceptionRecord")
-                .jurisdiction("BULKSCAN")
-                .data(caseData)
-        );
-        Validation<Seq<String>, CaseDetails> res =
-            CallbackValidations.hasValidDetailsForAttachingToCase(false, caseDetails);
-        assertThat(res.isValid()).isEqualTo(false);
-        assertThat(res.getError()).containsExactlyInAnyOrder(
-            "Invalid case reference: '1'"
         );
     }
 
