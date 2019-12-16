@@ -19,6 +19,7 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(InvalidRequestException.class)
     protected ResponseEntity<ErrorResponse> handleInvalidRequestException(Exception exception) {
+        log.error("Received invalid request", exception);
         return status(BAD_REQUEST).body(new ErrorResponse(exception.getMessage()));
     }
 
