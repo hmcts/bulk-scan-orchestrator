@@ -148,6 +148,26 @@ public class CcdCaseUpdater {
             log.error(msg);
             ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(asList(msg), emptyList());
             return new ProcessResult(errorResponse.warnings, errorResponse.errors);
+        } catch (FeignException exception) {
+            log.error(
+                "Failed to update case for {} service with case Id {} based on exception record {}. "
+                    + "Service response: {}",
+                configItem.getService(),
+                existingCaseId,
+                exceptionRecord.id,
+                exception.contentUTF8(),
+                exception
+            );
+
+            throw new CallbackException(
+                format(
+                    "Failed to update case for %s service with case Id %s based on exception record %s",
+                    configItem.getService(),
+                    existingCaseId,
+                    exceptionRecord.id
+                ),
+                exception
+            );
         } catch (Exception exception) {
             throw new CallbackException(
                 format(
