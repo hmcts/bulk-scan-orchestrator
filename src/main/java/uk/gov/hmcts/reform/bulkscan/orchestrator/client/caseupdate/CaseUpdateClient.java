@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -54,6 +55,16 @@ public class CaseUpdateClient {
                 new HttpEntity<>(caseUpdate, headers),
                 SuccessfulUpdateResponse.class
             );
+        } catch (HttpServerErrorException.InternalServerError ex) {
+            log.error(
+                "Failed to update Case for case type {} and id {}, response body {}",
+                existingCase.getCaseTypeId(),
+                existingCase.getId(),
+                ex.getResponseBodyAsString(),
+                ex
+            );
+
+            throw ex;
         } catch (HttpStatusCodeException ex) {
             log.error(
                 "Failed to update Case for case type {} and id {}",
