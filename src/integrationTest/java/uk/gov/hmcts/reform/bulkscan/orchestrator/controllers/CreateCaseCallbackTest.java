@@ -228,8 +228,7 @@ class CreateCaseCallbackTest {
     @Test
     void should_respond_with_relevant_error_when_body_of_create_case_callback_is_empty() {
         postWithBody("{}".getBytes())
-            .statusCode(OK.value())
-            .body("errors", hasItem("Internal Error: callback or case details were empty"));
+            .statusCode(400);
     }
 
     @Test
