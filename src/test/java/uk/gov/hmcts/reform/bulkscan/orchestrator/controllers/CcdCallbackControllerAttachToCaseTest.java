@@ -42,7 +42,7 @@ class CcdCallbackControllerAttachToCaseTest {
         mvc
             .perform(
                 post("/callback/attach_case")
-                    .content("{ 'case_details': null, 'event_id': '' }".replace("'", "\""))
+                    .content("{ 'event_id': 'attach_to_case' }".replace("'", "\""))
                     .contentType(MediaType.APPLICATION_JSON)
             )
             .andExpect(status().isBadRequest());
