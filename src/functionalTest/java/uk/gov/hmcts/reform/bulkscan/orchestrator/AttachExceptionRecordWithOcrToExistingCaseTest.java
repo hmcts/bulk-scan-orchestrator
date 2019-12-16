@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import io.restassured.RestAssured;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,6 +53,7 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
     @Autowired DocumentManagementUploadService dmUploadService;
     @Autowired CcdAuthenticatorFactory ccdAuthenticatorFactory;
 
+    @Disabled
     @Test
     void should_update_case_with_ocr() throws Exception {
         //given
