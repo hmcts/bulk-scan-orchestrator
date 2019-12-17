@@ -172,8 +172,6 @@ class ExceptionRecordCreationTest {
         assertThat(getOcrData(exceptionRecord)).isEqualTo(expectedOcrData);
         assertThat(getCaseDataForField(exceptionRecord, "envelopeCaseReference")).isEqualTo(envelopeCaseRef);
         assertThat(getCaseDataForField(exceptionRecord, "envelopeLegacyCaseReference")).isEmpty();
-        assertThat(getCaseDataForField(exceptionRecord, "surname")).isEqualTo("value2");
-
     }
 
     private List<CaseDetails> findCasesByEnvelopeId(String envelopeId) {
