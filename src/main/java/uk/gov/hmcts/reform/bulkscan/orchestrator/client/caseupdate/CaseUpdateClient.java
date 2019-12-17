@@ -57,10 +57,11 @@ public class CaseUpdateClient {
             );
         } catch (HttpServerErrorException.InternalServerError ex) {
             log.error(
-                "Failed to update Case for case type {} and id {}, response body {}",
+                "-------------Failed to update Case for case type {} and id {}, response body {}, url {}",
                 existingCase.getCaseTypeId(),
                 existingCase.getId(),
                 ex.getResponseBodyAsString(),
+                url,
                 ex
             );
 
