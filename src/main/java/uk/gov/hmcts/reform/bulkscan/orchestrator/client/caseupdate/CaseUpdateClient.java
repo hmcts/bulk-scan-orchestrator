@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -49,6 +51,12 @@ public class CaseUpdateClient {
             existingCase.getData()
         );
         CaseUpdate caseUpdate = new CaseUpdate(exceptionRecord, existingCaseDetails);
+        String caseUpdateString;
+        try {
+            caseUpdateString = new ObjectMapper().writeValueAsString(caseUpdate);
+        } catch (JsonProcessingException e) {
+            caseUpdateString = "Exception";
+        }
         try {
             return restTemplate.postForObject(
                 url,
@@ -57,11 +65,12 @@ public class CaseUpdateClient {
             );
         } catch (HttpServerErrorException.InternalServerError ex) {
             log.error(
-                "-------------Failed to update Case for case type {} and id {}, response body {}, url {}",
+                "-------Failed to update Case for case type {} and id {}, response body {}, url {}, caseUpdate {}",
                 existingCase.getCaseTypeId(),
                 existingCase.getId(),
                 ex.getResponseBodyAsString(),
                 url,
+                caseUpdateString,
                 ex
             );
 
