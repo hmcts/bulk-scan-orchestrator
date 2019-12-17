@@ -109,7 +109,7 @@ class ExceptionRecordCreationTest {
         Map<String, String> expectedOcrData = ImmutableMap.of(
             "field1", "value1",
             "field2", "value2",
-            "field_surname", "surnameXXXX"
+            "last_name", "surnameXXXX"
         );
         assertThat(getOcrData(caseDetails)).isEqualTo(expectedOcrData);
         List<String> expectedOcrDataWarnings = Arrays.asList("warning 1", "warning 2");
@@ -172,6 +172,8 @@ class ExceptionRecordCreationTest {
         assertThat(getOcrData(exceptionRecord)).isEqualTo(expectedOcrData);
         assertThat(getCaseDataForField(exceptionRecord, "envelopeCaseReference")).isEqualTo(envelopeCaseRef);
         assertThat(getCaseDataForField(exceptionRecord, "envelopeLegacyCaseReference")).isEmpty();
+        assertThat(getCaseDataForField(exceptionRecord, "surname")).isEqualTo("value2");
+
     }
 
     private List<CaseDetails> findCasesByEnvelopeId(String envelopeId) {
