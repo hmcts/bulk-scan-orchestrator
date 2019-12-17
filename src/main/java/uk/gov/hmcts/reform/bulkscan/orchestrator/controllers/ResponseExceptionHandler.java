@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.ResponseEntity.status;
 
@@ -15,6 +16,12 @@ import static org.springframework.http.ResponseEntity.status;
 public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ResponseExceptionHandler.class);
+
+    @ExceptionHandler(InvalidRequestException.class)
+    protected ResponseEntity<ErrorResponse> handleInvalidRequestException(Exception exception) {
+        log.error("Received invalid request", exception);
+        return status(BAD_REQUEST).body(new ErrorResponse(exception.getMessage()));
+    }
 
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<ErrorResponse> handleInternalException(Exception exception) {
