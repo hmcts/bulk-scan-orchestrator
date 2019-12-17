@@ -5,8 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Map;
 
 public class ExistingCaseDetails {
+    @JsonProperty("case_type_id")
     public final String caseTypeId;
 
+    @JsonProperty("case_data")
     public final Map<String, Object> data;
 
     public ExistingCaseDetails(

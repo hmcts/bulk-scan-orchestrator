@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 
 public class CaseUpdate {
+    @JsonProperty("exception_record")
     public final ExceptionRecord exceptionRecord;
 
+    @JsonProperty("case_details")
     public final ExistingCaseDetails caseDetails;
 
     public CaseUpdate(
