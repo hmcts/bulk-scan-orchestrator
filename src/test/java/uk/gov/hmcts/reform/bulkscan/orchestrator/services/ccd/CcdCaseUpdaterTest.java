@@ -218,7 +218,8 @@ class CcdCaseUpdaterTest {
             .willReturn(noWarningsUpdateResponse);
         initResponseMockData();
         initMockData();
-        given(coreCaseDataApi.submitForCaseworker(
+        given(coreCaseDataApi.submitEventForCaseWorker(
+            anyString(),
             anyString(),
             anyString(),
             anyString(),
@@ -394,7 +395,8 @@ class CcdCaseUpdaterTest {
     }
 
     private BDDMyOngoingStubbing<CaseDetails> prepareMockForSubmissionEventForCaseWorker() {
-        return given(coreCaseDataApi.submitForCaseworker(
+        return given(coreCaseDataApi.submitEventForCaseWorker(
+            anyString(),
             anyString(),
             anyString(),
             anyString(),

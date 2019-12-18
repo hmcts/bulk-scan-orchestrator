@@ -210,7 +210,8 @@ class AttachExceptionRecordWithOcrTest {
                 "/caseworkers/" + USER_ID
                     + "/jurisdictions/BULKSCAN"
                     + "/case-types/BULKSCAN_ExceptionRecord"
-                    + "/cases?ignore-warning=true"
+                    + "/cases/1539007368674134"
+                    + "/events?ignore-warning=true"
             )
                 .withHeader("ServiceAuthorization", containing("Bearer"))
                 .willReturn(response)

@@ -197,12 +197,13 @@ public class CcdCaseUpdater {
 
         final CaseDataContent caseDataContent = getCaseDataContent(exceptionRecord, caseUpdateDetails, startEvent);
         try {
-            coreCaseDataApi.submitForCaseworker(
+            coreCaseDataApi.submitEventForCaseWorker(
                 idamToken,
                 s2sToken,
                 userId,
                 exceptionRecord.poBoxJurisdiction,
                 startEvent.getCaseDetails().getCaseTypeId(),
+                exceptionRecord.id,
                 ignoreWarnings,
                 caseDataContent
             );
