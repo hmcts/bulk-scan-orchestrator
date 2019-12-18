@@ -222,8 +222,8 @@ public class CcdCaseUpdater {
                 caseDataContentStr = "Exception";
             }
             log.error(
-                "Failed to update case for {} jurisdiction with case Id {} based on exception record with Id {}. " +
-                    "caseDataContent: {}, {}",
+                "Failed to update case for {} jurisdiction with case Id {} based on exception record with Id {}. "
+                    + "caseDataContent: {}, {}",
                 exceptionRecord.poBoxJurisdiction,
                 existingCase.getId(),
                 exceptionRecord.id,
