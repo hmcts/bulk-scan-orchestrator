@@ -4,10 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CaseUpdateDetails {
 
-    @JsonProperty("event_id")
     public final String eventId;
 
-    @JsonProperty("case_data")
     public final Object caseData;
 
     public CaseUpdateDetails(
