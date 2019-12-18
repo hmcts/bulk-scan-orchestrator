@@ -384,7 +384,7 @@ public class AttachCaseCallbackService {
                 callBackEvent.userId,
                 targetCaseCcdRef
             );
-            
+
             if (!processResult.getWarnings().isEmpty()) {
                 return Either.left(ErrorsAndWarnings.withWarnings(processResult.getWarnings()));
             } else {
