@@ -44,13 +44,15 @@ public class EnvelopeHandler {
                         paymentsProcessor.createPayments(envelope, existingCase.getId(), false);
                     } else {
                         log.info(
-                            "Creating exception record as supplementary evidence failed for envelope {} case {}",
+                            "Adding supplementary evidence from envelope {} to case {} failed. "
+                                + "Creating exception record instead.",
                             envelope.id,
                             existingCase.getId()
                         );
                         createExceptionRecord(envelope);
                     }
                 } else {
+                    log.info("Case for envelope {} not found. Creating exception record instead.", envelope.id);
                     createExceptionRecord(envelope);
                 }
                 break;

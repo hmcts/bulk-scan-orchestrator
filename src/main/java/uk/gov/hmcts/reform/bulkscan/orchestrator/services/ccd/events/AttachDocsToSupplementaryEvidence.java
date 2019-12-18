@@ -42,6 +42,7 @@ class AttachDocsToSupplementaryEvidence {
     public boolean attach(Envelope envelope, CaseDetails existingCase) {
         if (mapper.getDocsToAdd(getDocuments(existingCase), envelope.documents).isEmpty()) {
             log.warn("Envelope {} has no new documents. CCD Case {} not updated", envelope.id, existingCase.getId());
+            return true;
         } else {
             log.info(
                 "Attaching supplementary evidence. Envelope: {}. Case: {}. Case type: {}",
@@ -83,6 +84,7 @@ class AttachDocsToSupplementaryEvidence {
                     existingCase.getId(),
                     envelope.id
                 );
+                return true;
             } catch (UnableToAttachDocumentsException e) {
                 log.error(
                     "Failed to attach documents from envelope to case. Case Type: {}, Case ID: {}, envelope ID: {}",
@@ -93,7 +95,6 @@ class AttachDocsToSupplementaryEvidence {
                 return false;
             }
         }
-        return true;
     }
 
     private CaseDataContent buildCaseDataContent(Envelope envelope, StartEventResponse startEventResponse) {
