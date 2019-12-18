@@ -124,6 +124,7 @@ public class CcdCaseUpdater {
                     idamToken,
                     s2sToken,
                     userId,
+                    existingCaseId,
                     exceptionRecord,
                     updateResponse.caseDetails,
                     startEvent
@@ -189,6 +190,7 @@ public class CcdCaseUpdater {
         String idamToken,
         String s2sToken,
         String userId,
+        String existingCaseId,
         ExceptionRecord exceptionRecord,
         CaseUpdateDetails caseUpdateDetails,
         StartEventResponse startEvent
@@ -203,7 +205,7 @@ public class CcdCaseUpdater {
                 userId,
                 exceptionRecord.poBoxJurisdiction,
                 startEvent.getCaseDetails().getCaseTypeId(),
-                exceptionRecord.id,
+                existingCaseId,
                 ignoreWarnings,
                 caseDataContent
             );
