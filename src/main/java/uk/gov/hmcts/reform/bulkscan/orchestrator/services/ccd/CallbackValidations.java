@@ -258,7 +258,12 @@ public final class CallbackValidations {
             .map(classification -> Try.of(() -> Classification.valueOf(classification)))
             .map(Try::toValidation)
             .map(validation -> validation
-                .mapError(throwable -> "Invalid journeyClassification. Error: " + throwable.getMessage())
+                .mapError(throwable ->
+                    format(
+                        "Journey Classification %s is not allowed when attaching exception record to a case",
+                        classificationOption.get()
+                    )
+                )
                 .flatMap(classification -> validateClassificationForAttachToCase(classification, theCase))
             )
             .orElse(invalid("Missing journeyClassification"));
@@ -270,14 +275,14 @@ public final class CallbackValidations {
     ) {
         if (!VALID_CLASSIFICATIONS_FOR_ATTACH_TO_CASE.contains(classification)) {
             return invalid(format(
-                "The current journey classification %s is not allowed for attaching to case",
+                "The current Journey Classification %s is not allowed for attaching to case",
                 classification
             ));
         }
 
         if (SUPPLEMENTARY_EVIDENCE_WITH_OCR.equals(classification) && !hasOcr(theCase)) {
             return invalid(format(
-                "The current journey classification %s is not allowed without OCR",
+                "The current journey classification %s is not allowed without OCR data",
                 classification
             ));
         }

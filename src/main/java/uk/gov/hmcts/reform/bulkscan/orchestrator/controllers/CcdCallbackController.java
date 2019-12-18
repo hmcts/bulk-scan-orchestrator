@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.AttachCaseCallbackService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CreateCaseCallbackService;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.ErrorsAndWarnings;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 
-import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
@@ -53,8 +53,8 @@ public class CcdCallbackController {
                     callback.getEventId(),
                     callback.isIgnoreWarnings()
                 )
-                .map(this::okResponse)
-                .getOrElseGet(this::errorResponse);
+                .map(modifiedFields -> okResponse(modifiedFields))
+                .getOrElseGet(errors -> errorResponse(errors));
         } else {
             throw new InvalidRequestException("Callback or case details were empty");
         }
@@ -88,7 +88,11 @@ public class CcdCallbackController {
             .build();
     }
 
-    private AboutToStartOrSubmitCallbackResponse errorResponse(List<String> errors) {
-        return AboutToStartOrSubmitCallbackResponse.builder().errors(errors).build();
+    private AboutToStartOrSubmitCallbackResponse errorResponse(ErrorsAndWarnings errorsAndWarnings) {
+        return AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .errors(errorsAndWarnings.getErrors())
+            .warnings(errorsAndWarnings.getWarnings())
+            .build();
     }
 }

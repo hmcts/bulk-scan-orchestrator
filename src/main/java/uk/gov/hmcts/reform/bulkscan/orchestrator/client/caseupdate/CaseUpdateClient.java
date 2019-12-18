@@ -5,8 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdate;
@@ -48,33 +46,13 @@ public class CaseUpdateClient {
             existingCase.getCaseTypeId(),
             existingCase.getData()
         );
+
         CaseUpdate caseUpdate = new CaseUpdate(exceptionRecord, existingCaseDetails);
-        try {
-            return restTemplate.postForObject(
-                url,
-                new HttpEntity<>(caseUpdate, headers),
-                SuccessfulUpdateResponse.class
-            );
-        } catch (HttpServerErrorException.InternalServerError ex) {
-            log.error(
-                "Failed to update Case for case type {} and id {}, response body {}, url {}",
-                existingCase.getCaseTypeId(),
-                existingCase.getId(),
-                ex.getResponseBodyAsString(),
-                url,
-                ex
-            );
 
-            throw ex;
-        } catch (HttpStatusCodeException ex) {
-            log.error(
-                "Failed to update Case for case type {} and id {}",
-                existingCase.getCaseTypeId(),
-                existingCase.getId(),
-                ex
-            );
-
-            throw ex;
-        }
+        return restTemplate.postForObject(
+            url,
+            new HttpEntity<>(caseUpdate, headers),
+            SuccessfulUpdateResponse.class
+        );
     }
 }
