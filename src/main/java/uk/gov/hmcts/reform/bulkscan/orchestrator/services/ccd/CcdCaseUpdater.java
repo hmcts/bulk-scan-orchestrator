@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -193,6 +195,7 @@ public class CcdCaseUpdater {
     ) {
         CaseDetails existingCase = startEvent.getCaseDetails();
 
+        final CaseDataContent caseDataContent = getCaseDataContent(exceptionRecord, caseUpdateDetails, startEvent);
         try {
             coreCaseDataApi.submitForCaseworker(
                 idamToken,
@@ -201,7 +204,7 @@ public class CcdCaseUpdater {
                 exceptionRecord.poBoxJurisdiction,
                 startEvent.getCaseDetails().getCaseTypeId(),
                 ignoreWarnings,
-                getCaseDataContent(exceptionRecord, caseUpdateDetails, startEvent)
+                caseDataContent
             );
 
             log.info(
@@ -212,11 +215,19 @@ public class CcdCaseUpdater {
             );
         } catch (FeignException exception) {
             String msg = format("Service response: %s", exception.contentUTF8());
+            String caseDataContentStr;
+            try {
+                caseDataContentStr = new ObjectMapper().writeValueAsString(caseDataContent);
+            } catch (JsonProcessingException e) {
+                caseDataContentStr = "Exception";
+            }
             log.error(
-                "Failed to update case for {} jurisdiction with case Id {} based on exception record with Id {}. {}",
+                "Failed to update case for {} jurisdiction with case Id {} based on exception record with Id {}. " +
+                    "caseDataContent: {}, {}",
                 exceptionRecord.poBoxJurisdiction,
                 existingCase.getId(),
                 exceptionRecord.id,
+                caseDataContentStr,
                 msg,
                 exception
             );
