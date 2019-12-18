@@ -163,7 +163,7 @@ class AttachExceptionRecordToExistingCaseTest {
                 .headers(userHeaders())
                 .post(CALLBACK_ATTACH_CASE_PATH)
                 .then()
-                .statusCode(200);
+                .statusCode(201);
 
         verifySuccessResponse(response, callbackRequest);
         verifyRequestedAttachingToCase();
@@ -191,7 +191,7 @@ class AttachExceptionRecordToExistingCaseTest {
                 .headers(userHeaders())
                 .post(CALLBACK_ATTACH_CASE_PATH)
                 .then()
-                .statusCode(200);
+                .statusCode(201);
 
         verifySuccessResponse(response, callbackRequest);
         verifyRequestedAttachingToCase();

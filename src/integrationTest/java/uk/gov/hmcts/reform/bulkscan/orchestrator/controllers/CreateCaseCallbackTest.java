@@ -126,7 +126,7 @@ class CreateCaseCallbackTest {
                 equalTo(
                     expectedResponseExceptionRecordFields(
                         requestBody,
-                        "1539007368674134" // from sample-case.json
+                        "x1539007368674134" // from sample-case.json
                     )
                 )
             );
