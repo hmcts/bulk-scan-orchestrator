@@ -37,4 +37,15 @@ class CcdCallbackControllerAttachToCaseTest {
             )
             .andExpect(status().isInternalServerError());
     }
+
+    @Test
+    void should_return_400_when_case_details_are_missing() throws Exception {
+        mvc
+            .perform(
+                post("/callback/attach_case")
+                    .content("{ 'event_id': 'attach_to_case' }".replace("'", "\""))
+                    .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isBadRequest());
+    }
 }

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers;
 
-import com.google.common.collect.ImmutableList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -57,7 +56,7 @@ public class CcdCallbackController {
                 .map(this::okResponse)
                 .getOrElseGet(this::errorResponse);
         } else {
-            return errorResponse(ImmutableList.of("Internal Error: callback or case details were empty"));
+            throw new InvalidRequestException("Callback or case details were empty");
         }
     }
 
@@ -77,7 +76,7 @@ public class CcdCallbackController {
                 .errors(result.getErrors())
                 .build();
         } else {
-            return errorResponse(ImmutableList.of("Internal Error: callback or case details were empty"));
+            throw new InvalidRequestException("Callback or case details were empty");
         }
     }
 

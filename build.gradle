@@ -69,7 +69,6 @@ task functional(type: Test, description: 'Runs the functional tests.', group: 'V
 task integration(type: Test, description: 'Runs the integration tests.', group: 'Verification') {
   testClassesDirs = sourceSets.integrationTest.output.classesDirs
   classpath = sourceSets.integrationTest.runtimeClasspath
-  failFast = true
 }
 
 task smoke(type: Test) {
@@ -182,7 +181,7 @@ dependencyManagement {
       entry 'spring-security-rsa'
     }
     // align with jupiter version
-    dependencySet(group: 'org.mockito', version: '3.2.0') {
+    dependencySet(group: 'org.mockito', version: '3.2.4') {
       entry 'mockito-core'
     }
   }
@@ -216,7 +215,7 @@ dependencies {
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
   testCompile group: 'com.typesafe', name: 'config', version: '1.4.0'
-  testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: '3.2.0'
+  testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: '3.2.4'
   testCompile group: 'org.assertj', name: 'assertj-core', version: '3.14.0'
   testCompile group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '2.0.2.RELEASE'
   testCompile group: 'org.awaitility', name: 'awaitility', version: '4.0.1'

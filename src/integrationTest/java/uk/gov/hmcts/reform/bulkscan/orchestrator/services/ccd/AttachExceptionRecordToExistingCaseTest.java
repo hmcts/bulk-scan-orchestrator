@@ -457,8 +457,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .headers(userHeaders())
             .post(CALLBACK_ATTACH_CASE_PATH)
             .then()
-            .statusCode(200)
-            .body(RESPONSE_FIELD_ERRORS, hasItem("Internal Error: callback or case details were empty"));
+            .statusCode(400);
     }
 
     @Test
