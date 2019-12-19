@@ -114,7 +114,11 @@ public class CcdNewCaseCreator {
             paymentsProcessor.updatePayments(exceptionRecordData, newCaseId);
 
             return new ProcessResult(
-                exceptionRecordFinalizer.finalizeExceptionRecord(exceptionRecordData.getData(), newCaseId)
+                exceptionRecordFinalizer.finalizeExceptionRecord(
+                    exceptionRecordData.getData(),
+                    newCaseId,
+                    CcdCallbackType.CASE_CREATION
+                )
             );
         } catch (BadRequest exception) {
             throw new CallbackException(

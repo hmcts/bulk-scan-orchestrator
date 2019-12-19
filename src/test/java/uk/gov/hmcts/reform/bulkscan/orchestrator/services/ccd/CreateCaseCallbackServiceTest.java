@@ -41,6 +41,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdCallbackType.CASE_CREATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_CREATE_NEW_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
@@ -97,7 +98,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException).hasMessage("The some event event is not supported. Please contact service team");
 
         verify(serviceConfigProvider, never()).getConfig(anyString());
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
     }
 
     @Test
@@ -119,7 +120,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException).hasMessage("No case type ID supplied");
 
         verify(serviceConfigProvider, never()).getConfig(anyString());
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
     }
 
     @Test
@@ -142,7 +143,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException).hasMessage("Case type ID () has invalid format");
 
         verify(serviceConfigProvider, never()).getConfig(anyString());
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
     }
 
     @Test
@@ -165,7 +166,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException.getCause()).isNull();
         assertThat(callbackException).hasMessage("oh no");
 
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
     }
 
     @Test
@@ -188,7 +189,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException.getCause()).isNull();
         assertThat(callbackException).hasMessage("Transformation URL is not configured");
 
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
     }
 
     @Test
@@ -274,7 +275,7 @@ class CreateCaseCallbackServiceTest {
             )
         );
 
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
     }
 
     @Test
@@ -302,7 +303,7 @@ class CreateCaseCallbackServiceTest {
             )
         );
 
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
     }
 
     @Test
@@ -314,7 +315,7 @@ class CreateCaseCallbackServiceTest {
             .thenReturn(asList(345L));
         Map<String, Object> caseData = basicCaseData();
         Map<String, Object> finalizedCaseData = new HashMap<>();
-        when(exceptionRecordFinalizer.finalizeExceptionRecord(caseData, 345L))
+        when(exceptionRecordFinalizer.finalizeExceptionRecord(caseData, 345L, CASE_CREATION))
             .thenReturn(finalizedCaseData);
 
         // when
@@ -329,7 +330,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(result.getWarnings()).isEmpty();
         assertThat(result.getErrors()).isEmpty();
 
-        verify(exceptionRecordFinalizer).finalizeExceptionRecord(caseData, 345L);
+        verify(exceptionRecordFinalizer).finalizeExceptionRecord(caseData, 345L, CASE_CREATION);
     }
 
     @Test
@@ -349,7 +350,7 @@ class CreateCaseCallbackServiceTest {
             .isInstanceOf(MultipleCasesFoundException.class)
             .hasMessage("Multiple cases (345, 456) found for the given bulk scan case reference: 123");
 
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
     }
 
     @Test
@@ -373,7 +374,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(result.getWarnings()).isEmpty();
         assertThat(result.getErrors()).containsOnly("Missing journeyClassification");
 
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
     }
 
     @Test
@@ -397,7 +398,7 @@ class CreateCaseCallbackServiceTest {
             "Invalid journeyClassification. Error: No enum constant " + Classification.class.getName() + ".EXCEPTIONS"
         );
 
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
     }
 
     @Test
@@ -445,7 +446,7 @@ class CreateCaseCallbackServiceTest {
             "Invalid scannedDocuments format. Error: No enum constant " + DocumentType.class.getName() + ".OTHERS"
         );
 
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
     }
 
     @Test
@@ -502,7 +503,7 @@ class CreateCaseCallbackServiceTest {
             .asString()
             .matches(match);
 
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
     }
 
     @Test
@@ -529,7 +530,7 @@ class CreateCaseCallbackServiceTest {
             .asString()
             .matches(match);
 
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
     }
 
     @ParameterizedTest(name = "Allowed to proceed: {0}. User ignores warnings: {1}")

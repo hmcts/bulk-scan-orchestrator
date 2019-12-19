@@ -176,7 +176,8 @@ public class CreateCaseCallbackService {
                 final Map<String, Object> finalizedExceptionRecordData =
                     exceptionRecordFinalizer.finalizeExceptionRecord(
                         exceptionRecordData.getData(),
-                        ids.get(0)
+                        ids.get(0),
+                        CcdCallbackType.CASE_CREATION
                     );
                 return new ProcessResult(finalizedExceptionRecordData);
             } else {
