@@ -63,6 +63,9 @@ public class ExceptionRecord implements CaseData {
     @JsonProperty("showEnvelopeLegacyCaseReference")
     public final String showEnvelopeLegacyCaseReference;
 
+    @JsonProperty("surname")
+    public final String surname;
+
     public ExceptionRecord(
         String classification,
         String poBox,
@@ -80,7 +83,8 @@ public class ExceptionRecord implements CaseData {
         String envelopeCaseReference,
         String envelopeLegacyCaseReference,
         String showEnvelopeCaseReference,
-        String showEnvelopeLegacyCaseReference
+        String showEnvelopeLegacyCaseReference,
+        String surname
     ) {
         this.classification = classification;
         this.poBox = poBox;
@@ -99,5 +103,6 @@ public class ExceptionRecord implements CaseData {
         this.envelopeLegacyCaseReference = envelopeLegacyCaseReference;
         this.showEnvelopeCaseReference = showEnvelopeCaseReference;
         this.showEnvelopeLegacyCaseReference = showEnvelopeLegacyCaseReference;
+        this.surname = surname;
     }
 }
