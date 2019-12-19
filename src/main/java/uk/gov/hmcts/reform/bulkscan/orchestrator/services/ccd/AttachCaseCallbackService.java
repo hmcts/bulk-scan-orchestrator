@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import io.vavr.collection.Array;
 import io.vavr.collection.Seq;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
@@ -53,6 +54,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.EVIDENCE_HANDLED;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SCANNED_DOCUMENTS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SEARCH_CASE_REFERENCE_TYPE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
 @Service
 public class AttachCaseCallbackService {
@@ -137,18 +139,61 @@ public class AttachCaseCallbackService {
             ? hasSearchCaseReference(exceptionRecord)
             : hasAttachToCaseReference(exceptionRecord);
 
-        return Validation
-            .combine(
-                hasJurisdiction(exceptionRecord),
-                hasServiceNameInCaseTypeId(exceptionRecord),
-                caseReferenceTypeValidation,
-                caseReferenceValidation,
-                hasAnId(exceptionRecord),
-                hasAScannedRecord(exceptionRecord),
-                hasIdamToken(requesterIdamToken),
-                hasUserId(requesterUserId)
-            )
-            .ap(AttachToCaseEventData::new);
+        Validation<String, String> jurisdictionValidation = hasJurisdiction(exceptionRecord);
+        Validation<String, String> serviceNameInCaseTypeIdValidation = hasServiceNameInCaseTypeId(exceptionRecord);
+        Validation<String, Long> idValidation = hasAnId(exceptionRecord);
+        Validation<String, List<Map<String, Object>>> scannedRecordValidation = hasAScannedRecord(exceptionRecord);
+        Validation<String, String> idamTokenValidation = hasIdamToken(requesterIdamToken);
+        Validation<String, String> userIdValidation = hasUserId(requesterUserId);
+        Validation<String, Classification> classificationValidation =
+            hasJourneyClassificationForAttachToCase(exceptionRecord);
+
+        final Validation<Seq<String>, ExceptionRecord> exceptionRecordValidation;
+        if (classificationValidation.isValid() && classificationValidation.get() == SUPPLEMENTARY_EVIDENCE_WITH_OCR) {
+            exceptionRecordValidation = exceptionRecordValidator.getValidation(exceptionRecord);
+        } else {
+            exceptionRecordValidation = Validation.valid(null);
+        }
+
+        Seq<Validation<String, ?>> validations = Array.of(
+            jurisdictionValidation,
+            serviceNameInCaseTypeIdValidation,
+            caseReferenceTypeValidation,
+            caseReferenceValidation,
+            idValidation,
+            scannedRecordValidation,
+            idamTokenValidation,
+            userIdValidation,
+            classificationValidation
+        );
+
+        Seq<String> errors = getValidationErrors(validations);
+        if (errors.isEmpty() && exceptionRecordValidation.isValid()) {
+            return Validation.valid(new AttachToCaseEventData(
+                jurisdictionValidation.get(),
+                serviceNameInCaseTypeIdValidation.get(),
+                caseReferenceTypeValidation.get(),
+                caseReferenceValidation.get(),
+                idValidation.get(),
+                scannedRecordValidation.get(),
+                idamTokenValidation.get(),
+                userIdValidation.get(),
+                classificationValidation.get(),
+                exceptionRecordValidation.get()
+            ));
+        }
+
+        if (exceptionRecordValidation.isInvalid()) {
+            return Validation.invalid(errors.appendAll(exceptionRecordValidation.getError()));
+        } else {
+            return Validation.invalid(errors);
+        }
+    }
+
+    private Seq<String> getValidationErrors(Seq<Validation<String, ?>> validations) {
+        return validations
+            .filter(Validation::isInvalid)
+            .map(Validation::getError);
     }
 
     //The code below need to be rewritten to reuse the EventPublisher class
@@ -293,9 +338,7 @@ public class AttachCaseCallbackService {
             targetCaseCcdRef
         );
 
-        Classification classification = hasJourneyClassificationForAttachToCase(exceptionRecordDetails)
-            .getOrElseThrow(() -> new CallbackException("Missing Journey Classification"));
-        switch (classification) {
+        switch (callBackEvent.classification) {
             case EXCEPTION:
             case SUPPLEMENTARY_EVIDENCE:
                 return updateSupplementaryEvidence(
@@ -313,7 +356,7 @@ public class AttachCaseCallbackService {
                 );
 
             default:
-                throw new CallbackException("Invalid Journey Classification: " + classification);
+                throw new CallbackException("Invalid Journey Classification: " + callBackEvent.classification);
         }
     }
 
@@ -373,26 +416,20 @@ public class AttachCaseCallbackService {
         CaseDetails exceptionRecordDetails,
         boolean ignoreWarnings
     ) {
-        Validation<Seq<String>, ExceptionRecord> exceptionRecordValidation =
-            exceptionRecordValidator.getValidation(exceptionRecordDetails);
-        if (exceptionRecordValidation.isValid()) {
-            ServiceConfigItem serviceConfigItem = getServiceConfig(exceptionRecordDetails);
-            ProcessResult processResult = ccdCaseUpdater.updateCase(
-                exceptionRecordValidation.get(),
-                serviceConfigItem,
-                ignoreWarnings,
-                callBackEvent.idamToken,
-                callBackEvent.userId,
-                targetCaseCcdRef
-            );
+        ServiceConfigItem serviceConfigItem = getServiceConfig(exceptionRecordDetails);
+        ProcessResult processResult = ccdCaseUpdater.updateCase(
+            callBackEvent.exceptionRecord,
+            serviceConfigItem,
+            ignoreWarnings,
+            callBackEvent.idamToken,
+            callBackEvent.userId,
+            targetCaseCcdRef
+        );
 
-            if (!processResult.getWarnings().isEmpty()) {
-                return Either.left(ErrorsAndWarnings.withWarnings(processResult.getWarnings()));
-            } else {
-                return Either.right(true);
-            }
+        if (!processResult.getWarnings().isEmpty()) {
+            return Either.left(ErrorsAndWarnings.withWarnings(processResult.getWarnings()));
         } else {
-            return Either.left(ErrorsAndWarnings.withErrors(exceptionRecordValidation.getError().asJava()));
+            return Either.right(true);
         }
     }
 
@@ -481,6 +518,8 @@ public class AttachCaseCallbackService {
         public final List<Map<String, Object>> exceptionRecordDocuments;
         public final String idamToken;
         public final String userId;
+        public final Classification classification;
+        public final ExceptionRecord exceptionRecord;
 
         public AttachToCaseEventData(
             String exceptionRecordJurisdiction,
@@ -490,7 +529,9 @@ public class AttachCaseCallbackService {
             Long exceptionRecordId,
             List<Map<String, Object>> exceptionRecordDocuments,
             String idamToken,
-            String userId
+            String userId,
+            Classification classification,
+            ExceptionRecord exceptionRecord
         ) {
             this.exceptionRecordJurisdiction = exceptionRecordJurisdiction;
             this.service = service;
@@ -500,6 +541,8 @@ public class AttachCaseCallbackService {
             this.exceptionRecordDocuments = exceptionRecordDocuments;
             this.idamToken = idamToken;
             this.userId = userId;
+            this.classification = classification;
+            this.exceptionRecord = exceptionRecord;
         }
     }
 
