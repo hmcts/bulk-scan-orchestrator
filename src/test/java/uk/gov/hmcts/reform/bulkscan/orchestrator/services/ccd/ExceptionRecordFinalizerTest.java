@@ -43,7 +43,13 @@ class ExceptionRecordFinalizerTest {
         );
 
         // then
-        assertThat(res).containsOnlyKeys("field1", FIELD_CASE_REFERENCE, FIELD_DISPLAY_WARNINGS, FIELD_OCR_DATA_VALIDATION_WARNINGS);
+        assertThat(res).containsOnlyKeys(
+            "field1",
+            FIELD_CASE_REFERENCE,
+            FIELD_DISPLAY_WARNINGS,
+            FIELD_OCR_DATA_VALIDATION_WARNINGS
+        );
+
         assertThat(res.get("field1")).isEqualTo("value1");
         assertThat(res.get(FIELD_CASE_REFERENCE)).isEqualTo(Long.toString(CASE_ID));
         assertThat(res.get(FIELD_DISPLAY_WARNINGS)).isEqualTo(NO);
@@ -96,7 +102,13 @@ class ExceptionRecordFinalizerTest {
         );
 
         // then
-        assertThat(res).containsOnlyKeys("field1", FIELD_CASE_REFERENCE, FIELD_DISPLAY_WARNINGS, FIELD_OCR_DATA_VALIDATION_WARNINGS);
+        assertThat(res).containsOnlyKeys(
+            "field1",
+            FIELD_CASE_REFERENCE,
+            FIELD_DISPLAY_WARNINGS,
+            FIELD_OCR_DATA_VALIDATION_WARNINGS
+        );
+
         assertThat(res.get("field1")).isEqualTo("value1");
         assertThat(res.get(FIELD_CASE_REFERENCE)).isEqualTo(Long.toString(CASE_ID));
         assertThat(res.get(FIELD_DISPLAY_WARNINGS)).isEqualTo(NO);
