@@ -74,6 +74,7 @@ class ExceptionRecordCreationTest {
         CaseDetails caseDetails = caseSearcher.findExceptionRecord(randomPoBox.toString()).get();
         assertThat(getCaseDataForField(caseDetails, "awaitingPaymentDCNProcessing")).isEqualTo("No");
         assertThat(getCaseDataForField(caseDetails, "containsPayments")).isEqualTo("No");
+        assertThat(getCaseDataForField(caseDetails, "surname")).isNull();
     }
 
     @DisplayName("Should create ExceptionRecord when classification is NEW_APPLICATION")
@@ -99,19 +100,24 @@ class ExceptionRecordCreationTest {
 
         CaseDetails caseDetails = caseSearcher.findExceptionRecord(randomPoBox.toString()).get();
 
+        // envelope ID from the JSON resource representing the test message
+        assertThat(caseDetails.getData().get("envelopeId")).isEqualTo(messageEnvelopeId);
+
         assertThat(caseDetails.getCaseTypeId()).isEqualTo("BULKSCAN_ExceptionRecord");
         assertThat(caseDetails.getJurisdiction()).isEqualTo("BULKSCAN");
 
-        Map<String, String> expectedOcrData = ImmutableMap.of("field1", "value1", "field2", "value2");
+        Map<String, String> expectedOcrData = ImmutableMap.of(
+            "field1", "value1",
+            "field2", "value2",
+            "last_name", "surnameXXXX"
+        );
         assertThat(getOcrData(caseDetails)).isEqualTo(expectedOcrData);
-
         List<String> expectedOcrDataWarnings = Arrays.asList("warning 1", "warning 2");
         assertThat(getOcrDataValidationWarnings(caseDetails)).isEqualTo(expectedOcrDataWarnings);
 
-        // envelope ID from the JSON resource representing the test message
-        assertThat(caseDetails.getData().get("envelopeId")).isEqualTo(messageEnvelopeId);
         assertThat(getCaseDataForField(caseDetails, "awaitingPaymentDCNProcessing")).isEqualTo("Yes");
         assertThat(getCaseDataForField(caseDetails, "containsPayments")).isEqualTo("Yes");
+        assertThat(getCaseDataForField(caseDetails, "surname")).isEqualTo("surnameXXXX");
     }
 
     @DisplayName("Should create ExceptionRecord when provided/requested case reference is invalid")

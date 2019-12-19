@@ -2,11 +2,14 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdKeyValue;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
@@ -19,22 +22,43 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 
 class ExceptionRecordMapperTest {
 
+    private ServiceConfigProvider serviceConfigProvider = mock(ServiceConfigProvider.class);
+    private ServiceConfigItem serviceConfigItem = mock(ServiceConfigItem.class);
+
     private final ExceptionRecordMapper mapper = new ExceptionRecordMapper(
         "https://example.gov.uk",
-        "files"
+        "files",
+        serviceConfigProvider
     );
+
+    @BeforeEach
+    void setupServiceConfig() {
+        given(serviceConfigProvider.getConfig("bulkscan")).willReturn(serviceConfigItem);
+        given(serviceConfigItem.getSurnameOcrFieldName("FORM_TYPE")).willReturn("field_surname");
+    }
 
     @Test
     public void mapEnvelope_maps_all_fields_correctly() {
         // given
-        Envelope envelope = envelope(2);
+        Envelope envelope = envelope(
+            2,
+            ImmutableList.of(new Payment("dcn1")),
+            ImmutableList.of(
+                new OcrDataField("fieldName1", "value1"),
+                new OcrDataField("field_surname", "surname1")
+            ),
+            asList("warning 1", "warning 2")
+        );
 
         // when
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
@@ -71,6 +95,7 @@ class ExceptionRecordMapperTest {
         assertThat(exceptionRecord.envelopeLegacyCaseReference).isEqualTo(envelope.legacyCaseRef);
         assertThat(exceptionRecord.showEnvelopeCaseReference).isEqualTo("No"); // for "New Application"
         assertThat(exceptionRecord.showEnvelopeLegacyCaseReference).isEqualTo("No"); // for "New Application"
+        assertThat(exceptionRecord.surname).isEqualTo("surname1");
     }
 
     @Test
@@ -78,6 +103,7 @@ class ExceptionRecordMapperTest {
         Envelope envelope = envelope(2, emptyList(), null, emptyList());
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
         assertThat(exceptionRecord.ocrData).isNull();
+        assertThat(exceptionRecord.surname).isNull();
     }
 
     @Test
@@ -182,6 +208,37 @@ class ExceptionRecordMapperTest {
         assertThat(exceptionRecord.envelopeLegacyCaseReference).isEqualTo("LEGACY_CASE_123");
         assertThat(exceptionRecord.showEnvelopeCaseReference).isEqualTo("Yes");
         assertThat(exceptionRecord.showEnvelopeLegacyCaseReference).isEqualTo("Yes");
+    }
+
+    @Test
+    public void mapEnvelope_sets_surname_null_when_no_surname_data_in_ocr() {
+        //given
+        Envelope envelope = envelope("CASE_123", "LEGACY_CASE_123", Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR);
+        // when
+        ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
+
+        // then
+        assertThat(exceptionRecord.surname).isNull();
+    }
+
+    @Test
+    public void mapEnvelope_sets_first_surname_when_multiple_surname_data_in_ocr() {
+        //given
+        Envelope envelope = envelope(
+            1,
+            ImmutableList.of(new Payment("dcn1")),
+            ImmutableList.of(
+                new OcrDataField("fieldName1", "value1"),
+                new OcrDataField("field_surname", "surname_a"),
+                new OcrDataField("field_surname", "surname_1"),
+                new OcrDataField("field_surname", "surname_2")
+            ),
+            asList("warning 1", "warning 2")
+        );        // when
+        ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
+
+        // then
+        assertThat(exceptionRecord.surname).isEqualTo("surname_a");
     }
 
     private Envelope envelopeWithJurisdiction(String jurisdiction) {
