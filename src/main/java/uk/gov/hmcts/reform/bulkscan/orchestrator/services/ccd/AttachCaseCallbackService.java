@@ -91,7 +91,7 @@ public class AttachCaseCallbackService {
      *         or the list of errors, in case of errors
      */
     public Either<ErrorsAndWarnings, Map<String, Object>> process(
-        CaseDetails exceptionRecordData,
+        CaseDetails exceptionRecordDetails,
         String requesterIdamToken,
         String requesterUserId,
         String eventId,
@@ -105,19 +105,19 @@ public class AttachCaseCallbackService {
             return Either.left(ErrorsAndWarnings.withErrors(singletonList(eventIdValidationError)));
         }
 
-        Validation<String, Void> classificationValidation = canBeAttachedToCase(exceptionRecordData);
+        Validation<String, Void> classificationValidation = canBeAttachedToCase(exceptionRecordDetails);
 
         if (classificationValidation.isInvalid()) {
             String eventIdClassificationValidationError = classificationValidation.getError();
             log.warn("Validation error {}", eventIdClassificationValidationError);
             return Either.left(ErrorsAndWarnings.withErrors(singletonList(eventIdClassificationValidationError)));
         }
-        boolean useSearchCaseReference = isSearchCaseReferenceTypePresent(exceptionRecordData);
+        boolean useSearchCaseReference = isSearchCaseReferenceTypePresent(exceptionRecordDetails);
 
-        return getValidation(exceptionRecordData, useSearchCaseReference, requesterIdamToken, requesterUserId)
-            .map(callBackEvent -> tryAttachToCase(callBackEvent, exceptionRecordData, ignoreWarnings))
+        return getValidation(exceptionRecordDetails, useSearchCaseReference, requesterIdamToken, requesterUserId)
+            .map(callBackEvent -> tryAttachToCase(callBackEvent, exceptionRecordDetails, ignoreWarnings))
             .map(attachCaseResult ->
-                attachCaseResult.map(modifiedFields -> mergeCaseFields(exceptionRecordData.getData(), modifiedFields))
+                attachCaseResult.map(modifiedFields -> mergeCaseFields(exceptionRecordDetails.getData(), modifiedFields))
             )
             .getOrElseGet(errors -> Either.left(ErrorsAndWarnings.withErrors(errors.toJavaList())));
     }
@@ -209,18 +209,18 @@ public class AttachCaseCallbackService {
 
     private Either<ErrorsAndWarnings, Map<String, Object>> attachToCase(
         AttachToCaseEventData callBackEvent,
-        CaseDetails exceptionRecordData,
+        CaseDetails exceptionRecordDetails,
         boolean ignoreWarnings
     ) {
         String targetCaseCcdId;
 
         if (EXTERNAL_CASE_REFERENCE.equals(callBackEvent.targetCaseRefType)) {
-            targetCaseCcdId = attachCaseByLegacyId(callBackEvent, exceptionRecordData, ignoreWarnings);
+            targetCaseCcdId = attachCaseByLegacyId(callBackEvent, exceptionRecordDetails, ignoreWarnings);
         } else {
             Either<ErrorsAndWarnings, Boolean> attachResult = attachCaseByCcdId(
                 callBackEvent,
                 callBackEvent.targetCaseRef,
-                exceptionRecordData,
+                exceptionRecordDetails,
                 ignoreWarnings
             );
 
@@ -242,7 +242,7 @@ public class AttachCaseCallbackService {
 
     private String attachCaseByLegacyId(
         AttachToCaseEventData callBackEvent,
-        CaseDetails exceptionRecordData,
+        CaseDetails exceptionRecordDetails,
         boolean ignoreWarnings
     ) {
         List<Long> targetCaseCcdIds = ccdApi.getCaseRefsByLegacyId(callBackEvent.targetCaseRef, callBackEvent.service);
@@ -260,7 +260,7 @@ public class AttachCaseCallbackService {
             attachCaseByCcdId(
                 callBackEvent,
                 targetCaseCcdId,
-                exceptionRecordData,
+                exceptionRecordDetails,
                 ignoreWarnings
             );
 
