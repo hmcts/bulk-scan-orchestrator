@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
-import io.vavr.collection.Array;
-import io.vavr.collection.Seq;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
 import org.apache.commons.collections4.CollectionUtils;
@@ -23,7 +21,6 @@ import javax.annotation.Nonnull;
 import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
 import static java.lang.String.format;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.CCD_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
@@ -116,40 +113,6 @@ public final class CallbackValidations {
     }
 
     @Nonnull
-    public static Validation<Seq<String>, CaseDetails> hasValidDetailsForAttachingToCase(
-        boolean useSearchCaseReference,
-        CaseDetails theCase
-    ) {
-        Validation<String, String> caseReferenceTypeValidation = useSearchCaseReference
-            ? hasSearchCaseReferenceType(theCase)
-            : valid(CCD_CASE_REFERENCE);
-        Validation<String, String> caseReferenceValidation = useSearchCaseReference
-            ? hasSearchCaseReference(theCase)
-            : hasAttachToCaseReference(theCase);
-        Validation<String, String> jurisdictionValidation = hasJurisdiction(theCase);
-        Validation<String, String> serviceNameInCaseTypeIdValidation = hasServiceNameInCaseTypeId(theCase);
-        Validation<String, Long> idValidation = hasAnId(theCase);
-        Validation<String, List<Map<String, Object>>> scannedRecordValidation = hasAScannedRecord(theCase);
-
-        Seq<Validation<String, ?>> validations = Array.of(
-            caseReferenceTypeValidation,
-            caseReferenceValidation,
-            jurisdictionValidation,
-            serviceNameInCaseTypeIdValidation,
-            idValidation,
-            scannedRecordValidation
-        );
-
-        Seq<String> errors = validations
-            .filter(Validation::isInvalid)
-            .map(Validation::getError);
-        if (errors.isEmpty()) {
-            return Validation.valid(theCase);
-        }
-        return Validation.invalid(errors);
-    }
-
-    @Nonnull
     static Validation<String, String> hasServiceNameInCaseTypeId(CaseDetails theCase) {
         return Optional
             .ofNullable(theCase)
@@ -191,14 +154,16 @@ public final class CallbackValidations {
                             return hasOcr(theCase)
                                 ? Validation.<String, Void>valid(null)
                                 : Validation.<String, Void>invalid(
+                                format(
                                     "The 'attach to case' event is not supported for supplementary evidence with OCR "
                                         + "but not containing OCR data"
+                                )
                             );
                         case CLASSIFICATION_EXCEPTION:
                             return !hasOcr(theCase)
                                 ? Validation.<String, Void>valid(null)
                                 : Validation.<String, Void>invalid(
-                                    "The 'attach to case' event is not supported for exception records with OCR"
+                                    format("The 'attach to case' event is not supported for exception records with OCR")
                             );
                         default:
                             return Validation.<String, Void>invalid(
