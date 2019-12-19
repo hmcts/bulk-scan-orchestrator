@@ -248,7 +248,7 @@ class CallbackValidationsTest {
     }
 
     @Test
-    void no_case_id_should_fail() {
+    void noCaseIdTest() {
         checkValidation(
             createCaseWith(b -> b.id(null)),
             false,

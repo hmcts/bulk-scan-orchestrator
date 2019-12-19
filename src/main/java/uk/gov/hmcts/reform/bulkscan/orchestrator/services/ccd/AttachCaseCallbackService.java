@@ -117,7 +117,8 @@ public class AttachCaseCallbackService {
         return getValidation(exceptionRecordDetails, useSearchCaseReference, requesterIdamToken, requesterUserId)
             .map(callBackEvent -> tryAttachToCase(callBackEvent, exceptionRecordDetails, ignoreWarnings))
             .map(attachCaseResult ->
-                attachCaseResult.map(modifiedFields -> mergeCaseFields(exceptionRecordDetails.getData(), modifiedFields))
+                attachCaseResult.map(modifiedFields ->
+                    mergeCaseFields(exceptionRecordDetails.getData(), modifiedFields))
             )
             .getOrElseGet(errors -> Either.left(ErrorsAndWarnings.withErrors(errors.toJavaList())));
     }
