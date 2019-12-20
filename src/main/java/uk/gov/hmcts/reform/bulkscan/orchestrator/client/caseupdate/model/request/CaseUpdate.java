@@ -11,8 +11,8 @@ public class CaseUpdate {
     public final ExistingCaseDetails caseDetails;
 
     public CaseUpdate(
-        @JsonProperty("exception_record") ExceptionRecord exceptionRecord,
-        @JsonProperty("case_details") ExistingCaseDetails caseDetails
+        ExceptionRecord exceptionRecord,
+        ExistingCaseDetails caseDetails
     ) {
         this.exceptionRecord = exceptionRecord;
         this.caseDetails = caseDetails;
