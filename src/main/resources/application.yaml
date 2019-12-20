@@ -71,7 +71,6 @@ service-config:
       form-type-to-surname-ocr-field-mappings:
         - formType: PERSONAL
           ocrFieldList:
-            - lastname_not_found
             - last_name
 
     - service: sscs
