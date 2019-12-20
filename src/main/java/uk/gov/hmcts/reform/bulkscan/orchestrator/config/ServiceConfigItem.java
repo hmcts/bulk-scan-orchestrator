@@ -88,8 +88,7 @@ public class ServiceConfigItem {
     }
 
     public List<String> getSurnameOcrFieldNameList(String formType) {
-        List<String> surnameOcrKeyList = formTypeToSurnameOcrFieldMappings.get(formType);
-        return surnameOcrKeyList == null ? Collections.emptyList() : surnameOcrKeyList;
+        return formTypeToSurnameOcrFieldMappings.getOrDefault(formType, Collections.emptyList());
     }
 
     public void setFormTypeToSurnameOcrFieldMappings(List<FormFieldMapping> formTypeToSurnameOcrFieldMappings) {
