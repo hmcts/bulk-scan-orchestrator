@@ -107,8 +107,10 @@ public class ExceptionRecordMapper {
         }
 
 
-        Optional<List<String>> surnameOcrFieldNameListOp = serviceConfigProvider.getConfig(envelope.container)
-            .getSurnameOcrFieldNameList(envelope.formType);
+        Optional<List<String>> surnameOcrFieldNameListOp =
+            serviceConfigProvider
+                .getConfig(envelope.container)
+                .getSurnameOcrFieldNameList(envelope.formType);
 
 
         if (!surnameOcrFieldNameListOp.isPresent()) {
@@ -116,49 +118,42 @@ public class ExceptionRecordMapper {
         }
 
 
-        List<String> surnameList = null;
-        String surnameOcrFieldName = null;
+        for (String surnameOcrFieldName : surnameOcrFieldNameListOp.get()) {
 
+            LOGGER.info("Surname search by ocr field name {}", surnameOcrFieldName);
 
-        for (String ocrFieldName : surnameOcrFieldNameListOp.get()) {
-
-            LOGGER.info("Surname search by ocr field name {}", ocrFieldName);
-
-            surnameList = envelope.ocrData
+            List<String> surnameList = envelope.ocrData
                 .stream()
-                .filter(ocrData -> ocrData.name.equals(ocrFieldName))
+                .filter(ocrData -> ocrData.name.equals(surnameOcrFieldName))
                 .map(ocrData -> ocrData.value)
                 .collect(toList());
 
-            surnameOcrFieldName = ocrFieldName;
-
             if (!surnameList.isEmpty()) {
-                break;
+
+                if (surnameList.size() > 1) {
+                    LOGGER.error(
+                        "Surname found {} times in OCR data. "
+                            + "Surname Ocr Field Name: {}, Envelope id: {}, Case Ref: {}, Jurisdiction: {}",
+                        surnameList.size(),
+                        surnameOcrFieldName,
+                        envelope.id,
+                        envelope.caseRef,
+                        envelope.jurisdiction
+                    );
+                }
+                return surnameList.get(0);
+
             }
         }
 
+        LOGGER.info(
+            "Surname not found in OCR data. "
+                + "Envelope id: {}, Case Ref: {}, Jurisdiction: {}",
+            envelope.id,
+            envelope.caseRef,
+            envelope.jurisdiction
+        );
+        return null;
 
-        if (surnameList.size() == 0) {
-            LOGGER.info(
-                "Surname not found in OCR data. "
-                    + "Surname Ocr Field Name: {}. Envelope id: {}, Case Ref: {}, Jurisdiction: {}",
-                surnameOcrFieldName,
-                envelope.id,
-                envelope.caseRef,
-                envelope.jurisdiction
-            );
-            return null;
-        } else if (surnameList.size() > 1) {
-            LOGGER.error(
-                "Surname found {} times in OCR data. "
-                    + "Surname Ocr Field Name: {}, Envelope id: {}, Case Ref: {}, Jurisdiction: {}",
-                surnameList.size(),
-                surnameOcrFieldName,
-                envelope.id,
-                envelope.caseRef,
-                envelope.jurisdiction
-            );
-        }
-        return surnameList.get(0);
     }
 }
