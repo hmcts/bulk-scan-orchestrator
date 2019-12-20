@@ -21,9 +21,11 @@ import javax.annotation.Nonnull;
 import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
 public final class CallbackValidations {
 
@@ -32,6 +34,9 @@ public final class CallbackValidations {
     private static final String CLASSIFICATION_SUPPLEMENTARY_EVIDENCE = "SUPPLEMENTARY_EVIDENCE";
     private static final String CLASSIFICATION_SUPPLEMENTARY_EVIDENCE_WITH_OCR = "SUPPLEMENTARY_EVIDENCE_WITH_OCR";
     private static final String CLASSIFICATION_EXCEPTION = "EXCEPTION";
+
+    private static final List<Classification> VALID_CLASSIFICATIONS_FOR_ATTACH_TO_CASE =
+        asList(EXCEPTION, SUPPLEMENTARY_EVIDENCE, SUPPLEMENTARY_EVIDENCE_WITH_OCR);
 
     private static final Logger log = LoggerFactory.getLogger(CallbackValidations.class);
 
@@ -154,15 +159,15 @@ public final class CallbackValidations {
                             return hasOcr(theCase)
                                 ? Validation.<String, Void>valid(null)
                                 : Validation.<String, Void>invalid(
-                                    "The 'attach to case' event is not supported for supplementary evidence with OCR "
-                                        + "but not containing OCR data"
-                                );
+                                "The 'attach to case' event is not supported for supplementary evidence with OCR "
+                                    + "but not containing OCR data"
+                            );
                         case CLASSIFICATION_EXCEPTION:
                             return !hasOcr(theCase)
                                 ? Validation.<String, Void>valid(null)
                                 : Validation.<String, Void>invalid(
-                                    "The 'attach to case' event is not supported for exception records with OCR"
-                                );
+                                "The 'attach to case' event is not supported for exception records with OCR"
+                            );
                         default:
                             return Validation.<String, Void>invalid(
                                 format("Invalid journey classification %s", classification)
@@ -239,6 +244,45 @@ public final class CallbackValidations {
         if ((EXCEPTION.equals(classification) || NEW_APPLICATION.equals(classification)) && !hasOcr(theCase)) {
             return invalid(format(
                 "Event createNewCase not allowed for the current journey classification %s without OCR",
+                classification
+            ));
+        }
+
+        return valid(classification);
+    }
+
+    public static Validation<String, Classification> hasJourneyClassificationForAttachToCase(CaseDetails theCase) {
+        Optional<String> classificationOption = getJourneyClassification(theCase);
+
+        return classificationOption
+            .map(classification -> Try.of(() -> Classification.valueOf(classification)))
+            .map(Try::toValidation)
+            .map(validation -> validation
+                .mapError(throwable ->
+                    format(
+                        "Journey Classification %s is not allowed when attaching exception record to a case",
+                        classificationOption.get()
+                    )
+                )
+                .flatMap(classification -> validateClassificationForAttachToCase(classification, theCase))
+            )
+            .orElse(invalid("Missing journeyClassification"));
+    }
+
+    private static Validation<String, Classification> validateClassificationForAttachToCase(
+        Classification classification,
+        CaseDetails theCase
+    ) {
+        if (!VALID_CLASSIFICATIONS_FOR_ATTACH_TO_CASE.contains(classification)) {
+            return invalid(format(
+                "The current Journey Classification %s is not allowed for attaching to case",
+                classification
+            ));
+        }
+
+        if (SUPPLEMENTARY_EVIDENCE_WITH_OCR.equals(classification) && !hasOcr(theCase)) {
+            return invalid(format(
+                "The current journey classification %s is not allowed without OCR data",
                 classification
             ));
         }

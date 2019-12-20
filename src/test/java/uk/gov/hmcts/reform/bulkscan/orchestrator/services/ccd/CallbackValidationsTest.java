@@ -258,6 +258,28 @@ class CallbackValidationsTest {
         );
     }
 
+    @Test
+    void valid_case_id_should_pass() {
+        checkValidation(
+            createCaseWith(b -> b.id(1L)),
+            true,
+            1L,
+            CallbackValidations::hasAnId,
+            null
+        );
+    }
+
+    @Test
+    void no_case_details_should_fail() {
+        checkValidation(
+            null,
+            false,
+            1L,
+            CallbackValidations::hasAnId,
+            "Exception case has no Id"
+        );
+    }
+
     private static Object[][] idamTokenTestParams() {
         return new Object[][]{
             {"null idam token", null, false, NO_IDAM_TOKEN_RECEIVED_ERROR},
