@@ -244,6 +244,27 @@ class ExceptionRecordMapperTest {
     }
 
     @Test
+    public void mapEnvelope_sets_non_empty_surname_when_ocr_surname_data_empty(){
+
+        //given
+        Envelope envelope = envelope(
+            1,
+            ImmutableList.of(new Payment("dcn1")),
+            ImmutableList.of(
+                new OcrDataField("field_surname", "   "),
+                new OcrDataField("field_surname", ""),
+                new OcrDataField("field_surname", null),
+                new OcrDataField("field_surname", "surname_2")
+            ),
+            asList("warning 1", "warning 2")
+        );        // when
+        ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
+
+        // then
+        assertThat(exceptionRecord.surname).isEqualTo("surname_2");
+    }
+
+    @Test
     public void mapEnvelope_sets_surname_with_first_matching_ocr_conf_when_multiple_conf_available() {
         //given
         given(serviceConfigItem.getSurnameOcrFieldNameList("FORM_TYPE"))

@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -124,7 +125,7 @@ public class ExceptionRecordMapper {
 
             List<String> surnameList = envelope.ocrData
                 .stream()
-                .filter(ocrData -> ocrData.name.equals(surnameOcrFieldName))
+                .filter(ocrData -> ocrData.name.equals(surnameOcrFieldName) && StringUtils.isNotBlank(ocrData.value))
                 .map(ocrData -> ocrData.value)
                 .collect(toList());
 
