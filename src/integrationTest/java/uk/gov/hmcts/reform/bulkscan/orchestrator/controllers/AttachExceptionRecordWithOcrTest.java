@@ -43,23 +43,10 @@ class AttachExceptionRecordWithOcrTest {
     private static final String IDAM_TOKEN = "idam-token";
     private static final String USER_ID = "640";
 
-    private static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
     private static final String RESPONSE_FIELD_ERRORS = "errors";
     private static final String RESPONSE_FIELD_WARNINGS = "warnings";
     private static final String RESPONSE_FIELD_DATA = "data";
-    private static final String EVENT_ID_ATTACH_TO_CASE = "attachToExistingCase";
-    private static final String CLASSIFICATION_EXCEPTION = "EXCEPTION";
-    private static final String CALLBACK_ATTACH_CASE_PATH = "/callback/attach_case";
     private static final String ATTACH_TO_CASE_REFERENCE_FIELD_NAME = "attachToCaseReference";
-
-    private static final String CASE_REFERENCE_TYPE_CCD = "ccdCaseReference";
-    private static final long EXCEPTION_RECORD_ID = 26409983479785245L;
-    private static final String EXCEPTION_RECORD_FILENAME = "record.pdf";
-    private static final String EXCEPTION_RECORD_DOCUMENT_NUMBER = "654321";
-    private static final Map<String, Object> EXCEPTION_RECORD_DOC = document(
-        EXCEPTION_RECORD_FILENAME,
-        EXCEPTION_RECORD_DOCUMENT_NUMBER
-    );
 
     @LocalServerPort
     int serverPort;
