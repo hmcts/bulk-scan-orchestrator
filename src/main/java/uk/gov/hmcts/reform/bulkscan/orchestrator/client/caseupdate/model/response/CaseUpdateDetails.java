@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class CaseUpdateDetails {
 
     public final String eventId;
+
     public final Object caseData;
 
     public CaseUpdateDetails(
