@@ -33,9 +33,9 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasPoBox;
 
 @Component
-public class CreateCaseValidator {
+public class ExceptionRecordValidator {
 
-    public CreateCaseValidator() {
+    public ExceptionRecordValidator() {
         // empty constructor
     }
 

@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionR
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseValidator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ExceptionRecordValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
@@ -38,14 +38,14 @@ public class CreateCaseCallbackService {
     public static final String AWAITING_PAYMENTS_MESSAGE =
         "Payments for this Exception Record have not been processed yet";
 
-    private final CreateCaseValidator validator;
+    private final ExceptionRecordValidator validator;
     private final ServiceConfigProvider serviceConfigProvider;
     private final CcdApi ccdApi;
     private final CcdNewCaseCreator ccdNewCaseCreator;
     private final ExceptionRecordFinalizer exceptionRecordFinalizer;
 
     public CreateCaseCallbackService(
-        CreateCaseValidator validator,
+        ExceptionRecordValidator validator,
         ServiceConfigProvider serviceConfigProvider,
         CcdApi ccdApi,
         CcdNewCaseCreator ccdNewCaseCreator,

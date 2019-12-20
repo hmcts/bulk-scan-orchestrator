@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionR
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseValidator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ExceptionRecordValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
@@ -55,7 +55,7 @@ class CreateCaseCallbackServiceTest {
     private static final String SERVICE = "service";
     private static final long CASE_ID = 123;
     private static final String CASE_TYPE_ID = SERVICE + "_ExceptionRecord";
-    private static final CreateCaseValidator VALIDATOR = new CreateCaseValidator();
+    private static final ExceptionRecordValidator VALIDATOR = new ExceptionRecordValidator();
 
     @Mock
     private ServiceConfigProvider serviceConfigProvider;
