@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.env
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -44,7 +45,8 @@ class ExceptionRecordMapperTest {
     @BeforeEach
     void setupServiceConfig() {
         given(serviceConfigProvider.getConfig("bulkscan")).willReturn(serviceConfigItem);
-        given(serviceConfigItem.getSurnameOcrFieldName("FORM_TYPE")).willReturn("field_surname");
+        given(serviceConfigItem.getSurnameOcrFieldNameList("FORM_TYPE"))
+            .willReturn(Optional.of(asList("field_surname")));
     }
 
     @Test
@@ -239,6 +241,51 @@ class ExceptionRecordMapperTest {
 
         // then
         assertThat(exceptionRecord.surname).isEqualTo("surname_a");
+    }
+
+    @Test
+    public void mapEnvelope_sets_surname_with_first_matching_ocr_conf_when_multiple_conf_available() {
+        //given
+        given(serviceConfigItem.getSurnameOcrFieldNameList("FORM_TYPE"))
+            .willReturn(Optional.of(asList("field_surname_not_found", "field_surname","fieldName1")));
+
+
+        Envelope envelope = envelope(
+            1,
+            ImmutableList.of(new Payment("dcn1")),
+            ImmutableList.of(
+                new OcrDataField("fieldName1", "value1"),
+                new OcrDataField("field_surname_2", "surname_a"),
+                new OcrDataField("field_surname", "surname_1"),
+                new OcrDataField("field_surname", "surname_2")
+            ),
+            asList("warning 1", "warning 2")
+        );        // when
+        ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
+
+        // then
+        assertThat(exceptionRecord.surname).isEqualTo("surname_1");
+    }
+
+    @Test
+    public void mapEnvelope_sets_surname_when_both_ocr_cof_available_by_using_first_surname_configuration() {
+        //given
+        given(serviceConfigItem.getSurnameOcrFieldNameList("FORM_TYPE"))
+            .willReturn(Optional.of(asList("field_surname", "fieldName1")));
+
+        Envelope envelope = envelope(
+            1,
+            ImmutableList.of(new Payment("dcn1")),
+            ImmutableList.of(
+                new OcrDataField("fieldName1", "value1"),
+                new OcrDataField("field_surname", "surname_x")
+            ),
+            asList("warning 1", "warning 2")
+        );        // when
+        ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
+
+        // then
+        assertThat(exceptionRecord.surname).isEqualTo("surname_x");
     }
 
     private Envelope envelopeWithJurisdiction(String jurisdiction) {

@@ -19,7 +19,7 @@ class ServiceConfigTest {
         ServiceConfigItem configItem = serviceConfigProvider.getConfig(TEST_SERVICE_NAME);
 
         //form types and field names are defined in application-integration.yaml
-        assertThat(configItem.getSurnameOcrFieldName("form1")).isEqualTo("lastName");
-        assertThat(configItem.getSurnameOcrFieldName("form2")).isEqualTo("surname");
+        assertThat(configItem.getSurnameOcrFieldNameList("form1").get().get(0)).isEqualTo("lastName");
+        assertThat(configItem.getSurnameOcrFieldNameList("form2").get().get(0)).isEqualTo("surname");
     }
 }

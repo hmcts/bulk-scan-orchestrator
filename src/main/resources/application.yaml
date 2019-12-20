@@ -70,7 +70,9 @@ service-config:
       allow-creating-case-before-payments-are-processed: true
       form-type-to-surname-ocr-field-mappings:
         - formType: PERSONAL
-          ocrField: last_name
+          ocrFieldList:
+            - lastname_not_found
+            - last_name
 
     - service: sscs
       jurisdiction: SSCS

@@ -1,8 +1,10 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
 
+import java.util.List;
+
 public class FormFieldMapping {
     private String formType;
-    private String ocrField;
+    private List<String> ocrFieldList;
 
     public String getFormType() {
         return formType;
@@ -12,11 +14,11 @@ public class FormFieldMapping {
         this.formType = formType;
     }
 
-    public String getOcrField() {
-        return ocrField;
+    public List<String> getOcrFieldList() {
+        return ocrFieldList;
     }
 
-    public void setOcrField(String ocrField) {
-        this.ocrField = ocrField;
+    public void setOcrFieldList(List<String> ocrField) {
+        this.ocrFieldList = ocrField;
     }
 }

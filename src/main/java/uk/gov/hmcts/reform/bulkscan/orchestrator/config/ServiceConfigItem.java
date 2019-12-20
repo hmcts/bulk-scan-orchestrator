@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.validation.constraints.NotNull;
 
 import static java.util.stream.Collectors.toMap;
@@ -34,7 +35,7 @@ public class ServiceConfigItem {
 
     private boolean allowCreatingCaseBeforePaymentsAreProcessed = false;
 
-    private Map<String, String> formTypeToSurnameOcrFieldMappings = new HashMap<>();
+    private Map<String, List<String>> formTypeToSurnameOcrFieldMappings = new HashMap<>();
 
     // region getters & setters
 
@@ -86,8 +87,8 @@ public class ServiceConfigItem {
         this.allowCreatingCaseBeforePaymentsAreProcessed = allowCreatingCaseBeforePaymentsAreProcessed;
     }
 
-    public String getSurnameOcrFieldName(String formType) {
-        return formTypeToSurnameOcrFieldMappings.get(formType);
+    public Optional<List<String>> getSurnameOcrFieldNameList(String formType) {
+        return Optional.ofNullable(formTypeToSurnameOcrFieldMappings.get(formType));
     }
 
     public void setFormTypeToSurnameOcrFieldMappings(List<FormFieldMapping> formTypeToSurnameOcrFieldMappings) {
@@ -95,7 +96,7 @@ public class ServiceConfigItem {
             .collect(
                 toMap(
                     FormFieldMapping::getFormType,
-                    FormFieldMapping::getOcrField,
+                    FormFieldMapping::getOcrFieldList,
                     (v1, v2) -> {
                         throw new InvalidConfigurationException(
                             String.format("Form type has multiple mappings to surname fields %s, %s.", v1, v2)

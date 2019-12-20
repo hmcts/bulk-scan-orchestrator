@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.env
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -105,14 +106,38 @@ public class ExceptionRecordMapper {
             return null;
         }
 
-        String surnameOcrFieldName = serviceConfigProvider.getConfig(envelope.container)
-            .getSurnameOcrFieldName(envelope.formType);
 
-        List<String> surnameList = envelope.ocrData
-            .stream()
-            .filter(ocrData -> ocrData.name.equals(surnameOcrFieldName))
-            .map(ocrData -> ocrData.value)
-            .collect(toList());
+        Optional<List<String>> surnameOcrFieldNameListOp = serviceConfigProvider.getConfig(envelope.container)
+            .getSurnameOcrFieldNameList(envelope.formType);
+
+
+        if (!surnameOcrFieldNameListOp.isPresent()) {
+            return null;
+        }
+
+
+        List<String> surnameList = null;
+        String surnameOcrFieldName = null;
+
+
+        for (String ocrFieldName : surnameOcrFieldNameListOp.get()) {
+
+            LOGGER.info("Surname search by ocr field name {}", ocrFieldName);
+
+            surnameList = envelope.ocrData
+                .stream()
+                .filter(ocrData -> ocrData.name.equals(ocrFieldName))
+                .map(ocrData -> ocrData.value)
+                .collect(toList());
+
+            surnameOcrFieldName = ocrFieldName;
+
+            if (!surnameList.isEmpty()) {
+                break;
+            }
+        }
+
+
         if (surnameList.size() == 0) {
             LOGGER.info(
                 "Surname not found in OCR data. "
