@@ -244,7 +244,7 @@ class ExceptionRecordMapperTest {
     }
 
     @Test
-    public void mapEnvelope_sets_non_empty_surname_when_ocr_surname_data_empty(){
+    public void mapEnvelope_sets_non_empty_surname_when_ocr_surname_data_empty() {
 
         //given
         Envelope envelope = envelope(
