@@ -77,6 +77,15 @@ service-config:
     - service: sscs
       jurisdiction: SSCS
       case-type-ids: []
+      form-type-to-surname-ocr-field-mappings:
+        - formType: sscs1
+          ocrFieldList:
+            - person2_last_name
+            - person1_last_name
+        - formType: SSCS1
+          ocrFieldList:
+            - person2_last_name
+            - person1_last_name
 
     - service: probate
       jurisdiction: PROBATE
