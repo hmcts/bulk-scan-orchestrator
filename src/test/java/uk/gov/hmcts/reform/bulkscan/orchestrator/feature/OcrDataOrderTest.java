@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.env
 
 import java.util.ArrayList;
 import java.util.ListIterator;
-import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,7 +34,7 @@ public class OcrDataOrderTest {
         // given
         byte[] envelopeMessage = SampleData.exampleJsonAsBytes();
         given(serviceConfigProvider.getConfig("container")).willReturn(serviceConfigItem);
-        given(serviceConfigItem.getSurnameOcrFieldNameList(any())).willReturn(Optional.of(asList("field_surname")));
+        given(serviceConfigItem.getSurnameOcrFieldNameList(any())).willReturn(asList("field_surname"));
 
         // when
         Envelope envelope = EnvelopeParser.parse(envelopeMessage);

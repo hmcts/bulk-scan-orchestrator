@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,31 +25,33 @@ class ServiceConfigItemFormFieldMappingsTest {
     }
 
     @Test
-    void should_return_empty_option_if_mappings_not_set() {
+    void should_return_empty_list_if_mappings_not_set() {
         // given
 
         // when
-        final Optional<List<String>> fieldNameList1 = configItem.getSurnameOcrFieldNameList(FORM_1);
+        final List<String> fieldNameList1 = configItem.getSurnameOcrFieldNameList(FORM_1);
 
         // then
 
-        assertThat(fieldNameList1.isPresent()).isFalse();
+        assertThat(fieldNameList1).isNotNull();
+        assertThat(fieldNameList1.isEmpty()).isTrue();
     }
 
     @Test
-    void should_return_empty_option_if_no_mapping_for_form_type() {
+    void should_return_empty_list_if_no_mapping_for_form_type() {
         // given
         FormFieldMapping formFieldMapping1 = new FormFieldMapping();
         formFieldMapping1.setFormType(FORM_1);
-        formFieldMapping1.setOcrFieldList(asList(FIELD_1));
+        formFieldMapping1.setOcrFields(asList(FIELD_1));
 
         configItem.setFormTypeToSurnameOcrFieldMappings(asList(formFieldMapping1));
 
         // when
-        final Optional<List<String>> fieldNameList1 = configItem.getSurnameOcrFieldNameList(FORM_2);
+        final List<String> fieldNameList1 = configItem.getSurnameOcrFieldNameList(FORM_2);
 
         // then
-        assertThat(fieldNameList1.isPresent()).isFalse();
+        assertThat(fieldNameList1).isNotNull();
+        assertThat(fieldNameList1.isEmpty()).isTrue();
     }
 
     @Test
@@ -58,16 +59,16 @@ class ServiceConfigItemFormFieldMappingsTest {
         // given
         FormFieldMapping formFieldMapping1 = new FormFieldMapping();
         formFieldMapping1.setFormType(FORM_1);
-        formFieldMapping1.setOcrFieldList(asList(FIELD_1));
+        formFieldMapping1.setOcrFields(asList(FIELD_1));
 
         configItem.setFormTypeToSurnameOcrFieldMappings(asList(formFieldMapping1));
 
         // when
-        final Optional<List<String>> fieldNameList1 = configItem.getSurnameOcrFieldNameList(FORM_1);
+        final List<String> fieldNameList1 = configItem.getSurnameOcrFieldNameList(FORM_1);
 
         // then
-        assertThat(fieldNameList1.get().get(0)).isEqualTo(FIELD_1);
-        assertThat(fieldNameList1.get().size()).isEqualTo(1);
+        assertThat(fieldNameList1.get(0)).isEqualTo(FIELD_1);
+        assertThat(fieldNameList1.size()).isEqualTo(1);
 
     }
 
@@ -76,17 +77,17 @@ class ServiceConfigItemFormFieldMappingsTest {
         // given
         FormFieldMapping formFieldMapping1 = new FormFieldMapping();
         formFieldMapping1.setFormType(FORM_1);
-        formFieldMapping1.setOcrFieldList(asList(FIELD_1, FIELD_2));
+        formFieldMapping1.setOcrFields(asList(FIELD_1, FIELD_2));
 
         configItem.setFormTypeToSurnameOcrFieldMappings(asList(formFieldMapping1));
 
         // when
-        final Optional<List<String>> fieldNameList1 = configItem.getSurnameOcrFieldNameList(FORM_1);
+        final List<String> fieldNameList1 = configItem.getSurnameOcrFieldNameList(FORM_1);
 
         // then
-        assertThat(fieldNameList1.get().get(0)).isEqualTo(FIELD_1);
-        assertThat(fieldNameList1.get().get(1)).isEqualTo(FIELD_2);
-        assertThat(fieldNameList1.get().size()).isEqualTo(2);
+        assertThat(fieldNameList1.get(0)).isEqualTo(FIELD_1);
+        assertThat(fieldNameList1.get(1)).isEqualTo(FIELD_2);
+        assertThat(fieldNameList1.size()).isEqualTo(2);
 
     }
 
@@ -95,22 +96,22 @@ class ServiceConfigItemFormFieldMappingsTest {
         // given
         FormFieldMapping formFieldMapping1 = new FormFieldMapping();
         formFieldMapping1.setFormType(FORM_1);
-        formFieldMapping1.setOcrFieldList(asList(FIELD_1));
+        formFieldMapping1.setOcrFields(asList(FIELD_1));
         FormFieldMapping formFieldMapping2 = new FormFieldMapping();
         formFieldMapping2.setFormType(FORM_2);
-        formFieldMapping2.setOcrFieldList(asList(FIELD_2));
+        formFieldMapping2.setOcrFields(asList(FIELD_2));
 
         configItem.setFormTypeToSurnameOcrFieldMappings(asList(formFieldMapping1, formFieldMapping2));
 
         // when
-        final Optional<List<String>> fieldNameList1 = configItem.getSurnameOcrFieldNameList(FORM_1);
-        final Optional<List<String>> fieldNameList2 = configItem.getSurnameOcrFieldNameList(FORM_2);
+        final List<String> fieldNameList1 = configItem.getSurnameOcrFieldNameList(FORM_1);
+        final List<String> fieldNameList2 = configItem.getSurnameOcrFieldNameList(FORM_2);
 
         // then
-        assertThat(fieldNameList1.get().get(0)).isEqualTo(FIELD_1);
-        assertThat(fieldNameList1.get().size()).isEqualTo(1);
-        assertThat(fieldNameList2.get().get(0)).isEqualTo(FIELD_2);
-        assertThat(fieldNameList2.get().size()).isEqualTo(1);
+        assertThat(fieldNameList1.get(0)).isEqualTo(FIELD_1);
+        assertThat(fieldNameList1.size()).isEqualTo(1);
+        assertThat(fieldNameList2.get(0)).isEqualTo(FIELD_2);
+        assertThat(fieldNameList2.size()).isEqualTo(1);
 
     }
 
@@ -119,13 +120,13 @@ class ServiceConfigItemFormFieldMappingsTest {
         // given
         FormFieldMapping formFieldMapping1 = new FormFieldMapping();
         formFieldMapping1.setFormType(FORM_1);
-        formFieldMapping1.setOcrFieldList(asList(FIELD_1));
+        formFieldMapping1.setOcrFields(asList(FIELD_1));
         FormFieldMapping formFieldMapping2 = new FormFieldMapping();
         formFieldMapping2.setFormType(FORM_2);
-        formFieldMapping2.setOcrFieldList(asList(FIELD_2));
+        formFieldMapping2.setOcrFields(asList(FIELD_2));
         FormFieldMapping formFieldMapping3 = new FormFieldMapping();
         formFieldMapping3.setFormType(FORM_2);
-        formFieldMapping3.setOcrFieldList(asList(FIELD_3));
+        formFieldMapping3.setOcrFields(asList(FIELD_3));
 
         // when
         assertThatThrownBy(

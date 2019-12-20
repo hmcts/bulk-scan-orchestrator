@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.env
 
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -108,18 +107,18 @@ public class ExceptionRecordMapper {
         }
 
 
-        Optional<List<String>> surnameOcrFieldNameListOp =
+        List<String> surnameOcrFieldNameList =
             serviceConfigProvider
                 .getConfig(envelope.container)
                 .getSurnameOcrFieldNameList(envelope.formType);
 
 
-        if (!surnameOcrFieldNameListOp.isPresent()) {
+        if (surnameOcrFieldNameList.isEmpty()) {
             return null;
         }
 
 
-        for (String surnameOcrFieldName : surnameOcrFieldNameListOp.get()) {
+        for (String surnameOcrFieldName : surnameOcrFieldNameList) {
 
             LOGGER.info("Surname search by ocr field name {}", surnameOcrFieldName);
 

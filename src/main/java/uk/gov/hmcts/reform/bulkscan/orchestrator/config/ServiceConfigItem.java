@@ -3,10 +3,10 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import javax.validation.constraints.NotNull;
 
 import static java.util.stream.Collectors.toMap;
@@ -87,8 +87,9 @@ public class ServiceConfigItem {
         this.allowCreatingCaseBeforePaymentsAreProcessed = allowCreatingCaseBeforePaymentsAreProcessed;
     }
 
-    public Optional<List<String>> getSurnameOcrFieldNameList(String formType) {
-        return Optional.ofNullable(formTypeToSurnameOcrFieldMappings.get(formType));
+    public List<String> getSurnameOcrFieldNameList(String formType) {
+        List<String> surnameOcrKeyList = formTypeToSurnameOcrFieldMappings.get(formType);
+        return surnameOcrKeyList == null ? Collections.emptyList() : surnameOcrKeyList;
     }
 
     public void setFormTypeToSurnameOcrFieldMappings(List<FormFieldMapping> formTypeToSurnameOcrFieldMappings) {
@@ -96,7 +97,7 @@ public class ServiceConfigItem {
             .collect(
                 toMap(
                     FormFieldMapping::getFormType,
-                    FormFieldMapping::getOcrFieldList,
+                    FormFieldMapping::getOcrFields,
                     (v1, v2) -> {
                         throw new InvalidConfigurationException(
                             String.format("Form type has multiple mappings to surname fields %s, %s.", v1, v2)

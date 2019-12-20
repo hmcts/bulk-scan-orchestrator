@@ -4,7 +4,7 @@ import java.util.List;
 
 public class FormFieldMapping {
     private String formType;
-    private List<String> ocrFieldList;
+    private List<String> ocrFields;
 
     public String getFormType() {
         return formType;
@@ -14,11 +14,11 @@ public class FormFieldMapping {
         this.formType = formType;
     }
 
-    public List<String> getOcrFieldList() {
-        return ocrFieldList;
+    public List<String> getOcrFields() {
+        return ocrFields;
     }
 
-    public void setOcrFieldList(List<String> ocrField) {
-        this.ocrFieldList = ocrField;
+    public void setOcrFields(List<String> ocrFields) {
+        this.ocrFields = ocrFields;
     }
 }
