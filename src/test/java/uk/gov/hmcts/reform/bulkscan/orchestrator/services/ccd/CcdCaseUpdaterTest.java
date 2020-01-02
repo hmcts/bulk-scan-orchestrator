@@ -363,6 +363,39 @@ class CcdCaseUpdaterTest {
     }
 
     @Test
+    void updateCase_should_handle_feign_exception_from_start_event() {
+        // given
+        given(coreCaseDataApi.startEventForCaseWorker(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString()))
+            .willThrow(new FeignException.BadRequest("Msg", "Body".getBytes()));
+
+        // when
+        CallbackException callbackException = catchThrowableOfType(() ->
+                ccdCaseUpdater.updateCase(
+                    exceptionRecord,
+                    configItem,
+                    true,
+                    "idamToken",
+                    "userId",
+                    EXISTING_CASE_ID
+                ),
+            CallbackException.class
+        );
+
+        // then
+        assertThat(callbackException.getMessage())
+            .isEqualTo("Failed to update case for Service service with case Id existing_case_id "
+                + "based on exception record 1. Service response: Body");
+        assertThat(callbackException.getCause().getMessage()).isEqualTo("Msg");
+    }
+
+    @Test
     void updateCase_should_handle_exception() {
         // given
         given(coreCaseDataApi.startEventForCaseWorker(
