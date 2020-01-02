@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import feign.FeignException;
+import io.vavr.control.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -22,9 +23,12 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import java.util.List;
+
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR;
 
 @Service
@@ -116,16 +120,21 @@ public class CcdCaseUpdater {
                 );
                 return new ProcessResult(updateResponse.warnings, emptyList());
             } else {
-                updateCaseInCcd(
+                Either<List<String>, Boolean> updateResult =  updateCaseInCcd(
                     configItem.getService(),
                     ignoreWarnings,
                     idamToken,
                     s2sToken,
                     userId,
+                    existingCaseId,
                     exceptionRecord,
                     updateResponse.caseDetails,
                     startEvent
                 );
+
+                if (updateResult.isLeft()) {
+                    return new ProcessResult(updateResult.getLeft(), emptyList());
+                }
 
                 return new ProcessResult(
                     exceptionRecordFinalizer.finalizeExceptionRecord(
@@ -148,6 +157,28 @@ public class CcdCaseUpdater {
             log.error(msg);
             ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(asList(msg), emptyList());
             return new ProcessResult(errorResponse.warnings, errorResponse.errors);
+        } catch (FeignException exception) {
+            log.error(
+                "Failed to update case for {} service with case Id {} based on exception record {}. "
+                    + "Service response: {}",
+                configItem.getService(),
+                existingCaseId,
+                exceptionRecord.id,
+                exception.contentUTF8(),
+                exception
+            );
+
+            throw new CallbackException(
+                format(
+                    "Failed to update case for %s service with case Id %s based on exception record %s. "
+                        + "Service response: %s",
+                    configItem.getService(),
+                    existingCaseId,
+                    exceptionRecord.id,
+                    exception.contentUTF8()
+                ),
+                exception
+            );
         } catch (Exception exception) {
             throw new CallbackException(
                 format(
@@ -161,27 +192,30 @@ public class CcdCaseUpdater {
         }
     }
 
-    private void updateCaseInCcd(
+    private Either<List<String>, Boolean> updateCaseInCcd(
         String service,
         boolean ignoreWarnings,
         String idamToken,
         String s2sToken,
         String userId,
+        String existingCaseId,
         ExceptionRecord exceptionRecord,
         CaseUpdateDetails caseUpdateDetails,
         StartEventResponse startEvent
     ) {
         CaseDetails existingCase = startEvent.getCaseDetails();
 
+        final CaseDataContent caseDataContent = getCaseDataContent(exceptionRecord, caseUpdateDetails, startEvent);
         try {
-            coreCaseDataApi.submitForCaseworker(
+            coreCaseDataApi.submitEventForCaseWorker(
                 idamToken,
                 s2sToken,
                 userId,
                 exceptionRecord.poBoxJurisdiction,
                 startEvent.getCaseDetails().getCaseTypeId(),
+                existingCaseId,
                 ignoreWarnings,
-                getCaseDataContent(exceptionRecord, caseUpdateDetails, startEvent)
+                caseDataContent
             );
 
             log.info(
@@ -190,6 +224,19 @@ public class CcdCaseUpdater {
                 existingCase.getId(),
                 exceptionRecord.id
             );
+
+            return Either.right(true);
+        } catch (FeignException.UnprocessableEntity exception) {
+            String msg = format("Service returned 422 Unprocessable Entity response when trying to update "
+                    + "case for %s jurisdiction with case Id %s based on exception record with Id %s. "
+                    + "Service response: %s",
+                exceptionRecord.poBoxJurisdiction,
+                existingCase.getId(),
+                exceptionRecord.id,
+                exception.contentUTF8());
+            log.error(msg, exception);
+
+            return Either.left(singletonList(msg));
         } catch (FeignException exception) {
             String msg = format("Service response: %s", exception.contentUTF8());
             log.error(
