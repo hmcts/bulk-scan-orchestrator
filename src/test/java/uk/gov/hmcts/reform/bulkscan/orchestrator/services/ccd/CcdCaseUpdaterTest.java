@@ -282,6 +282,33 @@ class CcdCaseUpdaterTest {
     }
 
     @Test
+    void updateCase_should_handle_feign_unprocessable_entity() {
+        // given
+        initResponseMockData();
+        given(configItem.getUpdateUrl()).willReturn("url");
+        given(caseUpdateClient.updateCase(anyString(), any(CaseDetails.class), any(ExceptionRecord.class), anyString()))
+            .willReturn(noWarningsUpdateResponse);
+        initMockData();
+        prepareMockForSubmissionEventForCaseWorker().willThrow(new FeignException.UnprocessableEntity("Msg", "Body".getBytes()));
+
+        // when
+        ProcessResult res = ccdCaseUpdater.updateCase(
+            exceptionRecord,
+            configItem,
+            true,
+            "idamToken",
+            "userId",
+            EXISTING_CASE_ID
+        );
+
+        // then
+        assertThat(res.getWarnings()).containsExactlyInAnyOrder("Service returned 422 Unprocessable Entity response "
+            + "when trying to update case for some jurisdiction jurisdiction with case Id 0 based on exception record "
+            + "with Id 1. Service response: Body");
+        assertThat(res.getErrors()).isEmpty();
+    }
+
+    @Test
     void updateCase_should_handle_bad_request_from_start_event() {
         // given
         given(coreCaseDataApi.startEventForCaseWorker(
