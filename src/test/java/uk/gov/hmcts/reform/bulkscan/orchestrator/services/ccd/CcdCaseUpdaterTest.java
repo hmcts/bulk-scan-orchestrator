@@ -289,7 +289,8 @@ class CcdCaseUpdaterTest {
         given(caseUpdateClient.updateCase(anyString(), any(CaseDetails.class), any(ExceptionRecord.class), anyString()))
             .willReturn(noWarningsUpdateResponse);
         initMockData();
-        prepareMockForSubmissionEventForCaseWorker().willThrow(new FeignException.UnprocessableEntity("Msg", "Body".getBytes()));
+        prepareMockForSubmissionEventForCaseWorker()
+            .willThrow(new FeignException.UnprocessableEntity("Msg", "Body".getBytes()));
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
