@@ -133,6 +133,7 @@ public class CcdCaseUpdater {
                 );
 
                 if (updateResult.isLeft()) {
+                    // error
                     return new ProcessResult(updateResult.getLeft(), emptyList());
                 }
 
@@ -147,19 +148,14 @@ public class CcdCaseUpdater {
             ClientServiceErrorResponse errorResponse = serviceResponseParser.parseResponseBody(exception);
             return new ProcessResult(errorResponse.warnings, errorResponse.errors);
         } catch (Conflict exception) {
-            String msg = format(
-                "Failed to update case for %s service with case Id %s based on exception record %s "
-                    + "because it has been updated in the meantime",
-                configItem.getService(),
-                existingCaseId,
-                exceptionRecord.id
-            );
+            String msg = getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id)
+                + " because it has been updated in the meantime";
             log.error(msg);
             ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(asList(msg), emptyList());
             return new ProcessResult(errorResponse.warnings, errorResponse.errors);
         } catch (FeignException exception) {
             log.error(
-                "Failed to update case for {} service with case Id {} based on exception record {}. "
+                getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id)
                     + "Service response: {}",
                 configItem.getService(),
                 existingCaseId,
@@ -170,26 +166,29 @@ public class CcdCaseUpdater {
 
             throw new CallbackException(
                 format(
-                    "Failed to update case for %s service with case Id %s based on exception record %s. "
-                        + "Service response: %s",
-                    configItem.getService(),
-                    existingCaseId,
-                    exceptionRecord.id,
+                    "%s. Service response: %s",
+                    getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id),
                     exception.contentUTF8()
                 ),
                 exception
             );
         } catch (Exception exception) {
             throw new CallbackException(
-                format(
-                    "Failed to update case for %s service with case Id %s based on exception record %s",
-                    configItem.getService(),
-                    existingCaseId,
-                    exceptionRecord.id
-                ),
+                getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id),
                 exception
             );
         }
+    }
+
+    private String getErrorMessage(String service, String existingCaseId, String exceptionRecordId) {
+        return format(
+            "Failed to update case for %s service "
+                + "with case Id %s "
+                + "based on exception record %s",
+            service,
+            existingCaseId,
+            exceptionRecordId
+        );
     }
 
     private Either<List<String>, Boolean> updateCaseInCcd(
@@ -219,7 +218,9 @@ public class CcdCaseUpdater {
             );
 
             log.info(
-                "Successfully updated case for service {} with case Id {} based on exception record ref {}",
+                "Successfully updated case for service {} "
+                    + "with case Id {} "
+                    + "based on exception record ref {}",
                 service,
                 existingCase.getId(),
                 exceptionRecord.id
@@ -227,8 +228,10 @@ public class CcdCaseUpdater {
 
             return Either.right(true);
         } catch (FeignException.UnprocessableEntity exception) {
-            String msg = format("Service returned 422 Unprocessable Entity response when trying to update "
-                    + "case for %s jurisdiction with case Id %s based on exception record with Id %s. "
+            String msg = format("Service returned 422 Unprocessable Entity response "
+                    + "when trying to update case for %s jurisdiction "
+                    + "with case Id %s "
+                    + "based on exception record with Id %s. "
                     + "Service response: %s",
                 exceptionRecord.poBoxJurisdiction,
                 existingCase.getId(),
@@ -240,7 +243,10 @@ public class CcdCaseUpdater {
         } catch (FeignException exception) {
             String msg = format("Service response: %s", exception.contentUTF8());
             log.error(
-                "Failed to update case for {} jurisdiction with case Id {} based on exception record with Id {}. {}",
+                "Failed to update case for {} jurisdiction "
+                    + "with case Id {} "
+                    + "based on exception record with Id {}. "
+                    + "{}",
                 exceptionRecord.poBoxJurisdiction,
                 existingCase.getId(),
                 exceptionRecord.id,
