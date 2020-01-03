@@ -1,5 +1,5 @@
 #!groovy
-@Library('Infrastructure@disableprdepcheck')
+@Library("Infrastructure")
 
 import uk.gov.hmcts.contino.GradleBuilder
 import uk.gov.hmcts.contino.Kubectl
