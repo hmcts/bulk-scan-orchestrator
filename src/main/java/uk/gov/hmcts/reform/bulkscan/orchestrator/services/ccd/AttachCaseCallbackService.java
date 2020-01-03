@@ -68,7 +68,7 @@ public class AttachCaseCallbackService {
      * @return Either exception record field map, when processing was successful,
      *         or the list of errors, in case of errors
      */
-    public Either<List<String>, Map<String, Object>> process(
+    public Either<ErrorsAndWarnings, Map<String, Object>> process(
         CaseDetails exceptionRecord,
         String requesterIdamToken,
         String requesterUserId,
@@ -79,7 +79,7 @@ public class AttachCaseCallbackService {
         if (eventIdValidation.isInvalid()) {
             String eventIdValidationError = eventIdValidation.getError();
             log.warn("Validation error {}", eventIdValidationError);
-            return Either.left(singletonList(eventIdValidationError));
+            return Either.left(ErrorsAndWarnings.withErrors(singletonList(eventIdValidationError)));
         }
 
         Validation<String, Void> classificationValidation = canBeAttachedToCase(exceptionRecord);
@@ -87,7 +87,7 @@ public class AttachCaseCallbackService {
         if (classificationValidation.isInvalid()) {
             String eventIdClassificationValidationError = classificationValidation.getError();
             log.warn("Validation error {}", eventIdClassificationValidationError);
-            return Either.left(singletonList(eventIdClassificationValidationError));
+            return Either.left(ErrorsAndWarnings.withErrors(singletonList(eventIdClassificationValidationError)));
         }
         boolean useSearchCaseReference = isSearchCaseReferenceTypePresent(exceptionRecord);
 
@@ -96,7 +96,7 @@ public class AttachCaseCallbackService {
             .map(attachCaseResult ->
                 attachCaseResult.map(modifiedFields -> mergeCaseFields(exceptionRecord.getData(), modifiedFields))
             )
-            .getOrElseGet(errors -> Either.left(errors.toJavaList()));
+            .getOrElseGet(errors -> Either.left(ErrorsAndWarnings.withErrors(errors.toJavaList())));
     }
 
     private Validation<Seq<String>, AttachToCaseEventData> getValidation(
@@ -135,7 +135,7 @@ public class AttachCaseCallbackService {
      * @return Either a map of fields that should be modified in CCD when processing was successful,
      *         or the list of errors, in case of errors
      */
-    private Either<List<String>, Map<String, Object>> tryAttachToCase(
+    private Either<ErrorsAndWarnings, Map<String, Object>> tryAttachToCase(
         AttachToCaseEventData event, CaseDetails exceptionRecord
     ) {
         try {
@@ -167,7 +167,7 @@ public class AttachCaseCallbackService {
                 event.targetCaseRef,
                 exc
             );
-            return Either.left(singletonList(exc.getMessage()));
+            return Either.left(ErrorsAndWarnings.withErrors(singletonList(exc.getMessage())));
 
         } catch (PaymentsPublishingException exception) {
             log.error(
@@ -176,7 +176,7 @@ public class AttachCaseCallbackService {
                 exceptionRecord.getId(),
                 exception
             );
-            return Either.left(singletonList(PAYMENT_ERROR_MSG));
+            return Either.left(ErrorsAndWarnings.withErrors(singletonList(PAYMENT_ERROR_MSG)));
         } catch (Exception exc) {
             log.error(
                 "Error attaching ER {} in {} to case {}",
