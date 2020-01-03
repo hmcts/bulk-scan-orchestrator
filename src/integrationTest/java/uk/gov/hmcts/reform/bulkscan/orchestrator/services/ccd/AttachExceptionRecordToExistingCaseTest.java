@@ -578,7 +578,7 @@ class AttachExceptionRecordToExistingCaseTest {
                     RESPONSE_FIELD_ERRORS,
                     hasItem("The 'attach to case' event is not supported for supplementary evidence with OCR "
                         + "but not containing OCR data")
-        );
+                );
     }
 
     @Test
