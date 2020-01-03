@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import feign.FeignException;
-import io.vavr.control.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,7 +22,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
-import java.util.List;
+import java.util.Optional;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -120,7 +119,7 @@ public class CcdCaseUpdater {
                 );
                 return new ProcessResult(updateResponse.warnings, emptyList());
             } else {
-                Either<List<String>, Boolean> updateResult =  updateCaseInCcd(
+                Optional<String> updateResult =  updateCaseInCcd(
                     configItem.getService(),
                     ignoreWarnings,
                     idamToken,
@@ -132,9 +131,9 @@ public class CcdCaseUpdater {
                     startEvent
                 );
 
-                if (updateResult.isLeft()) {
+                if (updateResult.isPresent()) {
                     // error
-                    return new ProcessResult(updateResult.getLeft(), emptyList());
+                    return new ProcessResult(singletonList(updateResult.get()), emptyList());
                 }
 
                 return new ProcessResult(
@@ -191,7 +190,12 @@ public class CcdCaseUpdater {
         );
     }
 
-    private Either<List<String>, Boolean> updateCaseInCcd(
+    /**
+     * Submits event to update the case.
+     *
+     * @return either error message in case of error or empty if no error detected
+     */
+    private Optional<String> updateCaseInCcd(
         String service,
         boolean ignoreWarnings,
         String idamToken,
@@ -226,7 +230,7 @@ public class CcdCaseUpdater {
                 exceptionRecord.id
             );
 
-            return Either.right(true);
+            return Optional.empty();
         } catch (FeignException.UnprocessableEntity exception) {
             String msg = format("Service returned 422 Unprocessable Entity response "
                     + "when trying to update case for %s jurisdiction "
@@ -239,7 +243,7 @@ public class CcdCaseUpdater {
                 exception.contentUTF8());
             log.error(msg, exception);
 
-            return Either.left(singletonList(msg));
+            return Optional.of(msg);
         } catch (FeignException exception) {
             String msg = format("Service response: %s", exception.contentUTF8());
             log.error(
