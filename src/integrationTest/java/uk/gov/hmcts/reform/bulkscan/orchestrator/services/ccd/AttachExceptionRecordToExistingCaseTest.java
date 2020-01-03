@@ -559,27 +559,6 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-    public void should_succeed_when_classification_is_supplementary_evidence_with_ocr() {
-        CallbackRequest callbackRequest =
-            callbackRequestWith(
-                EVENT_ID_ATTACH_TO_CASE,
-                SUPPLEMENTARY_EVIDENCE_WITH_OCR.name(),
-                true
-            );
-
-        ValidatableResponse response =
-            given()
-                .body(callbackRequest)
-                .headers(userHeaders())
-                .post(CALLBACK_ATTACH_CASE_PATH)
-                .then()
-                .statusCode(200);
-
-        verifySuccessResponse(response, callbackRequest);
-        verifyRequestedAttachingToCase();
-    }
-
-    @Test
     public void should_fail_when_classification_is_supplementary_evidence_with_ocr_does_not_include_ocr() {
         CallbackRequest callbackRequest =
             callbackRequestWith(
