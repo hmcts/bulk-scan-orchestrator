@@ -914,32 +914,6 @@ class AttachExceptionRecordToExistingCaseTest {
             .build();
     }
 
-    private CaseDetails getCaseDetails(Map<String, Object> caseData) {
-        return CaseDetails.builder()
-            .jurisdiction(JURISDICTION)
-            .id(EXCEPTION_RECORD_ID)
-            .caseTypeId(CASE_TYPE_EXCEPTION_RECORD)
-            .data(caseData)
-            .build();
-    }
-
-    private Map<String, Object> getCaseData(String classification, boolean includeOcr) {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put("journeyClassification", classification);
-
-        if (includeOcr) {
-            caseData.put("scanOCRData", singletonList(
-                ImmutableMap.of("first_name", "John")
-            ));
-        } else {
-            caseData.put("scanOCRData", emptyList());
-        }
-
-        caseData.put("scannedDocuments", ImmutableList.of(EXCEPTION_RECORD_DOC));
-        caseData.put("attachToCaseReference", CASE_REF);
-        return caseData;
-    }
-
     private static Map<String, Object> document(String filename, String documentNumber) {
         return ImmutableMap.of(
             "value", ImmutableMap.of(
