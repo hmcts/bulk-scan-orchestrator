@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static io.vavr.control.Validation.valid;
@@ -181,9 +182,7 @@ public class AttachCaseCallbackService {
                 classificationValidation.get(),
                 exceptionRecordValidation.get()
             ));
-        }
-
-        if (exceptionRecordValidation.isInvalid()) {
+        } else if (exceptionRecordValidation.isInvalid()) {
             return Validation.invalid(errors.appendAll(exceptionRecordValidation.getError()));
         } else {
             return Validation.invalid(errors);
@@ -263,15 +262,15 @@ public class AttachCaseCallbackService {
         if (EXTERNAL_CASE_REFERENCE.equals(callBackEvent.targetCaseRefType)) {
             targetCaseCcdId = attachCaseByLegacyId(callBackEvent, exceptionRecordDetails, ignoreWarnings);
         } else {
-            Either<ErrorsAndWarnings, Boolean> attachResult = attachCaseByCcdId(
+            Optional<ErrorsAndWarnings> attachResult = attachCaseByCcdId(
                 callBackEvent,
                 callBackEvent.targetCaseRef,
                 exceptionRecordDetails,
                 ignoreWarnings
             );
 
-            if (attachResult.isLeft()) {
-                return Either.left(attachResult.getLeft());
+            if (attachResult.isPresent()) {
+                return Either.left(attachResult.get());
             }
 
             targetCaseCcdId = callBackEvent.targetCaseRef;
@@ -326,7 +325,7 @@ public class AttachCaseCallbackService {
         }
     }
 
-    private Either<ErrorsAndWarnings, Boolean> attachCaseByCcdId(
+    private Optional<ErrorsAndWarnings> attachCaseByCcdId(
         AttachToCaseEventData callBackEvent,
         String targetCaseCcdRef,
         CaseDetails exceptionRecordDetails,
@@ -341,11 +340,12 @@ public class AttachCaseCallbackService {
         switch (callBackEvent.classification) {
             case EXCEPTION:
             case SUPPLEMENTARY_EVIDENCE:
-                return updateSupplementaryEvidence(
+                updateSupplementaryEvidence(
                     callBackEvent,
                     targetCaseCcdRef,
                     exceptionRecordDetails
                 );
+                return Optional.empty();
 
             case SUPPLEMENTARY_EVIDENCE_WITH_OCR:
                 return updateSupplementaryEvidenceWithOcr(
@@ -360,7 +360,7 @@ public class AttachCaseCallbackService {
         }
     }
 
-    private Either<ErrorsAndWarnings, Boolean> updateSupplementaryEvidence(
+    private void updateSupplementaryEvidence(
         AttachToCaseEventData callBackEvent,
         String targetCaseCcdRef,
         CaseDetails exceptionRecordDetails
@@ -406,11 +406,9 @@ public class AttachCaseCallbackService {
         );
 
         paymentsProcessor.updatePayments(exceptionRecordDetails, theCase.getId());
-
-        return Either.right(true);
     }
 
-    private Either<ErrorsAndWarnings, Boolean> updateSupplementaryEvidenceWithOcr(
+    private Optional<ErrorsAndWarnings> updateSupplementaryEvidenceWithOcr(
         AttachToCaseEventData callBackEvent,
         String targetCaseCcdRef,
         CaseDetails exceptionRecordDetails,
@@ -426,10 +424,13 @@ public class AttachCaseCallbackService {
             targetCaseCcdRef
         );
 
-        if (!processResult.getWarnings().isEmpty()) {
-            return Either.left(ErrorsAndWarnings.withWarnings(processResult.getWarnings()));
+        if (!processResult.getErrors().isEmpty() || !processResult.getWarnings().isEmpty()) {
+            return Optional.of(ErrorsAndWarnings.withErrorsAndWarnings(
+                processResult.getErrors(),
+                processResult.getWarnings()
+            ));
         } else {
-            return Either.right(true);
+            return Optional.empty();
         }
     }
 
