@@ -153,6 +153,8 @@ public class AttachCaseCallbackService {
         if (classificationValidation.isValid() && classificationValidation.get() == SUPPLEMENTARY_EVIDENCE_WITH_OCR) {
             exceptionRecordValidation = exceptionRecordValidator.getValidation(exceptionRecord);
         } else {
+            // exceptionRecord value is used only for SUPPLEMENTARY_EVIDENCE_WITH_OCR journey classification
+            // otherwise we can safely set its value to null in the validation result
             exceptionRecordValidation = Validation.valid(null);
         }
 
