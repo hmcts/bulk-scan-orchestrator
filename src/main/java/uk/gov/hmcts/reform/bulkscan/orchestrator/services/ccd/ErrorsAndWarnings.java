@@ -17,8 +17,8 @@ public class ErrorsAndWarnings {
         return new ErrorsAndWarnings(errors, emptyList());
     }
 
-    static ErrorsAndWarnings withWarnings(List<String> warnings) {
-        return new ErrorsAndWarnings(emptyList(), warnings);
+    static ErrorsAndWarnings withErrorsAndWarnings(List<String> errors, List<String> warnings) {
+        return new ErrorsAndWarnings(errors, warnings);
     }
 
     public List<String> getErrors() {
