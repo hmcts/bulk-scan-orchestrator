@@ -106,7 +106,6 @@ public class ExceptionRecordMapper {
             return null;
         }
 
-
         List<String> surnameOcrFieldNameList =
             serviceConfigProvider
                 .getConfig(envelope.container)
@@ -116,7 +115,6 @@ public class ExceptionRecordMapper {
         if (surnameOcrFieldNameList.isEmpty()) {
             return null;
         }
-
 
         for (String surnameOcrFieldName : surnameOcrFieldNameList) {
 
@@ -147,8 +145,7 @@ public class ExceptionRecordMapper {
         }
 
         LOGGER.info(
-            "Surname not found in OCR data. "
-                + "Envelope id: {}, Case Ref: {}, Jurisdiction: {}",
+            "Surname not found in OCR data. Envelope id: {}, Case Ref: {}, Jurisdiction: {}",
             envelope.id,
             envelope.caseRef,
             envelope.jurisdiction
