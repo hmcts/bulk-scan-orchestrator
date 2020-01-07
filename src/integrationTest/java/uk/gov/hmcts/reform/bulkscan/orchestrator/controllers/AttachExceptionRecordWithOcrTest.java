@@ -68,6 +68,14 @@ class AttachExceptionRecordWithOcrTest {
         EXCEPTION_RECORD_FILENAME,
         EXCEPTION_RECORD_DOCUMENT_NUMBER
     );
+    private static final String CASE_ID = "1539007368674134";
+    private static final String SUPPLEMENTARY_EVIDENCE_WITH_OCR = "SUPPLEMENTARY_EVIDENCE_WITH_OCR";
+    private static final String PO_BOX_VALUE = "PO 12345";
+    private static final String FORM_TYPE_VALUE = "B123";
+    private static final String ATTACH_TO_CASE_REFERENCE = "attachToCaseReference";
+    private static final String FORM_TYPE = "formType";
+    private static final String JOURNEY_CLASSIFICATION = "journeyClassification";
+    private static final String PO_BOX = "poBox";
 
     private static Map<String, Object> document(String filename, String documentNumber) {
         return ImmutableMap.of(
@@ -78,14 +86,6 @@ class AttachExceptionRecordWithOcrTest {
             )
         );
     }
-
-    private static final String DOCUMENT_FILENAME = "document.pdf";
-    private static final String DOCUMENT_NUMBER = "123456";
-    private static final Map<String, Object> EXISTING_DOC = document(DOCUMENT_FILENAME, DOCUMENT_NUMBER);
-
-    private static final Map<String, Object> CASE_DATA = ImmutableMap.of(
-        "scannedDocuments", ImmutableList.of(EXISTING_DOC)
-    );
 
     @LocalServerPort
     int serverPort;
@@ -111,7 +111,7 @@ class AttachExceptionRecordWithOcrTest {
     @DisplayName("Should successfully pass if exception record already attached")
     @Test
     void should_pass_if_record_already_attached() throws JsonProcessingException {
-        String caseRef = "1234567890123456";
+        String caseRef = "1234567890123456"; // just an arbitrary value
         setUpCaseSearchByCcdId(okJson(MAPPER.writeValueAsString(exceptionRecord(caseRef))));
 
         Map<String, Object> caseData = getCaseData();
@@ -178,10 +178,10 @@ class AttachExceptionRecordWithOcrTest {
 
     private Map<String, Object> getCaseData() {
         Map<String, Object> caseData = new HashMap<>();
-        caseData.put("poBox", "PO 12345");
-        caseData.put("journeyClassification", "SUPPLEMENTARY_EVIDENCE_WITH_OCR");
-        caseData.put("formType", "B123");
-        caseData.put("attachToCaseReference", "1539007368674134");
+        caseData.put(PO_BOX, PO_BOX_VALUE);
+        caseData.put(JOURNEY_CLASSIFICATION, SUPPLEMENTARY_EVIDENCE_WITH_OCR);
+        caseData.put(FORM_TYPE, FORM_TYPE_VALUE);
+        caseData.put(ATTACH_TO_CASE_REFERENCE, CASE_ID);
         return caseData;
     }
 
@@ -246,7 +246,7 @@ class AttachExceptionRecordWithOcrTest {
               "/caseworkers/" + USER_ID
                 + "/jurisdictions/BULKSCAN"
                 + "/case-types/BULKSCAN_ExceptionRecord"
-                + "/cases/1539007368674134"
+                + "/cases/" + CASE_ID
                 + "/event-triggers/" + EVENT_ID
                 + "/token"
             )
@@ -257,7 +257,7 @@ class AttachExceptionRecordWithOcrTest {
 
     private void setUpCaseSearchByCcdId(ResponseDefinitionBuilder responseBuilder) throws JsonProcessingException {
         givenThat(
-            get("/cases/1539007368674134")
+            get("/cases/" + CASE_ID)
                 .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(BEARER))
                 .willReturn(responseBuilder)
         );
@@ -270,7 +270,7 @@ class AttachExceptionRecordWithOcrTest {
                 "/caseworkers/" + USER_ID
                     + "/jurisdictions/BULKSCAN"
                     + "/case-types/BULKSCAN_ExceptionRecord"
-                    + "/cases/1539007368674134"
+                    + "/cases/" + CASE_ID
                     + "/events?ignore-warning=true"
             )
                 .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(BEARER))
