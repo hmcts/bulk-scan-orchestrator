@@ -426,7 +426,11 @@ public class AttachCaseCallbackService {
         );
 
         if (attachedToCase.isPresent()) {
-            log.warn("Exception record is already attached to case {}", attachedToCase.get());
+            log.warn("There's been an attempt to attach an already attached exception record to another case. "
+                + "Exception record ID: {}, attempt to attach to case: {}, already attached to case: {}",
+                callBackEvent.exceptionRecordId,
+                targetCaseCcdRef,
+                attachedToCase.get());
             return Optional.empty();
         }
 
