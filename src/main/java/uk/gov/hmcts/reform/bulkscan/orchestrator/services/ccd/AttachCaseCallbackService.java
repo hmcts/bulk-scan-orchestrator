@@ -426,12 +426,21 @@ public class AttachCaseCallbackService {
         );
 
         if (attachedToCase.isPresent()) {
-            log.warn("There has been an attempt to attach an already attached exception record to another case. "
-                + "Exception record ID: {}, attempt to attach to case: {}, already attached to case: {}",
-                callBackEvent.exceptionRecordId,
-                targetCaseCcdRef,
-                attachedToCase.get());
-            return Optional.empty();
+            if (targetCaseCcdRef.equals(attachedToCase.get())) {
+                log.warn("There has been an attempt to attach an already attached exception record to another case. "
+                        + "Exception record ID: {}, attempt to attach to case: {}",
+                    callBackEvent.exceptionRecordId,
+                    targetCaseCcdRef);
+                return Optional.empty();
+            } else {
+                log.warn("There has been an attempt to attach an already attached exception record to another case. "
+                        + "Exception record ID: {}, attempt to attach to case: {}, already attached to case: {}",
+                    callBackEvent.exceptionRecordId,
+                    targetCaseCcdRef,
+                    attachedToCase.get());
+                throw new AlreadyAttachedToCaseException("Exception record is already attached to case "
+                    + attachedToCase.get());
+            }
         }
 
         ServiceConfigItem serviceConfigItem = getServiceConfig(exceptionRecordDetails);
