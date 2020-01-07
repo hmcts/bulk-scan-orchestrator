@@ -70,11 +70,21 @@ service-config:
       allow-creating-case-before-payments-are-processed: true
       form-type-to-surname-ocr-field-mappings:
         - formType: PERSONAL
-          ocrField: last_name
+          ocrFields:
+            - last_name
 
     - service: sscs
       jurisdiction: SSCS
       case-type-ids: []
+      form-type-to-surname-ocr-field-mappings:
+        - formType: sscs1
+          ocrFields:
+            - person2_last_name
+            - person1_last_name
+        - formType: SSCS1
+          ocrFields:
+            - person2_last_name
+            - person1_last_name
 
     - service: probate
       jurisdiction: PROBATE

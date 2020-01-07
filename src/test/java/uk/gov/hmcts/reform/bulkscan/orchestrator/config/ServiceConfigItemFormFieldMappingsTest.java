@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -23,30 +25,33 @@ class ServiceConfigItemFormFieldMappingsTest {
     }
 
     @Test
-    void should_return_null_if_mappings_not_set() {
+    void should_return_empty_list_if_mappings_not_set() {
         // given
 
         // when
-        final String fieldName1 = configItem.getSurnameOcrFieldName(FORM_1);
+        final List<String> fieldNameList1 = configItem.getSurnameOcrFieldNameList(FORM_1);
 
         // then
-        assertThat(fieldName1).isEqualTo(null);
+
+        assertThat(fieldNameList1).isNotNull();
+        assertThat(fieldNameList1.isEmpty()).isTrue();
     }
 
     @Test
-    void should_return_null_if_no_mapping_for_form_type() {
+    void should_return_empty_list_if_no_mapping_for_form_type() {
         // given
         FormFieldMapping formFieldMapping1 = new FormFieldMapping();
         formFieldMapping1.setFormType(FORM_1);
-        formFieldMapping1.setOcrField(FIELD_1);
+        formFieldMapping1.setOcrFields(asList(FIELD_1));
 
         configItem.setFormTypeToSurnameOcrFieldMappings(asList(formFieldMapping1));
 
         // when
-        final String fieldName1 = configItem.getSurnameOcrFieldName(FORM_2);
+        final List<String> fieldNameList1 = configItem.getSurnameOcrFieldNameList(FORM_2);
 
         // then
-        assertThat(fieldName1).isEqualTo(null);
+        assertThat(fieldNameList1).isNotNull();
+        assertThat(fieldNameList1.isEmpty()).isTrue();
     }
 
     @Test
@@ -54,15 +59,36 @@ class ServiceConfigItemFormFieldMappingsTest {
         // given
         FormFieldMapping formFieldMapping1 = new FormFieldMapping();
         formFieldMapping1.setFormType(FORM_1);
-        formFieldMapping1.setOcrField(FIELD_1);
+        formFieldMapping1.setOcrFields(asList(FIELD_1));
 
         configItem.setFormTypeToSurnameOcrFieldMappings(asList(formFieldMapping1));
 
         // when
-        final String fieldName1 = configItem.getSurnameOcrFieldName(FORM_1);
+        final List<String> fieldNameList1 = configItem.getSurnameOcrFieldNameList(FORM_1);
 
         // then
-        assertThat(fieldName1).isEqualTo(FIELD_1);
+        assertThat(fieldNameList1.get(0)).isEqualTo(FIELD_1);
+        assertThat(fieldNameList1.size()).isEqualTo(1);
+
+    }
+
+    @Test
+    void should_return_two_ocr_field_name_for_form_type() {
+        // given
+        FormFieldMapping formFieldMapping1 = new FormFieldMapping();
+        formFieldMapping1.setFormType(FORM_1);
+        formFieldMapping1.setOcrFields(asList(FIELD_1, FIELD_2));
+
+        configItem.setFormTypeToSurnameOcrFieldMappings(asList(formFieldMapping1));
+
+        // when
+        final List<String> fieldNameList1 = configItem.getSurnameOcrFieldNameList(FORM_1);
+
+        // then
+        assertThat(fieldNameList1.get(0)).isEqualTo(FIELD_1);
+        assertThat(fieldNameList1.get(1)).isEqualTo(FIELD_2);
+        assertThat(fieldNameList1.size()).isEqualTo(2);
+
     }
 
     @Test
@@ -70,20 +96,23 @@ class ServiceConfigItemFormFieldMappingsTest {
         // given
         FormFieldMapping formFieldMapping1 = new FormFieldMapping();
         formFieldMapping1.setFormType(FORM_1);
-        formFieldMapping1.setOcrField(FIELD_1);
+        formFieldMapping1.setOcrFields(asList(FIELD_1));
         FormFieldMapping formFieldMapping2 = new FormFieldMapping();
         formFieldMapping2.setFormType(FORM_2);
-        formFieldMapping2.setOcrField(FIELD_2);
+        formFieldMapping2.setOcrFields(asList(FIELD_2));
 
         configItem.setFormTypeToSurnameOcrFieldMappings(asList(formFieldMapping1, formFieldMapping2));
 
         // when
-        final String fieldName1 = configItem.getSurnameOcrFieldName(FORM_1);
-        final String fieldName2 = configItem.getSurnameOcrFieldName(FORM_2);
+        final List<String> fieldNameList1 = configItem.getSurnameOcrFieldNameList(FORM_1);
+        final List<String> fieldNameList2 = configItem.getSurnameOcrFieldNameList(FORM_2);
 
         // then
-        assertThat(fieldName1).isEqualTo(FIELD_1);
-        assertThat(fieldName2).isEqualTo(FIELD_2);
+        assertThat(fieldNameList1.get(0)).isEqualTo(FIELD_1);
+        assertThat(fieldNameList1.size()).isEqualTo(1);
+        assertThat(fieldNameList2.get(0)).isEqualTo(FIELD_2);
+        assertThat(fieldNameList2.size()).isEqualTo(1);
+
     }
 
     @Test
@@ -91,19 +120,19 @@ class ServiceConfigItemFormFieldMappingsTest {
         // given
         FormFieldMapping formFieldMapping1 = new FormFieldMapping();
         formFieldMapping1.setFormType(FORM_1);
-        formFieldMapping1.setOcrField(FIELD_1);
+        formFieldMapping1.setOcrFields(asList(FIELD_1));
         FormFieldMapping formFieldMapping2 = new FormFieldMapping();
         formFieldMapping2.setFormType(FORM_2);
-        formFieldMapping2.setOcrField(FIELD_2);
+        formFieldMapping2.setOcrFields(asList(FIELD_2));
         FormFieldMapping formFieldMapping3 = new FormFieldMapping();
         formFieldMapping3.setFormType(FORM_2);
-        formFieldMapping3.setOcrField(FIELD_3);
+        formFieldMapping3.setOcrFields(asList(FIELD_3));
 
         // when
         assertThatThrownBy(
             () -> configItem.setFormTypeToSurnameOcrFieldMappings(
                 asList(formFieldMapping1, formFieldMapping2, formFieldMapping3)
             )
-        ).hasMessage("Form type has multiple mappings to surname fields field2, field3.");
+        ).hasMessage("Form type has multiple mappings to surname fields [field2], [field3].");
     }
 }

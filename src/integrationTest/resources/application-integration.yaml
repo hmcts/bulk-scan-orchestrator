@@ -60,6 +60,9 @@ service-config:
         - Bulk_Scanned
       form-type-to-surname-ocr-field-mappings:
         - formType: form1
-          ocrField: lastName
+          ocrFields:
+            - lastName
         - formType: form2
-          ocrField: surname
+          ocrFields:
+            - surname_not_found
+            - surname
