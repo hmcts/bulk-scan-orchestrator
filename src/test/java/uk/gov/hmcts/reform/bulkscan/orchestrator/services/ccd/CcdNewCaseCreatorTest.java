@@ -37,6 +37,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -44,6 +45,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdCallbackType.CASE_CREATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 
 @ExtendWith(MockitoExtension.class)
@@ -137,7 +139,7 @@ class CcdNewCaseCreatorTest {
         assertThat(result.getErrors()).isEmpty();
         assertThat(result.getWarnings()).isEmpty();
 
-        verify(exceptionRecordFinalizer).finalizeExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer).finalizeExceptionRecord(anyMap(), anyLong(), eq(CASE_CREATION));
         verify(paymentsProcessor).updatePayments(caseDetails, CASE_ID);
     }
 
@@ -205,7 +207,7 @@ class CcdNewCaseCreatorTest {
         assertThat(result.getErrors()).isEmpty();
         assertThat(result.getWarnings()).isEmpty();
 
-        verify(exceptionRecordFinalizer).finalizeExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer).finalizeExceptionRecord(anyMap(), anyLong(), eq(CASE_CREATION));
         verify(paymentsProcessor).updatePayments(caseDetails, CASE_ID);
     }
 
@@ -249,7 +251,7 @@ class CcdNewCaseCreatorTest {
         assertThat(result.getWarnings()).containsOnly("warning");
         assertThat(result.getErrors()).containsOnly("error");
 
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
     }
 
     @Test

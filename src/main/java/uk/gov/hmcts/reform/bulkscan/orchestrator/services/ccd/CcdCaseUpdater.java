@@ -139,7 +139,8 @@ public class CcdCaseUpdater {
                 return new ProcessResult(
                     exceptionRecordFinalizer.finalizeExceptionRecord(
                         existingCase.getData(),
-                        existingCase.getId()
+                        existingCase.getId(),
+                        CcdCallbackType.ATTACHING_SUPPLEMENTARY_EVIDENCE
                     )
                 );
             }
