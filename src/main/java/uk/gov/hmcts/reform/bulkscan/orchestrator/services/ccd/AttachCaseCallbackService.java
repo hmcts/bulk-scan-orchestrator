@@ -367,10 +367,14 @@ public class AttachCaseCallbackService {
         String targetCaseCcdRef,
         CaseDetails exceptionRecordDetails
     ) {
-        verifyExceptionRecordIsNotAttachedToCase(
+        Optional<String> attachedToCase = isExceptionRecordAttachedToCase(
             callBackEvent.exceptionRecordJurisdiction,
             callBackEvent.exceptionRecordId
         );
+        if (attachedToCase.isPresent()) {
+            throw new AlreadyAttachedToCaseException("Exception record is already attached to case "
+                + attachedToCase.get());
+        }
 
         CaseDetails theCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
         List<Map<String, Object>> targetCaseDocuments = getScannedDocuments(theCase);
@@ -416,6 +420,16 @@ public class AttachCaseCallbackService {
         CaseDetails exceptionRecordDetails,
         boolean ignoreWarnings
     ) {
+        Optional<String> attachedToCase = isExceptionRecordAttachedToCase(
+            callBackEvent.exceptionRecordJurisdiction,
+            callBackEvent.exceptionRecordId
+        );
+
+        if (attachedToCase.isPresent()) {
+            log.warn("Exception record is already attached to case {}", attachedToCase.get());
+            return Optional.empty();
+        }
+
         ServiceConfigItem serviceConfigItem = getServiceConfig(exceptionRecordDetails);
         ProcessResult processResult = ccdCaseUpdater.updateCase(
             callBackEvent.exceptionRecord,
@@ -444,7 +458,7 @@ public class AttachCaseCallbackService {
         return ImmutableMap.of(SCANNED_DOCUMENTS, documents, EVIDENCE_HANDLED, YesNoFieldValues.NO);
     }
 
-    private void verifyExceptionRecordIsNotAttachedToCase(
+    private Optional<String> isExceptionRecordAttachedToCase(
         String exceptionRecordJurisdiction,
         Long exceptionRecordReference
     ) {
@@ -456,7 +470,9 @@ public class AttachCaseCallbackService {
         Object attachToCaseRef = fetchedExceptionRecord.getData().get(ATTACH_TO_CASE_REFERENCE);
 
         if (attachToCaseRef != null && !Strings.isNullOrEmpty(attachToCaseRef.toString())) {
-            throw new AlreadyAttachedToCaseException("Exception record is already attached to case " + attachToCaseRef);
+            return Optional.of(attachToCaseRef.toString());
+        } else {
+            return Optional.empty();
         }
     }
 

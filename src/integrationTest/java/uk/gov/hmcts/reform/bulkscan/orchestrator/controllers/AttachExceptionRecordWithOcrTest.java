@@ -1,16 +1,22 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.ValidatableResponse;
+import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -33,6 +39,8 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_EXCEPTION_RECORD;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURISDICTION;
 
 @IntegrationTest
 class AttachExceptionRecordWithOcrTest {
@@ -47,22 +55,66 @@ class AttachExceptionRecordWithOcrTest {
     private static final String RESPONSE_FIELD_WARNINGS = "warnings";
     private static final String RESPONSE_FIELD_DATA = "data";
     private static final String ATTACH_TO_CASE_REFERENCE_FIELD_NAME = "attachToCaseReference";
+    private static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
+    private static final String BEARER = "Bearer";
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    private static final long EXCEPTION_RECORD_ID = 26409983479785245L;
+    private static final String EXCEPTION_RECORD_FILENAME = "record.pdf";
+    private static final String EXCEPTION_RECORD_DOCUMENT_NUMBER = "654321";
+
+    private static final Map<String, Object> EXCEPTION_RECORD_DOC = document(
+        EXCEPTION_RECORD_FILENAME,
+        EXCEPTION_RECORD_DOCUMENT_NUMBER
+    );
+
+    private static Map<String, Object> document(String filename, String documentNumber) {
+        return ImmutableMap.of(
+            "value", ImmutableMap.of(
+                "fileName", filename,
+                "controlNumber", documentNumber,
+                "someNumber", 3
+            )
+        );
+    }
+
+    private static final String DOCUMENT_FILENAME = "document.pdf";
+    private static final String DOCUMENT_NUMBER = "123456";
+    private static final Map<String, Object> EXISTING_DOC = document(DOCUMENT_FILENAME, DOCUMENT_NUMBER);
+
+    private static final Map<String, Object> CASE_DATA = ImmutableMap.of(
+        "scannedDocuments", ImmutableList.of(EXISTING_DOC)
+    );
 
     @LocalServerPort
     int serverPort;
 
     @DisplayName("Should successfully callback with correct information")
     @Test
-    void should_update_case_with_ocr_data() {
+    void should_update_case_with_ocr_data() throws JsonProcessingException {
+        setUpCaseSearchByCcdId(okJson(MAPPER.writeValueAsString(exceptionRecord(null))));
         setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
         setUpCcdStartEvent(okJson(getResponseBody("ccd-start-event-for-case-worker.json")));
         setUpCcdSubmitEvent(okJson(getResponseBody("ccd-submit-event-for-case-worker.json")));
 
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put("poBox", "PO 12345");
-        caseData.put("journeyClassification", "SUPPLEMENTARY_EVIDENCE_WITH_OCR");
-        caseData.put("formType", "B123");
-        caseData.put("attachToCaseReference", "1539007368674134");
+        Map<String, Object> caseData = getCaseData();
+
+        byte[] requestBody = getRequestBody("valid-supplementary-evidence-with-ocr.json");
+
+        ValidatableResponse response = postWithBody(requestBody)
+            .statusCode(OK.value());
+
+        verifySuccessResponse(response, caseData);
+    }
+
+    @DisplayName("Should successfully pass if exception record already attached")
+    @Test
+    void should_pass_if_record_already_attached() throws JsonProcessingException {
+        String caseRef = "1234567890123456";
+        setUpCaseSearchByCcdId(okJson(MAPPER.writeValueAsString(exceptionRecord(caseRef))));
+
+        Map<String, Object> caseData = getCaseData();
 
         byte[] requestBody = getRequestBody("valid-supplementary-evidence-with-ocr.json");
 
@@ -74,7 +126,8 @@ class AttachExceptionRecordWithOcrTest {
 
     @DisplayName("Should fail with the correct error when submit api call fails")
     @Test
-    public void should_fail_with_the_correct_error_when_submit_api_call_fails() {
+    public void should_fail_with_the_correct_error_when_submit_api_call_fails() throws JsonProcessingException {
+        setUpCaseSearchByCcdId(okJson(MAPPER.writeValueAsString(exceptionRecord(null))));
         setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
         setUpCcdStartEvent(okJson(getResponseBody("ccd-start-event-for-case-worker.json")));
         setUpCcdSubmitEvent(serverError());
@@ -86,7 +139,8 @@ class AttachExceptionRecordWithOcrTest {
 
     @DisplayName("Should fail with the correct error when wrong classification")
     @Test
-    public void should_fail_with_the_correct_error_when_classification_is_wrong() {
+    public void should_fail_with_the_correct_error_when_classification_is_wrong() throws JsonProcessingException {
+        setUpCaseSearchByCcdId(okJson(MAPPER.writeValueAsString(exceptionRecord(null))));
         setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
         setUpCcdStartEvent(okJson(getResponseBody("ccd-start-event-for-case-worker.json")));
         setUpCcdSubmitEvent(serverError());
@@ -100,7 +154,8 @@ class AttachExceptionRecordWithOcrTest {
 
     @DisplayName("Should fail with the correct error when start event api call fails")
     @Test
-    public void should_fail_with_the_correct_error_when_start_event_api_call_fails() {
+    public void should_fail_with_the_correct_error_when_start_event_api_call_fails() throws JsonProcessingException {
+        setUpCaseSearchByCcdId(okJson(MAPPER.writeValueAsString(exceptionRecord(null))));
         setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
         setUpCcdStartEvent(notFound());
 
@@ -111,13 +166,23 @@ class AttachExceptionRecordWithOcrTest {
 
     @DisplayName("Should fail correctly if ccd is down")
     @Test
-    public void should_fail_correctly_if_ccd_is_down() {
+    public void should_fail_correctly_if_ccd_is_down() throws JsonProcessingException {
+        setUpCaseSearchByCcdId(okJson(MAPPER.writeValueAsString(exceptionRecord(null))));
         setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
         setUpCcdStartEvent(serverError());
 
         byte[] requestBody = getRequestBody("valid-supplementary-evidence-with-ocr.json");
 
         postWithBody(requestBody).statusCode(INTERNAL_SERVER_ERROR.value());
+    }
+
+    private Map<String, Object> getCaseData() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("poBox", "PO 12345");
+        caseData.put("journeyClassification", "SUPPLEMENTARY_EVIDENCE_WITH_OCR");
+        caseData.put("formType", "B123");
+        caseData.put("attachToCaseReference", "1539007368674134");
+        return caseData;
     }
 
     private void verifySuccessResponse(
@@ -170,7 +235,7 @@ class AttachExceptionRecordWithOcrTest {
 
     private void setUpClientUpdate(String responseBody) {
         givenThat(post("/update-case")
-            .withHeader("ServiceAuthorization", containing("Bearer"))
+            .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(BEARER))
             .willReturn(okJson(responseBody))
         );
     }
@@ -185,8 +250,16 @@ class AttachExceptionRecordWithOcrTest {
                 + "/event-triggers/" + EVENT_ID
                 + "/token"
             )
-                .withHeader("ServiceAuthorization", containing("Bearer"))
+                .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(BEARER))
                 .willReturn(response)
+        );
+    }
+
+    private void setUpCaseSearchByCcdId(ResponseDefinitionBuilder responseBuilder) throws JsonProcessingException {
+        givenThat(
+            get("/cases/1539007368674134")
+                .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(BEARER))
+                .willReturn(responseBuilder)
         );
     }
 
@@ -200,7 +273,7 @@ class AttachExceptionRecordWithOcrTest {
                     + "/cases/1539007368674134"
                     + "/events?ignore-warning=true"
             )
-                .withHeader("ServiceAuthorization", containing("Bearer"))
+                .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(BEARER))
                 .willReturn(response)
         );
     }
@@ -231,13 +304,70 @@ class AttachExceptionRecordWithOcrTest {
             .then();
     }
 
-    private static Map<String, Object> document(String filename, String documentNumber) {
-        return ImmutableMap.of(
-            "value", ImmutableMap.of(
-                "fileName", filename,
-                "controlNumber", documentNumber,
-                "someNumber", 3
-            )
+    private CaseDetails exceptionRecord(String attachToCaseReference) {
+        return exceptionRecord(
+            attachToCaseReference,
+            null,
+            null,
+            CASE_TYPE_EXCEPTION_RECORD,
+            EXCEPTION_RECORD_DOC,
+            false
         );
+    }
+
+    private CaseDetails exceptionRecord(
+        String attachToCaseReference,
+        String searchCaseReferenceType,
+        String searchCaseReference,
+        String caseTypeId,
+        Map<String, Object> document,
+        boolean containsPayment
+    ) {
+        return CaseDetails.builder()
+            .jurisdiction(JURISDICTION)
+            .id(EXCEPTION_RECORD_ID)
+            .caseTypeId(caseTypeId)
+            .data(
+                exceptionDataWithDoc(
+                    document,
+                    attachToCaseReference,
+                    searchCaseReferenceType,
+                    searchCaseReference,
+                    containsPayment
+                )
+            ).build();
+    }
+
+    private Map<String, Object> exceptionDataWithDoc(
+        Map<String, Object> scannedDocument,
+        String attachToCaseReference,
+        String searchCaseReferenceType,
+        String searchCaseReference,
+        boolean containsPayment
+    ) {
+        Map<String, Object> exceptionData =
+            Maps.newHashMap("scannedDocuments", ImmutableList.of(scannedDocument));
+
+        if (attachToCaseReference != null) {
+            exceptionData.put("attachToCaseReference", attachToCaseReference);
+        }
+
+        if (searchCaseReferenceType != null) {
+            exceptionData.put("searchCaseReferenceType", searchCaseReferenceType);
+        }
+
+        if (searchCaseReference != null) {
+            exceptionData.put("searchCaseReference", searchCaseReference);
+        }
+
+        if (containsPayment) {
+            exceptionData.put("containsPayments", "Yes");
+            exceptionData.put(ExceptionRecordFields.ENVELOPE_ID, "21321931312-32121-312112");
+            exceptionData.put(ExceptionRecordFields.PO_BOX_JURISDICTION, "sample jurisdiction");
+        }
+
+        exceptionData.put("journeyClassification", "SUPPLEMENTARY_EVIDENCE");
+
+        return exceptionData;
     }
 }
