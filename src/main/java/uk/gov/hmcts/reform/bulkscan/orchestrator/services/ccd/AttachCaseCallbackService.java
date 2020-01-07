@@ -367,7 +367,7 @@ public class AttachCaseCallbackService {
         String targetCaseCcdRef,
         CaseDetails exceptionRecordDetails
     ) {
-        Optional<String> attachedToCase = isExceptionRecordAttachedToCase(
+        Optional<String> attachedToCase = getCaseExceptionRecordIsAttachedTo(
             callBackEvent.exceptionRecordJurisdiction,
             callBackEvent.exceptionRecordId
         );
@@ -420,7 +420,7 @@ public class AttachCaseCallbackService {
         CaseDetails exceptionRecordDetails,
         boolean ignoreWarnings
     ) {
-        Optional<String> attachedToCase = isExceptionRecordAttachedToCase(
+        Optional<String> attachedToCase = getCaseExceptionRecordIsAttachedTo(
             callBackEvent.exceptionRecordJurisdiction,
             callBackEvent.exceptionRecordId
         );
@@ -458,7 +458,7 @@ public class AttachCaseCallbackService {
         return ImmutableMap.of(SCANNED_DOCUMENTS, documents, EVIDENCE_HANDLED, YesNoFieldValues.NO);
     }
 
-    private Optional<String> isExceptionRecordAttachedToCase(
+    private Optional<String> getCaseExceptionRecordIsAttachedTo(
         String exceptionRecordJurisdiction,
         Long exceptionRecordReference
     ) {
