@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CreateCaseCallback
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.ErrorsAndWarnings;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 
 import java.util.Map;
@@ -40,14 +39,20 @@ public class CcdCallbackController {
 
     @PostMapping(path = "/attach_case")
     public CallbackResponse attachToCase(
-        @RequestBody CallbackRequest callback,
+        @RequestBody CcdCallbackRequest callback,
         @RequestHeader(value = "Authorization", required = false) String idamToken,
         @RequestHeader(value = USER_ID, required = false) String userId
     ) {
         if (callback != null && callback.getCaseDetails() != null) {
 
             return attachCaseCallbackService
-                .process(callback.getCaseDetails(), idamToken, userId, callback.getEventId())
+                .process(
+                    callback.getCaseDetails(),
+                    idamToken,
+                    userId,
+                    callback.getEventId(),
+                    callback.isIgnoreWarnings()
+                )
                 .map(modifiedFields -> okResponse(modifiedFields))
                 .getOrElseGet(errors -> errorResponse(errors));
         } else {

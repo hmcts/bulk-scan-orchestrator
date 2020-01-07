@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.ValidatableResponse;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -36,7 +35,6 @@ import static org.springframework.http.HttpStatus.OK;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
 
 @IntegrationTest
-@Disabled
 class AttachExceptionRecordWithOcrTest {
 
     // event id used for service specific case creation
