@@ -9,12 +9,11 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.AttachCaseCallbackService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CreateCaseCallbackService;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.ErrorsAndWarnings;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 
-import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
@@ -40,14 +39,20 @@ public class CcdCallbackController {
 
     @PostMapping(path = "/attach_case")
     public CallbackResponse attachToCase(
-        @RequestBody CallbackRequest callback,
+        @RequestBody CcdCallbackRequest callback,
         @RequestHeader(value = "Authorization", required = false) String idamToken,
         @RequestHeader(value = USER_ID, required = false) String userId
     ) {
         if (callback != null && callback.getCaseDetails() != null) {
 
             return attachCaseCallbackService
-                .process(callback.getCaseDetails(), idamToken, userId, callback.getEventId())
+                .process(
+                    callback.getCaseDetails(),
+                    idamToken,
+                    userId,
+                    callback.getEventId(),
+                    callback.isIgnoreWarnings()
+                )
                 .map(modifiedFields -> okResponse(modifiedFields))
                 .getOrElseGet(errors -> errorResponse(errors));
         } else {
@@ -76,10 +81,18 @@ public class CcdCallbackController {
     }
 
     private AboutToStartOrSubmitCallbackResponse okResponse(Map<String, Object> modifiedFields) {
-        return AboutToStartOrSubmitCallbackResponse.builder().data(modifiedFields).errors(emptyList()).build();
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(modifiedFields)
+            .errors(emptyList())
+            .warnings(emptyList())
+            .build();
     }
 
-    private AboutToStartOrSubmitCallbackResponse errorResponse(List<String> errors) {
-        return AboutToStartOrSubmitCallbackResponse.builder().errors(errors).build();
+    private AboutToStartOrSubmitCallbackResponse errorResponse(ErrorsAndWarnings errorsAndWarnings) {
+        return AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .errors(errorsAndWarnings.getErrors())
+            .warnings(errorsAndWarnings.getWarnings())
+            .build();
     }
 }
