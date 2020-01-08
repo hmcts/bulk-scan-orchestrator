@@ -59,28 +59,17 @@ class AttachExceptionRecordWithOcrTest {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private static final long EXCEPTION_RECORD_ID = 26409983479785245L;
-    private static final String EXCEPTION_RECORD_FILENAME = "record.pdf";
-    private static final String EXCEPTION_RECORD_DOCUMENT_NUMBER = "654321";
-
     private static final String CASE_ID = "1539007368674134";
     private static final String SUPPLEMENTARY_EVIDENCE_WITH_OCR = "SUPPLEMENTARY_EVIDENCE_WITH_OCR";
-    private static final String PO_BOX_VALUE = "PO 12345";
-    private static final String FORM_TYPE_VALUE = "B123";
-    private static final String ATTACH_TO_CASE_REFERENCE = "attachToCaseReference";
-    private static final String FORM_TYPE = "formType";
+    private static final String ATTACH_TO_CASE_REFERENCE_FIELD_NAME = "attachToCaseReference";
     private static final String JOURNEY_CLASSIFICATION = "journeyClassification";
-    private static final String PO_BOX = "poBox";
-    private static final String SEARCH_CASE_REFERENCE = "searchCaseReference";
-    private static final String SEARCH_CASE_REFERENCE_TYPE = "searchCaseReferenceType";
-    private static final String SCANNED_DOCUMENTS = "scannedDocuments";
 
     @LocalServerPort
     int serverPort;
 
     @DisplayName("Should successfully callback with correct information")
     @Test
-    void should_update_case_with_ocr_data() throws JsonProcessingException {
+    void should_update_case_with_ocr_data() throws Exception {
         setUpCaseSearchByCcdId(okJson(mapper.writeValueAsString(exceptionRecord(null))));
         setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
         setUpCcdStartEvent(okJson(getResponseBody("ccd-start-event-for-case-worker.json")));
@@ -98,7 +87,7 @@ class AttachExceptionRecordWithOcrTest {
 
     @DisplayName("Should successfully pass if exception record already attached to the same case")
     @Test
-    void should_pass_if_record_already_attached_to_the_same_case() throws JsonProcessingException {
+    void should_pass_if_record_already_attached_to_the_same_case() throws Exception {
         setUpCaseSearchByCcdId(okJson(mapper.writeValueAsString(exceptionRecord(CASE_ID))));
 
         Map<String, Object> caseData = getCaseData();
@@ -111,9 +100,9 @@ class AttachExceptionRecordWithOcrTest {
         verifySuccessResponse(response, caseData);
     }
 
-    @DisplayName("Should successfully pass if exception record already attached to another case")
+    @DisplayName("Should fail if exception record already attached to another case")
     @Test
-    void should_fail_if_record_already_attached_to_another_case() throws JsonProcessingException {
+    void should_fail_if_record_already_attached_to_another_case() throws Exception {
         String caseRef = "1234567890123456"; // just an arbitrary value
         setUpCaseSearchByCcdId(okJson(mapper.writeValueAsString(exceptionRecord(caseRef))));
 
@@ -128,7 +117,7 @@ class AttachExceptionRecordWithOcrTest {
 
     @DisplayName("Should fail with the correct error when submit api call fails")
     @Test
-    void should_fail_with_the_correct_error_when_submit_api_call_fails() throws JsonProcessingException {
+    void should_fail_with_the_correct_error_when_submit_api_call_fails() throws Exception {
         setUpCaseSearchByCcdId(okJson(mapper.writeValueAsString(exceptionRecord(null))));
         setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
         setUpCcdStartEvent(okJson(getResponseBody("ccd-start-event-for-case-worker.json")));
@@ -141,7 +130,7 @@ class AttachExceptionRecordWithOcrTest {
 
     @DisplayName("Should fail with the correct error when wrong classification")
     @Test
-    void should_fail_with_the_correct_error_when_classification_is_wrong() throws JsonProcessingException {
+    void should_fail_with_the_correct_error_when_classification_is_wrong() throws Exception {
         setUpCaseSearchByCcdId(okJson(mapper.writeValueAsString(exceptionRecord(null))));
         setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
         setUpCcdStartEvent(okJson(getResponseBody("ccd-start-event-for-case-worker.json")));
@@ -156,7 +145,7 @@ class AttachExceptionRecordWithOcrTest {
 
     @DisplayName("Should fail with the correct error when start event api call fails")
     @Test
-    void should_fail_with_the_correct_error_when_start_event_api_call_fails() throws JsonProcessingException {
+    void should_fail_with_the_correct_error_when_start_event_api_call_fails() throws Exception {
         setUpCaseSearchByCcdId(okJson(mapper.writeValueAsString(exceptionRecord(null))));
         setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
         setUpCcdStartEvent(notFound());
@@ -168,7 +157,7 @@ class AttachExceptionRecordWithOcrTest {
 
     @DisplayName("Should fail correctly if ccd is down")
     @Test
-    void should_fail_correctly_if_ccd_is_down() throws JsonProcessingException {
+    void should_fail_correctly_if_ccd_is_down() throws Exception {
         setUpCaseSearchByCcdId(okJson(mapper.writeValueAsString(exceptionRecord(null))));
         setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
         setUpCcdStartEvent(serverError());
@@ -180,10 +169,10 @@ class AttachExceptionRecordWithOcrTest {
 
     private Map<String, Object> getCaseData() {
         Map<String, Object> caseData = new HashMap<>();
-        caseData.put(PO_BOX, PO_BOX_VALUE);
+        caseData.put("poBox", "PO 12345");
         caseData.put(JOURNEY_CLASSIFICATION, SUPPLEMENTARY_EVIDENCE_WITH_OCR);
-        caseData.put(FORM_TYPE, FORM_TYPE_VALUE);
-        caseData.put(ATTACH_TO_CASE_REFERENCE, CASE_ID);
+        caseData.put("formType", "B123");
+        caseData.put(ATTACH_TO_CASE_REFERENCE_FIELD_NAME, CASE_ID);
         return caseData;
     }
 
@@ -198,12 +187,12 @@ class AttachExceptionRecordWithOcrTest {
 
         Map<String, Object> responseData = responseJson.getMap(RESPONSE_FIELD_DATA);
         assertThat(responseData).isNotNull();
-        assertThat(responseData.get(ATTACH_TO_CASE_REFERENCE)).isEqualTo(CASE_REF);
+        assertThat(responseData.get(ATTACH_TO_CASE_REFERENCE_FIELD_NAME)).isEqualTo(CASE_REF);
 
         assertMapsAreEqualIgnoringFields(
             responseData,
             requestData,
-            ATTACH_TO_CASE_REFERENCE,
+            ATTACH_TO_CASE_REFERENCE_FIELD_NAME,
             "deliveryDate",
             "openingDate",
             "scannedDocuments",
@@ -308,8 +297,8 @@ class AttachExceptionRecordWithOcrTest {
 
     private CaseDetails exceptionRecord(String attachToCaseReference) {
         final Map<String, Object> exception_record_doc = document(
-            EXCEPTION_RECORD_FILENAME,
-            EXCEPTION_RECORD_DOCUMENT_NUMBER
+            "record.pdf",
+            "654321"
         );
         return exceptionRecord(
             attachToCaseReference,
@@ -331,7 +320,7 @@ class AttachExceptionRecordWithOcrTest {
     ) {
         return CaseDetails.builder()
             .jurisdiction(JURISDICTION)
-            .id(EXCEPTION_RECORD_ID)
+            .id(26409983479785245L)
             .caseTypeId(caseTypeId)
             .data(
                 exceptionDataWithDoc(
@@ -352,18 +341,18 @@ class AttachExceptionRecordWithOcrTest {
         boolean containsPayment
     ) {
         Map<String, Object> exceptionData =
-            Maps.newHashMap(SCANNED_DOCUMENTS, ImmutableList.of(scannedDocument));
+            Maps.newHashMap("scannedDocuments", ImmutableList.of(scannedDocument));
 
         if (attachToCaseReference != null) {
-            exceptionData.put(ATTACH_TO_CASE_REFERENCE, attachToCaseReference);
+            exceptionData.put(ATTACH_TO_CASE_REFERENCE_FIELD_NAME, attachToCaseReference);
         }
 
         if (searchCaseReferenceType != null) {
-            exceptionData.put(SEARCH_CASE_REFERENCE_TYPE, searchCaseReferenceType);
+            exceptionData.put("searchCaseReferenceType", searchCaseReferenceType);
         }
 
         if (searchCaseReference != null) {
-            exceptionData.put(SEARCH_CASE_REFERENCE, searchCaseReference);
+            exceptionData.put("searchCaseReference", searchCaseReference);
         }
 
         if (containsPayment) {
