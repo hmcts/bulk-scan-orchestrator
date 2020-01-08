@@ -114,7 +114,7 @@ class CcdCaseUpdaterTest {
         initResponseMockData();
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
-        given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong())).willReturn(originalFields);
+        given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong(), any())).willReturn(originalFields);
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
@@ -141,7 +141,7 @@ class CcdCaseUpdaterTest {
         initResponseMockData();
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
-        given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong())).willReturn(originalFields);
+        given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong(), any())).willReturn(originalFields);
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
@@ -192,7 +192,7 @@ class CcdCaseUpdaterTest {
         initResponseMockData();
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
-        given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong())).willReturn(originalFields);
+        given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong(), any())).willReturn(originalFields);
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
