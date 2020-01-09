@@ -319,7 +319,8 @@ class CcdCaseUpdaterTest {
             anyString(),
             anyString(),
             anyString(),
-            anyString()))
+            anyString()
+        ))
             .willThrow(HttpClientErrorException.create(
                 HttpStatus.BAD_REQUEST,
                 "bad request message",
@@ -370,7 +371,8 @@ class CcdCaseUpdaterTest {
             anyString(),
             anyString(),
             anyString(),
-            anyString()))
+            anyString()
+        ))
             .willThrow(unprocessableEntity);
         given(serviceResponseParser.parseResponseBody(unprocessableEntity))
             .willReturn(new ClientServiceErrorResponse(asList("error1", "error2"), emptyList()));
@@ -400,7 +402,8 @@ class CcdCaseUpdaterTest {
             anyString(),
             anyString(),
             anyString(),
-            anyString()))
+            anyString()
+        ))
             .willThrow(new FeignException.BadRequest("Msg", "Body".getBytes()));
 
         // when
@@ -433,7 +436,8 @@ class CcdCaseUpdaterTest {
             anyString(),
             anyString(),
             anyString(),
-            anyString()))
+            anyString()
+        ))
             .willThrow(new RuntimeException());
 
         // when
@@ -477,7 +481,8 @@ class CcdCaseUpdaterTest {
             anyString(),
             anyString(),
             anyString(),
-            anyString()))
+            anyString()
+        ))
             .willReturn(eventResponse);
     }
 

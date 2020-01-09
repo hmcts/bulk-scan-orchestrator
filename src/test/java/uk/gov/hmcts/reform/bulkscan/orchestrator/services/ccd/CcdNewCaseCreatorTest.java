@@ -146,7 +146,7 @@ class CcdNewCaseCreatorTest {
     @Test
     void should_call_payments_handler_when_case_has_no_payments() throws Exception {
         // given
-        given(transformationClient.transformExceptionRecord(any(),any(), any()))
+        given(transformationClient.transformExceptionRecord(any(), any(), any()))
             .willReturn(
                 new SuccessfulTransformationResponse(
                     new CaseCreationDetails(

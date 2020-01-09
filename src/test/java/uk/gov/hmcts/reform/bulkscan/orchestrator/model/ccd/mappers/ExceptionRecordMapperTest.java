@@ -267,7 +267,7 @@ class ExceptionRecordMapperTest {
     public void mapEnvelope_sets_surname_with_first_matching_ocr_conf_when_multiple_conf_available() {
         //given
         given(serviceConfigItem.getSurnameOcrFieldNameList("FORM_TYPE"))
-            .willReturn(asList("field_surname_not_found", "field_surname","fieldName1"));
+            .willReturn(asList("field_surname_not_found", "field_surname", "fieldName1"));
 
 
         Envelope envelope = envelope(
