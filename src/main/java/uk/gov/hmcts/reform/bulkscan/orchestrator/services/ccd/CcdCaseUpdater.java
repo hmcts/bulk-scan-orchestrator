@@ -119,7 +119,7 @@ public class CcdCaseUpdater {
                 );
                 return new ProcessResult(updateResponse.warnings, emptyList());
             } else {
-                Optional<String> updateResult =  updateCaseInCcd(
+                Optional<String> updateResult = updateCaseInCcd(
                     configItem.getService(),
                     ignoreWarnings,
                     idamToken,
@@ -233,7 +233,8 @@ public class CcdCaseUpdater {
 
             return Optional.empty();
         } catch (FeignException.UnprocessableEntity exception) {
-            String msg = format("Service returned 422 Unprocessable Entity response "
+            String msg = format(
+                "Service returned 422 Unprocessable Entity response "
                     + "when trying to update case for %s jurisdiction "
                     + "with case Id %s "
                     + "based on exception record with Id %s. "
@@ -241,7 +242,8 @@ public class CcdCaseUpdater {
                 exceptionRecord.poBoxJurisdiction,
                 existingCase.getId(),
                 exceptionRecord.id,
-                exception.contentUTF8());
+                exception.contentUTF8()
+            );
             log.error(msg, exception);
 
             return Optional.of(msg);

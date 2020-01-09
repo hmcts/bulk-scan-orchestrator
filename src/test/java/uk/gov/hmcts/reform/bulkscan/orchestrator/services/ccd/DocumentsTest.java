@@ -47,7 +47,8 @@ class DocumentsTest {
             .map(String::valueOf)
             .map(dcn -> ImmutableMap.<String, Object>of(
                 DOCUMENT_NUMBER, UUID.randomUUID().toString(),
-                "value", ImmutableMap.of("controlNumber", dcn))
+                "value", ImmutableMap.of("controlNumber", dcn)
+                )
             )
             .collect(toImmutableList());
     }
