@@ -153,13 +153,19 @@ public class CcdCaseUpdater {
             ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(singletonList(msg), emptyList());
             return new ProcessResult(errorResponse.warnings, errorResponse.errors);
         } catch (FeignException.NotFound exception) {
-            String msg = "Could not find case: " + existingCaseId;
-            log.error(msg);
+            String msg = "No case found for case ID: " + existingCaseId;
+            log.error(
+                "No case found for case ID: {} service: {} exception record id: {}",
+                existingCaseId, configItem.getService(), exceptionRecord.id
+            );
             ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(singletonList(msg), emptyList());
             return new ProcessResult(errorResponse.warnings, errorResponse.errors);
         } catch (FeignException.BadRequest exception) {
             String msg = "Invalid case ID: " + existingCaseId;
-            log.error(msg);
+            log.error(
+                "Invalid case ID: {} service: {} exception record id: {}",
+                existingCaseId, configItem.getService(), exceptionRecord.id
+            );
             ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(singletonList(msg), emptyList());
             return new ProcessResult(errorResponse.warnings, errorResponse.errors);
         } catch (FeignException exception) {
