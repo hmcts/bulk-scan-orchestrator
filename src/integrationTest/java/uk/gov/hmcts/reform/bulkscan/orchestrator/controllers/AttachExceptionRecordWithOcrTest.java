@@ -23,10 +23,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.badRequestEntity;
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
-import static com.github.tomakehurst.wiremock.client.WireMock.notFound;
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.serverError;
@@ -148,7 +148,7 @@ class AttachExceptionRecordWithOcrTest {
     void should_fail_with_the_correct_error_when_start_event_api_call_fails() throws Exception {
         setUpCaseSearchByCcdId(okJson(mapper.writeValueAsString(exceptionRecord(null))));
         setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
-        setUpCcdStartEvent(notFound());
+        setUpCcdStartEvent(badRequestEntity());
 
         byte[] requestBody = getRequestBody("valid-supplementary-evidence-with-ocr.json");
 
@@ -234,12 +234,12 @@ class AttachExceptionRecordWithOcrTest {
     private void setUpCcdStartEvent(ResponseDefinitionBuilder response) {
         givenThat(
             get(
-              "/caseworkers/" + USER_ID
-                + "/jurisdictions/BULKSCAN"
-                + "/case-types/BULKSCAN_ExceptionRecord"
-                + "/cases/" + CASE_ID
-                + "/event-triggers/" + EVENT_ID
-                + "/token"
+                "/caseworkers/" + USER_ID
+                    + "/jurisdictions/BULKSCAN"
+                    + "/case-types/BULKSCAN_ExceptionRecord"
+                    + "/cases/" + CASE_ID
+                    + "/event-triggers/" + EVENT_ID
+                    + "/token"
             )
                 .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(BEARER_TOKEN_PREFIX))
                 .willReturn(response)
