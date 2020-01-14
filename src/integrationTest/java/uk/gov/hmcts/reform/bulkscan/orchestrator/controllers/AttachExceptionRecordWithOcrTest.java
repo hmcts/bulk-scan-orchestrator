@@ -153,7 +153,7 @@ class AttachExceptionRecordWithOcrTest {
         setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
         setUpCcdStartEvent(badRequestEntity());
 
-        byte[] requestBody = getRequestBody("invalid-case-id-update-case-with-ocr.json");
+        byte[] requestBody = getRequestBody("valid-supplementary-evidence-with-ocr.json");
 
         postWithBody(requestBody).statusCode(INTERNAL_SERVER_ERROR.value());
     }
