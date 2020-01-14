@@ -9,6 +9,7 @@ import com.google.common.collect.Sets;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.ValidatableResponse;
 import org.assertj.core.util.Maps;
+import org.json.JSONObject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -23,6 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.badRequest;
+import static com.github.tomakehurst.wiremock.client.WireMock.badRequestEntity;
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
@@ -148,11 +151,47 @@ class AttachExceptionRecordWithOcrTest {
     void should_fail_with_the_correct_error_when_start_event_api_call_fails() throws Exception {
         setUpCaseSearchByCcdId(okJson(mapper.writeValueAsString(exceptionRecord(null))));
         setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
-        setUpCcdStartEvent(notFound());
+        setUpCcdStartEvent(badRequestEntity());
 
         byte[] requestBody = getRequestBody("valid-supplementary-evidence-with-ocr.json");
 
         postWithBody(requestBody).statusCode(INTERNAL_SERVER_ERROR.value());
+    }
+
+    @DisplayName("Should return with the correct error message when start event fails for invalid case reference")
+    @Test
+    void should_return_correct_error_for_the_invalid_case_id() throws Exception {
+        String invalidCaseId = "1234";
+        setUpCaseSearchByCcdId(okJson(mapper.writeValueAsString(exceptionRecord(null))));
+        setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
+        setUpCcdStartEvent(badRequest(), invalidCaseId);
+
+        // request with invalid case reference
+        byte[] requestBody = getRequestBodyWithAttachToCaseRef(
+            "valid-supplementary-evidence-with-ocr.json", invalidCaseId
+        );
+
+        postWithBody(requestBody)
+            .statusCode(OK.value())
+            .body(RESPONSE_FIELD_ERRORS, hasItem("Invalid case ID: " + invalidCaseId));
+    }
+
+    @DisplayName("Should return with the correct error message when start event fails with case not found response")
+    @Test
+    void should_return_correct_error_when_no_case_found_for_the_case_id() throws Exception {
+        String caseReference = "1234123412341234";
+        setUpCaseSearchByCcdId(okJson(mapper.writeValueAsString(exceptionRecord(null))));
+        setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
+        setUpCcdStartEvent(notFound(), caseReference);
+
+        // request with case id which does not exist
+        byte[] requestBody = getRequestBodyWithAttachToCaseRef(
+            "valid-supplementary-evidence-with-ocr.json", caseReference
+        );
+
+        postWithBody(requestBody)
+            .statusCode(OK.value())
+            .body(RESPONSE_FIELD_ERRORS, hasItem("No case found for case ID: " + caseReference));
     }
 
     @DisplayName("Should fail correctly if ccd is down")
@@ -232,14 +271,18 @@ class AttachExceptionRecordWithOcrTest {
     }
 
     private void setUpCcdStartEvent(ResponseDefinitionBuilder response) {
+        setUpCcdStartEvent(response, CASE_ID);
+    }
+
+    private void setUpCcdStartEvent(ResponseDefinitionBuilder response, String caseReference) {
         givenThat(
             get(
-              "/caseworkers/" + USER_ID
-                + "/jurisdictions/BULKSCAN"
-                + "/case-types/BULKSCAN_ExceptionRecord"
-                + "/cases/" + CASE_ID
-                + "/event-triggers/" + EVENT_ID
-                + "/token"
+                "/caseworkers/" + USER_ID
+                    + "/jurisdictions/BULKSCAN"
+                    + "/case-types/BULKSCAN_ExceptionRecord"
+                    + "/cases/" + caseReference
+                    + "/event-triggers/" + EVENT_ID
+                    + "/token"
             )
                 .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(BEARER_TOKEN_PREFIX))
                 .willReturn(response)
@@ -279,6 +322,16 @@ class AttachExceptionRecordWithOcrTest {
 
     private byte[] getRequestBody(String filename) {
         return getFileContents("/request/", filename);
+    }
+
+    private byte[] getRequestBodyWithAttachToCaseRef(String filename, String attachToCaseReference) throws Exception {
+        String fileContent = new String(getFileContents("/request/", filename));
+        JSONObject json = new JSONObject(fileContent);
+        JSONObject caseData = json
+            .getJSONObject("case_details")
+            .getJSONObject("case_data");
+        caseData.put("attachToCaseReference", attachToCaseReference);
+        return json.toString().getBytes();
     }
 
     private String getResponseBody(String filename) {

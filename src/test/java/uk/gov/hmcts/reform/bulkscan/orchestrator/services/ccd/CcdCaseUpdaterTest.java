@@ -348,9 +348,9 @@ class CcdCaseUpdaterTest {
                 + "based on exception record 1");
         assertThat(callbackException.getCause().getMessage()).isEqualTo("400 bad request message");
         assertThat(callbackException.getCause() instanceof HttpClientErrorException).isTrue();
-        assertThat(((HttpClientErrorException)callbackException.getCause()).getStatusText())
+        assertThat(((HttpClientErrorException) callbackException.getCause()).getStatusText())
             .isEqualTo("bad request message");
-        assertThat(((HttpClientErrorException)callbackException.getCause()).getRawStatusCode()).isEqualTo(400);
+        assertThat(((HttpClientErrorException) callbackException.getCause()).getRawStatusCode()).isEqualTo(400);
     }
 
     @Test
@@ -404,7 +404,7 @@ class CcdCaseUpdaterTest {
             anyString(),
             anyString()
         ))
-            .willThrow(new FeignException.BadRequest("Msg", "Body".getBytes()));
+            .willThrow(new FeignException.MethodNotAllowed("Msg", "Body".getBytes()));
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -457,6 +457,64 @@ class CcdCaseUpdaterTest {
         assertThat(callbackException.getMessage())
             .isEqualTo("Failed to update case for Service service with case Id existing_case_id "
                 + "based on exception record 1");
+    }
+
+    @Test
+    void updateCase_should_handle_exception_when_start_event_returns_not_found_response() {
+        // given
+        given(coreCaseDataApi.startEventForCaseWorker(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString()
+        ))
+            .willThrow(new FeignException.NotFound("case not found", "Body".getBytes()));
+
+        // when
+        ProcessResult res = ccdCaseUpdater.updateCase(
+            exceptionRecord,
+            configItem,
+            true,
+            "idamToken",
+            "userId",
+            "1234123412341234"
+        );
+
+        // then
+        assertThat(res.getErrors()).containsOnly("No case found for case ID: 1234123412341234");
+        assertThat(res.getWarnings()).isEmpty();
+    }
+
+    @Test
+    void updateCase_should_handle_exception_when_start_event_returns_invalid_case_id_response() {
+        // given
+        given(coreCaseDataApi.startEventForCaseWorker(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString()
+        ))
+            .willThrow(new FeignException.BadRequest("invalid", "Body".getBytes()));
+
+        // when
+        ProcessResult res = ccdCaseUpdater.updateCase(
+            exceptionRecord,
+            configItem,
+            true,
+            "idamToken",
+            "userId",
+            "1234"
+        );
+
+        // then
+        assertThat(res.getErrors()).containsOnly("Invalid case ID: 1234");
+        assertThat(res.getWarnings()).isEmpty();
     }
 
     private BDDMyOngoingStubbing<CaseDetails> prepareMockForSubmissionEventForCaseWorker() {
