@@ -33,6 +33,7 @@ import static io.vavr.control.Validation.valid;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.canBeAttachedToCase;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAScannedRecord;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAnId;
@@ -420,30 +421,55 @@ public class AttachCaseCallbackService {
         CaseDetails exceptionRecordDetails,
         boolean ignoreWarnings
     ) {
-        Optional<String> attachedToCase = getCaseExceptionRecordIsAttachedTo(
-            callBackEvent.exceptionRecordJurisdiction,
-            callBackEvent.exceptionRecordId
+        CaseDetails fetchedExceptionRecord = ccdApi.getCase(
+            callBackEvent.exceptionRecordId.toString(),
+            callBackEvent.exceptionRecordJurisdiction
         );
 
-        if (attachedToCase.isPresent()) {
-            if (targetCaseCcdRef.equals(attachedToCase.get())) {
-                log.warn(
-                    "There has been an attempt to attach an already attached exception record to another case. "
-                        + "Exception record ID: {}, attempt to attach to case: {}",
-                    callBackEvent.exceptionRecordId,
-                    targetCaseCcdRef
-                );
-                return Optional.empty();
+        String attachToCaseRef = (String) fetchedExceptionRecord.getData().get(ATTACH_TO_CASE_REFERENCE);
+
+        if (attachToCaseRef != null) {
+            if (targetCaseCcdRef.equals(attachToCaseRef)) {
+
+                List<String> caseDocList = getDocuments(fetchedExceptionRecord)
+                    .stream()
+                    .map(d -> d.controlNumber)
+                    .collect(toList());
+
+                List<String> newExDocList = callBackEvent
+                    .exceptionRecord
+                    .scannedDocuments
+                    .stream()
+                    .map(d -> d.controlNumber).collect(toList());
+
+                if (caseDocList.containsAll(newExDocList)) {
+                    log.warn(
+                        "Attempt to attach an already attached exception record to same case. "
+                            + "Exception record ID: {}, attach to case: {}",
+                        callBackEvent.exceptionRecordId,
+                        targetCaseCcdRef
+                    );
+                    return Optional.empty();
+                } else {
+                    log.warn(
+                        "Attempt to attach an already attached exception record to same case, "
+                            + "Document control number(s)  are not matching, will update the case "
+                            + "Exception record ID: {}, attach to case: {}",
+                        callBackEvent.exceptionRecordId,
+                        targetCaseCcdRef
+                    );
+                }
+
             } else {
                 log.warn(
-                    "There has been an attempt to attach an already attached exception record to another case. "
-                        + "Exception record ID: {}, attempt to attach to case: {}, already attached to case: {}",
+                    "Attempt to attach an already attached exception record to another case. "
+                        + "Exception record ID: {}, attach to case: {}, already attached to case: {}",
                     callBackEvent.exceptionRecordId,
                     targetCaseCcdRef,
-                    attachedToCase.get()
+                    attachToCaseRef
                 );
                 throw new AlreadyAttachedToCaseException("Exception record is already attached to case "
-                    + attachedToCase.get());
+                    + attachToCaseRef);
             }
         }
 
