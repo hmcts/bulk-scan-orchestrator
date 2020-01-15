@@ -421,17 +421,16 @@ public class AttachCaseCallbackService {
         CaseDetails exceptionRecordDetails,
         boolean ignoreWarnings
     ) {
-        CaseDetails attachToCase = ccdApi.getCase(
-            callBackEvent.exceptionRecordId.toString(),
-            callBackEvent.exceptionRecordJurisdiction
+        Optional<String> attachedToCase = getCaseExceptionRecordIsAttachedTo(
+            callBackEvent.exceptionRecordJurisdiction,
+            callBackEvent.exceptionRecordId
         );
 
-        String attachToCaseRef = (String) attachToCase.getData().get(ATTACH_TO_CASE_REFERENCE);
+        if (attachedToCase.isPresent()) {
+            if (targetCaseCcdRef.equals(attachedToCase.get())) {
+                CaseDetails theCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
 
-        if (attachToCaseRef != null) {
-            if (targetCaseCcdRef.equals(attachToCaseRef)) {
-
-                List<String> caseDocList = getDocuments(attachToCase)
+                List<String> caseDocList = getDocuments(theCase)
                     .stream()
                     .map(d -> d.controlNumber)
                     .collect(toList());
@@ -444,16 +443,16 @@ public class AttachCaseCallbackService {
 
                 if (caseDocList.containsAll(newExDocList)) {
                     log.warn(
-                        "Attempt to attach an already attached exception record to same case. "
-                            + "Exception record ID: {}, attach to case: {}",
+                        "There has been an attempt to attach an already attached exception record to same case. "
+                            + "Exception record ID: {}, attempt to attach to case: {}",
                         callBackEvent.exceptionRecordId,
                         targetCaseCcdRef
                     );
                     return Optional.empty();
                 } else {
                     log.warn(
-                        "Attempt to attach an already attached exception record to same case, "
-                            + "Document control number(s) are not matching, will update the case "
+                        "There has been an attempt to attach an already attached exception record to same case, "
+                            + "Document control number(s) are not matching. Will update the case "
                             + "Exception record ID: {}, attach to case: {}",
                         callBackEvent.exceptionRecordId,
                         targetCaseCcdRef
@@ -462,14 +461,14 @@ public class AttachCaseCallbackService {
 
             } else {
                 log.warn(
-                    "Attempt to attach an already attached exception record to another case. "
-                        + "Exception record ID: {}, attach to case: {}, already attached to case: {}",
+                    "There has been an attempt to attach an already attached exception record to another case. "
+                        + "Exception record ID: {}, attempt to attach to case: {}, already attached to case: {}",
                     callBackEvent.exceptionRecordId,
                     targetCaseCcdRef,
-                    attachToCaseRef
+                    attachedToCase.get()
                 );
                 throw new AlreadyAttachedToCaseException("Exception record is already attached to case "
-                    + attachToCaseRef);
+                    + attachedToCase.get());
             }
         }
 
