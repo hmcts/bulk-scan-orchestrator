@@ -452,13 +452,12 @@ public class AttachCaseCallbackService {
                 } else {
                     log.warn(
                         "There has been an attempt to attach an already attached exception record to same case, "
-                            + "Document control number(s) are not matching. Will update the case "
+                            + "Document control numbers are not matching. Will update the case "
                             + "Exception record ID: {}, attach to case: {}",
                         callBackEvent.exceptionRecordId,
                         targetCaseCcdRef
                     );
                 }
-
             } else {
                 log.warn(
                     "There has been an attempt to attach an already attached exception record to another case. "
