@@ -421,17 +421,17 @@ public class AttachCaseCallbackService {
         CaseDetails exceptionRecordDetails,
         boolean ignoreWarnings
     ) {
-        CaseDetails fetchedExceptionRecord = ccdApi.getCase(
+        CaseDetails attachToCase = ccdApi.getCase(
             callBackEvent.exceptionRecordId.toString(),
             callBackEvent.exceptionRecordJurisdiction
         );
 
-        String attachToCaseRef = (String) fetchedExceptionRecord.getData().get(ATTACH_TO_CASE_REFERENCE);
+        String attachToCaseRef = (String) attachToCase.getData().get(ATTACH_TO_CASE_REFERENCE);
 
         if (attachToCaseRef != null) {
             if (targetCaseCcdRef.equals(attachToCaseRef)) {
 
-                List<String> caseDocList = getDocuments(fetchedExceptionRecord)
+                List<String> caseDocList = getDocuments(attachToCase)
                     .stream()
                     .map(d -> d.controlNumber)
                     .collect(toList());

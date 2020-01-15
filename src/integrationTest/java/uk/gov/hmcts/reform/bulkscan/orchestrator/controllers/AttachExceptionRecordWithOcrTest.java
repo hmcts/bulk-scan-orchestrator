@@ -88,8 +88,8 @@ class AttachExceptionRecordWithOcrTest {
         verifySuccessResponse(response, caseData);
     }
 
-    @DisplayName("Should successfully update the case with ocr data even exception already attached to the same case if "
-        + "document control numbers do not match")
+    @DisplayName("Should successfully update the case with ocr data even exception already attached to the same case "
+        + "if document control numbers do not match")
     @Test
     void should_update_case_with_ocr_data_even_record_already_attached_if_doc_numbers_not_match() throws Exception {
 
@@ -318,7 +318,7 @@ class AttachExceptionRecordWithOcrTest {
         );
     }
 
-    private void setUpCaseSearchByCcdId(ResponseDefinitionBuilder responseBuilder) throws JsonProcessingException {
+    private void setUpCaseSearchByCcdId(ResponseDefinitionBuilder responseBuilder) {
         givenThat(
             get("/cases/" + CASE_ID)
                 .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(BEARER_TOKEN_PREFIX))
