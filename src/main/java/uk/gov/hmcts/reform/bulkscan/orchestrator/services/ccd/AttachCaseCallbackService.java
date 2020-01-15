@@ -453,7 +453,7 @@ public class AttachCaseCallbackService {
                 } else {
                     log.warn(
                         "Attempt to attach an already attached exception record to same case, "
-                            + "Document control number(s)  are not matching, will update the case "
+                            + "Document control number(s) are not matching, will update the case "
                             + "Exception record ID: {}, attach to case: {}",
                         callBackEvent.exceptionRecordId,
                         targetCaseCcdRef

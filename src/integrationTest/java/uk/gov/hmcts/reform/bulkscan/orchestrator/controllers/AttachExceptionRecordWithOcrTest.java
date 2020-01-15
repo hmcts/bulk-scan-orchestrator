@@ -88,6 +88,35 @@ class AttachExceptionRecordWithOcrTest {
         verifySuccessResponse(response, caseData);
     }
 
+    @DisplayName("Should successfully update the case with ocr data even exception already attached to the same case if "
+        + "document control numbers do not match")
+    @Test
+    void should_update_case_with_ocr_data_even_record_already_attached_if_doc_numbers_not_match() throws Exception {
+
+        CaseDetails existingCase = exceptionRecord(
+            CASE_ID,
+            null,
+            null,
+            CASE_TYPE_EXCEPTION_RECORD,
+            document("record.pdf", "123456"),
+            false
+        );
+
+        setUpCaseSearchByCcdId(okJson(mapper.writeValueAsString(existingCase)));
+        setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
+        setUpCcdStartEvent(okJson(getResponseBody("ccd-start-event-for-case-worker.json")));
+        setUpCcdSubmitEvent(okJson(getResponseBody("ccd-submit-event-for-case-worker.json")));
+
+        Map<String, Object> caseData = getCaseData();
+
+        byte[] requestBody = getRequestBody("valid-supplementary-evidence-with-ocr.json");
+
+        ValidatableResponse response = postWithBody(requestBody)
+            .statusCode(OK.value());
+
+        verifySuccessResponse(response, caseData);
+    }
+
     @DisplayName("Should successfully pass if exception record already attached to the same case")
     @Test
     void should_pass_if_record_already_attached_to_the_same_case() throws Exception {
