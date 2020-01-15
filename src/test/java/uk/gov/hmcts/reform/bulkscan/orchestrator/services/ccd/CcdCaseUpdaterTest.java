@@ -14,7 +14,10 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.CaseUpdateClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.CaseUpdateDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
@@ -30,6 +33,7 @@ import java.util.Map;
 import static java.time.LocalDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
@@ -560,7 +564,19 @@ class CcdCaseUpdaterTest {
             "Form1",
             now(),
             now(),
-            emptyList(),
+            singletonList(new ScannedDocument(
+                DocumentType.FORM,
+                "D8",
+                new DocumentUrl(
+                    "http://locahost",
+                    "http://locahost/binary",
+                    "file1.pdf"
+                ),
+                "1234",
+                "file1.pdf",
+                now(),
+                now()
+            )),
             emptyList()
         );
     }
