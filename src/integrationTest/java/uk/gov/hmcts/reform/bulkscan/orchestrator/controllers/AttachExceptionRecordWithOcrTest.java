@@ -120,6 +120,7 @@ class AttachExceptionRecordWithOcrTest {
     @Test
     void should_pass_if_record_already_attached_to_the_same_case() throws Exception {
         setUpCaseSearchByCcdId(okJson(mapper.writeValueAsString(exceptionRecord(CASE_ID))));
+        setUpCcdStartEvent(okJson(getResponseBody("ccd-start-event-for-case-worker_with_document.json")));
 
         Map<String, Object> caseData = getCaseData();
 

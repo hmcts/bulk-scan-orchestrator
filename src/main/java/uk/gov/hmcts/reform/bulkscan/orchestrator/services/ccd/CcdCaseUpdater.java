@@ -22,11 +22,14 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import java.util.List;
 import java.util.Optional;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR;
 
 @Service
@@ -92,6 +95,16 @@ public class CcdCaseUpdater {
             );
 
             final CaseDetails existingCase = startEvent.getCaseDetails();
+
+            if (isExceptionAlreadyAttached(existingCase, exceptionRecord)) {
+                log.warn(
+                    "Exception already attached to case. "
+                        + "Exception record ID: {}, attempt to attach to case: {}, Skipping Update",
+                    exceptionRecord.id,
+                    existingCase.getId()
+                );
+                return new ProcessResult(emptyList(), emptyList());
+            }
 
             SuccessfulUpdateResponse updateResponse = caseUpdateClient.updateCase(
                 configItem.getUpdateUrl(),
@@ -193,6 +206,22 @@ public class CcdCaseUpdater {
                 exception
             );
         }
+    }
+
+    private boolean isExceptionAlreadyAttached(CaseDetails existingCase,
+                                               ExceptionRecord exceptionRecord) {
+
+        List<String> caseDocList = getDocuments(existingCase)
+            .stream()
+            .map(d -> d.controlNumber)
+            .collect(toList());
+
+        List<String> newExDocList = exceptionRecord
+            .scannedDocuments
+            .stream()
+            .map(d -> d.controlNumber).collect(toList());
+
+        return caseDocList.containsAll(newExDocList);
     }
 
     private String getErrorMessage(String service, String existingCaseId, String exceptionRecordId) {

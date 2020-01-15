@@ -1,0 +1,55 @@
+{
+  "case_details": {
+    "id": 1539007368674134,
+    "jurisdiction": "BULKSCAN",
+    "case_type_id": "BULKSCAN_ExceptionRecord",
+    "created_date": "2018-01-01T12:34:56.123Z",
+    "last_modified": "2018-01-01T12:34:56.123Z",
+    "state": "",
+    "locked_by_user_id": null,
+    "security_level": 0,
+    "case_data": {
+      "poBox": "PO 12345",
+      "journeyClassification": "EXCEPTION",
+      "formType": "B123",
+      "deliveryDate": "2018-01-02T12:34:56.123Z",
+      "openingDate": "2018-01-03T12:34:56.123Z",
+      "scannedDocuments": [
+        {
+          "value": {
+            "fileName": "fileName",
+            "controlNumber": "654321",
+            "type": "cherished",
+            "url": {
+              "document_url": "document_url",
+              "document_binary_url": "document_binary_url",
+              "document_filename": "document_filename"
+            },
+            "subtype": "subtype",
+            "scannedDate": "2018-01-03T12:34:56.123Z",
+            "uuid": "uuid",
+            "deliveryDate": "2018-01-03T12:34:56.123Z"
+          }
+        }
+      ],
+      "scanOCRData": [
+        {
+          "value": {
+            "key": "item",
+            "value": "value"
+          }
+        },
+        {
+          "value": {
+            "key": "item2",
+            "value": "12345"
+          }
+        }
+      ]
+    },
+    "security_classification": "PUBLIC",
+    "callback_response_status": ""
+  },
+  "event_id": "NEW_EVENT_ID",
+  "token": "MY_NEW_TOKEN"
+}

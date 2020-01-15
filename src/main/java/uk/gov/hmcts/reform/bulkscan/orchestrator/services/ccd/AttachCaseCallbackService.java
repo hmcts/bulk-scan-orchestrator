@@ -447,18 +447,6 @@ public class AttachCaseCallbackService {
             }
         }
 
-        //check the case even attachedToCase ref empty
-
-        if (isExceptionAlreadyAttached(callBackEvent, targetCaseCcdRef)) {
-            log.warn(
-                "There has been an attempt to attach an already attached exception record to same case. "
-                    + "Exception record ID: {}, attempt to attach to case: {}",
-                callBackEvent.exceptionRecordId,
-                targetCaseCcdRef
-            );
-            return Optional.empty();
-        }
-
         ServiceConfigItem serviceConfigItem = getServiceConfig(exceptionRecordDetails);
         ProcessResult processResult = ccdCaseUpdater.updateCase(
             callBackEvent.exceptionRecord,
@@ -477,24 +465,6 @@ public class AttachCaseCallbackService {
         } else {
             return Optional.empty();
         }
-    }
-
-    private boolean isExceptionAlreadyAttached(AttachToCaseEventData callBackEvent,
-                                               String targetCaseCcdRef) {
-        CaseDetails theCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
-
-        List<String> caseDocList = getDocuments(theCase)
-            .stream()
-            .map(d -> d.controlNumber)
-            .collect(toList());
-
-        List<String> newExDocList = callBackEvent
-            .exceptionRecord
-            .scannedDocuments
-            .stream()
-            .map(d -> d.controlNumber).collect(toList());
-
-        return caseDocList.containsAll(newExDocList);
     }
 
     private Map<String, Object> buildCaseData(
