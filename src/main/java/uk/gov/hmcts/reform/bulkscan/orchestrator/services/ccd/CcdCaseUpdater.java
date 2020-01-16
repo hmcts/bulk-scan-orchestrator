@@ -98,8 +98,8 @@ public class CcdCaseUpdater {
 
             if (isExceptionAlreadyAttached(existingCase, exceptionRecord)) {
                 log.warn(
-                    "Exception already attached to case. "
-                        + "Exception record ID: {}, attempt to attach to case: {}, Skipping Update",
+                    "Skipping Update as all documents from this exception record are already in the case. "
+                        + "Exception record ID: {}, attempt to attach to case: {} ",
                     exceptionRecord.id,
                     existingCase.getId()
                 );
