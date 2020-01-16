@@ -89,7 +89,7 @@ class AttachExceptionRecordWithOcrTest {
 
     @DisplayName("Should successfully update the case with ocr data if document control numbers do not match")
     @Test
-    void should_update_case_with_ocr_data_even_record_already_attached_if_doc_numbers_not_match() throws Exception {
+    void should_update_case_with_ocr_data_if_doc_numbers_not_match() throws Exception {
 
         CaseDetails existingCase = exceptionRecord(
             null,

@@ -8,6 +8,7 @@ import io.vavr.collection.Seq;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -459,9 +460,9 @@ public class AttachCaseCallbackService {
             exceptionRecordJurisdiction
         );
 
-        Object attachToCaseRef = fetchedExceptionRecord.getData().get(ATTACH_TO_CASE_REFERENCE);
+        String attachToCaseRef = (String)fetchedExceptionRecord.getData().get(ATTACH_TO_CASE_REFERENCE);
 
-        if (attachToCaseRef != null && !Strings.isNullOrEmpty(attachToCaseRef.toString())) {
+        if (StringUtils.isNotEmpty(attachToCaseRef)) {
             throw new AlreadyAttachedToCaseException("Exception record is already attached to case " + attachToCaseRef);
         }
     }
