@@ -49,7 +49,8 @@ public class CaseFinder {
                 details.isPresent(),
                 caseCcdRef,
                 envelope.legacyCaseRef,
-                envelope.id);
+                envelope.id
+            );
 
             return details;
         } else {

@@ -107,7 +107,7 @@ public class ExceptionRecordCreatorTest {
 
         CaseDetails caseDetails = mock(CaseDetails.class);
         given(caseDetails.getId()).willReturn(CASE_DETAILS_ID);
-        given(ccdApi.submitEvent(any(),any(), any(), any()))
+        given(ccdApi.submitEvent(any(), any(), any(), any()))
             .willReturn(caseDetails);
     }
 }

@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import java.util.Optional;
 
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR;
@@ -119,7 +118,7 @@ public class CcdCaseUpdater {
                 );
                 return new ProcessResult(updateResponse.warnings, emptyList());
             } else {
-                Optional<String> updateResult =  updateCaseInCcd(
+                Optional<String> updateResult = updateCaseInCcd(
                     configItem.getService(),
                     ignoreWarnings,
                     idamToken,
@@ -139,7 +138,8 @@ public class CcdCaseUpdater {
                 return new ProcessResult(
                     exceptionRecordFinalizer.finalizeExceptionRecord(
                         existingCase.getData(),
-                        existingCase.getId()
+                        existingCase.getId(),
+                        CcdCallbackType.ATTACHING_SUPPLEMENTARY_EVIDENCE
                     )
                 );
             }
@@ -150,7 +150,23 @@ public class CcdCaseUpdater {
             String msg = getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id)
                 + " because it has been updated in the meantime";
             log.error(msg);
-            ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(asList(msg), emptyList());
+            ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(singletonList(msg), emptyList());
+            return new ProcessResult(errorResponse.warnings, errorResponse.errors);
+        } catch (FeignException.NotFound exception) {
+            String msg = "No case found for case ID: " + existingCaseId;
+            log.error(
+                "No case found for case ID: {} service: {} exception record id: {}",
+                existingCaseId, configItem.getService(), exceptionRecord.id
+            );
+            ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(singletonList(msg), emptyList());
+            return new ProcessResult(errorResponse.warnings, errorResponse.errors);
+        } catch (FeignException.BadRequest exception) {
+            String msg = "Invalid case ID: " + existingCaseId;
+            log.error(
+                "Invalid case ID: {} service: {} exception record id: {}",
+                existingCaseId, configItem.getService(), exceptionRecord.id
+            );
+            ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(singletonList(msg), emptyList());
             return new ProcessResult(errorResponse.warnings, errorResponse.errors);
         } catch (FeignException exception) {
             log.error(
@@ -232,7 +248,8 @@ public class CcdCaseUpdater {
 
             return Optional.empty();
         } catch (FeignException.UnprocessableEntity exception) {
-            String msg = format("Service returned 422 Unprocessable Entity response "
+            String msg = format(
+                "Service returned 422 Unprocessable Entity response "
                     + "when trying to update case for %s jurisdiction "
                     + "with case Id %s "
                     + "based on exception record with Id %s. "
@@ -240,7 +257,8 @@ public class CcdCaseUpdater {
                 exceptionRecord.poBoxJurisdiction,
                 existingCase.getId(),
                 exceptionRecord.id,
-                exception.contentUTF8());
+                exception.contentUTF8()
+            );
             log.error(msg, exception);
 
             return Optional.of(msg);
