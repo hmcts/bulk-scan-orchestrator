@@ -208,9 +208,10 @@ public class CcdCaseUpdater {
         }
     }
 
-    private boolean isExceptionAlreadyAttached(CaseDetails existingCase,
-                                               ExceptionRecord exceptionRecord) {
-
+    private boolean isExceptionAlreadyAttached(
+        CaseDetails existingCase,
+        ExceptionRecord exceptionRecord
+    ) {
         List<String> caseDocList = getDocuments(existingCase)
             .stream()
             .map(d -> d.controlNumber)
