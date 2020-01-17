@@ -29,7 +29,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.badRequestEntity;
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
-import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
 import static com.github.tomakehurst.wiremock.client.WireMock.notFound;
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -267,8 +266,6 @@ class AttachExceptionRecordWithOcrTest {
     private void setUpClientUpdate(String responseBody) {
         givenThat(post("/update-case")
             .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(BEARER_TOKEN_PREFIX))
-            .withRequestBody(matchingJsonPath("$.exception_record.id"))
-            .withRequestBody(matchingJsonPath("$.exception_record.case_type_id"))
             .willReturn(okJson(responseBody))
         );
     }
