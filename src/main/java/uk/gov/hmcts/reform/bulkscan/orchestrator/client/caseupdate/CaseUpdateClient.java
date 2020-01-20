@@ -43,6 +43,7 @@ public class CaseUpdateClient {
                 .toString();
 
         ExistingCaseDetails existingCaseDetails = new ExistingCaseDetails(
+            existingCase.getId().toString(),
             existingCase.getCaseTypeId(),
             existingCase.getData()
         );
