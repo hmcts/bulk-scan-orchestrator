@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.google.common.collect.ImmutableList;
@@ -88,10 +87,39 @@ class AttachExceptionRecordWithOcrTest {
         verifySuccessResponse(response, caseData);
     }
 
-    @DisplayName("Should successfully pass if exception record already attached to the same case")
+    @DisplayName("Should successfully update the case with ocr data if document control numbers do not match")
+    @Test
+    void should_update_case_with_ocr_data_if_doc_numbers_not_match() throws Exception {
+
+        CaseDetails existingCase = exceptionRecord(
+            null,
+            null,
+            null,
+            CASE_TYPE_EXCEPTION_RECORD,
+            document("record.pdf", "123456"),
+            false
+        );
+
+        setUpCaseSearchByCcdId(okJson(mapper.writeValueAsString(existingCase)));
+        setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
+        setUpCcdStartEvent(okJson(getResponseBody("ccd-start-event-for-case-worker.json")));
+        setUpCcdSubmitEvent(okJson(getResponseBody("ccd-submit-event-for-case-worker.json")));
+
+        Map<String, Object> caseData = getCaseData();
+
+        byte[] requestBody = getRequestBody("valid-supplementary-evidence-with-ocr.json");
+
+        ValidatableResponse response = postWithBody(requestBody)
+            .statusCode(OK.value());
+
+        verifySuccessResponse(response, caseData);
+    }
+
+    @DisplayName("Should successfully pass if exception record already has same document case numbers")
     @Test
     void should_pass_if_record_already_attached_to_the_same_case() throws Exception {
-        setUpCaseSearchByCcdId(okJson(mapper.writeValueAsString(exceptionRecord(CASE_ID))));
+        setUpCaseSearchByCcdId(okJson(mapper.writeValueAsString(exceptionRecord(null))));
+        setUpCcdStartEvent(okJson(getResponseBody("ccd-start-event-for-case-worker_with_document.json")));
 
         Map<String, Object> caseData = getCaseData();
 
@@ -289,7 +317,7 @@ class AttachExceptionRecordWithOcrTest {
         );
     }
 
-    private void setUpCaseSearchByCcdId(ResponseDefinitionBuilder responseBuilder) throws JsonProcessingException {
+    private void setUpCaseSearchByCcdId(ResponseDefinitionBuilder responseBuilder) {
         givenThat(
             get("/cases/" + CASE_ID)
                 .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(BEARER_TOKEN_PREFIX))
