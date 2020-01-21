@@ -1,5 +1,4 @@
 {
-  "event_id": "attachToExistingCase",
   "case_details": {
     "id": 1539007368674134,
     "jurisdiction": "BULKSCAN",
@@ -11,11 +10,10 @@
     "security_level": 0,
     "case_data": {
       "poBox": "PO 12345",
-      "journeyClassification": "SUPPLEMENTARY_EVIDENCE_WITH_OCR",
+      "journeyClassification": "EXCEPTION",
       "formType": "B123",
       "deliveryDate": "2018-01-02T12:34:56.123Z",
       "openingDate": "2018-01-03T12:34:56.123Z",
-      "attachToCaseReference": "1539007368674134",
       "scannedDocuments": [
         {
           "value": {
@@ -52,5 +50,6 @@
     "security_classification": "PUBLIC",
     "callback_response_status": ""
   },
-  "ignore_warning": true
+  "event_id": "NEW_EVENT_ID",
+  "token": "MY_NEW_TOKEN"
 }
