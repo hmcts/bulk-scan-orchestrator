@@ -279,11 +279,27 @@ public class CcdCaseUpdater {
             return Optional.empty();
         } catch (FeignException.UnprocessableEntity exception) {
             String msg = format(
-                "Service returned 422 Unprocessable Entity response "
+                "CCD returned 422 Unprocessable Entity response "
                     + "when trying to update case for %s jurisdiction "
                     + "with case Id %s "
                     + "based on exception record with Id %s. "
-                    + "Service response: %s",
+                    + "CCD response: %s",
+                exceptionRecord.poBoxJurisdiction,
+                existingCase.getId(),
+                exceptionRecord.id,
+                exception.contentUTF8()
+            );
+            log.error(msg, exception);
+
+            return Optional.of(msg);
+        } catch (FeignException.Conflict exception) {
+            String msg = format(
+                "CCD returned 409 Conflict response "
+                    + "when trying to update case for %s jurisdiction "
+                    + "with case Id %s "
+                    + "based on exception record with Id %s "
+                    + "because it has been updated in the meantime. "
+                    + "CCD response: %s",
                 exceptionRecord.poBoxJurisdiction,
                 existingCase.getId(),
                 exceptionRecord.id,

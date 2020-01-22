@@ -307,9 +307,37 @@ class CcdCaseUpdaterTest {
         );
 
         // then
-        assertThat(res.getWarnings()).containsExactlyInAnyOrder("Service returned 422 Unprocessable Entity response "
+        assertThat(res.getWarnings()).containsExactlyInAnyOrder("CCD returned 422 Unprocessable Entity response "
             + "when trying to update case for some jurisdiction jurisdiction with case Id 0 based on exception record "
-            + "with Id 1. Service response: Body");
+            + "with Id 1. CCD response: Body");
+        assertThat(res.getErrors()).isEmpty();
+    }
+
+    @Test
+    void updateCase_should_handle_feign_conflict() {
+        // given
+        initResponseMockData();
+        given(configItem.getUpdateUrl()).willReturn("url");
+        given(caseUpdateClient.updateCase(anyString(), any(CaseDetails.class), any(ExceptionRecord.class), anyString()))
+            .willReturn(noWarningsUpdateResponse);
+        initMockData();
+        prepareMockForSubmissionEventForCaseWorker()
+            .willThrow(new FeignException.Conflict("Msg", "Body".getBytes()));
+
+        // when
+        ProcessResult res = ccdCaseUpdater.updateCase(
+            exceptionRecord,
+            configItem,
+            true,
+            "idamToken",
+            "userId",
+            EXISTING_CASE_ID
+        );
+
+        // then
+        assertThat(res.getWarnings()).containsExactlyInAnyOrder("CCD returned 409 Conflict response "
+            + "when trying to update case for some jurisdiction jurisdiction with case Id 0 based on exception record "
+            + "with Id 1 because it has been updated in the meantime. CCD response: Body");
         assertThat(res.getErrors()).isEmpty();
     }
 
