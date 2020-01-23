@@ -51,10 +51,11 @@ public class CaseUpdateClient {
         CaseUpdate caseUpdate = new CaseUpdate(exceptionRecord, existingCaseDetails);
 
         log.info(
-            "Requesting service to update case, caseTypeId: {}, case id: {}, exception id: {}",
+            "Requesting service to update case, caseTypeId: {}, case id: {}, exception id: {}, url: {}",
             caseUpdate.caseDetails.caseTypeId,
             caseUpdate.caseDetails.id,
-            caseUpdate.exceptionRecord.id
+            caseUpdate.exceptionRecord.id,
+            url
         );
 
         return restTemplate.postForObject(
