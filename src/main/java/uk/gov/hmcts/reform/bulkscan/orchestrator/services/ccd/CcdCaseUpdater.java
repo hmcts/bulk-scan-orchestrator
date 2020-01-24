@@ -4,7 +4,6 @@ import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException.Conflict;
 import org.springframework.web.client.HttpClientErrorException.UnprocessableEntity;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
@@ -159,7 +158,7 @@ public class CcdCaseUpdater {
         } catch (UnprocessableEntity exception) {
             ClientServiceErrorResponse errorResponse = serviceResponseParser.parseResponseBody(exception);
             return new ProcessResult(errorResponse.warnings, errorResponse.errors);
-        } catch (Conflict exception) {
+        } catch (FeignException.Conflict exception) {
             String msg = getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id)
                 + " because it has been updated in the meantime";
             log.error(msg);
@@ -279,11 +278,11 @@ public class CcdCaseUpdater {
             return Optional.empty();
         } catch (FeignException.UnprocessableEntity exception) {
             String msg = format(
-                "Service returned 422 Unprocessable Entity response "
+                "CCD returned 422 Unprocessable Entity response "
                     + "when trying to update case for %s jurisdiction "
                     + "with case Id %s "
                     + "based on exception record with Id %s. "
-                    + "Service response: %s",
+                    + "CCD response: %s",
                 exceptionRecord.poBoxJurisdiction,
                 existingCase.getId(),
                 exceptionRecord.id,
@@ -292,6 +291,8 @@ public class CcdCaseUpdater {
             log.error(msg, exception);
 
             return Optional.of(msg);
+        } catch (FeignException.Conflict exception) {
+            throw exception;
         } catch (FeignException exception) {
             String msg = format("Service response: %s", exception.contentUTF8());
             log.error(
