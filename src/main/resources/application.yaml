@@ -102,6 +102,7 @@ service-config:
         - DIVORCE
         - DIVORCE_NOTICE_OF_ACTING
       transformation-url: ${TRANSFORMATION_URL_DIVORCE}
+      allow-creating-case-before-payments-are-processed: true
 
     - service: finrem
       jurisdiction: DIVORCE
