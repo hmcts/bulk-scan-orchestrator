@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
+import com.google.common.collect.ImmutableMap;
 import feign.FeignException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,7 @@ import java.util.Map;
 import static java.time.LocalDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
@@ -42,13 +44,15 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
 @ExtendWith(MockitoExtension.class)
 class CcdCaseUpdaterTest {
 
     private static final String EXISTING_CASE_ID = "existing_case_id";
+    private static final String DOCUMENT_CONTROL_NUMBER = "1234";
 
     private CcdCaseUpdater ccdCaseUpdater;
 
@@ -71,22 +75,19 @@ class CcdCaseUpdaterTest {
     private ServiceConfigItem configItem;
 
     @Mock
-    private CaseDetails existingCase;
-
-    @Mock
     private StartEventResponse eventResponse;
 
     @Mock
     private Map<String, Object> originalFields;
 
     @Mock
-    private ClientServiceErrorResponse clientServiceErrorResponse;
-
-    @Mock
     private PaymentsProcessor paymentsProcessor;
 
+    private CaseDetails existingCase;
+    private CaseDetails updatedCase;
     private ExceptionRecord exceptionRecord;
     private CaseDetails exceptionRecordDetails;
+    private ScannedDocument scannedDocument;
 
     private SuccessfulUpdateResponse noWarningsUpdateResponse;
     private SuccessfulUpdateResponse warningsUpdateResponse;
@@ -104,8 +105,27 @@ class CcdCaseUpdaterTest {
             paymentsProcessor
         );
 
+        scannedDocument = new ScannedDocument(
+            DocumentType.FORM,
+            "D8",
+            new DocumentUrl(
+                "http://locahost",
+                "http://locahost/binary",
+                "file1.pdf"
+            ),
+            DOCUMENT_CONTROL_NUMBER,
+            "file1.pdf",
+            now(),
+            now()
+        );
+
         caseUpdateDetails = new CaseUpdateDetails("event_id", new HashMap<String, String>());
         exceptionRecord = getExceptionRecord();
+        exceptionRecordDetails = CaseDetails.builder().id(2L).build();
+
+        existingCase = CaseDetails.builder().id(2L).data(emptyMap()).caseTypeId("caseTypeId").build();
+        updatedCase = CaseDetails.builder().id(2L).data(emptyMap()).caseTypeId("caseTypeId").build();
+
 
         noWarningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
         warningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, asList("warning1"));
@@ -115,14 +135,13 @@ class CcdCaseUpdaterTest {
     }
 
     @Test
-    void updateCase_should_if_no_warnings() {
+    void updateCase_should_succeed_if_no_warnings() {
         // given
         given(configItem.getUpdateUrl()).willReturn("url");
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
             .willReturn(noWarningsUpdateResponse);
-        initResponseMockData();
         initMockData();
-        prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
+        prepareMockForSubmissionEventForCaseWorker().willReturn(updatedCase);
         given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong(), any())).willReturn(originalFields);
 
         // when
@@ -140,6 +159,41 @@ class CcdCaseUpdaterTest {
         assertThat(res.getErrors()).isEmpty();
         assertThat(res.getWarnings()).isEmpty();
         assertThat(res.getExceptionRecordData()).isEqualTo(originalFields);
+
+        verify(paymentsProcessor).updatePayments(exceptionRecordDetails, existingCase.getId());
+    }
+
+    @Test
+    void updateCase_should_update_payments_if_exception_record_already_attached() {
+        // given
+        existingCase.setData(
+            ImmutableMap.of(
+                "scannedDocuments", singletonList(
+                    ImmutableMap.of(
+                        "value", ImmutableMap.of("controlNumber", "1234")
+                    )
+                )
+            )
+        );
+        initMockData();
+
+        // when
+        ProcessResult res = ccdCaseUpdater.updateCase(
+            exceptionRecord,
+            configItem,
+            true,
+            "idamToken",
+            "userId",
+            EXISTING_CASE_ID,
+            exceptionRecordDetails
+        );
+
+        // then
+        assertThat(res.getErrors()).isEmpty();
+        assertThat(res.getWarnings()).isEmpty();
+        assertThat(res.getExceptionRecordData()).hasSize(0);
+
+        verify(paymentsProcessor).updatePayments(exceptionRecordDetails, existingCase.getId());
     }
 
     @Test
@@ -148,7 +202,6 @@ class CcdCaseUpdaterTest {
         given(configItem.getUpdateUrl()).willReturn("url");
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
             .willReturn(noWarningsUpdateResponse);
-        initResponseMockData();
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
         given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong(), any())).willReturn(originalFields);
@@ -168,6 +221,8 @@ class CcdCaseUpdaterTest {
         assertThat(res.getErrors()).isEmpty();
         assertThat(res.getWarnings()).isEmpty();
         assertThat(res.getExceptionRecordData()).isEqualTo(originalFields);
+
+        verify(paymentsProcessor).updatePayments(exceptionRecordDetails, existingCase.getId());
     }
 
     @Test
@@ -193,6 +248,8 @@ class CcdCaseUpdaterTest {
         assertThat(res.getErrors()).isEmpty();
         assertThat(res.getWarnings()).containsOnly("warning1");
         assertThat(res.getExceptionRecordData()).isEmpty();
+
+        verifyNoInteractions(paymentsProcessor);
     }
 
     @Test
@@ -201,7 +258,6 @@ class CcdCaseUpdaterTest {
         given(configItem.getUpdateUrl()).willReturn("url");
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
             .willReturn(noWarningsUpdateResponse);
-        initResponseMockData();
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
         given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong(), any())).willReturn(originalFields);
@@ -221,11 +277,12 @@ class CcdCaseUpdaterTest {
         assertThat(res.getErrors()).isEmpty();
         assertThat(res.getWarnings()).isEmpty();
         assertThat(res.getExceptionRecordData()).isEqualTo(originalFields);
+
+        verify(paymentsProcessor).updatePayments(exceptionRecordDetails, existingCase.getId());
     }
 
     @Test
     void updateCase_should_handle_conflict_response_from_ccd_api() {
-        initResponseMockData();
         given(configItem.getUpdateUrl()).willReturn("url");
         given(caseUpdateClient.updateCase(anyString(), any(CaseDetails.class), any(ExceptionRecord.class), anyString()))
             .willReturn(noWarningsUpdateResponse);
@@ -248,12 +305,13 @@ class CcdCaseUpdaterTest {
         assertThat(res.getErrors()).containsExactlyInAnyOrder("Failed to update case for Service service "
             + "with case Id existing_case_id based on exception record 1 because it has been updated in the meantime");
         assertThat(res.getWarnings()).isEmpty();
+
+        verifyNoInteractions(paymentsProcessor);
     }
 
     @Test
     void updateCase_should_handle_feign_exception() {
         // given
-        initResponseMockData();
         given(configItem.getUpdateUrl()).willReturn("url");
         given(caseUpdateClient.updateCase(anyString(), any(CaseDetails.class), any(ExceptionRecord.class), anyString()))
             .willReturn(noWarningsUpdateResponse);
@@ -279,12 +337,13 @@ class CcdCaseUpdaterTest {
             .isEqualTo("Failed to update case for Service service with case Id existing_case_id "
                 + "based on exception record 1");
         assertThat(callbackException.getCause().getMessage()).isEqualTo("Service response: Body");
+
+        verifyNoInteractions(paymentsProcessor);
     }
 
     @Test
     void updateCase_should_handle_feign_unprocessable_entity() {
         // given
-        initResponseMockData();
         given(configItem.getUpdateUrl()).willReturn("url");
         given(caseUpdateClient.updateCase(anyString(), any(CaseDetails.class), any(ExceptionRecord.class), anyString()))
             .willReturn(noWarningsUpdateResponse);
@@ -305,9 +364,11 @@ class CcdCaseUpdaterTest {
 
         // then
         assertThat(res.getWarnings()).containsExactlyInAnyOrder("CCD returned 422 Unprocessable Entity response "
-            + "when trying to update case for some jurisdiction jurisdiction with case Id 0 based on exception record "
+            + "when trying to update case for some jurisdiction jurisdiction with case Id 2 based on exception record "
             + "with Id 1. CCD response: Body");
         assertThat(res.getErrors()).isEmpty();
+
+        verifyNoInteractions(paymentsProcessor);
     }
 
     @Test
@@ -353,6 +414,8 @@ class CcdCaseUpdaterTest {
         assertThat(((HttpClientErrorException) callbackException.getCause()).getStatusText())
             .isEqualTo("bad request message");
         assertThat(((HttpClientErrorException) callbackException.getCause()).getRawStatusCode()).isEqualTo(400);
+
+        verifyNoInteractions(paymentsProcessor);
     }
 
     @Test
@@ -393,6 +456,8 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(res.getErrors()).containsExactlyInAnyOrder("error1", "error2");
         assertThat(res.getWarnings()).isEmpty();
+
+        verifyNoInteractions(paymentsProcessor);
     }
 
     @Test
@@ -428,6 +493,8 @@ class CcdCaseUpdaterTest {
             .isEqualTo("Failed to update case for Service service with case Id existing_case_id "
                 + "based on exception record 1. Service response: Body");
         assertThat(callbackException.getCause().getMessage()).isEqualTo("Msg");
+
+        verifyNoInteractions(paymentsProcessor);
     }
 
     @Test
@@ -462,6 +529,8 @@ class CcdCaseUpdaterTest {
         assertThat(callbackException.getMessage())
             .isEqualTo("Failed to update case for Service service with case Id existing_case_id "
                 + "based on exception record 1");
+
+        verifyNoInteractions(paymentsProcessor);
     }
 
     @Test
@@ -492,6 +561,8 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(res.getErrors()).containsOnly("No case found for case ID: 1234123412341234");
         assertThat(res.getWarnings()).isEmpty();
+
+        verifyNoInteractions(paymentsProcessor);
     }
 
     @Test
@@ -522,6 +593,8 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(res.getErrors()).containsOnly("Invalid case ID: 1234");
         assertThat(res.getWarnings()).isEmpty();
+
+        verifyNoInteractions(paymentsProcessor);
     }
 
     private BDDMyOngoingStubbing<CaseDetails> prepareMockForSubmissionEventForCaseWorker() {
@@ -551,12 +624,6 @@ class CcdCaseUpdaterTest {
             .willReturn(eventResponse);
     }
 
-    private void initResponseMockData() {
-        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
-        given(eventResponse.getEventId()).willReturn(EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR);
-        given(eventResponse.getToken()).willReturn("token");
-    }
-
     private ExceptionRecord getExceptionRecord() {
         return new ExceptionRecord(
             "1",
@@ -567,19 +634,7 @@ class CcdCaseUpdaterTest {
             "Form1",
             now(),
             now(),
-            singletonList(new ScannedDocument(
-                DocumentType.FORM,
-                "D8",
-                new DocumentUrl(
-                    "http://locahost",
-                    "http://locahost/binary",
-                    "file1.pdf"
-                ),
-                "1234",
-                "file1.pdf",
-                now(),
-                now()
-            )),
+            singletonList(scannedDocument),
             emptyList()
         );
     }
