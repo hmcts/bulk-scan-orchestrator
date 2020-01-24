@@ -430,7 +430,8 @@ public class AttachCaseCallbackService {
             ignoreWarnings,
             callBackEvent.idamToken,
             callBackEvent.userId,
-            targetCaseCcdRef
+            targetCaseCcdRef,
+            exceptionRecordDetails
         );
 
         if (!processResult.getErrors().isEmpty() || !processResult.getWarnings().isEmpty()) {

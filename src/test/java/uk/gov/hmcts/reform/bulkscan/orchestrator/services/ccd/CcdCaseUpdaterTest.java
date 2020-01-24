@@ -82,7 +82,11 @@ class CcdCaseUpdaterTest {
     @Mock
     private ClientServiceErrorResponse clientServiceErrorResponse;
 
+    @Mock
+    private PaymentsProcessor paymentsProcessor;
+
     private ExceptionRecord exceptionRecord;
+    private CaseDetails exceptionRecordDetails;
 
     private SuccessfulUpdateResponse noWarningsUpdateResponse;
     private SuccessfulUpdateResponse warningsUpdateResponse;
@@ -96,7 +100,8 @@ class CcdCaseUpdaterTest {
             coreCaseDataApi,
             caseUpdateClient,
             serviceResponseParser,
-            exceptionRecordFinalizer
+            exceptionRecordFinalizer,
+            paymentsProcessor
         );
 
         caseUpdateDetails = new CaseUpdateDetails("event_id", new HashMap<String, String>());
@@ -127,7 +132,8 @@ class CcdCaseUpdaterTest {
             true,
             "idamToken",
             "userId",
-            EXISTING_CASE_ID
+            EXISTING_CASE_ID,
+            exceptionRecordDetails
         );
 
         // then
@@ -154,7 +160,8 @@ class CcdCaseUpdaterTest {
             true,
             "idamToken",
             "userId",
-            EXISTING_CASE_ID
+            EXISTING_CASE_ID,
+            exceptionRecordDetails
         );
 
         // then
@@ -178,7 +185,8 @@ class CcdCaseUpdaterTest {
             false,
             "idamToken",
             "userId",
-            EXISTING_CASE_ID
+            EXISTING_CASE_ID,
+            exceptionRecordDetails
         );
 
         // then
@@ -205,7 +213,8 @@ class CcdCaseUpdaterTest {
             false,
             "idamToken",
             "userId",
-            EXISTING_CASE_ID
+            EXISTING_CASE_ID,
+            exceptionRecordDetails
         );
 
         // then
@@ -246,7 +255,8 @@ class CcdCaseUpdaterTest {
             true,
             "idamToken",
             "userId",
-            EXISTING_CASE_ID
+            EXISTING_CASE_ID,
+            exceptionRecordDetails
         );
 
         // then
@@ -273,7 +283,8 @@ class CcdCaseUpdaterTest {
                     true,
                     "idamToken",
                     "userId",
-                    EXISTING_CASE_ID
+                    EXISTING_CASE_ID,
+                    exceptionRecordDetails
                 ),
             CallbackException.class
         );
@@ -303,7 +314,8 @@ class CcdCaseUpdaterTest {
             true,
             "idamToken",
             "userId",
-            EXISTING_CASE_ID
+            EXISTING_CASE_ID,
+            exceptionRecordDetails
         );
 
         // then
@@ -341,7 +353,8 @@ class CcdCaseUpdaterTest {
                     true,
                     "idamToken",
                     "userId",
-                    EXISTING_CASE_ID
+                    EXISTING_CASE_ID,
+                    exceptionRecordDetails
                 ),
             CallbackException.class
         );
@@ -388,7 +401,8 @@ class CcdCaseUpdaterTest {
             true,
             "idamToken",
             "userId",
-            EXISTING_CASE_ID
+            EXISTING_CASE_ID,
+            exceptionRecordDetails
         );
 
         // then
@@ -418,7 +432,8 @@ class CcdCaseUpdaterTest {
                     true,
                     "idamToken",
                     "userId",
-                    EXISTING_CASE_ID
+                    EXISTING_CASE_ID,
+                    exceptionRecordDetails
                 ),
             CallbackException.class
         );
@@ -452,7 +467,8 @@ class CcdCaseUpdaterTest {
                     true,
                     "idamToken",
                     "userId",
-                    EXISTING_CASE_ID
+                    EXISTING_CASE_ID,
+                    exceptionRecordDetails
                 ),
             CallbackException.class
         );
@@ -484,7 +500,8 @@ class CcdCaseUpdaterTest {
             true,
             "idamToken",
             "userId",
-            "1234123412341234"
+            "1234123412341234",
+            exceptionRecordDetails
         );
 
         // then
@@ -513,7 +530,8 @@ class CcdCaseUpdaterTest {
             true,
             "idamToken",
             "userId",
-            "1234"
+            "1234",
+            exceptionRecordDetails
         );
 
         // then

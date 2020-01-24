@@ -41,19 +41,21 @@ public class CcdCaseUpdater {
     private final CaseUpdateClient caseUpdateClient;
     private final ServiceResponseParser serviceResponseParser;
     private final ExceptionRecordFinalizer exceptionRecordFinalizer;
+    private final PaymentsProcessor paymentsProcessor;
 
     public CcdCaseUpdater(
         AuthTokenGenerator s2sTokenGenerator,
         CoreCaseDataApi coreCaseDataApi,
         CaseUpdateClient caseUpdateClient,
         ServiceResponseParser serviceResponseParser,
-        ExceptionRecordFinalizer exceptionRecordFinalizer
-    ) {
+        ExceptionRecordFinalizer exceptionRecordFinalizer,
+        PaymentsProcessor paymentsProcessor) {
         this.s2sTokenGenerator = s2sTokenGenerator;
         this.coreCaseDataApi = coreCaseDataApi;
         this.caseUpdateClient = caseUpdateClient;
         this.serviceResponseParser = serviceResponseParser;
         this.exceptionRecordFinalizer = exceptionRecordFinalizer;
+        this.paymentsProcessor = paymentsProcessor;
     }
 
     public ProcessResult updateCase(
@@ -62,7 +64,8 @@ public class CcdCaseUpdater {
         boolean ignoreWarnings,
         String idamToken,
         String userId,
-        String existingCaseId
+        String existingCaseId,
+        CaseDetails exceptionRecordDetails
     ) {
         log.info(
             "Start updating case for service {} with case Id {} from exception record {}",
@@ -147,6 +150,8 @@ public class CcdCaseUpdater {
                     // error
                     return new ProcessResult(singletonList(updateResult.get()), emptyList());
                 }
+
+                paymentsProcessor.updatePayments(exceptionRecordDetails, existingCase.getId());
 
                 return new ProcessResult(
                     exceptionRecordFinalizer.finalizeExceptionRecord(
