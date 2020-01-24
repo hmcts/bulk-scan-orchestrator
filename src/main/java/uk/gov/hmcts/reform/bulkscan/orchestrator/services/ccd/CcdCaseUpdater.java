@@ -128,8 +128,8 @@ public class CcdCaseUpdater {
 
                 if (!ignoreWarnings && !updateResponse.warnings.isEmpty()) {
                     log.info(
-                        "Returned warnings after calling case update endpoint of service {} to update case with case Id {} "
-                            + "based on exception record ref {}",
+                        "Returned warnings after calling case update endpoint of service {} "
+                            + "to update case with case Id {} based on exception record ref {}",
                         configItem.getService(),
                         existingCase.getId(),
                         exceptionRecord.id
