@@ -130,13 +130,9 @@
     <packageUrl regex="true">^pkg:javascript/handlebars\.js@.*$</packageUrl>
     <vulnerabilityName>A prototype pollution vulnerability in handlebars is exploitable if an attacker can control the template</vulnerabilityName>
   </suppress>
-
-  <suppress until="2020-01-06">
-    <notes><![CDATA[
-   file name: spring-webmvc-5.2.1.RELEASE.jar
-   ]]></notes>
+  <suppress until="2020-06-06">
+    <notes><![CDATA[file name: spring-webmvc-5.2.1.RELEASE.jar]]></notes>
     <packageUrl regex="true">^pkg:maven/org\.springframework/spring\-webmvc@.*$</packageUrl>
     <cve>CVE-2020-5397</cve>
   </suppress>
-
 </suppressions>
