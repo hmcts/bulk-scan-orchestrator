@@ -99,8 +99,8 @@ public class TransformationClientTest {
         );
 
         // then
-        assertThat(exception.getMessage()).isEqualTo("422 Unprocessable Entity");
         assertThat(exception.getStatusCode()).isEqualTo(UNPROCESSABLE_ENTITY);
+        assertThat(exception.getStatusText()).isEqualTo("Unprocessable Entity");
         assertThat(exception.getResponseBodyAsString())
             .isEqualTo("{\"warnings\":[\"field2 is missing\"],\"errors\":[\"field1 is missing\"]}");
     }
