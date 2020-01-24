@@ -115,10 +115,11 @@ public class CcdCaseUpdater {
 
             log.info(
                 "Successfully called case update endpoint of service {} to update case with case Id {} "
-                    + "based on exception record ref {}",
+                    + "based on exception record ref {}, existingCase Data: {}",
                 configItem.getService(),
                 existingCase.getId(),
-                exceptionRecord.id
+                exceptionRecord.id,
+                existingCase.getData()
             );
 
             if (!ignoreWarnings && !updateResponse.warnings.isEmpty()) {
