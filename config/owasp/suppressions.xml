@@ -62,7 +62,7 @@
        This is only used for TESTING purposes.
    ]]></notes>
     <filePath regex="true">.*spring-cloud-contract-wiremock-2\.0\.2\.RELEASE\.jar</filePath>
-    <cpe>cpe:/a:wiremock:wiremock:2.0.2.release</cpe>
+    <cpe>cpe:/a:wiremock:wiremock:2.0.2:release</cpe>
   </suppress>
 
   <suppress>
