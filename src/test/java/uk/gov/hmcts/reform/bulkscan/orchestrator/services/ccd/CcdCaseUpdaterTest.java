@@ -225,28 +225,13 @@ class CcdCaseUpdaterTest {
 
     @Test
     void updateCase_should_handle_conflict_response_from_ccd_api() {
-        // given
-        given(configItem.getUpdateUrl()).willReturn("url");
-        given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
-            .willReturn(noWarningsUpdateResponse);
         initResponseMockData();
+        given(configItem.getUpdateUrl()).willReturn("url");
+        given(caseUpdateClient.updateCase(anyString(), any(CaseDetails.class), any(ExceptionRecord.class), anyString()))
+            .willReturn(noWarningsUpdateResponse);
         initMockData();
-        given(coreCaseDataApi.submitEventForCaseWorker(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyBoolean(),
-            any(CaseDataContent.class)
-        )).willThrow(HttpClientErrorException.create(
-            HttpStatus.CONFLICT,
-            "conflict message",
-            null,
-            null,
-            null
-        ));
+        prepareMockForSubmissionEventForCaseWorker()
+            .willThrow(new FeignException.Conflict("Msg", "Body".getBytes()));
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
@@ -319,9 +304,9 @@ class CcdCaseUpdaterTest {
         );
 
         // then
-        assertThat(res.getWarnings()).containsExactlyInAnyOrder("Service returned 422 Unprocessable Entity response "
+        assertThat(res.getWarnings()).containsExactlyInAnyOrder("CCD returned 422 Unprocessable Entity response "
             + "when trying to update case for some jurisdiction jurisdiction with case Id 0 based on exception record "
-            + "with Id 1. Service response: Body");
+            + "with Id 1. CCD response: Body");
         assertThat(res.getErrors()).isEmpty();
     }
 
