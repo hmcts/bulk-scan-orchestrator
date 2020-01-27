@@ -430,8 +430,7 @@ public class AttachCaseCallbackService {
             ignoreWarnings,
             callBackEvent.idamToken,
             callBackEvent.userId,
-            targetCaseCcdRef,
-            exceptionRecordDetails
+            targetCaseCcdRef
         );
 
         if (!processResult.getErrors().isEmpty() || !processResult.getWarnings().isEmpty()) {
@@ -440,6 +439,8 @@ public class AttachCaseCallbackService {
                 processResult.getWarnings()
             ));
         } else {
+            paymentsProcessor.updatePayments(exceptionRecordDetails, Long.parseLong(targetCaseCcdRef));
+
             return Optional.empty();
         }
     }

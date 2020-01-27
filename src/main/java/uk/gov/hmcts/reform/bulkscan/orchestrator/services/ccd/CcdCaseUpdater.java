@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static java.lang.String.format;
@@ -41,21 +40,19 @@ public class CcdCaseUpdater {
     private final CaseUpdateClient caseUpdateClient;
     private final ServiceResponseParser serviceResponseParser;
     private final ExceptionRecordFinalizer exceptionRecordFinalizer;
-    private final PaymentsProcessor paymentsProcessor;
 
     public CcdCaseUpdater(
         AuthTokenGenerator s2sTokenGenerator,
         CoreCaseDataApi coreCaseDataApi,
         CaseUpdateClient caseUpdateClient,
         ServiceResponseParser serviceResponseParser,
-        ExceptionRecordFinalizer exceptionRecordFinalizer,
-        PaymentsProcessor paymentsProcessor) {
+        ExceptionRecordFinalizer exceptionRecordFinalizer
+    ) {
         this.s2sTokenGenerator = s2sTokenGenerator;
         this.coreCaseDataApi = coreCaseDataApi;
         this.caseUpdateClient = caseUpdateClient;
         this.serviceResponseParser = serviceResponseParser;
         this.exceptionRecordFinalizer = exceptionRecordFinalizer;
-        this.paymentsProcessor = paymentsProcessor;
     }
 
     public ProcessResult updateCase(
@@ -64,8 +61,7 @@ public class CcdCaseUpdater {
         boolean ignoreWarnings,
         String idamToken,
         String userId,
-        String existingCaseId,
-        CaseDetails exceptionRecordDetails
+        String existingCaseId
     ) {
         log.info(
             "Start updating case for service {} with case Id {} from exception record {}",
@@ -99,8 +95,6 @@ public class CcdCaseUpdater {
 
             final CaseDetails existingCase = startEvent.getCaseDetails();
 
-            final ProcessResult processResult;
-
             if (isExceptionAlreadyAttached(existingCase, exceptionRecord)) {
                 log.warn(
                     "Skipping Update as all documents from this exception record are already in the case. "
@@ -108,64 +102,59 @@ public class CcdCaseUpdater {
                     exceptionRecord.id,
                     existingCase.getId()
                 );
+                return new ProcessResult(emptyList(), emptyList());
+            }
 
-                processResult = new ProcessResult(emptyList(), emptyList());
-            } else {
-                SuccessfulUpdateResponse updateResponse = caseUpdateClient.updateCase(
-                    configItem.getUpdateUrl(),
-                    existingCase,
-                    exceptionRecord,
-                    s2sToken
-                );
+            SuccessfulUpdateResponse updateResponse = caseUpdateClient.updateCase(
+                configItem.getUpdateUrl(),
+                existingCase,
+                exceptionRecord,
+                s2sToken
+            );
 
+            log.info(
+                "Successfully called case update endpoint of service {} to update case with case Id {} "
+                    + "based on exception record ref {}",
+                configItem.getService(),
+                existingCase.getId(),
+                exceptionRecord.id
+            );
+
+            if (!ignoreWarnings && !updateResponse.warnings.isEmpty()) {
                 log.info(
-                    "Successfully called case update endpoint of service {} to update case with case Id {} "
+                    "Returned warnings after calling case update endpoint of service {} to update case with case Id {} "
                         + "based on exception record ref {}",
                     configItem.getService(),
                     existingCase.getId(),
                     exceptionRecord.id
                 );
+                return new ProcessResult(updateResponse.warnings, emptyList());
+            } else {
+                Optional<String> updateResult = updateCaseInCcd(
+                    configItem.getService(),
+                    ignoreWarnings,
+                    idamToken,
+                    s2sToken,
+                    userId,
+                    existingCaseId,
+                    exceptionRecord,
+                    updateResponse.caseDetails,
+                    startEvent
+                );
 
-                if (!ignoreWarnings && !updateResponse.warnings.isEmpty()) {
-                    log.info(
-                        "Returned warnings after calling case update endpoint of service {} "
-                            + "to update case with case Id {} based on exception record ref {}",
-                        configItem.getService(),
-                        existingCase.getId(),
-                        exceptionRecord.id
-                    );
-                    return new ProcessResult(updateResponse.warnings, emptyList());
-                } else {
-                    Optional<String> updateResult = updateCaseInCcd(
-                        configItem.getService(),
-                        ignoreWarnings,
-                        idamToken,
-                        s2sToken,
-                        userId,
-                        existingCaseId,
-                        exceptionRecord,
-                        updateResponse.caseDetails,
-                        startEvent
-                    );
+                if (updateResult.isPresent()) {
+                    // error
+                    return new ProcessResult(singletonList(updateResult.get()), emptyList());
+                }
 
-                    if (updateResult.isPresent()) {
-                        // error
-                        return new ProcessResult(singletonList(updateResult.get()), emptyList());
-                    }
-
-                    final Map<String, Object> exceptionRecordData = exceptionRecordFinalizer.finalizeExceptionRecord(
+                return new ProcessResult(
+                    exceptionRecordFinalizer.finalizeExceptionRecord(
                         existingCase.getData(),
                         existingCase.getId(),
                         CcdCallbackType.ATTACHING_SUPPLEMENTARY_EVIDENCE
-                    );
-
-                    processResult = new ProcessResult(exceptionRecordData);
-                }
+                    )
+                );
             }
-
-            paymentsProcessor.updatePayments(exceptionRecordDetails, existingCase.getId());
-
-            return processResult;
         } catch (UnprocessableEntity exception) {
             ClientServiceErrorResponse errorResponse = serviceResponseParser.parseResponseBody(exception);
             return new ProcessResult(errorResponse.warnings, errorResponse.errors);
