@@ -1,11 +1,12 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation;
 
-import com.github.tomakehurst.wiremock.core.Options;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException.BadRequest;
 import org.springframework.web.client.HttpClientErrorException.Forbidden;
@@ -42,6 +43,7 @@ import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
+@AutoConfigureWireMock(port = 0)
 @IntegrationTest
 public class TransformationClientTest {
 
@@ -50,8 +52,8 @@ public class TransformationClientTest {
     @Autowired
     private TransformationClient client;
 
-    @Autowired
-    private Options wiremockOptions;
+    @Value("${service-config.services[0].transformation-url}")
+    private String transformationUrl;
 
     @Test
     public void should_return_case_details_for_successful_transformation() throws Exception {
@@ -68,7 +70,7 @@ public class TransformationClientTest {
 
         // when
         SuccessfulTransformationResponse response = client.transformExceptionRecord(
-            url(),
+            transformationUrl,
             exceptionRecordRequestData(),
             s2sToken
         );
@@ -94,7 +96,7 @@ public class TransformationClientTest {
 
         // when
         UnprocessableEntity exception = catchThrowableOfType(
-            () -> client.transformExceptionRecord(url(), exceptionRecordRequestData(), s2sToken),
+            () -> client.transformExceptionRecord(transformationUrl, exceptionRecordRequestData(), s2sToken),
             UnprocessableEntity.class
         );
 
@@ -116,7 +118,7 @@ public class TransformationClientTest {
 
         // when
         BadRequest exception = catchThrowableOfType(
-            () -> client.transformExceptionRecord(url(), exceptionRecordRequestData(), s2sToken),
+            () -> client.transformExceptionRecord(transformationUrl, exceptionRecordRequestData(), s2sToken),
             BadRequest.class
         );
 
@@ -136,7 +138,7 @@ public class TransformationClientTest {
 
         // when
         BadRequest exception = catchThrowableOfType(
-            () -> client.transformExceptionRecord(url(), exceptionRecordRequestData(), s2sToken),
+            () -> client.transformExceptionRecord(transformationUrl, exceptionRecordRequestData(), s2sToken),
             BadRequest.class
         );
 
@@ -154,7 +156,11 @@ public class TransformationClientTest {
 
         // when
         Forbidden exception = catchThrowableOfType(
-            () -> client.transformExceptionRecord(url(), exceptionRecordRequestData(), randomUUID().toString()),
+            () -> client.transformExceptionRecord(
+                transformationUrl,
+                exceptionRecordRequestData(),
+                randomUUID().toString()
+            ),
             Forbidden.class
         );
 
@@ -172,7 +178,11 @@ public class TransformationClientTest {
 
         // when
         Unauthorized exception = catchThrowableOfType(
-            () -> client.transformExceptionRecord(url(), exceptionRecordRequestData(), randomUUID().toString()),
+            () -> client.transformExceptionRecord(
+                transformationUrl,
+                exceptionRecordRequestData(),
+                randomUUID().toString()
+            ),
             Unauthorized.class
         );
 
@@ -189,17 +199,17 @@ public class TransformationClientTest {
 
         // when
         InternalServerError exception = catchThrowableOfType(
-            () -> client.transformExceptionRecord(url(), exceptionRecordRequestData(), randomUUID().toString()),
+            () -> client.transformExceptionRecord(
+                transformationUrl,
+                exceptionRecordRequestData(),
+                randomUUID().toString()
+            ),
             InternalServerError.class
         );
 
         // then
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(exception.getResponseBodyAsString()).contains("Internal Server error");
-    }
-
-    private String url() {
-        return "http://localhost:" + wiremockOptions.portNumber();
     }
 
     private ExceptionRecord exceptionRecordRequestData() {

@@ -1,11 +1,12 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate;
 
-import com.github.tomakehurst.wiremock.core.Options;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException.BadRequest;
 import org.springframework.web.client.HttpClientErrorException.Forbidden;
@@ -43,6 +44,7 @@ import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
+@AutoConfigureWireMock(port = 0)
 @IntegrationTest
 public class CaseUpdateClientTest {
 
@@ -51,8 +53,8 @@ public class CaseUpdateClientTest {
     @Autowired
     private CaseUpdateClient client;
 
-    @Autowired
-    private Options wiremockOptions;
+    @Value("${service-config.services[0].update-url}")
+    private String updateUrl;
 
     @Test
     public void should_return_case_details_for_successful_update() throws Exception {
@@ -71,7 +73,7 @@ public class CaseUpdateClientTest {
 
         // when
         SuccessfulUpdateResponse response = client.updateCase(
-            url(),
+            updateUrl,
             existingCase(),
             exceptionRecordRequestData(),
             s2sToken
@@ -97,7 +99,7 @@ public class CaseUpdateClientTest {
 
         // when
         UnprocessableEntity exception = catchThrowableOfType(
-            () -> client.updateCase(url(), existingCase(), exceptionRecordRequestData(), s2sToken),
+            () -> client.updateCase(updateUrl, existingCase(), exceptionRecordRequestData(), s2sToken),
             UnprocessableEntity.class
         );
 
@@ -120,7 +122,7 @@ public class CaseUpdateClientTest {
 
         // when
         BadRequest exception = catchThrowableOfType(
-            () -> client.updateCase(url(), existingCase(), exceptionRecordRequestData(), s2sToken),
+            () -> client.updateCase(updateUrl, existingCase(), exceptionRecordRequestData(), s2sToken),
             BadRequest.class
         );
 
@@ -140,7 +142,7 @@ public class CaseUpdateClientTest {
 
         // when
         BadRequest exception = catchThrowableOfType(
-            () -> client.updateCase(url(), existingCase(), exceptionRecordRequestData(), s2sToken),
+            () -> client.updateCase(updateUrl, existingCase(), exceptionRecordRequestData(), s2sToken),
             BadRequest.class
         );
 
@@ -158,7 +160,7 @@ public class CaseUpdateClientTest {
 
         // when
         Forbidden exception = catchThrowableOfType(
-            () -> client.updateCase(url(), existingCase(), exceptionRecordRequestData(), randomUUID().toString()),
+            () -> client.updateCase(updateUrl, existingCase(), exceptionRecordRequestData(), randomUUID().toString()),
             Forbidden.class
         );
 
@@ -176,7 +178,7 @@ public class CaseUpdateClientTest {
 
         // when
         Unauthorized exception = catchThrowableOfType(
-            () -> client.updateCase(url(), existingCase(), exceptionRecordRequestData(), randomUUID().toString()),
+            () -> client.updateCase(updateUrl, existingCase(), exceptionRecordRequestData(), randomUUID().toString()),
             Unauthorized.class
         );
 
@@ -194,17 +196,13 @@ public class CaseUpdateClientTest {
 
         // when
         InternalServerError exception = catchThrowableOfType(
-            () -> client.updateCase(url(), existingCase(), exceptionRecordRequestData(), randomUUID().toString()),
+            () -> client.updateCase(updateUrl, existingCase(), exceptionRecordRequestData(), randomUUID().toString()),
             InternalServerError.class
         );
 
         // then
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(exception.getResponseBodyAsString()).contains("Internal Server error");
-    }
-
-    private String url() {
-        return "http://localhost:" + wiremockOptions.portNumber();
     }
 
     private CaseDetails existingCase() {
