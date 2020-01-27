@@ -104,7 +104,6 @@ public class CaseUpdateClientTest {
         );
 
         // then
-        ;
         assertThat(exception.getStatusCode()).isEqualTo(UNPROCESSABLE_ENTITY);
         assertThat(exception.getStatusText()).isEqualTo("Unprocessable Entity");
         assertThat(exception.getResponseBodyAsString())
