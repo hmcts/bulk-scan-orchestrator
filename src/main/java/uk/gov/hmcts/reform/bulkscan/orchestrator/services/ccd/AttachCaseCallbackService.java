@@ -142,9 +142,11 @@ public class AttachCaseCallbackService {
             : hasAttachToCaseReference(exceptionRecordDetails);
 
         Validation<String, String> jurisdictionValidation = hasJurisdiction(exceptionRecordDetails);
-        Validation<String, String> serviceNameInCaseTypeIdValidation = hasServiceNameInCaseTypeId(exceptionRecordDetails);
+        Validation<String, String> serviceNameInCaseTypeIdValidation =
+            hasServiceNameInCaseTypeId(exceptionRecordDetails);
         Validation<String, Long> idValidation = hasAnId(exceptionRecordDetails);
-        Validation<String, List<Map<String, Object>>> scannedRecordValidation = hasAScannedRecord(exceptionRecordDetails);
+        Validation<String, List<Map<String, Object>>> scannedRecordValidation =
+            hasAScannedRecord(exceptionRecordDetails);
         Validation<String, String> idamTokenValidation = hasIdamToken(requesterIdamToken);
         Validation<String, String> userIdValidation = hasUserId(requesterUserId);
         Validation<String, Classification> classificationValidation =
