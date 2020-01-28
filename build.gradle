@@ -158,7 +158,7 @@ repositories {
 def versions = [
   reformLogging     : '5.1.1',
   springBoot        : springBoot.class.package.implementationVersion,
-  springHystrix     : '2.1.1.RELEASE',
+  springHystrix     : '2.2.1.RELEASE',
   springfoxSwagger  : '2.9.2',
   junit             : '5.5.2',
   junitPlatform     : '1.5.2',
