@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException.UnprocessableEntity;
+import org.springframework.web.client.RestClientException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.CaseUpdateClient;
@@ -199,6 +200,13 @@ public class CcdCaseUpdater {
                 ),
                 exception
             );
+        // I/O related exception received from case update client
+        } catch (RestClientException exception) {
+            String message = getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id);
+
+            log.error(message, exception);
+
+            throw new CallbackException(message, exception);
         } catch (Exception exception) {
             throw new CallbackException(
                 getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id),

@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException.BadRequest;
 import org.springframework.web.client.HttpClientErrorException.UnprocessableEntity;
+import org.springframework.web.client.RestClientException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
@@ -137,6 +138,17 @@ public class CcdNewCaseCreator {
             );
 
             throw new CallbackException("Payment references cannot be processed. Please try again later", exception);
+        // I/O related exception received from transformation client
+        } catch (RestClientException exception) {
+            String message = format(
+                "Failed to receive transformed exception record from %s client for exception record %s",
+                configItem.getService(),
+                exceptionRecord.id
+            );
+
+            log.error(message, exception);
+
+            throw new CallbackException(message, exception);
         } catch (Exception exception) {
             // log happens individually to cover transformation/ccd cases
             throw new CallbackException(

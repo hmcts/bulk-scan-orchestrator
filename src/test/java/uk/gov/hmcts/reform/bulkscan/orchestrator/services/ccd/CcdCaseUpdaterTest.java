@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.CaseUpdateClient;
@@ -296,6 +297,40 @@ class CcdCaseUpdaterTest {
             + "when trying to update case for some jurisdiction jurisdiction with case Id 0 based on exception record "
             + "with Id 1. CCD response: Body");
         assertThat(res.getErrors()).isEmpty();
+    }
+
+    @Test
+    void updateCase_should_handle_rest_template_client_exception_for_i_o_exceptions() {
+        // given
+        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
+        given(eventResponse.getEventId()).willReturn(EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR);
+        given(configItem.getUpdateUrl()).willReturn("url");
+        given(caseUpdateClient.updateCase(anyString(), any(CaseDetails.class), any(ExceptionRecord.class), anyString()))
+            .willThrow(new RestClientException("I/O error"));
+        initMockData();
+
+        // when
+        CallbackException exception = catchThrowableOfType(() ->
+            ccdCaseUpdater.updateCase(
+                exceptionRecord,
+                configItem,
+                true,
+                "idamToken",
+                "userId",
+                EXISTING_CASE_ID
+            ),
+            CallbackException.class
+        );
+
+        // then
+        assertThat(exception)
+            .hasCauseInstanceOf(RestClientException.class)
+            .hasMessage(
+                "Failed to update case for %s service with case Id %s based on exception record %s",
+                configItem.getService(),
+                EXISTING_CASE_ID,
+                exceptionRecord.id
+            );
     }
 
     @Test
