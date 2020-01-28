@@ -156,15 +156,15 @@ repositories {
 // it is important to specify logback classic and core packages explicitly as libraries like spring boot
 // enforces it's own (older) version which is not recommended.
 def versions = [
-  reformLogging     : '5.1.0',
+  reformLogging     : '5.1.1',
   springBoot        : springBoot.class.package.implementationVersion,
-  springHystrix     : '2.1.1.RELEASE',
+  springHystrix     : '2.2.1.RELEASE',
   springfoxSwagger  : '2.9.2',
-  junit             : '5.5.2',
-  junitPlatform     : '1.5.2',
+  junit             : '5.6.0',
+  junitPlatform     : '1.6.0',
 ]
 
-ext["rest-assured.version"] = '4.1.2'
+ext["rest-assured.version"] = '4.2.0'
 
 dependencyManagement {
   dependencies {
@@ -183,10 +183,6 @@ dependencyManagement {
     // align with jupiter version
     dependencySet(group: 'org.mockito', version: '3.2.4') {
       entry 'mockito-core'
-    }
-    dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.30') {
-      entry 'tomcat-embed-core'
-      entry 'tomcat-embed-websocket'
     }
   }
 }
