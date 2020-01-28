@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestClientException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
@@ -251,54 +250,6 @@ class CcdNewCaseCreatorTest {
         assertThat(result.getExceptionRecordData()).isEmpty();
         assertThat(result.getWarnings()).containsOnly("warning");
         assertThat(result.getErrors()).containsOnly("error");
-
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
-    }
-
-    @Test
-    void should_throw_CallbackException_when_transformation_client_throws_RestClientException() {
-        // given
-        when(s2sTokenGenerator.generate()).thenReturn(randomUUID().toString());
-        doThrow(new RestClientException("I/O error"))
-            .when(transformationClient)
-            .transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString());
-
-        ServiceConfigItem configItem = getConfigItem();
-        ExceptionRecord exceptionRecord = getExceptionRecord();
-
-        Map<String, Object> data = new HashMap<>();
-        // putting 6 via `ImmutableMap` is available from Java 9
-        data.put("poBox", "12345");
-        data.put("journeyClassification", EXCEPTION.name());
-        data.put("formType", "Form1");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
-        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
-
-        CaseDetails caseDetails = getCaseDetails(data);
-
-        // when
-        CallbackException exception = catchThrowableOfType(() ->
-            ccdNewCaseCreator.createNewCase(
-                exceptionRecord,
-                configItem,
-                true,
-                IDAM_TOKEN,
-                USER_ID,
-                caseDetails
-            ),
-            CallbackException.class
-        );
-
-        // then
-        assertThat(exception)
-            .hasCauseInstanceOf(RestClientException.class)
-            .hasMessage(
-                "Failed to receive transformed exception record from %s client for exception record %s",
-                configItem.getService(),
-                exceptionRecord.id
-            );
 
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
     }
