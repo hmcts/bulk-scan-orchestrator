@@ -200,13 +200,14 @@ public class CcdCaseUpdater {
                 ),
                 exception
             );
-        // I/O related exception received from case update client
+        // exceptions received from case update client
         } catch (RestClientException exception) {
             String message = getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id);
 
             log.error(message, exception);
 
             throw new CallbackException(message, exception);
+        // rest of exceptions we did not handle appropriately. so far not such case
         } catch (Exception exception) {
             throw new CallbackException(
                 getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id),

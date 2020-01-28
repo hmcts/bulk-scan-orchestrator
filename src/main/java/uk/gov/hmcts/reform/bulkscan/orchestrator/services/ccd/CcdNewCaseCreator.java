@@ -138,7 +138,7 @@ public class CcdNewCaseCreator {
             );
 
             throw new CallbackException("Payment references cannot be processed. Please try again later", exception);
-        // I/O related exception received from transformation client
+        // exceptions received from transformation client
         } catch (RestClientException exception) {
             String message = format(
                 "Failed to receive transformed exception record from %s client for exception record %s",
@@ -149,8 +149,8 @@ public class CcdNewCaseCreator {
             log.error(message, exception);
 
             throw new CallbackException(message, exception);
+        // rest of exceptions received from ccd and logged separately
         } catch (Exception exception) {
-            // log happens individually to cover transformation/ccd cases
             throw new CallbackException(
                 format("Failed to create new case for exception record with Id %s", exceptionRecord.id),
                 exception
