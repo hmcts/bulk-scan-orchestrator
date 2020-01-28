@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
@@ -35,6 +36,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.EXCEPTION_RECORD_SEARCH_URL;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.GET_CASE_URL;
 
+@AutoConfigureWireMock(port = 0)
 @IntegrationTest
 class SupplementaryEvidenceCreatorTest {
 

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
@@ -30,6 +31,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.EXCEP
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.GET_CASE_URL;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURISDICTION;
 
+@AutoConfigureWireMock(port = 0)
 @IntegrationTest
 class CaseRetrievalTest {
 
