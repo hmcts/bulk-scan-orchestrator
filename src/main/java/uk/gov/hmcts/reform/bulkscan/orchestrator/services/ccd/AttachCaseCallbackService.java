@@ -128,31 +128,31 @@ public class AttachCaseCallbackService {
     }
 
     private Validation<Seq<String>, AttachToCaseEventData> getValidation(
-        CaseDetails exceptionRecord,
+        CaseDetails exceptionRecordDetails,
         boolean useSearchCaseReference,
         String requesterIdamToken,
         String requesterUserId
     ) {
         Validation<String, String> caseReferenceTypeValidation = useSearchCaseReference
-            ? hasSearchCaseReferenceType(exceptionRecord)
+            ? hasSearchCaseReferenceType(exceptionRecordDetails)
             : valid(CCD_CASE_REFERENCE);
 
         Validation<String, String> caseReferenceValidation = useSearchCaseReference
-            ? hasSearchCaseReference(exceptionRecord)
-            : hasAttachToCaseReference(exceptionRecord);
+            ? hasSearchCaseReference(exceptionRecordDetails)
+            : hasAttachToCaseReference(exceptionRecordDetails);
 
-        Validation<String, String> jurisdictionValidation = hasJurisdiction(exceptionRecord);
-        Validation<String, String> serviceNameInCaseTypeIdValidation = hasServiceNameInCaseTypeId(exceptionRecord);
-        Validation<String, Long> idValidation = hasAnId(exceptionRecord);
-        Validation<String, List<Map<String, Object>>> scannedRecordValidation = hasAScannedRecord(exceptionRecord);
+        Validation<String, String> jurisdictionValidation = hasJurisdiction(exceptionRecordDetails);
+        Validation<String, String> serviceNameInCaseTypeIdValidation = hasServiceNameInCaseTypeId(exceptionRecordDetails);
+        Validation<String, Long> idValidation = hasAnId(exceptionRecordDetails);
+        Validation<String, List<Map<String, Object>>> scannedRecordValidation = hasAScannedRecord(exceptionRecordDetails);
         Validation<String, String> idamTokenValidation = hasIdamToken(requesterIdamToken);
         Validation<String, String> userIdValidation = hasUserId(requesterUserId);
         Validation<String, Classification> classificationValidation =
-            hasJourneyClassificationForAttachToCase(exceptionRecord);
+            hasJourneyClassificationForAttachToCase(exceptionRecordDetails);
 
         final Validation<Seq<String>, ExceptionRecord> exceptionRecordValidation;
         if (classificationValidation.isValid() && classificationValidation.get() == SUPPLEMENTARY_EVIDENCE_WITH_OCR) {
-            exceptionRecordValidation = exceptionRecordValidator.getValidation(exceptionRecord);
+            exceptionRecordValidation = exceptionRecordValidator.getValidation(exceptionRecordDetails);
         } else {
             // exceptionRecord value is used only for SUPPLEMENTARY_EVIDENCE_WITH_OCR journey classification
             // otherwise we can safely set its value to null in the validation result
@@ -572,11 +572,17 @@ public class AttachCaseCallbackService {
 
     private ServiceConfigItem getServiceConfig(CaseDetails caseDetails) {
         return hasServiceNameInCaseTypeId(caseDetails).flatMap(service -> Try
-            .of(() -> serviceConfigProvider.getConfig(service))
+            .of(() -> {
+                System.out.println(service);
+                return serviceConfigProvider.getConfig(service);
+            })
             .toValidation()
             .mapError(Throwable::getMessage)
         )
-            .filter(item -> !Strings.isNullOrEmpty(item.getUpdateUrl()))
+            .filter(item -> {
+                System.out.println(item);
+                return !Strings.isNullOrEmpty(item.getUpdateUrl());
+            })
             .getOrElseThrow(() -> new CallbackException("Update URL is not configured")).get();
     }
 }
