@@ -72,19 +72,17 @@ class AttachCaseCallbackServiceTest {
     private ExceptionRecord exceptionRecord;
     private ServiceConfigItem configItem;
 
-    private static final Map<String, Object> CASE_DATA = ImmutableMap.of(
-        "case_type_id", CASE_TYPE_EXCEPTION_RECORD,
-        JOURNEY_CLASSIFICATION, SUPPLEMENTARY_EVIDENCE_WITH_OCR.name(),
-        ATTACH_TO_CASE_REFERENCE, EXISTING_CASE_ID,
-        OCR_DATA, asList(ImmutableMap.of("firstName", "John")),
-        SCANNED_DOCUMENTS, ImmutableList.of(EXISTING_DOC)
-    );
-
     private static final CaseDetails CASE_DETAILS = CaseDetails.builder()
         .jurisdiction(JURISDICTION)
         .caseTypeId(CASE_TYPE_EXCEPTION_RECORD)
         .id(Long.parseLong(CASE_REF))
-        .data(CASE_DATA)
+        .data(
+            ImmutableMap.of(
+            JOURNEY_CLASSIFICATION, SUPPLEMENTARY_EVIDENCE_WITH_OCR.name(),
+            ATTACH_TO_CASE_REFERENCE, EXISTING_CASE_ID,
+            OCR_DATA, asList(ImmutableMap.of("firstName", "John")),
+            SCANNED_DOCUMENTS, ImmutableList.of(EXISTING_DOC)
+        ))
         .build();
 
     @BeforeEach
