@@ -439,6 +439,8 @@ public class AttachCaseCallbackService {
                 processResult.getWarnings()
             ));
         } else {
+            paymentsProcessor.updatePayments(exceptionRecordDetails, Long.parseLong(targetCaseCcdRef));
+
             return Optional.empty();
         }
     }
