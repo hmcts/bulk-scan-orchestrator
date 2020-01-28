@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
@@ -12,8 +10,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.res
 
 @Component
 public class TransformationClient {
-
-    private static final Logger log = LoggerFactory.getLogger(TransformationClient.class);
 
     private final RestTemplate restTemplate;
 
