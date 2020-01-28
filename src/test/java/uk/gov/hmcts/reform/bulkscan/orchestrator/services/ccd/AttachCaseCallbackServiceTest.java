@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import io.vavr.control.Either;
 import io.vavr.control.Validation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,12 +26,16 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidationsTest.JOURNEY_CLASSIFICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_ATTACH_TO_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.ATTACH_TO_CASE_REFERENCE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.OCR_DATA;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SCANNED_DOCUMENTS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
 @ExtendWith(MockitoExtension.class)
@@ -64,12 +69,15 @@ class AttachCaseCallbackServiceTest {
     private static final String USER_ID = "USER_ID";
     private static final String EXISTING_CASE_ID = "12345";
 
+    private ExceptionRecord exceptionRecord;
+    private ServiceConfigItem configItem;
+
     private static final Map<String, Object> CASE_DATA = ImmutableMap.of(
         "case_type_id", CASE_TYPE_EXCEPTION_RECORD,
         JOURNEY_CLASSIFICATION, SUPPLEMENTARY_EVIDENCE_WITH_OCR.name(),
-        ATTACH_TO_CASE_REFERENCE, "12345",
-        "scanOCRData", asList(ImmutableMap.of("firstName", "John")),
-        "scannedDocuments", ImmutableList.of(EXISTING_DOC)
+        ATTACH_TO_CASE_REFERENCE, EXISTING_CASE_ID,
+        OCR_DATA, asList(ImmutableMap.of("firstName", "John")),
+        SCANNED_DOCUMENTS, ImmutableList.of(EXISTING_DOC)
     );
 
     private static final CaseDetails CASE_DETAILS = CaseDetails.builder()
@@ -88,22 +96,23 @@ class AttachCaseCallbackServiceTest {
             ccdCaseUpdater,
             paymentsProcessor
         );
+
+        exceptionRecord = getExceptionRecord();
+        given(exceptionRecordValidator.getValidation(CASE_DETAILS)).willReturn(Validation.valid(exceptionRecord));
+        given(ccdApi.getCase(anyString(), anyString())).willReturn(CaseDetails.builder().data(emptyMap()).build());
+        configItem = new ServiceConfigItem();
+        configItem.setUpdateUrl("url");
+        given(serviceConfigProvider.getConfig("bulkscan")).willReturn(configItem);
     }
 
     @Test
     void process_should_process_supplementary_evidence_with_ocr() {
         // given
-        final ExceptionRecord exceptionRecord = getExceptionRecord();
-        given(exceptionRecordValidator.getValidation(CASE_DETAILS)).willReturn(Validation.valid(exceptionRecord));
-        given(ccdApi.getCase(anyString(), anyString())).willReturn(CaseDetails.builder().data(emptyMap()).build());
-        final ServiceConfigItem configItem = new ServiceConfigItem();
-        configItem.setUpdateUrl("url");
-        given(serviceConfigProvider.getConfig("bulkscan")).willReturn(configItem);
         given(ccdCaseUpdater.updateCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID))
             .willReturn(new ProcessResult(emptyMap()));
 
         // when
-        attachCaseCallbackService.process(
+        Either<ErrorsAndWarnings, Map<String, Object>> res = attachCaseCallbackService.process(
             CASE_DETAILS,
             IDAM_TOKEN,
             USER_ID,
@@ -112,8 +121,33 @@ class AttachCaseCallbackServiceTest {
         );
 
         // then
+        assertThat(res.isRight()).isTrue();
         verify(ccdCaseUpdater).updateCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID);
-        verify(paymentsProcessor).updatePayments(CASE_DETAILS, 12345L);
+        verify(paymentsProcessor).updatePayments(CASE_DETAILS, Long.parseLong(EXISTING_CASE_ID));
+    }
+
+    @Test
+    void process_should_not_update_case_if_error_occurs() {
+        // given
+        given(ccdCaseUpdater.updateCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID))
+            .willReturn(new ProcessResult(asList("warning1"), asList("error1")));
+
+        // when
+        Either<ErrorsAndWarnings, Map<String, Object>> res = attachCaseCallbackService.process(
+            CASE_DETAILS,
+            IDAM_TOKEN,
+            USER_ID,
+            EVENT_ID_ATTACH_TO_CASE,
+            true
+        );
+
+        // then
+        assertThat(res.isLeft()).isTrue();
+        assertThat(res.getLeft().getWarnings()).isEqualTo(asList("warning1"));
+        assertThat(res.getLeft().getErrors()).isEqualTo(asList("error1"));
+
+        verify(ccdCaseUpdater).updateCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID);
+        verifyNoInteractions(paymentsProcessor);
     }
 
     private static Map<String, Object> document(String filename, String documentNumber) {
