@@ -86,3 +86,7 @@ variable "update_url_bulkscan" {
 variable "enable_ase" {
   default = false
 }
+
+variable "deployment_namespace" {
+  default = ""
+}
