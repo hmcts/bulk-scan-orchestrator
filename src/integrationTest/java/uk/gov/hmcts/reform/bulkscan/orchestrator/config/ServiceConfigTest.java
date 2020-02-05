@@ -30,6 +30,6 @@ class ServiceConfigTest {
 
         assertThat(configItem.getAllowAttachingToCaseBeforePaymentsAreProcessedForClassifications()).isNotNull();
         assertThat(configItem.getAllowAttachingToCaseBeforePaymentsAreProcessedForClassifications().get(0))
-            .isEqualTo(Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR.toString());
+            .isEqualTo(Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR);
     }
 }

@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,7 +36,7 @@ public class ServiceConfigItem {
 
     private boolean allowCreatingCaseBeforePaymentsAreProcessed = false;
 
-    private List<String> allowAttachingToCaseBeforePaymentsAreProcessedForClassifications;
+    private List<Classification> allowAttachingToCaseBeforePaymentsAreProcessedForClassifications;
 
     private Map<String, List<String>> formTypeToSurnameOcrFieldMappings = new HashMap<>();
 
@@ -89,12 +90,12 @@ public class ServiceConfigItem {
         this.allowCreatingCaseBeforePaymentsAreProcessed = allowCreatingCaseBeforePaymentsAreProcessed;
     }
 
-    public List<String> getAllowAttachingToCaseBeforePaymentsAreProcessedForClassifications() {
+    public List<Classification> getAllowAttachingToCaseBeforePaymentsAreProcessedForClassifications() {
         return allowAttachingToCaseBeforePaymentsAreProcessedForClassifications;
     }
 
     public void setAllowAttachingToCaseBeforePaymentsAreProcessedForClassifications(
-        List<String> allowAttachingToCaseBeforePaymentsAreProcessedForClassifications
+        List<Classification> allowAttachingToCaseBeforePaymentsAreProcessedForClassifications
     ) {
         this.allowAttachingToCaseBeforePaymentsAreProcessedForClassifications
             = allowAttachingToCaseBeforePaymentsAreProcessedForClassifications;
