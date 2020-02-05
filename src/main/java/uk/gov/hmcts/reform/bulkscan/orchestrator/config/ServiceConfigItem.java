@@ -35,6 +35,8 @@ public class ServiceConfigItem {
 
     private boolean allowCreatingCaseBeforePaymentsAreProcessed = false;
 
+    private List<String> allowAttachingToCaseBeforePaymentsAreProcessedForClassifications;
+
     private Map<String, List<String>> formTypeToSurnameOcrFieldMappings = new HashMap<>();
 
     // region getters & setters
@@ -85,6 +87,17 @@ public class ServiceConfigItem {
 
     public void setAllowCreatingCaseBeforePaymentsAreProcessed(boolean allowCreatingCaseBeforePaymentsAreProcessed) {
         this.allowCreatingCaseBeforePaymentsAreProcessed = allowCreatingCaseBeforePaymentsAreProcessed;
+    }
+
+    public List<String> getAllowAttachingToCaseBeforePaymentsAreProcessedForClassifications() {
+        return allowAttachingToCaseBeforePaymentsAreProcessedForClassifications;
+    }
+
+    public void setAllowAttachingToCaseBeforePaymentsAreProcessedForClassifications(
+        List<String> allowAttachingToCaseBeforePaymentsAreProcessedForClassifications
+    ) {
+        this.allowAttachingToCaseBeforePaymentsAreProcessedForClassifications
+            = allowAttachingToCaseBeforePaymentsAreProcessedForClassifications;
     }
 
     public List<String> getSurnameOcrFieldNameList(String formType) {
