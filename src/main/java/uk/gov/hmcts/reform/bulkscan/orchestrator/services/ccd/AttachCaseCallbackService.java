@@ -280,7 +280,7 @@ public class AttachCaseCallbackService {
         }
 
         log.info(
-            "Successfully attached exception record {} to case {}",
+            "Completed the process of attaching exception record to a case. ER ID: {}. Case ID: {}",
             callBackEvent.exceptionRecordId,
             callBackEvent.targetCaseRef
         );
@@ -403,9 +403,9 @@ public class AttachCaseCallbackService {
         );
 
         log.info(
-            "Successfully attach Exception Record with ID {} to case with id {}",
-            theCase.getId(),
-            exceptionRecordDetails.getId()
+            "Attached Exception Record to a case in CCD. ER ID: {}. Case ID: {}",
+            exceptionRecordDetails.getId(),
+            theCase.getId()
         );
 
         paymentsProcessor.updatePayments(exceptionRecordDetails, theCase.getId());
