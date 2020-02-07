@@ -212,15 +212,18 @@ public final class CallbackValidations {
             .orElse(false);
     }
 
-    static Validation<String, Void> validatePayments(CaseDetails theCase, ServiceConfigItem config) {
+    static Validation<String, Void> validatePayments(
+        CaseDetails theCase,
+        Classification classification,
+        ServiceConfigItem config
+    ) {
         Optional<String> awaitingPaymentsOptional = getAwaitingPaymentDcnProcessing(theCase);
-        Optional<String> classificationOptional = getJourneyClassification(theCase);
 
         if (!awaitingPaymentsOptional.isPresent()
             || (awaitingPaymentsOptional.get().equals("No") // no payments or no payments pending for completion
                 || (awaitingPaymentsOptional.get().equals("Yes") // payments processing pending
                     && config.getAllowAttachingToCaseBeforePaymentsAreProcessedForClassifications()
-                        .contains(Classification.valueOf(classificationOptional.get()))))
+                        .contains(classification)))
         ) {
             return valid(null);
         } else {

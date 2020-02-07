@@ -134,7 +134,6 @@ public class AttachCaseCallbackService {
         String requesterIdamToken,
         String requesterUserId
     ) {
-        ServiceConfigItem serviceConfig = getServiceConfig(exceptionRecord);
         Validation<String, String> caseReferenceTypeValidation = useSearchCaseReference
             ? hasSearchCaseReferenceType(exceptionRecord)
             : valid(CCD_CASE_REFERENCE);
@@ -151,7 +150,14 @@ public class AttachCaseCallbackService {
         Validation<String, String> userIdValidation = hasUserId(requesterUserId);
         Validation<String, Classification> classificationValidation =
             hasJourneyClassificationForAttachToCase(exceptionRecord);
-        Validation<String, Void> paymentsValidation = validatePayments(exceptionRecord, serviceConfig);
+
+        final Validation<String, Void> paymentsValidation;
+        if (classificationValidation.isValid() && serviceNameInCaseTypeIdValidation.isValid()) {
+            ServiceConfigItem serviceConfig = getServiceConfig(exceptionRecord);
+            paymentsValidation = validatePayments(exceptionRecord, classificationValidation.get(), serviceConfig);
+        } else {
+            paymentsValidation = Validation.valid(null);
+        }
 
         final Validation<Seq<String>, ExceptionRecord> exceptionRecordValidation;
         if (classificationValidation.isValid() && classificationValidation.get() == SUPPLEMENTARY_EVIDENCE_WITH_OCR) {
@@ -466,7 +472,7 @@ public class AttachCaseCallbackService {
             exceptionRecordJurisdiction
         );
 
-        String attachToCaseRef = (String)fetchedExceptionRecord.getData().get(ATTACH_TO_CASE_REFERENCE);
+        String attachToCaseRef = (String) fetchedExceptionRecord.getData().get(ATTACH_TO_CASE_REFERENCE);
 
         if (StringUtils.isNotEmpty(attachToCaseRef)) {
             throw new AlreadyAttachedToCaseException("Exception record is already attached to case " + attachToCaseRef);
