@@ -23,6 +23,7 @@ import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues.YES;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
@@ -219,17 +220,16 @@ public final class CallbackValidations {
     ) {
         Optional<String> awaitingPaymentsOptional = getAwaitingPaymentDcnProcessing(theCase);
 
-        if (!awaitingPaymentsOptional.isPresent()
-            || (awaitingPaymentsOptional.get().equals("No") // no payments or no payments pending for completion
-                || (awaitingPaymentsOptional.get().equals("Yes") // payments processing pending
-                    && config.getAllowAttachingToCaseBeforePaymentsAreProcessedForClassifications()
-                        .contains(classification)))
+        if (awaitingPaymentsOptional.isPresent()
+            && awaitingPaymentsOptional.get().equals(YES) // payments processing pending
+            && !config.getAllowAttachingToCaseBeforePaymentsAreProcessedForClassifications() // check if config allows
+            .contains(classification)
         ) {
-            return valid(null);
-        } else {
             return invalid(
                 "The 'attach to case' event is not supported for the Exception Record with pending payments"
             );
+        } else {
+            return valid(null);
         }
     }
 
