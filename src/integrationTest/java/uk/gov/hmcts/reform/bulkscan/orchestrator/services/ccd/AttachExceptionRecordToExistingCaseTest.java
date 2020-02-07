@@ -55,7 +55,9 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.doNothing;
@@ -65,6 +67,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_EXCEPTION_RECORD;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURISDICTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.CcdCallbackController.USER_ID;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
 @AutoConfigureWireMock(port = 0)
@@ -580,7 +584,102 @@ class AttachExceptionRecordToExistingCaseTest {
                     RESPONSE_FIELD_ERRORS,
                     hasItem("The 'attach to case' event is not supported for supplementary evidence with OCR "
                         + "but not containing OCR data")
-        );
+                );
+    }
+
+    @Test
+    public void should_fail_when_classification_is_exception_and_exception_record_contains_pending_payments() {
+        CallbackRequest callbackRequest =
+            callbackRequestWith(
+                EVENT_ID_ATTACH_TO_CASE,
+                CLASSIFICATION_EXCEPTION,
+                "Yes", // awaiting payments DCN processing
+                false
+            );
+
+        given()
+            .body(callbackRequest)
+            .headers(userHeaders())
+            .post(CALLBACK_ATTACH_CASE_PATH)
+            .then()
+            .statusCode(200)
+            .body(
+                RESPONSE_FIELD_ERRORS,
+                hasItem("The 'attach to case' event is not supported for the Exception Record "
+                    + "with pending payments")
+            );
+    }
+
+    @Test
+    public void should_not_return_payments_error_when_supplementary_evidence_with_ocr_have_pending_payments() {
+        CallbackRequest callbackRequest =
+            callbackRequestWith(
+                EVENT_ID_ATTACH_TO_CASE,
+                SUPPLEMENTARY_EVIDENCE_WITH_OCR.name(),
+                "Yes", // awaiting payments DCN processing
+                true
+            );
+
+        given()
+            .body(callbackRequest)
+            .headers(userHeaders())
+            .post(CALLBACK_ATTACH_CASE_PATH)
+            .then()
+            .statusCode(200)
+            .body(
+                RESPONSE_FIELD_ERRORS,
+                not(hasItem("The 'attach to case' event is not supported for the Exception Record "
+                    + "with pending payments"))
+            );
+    }
+
+    @Test
+    public void should_fail_when_classification_is_supplementary_evidence_with_pending_payments() {
+        CallbackRequest callbackRequest =
+            callbackRequestWith(
+                EVENT_ID_ATTACH_TO_CASE,
+                SUPPLEMENTARY_EVIDENCE.name(),
+                "Yes", // awaiting payments DCN processing
+                false
+            );
+
+        given()
+            .body(callbackRequest)
+            .headers(userHeaders())
+            .post(CALLBACK_ATTACH_CASE_PATH)
+            .then()
+            .statusCode(200)
+            .body(
+                RESPONSE_FIELD_ERRORS,
+                hasItem("The 'attach to case' event is not supported for the Exception Record "
+                    + "with pending payments")
+            );
+    }
+
+    @Test
+    public void should_succeed_when_classification_is_supplementary_evidence_with_processed_payments() {
+        CallbackRequest callbackRequest =
+            callbackRequestWith(
+                EVENT_ID_ATTACH_TO_CASE,
+                SUPPLEMENTARY_EVIDENCE.name(),
+                "No", // awaiting payments DCN processing
+                false
+            );
+
+        ValidatableResponse response =
+            given()
+                .body(callbackRequest)
+                .headers(userHeaders())
+                .post(CALLBACK_ATTACH_CASE_PATH)
+                .then()
+                .statusCode(200)
+                .body(
+                    RESPONSE_FIELD_ERRORS,
+                    empty()
+                );
+
+        verifySuccessResponse(response, callbackRequest);
+        verifyRequestedAttachingToCase();
     }
 
     @Test
@@ -893,7 +992,47 @@ class AttachExceptionRecordToExistingCaseTest {
             .build();
     }
 
+    private CallbackRequest callbackRequestWith(
+        String eventId,
+        String classification,
+        String awaitingPaymentDcnProcessing,
+        boolean includeOcr
+    ) {
+        return CallbackRequest
+            .builder()
+            .caseDetails(exceptionRecordWith(classification, awaitingPaymentDcnProcessing, includeOcr))
+            .eventId(eventId)
+            .build();
+    }
+
+    private CaseDetails exceptionRecordWith(
+        String classification,
+        String awaitingPaymentDcnProcessing,
+        boolean includeOcr
+    ) {
+        Map<String, Object> caseData = exceptionRecordData(classification, includeOcr);
+        caseData.put(AWAITING_PAYMENT_DCN_PROCESSING, awaitingPaymentDcnProcessing);
+
+        return CaseDetails.builder()
+            .jurisdiction(JURISDICTION)
+            .id(EXCEPTION_RECORD_ID)
+            .caseTypeId(CASE_TYPE_EXCEPTION_RECORD)
+            .data(caseData)
+            .build();
+    }
+
     private CaseDetails exceptionRecordWith(String classification, boolean includeOcr) {
+        Map<String, Object> caseData = exceptionRecordData(classification, includeOcr);
+
+        return CaseDetails.builder()
+            .jurisdiction(JURISDICTION)
+            .id(EXCEPTION_RECORD_ID)
+            .caseTypeId(CASE_TYPE_EXCEPTION_RECORD)
+            .data(caseData)
+            .build();
+    }
+
+    private Map<String, Object> exceptionRecordData(String classification, boolean includeOcr) {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put("journeyClassification", classification);
 
@@ -907,13 +1046,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
         caseData.put("scannedDocuments", ImmutableList.of(EXCEPTION_RECORD_DOC));
         caseData.put("attachToCaseReference", CASE_REF);
-
-        return CaseDetails.builder()
-            .jurisdiction(JURISDICTION)
-            .id(EXCEPTION_RECORD_ID)
-            .caseTypeId(CASE_TYPE_EXCEPTION_RECORD)
-            .data(caseData)
-            .build();
+        return caseData;
     }
 
     private static Map<String, Object> document(String filename, String documentNumber) {

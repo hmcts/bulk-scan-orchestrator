@@ -5,6 +5,7 @@ import io.vavr.control.Validation;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -198,10 +199,35 @@ public final class CallbackValidations {
             .map(c -> (String) c);
     }
 
+    private static Optional<String> getAwaitingPaymentDcnProcessing(CaseDetails theCase) {
+        return Optional.ofNullable(theCase)
+            .map(CaseDetails::getData)
+            .map(data -> data.get("awaitingPaymentDCNProcessing"))
+            .map(c -> (String) c);
+    }
+
     static boolean hasOcr(CaseDetails theCase) {
         return getOcrData(theCase)
             .map(CollectionUtils::isNotEmpty)
             .orElse(false);
+    }
+
+    static Validation<String, Void> validatePayments(CaseDetails theCase, ServiceConfigItem config) {
+        Optional<String> awaitingPaymentsOptional = getAwaitingPaymentDcnProcessing(theCase);
+        Optional<String> classificationOptional = getJourneyClassification(theCase);
+
+        if (!awaitingPaymentsOptional.isPresent()
+            || (awaitingPaymentsOptional.get().equals("No") // no payments or no payments pending for completion
+                || (awaitingPaymentsOptional.get().equals("Yes") // payments processing pending
+                    && config.getAllowAttachingToCaseBeforePaymentsAreProcessedForClassifications()
+                        .contains(Classification.valueOf(classificationOptional.get()))))
+        ) {
+            return valid(null);
+        } else {
+            return invalid(
+                "The 'attach to case' event is not supported for the Exception Record with pending payments"
+            );
+        }
     }
 
     public static Validation<String, String> hasPoBox(CaseDetails theCase) {

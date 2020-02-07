@@ -45,6 +45,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasSearchCaseReferenceType;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasUserId;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.validatePayments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.checkForDuplicatesOrElse;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.concatDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.getDocumentNumbers;
@@ -133,6 +134,7 @@ public class AttachCaseCallbackService {
         String requesterIdamToken,
         String requesterUserId
     ) {
+        ServiceConfigItem serviceConfig = getServiceConfig(exceptionRecord);
         Validation<String, String> caseReferenceTypeValidation = useSearchCaseReference
             ? hasSearchCaseReferenceType(exceptionRecord)
             : valid(CCD_CASE_REFERENCE);
@@ -149,6 +151,7 @@ public class AttachCaseCallbackService {
         Validation<String, String> userIdValidation = hasUserId(requesterUserId);
         Validation<String, Classification> classificationValidation =
             hasJourneyClassificationForAttachToCase(exceptionRecord);
+        Validation<String, Void> paymentsValidation = validatePayments(exceptionRecord, serviceConfig);
 
         final Validation<Seq<String>, ExceptionRecord> exceptionRecordValidation;
         if (classificationValidation.isValid() && classificationValidation.get() == SUPPLEMENTARY_EVIDENCE_WITH_OCR) {
@@ -168,7 +171,8 @@ public class AttachCaseCallbackService {
             scannedRecordValidation,
             idamTokenValidation,
             userIdValidation,
-            classificationValidation
+            classificationValidation,
+            paymentsValidation
         );
 
         Seq<String> errors = getValidationErrors(validations);

@@ -46,6 +46,16 @@ class TestCaseBuilder {
         return createCaseWith(b -> b.data(caseData));
     }
 
+    static CaseDetails caseWithAwaitingPaymentsAndClassification(
+        Object awaitingPaymentsProcessing,
+        Object classification
+    ) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("awaitingPaymentDCNProcessing", awaitingPaymentsProcessing);
+        data.put("journeyClassification", classification);
+        return createCaseWith(b -> b.data(data));
+    }
+
     static CaseDetails caseWithDocument(List<Map<String, Object>> caseReference) {
         Map<String, Object> data = new HashMap<>();
         data.put("scannedDocuments", caseReference);

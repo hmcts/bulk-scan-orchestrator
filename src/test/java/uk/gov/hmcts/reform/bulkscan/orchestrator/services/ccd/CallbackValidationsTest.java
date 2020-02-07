@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -19,6 +20,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithAttachReference;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithAwaitingPaymentsAndClassification;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithCcdSearchCaseReference;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithDocument;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithExternalSearchCaseReference;
@@ -369,6 +371,37 @@ class CallbackValidationsTest {
             OCR_DATA, singletonList(
                 ImmutableMap.of("first_name", "John")
             )
+        );
+    }
+
+    private static Object[][] attachToCaseWithPaymentsTestParams() {
+        String pendingPaymentsProcessing = "The 'attach to case' event is not supported for the Exception Record with pending payments";
+        return new Object[][]{
+            {"Valid supplementary evidence with no pending payments", caseWithAwaitingPaymentsAndClassification("No", SUPPLEMENTARY_EVIDENCE.toString()), singletonList(SUPPLEMENTARY_EVIDENCE), true, null},
+            {"Valid allow supplementary evidence with pending payments", caseWithAwaitingPaymentsAndClassification("Yes", SUPPLEMENTARY_EVIDENCE.toString()), singletonList(SUPPLEMENTARY_EVIDENCE), true, null},
+            {"Invalid supplementary evidence with pending payments", caseWithAwaitingPaymentsAndClassification("Yes", SUPPLEMENTARY_EVIDENCE.toString()), emptyList(), false, pendingPaymentsProcessing},
+            {"Valid supplementary evidence with ocr no pending payments", caseWithAwaitingPaymentsAndClassification("No", SUPPLEMENTARY_EVIDENCE_WITH_OCR.toString()), asList(SUPPLEMENTARY_EVIDENCE, SUPPLEMENTARY_EVIDENCE_WITH_OCR), true, null},
+            {"Valid allow supplementary evidence with ocr with pending payments", caseWithAwaitingPaymentsAndClassification("Yes", SUPPLEMENTARY_EVIDENCE_WITH_OCR.toString()), singletonList(SUPPLEMENTARY_EVIDENCE_WITH_OCR), true, null},
+            {"Invalid supplementary evidence with ocr with pending payments", caseWithAwaitingPaymentsAndClassification("Yes", SUPPLEMENTARY_EVIDENCE_WITH_OCR.toString()), emptyList(), false, pendingPaymentsProcessing},
+            {"Invalid awaiting payments dcn processing yes", caseWithAwaitingPaymentsAndClassification("Yes", EXCEPTION.toString()), singletonList(SUPPLEMENTARY_EVIDENCE), false, pendingPaymentsProcessing},
+            {"Valid awaiting payments dcn processing No", caseWithAwaitingPaymentsAndClassification("No", EXCEPTION.toString()), singletonList(EXCEPTION), true, null},
+            {"Valid awaiting payments dcn processing Yes", caseWithAwaitingPaymentsAndClassification("Yes", EXCEPTION.toString()), singletonList(EXCEPTION), true, null},
+            {"Valid awaiting payments dcn processing null", caseWithAwaitingPaymentsAndClassification(null, EXCEPTION.toString()), emptyList(), true, null}
+        };
+    }
+
+    @ParameterizedTest(name = "{0}: valid:{3} error:{4}")
+    @MethodSource("attachToCaseWithPaymentsTestParams")
+    @DisplayName("Should attach to case when allowed with pending payments")
+    void attachToCaseWithPaymentsTest(String caseReason, CaseDetails input, List<Classification> classifications, boolean valid, String expectedValueOrError) {
+        ServiceConfigItem configItem = new ServiceConfigItem();
+        configItem.setAllowAttachingToCaseBeforePaymentsAreProcessedForClassifications(classifications);
+        checkValidation(
+            input,
+            valid,
+            expectedValueOrError,
+            (caseDetails -> CallbackValidations.validatePayments(caseDetails, configItem)),
+            expectedValueOrError
         );
     }
 
