@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +31,7 @@ import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.empty;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getScannedDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.ATTACH_TO_CASE_REFERENCE;
 
 @SpringBootTest
@@ -72,6 +74,31 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
         assertThat(address.get("country")).isEqualTo(ocrCountry);
     }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    void should_returns_payments_error_when_updating_case_with_ocr() throws Exception {
+        //given
+        CaseDetails existingCase = ccdCaseCreator.createCase(emptyList(), now()); // with no scanned documents
+        String caseId = String.valueOf(existingCase.getId());
+
+        CaseDetails exceptionRecord = createExceptionRecord(
+            "envelopes/supplementary-evidence-with-ocr-with-payments-envelope.json"
+        );
+        String ocrCountry = "sample_country"; // country from OCR data in exception record json loaded above
+
+        // when
+        Response response = invokeAttachWithOcrEndpoint(exceptionRecord, caseId);
+
+        // then
+        assertThat(response.jsonPath().getList("errors")).isNotEmpty();
+        assertThat(response.jsonPath().getList("errors"))
+            .contains("The 'attach to case' event is not supported for the Exception Record with pending payments");
+
+        // verify case is not updated
+        CaseDetails updatedCase = ccdApi.getCase(caseId, existingCase.getJurisdiction());
+        assertThat(getScannedDocuments(updatedCase)).isEmpty(); // no scanned documents
+    }
+
     private CaseDetails createExceptionRecord(String resourceName) throws Exception {
         UUID poBox = UUID.randomUUID();
 
@@ -88,7 +115,14 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
     }
 
     private void sendAttachRequest(CaseDetails exceptionRecord, String targetCaseId) {
+        invokeAttachWithOcrEndpoint(exceptionRecord, targetCaseId)
+            .then()
+            .assertThat()
+            .statusCode(200)
+            .body("errors", empty());
+    }
 
+    private Response invokeAttachWithOcrEndpoint(CaseDetails exceptionRecord, String targetCaseId) {
         Map<String, Object> data = new HashMap<>(exceptionRecord.getData());
         data.put(ATTACH_TO_CASE_REFERENCE, targetCaseId);
 
@@ -100,7 +134,7 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
 
         CcdAuthenticator ccdAuthenticator = ccdAuthenticatorFactory.createForJurisdiction(SampleData.JURSIDICTION);
 
-        RestAssured
+        return RestAssured
             .given()
             .relaxedHTTPSValidation()
             .baseUri(testUrl)
@@ -110,10 +144,6 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
             .header(CcdCallbackController.USER_ID, ccdAuthenticator.getUserDetails().getId())
             .body(request)
             .when()
-            .post("/callback/attach_case")
-            .then()
-            .assertThat()
-            .statusCode(200)
-            .body("errors", empty());
+            .post("/callback/attach_case");
     }
 }

@@ -1,0 +1,28 @@
+{
+  "id": "{ENVELOPE_ID}",
+  "case_ref": "1539860706648396",
+  "po_box": "BULKSCAN PO BOX",
+  "jurisdiction": "BULKSCAN",
+  "container": "bulkscan",
+  "classification": "EXCEPTION",
+  "zip_file_name": "zip-file-test-updated.zip",
+  "delivery_date": "1970-01-01T00:00:00.000Z",
+  "opening_date": "1970-01-01T00:00:00.000Z",
+  "documents": [
+    {
+      "file_name": "certificate2.pdf",
+      "control_number": "15456576894456733",
+      "type": "other",
+      "subtype": null,
+      "scanned_at": "2018-01-01T11:20:00.000Z",
+      "uuid": "ee69aee8-1a33-40dd-9af9-d90da1b104babc"
+    }
+  ],
+  "ocr_data_validation_warnings": [
+  ],
+  "payments": [
+    {
+      "document_control_number": "15456"
+    }
+  ]
+}
