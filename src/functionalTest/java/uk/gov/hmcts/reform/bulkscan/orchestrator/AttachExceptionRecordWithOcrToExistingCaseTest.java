@@ -78,7 +78,8 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
     @Test
     @SuppressWarnings("unchecked")
     @Disabled("Functionality not implemented yet")
-    void should_return_payments_error_when_updating_case_with_ocr_having_pending_payments() throws Exception {
+    void should_not_attach_exception_record_with_pending_payments_when_classification_is_not_allowed()
+        throws Exception {
         //given
         CaseDetails existingCase = ccdCaseCreator.createCase(emptyList(), now()); // with no scanned documents
         String caseId = String.valueOf(existingCase.getId());
@@ -93,7 +94,7 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
         // then
         assertThat(response.jsonPath().getList("errors"))
             .isNotEmpty()
-            .contains("The 'attach to case' event is not supported for the Exception Record with pending payments");
+            .contains("Cannot attach this exception record to a case because it has pending payments");
 
         // verify case is not updated
         CaseDetails updatedCase = ccdApi.getCase(caseId, existingCase.getJurisdiction());
@@ -147,6 +148,7 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
             .header(HttpHeaders.AUTHORIZATION, ccdAuthenticator.getUserToken())
             .header(CcdCallbackController.USER_ID, ccdAuthenticator.getUserDetails().getId())
             .body(request)
+            .param("ignore-warning", "true")
             .when()
             .post("/callback/attach_case");
     }

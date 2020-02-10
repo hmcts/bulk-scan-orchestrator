@@ -134,54 +134,50 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-    public void should_attach_supplementary_evidence_with_pending_payments() throws Exception {
-        //given
-        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), now()); // with no scanned documents
-        CaseDetails exceptionRecord = createExceptionRecord(
-            "envelopes/supplementary-evidence-envelope-with-payment.json"
+    public void should_attach_exception_record_with_pending_payments_when_classification_allows() throws Exception {
+        verifyExceptionRecordWithPendingPaymentsAttachesToCase(
+            "envelopes/supplementary-evidence-envelope-with-payment.json",
+            true
         );
-
-        // when
-        attachExceptionRecord(caseDetails, exceptionRecord, null);
-
-        //then
-        await("Exception record with pending payments is attached to the case")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollDelay(2, TimeUnit.SECONDS)
-            .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 1));
-
-        verifyExistingCaseIsUpdatedWithExceptionRecordData(caseDetails, exceptionRecord, 1);
     }
 
     @Disabled("Functionality not implemented yet")
     @Test
-    public void should_return_error_when_attaching_exception_with_pending_payments() throws Exception {
-        //given
-        CaseDetails caseDetails =
-            ccdCaseCreator.createCase(
-                singletonList(
-                    new Document(
-                        "certificate1.pdf", "154565768", "other", null, Instant.now(), documentUuid, Instant.now()
-                    )),
-                Instant.now()
-            ); // with 1 scanned document
-
-        CaseDetails exceptionRecord = createExceptionRecord(
-            "envelopes/exception-classification-envelope-with-payment.json"
+    public void should_not_attach_exception_record_with_pending_payments_when_classification_is_not_allowed()
+        throws Exception {
+        verifyExceptionRecordWithPendingPaymentsAttachesToCase(
+            "envelopes/exception-classification-envelope-with-payment.json",
+            false
         );
+    }
+
+    private void verifyExceptionRecordWithPendingPaymentsAttachesToCase(
+        String fileName,
+        boolean configAllowsAttachingToCase
+    ) throws Exception {
+        //given
+        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), now()); // with no scanned documents
+        CaseDetails exceptionRecord = createExceptionRecord(fileName);
 
         // when
         Response response = invokeCallbackEndpoint(caseDetails, exceptionRecord, null, true);
 
         // then
         List<String> errors = response.jsonPath().getList("errors");
-        assertThat(errors).isNotEmpty()
-            .contains("The 'attach to case' event is not supported for the Exception Record with pending payments");
 
-        // verify case not updated
-        CaseDetails updatedCase = ccdApi.getCase(String.valueOf(caseDetails.getId()), caseDetails.getJurisdiction());
-        getCaseDataForField(updatedCase, "exceptionRecordReference");
-        assertThat(getScannedDocuments(updatedCase).size()).isEqualTo(1); // no new scanned documents
+        if (configAllowsAttachingToCase) {
+            assertThat(errors).isEmpty();
+            verifyExistingCaseIsUpdatedWithExceptionRecordData(caseDetails, exceptionRecord, 1);
+        } else {
+            assertThat(errors).isNotEmpty()
+                .contains("Cannot attach this exception record to a case because it has pending payments");
+
+            CaseDetails updatedCase = ccdApi.getCase(
+                String.valueOf(caseDetails.getId()),
+                caseDetails.getJurisdiction()
+            );
+            assertThat(getScannedDocuments(updatedCase).size()).isEqualTo(0); // no new scanned documents
+        }
     }
 
     @Test
@@ -313,6 +309,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .header(SyntheticHeaders.SYNTHETIC_TEST_SOURCE, "Bulk Scan Orchestrator Functional test")
             .header(AUTHORIZATION, ccdAuthenticator.getUserToken())
             .header(CcdCallbackController.USER_ID, ccdAuthenticator.getUserDetails().getId())
+            .param("ignore-warning", "true")
             .body(callbackRequest)
             .when()
             .post("/callback/attach_case");
