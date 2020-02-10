@@ -375,7 +375,7 @@ class CallbackValidationsTest {
     }
 
     private static Object[][] attachToCaseWithPaymentsTestParams() {
-        String pendingPaymentsProcessing = "The 'attach to case' event is not supported for the Exception Record with pending payments";
+        String pendingPaymentsProcessing = "Cannot attach this exception record to a case because it has pending payments";
         return new Object[][]{
             {"Valid supplementary evidence with no pending payments", caseWithAwaitingPaymentsAndClassification("No", SUPPLEMENTARY_EVIDENCE.toString()), SUPPLEMENTARY_EVIDENCE, singletonList(SUPPLEMENTARY_EVIDENCE), true, null},
             {"Valid allow supplementary evidence with pending payments", caseWithAwaitingPaymentsAndClassification("Yes", SUPPLEMENTARY_EVIDENCE.toString()), SUPPLEMENTARY_EVIDENCE, singletonList(SUPPLEMENTARY_EVIDENCE), true, null},

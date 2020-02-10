@@ -225,9 +225,7 @@ public final class CallbackValidations {
             && !config.getAllowAttachingToCaseBeforePaymentsAreProcessedForClassifications() // check if config allows
             .contains(classification)
         ) {
-            return invalid(
-                "The 'attach to case' event is not supported for the Exception Record with pending payments"
-            );
+            return invalid("Cannot attach this exception record to a case because it has pending payments");
         } else {
             return valid(null);
         }
