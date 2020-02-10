@@ -135,7 +135,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
     @Test
     public void should_attach_exception_record_with_pending_payments_when_classification_allows() throws Exception {
-        verifyExceptionRecordWithPendingPaymentsAttachesToCase(
+        verifyIfExceptionRecordWithPendingPaymentsAttachesToCase(
             "envelopes/supplementary-evidence-envelope-with-payment.json",
             true
         );
@@ -145,13 +145,13 @@ class AttachExceptionRecordToExistingCaseTest {
     @Test
     public void should_not_attach_exception_record_with_pending_payments_when_classification_is_not_allowed()
         throws Exception {
-        verifyExceptionRecordWithPendingPaymentsAttachesToCase(
+        verifyIfExceptionRecordWithPendingPaymentsAttachesToCase(
             "envelopes/exception-classification-envelope-with-payment.json",
             false
         );
     }
 
-    private void verifyExceptionRecordWithPendingPaymentsAttachesToCase(
+    private void verifyIfExceptionRecordWithPendingPaymentsAttachesToCase(
         String fileName,
         boolean configAllowsAttachingToCase
     ) throws Exception {
