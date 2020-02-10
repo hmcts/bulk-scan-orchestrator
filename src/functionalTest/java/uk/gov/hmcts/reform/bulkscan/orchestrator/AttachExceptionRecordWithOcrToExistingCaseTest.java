@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -76,6 +77,7 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    @Disabled("Functionality not implemented yet")
     void should_return_payments_error_when_updating_case_with_ocr_having_pending_payments() throws Exception {
         //given
         CaseDetails existingCase = ccdCaseCreator.createCase(emptyList(), now()); // with no scanned documents

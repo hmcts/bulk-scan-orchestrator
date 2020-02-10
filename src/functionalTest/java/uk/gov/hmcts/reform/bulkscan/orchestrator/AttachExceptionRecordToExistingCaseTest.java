@@ -4,6 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -152,6 +153,7 @@ class AttachExceptionRecordToExistingCaseTest {
         verifyExistingCaseIsUpdatedWithExceptionRecordData(caseDetails, exceptionRecord, 1);
     }
 
+    @Disabled("Functionality not implemented yet")
     @Test
     public void should_return_error_when_attaching_exception_with_pending_payments() throws Exception {
         //given
