@@ -69,7 +69,6 @@ service-config:
         - Bulk_Scanned
       allow-creating-case-before-payments-are-processed: true
       allow-attaching-to-case-before-payments-are-processed-for-classifications:
-        - SUPPLEMENTARY_EVIDENCE_WITH_OCR
         - SUPPLEMENTARY_EVIDENCE
       form-type-to-surname-ocr-field-mappings:
         - formType: PERSONAL
