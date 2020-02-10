@@ -605,8 +605,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .statusCode(200)
             .body(
                 RESPONSE_FIELD_ERRORS,
-                hasItem("The 'attach to case' event is not supported for the Exception Record "
-                    + "with pending payments")
+                hasItem("Cannot attach this exception record to a case because it has pending payments")
             );
     }
 
@@ -628,8 +627,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .statusCode(200)
             .body(
                 RESPONSE_FIELD_ERRORS,
-                not(hasItem("The 'attach to case' event is not supported for the Exception Record "
-                    + "with pending payments"))
+                not(hasItem("Cannot attach this exception record to a case because it has pending payments"))
             );
     }
 
@@ -651,8 +649,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .statusCode(200)
             .body(
                 RESPONSE_FIELD_ERRORS,
-                hasItem("The 'attach to case' event is not supported for the Exception Record "
-                    + "with pending payments")
+                hasItem("Cannot attach this exception record to a case because it has pending payments")
             );
     }
 
