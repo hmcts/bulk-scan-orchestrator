@@ -75,6 +75,7 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void should_return_payments_error_when_updating_case_with_ocr_having_pending_payments() throws Exception {
         //given
         CaseDetails existingCase = ccdCaseCreator.createCase(emptyList(), now()); // with no scanned documents
