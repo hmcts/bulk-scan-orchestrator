@@ -133,8 +133,7 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-    public void should_not_return_payments_error_when_attaching_supplementary_evidence_with_pending_payments()
-        throws Exception {
+    public void should_attach_supplementary_evidence_with_pending_payments() throws Exception {
         //given
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), now()); // with no scanned documents
         CaseDetails exceptionRecord = createExceptionRecord(
@@ -142,11 +141,15 @@ class AttachExceptionRecordToExistingCaseTest {
         );
 
         // when
-        Response response = invokeCallbackEndpoint(caseDetails, exceptionRecord, null, true);
+        attachExceptionRecord(caseDetails, exceptionRecord, null);
 
-        // then
-        assertThat(response.jsonPath().getList("errors")).isEmpty();
-        assertThat(response.jsonPath().getList("warnings")).isNotEmpty();
+        //then
+        await("Exception record with pending payments is attached to the case")
+            .atMost(60, TimeUnit.SECONDS)
+            .pollDelay(2, TimeUnit.SECONDS)
+            .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 1));
+
+        verifyExistingCaseIsUpdatedWithExceptionRecordData(caseDetails, exceptionRecord, 1);
     }
 
     @Test
@@ -176,7 +179,7 @@ class AttachExceptionRecordToExistingCaseTest {
         // verify case not updated
         CaseDetails updatedCase = ccdApi.getCase(String.valueOf(caseDetails.getId()), caseDetails.getJurisdiction());
         getCaseDataForField(updatedCase, "exceptionRecordReference");
-        assertThat(getScannedDocuments(updatedCase).size()).isEqualTo(1);
+        assertThat(getScannedDocuments(updatedCase).size()).isEqualTo(1); // no new scanned documents
     }
 
     @Test

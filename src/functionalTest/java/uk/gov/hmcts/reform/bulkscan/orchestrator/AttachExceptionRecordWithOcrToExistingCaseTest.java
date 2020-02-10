@@ -75,8 +75,7 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    void should_returns_payments_error_when_updating_case_with_ocr() throws Exception {
+    void should_return_payments_error_when_updating_case_with_ocr_having_pending_payments() throws Exception {
         //given
         CaseDetails existingCase = ccdCaseCreator.createCase(emptyList(), now()); // with no scanned documents
         String caseId = String.valueOf(existingCase.getId());
@@ -84,19 +83,21 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
         CaseDetails exceptionRecord = createExceptionRecord(
             "envelopes/supplementary-evidence-with-ocr-with-payments-envelope.json"
         );
-        String ocrCountry = "sample_country"; // country from OCR data in exception record json loaded above
 
         // when
         Response response = invokeAttachWithOcrEndpoint(exceptionRecord, caseId);
 
         // then
-        assertThat(response.jsonPath().getList("errors")).isNotEmpty();
         assertThat(response.jsonPath().getList("errors"))
+            .isNotEmpty()
             .contains("The 'attach to case' event is not supported for the Exception Record with pending payments");
 
         // verify case is not updated
         CaseDetails updatedCase = ccdApi.getCase(caseId, existingCase.getJurisdiction());
         assertThat(getScannedDocuments(updatedCase)).isEmpty(); // no scanned documents
+
+        Map<String, String> address = (Map<String, String>) updatedCase.getData().get("address");
+        assertThat(address.get("country")).isNull();
     }
 
     private CaseDetails createExceptionRecord(String resourceName) throws Exception {
