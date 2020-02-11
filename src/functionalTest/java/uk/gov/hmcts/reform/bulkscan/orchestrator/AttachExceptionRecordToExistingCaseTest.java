@@ -309,10 +309,9 @@ class AttachExceptionRecordToExistingCaseTest {
             .header(SyntheticHeaders.SYNTHETIC_TEST_SOURCE, "Bulk Scan Orchestrator Functional test")
             .header(AUTHORIZATION, ccdAuthenticator.getUserToken())
             .header(CcdCallbackController.USER_ID, ccdAuthenticator.getUserDetails().getId())
-            .param("ignore-warning", "true")
             .body(callbackRequest)
             .when()
-            .post("/callback/attach_case");
+            .post("/callback/attach_case?ignore-warning=true");
     }
 
     private Map<String, Object> exceptionRecordDataWithSearchFields(
