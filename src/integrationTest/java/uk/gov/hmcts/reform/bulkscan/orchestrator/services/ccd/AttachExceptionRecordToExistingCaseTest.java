@@ -588,11 +588,11 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-    public void should_fail_when_classification_is_exception_and_exception_record_contains_pending_payments() {
+    public void should_return_payments_error_when_config_does_not_allow_classification_with_pending_payments() {
         CallbackRequest callbackRequest =
             callbackRequestWith(
                 EVENT_ID_ATTACH_TO_CASE,
-                CLASSIFICATION_EXCEPTION,
+                CLASSIFICATION_EXCEPTION, // not allowed to attach exception record with pending payments
                 "Yes", // awaiting payments DCN processing
                 false
             );
@@ -610,11 +610,11 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-    public void should_not_return_payments_error_when_supplementary_evidence_with_ocr_have_pending_payments() {
+    public void should_not_return_payments_error_when_config_allows_classification_with_pending_payments() {
         CallbackRequest callbackRequest =
             callbackRequestWith(
                 EVENT_ID_ATTACH_TO_CASE,
-                SUPPLEMENTARY_EVIDENCE_WITH_OCR.name(),
+                SUPPLEMENTARY_EVIDENCE_WITH_OCR.name(), // config allows to attach with pending payments
                 "Yes", // awaiting payments DCN processing
                 true
             );
@@ -632,11 +632,11 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-    public void should_fail_when_classification_is_supplementary_evidence_with_pending_payments() {
+    public void should_return_payments_error_when_config_does_not_allow_supplementary_evidence_with_pending_payments() {
         CallbackRequest callbackRequest =
             callbackRequestWith(
                 EVENT_ID_ATTACH_TO_CASE,
-                SUPPLEMENTARY_EVIDENCE.name(),
+                SUPPLEMENTARY_EVIDENCE.name(), // not allowed to attach exception record with pending payments
                 "Yes", // awaiting payments DCN processing
                 false
             );
