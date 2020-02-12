@@ -59,7 +59,6 @@ public class AttachExceptionRecordTestBase {
 
     static final long EXCEPTION_RECORD_ID = 26409983479785245L;
     static final String EVENT_ID_ATTACH_TO_CASE = "attachToExistingCase";
-    static final String CLASSIFICATION_EXCEPTION = "EXCEPTION";
     static final String CALLBACK_ATTACH_CASE_PATH = "/callback/attach_case";
 
     static final String RESPONSE_FIELD_ERRORS = "errors";
@@ -67,6 +66,7 @@ public class AttachExceptionRecordTestBase {
 
     static final String DOCUMENT_FILENAME = "document.pdf";
     static final String DOCUMENT_NUMBER = "123456";
+    static final Map<String, Object> EXISTING_DOC = document(DOCUMENT_FILENAME, DOCUMENT_NUMBER);
 
     private static final String CASE_URL = CASE_SUBMIT_URL + "/" + CASE_REF;
     private static final String START_EVENT_URL = CASE_URL + "/event-triggers/attachScannedDocs/token";
@@ -88,8 +88,6 @@ public class AttachExceptionRecordTestBase {
     private static final String RESPONSE_FIELD_DATA = "data";
     private static final String ATTACH_TO_CASE_REFERENCE_FIELD_NAME = "attachToCaseReference";
 
-    private static final Map<String, Object> EXISTING_DOC = document(DOCUMENT_FILENAME, DOCUMENT_NUMBER);
-
     private static final Map<String, Object> CASE_DATA = ImmutableMap.of(
         "scannedDocuments", ImmutableList.of(EXISTING_DOC)
     );
@@ -101,7 +99,7 @@ public class AttachExceptionRecordTestBase {
         .data(CASE_DATA)
         .build();
 
-    private static final Map<String, Object> EXCEPTION_RECORD_DOC = document(
+    static final Map<String, Object> EXCEPTION_RECORD_DOC = document(
         EXCEPTION_RECORD_FILENAME,
         EXCEPTION_RECORD_DOCUMENT_NUMBER
     );
@@ -213,15 +211,17 @@ public class AttachExceptionRecordTestBase {
             null,
             null,
             CASE_TYPE_EXCEPTION_RECORD,
+            EXCEPTION_RECORD_DOC,
             false
         );
     }
 
-    CaseDetails exceptionRecord(
+    private CaseDetails exceptionRecord(
         String attachToCaseReference,
         String searchCaseReferenceType,
         String searchCaseReference,
         String caseTypeId,
+        Map<String, Object> document,
         boolean containsPayment
     ) {
         return CaseDetails.builder()
@@ -230,7 +230,7 @@ public class AttachExceptionRecordTestBase {
             .caseTypeId(caseTypeId)
             .data(
                 exceptionDataWithDoc(
-                    EXCEPTION_RECORD_DOC,
+                    document,
                     attachToCaseReference,
                     searchCaseReferenceType,
                     searchCaseReference,
@@ -289,6 +289,7 @@ public class AttachExceptionRecordTestBase {
             null,
             null,
             CASE_TYPE_EXCEPTION_RECORD,
+            EXCEPTION_RECORD_DOC,
             true
         );
     }
@@ -299,6 +300,7 @@ public class AttachExceptionRecordTestBase {
             null,
             null,
             CASE_TYPE_EXCEPTION_RECORD,
+            EXCEPTION_RECORD_DOC,
             false
         );
     }
@@ -314,6 +316,7 @@ public class AttachExceptionRecordTestBase {
             searchCaseReferenceType,
             searchCaseReference,
             caseTypeId,
+            EXCEPTION_RECORD_DOC,
             false
         );
     }
@@ -323,8 +326,8 @@ public class AttachExceptionRecordTestBase {
         String searchCaseReferenceType,
         String searchCaseReference,
         String caseTypeId,
+        Map<String, Object> document,
         boolean containsPayment
-
     ) {
         return CallbackRequest
             .builder()
@@ -334,6 +337,7 @@ public class AttachExceptionRecordTestBase {
                     searchCaseReferenceType,
                     searchCaseReference,
                     caseTypeId,
+                    document,
                     containsPayment
                 )
             )

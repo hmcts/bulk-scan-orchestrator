@@ -18,27 +18,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 class AttachExceptionRecordWithPendingPaymentsTest extends AttachExceptionRecordTestBase {
 
     @Test
-    void should_return_payments_error_when_config_does_not_allow_classification_with_pending_payments() {
-        CallbackRequest callbackRequest =
-            callbackRequestWith(
-                CLASSIFICATION_EXCEPTION, // not allowed to attach exception record with pending payments
-                "Yes", // awaiting payments DCN processing
-                false
-            );
-
-        given()
-            .body(callbackRequest)
-            .headers(userHeaders())
-            .post(CALLBACK_ATTACH_CASE_PATH)
-            .then()
-            .statusCode(200)
-            .body(
-                RESPONSE_FIELD_ERRORS,
-                hasItem("Cannot attach this exception record to a case because it has pending payments")
-            );
-    }
-
-    @Test
     void should_not_return_payments_error_when_config_allows_classification_with_pending_payments() {
         CallbackRequest callbackRequest =
             callbackRequestWith(

@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.pay
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 
+import java.util.Map;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
@@ -22,6 +24,7 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.doNothing;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_EXCEPTION_RECORD;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
 @AutoConfigureWireMock(port = 0)
@@ -135,7 +138,7 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
     @Test
     void should_fail_correctly_if_document_is_duplicate_or_document_is_already_attached() {
         given()
-            .body(attachToCaseRequest(CASE_REF))
+            .body(attachToCaseRequest(CASE_REF, null, null, EXISTING_DOC))
             .headers(userHeaders())
             .post(CALLBACK_ATTACH_CASE_PATH)
             .then()
@@ -406,7 +409,7 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
     @Test
     void should_fail_when_classification_is_exception_and_exception_record_has_ocr() {
         given()
-            .body(callbackRequestWith(EVENT_ID_ATTACH_TO_CASE, CLASSIFICATION_EXCEPTION, true))
+            .body(callbackRequestWith(EVENT_ID_ATTACH_TO_CASE, EXCEPTION.name(), true))
             .headers(userHeaders())
             .post(CALLBACK_ATTACH_CASE_PATH)
             .then()
@@ -419,7 +422,7 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
 
     @Test
     void should_succeed_when_classification_is_exception_and_exception_record_does_not_include_ocr() {
-        CallbackRequest callbackRequest = callbackRequestWith(EVENT_ID_ATTACH_TO_CASE, CLASSIFICATION_EXCEPTION, false);
+        CallbackRequest callbackRequest = callbackRequestWith(EVENT_ID_ATTACH_TO_CASE, EXCEPTION.name(), false);
 
         ValidatableResponse response =
             given()
@@ -500,14 +503,22 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
             .build();
     }
 
+    private CallbackRequest attachToCaseRequest(String attachToCaseReference) {
+        return attachToCaseRequest(attachToCaseReference, null, null, EXCEPTION_RECORD_DOC);
+    }
+
     private CallbackRequest attachToCaseRequest(
-        String attachToCaseReference
+        String attachToCaseReference,
+        String searchCaseReferenceType,
+        String searchCaseReference,
+        Map<String, Object> document
     ) {
         return exceptionRecordCallbackRequest(
             attachToCaseReference,
-            null,
-            null,
+            searchCaseReferenceType,
+            searchCaseReference,
             CASE_TYPE_EXCEPTION_RECORD,
+            document,
             false
         );
     }
