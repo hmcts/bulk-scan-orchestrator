@@ -75,7 +75,6 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void should_not_attach_exception_record_with_pending_payments_when_classification_is_not_allowed()
         throws Exception {
         //given
@@ -97,9 +96,6 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
         // verify case is not updated
         CaseDetails updatedCase = ccdApi.getCase(caseId, existingCase.getJurisdiction());
         assertThat(getScannedDocuments(updatedCase)).isEmpty(); // no scanned documents
-
-        Map<String, String> address = (Map<String, String>) updatedCase.getData().get("address");
-        assertThat(address.get("country")).isNull();
     }
 
     private CaseDetails createExceptionRecord(String resourceName) throws Exception {
