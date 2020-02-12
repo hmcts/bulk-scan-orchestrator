@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -77,7 +76,6 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    @Disabled("Functionality not implemented yet")
     void should_not_attach_exception_record_with_pending_payments_when_classification_is_not_allowed()
         throws Exception {
         //given
