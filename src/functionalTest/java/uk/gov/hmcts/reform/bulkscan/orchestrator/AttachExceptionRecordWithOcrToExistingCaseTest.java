@@ -148,8 +148,7 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
             .header(HttpHeaders.AUTHORIZATION, ccdAuthenticator.getUserToken())
             .header(CcdCallbackController.USER_ID, ccdAuthenticator.getUserDetails().getId())
             .body(request)
-            .param("ignore-warning", "true")
             .when()
-            .post("/callback/attach_case");
+            .post("/callback/attach_case?ignore-warning=true");
     }
 }
