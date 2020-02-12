@@ -45,6 +45,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasSearchCaseReferenceType;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasUserId;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.validatePayments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.checkForDuplicatesOrElse;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.concatDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.getDocumentNumbers;
@@ -150,6 +151,14 @@ public class AttachCaseCallbackService {
         Validation<String, Classification> classificationValidation =
             hasJourneyClassificationForAttachToCase(exceptionRecord);
 
+        final Validation<String, Void> paymentsValidation;
+        if (classificationValidation.isValid() && serviceNameInCaseTypeIdValidation.isValid()) {
+            ServiceConfigItem serviceConfig = getServiceConfig(exceptionRecord);
+            paymentsValidation = validatePayments(exceptionRecord, classificationValidation.get(), serviceConfig);
+        } else {
+            paymentsValidation = Validation.valid(null);
+        }
+
         final Validation<Seq<String>, ExceptionRecord> exceptionRecordValidation;
         if (classificationValidation.isValid() && classificationValidation.get() == SUPPLEMENTARY_EVIDENCE_WITH_OCR) {
             exceptionRecordValidation = exceptionRecordValidator.getValidation(exceptionRecord);
@@ -168,7 +177,8 @@ public class AttachCaseCallbackService {
             scannedRecordValidation,
             idamTokenValidation,
             userIdValidation,
-            classificationValidation
+            classificationValidation,
+            paymentsValidation
         );
 
         Seq<String> errors = getValidationErrors(validations);
@@ -462,7 +472,7 @@ public class AttachCaseCallbackService {
             exceptionRecordJurisdiction
         );
 
-        String attachToCaseRef = (String)fetchedExceptionRecord.getData().get(ATTACH_TO_CASE_REFERENCE);
+        String attachToCaseRef = (String) fetchedExceptionRecord.getData().get(ATTACH_TO_CASE_REFERENCE);
 
         if (StringUtils.isNotEmpty(attachToCaseRef)) {
             throw new AlreadyAttachedToCaseException("Exception record is already attached to case " + attachToCaseRef);
