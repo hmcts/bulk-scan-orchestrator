@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +32,7 @@ import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.empty;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getScannedDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.ATTACH_TO_CASE_REFERENCE;
 
 @SpringBootTest
@@ -72,6 +75,35 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
         assertThat(address.get("country")).isEqualTo(ocrCountry);
     }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    @Disabled("Functionality not implemented yet")
+    void should_not_attach_exception_record_with_pending_payments_when_classification_is_not_allowed()
+        throws Exception {
+        //given
+        CaseDetails existingCase = ccdCaseCreator.createCase(emptyList(), now()); // with no scanned documents
+        String caseId = String.valueOf(existingCase.getId());
+
+        CaseDetails exceptionRecord = createExceptionRecord(
+            "envelopes/supplementary-evidence-with-ocr-with-payments-envelope.json"
+        );
+
+        // when
+        Response response = invokeAttachWithOcrEndpoint(exceptionRecord, caseId);
+
+        // then
+        assertThat(response.jsonPath().getList("errors"))
+            .isNotEmpty()
+            .contains("Cannot attach this exception record to a case because it has pending payments");
+
+        // verify case is not updated
+        CaseDetails updatedCase = ccdApi.getCase(caseId, existingCase.getJurisdiction());
+        assertThat(getScannedDocuments(updatedCase)).isEmpty(); // no scanned documents
+
+        Map<String, String> address = (Map<String, String>) updatedCase.getData().get("address");
+        assertThat(address.get("country")).isNull();
+    }
+
     private CaseDetails createExceptionRecord(String resourceName) throws Exception {
         UUID poBox = UUID.randomUUID();
 
@@ -88,7 +120,14 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
     }
 
     private void sendAttachRequest(CaseDetails exceptionRecord, String targetCaseId) {
+        invokeAttachWithOcrEndpoint(exceptionRecord, targetCaseId)
+            .then()
+            .assertThat()
+            .statusCode(200)
+            .body("errors", empty());
+    }
 
+    private Response invokeAttachWithOcrEndpoint(CaseDetails exceptionRecord, String targetCaseId) {
         Map<String, Object> data = new HashMap<>(exceptionRecord.getData());
         data.put(ATTACH_TO_CASE_REFERENCE, targetCaseId);
 
@@ -100,7 +139,7 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
 
         CcdAuthenticator ccdAuthenticator = ccdAuthenticatorFactory.createForJurisdiction(SampleData.JURSIDICTION);
 
-        RestAssured
+        return RestAssured
             .given()
             .relaxedHTTPSValidation()
             .baseUri(testUrl)
@@ -110,10 +149,6 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
             .header(CcdCallbackController.USER_ID, ccdAuthenticator.getUserDetails().getId())
             .body(request)
             .when()
-            .post("/callback/attach_case")
-            .then()
-            .assertThat()
-            .statusCode(200)
-            .body("errors", empty());
+            .post("/callback/attach_case?ignore-warning=true");
     }
 }

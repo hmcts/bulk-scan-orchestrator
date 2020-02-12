@@ -1,8 +1,10 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +34,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static java.time.Instant.now;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
@@ -94,7 +97,7 @@ class AttachExceptionRecordToExistingCaseTest {
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
         // when
-        invokeCallbackEndpoint(caseDetails, exceptionRecord, null);
+        attachExceptionRecord(caseDetails, exceptionRecord, null);
 
         //then
         await("Exception record is attached to the case")
@@ -119,7 +122,7 @@ class AttachExceptionRecordToExistingCaseTest {
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
         // when
-        invokeCallbackEndpoint(caseDetails, exceptionRecord, null);
+        attachExceptionRecord(caseDetails, exceptionRecord, null);
 
         //then
         await("Exception record is attached to the case")
@@ -128,6 +131,53 @@ class AttachExceptionRecordToExistingCaseTest {
             .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 2));
 
         verifyExistingCaseIsUpdatedWithExceptionRecordData(caseDetails, exceptionRecord, 1);
+    }
+
+    @Test
+    public void should_attach_exception_record_with_pending_payments_when_classification_allows() throws Exception {
+        verifyIfExceptionRecordWithPendingPaymentsAttachesToCase(
+            "envelopes/supplementary-evidence-envelope-with-payment.json",
+            true
+        );
+    }
+
+    @Disabled("Functionality not implemented yet")
+    @Test
+    public void should_not_attach_exception_record_with_pending_payments_when_classification_is_not_allowed()
+        throws Exception {
+        verifyIfExceptionRecordWithPendingPaymentsAttachesToCase(
+            "envelopes/exception-classification-envelope-with-payment.json",
+            false
+        );
+    }
+
+    private void verifyIfExceptionRecordWithPendingPaymentsAttachesToCase(
+        String fileName,
+        boolean configAllowsAttachingToCase
+    ) throws Exception {
+        //given
+        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), now()); // with no scanned documents
+        CaseDetails exceptionRecord = createExceptionRecord(fileName);
+
+        // when
+        Response response = invokeCallbackEndpoint(caseDetails, exceptionRecord, null, true);
+
+        // then
+        List<String> errors = response.jsonPath().getList("errors");
+
+        if (configAllowsAttachingToCase) {
+            assertThat(errors).isEmpty();
+            verifyExistingCaseIsUpdatedWithExceptionRecordData(caseDetails, exceptionRecord, 1);
+        } else {
+            assertThat(errors).isNotEmpty()
+                .contains("Cannot attach this exception record to a case because it has pending payments");
+
+            CaseDetails updatedCase = ccdApi.getCase(
+                String.valueOf(caseDetails.getId()),
+                caseDetails.getJurisdiction()
+            );
+            assertThat(getScannedDocuments(updatedCase).size()).isEqualTo(0); // no new scanned documents
+        }
     }
 
     @Test
@@ -154,7 +204,7 @@ class AttachExceptionRecordToExistingCaseTest {
             createExceptionRecord("envelopes/supplementary-evidence-envelope-with-payment.json");
 
         // when
-        invokeCallbackEndpoint(caseDetails, exceptionRecord, null, true);
+        attachExceptionRecord(caseDetails, exceptionRecord, null, true);
 
         //then
         await("Exception record is attached to the case")
@@ -183,7 +233,7 @@ class AttachExceptionRecordToExistingCaseTest {
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
         // when
-        invokeCallbackEndpoint(caseDetails, exceptionRecord, searchCaseReferenceType);
+        attachExceptionRecord(caseDetails, exceptionRecord, searchCaseReferenceType);
 
         //then
         await("Exception record is attached to the case")
@@ -203,15 +253,31 @@ class AttachExceptionRecordToExistingCaseTest {
      *      and correspond to ReferenceType list in exception record definition.
      *      If null, case is referenced the old way - via attachToCaseReference field
      */
-    private void invokeCallbackEndpoint(
+    private void attachExceptionRecord(
         CaseDetails targetCaseDetails,
         CaseDetails exceptionRecord,
         String searchCaseReferenceType
     ) {
-        invokeCallbackEndpoint(targetCaseDetails, exceptionRecord, searchCaseReferenceType, false);
+        attachExceptionRecord(targetCaseDetails, exceptionRecord, searchCaseReferenceType, false);
     }
 
-    private void invokeCallbackEndpoint(
+    private void attachExceptionRecord(
+        CaseDetails targetCaseDetails,
+        CaseDetails exceptionRecord,
+        String searchCaseReferenceType,
+        boolean containPayments
+    ) {
+        invokeCallbackEndpoint(
+            targetCaseDetails,
+            exceptionRecord,
+            searchCaseReferenceType,
+            containPayments
+        ).jsonPath()
+            .getList("errors")
+            .isEmpty();
+    }
+
+    private Response invokeCallbackEndpoint(
         CaseDetails targetCaseDetails,
         CaseDetails exceptionRecord,
         String searchCaseReferenceType,
@@ -235,7 +301,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
         CcdAuthenticator ccdAuthenticator = ccdAuthenticatorFactory.createForJurisdiction("BULKSCAN");
 
-        RestAssured
+        return RestAssured
             .given()
             .relaxedHTTPSValidation()
             .baseUri(testUrl)
@@ -245,10 +311,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .header(CcdCallbackController.USER_ID, ccdAuthenticator.getUserDetails().getId())
             .body(callbackRequest)
             .when()
-            .post("/callback/attach_case")
-            .jsonPath()
-            .getList("errors")
-            .isEmpty();
+            .post("/callback/attach_case?ignore-warning=true");
     }
 
     private Map<String, Object> exceptionRecordDataWithSearchFields(
