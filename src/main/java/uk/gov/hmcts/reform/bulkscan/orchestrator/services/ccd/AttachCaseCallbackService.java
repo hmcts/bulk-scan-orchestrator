@@ -153,7 +153,9 @@ public class AttachCaseCallbackService {
 
         final Validation<String, Void> paymentsValidation;
         if (classificationValidation.isValid() && serviceNameInCaseTypeIdValidation.isValid()) {
-            ServiceConfigItem serviceConfig = getServiceConfig(exceptionRecord);
+            ServiceConfigItem serviceConfig = serviceConfigProvider.getConfig(
+                serviceNameInCaseTypeIdValidation.get()
+            );
             paymentsValidation = validatePayments(exceptionRecord, classificationValidation.get(), serviceConfig);
         } else {
             paymentsValidation = Validation.valid(null);
