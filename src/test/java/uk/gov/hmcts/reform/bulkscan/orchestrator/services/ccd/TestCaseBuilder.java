@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.JOURNEY_CLASSIFICATION;
+
 class TestCaseBuilder {
     private TestCaseBuilder() {
     }
@@ -44,6 +47,16 @@ class TestCaseBuilder {
         caseData.put("searchCaseReferenceType", searchCaseReferenceType);
 
         return createCaseWith(b -> b.data(caseData));
+    }
+
+    static CaseDetails caseWithAwaitingPaymentsAndClassification(
+        Object awaitingPaymentsProcessing,
+        Object classification
+    ) {
+        Map<String, Object> data = new HashMap<>();
+        data.put(AWAITING_PAYMENT_DCN_PROCESSING, awaitingPaymentsProcessing);
+        data.put(JOURNEY_CLASSIFICATION, classification);
+        return createCaseWith(b -> b.data(data));
     }
 
     static CaseDetails caseWithDocument(List<Map<String, Object>> caseReference) {
