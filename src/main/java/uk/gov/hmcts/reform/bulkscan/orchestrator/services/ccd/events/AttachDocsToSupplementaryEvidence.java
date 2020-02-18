@@ -48,9 +48,9 @@ class AttachDocsToSupplementaryEvidence {
             existingCase.getState()
         );
         if (mapper.getDocsToAdd(getDocuments(existingCase), envelope.documents).isEmpty()) {
-            log.warn("Envelope has no new documents. CCD Case not updated. " + loggingContext);
+            log.warn("Envelope has no new documents. CCD Case not updated. {}", loggingContext);
         } else {
-            log.info("Attaching supplementary evidence. " + loggingContext);
+            log.info("Attaching supplementary evidence. {}", loggingContext);
 
             try {
                 CcdAuthenticator authenticator = ccdApi.authenticateJurisdiction(envelope.jurisdiction);
@@ -63,7 +63,7 @@ class AttachDocsToSupplementaryEvidence {
                     EVENT_TYPE_ID
                 );
 
-                log.info("Started event in CCD to attach exception record to case. " + loggingContext);
+                log.info("Started event in CCD to attach exception record to case. {}", loggingContext);
 
                 ccdApi.submitEventForAttachScannedDocs(
                     authenticator,
@@ -73,13 +73,9 @@ class AttachDocsToSupplementaryEvidence {
                     buildCaseDataContent(envelope, startEventResp)
                 );
 
-                log.info(
-                    "Attached documents from envelope to case. " + loggingContext
-                );
+                log.info("Attached documents from envelope to case. {}", loggingContext);
             } catch (UnableToAttachDocumentsException e) {
-                log.error(
-                    "Failed to attach documents from envelope to case. " + loggingContext
-                );
+                log.error("Failed to attach documents from envelope to case. {}", loggingContext);
                 return false;
             }
         }
