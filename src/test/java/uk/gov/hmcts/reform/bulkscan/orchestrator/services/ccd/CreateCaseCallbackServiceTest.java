@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import io.vavr.control.Either;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
@@ -36,6 +36,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -70,6 +71,9 @@ class CreateCaseCallbackServiceTest {
     @Mock
     private ExceptionRecordFinalizer exceptionRecordFinalizer;
 
+    @Mock
+    private  PaymentsProcessor paymentsProcessor;
+
     private CreateCaseCallbackService service;
 
     @BeforeEach
@@ -79,7 +83,8 @@ class CreateCaseCallbackServiceTest {
             serviceConfigProvider,
             ccdApi,
             ccdNewCaseCreator,
-            exceptionRecordFinalizer
+            exceptionRecordFinalizer,
+            paymentsProcessor
         );
     }
 
@@ -577,6 +582,7 @@ class CreateCaseCallbackServiceTest {
         Map<String, Object> data = basicCaseData();
         data.put(ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING, YesNoFieldValues.YES);
 
+        long newCaseId = 1;
         given(ccdNewCaseCreator.createNewCase(
             any(ExceptionRecord.class),
             any(ServiceConfigItem.class),
@@ -584,7 +590,7 @@ class CreateCaseCallbackServiceTest {
             anyString(),
             anyString(),
             any(CaseDetails.class)
-        )).willReturn(new ProcessResult(emptyList(), emptyList()));
+        )).willReturn(Either.right(newCaseId));
 
         // when
         ProcessResult result =
@@ -598,6 +604,7 @@ class CreateCaseCallbackServiceTest {
         // then
         assertThat(result.getErrors()).isEmpty();
         assertThat(result.getWarnings()).isEmpty();
+        verify(paymentsProcessor).updatePayments(any(), eq(newCaseId));
     }
 
     private void setUpTransformationUrl() {

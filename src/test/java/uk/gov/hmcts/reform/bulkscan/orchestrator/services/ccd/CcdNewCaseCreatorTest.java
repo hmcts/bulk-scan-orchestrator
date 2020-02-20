@@ -15,11 +15,9 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.Transform
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -32,16 +30,13 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 
@@ -64,9 +59,6 @@ class CcdNewCaseCreatorTest {
     private AuthTokenGenerator s2sTokenGenerator;
 
     @Mock
-    private PaymentsProcessor paymentsProcessor;
-
-    @Mock
     private CoreCaseDataApi coreCaseDataApi;
 
     @Mock
@@ -83,7 +75,6 @@ class CcdNewCaseCreatorTest {
             transformationClient,
             serviceResponseParser,
             s2sTokenGenerator,
-            paymentsProcessor,
             coreCaseDataApi,
             exceptionRecordFinalizer
         );
@@ -134,8 +125,6 @@ class CcdNewCaseCreatorTest {
                 );
 
         assertThat(result.isRight()).isTrue();
-
-        verify(paymentsProcessor).updatePayments(caseDetails, CASE_ID);
     }
 
     @Test
@@ -200,8 +189,6 @@ class CcdNewCaseCreatorTest {
 
         // then
         assertThat(result.isRight()).isTrue();
-
-        verify(paymentsProcessor).updatePayments(caseDetails, CASE_ID);
     }
 
     @Test
@@ -243,58 +230,6 @@ class CcdNewCaseCreatorTest {
         assertThat(result.isLeft()).isTrue();
         assertThat(result.getLeft().getWarnings()).containsOnly("warning");
         assertThat(result.getLeft().getErrors()).containsOnly("error");
-    }
-
-    @Test
-    void should_return_error_if_publishing_payment_command_failed() throws Exception {
-        // given
-        given(transformationClient.transformExceptionRecord(any(), any(), any()))
-            .willReturn(
-                new SuccessfulTransformationResponse(
-                    new CaseCreationDetails("some_case_type", "some_event_id", basicCaseData()),
-                    emptyList()
-                )
-            );
-
-        StartEventResponse startCcdEventResp = mock(StartEventResponse.class);
-
-        given(coreCaseDataApi.startForCaseworker(any(), any(), any(), any(), any(), any()))
-            .willReturn(startCcdEventResp);
-
-        Long newCaseId = 123L;
-        CaseDetails newCaseDetails = mock(CaseDetails.class);
-        doReturn(newCaseId).when(newCaseDetails).getId();
-
-        given(coreCaseDataApi.submitForCaseworker(any(), any(), any(), any(), any(), anyBoolean(), any()))
-            .willReturn(newCaseDetails);
-
-        ServiceConfigItem configItem = getConfigItem();
-        ExceptionRecord exceptionRecord = getExceptionRecord();
-
-        CaseDetails caseDetails = getCaseDetails(basicCaseData());
-
-        PaymentsPublishingException paymentException = new PaymentsPublishingException("Error message", null);
-        doThrow(paymentException)
-            .when(paymentsProcessor)
-            .updatePayments(any(), anyLong());
-
-        // when
-        CallbackException exception = catchThrowableOfType(() ->
-                ccdNewCaseCreator
-                    .createNewCase(
-                        exceptionRecord,
-                        configItem,
-                        true,
-                        IDAM_TOKEN,
-                        USER_ID,
-                        caseDetails
-                    ),
-            CallbackException.class
-        );
-
-        // then
-        assertThat(exception.getMessage()).isEqualTo("Payment references cannot be processed. Please try again later");
-        assertThat(exception.getCause()).isInstanceOf(PaymentsPublishingException.class);
     }
 
     private ExceptionRecord getExceptionRecord() {

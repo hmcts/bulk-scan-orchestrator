@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.res
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -40,21 +39,18 @@ public class CcdNewCaseCreator {
     private final TransformationClient transformationClient;
     private final ServiceResponseParser serviceResponseParser;
     private final AuthTokenGenerator s2sTokenGenerator;
-    private final PaymentsProcessor paymentsProcessor;
     private final CoreCaseDataApi coreCaseDataApi;
     private final ExceptionRecordFinalizer exceptionRecordFinalizer;
 
     public CcdNewCaseCreator(
         TransformationClient transformationClient,
         ServiceResponseParser serviceResponseParser, AuthTokenGenerator s2sTokenGenerator,
-        PaymentsProcessor paymentsProcessor,
         CoreCaseDataApi coreCaseDataApi,
         ExceptionRecordFinalizer exceptionRecordFinalizer
     ) {
         this.transformationClient = transformationClient;
         this.serviceResponseParser = serviceResponseParser;
         this.s2sTokenGenerator = s2sTokenGenerator;
-        this.paymentsProcessor = paymentsProcessor;
         this.coreCaseDataApi = coreCaseDataApi;
         this.exceptionRecordFinalizer = exceptionRecordFinalizer;
     }
@@ -113,8 +109,6 @@ public class CcdNewCaseCreator {
                 exceptionRecord.id
             );
 
-            paymentsProcessor.updatePayments(exceptionRecordData, newCaseId);
-
             return Either.right(newCaseId);
         } catch (BadRequest exception) {
             throw new CallbackException(
@@ -124,15 +118,6 @@ public class CcdNewCaseCreator {
         } catch (UnprocessableEntity exception) {
             ClientServiceErrorResponse errorResponse = serviceResponseParser.parseResponseBody(exception);
             return Either.left(new ProcessResult(errorResponse.warnings, errorResponse.errors));
-        } catch (PaymentsPublishingException exception) {
-            log.error(
-                "Failed to send update to payment processor for {} exception record {}",
-                configItem.getService(),
-                exceptionRecord.id,
-                exception
-            );
-
-            throw new CallbackException("Payment references cannot be processed. Please try again later", exception);
         // exceptions received from transformation client
         } catch (RestClientException exception) {
             String message = format(
