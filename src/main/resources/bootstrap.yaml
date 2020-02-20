@@ -23,4 +23,3 @@ spring:
         payments-queue-send-connection-string: PAYMENTS_QUEUE_CONNECTION_STRING
         envelopes-queue-max-delivery-count: ENVELOPES_QUEUE_MAX_DELIVERY_COUNT
         app-insights-instrumentation-key: azure.application-insights.instrumentation-key
-        supported-jurisdictions: SUPPORTED_JURISDICTIONS

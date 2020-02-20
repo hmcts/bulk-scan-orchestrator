@@ -17,7 +17,6 @@ java:
     DELETE_ENVELOPES_DLQ_MESSAGES_ENABLED: "true"
     DELETE_ENVELOPES_DLQ_MESSAGES_CRON: "0 * * * * *"
     DELETE_ENVELOPES_DLQ_MESSAGES_TTL: "10s"
-    SUPPORTED_JURISDICTIONS: ["SSCS", "BULKSCAN", "DIVORCE", "PROBATE", "FINREM", "CMC", "PUBLICLAW"]
   keyVaults:
     bulk-scan:
       resourceGroup: bulk-scan
