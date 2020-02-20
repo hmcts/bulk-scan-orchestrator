@@ -13,6 +13,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.Optional;
 
+import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
@@ -44,7 +47,8 @@ class EnvelopeHandlerTest {
             attachDocsToSupplementaryEvidence,
             createExceptionRecord,
             caseFinder,
-            paymentsProcessor
+            paymentsProcessor,
+            singletonList(JURSIDICTION) // only BULKSCAN jurisdiction is supported
         );
     }
 
@@ -147,5 +151,18 @@ class EnvelopeHandlerTest {
         verify(createExceptionRecord).tryCreateFrom(envelope);
         verify(paymentsProcessor).createPayments(envelope, CASE_ID, true);
     }
+
+    @Test
+    void should_throw_exception_when_jurisdiction_is_not_configured() {
+        // given
+        Envelope envelope = envelope(SUPPLEMENTARY_EVIDENCE, "UNSUPPORTED_JURISDICTION", CASE_REF);
+
+        // when
+        Throwable exception = catchThrowable(() -> envelopeHandler.handleEnvelope(envelope));
+
+        // then
+        assertThat(exception).isInstanceOf(UnsupportedJurisdictionException.class);
+    }
+
 
 }
