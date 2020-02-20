@@ -55,7 +55,7 @@ public class CcdNewCaseCreator {
         this.exceptionRecordFinalizer = exceptionRecordFinalizer;
     }
 
-    @SuppressWarnings({"squid:S2139", "unchecked"}) // squid for exception handle + logging
+    @SuppressWarnings("squid:S2139") // squid for exception handle + logging
     public Either<ProcessResult, Long> createNewCase(
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,
