@@ -39,7 +39,7 @@ public class EnvelopeHandler {
 
     public void handleEnvelope(Envelope envelope) {
         // check if envelope jurisdiction is configured
-        isJurisdictionConfigured(envelope);
+        checkJurisdictionConfigured(envelope);
 
         switch (envelope.classification) {
             case SUPPLEMENTARY_EVIDENCE:
@@ -74,7 +74,7 @@ public class EnvelopeHandler {
         }
     }
 
-    private void isJurisdictionConfigured(Envelope envelope) {
+    private void checkJurisdictionConfigured(Envelope envelope) {
         if (!supportedJurisdictions.contains(envelope.jurisdiction)) {
             log.info(
                 "Jurisdiction is not supported for envelope {} file {} Jurisdiction {}",
