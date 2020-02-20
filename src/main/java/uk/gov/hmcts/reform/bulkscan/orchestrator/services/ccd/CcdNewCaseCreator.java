@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackE
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
@@ -40,19 +39,16 @@ public class CcdNewCaseCreator {
     private final ServiceResponseParser serviceResponseParser;
     private final AuthTokenGenerator s2sTokenGenerator;
     private final CoreCaseDataApi coreCaseDataApi;
-    private final ExceptionRecordFinalizer exceptionRecordFinalizer;
 
     public CcdNewCaseCreator(
         TransformationClient transformationClient,
         ServiceResponseParser serviceResponseParser, AuthTokenGenerator s2sTokenGenerator,
-        CoreCaseDataApi coreCaseDataApi,
-        ExceptionRecordFinalizer exceptionRecordFinalizer
+        CoreCaseDataApi coreCaseDataApi
     ) {
         this.transformationClient = transformationClient;
         this.serviceResponseParser = serviceResponseParser;
         this.s2sTokenGenerator = s2sTokenGenerator;
         this.coreCaseDataApi = coreCaseDataApi;
-        this.exceptionRecordFinalizer = exceptionRecordFinalizer;
     }
 
     @SuppressWarnings("squid:S2139") // squid for exception handle + logging
@@ -61,8 +57,7 @@ public class CcdNewCaseCreator {
         ServiceConfigItem configItem,
         boolean ignoreWarnings,
         String idamToken,
-        String userId,
-        CaseDetails exceptionRecordData
+        String userId
     ) {
         log.info(
             "Start creating new case for {} from exception record {}",

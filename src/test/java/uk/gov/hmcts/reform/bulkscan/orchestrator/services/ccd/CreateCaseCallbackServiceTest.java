@@ -588,8 +588,7 @@ class CreateCaseCallbackServiceTest {
             any(ServiceConfigItem.class),
             anyBoolean(),
             anyString(),
-            anyString(),
-            any(CaseDetails.class)
+            anyString()
         )).willReturn(Either.right(newCaseId));
 
         // when

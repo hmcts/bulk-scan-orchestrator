@@ -61,9 +61,6 @@ class CcdNewCaseCreatorTest {
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
 
-    @Mock
-    private ExceptionRecordFinalizer exceptionRecordFinalizer;
-
     private CcdNewCaseCreator ccdNewCaseCreator;
 
     @Mock
@@ -75,8 +72,7 @@ class CcdNewCaseCreatorTest {
             transformationClient,
             serviceResponseParser,
             s2sTokenGenerator,
-            coreCaseDataApi,
-            exceptionRecordFinalizer
+            coreCaseDataApi
         );
     }
 
@@ -120,8 +116,7 @@ class CcdNewCaseCreatorTest {
                     configItem,
                     true,
                     IDAM_TOKEN,
-                    USER_ID,
-                    caseDetails
+                    USER_ID
                 );
 
         assertThat(result.isRight()).isTrue();
@@ -183,8 +178,7 @@ class CcdNewCaseCreatorTest {
                     configItem,
                     true,
                     IDAM_TOKEN,
-                    USER_ID,
-                    caseDetails
+                    USER_ID
                 );
 
         // then
@@ -222,8 +216,7 @@ class CcdNewCaseCreatorTest {
             configItem,
             true,
             IDAM_TOKEN,
-            USER_ID,
-            caseDetails
+            USER_ID
         );
 
         // then

@@ -185,8 +185,7 @@ public class CreateCaseCallbackService {
                         configItem,
                         ignoreWarnings,
                         idamToken,
-                        userId,
-                        exceptionRecordData
+                        userId
                     ));
 
                 Either<ProcessResult, ProcessResult> processedResult = result
