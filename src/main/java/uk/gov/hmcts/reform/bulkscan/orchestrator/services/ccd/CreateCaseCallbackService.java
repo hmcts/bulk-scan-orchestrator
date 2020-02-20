@@ -163,24 +163,7 @@ public class CreateCaseCallbackService {
             return new ProcessResult(emptyList(), singletonList(AWAITING_PAYMENTS_MESSAGE));
         } else {
             List<Long> ids = ccdApi.getCaseRefsByBulkScanCaseReference(exceptionRecord.id, configItem.getService());
-            if (ids.isEmpty()) {
-                return ccdNewCaseCreator.createNewCase(
-                    exceptionRecord,
-                    configItem,
-                    ignoreWarnings,
-                    idamToken,
-                    userId,
-                    exceptionRecordData
-                );
-            } else if (ids.size() == 1) {
-                final Map<String, Object> finalizedExceptionRecordData =
-                    exceptionRecordFinalizer.finalizeExceptionRecord(
-                        exceptionRecordData.getData(),
-                        ids.get(0),
-                        CcdCallbackType.CASE_CREATION
-                    );
-                return new ProcessResult(finalizedExceptionRecordData);
-            } else {
+            if (ids.size() > 1) {
                 String msg = String.format(
                     "Multiple cases (%s) found for the given bulk scan case reference: %s",
                     ids.stream().map(String::valueOf).collect(joining(", ")),
@@ -188,6 +171,24 @@ public class CreateCaseCallbackService {
                 );
                 log.error(msg);
                 throw new MultipleCasesFoundException(msg);
+            } else {
+                return ids
+                    .stream()
+                    .findFirst()
+                    .map(id -> exceptionRecordFinalizer.finalizeExceptionRecord(
+                        exceptionRecordData.getData(),
+                        id,
+                        CcdCallbackType.CASE_CREATION
+                    ))
+                    .map(ProcessResult::new)
+                    .orElseGet(() -> ccdNewCaseCreator.createNewCase(
+                        exceptionRecord,
+                        configItem,
+                        ignoreWarnings,
+                        idamToken,
+                        userId,
+                        exceptionRecordData
+                    ));
             }
         }
     }
