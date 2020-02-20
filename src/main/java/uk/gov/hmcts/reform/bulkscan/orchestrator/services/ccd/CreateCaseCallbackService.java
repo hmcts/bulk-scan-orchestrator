@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.base.Strings;
 import io.vavr.collection.Seq;
+import io.vavr.control.Either;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
 import org.slf4j.Logger;
@@ -18,7 +19,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigPr
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Collections.emptyList;
@@ -172,15 +172,10 @@ public class CreateCaseCallbackService {
                 log.error(msg);
                 throw new MultipleCasesFoundException(msg);
             } else {
-                return ids
+                Either<ProcessResult, Long> result = ids
                     .stream()
                     .findFirst()
-                    .map(id -> exceptionRecordFinalizer.finalizeExceptionRecord(
-                        exceptionRecordData.getData(),
-                        id,
-                        CcdCallbackType.CASE_CREATION
-                    ))
-                    .map(ProcessResult::new)
+                    .map(Either::<ProcessResult, Long>right)
                     .orElseGet(() -> ccdNewCaseCreator.createNewCase(
                         exceptionRecord,
                         configItem,
@@ -189,6 +184,17 @@ public class CreateCaseCallbackService {
                         userId,
                         exceptionRecordData
                     ));
+
+                Either<ProcessResult, ProcessResult> processedResult = result
+                    .map(id -> new ProcessResult(
+                        exceptionRecordFinalizer.finalizeExceptionRecord(
+                            exceptionRecordData.getData(),
+                            id,
+                            CcdCallbackType.CASE_CREATION
+                        )
+                    ));
+
+                return processedResult.isLeft() ? processedResult.getLeft() : processedResult.get();
             }
         }
     }

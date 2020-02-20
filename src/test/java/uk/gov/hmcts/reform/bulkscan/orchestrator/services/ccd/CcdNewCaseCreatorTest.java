@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
+import io.vavr.control.Either;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,17 +36,13 @@ import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdCallbackType.CASE_CREATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 
 @ExtendWith(MockitoExtension.class)
@@ -125,7 +122,7 @@ class CcdNewCaseCreatorTest {
         CaseDetails caseDetails = getCaseDetails(basicCaseData());
 
         // when
-        ProcessResult result =
+        Either<ProcessResult, Long> result =
             ccdNewCaseCreator
                 .createNewCase(
                     exceptionRecord,
@@ -136,10 +133,8 @@ class CcdNewCaseCreatorTest {
                     caseDetails
                 );
 
-        assertThat(result.getErrors()).isEmpty();
-        assertThat(result.getWarnings()).isEmpty();
+        assertThat(result.isRight()).isTrue();
 
-        verify(exceptionRecordFinalizer).finalizeExceptionRecord(anyMap(), anyLong(), eq(CASE_CREATION));
         verify(paymentsProcessor).updatePayments(caseDetails, CASE_ID);
     }
 
@@ -192,7 +187,7 @@ class CcdNewCaseCreatorTest {
         CaseDetails caseDetails = getCaseDetails(data);
 
         // when
-        ProcessResult result =
+        Either<ProcessResult, Long> result =
             ccdNewCaseCreator
                 .createNewCase(
                     exceptionRecord,
@@ -204,10 +199,8 @@ class CcdNewCaseCreatorTest {
                 );
 
         // then
-        assertThat(result.getErrors()).isEmpty();
-        assertThat(result.getWarnings()).isEmpty();
+        assertThat(result.isRight()).isTrue();
 
-        verify(exceptionRecordFinalizer).finalizeExceptionRecord(anyMap(), anyLong(), eq(CASE_CREATION));
         verify(paymentsProcessor).updatePayments(caseDetails, CASE_ID);
     }
 
@@ -237,7 +230,7 @@ class CcdNewCaseCreatorTest {
         CaseDetails caseDetails = getCaseDetails(data);
 
         // when
-        ProcessResult result = ccdNewCaseCreator.createNewCase(
+        Either<ProcessResult, Long> result = ccdNewCaseCreator.createNewCase(
             exceptionRecord,
             configItem,
             true,
@@ -247,11 +240,9 @@ class CcdNewCaseCreatorTest {
         );
 
         // then
-        assertThat(result.getExceptionRecordData()).isEmpty();
-        assertThat(result.getWarnings()).containsOnly("warning");
-        assertThat(result.getErrors()).containsOnly("error");
-
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
+        assertThat(result.isLeft()).isTrue();
+        assertThat(result.getLeft().getWarnings()).containsOnly("warning");
+        assertThat(result.getLeft().getErrors()).containsOnly("error");
     }
 
     @Test

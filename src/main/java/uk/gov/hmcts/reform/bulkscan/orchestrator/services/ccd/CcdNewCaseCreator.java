@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import feign.FeignException;
+import io.vavr.control.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -59,7 +60,7 @@ public class CcdNewCaseCreator {
     }
 
     @SuppressWarnings({"squid:S2139", "unchecked"}) // squid for exception handle + logging
-    public ProcessResult createNewCase(
+    public Either<ProcessResult, Long> createNewCase(
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,
         boolean ignoreWarnings,
@@ -88,7 +89,7 @@ public class CcdNewCaseCreator {
                     configItem.getService(),
                     exceptionRecord.id
                 );
-                return new ProcessResult(transformationResponse.warnings, emptyList());
+                return Either.left(new ProcessResult(transformationResponse.warnings, emptyList()));
             }
 
             log.info(
@@ -114,13 +115,7 @@ public class CcdNewCaseCreator {
 
             paymentsProcessor.updatePayments(exceptionRecordData, newCaseId);
 
-            return new ProcessResult(
-                exceptionRecordFinalizer.finalizeExceptionRecord(
-                    exceptionRecordData.getData(),
-                    newCaseId,
-                    CcdCallbackType.CASE_CREATION
-                )
-            );
+            return Either.right(newCaseId);
         } catch (BadRequest exception) {
             throw new CallbackException(
                 format("Failed to transform exception record with Id %s", exceptionRecord.id),
@@ -128,7 +123,7 @@ public class CcdNewCaseCreator {
             );
         } catch (UnprocessableEntity exception) {
             ClientServiceErrorResponse errorResponse = serviceResponseParser.parseResponseBody(exception);
-            return new ProcessResult(errorResponse.warnings, errorResponse.errors);
+            return Either.left(new ProcessResult(errorResponse.warnings, errorResponse.errors));
         } catch (PaymentsPublishingException exception) {
             log.error(
                 "Failed to send update to payment processor for {} exception record {}",
