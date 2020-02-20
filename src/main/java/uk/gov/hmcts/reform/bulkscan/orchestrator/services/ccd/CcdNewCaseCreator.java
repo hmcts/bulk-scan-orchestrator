@@ -42,7 +42,8 @@ public class CcdNewCaseCreator {
 
     public CcdNewCaseCreator(
         TransformationClient transformationClient,
-        ServiceResponseParser serviceResponseParser, AuthTokenGenerator s2sTokenGenerator,
+        ServiceResponseParser serviceResponseParser,
+        AuthTokenGenerator s2sTokenGenerator,
         CoreCaseDataApi coreCaseDataApi
     ) {
         this.transformationClient = transformationClient;
