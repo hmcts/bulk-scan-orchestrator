@@ -143,3 +143,4 @@ hystrix:
 task:
   check-jurisdiction-log-in:
     check-validity-duration: PT5M # only ensure this often that no log-in attempt is rejected by IDAM
+
