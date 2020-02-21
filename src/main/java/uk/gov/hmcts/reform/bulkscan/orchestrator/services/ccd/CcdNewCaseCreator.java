@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import feign.FeignException;
-import io.vavr.control.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -17,7 +16,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.res
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseResult;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
@@ -53,7 +52,7 @@ public class CcdNewCaseCreator {
     }
 
     @SuppressWarnings("squid:S2139") // squid for exception handle + logging
-    public Either<ProcessResult, Long> createNewCase(
+    public CreateCaseResult createNewCase(
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,
         boolean ignoreWarnings,
@@ -81,7 +80,7 @@ public class CcdNewCaseCreator {
                     configItem.getService(),
                     exceptionRecord.id
                 );
-                return Either.left(new ProcessResult(transformationResponse.warnings, emptyList()));
+                return new CreateCaseResult(transformationResponse.warnings, emptyList());
             }
 
             log.info(
@@ -105,7 +104,7 @@ public class CcdNewCaseCreator {
                 exceptionRecord.id
             );
 
-            return Either.right(newCaseId);
+            return new CreateCaseResult(newCaseId);
         } catch (BadRequest exception) {
             throw new CallbackException(
                 format("Failed to transform exception record with Id %s", exceptionRecord.id),
@@ -113,7 +112,7 @@ public class CcdNewCaseCreator {
             );
         } catch (UnprocessableEntity exception) {
             ClientServiceErrorResponse errorResponse = serviceResponseParser.parseResponseBody(exception);
-            return Either.left(new ProcessResult(errorResponse.warnings, errorResponse.errors));
+            return new CreateCaseResult(errorResponse.warnings, errorResponse.errors);
         // exceptions received from transformation client
         } catch (RestClientException exception) {
             String message = format(

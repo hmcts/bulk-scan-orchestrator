@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
-import io.vavr.control.Either;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +14,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.Transform
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -109,7 +108,7 @@ class CcdNewCaseCreatorTest {
         CaseDetails caseDetails = getCaseDetails(basicCaseData());
 
         // when
-        Either<ProcessResult, Long> result =
+        CreateCaseResult result =
             ccdNewCaseCreator
                 .createNewCase(
                     exceptionRecord,
@@ -119,7 +118,7 @@ class CcdNewCaseCreatorTest {
                     USER_ID
                 );
 
-        assertThat(result.isRight()).isTrue();
+        assertThat(result.caseId).isEqualTo(newCaseId);
     }
 
     @Test
@@ -171,7 +170,7 @@ class CcdNewCaseCreatorTest {
         CaseDetails caseDetails = getCaseDetails(data);
 
         // when
-        Either<ProcessResult, Long> result =
+        CreateCaseResult result =
             ccdNewCaseCreator
                 .createNewCase(
                     exceptionRecord,
@@ -182,7 +181,7 @@ class CcdNewCaseCreatorTest {
                 );
 
         // then
-        assertThat(result.isRight()).isTrue();
+        assertThat(result.caseId).isEqualTo(newCaseId);
     }
 
     @Test
@@ -211,7 +210,7 @@ class CcdNewCaseCreatorTest {
         CaseDetails caseDetails = getCaseDetails(data);
 
         // when
-        Either<ProcessResult, Long> result = ccdNewCaseCreator.createNewCase(
+        CreateCaseResult result = ccdNewCaseCreator.createNewCase(
             exceptionRecord,
             configItem,
             true,
@@ -220,9 +219,8 @@ class CcdNewCaseCreatorTest {
         );
 
         // then
-        assertThat(result.isLeft()).isTrue();
-        assertThat(result.getLeft().getWarnings()).containsOnly("warning");
-        assertThat(result.getLeft().getErrors()).containsOnly("error");
+        assertThat(result.warnings).containsOnly("warning");
+        assertThat(result.errors).containsOnly("error");
     }
 
     private ExceptionRecord getExceptionRecord() {

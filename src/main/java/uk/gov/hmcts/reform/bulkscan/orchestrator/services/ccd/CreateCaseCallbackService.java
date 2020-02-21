@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.base.Strings;
 import io.vavr.collection.Seq;
-import io.vavr.control.Either;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
 import org.slf4j.Logger;
@@ -12,6 +11,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionR
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ExceptionRecordValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
@@ -176,10 +176,10 @@ public class CreateCaseCallbackService {
                 log.error(msg);
                 throw new MultipleCasesFoundException(msg);
             } else {
-                Either<ProcessResult, Long> result = ids
+                CreateCaseResult result = ids
                     .stream()
                     .findFirst()
-                    .map(Either::<ProcessResult, Long>right)
+                    .map(CreateCaseResult::new)
                     .orElseGet(() -> ccdNewCaseCreator.createNewCase(
                         exceptionRecord,
                         configItem,
@@ -188,20 +188,19 @@ public class CreateCaseCallbackService {
                         userId
                     ));
 
-                Either<ProcessResult, ProcessResult> processedResult = result
-                    .map(id -> {
-                        tryPublishPaymentMessage(configItem.getService(), exceptionRecordData, id);
+                if (result.caseId == null) {
+                    return new ProcessResult(result.warnings, result.errors);
+                } else {
+                    tryPublishPaymentMessage(configItem.getService(), exceptionRecordData, result.caseId);
 
-                        return new ProcessResult(
-                            exceptionRecordFinalizer.finalizeExceptionRecord(
-                                exceptionRecordData.getData(),
-                                id,
-                                CcdCallbackType.CASE_CREATION
-                            )
-                        );
-                    });
-
-                return processedResult.isLeft() ? processedResult.getLeft() : processedResult.get();
+                    return new ProcessResult(
+                        exceptionRecordFinalizer.finalizeExceptionRecord(
+                            exceptionRecordData.getData(),
+                            result.caseId,
+                            CcdCallbackType.CASE_CREATION
+                        )
+                    );
+                }
             }
         }
     }
