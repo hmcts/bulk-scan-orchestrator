@@ -191,23 +191,31 @@ public class CreateCaseCallbackService {
                 if (result.caseId == null) {
                     return new ProcessResult(result.warnings, result.errors);
                 } else {
-                    tryPublishPaymentMessage(configItem.getService(), exceptionRecordData, result.caseId);
-
-                    return new ProcessResult(
-                        exceptionRecordFinalizer.finalizeExceptionRecord(
-                            exceptionRecordData.getData(),
-                            result.caseId,
-                            CcdCallbackType.CASE_CREATION
-                        )
+                    return tryPublishPaymentMessageAndFinalise(
+                        configItem.getService(),
+                        exceptionRecordData,
+                        result.caseId
                     );
                 }
             }
         }
     }
 
-    private void tryPublishPaymentMessage(String serviceName, CaseDetails exceptionRecordData, long caseId) {
+    private ProcessResult tryPublishPaymentMessageAndFinalise(
+        String serviceName,
+        CaseDetails exceptionRecordData,
+        long caseId
+    ) {
         try {
             paymentsProcessor.updatePayments(exceptionRecordData, caseId);
+
+            return new ProcessResult(
+                exceptionRecordFinalizer.finalizeExceptionRecord(
+                    exceptionRecordData.getData(),
+                    caseId,
+                    CcdCallbackType.CASE_CREATION
+                )
+            );
         } catch (PaymentsPublishingException exception) {
             log.error(
                 "Failed to send update to payment processor for {} exception record {}",
@@ -216,7 +224,10 @@ public class CreateCaseCallbackService {
                 exception
             );
 
-            throw new CallbackException("Payment references cannot be processed. Please try again later", exception);
+            return new ProcessResult(
+                emptyList(),
+                singletonList("Payment references cannot be processed. Please try again later")
+            );
         }
     }
 }
