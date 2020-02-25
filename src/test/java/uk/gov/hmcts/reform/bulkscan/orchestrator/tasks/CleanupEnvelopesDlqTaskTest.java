@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -94,7 +93,6 @@ class CleanupEnvelopesDlqTaskTest {
     void should_not_delete_messages_from_dlq_when_deadLetteredTime_is_not_set()
         throws Exception {
         //given
-        given(message.getProperties()).willReturn(Collections.emptyMap());
         given(message.getProperties().get("deadLetteredAt")).willReturn(null);
         given(messageReceiver.receive()).willReturn(message).willReturn(null);
 
