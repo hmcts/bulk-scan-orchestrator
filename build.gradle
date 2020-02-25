@@ -217,7 +217,7 @@ dependencies {
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
   testCompile group: 'com.typesafe', name: 'config', version: '1.4.0'
-  testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: '3.2.4'
+  testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: '3.3.0'
   testCompile group: 'org.assertj', name: 'assertj-core', version: '3.15.0'
   testCompile group: 'org.awaitility', name: 'awaitility', version: '4.0.2'
   testCompile group: 'io.rest-assured', name: 'rest-assured'
