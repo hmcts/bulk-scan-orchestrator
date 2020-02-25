@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFi
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceNotConfiguredException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.HashMap;
@@ -38,6 +39,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -604,6 +606,39 @@ class CreateCaseCallbackServiceTest {
         assertThat(result.getErrors()).isEmpty();
         assertThat(result.getWarnings()).isEmpty();
         verify(paymentsProcessor).updatePayments(any(), eq(newCaseId));
+    }
+
+    @Test
+    void should_create_case_but_respond_failure_when_payments_processor_throws_an_error() {
+        // given
+        setUpServiceConfig("https://localhost", true); // allowed to create case despite pending payments
+
+        Map<String, Object> data = basicCaseData();
+        data.put(ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING, YesNoFieldValues.YES);
+
+        long newCaseId = 1;
+        given(ccdNewCaseCreator.createNewCase(
+            any(ExceptionRecord.class),
+            any(ServiceConfigItem.class),
+            anyBoolean(),
+            anyString(),
+            anyString()
+        )).willReturn(new CreateCaseResult(newCaseId));
+
+        willThrow(PaymentsPublishingException.class).given(paymentsProcessor).updatePayments(any(), eq(newCaseId));
+
+        // when
+        ProcessResult result =
+            service
+                .process(
+                    new CcdCallbackRequest(EVENT_ID_CREATE_NEW_CASE, caseDetails(data), true), // ignore warnings
+                    IDAM_TOKEN,
+                    USER_ID
+                );
+
+        // then
+        assertThat(result.getErrors()).containsOnly("Payment references cannot be processed. Please try again later");
+        assertThat(result.getWarnings()).isEmpty();
     }
 
     private void setUpTransformationUrl() {
