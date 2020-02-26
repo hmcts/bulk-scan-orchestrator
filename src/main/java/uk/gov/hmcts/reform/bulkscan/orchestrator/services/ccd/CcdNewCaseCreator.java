@@ -16,11 +16,9 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.res
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseResult;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
@@ -39,33 +37,27 @@ public class CcdNewCaseCreator {
     private final TransformationClient transformationClient;
     private final ServiceResponseParser serviceResponseParser;
     private final AuthTokenGenerator s2sTokenGenerator;
-    private final PaymentsProcessor paymentsProcessor;
     private final CoreCaseDataApi coreCaseDataApi;
-    private final ExceptionRecordFinalizer exceptionRecordFinalizer;
 
     public CcdNewCaseCreator(
         TransformationClient transformationClient,
-        ServiceResponseParser serviceResponseParser, AuthTokenGenerator s2sTokenGenerator,
-        PaymentsProcessor paymentsProcessor,
-        CoreCaseDataApi coreCaseDataApi,
-        ExceptionRecordFinalizer exceptionRecordFinalizer
+        ServiceResponseParser serviceResponseParser,
+        AuthTokenGenerator s2sTokenGenerator,
+        CoreCaseDataApi coreCaseDataApi
     ) {
         this.transformationClient = transformationClient;
         this.serviceResponseParser = serviceResponseParser;
         this.s2sTokenGenerator = s2sTokenGenerator;
-        this.paymentsProcessor = paymentsProcessor;
         this.coreCaseDataApi = coreCaseDataApi;
-        this.exceptionRecordFinalizer = exceptionRecordFinalizer;
     }
 
-    @SuppressWarnings({"squid:S2139", "unchecked"}) // squid for exception handle + logging
-    public ProcessResult createNewCase(
+    @SuppressWarnings("squid:S2139") // squid for exception handle + logging
+    public CreateCaseResult createNewCase(
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,
         boolean ignoreWarnings,
         String idamToken,
-        String userId,
-        CaseDetails exceptionRecordData
+        String userId
     ) {
         log.info(
             "Start creating new case for {} from exception record {}",
@@ -88,7 +80,7 @@ public class CcdNewCaseCreator {
                     configItem.getService(),
                     exceptionRecord.id
                 );
-                return new ProcessResult(transformationResponse.warnings, emptyList());
+                return new CreateCaseResult(transformationResponse.warnings, emptyList());
             }
 
             log.info(
@@ -112,15 +104,7 @@ public class CcdNewCaseCreator {
                 exceptionRecord.id
             );
 
-            paymentsProcessor.updatePayments(exceptionRecordData, newCaseId);
-
-            return new ProcessResult(
-                exceptionRecordFinalizer.finalizeExceptionRecord(
-                    exceptionRecordData.getData(),
-                    newCaseId,
-                    CcdCallbackType.CASE_CREATION
-                )
-            );
+            return new CreateCaseResult(newCaseId);
         } catch (BadRequest exception) {
             throw new CallbackException(
                 format("Failed to transform exception record with Id %s", exceptionRecord.id),
@@ -128,16 +112,7 @@ public class CcdNewCaseCreator {
             );
         } catch (UnprocessableEntity exception) {
             ClientServiceErrorResponse errorResponse = serviceResponseParser.parseResponseBody(exception);
-            return new ProcessResult(errorResponse.warnings, errorResponse.errors);
-        } catch (PaymentsPublishingException exception) {
-            log.error(
-                "Failed to send update to payment processor for {} exception record {}",
-                configItem.getService(),
-                exceptionRecord.id,
-                exception
-            );
-
-            throw new CallbackException("Payment references cannot be processed. Please try again later", exception);
+            return new CreateCaseResult(errorResponse.warnings, errorResponse.errors);
         // exceptions received from transformation client
         } catch (RestClientException exception) {
             String message = format(

@@ -11,14 +11,15 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionR
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ExceptionRecordValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Collections.emptyList;
@@ -43,19 +44,22 @@ public class CreateCaseCallbackService {
     private final CcdApi ccdApi;
     private final CcdNewCaseCreator ccdNewCaseCreator;
     private final ExceptionRecordFinalizer exceptionRecordFinalizer;
+    private final PaymentsProcessor paymentsProcessor;
 
     public CreateCaseCallbackService(
         ExceptionRecordValidator validator,
         ServiceConfigProvider serviceConfigProvider,
         CcdApi ccdApi,
         CcdNewCaseCreator ccdNewCaseCreator,
-        ExceptionRecordFinalizer exceptionRecordFinalizer
+        ExceptionRecordFinalizer exceptionRecordFinalizer,
+        PaymentsProcessor paymentsProcessor
     ) {
         this.validator = validator;
         this.serviceConfigProvider = serviceConfigProvider;
         this.ccdApi = ccdApi;
         this.ccdNewCaseCreator = ccdNewCaseCreator;
         this.exceptionRecordFinalizer = exceptionRecordFinalizer;
+        this.paymentsProcessor = paymentsProcessor;
     }
 
     /**
@@ -163,23 +167,18 @@ public class CreateCaseCallbackService {
             return new ProcessResult(emptyList(), singletonList(AWAITING_PAYMENTS_MESSAGE));
         } else {
             List<Long> ids = ccdApi.getCaseRefsByBulkScanCaseReference(exceptionRecord.id, configItem.getService());
+            CreateCaseResult result;
+
             if (ids.isEmpty()) {
-                return ccdNewCaseCreator.createNewCase(
+                result = ccdNewCaseCreator.createNewCase(
                     exceptionRecord,
                     configItem,
                     ignoreWarnings,
                     idamToken,
-                    userId,
-                    exceptionRecordData
+                    userId
                 );
             } else if (ids.size() == 1) {
-                final Map<String, Object> finalizedExceptionRecordData =
-                    exceptionRecordFinalizer.finalizeExceptionRecord(
-                        exceptionRecordData.getData(),
-                        ids.get(0),
-                        CcdCallbackType.CASE_CREATION
-                    );
-                return new ProcessResult(finalizedExceptionRecordData);
+                result = new CreateCaseResult(ids.get(0));
             } else {
                 String msg = String.format(
                     "Multiple cases (%s) found for the given bulk scan case reference: %s",
@@ -189,6 +188,46 @@ public class CreateCaseCallbackService {
                 log.error(msg);
                 throw new MultipleCasesFoundException(msg);
             }
+
+            if (result.caseId == null) {
+                return new ProcessResult(result.warnings, result.errors);
+            } else {
+                return tryPublishPaymentMessageAndFinalise(
+                    configItem.getService(),
+                    exceptionRecordData,
+                    result.caseId
+                );
+            }
+        }
+    }
+
+    private ProcessResult tryPublishPaymentMessageAndFinalise(
+        String serviceName,
+        CaseDetails exceptionRecordData,
+        long caseId
+    ) {
+        try {
+            paymentsProcessor.updatePayments(exceptionRecordData, caseId);
+
+            return new ProcessResult(
+                exceptionRecordFinalizer.finalizeExceptionRecord(
+                    exceptionRecordData.getData(),
+                    caseId,
+                    CcdCallbackType.CASE_CREATION
+                )
+            );
+        } catch (PaymentsPublishingException exception) {
+            log.error(
+                "Failed to send update to payment processor for {} exception record {}",
+                serviceName,
+                exceptionRecordData.getId(),
+                exception
+            );
+
+            return new ProcessResult(
+                emptyList(),
+                singletonList("Payment references cannot be processed. Please try again later")
+            );
         }
     }
 }
