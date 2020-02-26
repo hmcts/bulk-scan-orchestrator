@@ -167,7 +167,19 @@ public class CreateCaseCallbackService {
             return new ProcessResult(emptyList(), singletonList(AWAITING_PAYMENTS_MESSAGE));
         } else {
             List<Long> ids = ccdApi.getCaseRefsByBulkScanCaseReference(exceptionRecord.id, configItem.getService());
-            if (ids.size() > 1) {
+            CreateCaseResult result;
+
+            if (ids.isEmpty()) {
+                result = ccdNewCaseCreator.createNewCase(
+                    exceptionRecord,
+                    configItem,
+                    ignoreWarnings,
+                    idamToken,
+                    userId
+                );
+            } else if (ids.size() == 1) {
+                result = new CreateCaseResult(ids.get(0));
+            } else {
                 String msg = String.format(
                     "Multiple cases (%s) found for the given bulk scan case reference: %s",
                     ids.stream().map(String::valueOf).collect(joining(", ")),
@@ -175,28 +187,16 @@ public class CreateCaseCallbackService {
                 );
                 log.error(msg);
                 throw new MultipleCasesFoundException(msg);
-            } else {
-                CreateCaseResult result = ids
-                    .stream()
-                    .findFirst()
-                    .map(CreateCaseResult::new)
-                    .orElseGet(() -> ccdNewCaseCreator.createNewCase(
-                        exceptionRecord,
-                        configItem,
-                        ignoreWarnings,
-                        idamToken,
-                        userId
-                    ));
+            }
 
-                if (result.caseId == null) {
-                    return new ProcessResult(result.warnings, result.errors);
-                } else {
-                    return tryPublishPaymentMessageAndFinalise(
-                        configItem.getService(),
-                        exceptionRecordData,
-                        result.caseId
-                    );
-                }
+            if (result.caseId == null) {
+                return new ProcessResult(result.warnings, result.errors);
+            } else {
+                return tryPublishPaymentMessageAndFinalise(
+                    configItem.getService(),
+                    exceptionRecordData,
+                    result.caseId
+                );
             }
         }
     }
