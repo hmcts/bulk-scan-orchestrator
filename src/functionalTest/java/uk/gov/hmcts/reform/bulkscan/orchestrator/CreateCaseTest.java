@@ -95,7 +95,6 @@ class CreateCaseTest {
 
         await("Case is ingested")
             .atMost(30, TimeUnit.SECONDS)
-            .pollDelay(2, TimeUnit.SECONDS)
             .pollInterval(1, TimeUnit.SECONDS)
             .until(() -> caseIngested(bulkScanCaseReference));
 
