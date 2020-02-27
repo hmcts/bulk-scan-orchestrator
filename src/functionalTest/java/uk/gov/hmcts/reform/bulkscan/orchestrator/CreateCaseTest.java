@@ -94,8 +94,8 @@ class CreateCaseTest {
         assertThat(bulkScanCaseReference.equals(String.valueOf(exceptionRecord.getId())));
 
         await("Case is ingested")
-            .atMost(2, TimeUnit.SECONDS)
-            .pollDelay(1, TimeUnit.SECONDS)
+            .atMost(10, TimeUnit.SECONDS)
+            .pollInterval(1, TimeUnit.SECONDS)
             .until(() -> caseIngested(bulkScanCaseReference));
 
         // when
