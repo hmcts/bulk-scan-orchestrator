@@ -5,13 +5,13 @@ import com.google.common.collect.ImmutableSet;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.util.ExceptionRecordAttachDocumentConnectives;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 import javax.validation.constraints.NotNull;
 
@@ -59,13 +59,15 @@ class DocumentsTest {
     void findDuplicatesTest(CaseDetails theCase,
                             List<Map<String, Object>> exceptionRecords,
                             Set<Integer> duplicates) {
-        AtomicReference<Set<String>> result = new AtomicReference<>();
-        Documents.checkForDuplicatesOrElse(exceptionRecords, getScannedDocuments(theCase), result::set);
+        ExceptionRecordAttachDocumentConnectives erDocumentConnectives = Documents.calculateDocumentConnectives(
+            exceptionRecords,
+            getScannedDocuments(theCase)
+        );
 
         if (duplicates.isEmpty()) {
-            assertThat(result.get()).isNull();
+            assertThat(erDocumentConnectives.hasDuplicates()).isFalse();
         } else {
-            assertThat(result.get()).isEqualTo(asStringSet(duplicates));
+            assertThat(erDocumentConnectives.getDuplicates()).isEqualTo(asStringSet(duplicates));
         }
     }
 }
