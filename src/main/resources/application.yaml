@@ -87,7 +87,7 @@ service-config:
           ocrFields:
             - person2_last_name
             - person1_last_name
-        - formType: SSCS1PE
+        - formType: sscs1pe
           ocrFields:
             - person2_last_name
             - person1_last_name
