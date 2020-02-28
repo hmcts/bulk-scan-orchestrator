@@ -66,4 +66,20 @@
     <vulnerabilityName>Prototype pollution</vulnerabilityName>
   </suppress>
 
+  <suppress until="2021-01-05">
+    <notes><![CDATA[
+       No fix available. file name: tomcat-embed-websocket-9.0.30.jar
+   ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat\-embed\-websocket@.*$</packageUrl>
+    <cve>CVE-2020-1938</cve>
+  </suppress>
+
+  <suppress until="2021-01-05">
+    <notes><![CDATA[
+     No fix available. file name: tomcat-embed-core-9.0.30.jar
+   ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat\-embed\-core@.*$</packageUrl>
+    <cve>CVE-2020-1938</cve>
+  </suppress>
+
 </suppressions>
