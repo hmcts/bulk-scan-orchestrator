@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentCommand;
 
-import java.time.Instant;
 import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -45,7 +44,7 @@ public class PaymentsPublisher implements IPaymentsPublisher {
             );
             message.setLabel(cmd.getLabel());
 
-            queueClient.scheduleMessage(message, Instant.now().plusSeconds(10));
+            queueClient.send(message);
 
             LOG.info(
                 "Sent message to payments queue. ID: {}, Label: {}, Content: {}",
