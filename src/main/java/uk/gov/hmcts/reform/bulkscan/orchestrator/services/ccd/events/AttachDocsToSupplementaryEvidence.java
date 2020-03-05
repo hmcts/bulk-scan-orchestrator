@@ -63,7 +63,7 @@ class AttachDocsToSupplementaryEvidence {
                     EVENT_TYPE_ID
                 );
 
-                log.info("Started event in CCD to attach exception record to case. {}", loggingContext);
+                log.info("Started event in CCD to attach supplementary evidence to case. {}", loggingContext);
 
                 ccdApi.submitEventForAttachScannedDocs(
                     authenticator,
