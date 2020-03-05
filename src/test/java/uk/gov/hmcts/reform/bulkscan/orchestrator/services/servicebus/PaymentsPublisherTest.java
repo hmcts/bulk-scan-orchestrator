@@ -64,11 +64,7 @@ class PaymentsPublisherTest {
 
         // then
         ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
-        ArgumentCaptor<Instant> instantCaptor = ArgumentCaptor.forClass(Instant.class);
-        verify(queueClient).scheduleMessage(messageCaptor.capture(), instantCaptor.capture());
-
-        assertThat(instantCaptor.getValue()).isAfterOrEqualTo(startTime.plusSeconds(10));
-        assertThat(instantCaptor.getValue()).isBefore(startTime.plusSeconds(11));
+        verify(queueClient).send(messageCaptor.capture());
 
         Message message = messageCaptor.getValue();
 
@@ -97,7 +93,7 @@ class PaymentsPublisherTest {
         CreatePaymentsCommand cmd = getCreatePaymentsCommand(isExceptionRecord);
 
         ServiceBusException exceptionToThrow = new ServiceBusException(true, "test exception");
-        willThrow(exceptionToThrow).given(queueClient).scheduleMessage(any(), any());
+        willThrow(exceptionToThrow).given(queueClient).send(any());
 
         assertThatThrownBy(() -> paymentsPublisher.send(cmd))
             .isInstanceOf(PaymentsPublishingException.class)
@@ -121,7 +117,7 @@ class PaymentsPublisherTest {
 
         // then
         ArgumentCaptor<IMessage> messageCaptor = ArgumentCaptor.forClass(IMessage.class);
-        verify(queueClient).scheduleMessage(messageCaptor.capture(), any());
+        verify(queueClient).send(messageCaptor.capture());
 
         IMessage msg = messageCaptor.getValue();
 

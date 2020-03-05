@@ -20,7 +20,7 @@
 
   <suppress>
     <notes><![CDATA[No fix is available]]></notes>
-    <gav regex="true">^org\.springframework\.security:spring-security-crypto:5\.2\.1\.RELEASE$</gav>
+    <gav regex="true">^org\.springframework\.security:spring-security-crypto:5\.2\.2\.RELEASE$</gav>
     <cve>CVE-2018-1258</cve>
   </suppress>
 
@@ -36,6 +36,12 @@
     <notes><![CDATA[No fix is available]]></notes>
     <gav regex="true">^com\.sun\.jersey\.contribs:jersey-apache-client4:1\.19\.1$</gav>
     <cve>CVE-2006-0550</cve>
+  </suppress>
+
+  <suppress until="2020-04-01">
+    <notes><![CDATA[Fix available 6.3.1. Not jumping as it is spring boot actuator transitive dependency]]></notes>
+    <cpe regex="true">^a:netty:netty:4\.1\.15.*</cpe>
+    <cve>CVE-2019-10797</cve>
   </suppress>
 
   <suppress>
