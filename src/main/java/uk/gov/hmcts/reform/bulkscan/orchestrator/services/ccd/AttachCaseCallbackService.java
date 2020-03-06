@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.util.ExceptionRecordAttachDocumentConnectives;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ExceptionRecordValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
@@ -28,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import static io.vavr.control.Validation.valid;
 import static java.util.Collections.singletonList;
@@ -46,7 +46,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasUserId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.validatePayments;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.checkForDuplicatesOrElse;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.calculateDocumentConnectives;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.concatDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.getDocumentNumbers;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.getScannedDocuments;
@@ -388,12 +388,21 @@ public class AttachCaseCallbackService {
         CaseDetails theCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
         List<Map<String, Object>> targetCaseDocuments = getScannedDocuments(theCase);
 
-        //This is done so exception record does not change state if there is a document error
-        checkForDuplicatesOrElse(
+        ExceptionRecordAttachDocumentConnectives erDocumentConnectives = calculateDocumentConnectives(
             callBackEvent.exceptionRecordDocuments,
-            targetCaseDocuments,
-            ids -> throwDuplicateError(targetCaseCcdRef, ids)
+            targetCaseDocuments
         );
+
+        if (erDocumentConnectives.hasDuplicates()) {
+            // This is done so exception record does not change state if there is a document error
+            throw new DuplicateDocsException(
+                String.format(
+                    "Document(s) with control number %s are already attached to case reference: %s",
+                    erDocumentConnectives.getDuplicates(),
+                    targetCaseCcdRef
+                )
+            );
+        }
 
         List<Map<String, Object>> newCaseDocuments = attachExceptionRecordReference(
             callBackEvent.exceptionRecordDocuments,
@@ -500,16 +509,6 @@ public class AttachCaseCallbackService {
                 return ImmutableMap.<String, Object>of("value", copiedDocumentContent);
             })
             .collect(toList());
-    }
-
-    private void throwDuplicateError(String caseRef, Set<String> duplicateIds) {
-        throw new DuplicateDocsException(
-            String.format(
-                "Document(s) with control number %s are already attached to case reference: %s",
-                duplicateIds,
-                caseRef
-            )
-        );
     }
 
     private String createEventSummary(

@@ -4,13 +4,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.util.ExceptionRecordAttachDocumentConnectives;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import javax.annotation.Nonnull;
 import javax.validation.constraints.NotNull;
 
@@ -23,21 +23,19 @@ public final class Documents {
     private Documents() {
     }
 
-    private static Set<String> findDuplicates(List<Map<String, Object>> exceptionDocuments,
-                                              List<Map<String, Object>> existingDocuments) {
-        return Sets.intersection(
-            getDocumentIdSet(existingDocuments),
-            getDocumentIdSet(exceptionDocuments)
-        );
-    }
+    static ExceptionRecordAttachDocumentConnectives calculateDocumentConnectives(
+        List<Map<String, Object>> exceptionDocuments,
+        List<Map<String, Object>> existingDocuments
+    ) {
+        Set<String> exceptionRecordDocumentIds = getDocumentIdSet(exceptionDocuments);
+        Set<String> existingCaseDocumentIds = getDocumentIdSet(existingDocuments);
 
-    static void checkForDuplicatesOrElse(List<Map<String, Object>> exceptionDocuments,
-                                         List<Map<String, Object>> existingDocuments,
-                                         Consumer<Set<String>> duplicatesExist) {
-        Set<String> ids = findDuplicates(exceptionDocuments, existingDocuments);
-        if (!ids.isEmpty()) {
-            duplicatesExist.accept(ids);
-        }
+        return new ExceptionRecordAttachDocumentConnectives(
+            Sets.intersection(
+                exceptionRecordDocumentIds,
+                existingCaseDocumentIds
+            )
+        );
     }
 
     @NotNull
