@@ -185,13 +185,14 @@ public class EnvelopeEventProcessor {
 
     private void logMessageParsed(IMessage message, Envelope envelope) {
         log.info(
-            "Parsed message. ID: {}, Envelope ID: {}, File name: {}, Jurisdiction: {}, Classification: {}, Case: {}",
+            "Parsed message. ID: {}, Envelope ID: {}, File name: {}, Jurisdiction: {}, Classification: {}, {}: {}",
             message.getMessageId(),
             envelope.id,
             envelope.zipFileName,
             envelope.jurisdiction,
             envelope.classification,
-            envelope.caseRef
+            envelope.caseRef == null ? "Legacy Case" : "Case",
+            envelope.caseRef == null ? envelope.legacyCaseRef : envelope.caseRef
         );
     }
 
