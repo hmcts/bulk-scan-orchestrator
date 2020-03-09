@@ -399,7 +399,7 @@ public class AttachCaseCallbackService {
                 // todo include empty
                 String.format(
                     "Document(s) with control number %s are already attached to case reference: %s",
-                    erDocumentConnectives.getDuplicates(),
+                    erDocumentConnectives.getExistingInTargetCase(),
                     targetCaseCcdRef
                 )
             );

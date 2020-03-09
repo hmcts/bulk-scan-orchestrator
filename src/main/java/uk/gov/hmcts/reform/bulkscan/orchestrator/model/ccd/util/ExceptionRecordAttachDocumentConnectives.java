@@ -7,30 +7,30 @@ public class ExceptionRecordAttachDocumentConnectives {
     /**
      * Exception Record documents already present in target case.
      */
-    private Set<String> duplicates;
+    private Set<String> existingInTargetCase;
 
     /**
      * Exception Record documents which are still missing in target case.
      */
-    private Set<String> missing;
+    private Set<String> toBeAttachedToTargetCase;
 
     public ExceptionRecordAttachDocumentConnectives(
-        Set<String> duplicates,
-        Set<String> missing
+        Set<String> existingInTargetCase,
+        Set<String> toBeAttachedToTargetCase
     ) {
-        this.duplicates = duplicates;
-        this.missing = missing;
+        this.existingInTargetCase = existingInTargetCase;
+        this.toBeAttachedToTargetCase = toBeAttachedToTargetCase;
     }
 
     public boolean hasDuplicates() {
-        return !duplicates.isEmpty() && !missing.isEmpty();
+        return !existingInTargetCase.isEmpty() && !toBeAttachedToTargetCase.isEmpty();
     }
 
     public boolean hasMissing() {
-        return duplicates.isEmpty() && !missing.isEmpty();
+        return existingInTargetCase.isEmpty() && !toBeAttachedToTargetCase.isEmpty();
     }
 
-    public Set<String> getDuplicates() {
-        return duplicates;
+    public Set<String> getExistingInTargetCase() {
+        return existingInTargetCase;
     }
 }

@@ -67,7 +67,7 @@ class DocumentsTest {
         if (duplicates.isEmpty()) {
             assertThat(erDocumentConnectives.hasDuplicates()).isFalse();
         } else {
-            assertThat(erDocumentConnectives.getDuplicates()).isEqualTo(asStringSet(duplicates));
+            assertThat(erDocumentConnectives.getExistingInTargetCase()).isEqualTo(asStringSet(duplicates));
         }
     }
 }
