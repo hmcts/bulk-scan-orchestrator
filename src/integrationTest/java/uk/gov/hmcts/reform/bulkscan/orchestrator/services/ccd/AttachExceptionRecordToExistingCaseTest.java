@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
+import com.google.common.collect.ImmutableList;
 import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.IPaymentsPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.Map;
 
@@ -24,6 +26,7 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.doNothing;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_EXCEPTION_RECORD;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURISDICTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
@@ -108,6 +111,22 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
         verifyRequestedAttachingToCase();
     }
 
+    @Test
+    void should_callback_with_correct_information_when_all_documents_have_already_been_attached() {
+        CallbackRequest callbackRequest = attachToCaseRequest(CASE_REF, null, null, EXISTING_DOC);
+
+        ValidatableResponse response = given()
+            .body(callbackRequest)
+            .headers(userHeaders())
+            .post(CALLBACK_ATTACH_CASE_PATH)
+            .then()
+            .statusCode(200);
+
+        verifySuccessResponse(response, callbackRequest);
+        verify(exactly(0), startEventRequest());
+        verify(exactly(0), submittedScannedRecords());
+    }
+
     @DisplayName("Should fail with the correct error when submit api call fails")
     @Test
     void should_fail_with_the_correct_error_when_submit_api_call_fails() {
@@ -137,8 +156,28 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
     @DisplayName("Should fail correctly if document is duplicate or document is already attached")
     @Test
     void should_fail_correctly_if_document_is_duplicate_or_document_is_already_attached() {
+        CallbackRequest callbackRequest = CallbackRequest
+            .builder()
+            .caseDetails(
+                CaseDetails.builder()
+                    .jurisdiction(JURISDICTION)
+                    .id(EXCEPTION_RECORD_ID)
+                    .caseTypeId(CASE_TYPE_EXCEPTION_RECORD)
+                    .data(
+                        exceptionDataWithDoc(
+                            ImmutableList.of(EXISTING_DOC, EXCEPTION_RECORD_DOC),
+                            CASE_REF,
+                            null,
+                            null,
+                            false
+                        )
+                    ).build()
+            )
+            .eventId(EVENT_ID_ATTACH_TO_CASE)
+            .build();
+
         given()
-            .body(attachToCaseRequest(CASE_REF, null, null, EXISTING_DOC))
+            .body(callbackRequest)
             .headers(userHeaders())
             .post(CALLBACK_ATTACH_CASE_PATH)
             .then()
