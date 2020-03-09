@@ -396,38 +396,41 @@ public class AttachCaseCallbackService {
         if (erDocumentConnectives.hasDuplicates()) {
             // This is done so exception record does not change state if there is a document error
             throw new DuplicateDocsException(
+                // todo include empty
                 String.format(
                     "Document(s) with control number %s are already attached to case reference: %s",
-                    erDocumentConnectives.getDuplicates(),
+                    erDocumentConnectives.getExistingInTargetCase(),
                     targetCaseCcdRef
                 )
             );
         }
 
-        List<Map<String, Object>> newCaseDocuments = attachExceptionRecordReference(
-            callBackEvent.exceptionRecordDocuments,
-            callBackEvent.exceptionRecordId
-        );
+        if (erDocumentConnectives.hasMissing()) {
+            List<Map<String, Object>> newCaseDocuments = attachExceptionRecordReference(
+                callBackEvent.exceptionRecordDocuments,
+                callBackEvent.exceptionRecordId
+            );
 
-        StartEventResponse ccdStartEvent =
-            ccdApi.startAttachScannedDocs(theCase, callBackEvent.idamToken, callBackEvent.userId);
+            StartEventResponse ccdStartEvent =
+                ccdApi.startAttachScannedDocs(theCase, callBackEvent.idamToken, callBackEvent.userId);
 
-        Map<String, Object> newCaseData = buildCaseData(newCaseDocuments, targetCaseDocuments);
+            Map<String, Object> newCaseData = buildCaseData(newCaseDocuments, targetCaseDocuments);
 
-        ccdApi.attachExceptionRecord(
-            theCase,
-            callBackEvent.idamToken,
-            callBackEvent.userId,
-            newCaseData,
-            createEventSummary(theCase, callBackEvent.exceptionRecordId, newCaseDocuments),
-            ccdStartEvent
-        );
+            ccdApi.attachExceptionRecord(
+                theCase,
+                callBackEvent.idamToken,
+                callBackEvent.userId,
+                newCaseData,
+                createEventSummary(theCase, callBackEvent.exceptionRecordId, newCaseDocuments),
+                ccdStartEvent
+            );
 
-        log.info(
-            "Attached Exception Record to a case in CCD. ER ID: {}. Case ID: {}",
-            exceptionRecordDetails.getId(),
-            theCase.getId()
-        );
+            log.info(
+                "Attached Exception Record to a case in CCD. ER ID: {}. Case ID: {}",
+                exceptionRecordDetails.getId(),
+                theCase.getId()
+            );
+        }
 
         paymentsProcessor.updatePayments(exceptionRecordDetails, theCase.getId());
     }
