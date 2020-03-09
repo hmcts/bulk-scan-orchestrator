@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -230,7 +231,7 @@ public class AttachExceptionRecordTestBase {
             .caseTypeId(caseTypeId)
             .data(
                 exceptionDataWithDoc(
-                    document,
+                    ImmutableList.of(document),
                     attachToCaseReference,
                     searchCaseReferenceType,
                     searchCaseReference,
@@ -456,15 +457,14 @@ public class AttachExceptionRecordTestBase {
         verify(builder.withRequestBody(matchingJsonPath(jsonPath, pattern)));
     }
 
-    private Map<String, Object> exceptionDataWithDoc(
-        Map<String, Object> scannedDocument,
+    Map<String, Object> exceptionDataWithDoc(
+        List<Map<String, Object>> scannedDocuments,
         String attachToCaseReference,
         String searchCaseReferenceType,
         String searchCaseReference,
         boolean containsPayment
     ) {
-        Map<String, Object> exceptionData =
-            Maps.newHashMap("scannedDocuments", ImmutableList.of(scannedDocument));
+        Map<String, Object> exceptionData = Maps.newHashMap("scannedDocuments", scannedDocuments);
 
         if (attachToCaseReference != null) {
             exceptionData.put("attachToCaseReference", attachToCaseReference);
