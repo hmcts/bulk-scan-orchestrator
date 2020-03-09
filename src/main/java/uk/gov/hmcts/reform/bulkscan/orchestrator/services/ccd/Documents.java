@@ -34,6 +34,10 @@ public final class Documents {
             Sets.intersection(
                 exceptionRecordDocumentIds,
                 existingCaseDocumentIds
+            ),
+            Sets.difference(
+                exceptionRecordDocumentIds,
+                existingCaseDocumentIds
             )
         );
     }
