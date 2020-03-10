@@ -64,8 +64,8 @@ public class PaymentsPublisher implements IPaymentsPublisher {
     private void doSend(IMessage message, boolean retry) throws ServiceBusException, InterruptedException {
         try {
             queueClient.send(message);
-        } catch (ServiceBusException ex) {
-            if (retry && ex.getIsTransient()) {
+        } catch (Exception ex) {
+            if (retry) {
                 doSend(message, false);
             } else {
                 throw ex;

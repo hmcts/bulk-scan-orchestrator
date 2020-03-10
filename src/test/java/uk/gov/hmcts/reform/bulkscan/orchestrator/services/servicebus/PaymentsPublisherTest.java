@@ -163,22 +163,6 @@ class PaymentsPublisherTest {
 
     }
 
-    @Test
-    void sending_create_command_should_throw_exception_without_retry() throws Exception {
-        CreatePaymentsCommand cmd = getCreatePaymentsCommand(false);
-
-        ServiceBusException exceptionToThrow = new ServiceBusException(false, "test exception");
-        willThrow(exceptionToThrow).given(queueClient).send(any());
-
-        assertThatThrownBy(() -> paymentsPublisher.send(cmd))
-                .isInstanceOf(PaymentsPublishingException.class)
-                .hasMessageContaining("An error occurred when trying to publish message to payments queue.")
-                .hasCause(exceptionToThrow);
-
-        verify(queueClient, times(1)).send(any());
-
-    }
-
     private CreatePaymentsCommand getCreatePaymentsCommand(boolean isExceptionRecord) {
         return new CreatePaymentsCommand(
             "envelope-id",
