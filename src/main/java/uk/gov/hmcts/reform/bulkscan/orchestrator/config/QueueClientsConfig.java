@@ -44,7 +44,7 @@ public class QueueClientsConfig {
         @Value("${azure.servicebus.payments.queue-name}") String queueName
     ) throws InterruptedException, ServiceBusException {
         ConnectionStringBuilder connectionStringBuilder = new ConnectionStringBuilder(connectionString, queueName);
-        connectionStringBuilder.setOperationTimeout(Duration.ofSeconds(15));
+        connectionStringBuilder.setOperationTimeout(Duration.ofSeconds(5));
         return new QueueClient(connectionStringBuilder, ReceiveMode.PEEKLOCK);
     }
 }
