@@ -83,7 +83,7 @@ public class AttachExceptionRecordTestBase {
     private static final String EVENT_TOKEN = "theToken";
 
     private static final String EXCEPTION_RECORD_FILENAME = "record.pdf";
-    private static final String EXCEPTION_RECORD_DOCUMENT_NUMBER = "654321";
+    static final String EXCEPTION_RECORD_DOCUMENT_NUMBER = "654321";
 
     private static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
     private static final String RESPONSE_FIELD_DATA = "data";
