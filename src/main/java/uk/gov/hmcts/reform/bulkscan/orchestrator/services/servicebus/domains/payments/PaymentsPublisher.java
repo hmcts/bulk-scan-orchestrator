@@ -67,7 +67,7 @@ public class PaymentsPublisher implements IPaymentsPublisher {
         } catch (Exception ex) {
             if (retry) {
                 LOG.error(
-                        "Sending to payment queue got error, Message ID: {}, {}. Will retry....",
+                        "Sending to payment queue got error, Message ID: {}. Will retry....",
                         message.getMessageId(),
                         ex
                 );
