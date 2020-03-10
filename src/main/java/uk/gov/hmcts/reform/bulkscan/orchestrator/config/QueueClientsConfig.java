@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
+import java.time.Duration;
+
 @Configuration
 @Profile("!nosb") // do not register handler for the nosb (test) profile
 public class QueueClientsConfig {
@@ -41,9 +43,8 @@ public class QueueClientsConfig {
         @Value("${azure.servicebus.payments.connection-string}") String connectionString,
         @Value("${azure.servicebus.payments.queue-name}") String queueName
     ) throws InterruptedException, ServiceBusException {
-        return new QueueClient(
-            new ConnectionStringBuilder(connectionString, queueName),
-            ReceiveMode.PEEKLOCK
-        );
+        ConnectionStringBuilder connectionStringBuilder = new ConnectionStringBuilder(connectionString, queueName);
+        connectionStringBuilder.setOperationTimeout(Duration.ofSeconds(15));
+        return new QueueClient(connectionStringBuilder, ReceiveMode.PEEKLOCK);
     }
 }

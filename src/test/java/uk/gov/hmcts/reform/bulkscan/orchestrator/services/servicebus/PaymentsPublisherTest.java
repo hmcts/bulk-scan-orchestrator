@@ -23,12 +23,14 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.pay
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.UpdatePaymentsCommand;
 
 import java.time.Instant;
+import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @SuppressWarnings("checkstyle:LineLength")
@@ -99,6 +101,9 @@ class PaymentsPublisherTest {
             .isInstanceOf(PaymentsPublishingException.class)
             .hasMessageContaining("An error occurred when trying to publish message to payments queue.")
             .hasCause(exceptionToThrow);
+
+        verify(queueClient, times(2)).send(any());
+
     }
 
     @Test
@@ -135,6 +140,43 @@ class PaymentsPublisherTest {
             new String(MessageBodyRetriever.getBinaryData(msg.getMessageBody())),
             JSONCompareMode.LENIENT
         );
+    }
+
+    @Test
+    void sending_create_command_should_retry_for_transient_exception_and_should_recover() throws Exception {
+        CreatePaymentsCommand cmd = getCreatePaymentsCommand(true);
+
+        ServiceBusException exceptionToThrow = new ServiceBusException(true, "test exception");
+        willThrow(exceptionToThrow).willDoNothing().given(queueClient).send(any());
+
+        paymentsPublisher.send(cmd);
+
+        ArgumentCaptor<IMessage> messageCaptor = ArgumentCaptor.forClass(IMessage.class);
+        verify(queueClient, times(2)).send(messageCaptor.capture());
+
+        List<IMessage> capturedMessage = messageCaptor.getAllValues();
+
+        IMessage msg1 = capturedMessage.get(0);
+        IMessage msg2 = capturedMessage.get(1);
+
+        assertThat(msg1).isSameAs(msg2);
+
+    }
+
+    @Test
+    void sending_create_command_should_throw_exception_without_retry() throws Exception {
+        CreatePaymentsCommand cmd = getCreatePaymentsCommand(false);
+
+        ServiceBusException exceptionToThrow = new ServiceBusException(false, "test exception");
+        willThrow(exceptionToThrow).given(queueClient).send(any());
+
+        assertThatThrownBy(() -> paymentsPublisher.send(cmd))
+                .isInstanceOf(PaymentsPublishingException.class)
+                .hasMessageContaining("An error occurred when trying to publish message to payments queue.")
+                .hasCause(exceptionToThrow);
+
+        verify(queueClient, times(1)).send(any());
+
     }
 
     private CreatePaymentsCommand getCreatePaymentsCommand(boolean isExceptionRecord) {

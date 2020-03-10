@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.Message;
 import com.microsoft.azure.servicebus.QueueClient;
+import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,7 +45,7 @@ public class PaymentsPublisher implements IPaymentsPublisher {
             );
             message.setLabel(cmd.getLabel());
 
-            queueClient.send(message);
+            doSend(message, true);
 
             LOG.info(
                 "Sent message to payments queue. ID: {}, Label: {}, Content: {}",
@@ -57,6 +58,19 @@ public class PaymentsPublisher implements IPaymentsPublisher {
                 "An error occurred when trying to publish message to payments queue.",
                 ex
             );
+        }
+    }
+
+    private void doSend(IMessage message, boolean retry) throws ServiceBusException, InterruptedException {
+        try {
+            queueClient.send(message);
+        } catch (ServiceBusException ex) {
+            if (retry && ex.getIsTransient()) {
+                doSend(message, false);
+            } else {
+                throw ex;
+            }
+
         }
     }
 }
