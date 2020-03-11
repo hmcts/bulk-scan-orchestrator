@@ -69,10 +69,10 @@ public class PaymentsPublisher implements IPaymentsPublisher {
 
     private void doSend(IMessage message, boolean retry) throws ServiceBusException, InterruptedException {
         try {
-            LOG.info("Sending message to payments queue. ID: {}, Label: {}",
+            queueClient.send(message);
+            LOG.info("Sent message to payments queue. ID: {}, Label: {}",
                     message.getMessageId(),
                     message.getLabel());
-            queueClient.send(message);
         } catch (Exception ex) {
             if (retry) {
                 LOG.error(
