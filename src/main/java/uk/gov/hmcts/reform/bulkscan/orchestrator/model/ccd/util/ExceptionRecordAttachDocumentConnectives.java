@@ -22,7 +22,7 @@ public class ExceptionRecordAttachDocumentConnectives {
         this.toBeAttachedToTargetCase = toBeAttachedToTargetCase;
     }
 
-    public boolean hasDuplicates() {
+    public boolean hasDuplicatesAndMissing() {
         return !existingInTargetCase.isEmpty() && !toBeAttachedToTargetCase.isEmpty();
     }
 
@@ -32,5 +32,9 @@ public class ExceptionRecordAttachDocumentConnectives {
 
     public Set<String> getExistingInTargetCase() {
         return existingInTargetCase;
+    }
+
+    public Set<String> getToBeAttachedToTargetCase() {
+        return toBeAttachedToTargetCase;
     }
 }
