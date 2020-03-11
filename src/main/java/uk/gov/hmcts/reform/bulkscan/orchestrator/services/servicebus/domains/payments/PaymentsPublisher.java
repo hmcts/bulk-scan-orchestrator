@@ -45,7 +45,11 @@ public class PaymentsPublisher implements IPaymentsPublisher {
             );
             message.setLabel(cmd.getLabel());
 
-            LOG.info("Call doSend to send message payments queue");
+            LOG.info("About to send message to payments queue. ID: {}, Label: {}, Content: {}",
+                    message.getMessageId(),
+                    message.getLabel(),
+                    messageContent
+            );
 
             doSend(message, true);
 
@@ -65,7 +69,7 @@ public class PaymentsPublisher implements IPaymentsPublisher {
 
     private void doSend(IMessage message, boolean retry) throws ServiceBusException, InterruptedException {
         try {
-            LOG.info("Sending message to payments queue! ID: {}, Label: {}",
+            LOG.info("Sending message to payments queue. ID: {}, Label: {}",
                     message.getMessageId(),
                     message.getLabel());
             queueClient.send(message);
