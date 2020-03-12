@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -82,7 +83,7 @@ public class AttachExceptionRecordTestBase {
     private static final String EVENT_TOKEN = "theToken";
 
     private static final String EXCEPTION_RECORD_FILENAME = "record.pdf";
-    private static final String EXCEPTION_RECORD_DOCUMENT_NUMBER = "654321";
+    static final String EXCEPTION_RECORD_DOCUMENT_NUMBER = "654321";
 
     private static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
     private static final String RESPONSE_FIELD_DATA = "data";
@@ -230,7 +231,7 @@ public class AttachExceptionRecordTestBase {
             .caseTypeId(caseTypeId)
             .data(
                 exceptionDataWithDoc(
-                    document,
+                    ImmutableList.of(document),
                     attachToCaseReference,
                     searchCaseReferenceType,
                     searchCaseReference,
@@ -456,15 +457,14 @@ public class AttachExceptionRecordTestBase {
         verify(builder.withRequestBody(matchingJsonPath(jsonPath, pattern)));
     }
 
-    private Map<String, Object> exceptionDataWithDoc(
-        Map<String, Object> scannedDocument,
+    Map<String, Object> exceptionDataWithDoc(
+        List<Map<String, Object>> scannedDocuments,
         String attachToCaseReference,
         String searchCaseReferenceType,
         String searchCaseReference,
         boolean containsPayment
     ) {
-        Map<String, Object> exceptionData =
-            Maps.newHashMap("scannedDocuments", ImmutableList.of(scannedDocument));
+        Map<String, Object> exceptionData = Maps.newHashMap("scannedDocuments", scannedDocuments);
 
         if (attachToCaseReference != null) {
             exceptionData.put("attachToCaseReference", attachToCaseReference);
