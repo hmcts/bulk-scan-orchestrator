@@ -115,6 +115,8 @@ service-config:
       case-type-ids:
         - FinancialRemedyMVP2
         - FinancialRemedyContested
+      transformation-url: ${TRANSFORMATION_URL_FINREM}
+      allow-creating-case-before-payments-are-processed: true
 
     - service: cmc
       jurisdiction: CMC
