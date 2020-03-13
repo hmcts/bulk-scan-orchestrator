@@ -35,10 +35,7 @@ public final class Documents {
                 exceptionRecordDocumentIds,
                 existingCaseDocumentIds
             ),
-            Sets.difference(
-                exceptionRecordDocumentIds,
-                existingCaseDocumentIds
-            )
+            exceptionRecordDocumentIds.size()
         );
     }
 

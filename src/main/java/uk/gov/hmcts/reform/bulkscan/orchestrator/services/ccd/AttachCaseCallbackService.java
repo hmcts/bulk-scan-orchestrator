@@ -397,11 +397,8 @@ public class AttachCaseCallbackService {
             // This is done so exception record does not change state if there is a document error
             throw new DuplicateDocsException(
                 String.format(
-                    "Document(s) with control number(s) %s are already attached to case.\n"
-                        + " Document(s) with control numbers(s) %s missing in the target case."
-                        + " Case reference: %s",
+                    "Document(s) with control number(s) %s are already attached to case. Case reference: %s",
                     erDocumentConnectives.getExistingInTargetCase(),
-                    erDocumentConnectives.getToBeAttachedToTargetCase(),
                     targetCaseCcdRef
                 )
             );
