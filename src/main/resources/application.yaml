@@ -29,6 +29,7 @@ azure:
     payments:
       connection-string: ${PAYMENTS_QUEUE_CONNECTION_STRING}
       queue-name: payments
+      manual-retry-count: 3
 
 core_case_data:
   api:
