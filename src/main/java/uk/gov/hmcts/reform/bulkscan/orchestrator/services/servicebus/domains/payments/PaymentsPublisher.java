@@ -81,7 +81,8 @@ public class PaymentsPublisher implements IPaymentsPublisher {
         } catch (Exception ex) {
             if (retryCount > 0) {
                 LOG.error(
-                        "Sent message to payments queue got error, Message ID: {}.Remaining Retry Count:{}, Retrying..",
+                        "Sent message to payments queue got error, "
+                                + "Message ID: {}. Remaining Retry Count: {}, Retrying...",
                         message.getMessageId(),
                         retryCount,
                         ex

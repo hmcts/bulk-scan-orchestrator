@@ -51,7 +51,7 @@ class PaymentsPublisherTest {
 
     @BeforeEach
     void setUp() {
-        paymentsPublisher = new PaymentsPublisher(queueClient, new ObjectMapper(), 3);
+        paymentsPublisher = new PaymentsPublisher(queueClient, new ObjectMapper(), 2);
     }
 
     @ParameterizedTest
@@ -102,7 +102,7 @@ class PaymentsPublisherTest {
             .hasMessageContaining("An error occurred when trying to publish message to payments queue.")
             .hasCause(exceptionToThrow);
 
-        verify(queueClient, times(4)).send(any());
+        verify(queueClient, times(3)).send(any());
 
     }
 
