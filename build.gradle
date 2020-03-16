@@ -181,7 +181,7 @@ dependencyManagement {
       entry 'spring-security-rsa'
     }
     // align with jupiter version
-    dependencySet(group: 'org.mockito', version: '3.3.1') {
+    dependencySet(group: 'org.mockito', version: '3.3.3') {
       entry 'mockito-core'
     }
   }
