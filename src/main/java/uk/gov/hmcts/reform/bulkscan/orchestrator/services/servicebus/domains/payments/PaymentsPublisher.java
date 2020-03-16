@@ -31,7 +31,7 @@ public class PaymentsPublisher implements IPaymentsPublisher {
     public PaymentsPublisher(
         @Qualifier("payments") QueueClient queueClient,
         ObjectMapper objectMapper,
-        @Value("azure.servicebus.payments.manual-retry-count") int retryCount
+        @Value("${azure.servicebus.payments.manual-retry-count}") int retryCount
     ) {
         this.queueClient = queueClient;
         this.objectMapper = objectMapper;
