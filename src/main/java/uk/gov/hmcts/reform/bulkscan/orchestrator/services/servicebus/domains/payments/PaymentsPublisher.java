@@ -8,6 +8,7 @@ import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentCommand;
@@ -25,12 +26,16 @@ public class PaymentsPublisher implements IPaymentsPublisher {
     private final QueueClient queueClient;
     private final ObjectMapper objectMapper;
 
+    private final int retryCount;
+
     public PaymentsPublisher(
         @Qualifier("payments") QueueClient queueClient,
-        ObjectMapper objectMapper
+        ObjectMapper objectMapper,
+        @Value("${azure.servicebus.payments.manual-retry-count}") int retryCount
     ) {
         this.queueClient = queueClient;
         this.objectMapper = objectMapper;
+        this.retryCount = retryCount;
     }
 
     @Override
@@ -51,7 +56,7 @@ public class PaymentsPublisher implements IPaymentsPublisher {
                     messageContent
             );
 
-            doSend(message, true);
+            doSend(message, retryCount);
 
             LOG.info(
                 "Sent message to payments queue. ID: {}, Label: {}, Content: {}",
@@ -67,21 +72,19 @@ public class PaymentsPublisher implements IPaymentsPublisher {
         }
     }
 
-    private void doSend(IMessage message, boolean retry) throws ServiceBusException, InterruptedException {
+    private void doSend(IMessage message, int retryCount) throws ServiceBusException, InterruptedException {
         try {
             queueClient.send(message);
-            LOG.info("Sent message to payments queue. ID: {}, Label: {}",
-                    message.getMessageId(),
-                    message.getLabel());
         } catch (Exception ex) {
-            if (retry) {
+            if (retryCount > 0) {
                 LOG.error(
-                        "Sending to payment queue got error, Message ID: {}. Will retry....",
+                        "Sent message to payments queue got error, "
+                                + "Message ID: {}. Remaining Retry Count: {}, Retrying...",
                         message.getMessageId(),
+                        retryCount,
                         ex
                 );
-
-                doSend(message, false);
+                doSend(message, --retryCount);
             } else {
                 throw ex;
             }
