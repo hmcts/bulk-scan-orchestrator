@@ -394,15 +394,13 @@ public class AttachCaseCallbackService {
         );
 
         if (erDocumentConnectives.hasDuplicatesAndMissing()) {
-            // This is done so exception record does not change state if there is a document error
+            // To be fixed along with https://tools.hmcts.net/jira/browse/BPS-1095
             throw new DuplicateDocsException(
                 String.format(
-                    "Document(s) with control number(s) %s are already attached to case.\n"
-                        + " Document(s) with control numbers(s) %s missing in the target case."
-                        + " Case reference: %s",
+                    "Problem attaching to case %s: found %s duplicates and %s missing documents",
+                    targetCaseCcdRef,
                     erDocumentConnectives.getExistingInTargetCase(),
-                    erDocumentConnectives.getToBeAttachedToTargetCase(),
-                    targetCaseCcdRef
+                    erDocumentConnectives.getToBeAttachedToTargetCase()
                 )
             );
         }
