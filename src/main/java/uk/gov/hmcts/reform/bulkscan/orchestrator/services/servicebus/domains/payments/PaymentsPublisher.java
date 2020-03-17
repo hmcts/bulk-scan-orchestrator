@@ -75,9 +75,6 @@ public class PaymentsPublisher implements IPaymentsPublisher {
     private void doSend(IMessage message, int retryCount) throws ServiceBusException, InterruptedException {
         try {
             queueClient.send(message);
-            LOG.info("Sent message to payments queue. ID: {}, Label: {}",
-                    message.getMessageId(),
-                    message.getLabel());
         } catch (Exception ex) {
             if (retryCount > 0) {
                 LOG.error(
