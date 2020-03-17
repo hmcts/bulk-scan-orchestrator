@@ -183,11 +183,10 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
             .then()
             .statusCode(200)
             .body(RESPONSE_FIELD_ERRORS, hasItem(String.format(
-                "Document(s) with control number(s) [%s] are already attached to case.\n"
-                    + " Document(s) with control numbers(s) [%s] missing in the target case. Case reference: %s",
+                "Problem attaching to case %s: found [%s] duplicates and [%s] missing documents",
+                CASE_REF,
                 DOCUMENT_NUMBER,
-                EXCEPTION_RECORD_DOCUMENT_NUMBER,
-                CASE_REF
+                EXCEPTION_RECORD_DOCUMENT_NUMBER
             )));
 
         verify(exactly(0), startEventRequest());
