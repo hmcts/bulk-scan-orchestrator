@@ -52,6 +52,31 @@
     <cve>CVE-2019-16869</cve>
   </suppress>
 
+  <suppress until="2021-01-05">
+    <notes><![CDATA[netflix]]></notes>
+    <cpe regex="true">^a:docker:docker:0\.10\.1$</cpe>
+    <cve>CVE-2014-0047</cve>
+    <cve>CVE-2014-0048</cve>
+    <cve>CVE-2014-5277</cve>
+    <cve>CVE-2014-5278</cve>
+    <cve>CVE-2014-5282</cve>
+    <cve>CVE-2014-6407</cve>
+    <cve>CVE-2014-8178</cve>
+    <cve>CVE-2014-8179</cve>
+    <cve>CVE-2014-9356</cve>
+    <cve>CVE-2014-9358</cve>
+    <cve>CVE-2015-3627</cve>
+    <cve>CVE-2015-3630</cve>
+    <cve>CVE-2015-3631</cve>
+    <cve>CVE-2016-3697</cve>
+    <cve>CVE-2017-14992</cve>
+    <cve>CVE-2019-13139</cve>
+    <cve>CVE-2019-13509</cve>
+    <cve>CVE-2019-15752</cve>
+    <cve>CVE-2019-16884</cve>
+    <cve>CVE-2019-5736</cve>
+  </suppress>
+
   <!-- this is for the TEST jar wiremock-standalone -->
   <suppress until="2021-01-05">
     <notes><![CDATA[
@@ -66,7 +91,7 @@
     <notes><![CDATA[
       This is only used for TESTING purposes.
     ]]></notes>
-    <packageUrl regex="true">^pkg:javascript/handlebars\.js@4\.0\.4.*$</packageUrl>
+    <packageUrl regex="true">^pkg:javascript/handlebars@4\.0\.4.*$</packageUrl>
     <vulnerabilityName>A prototype pollution vulnerability in handlebars is exploitable if an attacker can control the template</vulnerabilityName>
     <vulnerabilityName>Disallow calling helperMissing and blockHelperMissing directly</vulnerabilityName>
     <vulnerabilityName>Prototype pollution</vulnerabilityName>
