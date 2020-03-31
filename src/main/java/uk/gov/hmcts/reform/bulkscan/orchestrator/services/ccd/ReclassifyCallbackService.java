@@ -32,7 +32,7 @@ public class ReclassifyCallbackService {
         String jurisdiction = exceptionRecordDetails.getJurisdiction();
 
         log.info(
-            "Reclassifying exception record {}. Jurisdiction: {}. User: {}",
+            "Reclassifying exception record. Exception record ID: {}. Jurisdiction: {}. User ID: {}",
             exceptionRecordId,
             jurisdiction,
             userId
@@ -42,7 +42,8 @@ public class ReclassifyCallbackService {
 
         if (errors.isEmpty()) {
             log.info(
-                "Returning successful reclassification result for exception record. ID: {}. Jurisdiction: {}. User: {}",
+                "Returning successful reclassification result for exception record. "
+                    + "Exception record ID: {}. Jurisdiction: {}. User ID: {}",
                 exceptionRecordId,
                 jurisdiction,
                 userId
@@ -53,9 +54,11 @@ public class ReclassifyCallbackService {
             // Logging validation failure as error, because the caseworker should have no way of causing it.
             // If it happens, the team needs to be alerted.
             log.error(
-                "Validation failed for exception record reclassification. ID: {}. Jurisdiction: {}. Errors: {}",
+                "Validation failed for exception record reclassification. "
+                + "Exception record ID: {}. Jurisdiction: {}. User ID: {}. Errors: {}",
                 exceptionRecordId,
                 jurisdiction,
+                userId,
                 String.join(", ", errors)
             );
 
