@@ -7,8 +7,10 @@ import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.CcdCallbackController;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
@@ -23,6 +25,8 @@ import static java.util.Collections.emptyList;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SpringBootTest
+@ActiveProfiles("nosb") // no servicebus queue handler registration
 public class ReclassifyCallbackTest {
 
     private static final String JOURNEY_CLASSIFICATION_FIELD_NAME = "journeyClassification";
