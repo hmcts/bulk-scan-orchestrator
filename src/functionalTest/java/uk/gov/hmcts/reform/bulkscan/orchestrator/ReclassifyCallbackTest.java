@@ -81,14 +81,14 @@ public class ReclassifyCallbackTest {
 
     private Map<String, Object> getExpectedFieldsInResponse(Map<String, Object> fieldsInRequest) {
         Map<String, Object> expectedFieldsInResponse = newHashMap(fieldsInRequest);
-        expectedFieldsInResponse.put("journeyClassification", "SUPPLEMENTARY_EVIDENCE_WITH_OCR");
+        expectedFieldsInResponse.put(JOURNEY_CLASSIFICATION_FIELD_NAME, "SUPPLEMENTARY_EVIDENCE_WITH_OCR");
         return expectedFieldsInResponse;
     }
 
     private CallbackRequest prepareValidCallbackRequest() {
         Map<String, Object> originalFields = ImmutableMap.<String, Object>builder()
             // journeyClassification is the only field that matters to the endpoint
-            .put("journeyClassification", "NEW_APPLICATION")
+            .put(JOURNEY_CLASSIFICATION_FIELD_NAME, "NEW_APPLICATION")
             .put("poBox", "12345")
             .put("poBoxJurisdiction", "BULKSCAN")
             .put("formType", "bsp-form-1")
