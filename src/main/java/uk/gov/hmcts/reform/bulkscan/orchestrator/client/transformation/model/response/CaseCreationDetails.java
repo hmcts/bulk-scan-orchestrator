@@ -2,12 +2,18 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.re
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 public class CaseCreationDetails {
 
+    @NotEmpty
     public final String caseTypeId;
 
+    @NotEmpty
     public final String eventId;
 
+    @NotNull
     public final Object caseData;
 
     public CaseCreationDetails(

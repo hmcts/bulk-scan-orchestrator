@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.validation.ConstraintViolationException;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
@@ -114,6 +115,18 @@ public class CcdNewCaseCreator {
             ClientServiceErrorResponse errorResponse = serviceResponseParser.parseResponseBody(exception);
             return new CreateCaseResult(errorResponse.warnings, errorResponse.errors);
         // exceptions received from transformation client
+        } catch (ConstraintViolationException exception) {
+            String message = format(
+                "Invalid response received from transformation endpoint. "
+                    + "Service: %s, exception record: %s, violations: %s",
+                configItem.getService(),
+                exceptionRecord.id,
+                exception.getMessage()
+            );
+
+            log.error(message, exception);
+
+            throw new CallbackException(message, exception);
         } catch (RestClientException exception) {
             String message = format(
                 "Failed to receive transformed exception record from %s client for exception record %s",
