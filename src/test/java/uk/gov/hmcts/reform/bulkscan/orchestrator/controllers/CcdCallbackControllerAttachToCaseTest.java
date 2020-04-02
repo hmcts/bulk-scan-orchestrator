@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.AttachCaseCallbackService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CreateCaseCallbackService;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.ReclassifyCallbackService;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -22,6 +23,7 @@ class CcdCallbackControllerAttachToCaseTest {
 
     @MockBean AttachCaseCallbackService attachService;
     @MockBean CreateCaseCallbackService createService;
+    @MockBean ReclassifyCallbackService reclassifyCallbackService;
 
     @Test
     void should_return_500_in_case_of_internal_error() throws Exception {
