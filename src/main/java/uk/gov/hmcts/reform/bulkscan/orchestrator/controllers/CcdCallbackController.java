@@ -89,7 +89,9 @@ public class CcdCallbackController {
         @RequestBody CcdCallbackRequest callbackRequest,
         @RequestHeader(value = USER_ID, required = false) String userId
     ) {
-        if (callbackRequest.getCaseDetails() == null) {
+        if (userId != null && userId.matches("^.*[\\n|\\r|\\t]+.*$")) {
+            throw new InvalidRequestException("User ID contains invalid characters");
+        } else if (callbackRequest.getCaseDetails() == null) {
             throw new InvalidRequestException("Case details are missing in callback data");
         } else if (callbackRequest.getCaseDetails().getData() == null) {
             throw new InvalidRequestException("Case data is missing in case details");

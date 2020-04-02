@@ -84,14 +84,26 @@ public class CcdCallbackControllerReclassifyTest {
         callReclassifyEndpoint("malformed body").andExpect(status().isBadRequest());
     }
 
+    @Test
+    void should_return_400_response_when_user_id_contains_invalid_characters() throws Exception {
+        callReclassifyEndpoint(VALID_REQUEST_BODY, "user\tId\tWith\tInvalid\tCharacters")
+            .andExpect(status().isBadRequest())
+            .andExpect(content().json("{'message':'User ID contains invalid characters'}"));
+    }
+
     private static String jsonString(String singleQuotedString) {
         return singleQuotedString.replace("'", "\"");
     }
 
     private ResultActions callReclassifyEndpoint(String body) throws Exception {
+        return callReclassifyEndpoint(body, "userId1");
+    }
+
+    private ResultActions callReclassifyEndpoint(String body, String userId) throws Exception {
         return mvc.perform(
             post("/callback/reclassify-exception-record")
                 .content(body)
+                .header("user-id", userId)
                 .contentType(MediaType.APPLICATION_JSON)
         );
     }
