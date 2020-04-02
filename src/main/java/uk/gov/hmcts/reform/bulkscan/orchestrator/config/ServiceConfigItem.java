@@ -4,12 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
 
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toMap;
 
 public class ServiceConfigItem {
@@ -36,7 +36,7 @@ public class ServiceConfigItem {
 
     private boolean allowCreatingCaseBeforePaymentsAreProcessed = false;
 
-    private List<Classification> allowAttachingToCaseBeforePaymentsAreProcessedForClassifications;
+    private List<Classification> allowAttachingToCaseBeforePaymentsAreProcessedForClassifications = emptyList();
 
     private Map<String, List<String>> formTypeToSurnameOcrFieldMappings = new HashMap<>();
 
@@ -102,7 +102,7 @@ public class ServiceConfigItem {
     }
 
     public List<String> getSurnameOcrFieldNameList(String formType) {
-        return formTypeToSurnameOcrFieldMappings.getOrDefault(formType, Collections.emptyList());
+        return formTypeToSurnameOcrFieldMappings.getOrDefault(formType, emptyList());
     }
 
     public void setFormTypeToSurnameOcrFieldMappings(List<FormFieldMapping> formTypeToSurnameOcrFieldMappings) {
