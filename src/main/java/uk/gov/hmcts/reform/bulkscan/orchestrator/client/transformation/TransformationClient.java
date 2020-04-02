@@ -35,15 +35,8 @@ public class TransformationClient {
         HttpHeaders headers = new HttpHeaders();
         headers.add("ServiceAuthorization", s2sToken);
 
-        String url =
-            UriComponentsBuilder
-                .fromHttpUrl(baseUrl)
-                .path("/transform-exception-record")
-                .build()
-                .toString();
-
         SuccessfulTransformationResponse response = restTemplate.postForObject(
-            url,
+            getUrl(baseUrl),
             new HttpEntity<>(exceptionRecord, headers),
             SuccessfulTransformationResponse.class
         );
@@ -55,5 +48,13 @@ public class TransformationClient {
         }
 
         throw new ConstraintViolationException(violations);
+    }
+
+    private String getUrl(String baseUrl) {
+        return UriComponentsBuilder
+            .fromHttpUrl(baseUrl)
+            .path("/transform-exception-record")
+            .build()
+            .toString();
     }
 }
