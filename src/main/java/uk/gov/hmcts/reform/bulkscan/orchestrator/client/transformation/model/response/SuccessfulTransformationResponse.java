@@ -3,9 +3,13 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.re
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 public class SuccessfulTransformationResponse {
 
+    @NotNull
+    @Valid
     public final CaseCreationDetails caseCreationDetails;
 
     public final List<String> warnings;

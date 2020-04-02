@@ -1,0 +1,8 @@
+{
+  "case_creation_details": {
+    "case_type_id": null,
+    "event_id": "createCase",
+    "case_data": {}
+  },
+  "warnings": []
+}

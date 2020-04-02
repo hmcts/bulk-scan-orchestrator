@@ -1,0 +1,7 @@
+{
+  "case_creation_details": {
+    "case_type_id": "123",
+    "event_id": "createCase"
+  },
+  "warnings": []
+}

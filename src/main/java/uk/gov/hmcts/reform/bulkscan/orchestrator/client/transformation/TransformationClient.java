@@ -3,18 +3,18 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ValidatableRestTemplate;
 
 @Component
 public class TransformationClient {
 
-    private final RestTemplate restTemplate;
+    private final ValidatableRestTemplate restTemplate;
 
     public TransformationClient(
-        RestTemplate restTemplate
+        ValidatableRestTemplate restTemplate
     ) {
         this.restTemplate = restTemplate;
     }
@@ -34,7 +34,7 @@ public class TransformationClient {
                 .build()
                 .toString();
 
-        return restTemplate.postForObject(
+        return restTemplate.post(
             url,
             new HttpEntity<>(exceptionRecord, headers),
             SuccessfulTransformationResponse.class
