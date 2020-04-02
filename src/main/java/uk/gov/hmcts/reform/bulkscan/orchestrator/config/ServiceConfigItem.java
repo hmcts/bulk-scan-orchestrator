@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
 
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toMap;
 
 public class ServiceConfigItem {
@@ -36,7 +37,7 @@ public class ServiceConfigItem {
 
     private boolean allowCreatingCaseBeforePaymentsAreProcessed = false;
 
-    private List<Classification> allowAttachingToCaseBeforePaymentsAreProcessedForClassifications;
+    private List<Classification> allowAttachingToCaseBeforePaymentsAreProcessedForClassifications = emptyList();
 
     private Map<String, List<String>> formTypeToSurnameOcrFieldMappings = new HashMap<>();
 
@@ -102,7 +103,7 @@ public class ServiceConfigItem {
     }
 
     public List<String> getSurnameOcrFieldNameList(String formType) {
-        return formTypeToSurnameOcrFieldMappings.getOrDefault(formType, Collections.emptyList());
+        return formTypeToSurnameOcrFieldMappings.getOrDefault(formType, emptyList());
     }
 
     public void setFormTypeToSurnameOcrFieldMappings(List<FormFieldMapping> formTypeToSurnameOcrFieldMappings) {
