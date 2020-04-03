@@ -13,7 +13,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ReclassifyCallbackServiceTest {
 
     private static final String NEW_APPLICATION_CLASSIFICATION = "NEW_APPLICATION";
-    private static final String SCANNED_RECORD_RECEIVED_STATE = "ScannedRecordReceived";
     private static final String JOURNEY_CLASSIFICATION_FIELD_NAME = "journeyClassification";
 
     private ReclassifyCallbackService reclassifyCallbackService;
@@ -32,7 +31,7 @@ public class ReclassifyCallbackServiceTest {
             .build();
 
         ProcessResult result = reclassifyCallbackService.reclassifyExceptionRecord(
-            caseDetails(SCANNED_RECORD_RECEIVED_STATE, originalFields),
+            caseDetails(originalFields),
             "user1"
         );
 
@@ -51,48 +50,12 @@ public class ReclassifyCallbackServiceTest {
         String invalidClassification = "SUPPLEMENTARY_EVIDENCE";
 
         ProcessResult result = reclassifyCallbackService.reclassifyExceptionRecord(
-            caseDetails("ScannedRecordReceived", invalidClassification),
+            caseDetails(invalidClassification),
             "userId1"
         );
 
         assertThat(result.getErrors()).containsExactly(
             expectedErrorForInvalidClassification(invalidClassification)
-        );
-
-        assertThat(result.getWarnings()).isEmpty();
-        assertThat(result.getExceptionRecordData()).isEmpty();
-    }
-
-    @Test
-    void should_return_error_when_state_is_incorrect() {
-        String invalidState = "ScannedRecordAttachedToCase";
-
-        ProcessResult result = reclassifyCallbackService.reclassifyExceptionRecord(
-            caseDetails(invalidState, NEW_APPLICATION_CLASSIFICATION),
-            "userId1"
-        );
-
-        assertThat(result.getErrors()).containsExactly(
-            expectedErrorForInvalidState(invalidState)
-        );
-
-        assertThat(result.getWarnings()).isEmpty();
-        assertThat(result.getExceptionRecordData()).isEmpty();
-    }
-
-    @Test
-    void should_combine_multiple_errors() {
-        String state = "invalid state";
-        String classification = "invalid classification";
-
-        ProcessResult result = reclassifyCallbackService.reclassifyExceptionRecord(
-            caseDetails(state, classification),
-            "user1"
-        );
-
-        assertThat(result.getErrors()).containsExactlyInAnyOrder(
-            expectedErrorForInvalidState(state),
-            expectedErrorForInvalidClassification(classification)
         );
 
         assertThat(result.getWarnings()).isEmpty();
@@ -115,18 +78,17 @@ public class ReclassifyCallbackServiceTest {
         );
     }
 
-    private CaseDetails caseDetails(String state, String classification) {
+    private CaseDetails caseDetails(String classification) {
         return caseDetails(
-            state,
             ImmutableMap.of(JOURNEY_CLASSIFICATION_FIELD_NAME, classification)
         );
     }
 
-    private CaseDetails caseDetails(String state, Map<String, Object> fields) {
+    private CaseDetails caseDetails(Map<String, Object> fields) {
         return CaseDetails
             .builder()
             .id(123L)
-            .state(state)
+            .state("ScannedRecordReceived")
             .data(fields)
             .build();
     }
