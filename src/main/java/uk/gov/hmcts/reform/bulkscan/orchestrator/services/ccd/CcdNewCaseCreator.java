@@ -219,9 +219,8 @@ public class CcdNewCaseCreator {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> caseDataWithExceptionRecordId(Object caseData, String exceptionRecordId) {
-        Map<String, Object> data = new HashMap((Map<String, Object>) caseData);
+    private Map<String, Object> caseDataWithExceptionRecordId(Map<String, Object> caseData, String exceptionRecordId) {
+        Map<String, Object> data = new HashMap<>(caseData);
         data.put(EXCEPTION_RECORD_REFERENCE, exceptionRecordId);
         return data;
     }

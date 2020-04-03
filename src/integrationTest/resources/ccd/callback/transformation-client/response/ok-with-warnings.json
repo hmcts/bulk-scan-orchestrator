@@ -2,7 +2,9 @@
   "case_creation_details": {
     "case_type_id": "123",
     "event_id": "createCase",
-    "case_data": {}
+    "case_data": {
+      "single_data_field": "value"
+    }
   },
   "warnings": [
     "case type id looks like a number"

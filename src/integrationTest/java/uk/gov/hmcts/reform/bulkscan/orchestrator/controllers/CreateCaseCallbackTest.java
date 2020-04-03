@@ -138,6 +138,7 @@ class CreateCaseCallbackTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
+        "bad-case-data-field-is-empty.json",
         "bad-case-data-field-is-null.json",
         "bad-case-details-field-is-null.json",
         "bad-case-type-id-field-is-null.json",

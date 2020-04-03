@@ -14,6 +14,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -48,7 +49,7 @@ class TransformationClientTest {
                 new CaseCreationDetails(
                     "case type id",
                     "event id",
-                    new Object()
+                    singletonMap("key", "value")
                 ),
                 emptyList()
             ));
