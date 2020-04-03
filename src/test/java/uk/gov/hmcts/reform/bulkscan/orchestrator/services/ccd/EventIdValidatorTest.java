@@ -13,7 +13,9 @@ class EventIdValidatorTest {
         return new Object[][]{
             {"Invalid 'Attach to Case' event id", "invalid_event_id", false},
             {"Invalid 'Attach to Case' event id", "AttachToExistingCase", false},
-            {"Valid 'Attach to Case' event id", "attachToExistingCase", true}
+            {"Valid 'Attach to Case' event id", "attachToExistingCase", true},
+            {"Valid 'Attach to Case' event id", "extendCaveatCase", true},
+            {"Valid 'Attach to Case' event id", "extendBulkScanCase", true}
         };
     }
 
