@@ -7,14 +7,12 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.JOURNEY_CLASSIFICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
@@ -38,9 +36,9 @@ public class ReclassifyCallbackService {
             userId
         );
 
-        List<String> errors = validateCallbackRequest(exceptionRecordDetails);
+        Optional<String> validationError = validateClassification(exceptionRecordDetails);
 
-        if (errors.isEmpty()) {
+        if (!validationError.isPresent()) {
             log.info(
                 "Returning successful reclassification result for exception record. "
                     + "Exception record ID: {}. Jurisdiction: {}. User ID: {}",
@@ -55,14 +53,14 @@ public class ReclassifyCallbackService {
             // If it happens, the team needs to be alerted.
             log.error(
                 "Validation failed for exception record reclassification. "
-                + "Exception record ID: {}. Jurisdiction: {}. User ID: {}. Errors: {}",
+                + "Exception record ID: {}. Jurisdiction: {}. User ID: {}. Error: {}",
                 exceptionRecordId,
                 jurisdiction,
                 userId,
-                String.join(", ", errors)
+                validationError.get()
             );
 
-            return new ProcessResult(emptyList(), errors);
+            return new ProcessResult(emptyList(), asList(validationError.get()));
         }
     }
 
@@ -70,35 +68,6 @@ public class ReclassifyCallbackService {
         Map<String, Object> updatedFields = Maps.newHashMap(exceptionRecordData);
         updatedFields.put(JOURNEY_CLASSIFICATION, SUPPLEMENTARY_EVIDENCE_WITH_OCR.name());
         return updatedFields;
-    }
-
-    private List<String> validateCallbackRequest(CaseDetails exceptionRecordDetails) {
-        List<Optional<String>> validationErrors = asList(
-            validateState(exceptionRecordDetails),
-            validateClassification(exceptionRecordDetails)
-        );
-
-        return validationErrors
-            .stream()
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .collect(toList());
-    }
-
-    private Optional<String> validateState(CaseDetails exceptionRecordDetails) {
-        String currentState = exceptionRecordDetails.getState();
-
-        if (!Objects.equals(currentState, REQUIRED_INITIAL_STATE)) {
-            return Optional.of(
-                String.format(
-                    "Reclassification is only allowed for '%s' state. This Exception record's current state is '%s'.",
-                    REQUIRED_INITIAL_STATE,
-                    currentState
-                )
-            );
-        } else {
-            return Optional.empty();
-        }
     }
 
     private Optional<String> validateClassification(CaseDetails exceptionRecordDetails) {
