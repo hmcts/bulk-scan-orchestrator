@@ -22,7 +22,6 @@ public class ReclassifyCallbackService {
 
     private static final Logger log = LoggerFactory.getLogger(ReclassifyCallbackService.class);
 
-    private static final String REQUIRED_INITIAL_STATE = "ScannedRecordReceived";
     private static final String REQUIRED_INITIAL_CLASSIFICATION = NEW_APPLICATION.name();
 
     public ProcessResult reclassifyExceptionRecord(CaseDetails exceptionRecordDetails, String userId) {
