@@ -19,7 +19,7 @@ public final class EventIdValidator {
     public static final String EVENT_ID_CREATE_NEW_CASE = "createNewCase";
     public static final String EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR = "attachScannedDocsWithOcr";
 
-    public static final List<String> ATTACH_TO_CASE_EVENT_IDS = asList(
+    private static final List<String> ATTACH_TO_CASE_EVENT_IDS = asList(
         EVENT_ID_ATTACH_TO_CASE,
         EVENT_ID_EXTEND_CAVEAT_CASE,
         EVENT_ID_EXTEND_BULK_SCAN_CASE
