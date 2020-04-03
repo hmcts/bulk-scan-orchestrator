@@ -124,8 +124,6 @@ public class CcdNewCaseCreator {
                 exception.getMessage()
             );
 
-            log.error(message, exception);
-
             throw new CallbackException(message, exception);
         } catch (RestClientException exception) {
             String message = format(
