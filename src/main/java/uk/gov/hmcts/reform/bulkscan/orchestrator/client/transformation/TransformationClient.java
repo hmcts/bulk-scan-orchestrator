@@ -8,15 +8,23 @@ import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 
+import java.util.Set;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validator;
+
 @Component
 public class TransformationClient {
 
     private final RestTemplate restTemplate;
+    private final Validator validator;
 
     public TransformationClient(
-        RestTemplate restTemplate
+        RestTemplate restTemplate,
+        Validator validator
     ) {
         this.restTemplate = restTemplate;
+        this.validator = validator;
     }
 
     public SuccessfulTransformationResponse transformExceptionRecord(
@@ -27,17 +35,26 @@ public class TransformationClient {
         HttpHeaders headers = new HttpHeaders();
         headers.add("ServiceAuthorization", s2sToken);
 
-        String url =
-            UriComponentsBuilder
-                .fromHttpUrl(baseUrl)
-                .path("/transform-exception-record")
-                .build()
-                .toString();
-
-        return restTemplate.postForObject(
-            url,
+        SuccessfulTransformationResponse response = restTemplate.postForObject(
+            getUrl(baseUrl),
             new HttpEntity<>(exceptionRecord, headers),
             SuccessfulTransformationResponse.class
         );
+
+        Set<ConstraintViolation<SuccessfulTransformationResponse>> violations = validator.validate(response);
+
+        if (violations.isEmpty()) {
+            return response;
+        }
+
+        throw new ConstraintViolationException(violations);
+    }
+
+    private String getUrl(String baseUrl) {
+        return UriComponentsBuilder
+            .fromHttpUrl(baseUrl)
+            .path("/transform-exception-record")
+            .build()
+            .toString();
     }
 }

@@ -5,6 +5,7 @@ import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpHeaders;
@@ -31,6 +32,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.collection.IsMapWithSize.anEmptyMap;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
@@ -132,6 +134,32 @@ class CreateCaseCallbackTest {
                     )
                 )
             );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "bad-case-data-field-is-empty.json",
+        "bad-case-data-field-is-null.json",
+        "bad-case-details-field-is-null.json",
+        "bad-case-type-id-field-is-null.json",
+        "bad-event-id-field-is-null.json",
+        "bad-no-case-data-field.json",
+        "bad-no-case-details-field.json",
+        "bad-no-case-type-id-field.json",
+        "bad-no-event-id-field.json"
+    })
+    void should_respond_with_relevant_error_when_transformation_response_is_invalid(
+        String transformationResponseBody
+    ) {
+        setUpCcdSearchResult(getCcdResponseBody("search-result-empty.json"));
+        setUpTransformation(getTransformationResponseBody(transformationResponseBody));
+
+        postWithBody(getRequestBody("valid-exception.json"))
+            .statusCode(INTERNAL_SERVER_ERROR.value())
+            // 1539007368674134 is from valid-exception.json
+            .body("message", startsWith("Invalid response received from transformation endpoint. "
+                + "Service: bulkscan, exception record: 1539007368674134"
+            ));
     }
 
     @ParameterizedTest
