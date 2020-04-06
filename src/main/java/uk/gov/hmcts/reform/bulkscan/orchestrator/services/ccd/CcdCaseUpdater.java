@@ -177,7 +177,7 @@ public class CcdCaseUpdater {
             String msg = "Invalid case ID: " + existingCaseId;
             log.error(
                 "Invalid case ID: {} service: {} exception record id: {}",
-                existingCaseId, configItem.getService(), exceptionRecord.id
+                existingCaseId, configItem.getService(), exceptionRecord.id, exception
             );
             ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(singletonList(msg), emptyList());
             return new ProcessResult(errorResponse.warnings, errorResponse.errors);
