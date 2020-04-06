@@ -11,6 +11,7 @@ java:
     DOCUMENT_MANAGEMENT_URL: "http://dm-store-aat.service.core-compute-aat.internal"
     TRANSFORMATION_URL_BULKSCAN: "http://bulk-scan-sample-app-aat.service.core-compute-aat.internal"
     UPDATE_URL_BULKSCAN: "http://bulk-scan-sample-app-aat.service.core-compute-aat.internal"
+    UPDATE_URL_PROBATE: "http://probate-back-office-aat.service.core-compute-aat.internal"
     ENVELOPES_QUEUE_CONNECTION_STRING: "$(SB_CONN_STRING);EntityPath=envelopes"
     ENVELOPES_QUEUE_MAX_DELIVERY_COUNT: "10"
     PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING: "$(SB_CONN_STRING);EntityPath=processed-envelopes"
