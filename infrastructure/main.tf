@@ -83,6 +83,7 @@ locals {
     TRANSFORMATION_URL_BULKSCAN = "${var.transformation_url_bulkscan}"
     TRANSFORMATION_URL_PROBATE  = "${var.transformation_url_probate}"
     UPDATE_URL_BULKSCAN = "${var.update_url_bulkscan}"
+    UPDATE_URL_PROBATE = "${var.update_url_probate}"
     // endregion
 
   }
