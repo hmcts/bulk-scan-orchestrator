@@ -99,7 +99,7 @@ class CaseUpdateClientResponseValidationTest {
             .satisfies(exc ->
                 assertThat(exc.getConstraintViolations())
                     .extracting(violation -> tuple(violation.getPropertyPath().toString(), violation.getMessage()))
-                    .containsExactly(violations)
+                    .containsExactlyInAnyOrder(violations)
             );
     }
 
