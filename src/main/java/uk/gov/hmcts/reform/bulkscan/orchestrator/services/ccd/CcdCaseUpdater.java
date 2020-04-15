@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import javax.validation.ConstraintViolationException;
 import java.util.List;
 import java.util.Optional;
 
@@ -201,7 +202,7 @@ public class CcdCaseUpdater {
                 exception
             );
         // exceptions received from case update client
-        } catch (RestClientException exception) {
+        } catch (RestClientException | ConstraintViolationException exception) {
             String message = getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id);
 
             log.error(message, exception);

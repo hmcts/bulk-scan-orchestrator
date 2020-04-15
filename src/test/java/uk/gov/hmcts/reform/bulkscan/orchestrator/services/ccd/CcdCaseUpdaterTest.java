@@ -28,14 +28,17 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import javax.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.Map;
 
 import static java.time.LocalDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -325,6 +328,40 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(exception)
             .hasCauseInstanceOf(RestClientException.class)
+            .hasMessage(
+                "Failed to update case for %s service with case Id %s based on exception record %s",
+                configItem.getService(),
+                EXISTING_CASE_ID,
+                exceptionRecord.id
+            );
+    }
+
+    @Test
+    void updateCase_should_handle_response_validation_exception() {
+        // given
+        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
+        given(eventResponse.getEventId()).willReturn(EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR);
+        given(configItem.getUpdateUrl()).willReturn("url");
+        given(caseUpdateClient.updateCase(anyString(), any(CaseDetails.class), any(ExceptionRecord.class), anyString()))
+            .willThrow(new ConstraintViolationException("validation error message", emptySet()));
+        initMockData();
+
+        // when
+        Throwable exception = catchThrowable(() ->
+                ccdCaseUpdater.updateCase(
+                    exceptionRecord,
+                    configItem,
+                    true,
+                    "idamToken",
+                    "userId",
+                    EXISTING_CASE_ID
+                )
+        );
+
+        // then
+        assertThat(exception)
+            .isInstanceOf(CallbackException.class)
+            .hasCauseInstanceOf(ConstraintViolationException.class)
             .hasMessage(
                 "Failed to update case for %s service with case Id %s based on exception record %s",
                 configItem.getService(),
