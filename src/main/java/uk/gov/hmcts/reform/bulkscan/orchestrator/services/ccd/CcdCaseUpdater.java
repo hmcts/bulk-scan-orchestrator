@@ -22,9 +22,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
-import javax.validation.ConstraintViolationException;
 import java.util.List;
 import java.util.Optional;
+import javax.validation.ConstraintViolationException;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;

@@ -13,10 +13,10 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.respons
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
-import java.util.Set;
 
 @Component
 public class CaseUpdateClient {
