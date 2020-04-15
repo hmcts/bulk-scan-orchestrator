@@ -41,7 +41,7 @@ class CaseUpdateClientResponseValidationTest {
     }
 
     @Test
-    void should_require_not_null_empty_caseDetails() {
+    void should_require_not_null_caseDetails() {
         // given
         serverRespondsWith(
             new SuccessfulUpdateResponse(
