@@ -28,9 +28,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
-import javax.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.validation.ConstraintViolationException;
 
 import static java.time.LocalDateTime.now;
 import static java.util.Arrays.asList;
