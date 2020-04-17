@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.out.JurisdictionConfigurationStatus;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.OAuth2Configuration;
 
 import java.util.Collections;
 import java.util.Map;
@@ -58,7 +59,7 @@ class AuthenticationCheckerTest {
         JurisdictionToUserMapping mapping = new JurisdictionToUserMapping();
         mapping.setUsers(USERS);
 
-        authenticationChecker = new AuthenticationChecker(mapping, idamClient);
+        authenticationChecker = new AuthenticationChecker(mapping, idamClient,  mock(OAuth2Configuration.class));
     }
 
     @Test
