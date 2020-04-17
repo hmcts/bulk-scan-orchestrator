@@ -18,7 +18,6 @@ IDAM_USERS_BULKSCAN_PASSWORD = Password12
       connection-string: XXXXX
       queue-name: YYYY
   ```
-  
   - where: 
     - XXXX is the connection string from azure to the queue you intend to use.
     - YYYY is the name of the queue
