@@ -362,12 +362,7 @@ class CcdCaseUpdaterTest {
         assertThat(exception)
             .isInstanceOf(CallbackException.class)
             .hasCauseInstanceOf(ConstraintViolationException.class)
-            .hasMessage(
-                "Failed to update case for %s service with case Id %s based on exception record %s",
-                configItem.getService(),
-                EXISTING_CASE_ID,
-                exceptionRecord.id
-            );
+            .hasMessageContaining("Invalid case-update response");
     }
 
     @Test
