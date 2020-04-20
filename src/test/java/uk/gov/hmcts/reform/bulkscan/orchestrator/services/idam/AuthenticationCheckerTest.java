@@ -65,7 +65,7 @@ class AuthenticationCheckerTest {
     void checkSignInForJurisdiction_should_return_success_for_successfully_authenticated_jurisdiction() {
         willReturn("token")
             .given(idamClient)
-            .getAccessToken(
+            .authenticateUser(
                 SUCCESSFUL_JURISDICTION_USERNAME,
                 SUCCESSFUL_JURISDICTION_PASSWORD
             );
@@ -86,7 +86,7 @@ class AuthenticationCheckerTest {
 
         willThrow(exception)
             .given(idamClient)
-            .getAccessToken(LOCKED_ACCOUNT_JURISDICTION_USERNAME, LOCKED_ACCOUNT_JURISDICTION_PASSWORD);
+            .authenticateUser(LOCKED_ACCOUNT_JURISDICTION_USERNAME, LOCKED_ACCOUNT_JURISDICTION_PASSWORD);
 
         JurisdictionConfigurationStatus status =
             authenticationChecker.checkSignInForJurisdiction(LOCKED_ACCOUNT_JURISDICTION);
@@ -113,7 +113,7 @@ class AuthenticationCheckerTest {
                 )
             );
 
-        verify(idamClient, never()).getAccessToken(anyString(), anyString());
+        verify(idamClient, never()).authenticateUser(anyString(), anyString());
     }
 
     @Test
@@ -121,7 +121,7 @@ class AuthenticationCheckerTest {
         String errorMessage = "test exception";
         RuntimeException exception = new RuntimeException(errorMessage);
 
-        willThrow(exception).given(idamClient).getAccessToken(any(), any());
+        willThrow(exception).given(idamClient).authenticateUser(any(), any());
 
         assertThat(authenticationChecker.checkSignInForJurisdiction(LOCKED_ACCOUNT_JURISDICTION))
             .isEqualToComparingFieldByField(new JurisdictionConfigurationStatus(
@@ -136,11 +136,11 @@ class AuthenticationCheckerTest {
     void checkSignInForAllJurisdictions_should_return_statuses_of_all_jurisdictions() {
         willReturn("token")
             .given(idamClient)
-            .getAccessToken(SUCCESSFUL_JURISDICTION_USERNAME, SUCCESSFUL_JURISDICTION_PASSWORD);
+            .authenticateUser(SUCCESSFUL_JURISDICTION_USERNAME, SUCCESSFUL_JURISDICTION_PASSWORD);
 
         willThrow(createFeignException(HttpStatus.LOCKED.value()))
             .given(idamClient)
-            .getAccessToken(LOCKED_ACCOUNT_JURISDICTION_USERNAME, LOCKED_ACCOUNT_JURISDICTION_PASSWORD);
+            .authenticateUser(LOCKED_ACCOUNT_JURISDICTION_USERNAME, LOCKED_ACCOUNT_JURISDICTION_PASSWORD);
 
         assertThat(authenticationChecker.checkSignInForAllJurisdictions())
             .extracting(status -> tuple(status.jurisdiction, status.isCorrect, status.errorResponseStatus))
