@@ -13,16 +13,24 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.respons
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.util.Set;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validator;
+
 @Component
 public class CaseUpdateClient {
 
     private static final Logger log = LoggerFactory.getLogger(CaseUpdateClient.class);
 
+    private final Validator validator;
     private final RestTemplate restTemplate;
 
     public CaseUpdateClient(
+        Validator validator,
         RestTemplate restTemplate
     ) {
+        this.validator = validator;
         this.restTemplate = restTemplate;
     }
 
@@ -57,10 +65,18 @@ public class CaseUpdateClient {
             caseUpdate.exceptionRecord.id
         );
 
-        return restTemplate.postForObject(
+        SuccessfulUpdateResponse response = restTemplate.postForObject(
             url,
             new HttpEntity<>(caseUpdate, headers),
             SuccessfulUpdateResponse.class
         );
+
+        Set<ConstraintViolation<SuccessfulUpdateResponse>> violations = validator.validate(response);
+
+        if (violations.isEmpty()) {
+            return response;
+        } else {
+            throw new ConstraintViolationException(violations);
+        }
     }
 }

@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.List;
 import java.util.Optional;
+import javax.validation.ConstraintViolationException;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
@@ -208,6 +209,12 @@ public class CcdCaseUpdater {
 
             throw new CallbackException(message, exception);
         // rest of exceptions we did not handle appropriately. so far not such case
+        } catch (ConstraintViolationException exc) {
+            String errorMessage = getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id);
+            throw new CallbackException(
+                "Invalid case-update response. " + errorMessage,
+                exc
+            );
         } catch (Exception exception) {
             throw new CallbackException(
                 getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id),
