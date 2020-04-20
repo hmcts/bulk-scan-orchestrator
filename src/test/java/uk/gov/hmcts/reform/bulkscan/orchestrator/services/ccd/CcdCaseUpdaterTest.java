@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import feign.FeignException;
+import feign.Request;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +47,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
@@ -226,7 +228,7 @@ class CcdCaseUpdaterTest {
             .willReturn(noWarningsUpdateResponse);
         initMockData();
         prepareMockForSubmissionEventForCaseWorker()
-            .willThrow(new FeignException.Conflict("Msg", "Body".getBytes()));
+            .willThrow(new FeignException.Conflict("Msg", mock(Request.class), "Body".getBytes()));
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
@@ -252,7 +254,9 @@ class CcdCaseUpdaterTest {
         given(caseUpdateClient.updateCase(anyString(), any(CaseDetails.class), any(ExceptionRecord.class), anyString()))
             .willReturn(noWarningsUpdateResponse);
         initMockData();
-        prepareMockForSubmissionEventForCaseWorker().willThrow(new FeignException.BadRequest("Msg", "Body".getBytes()));
+        prepareMockForSubmissionEventForCaseWorker().willThrow(
+                new FeignException.BadRequest("Msg", mock(Request.class), "Body".getBytes())
+        );
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -283,7 +287,9 @@ class CcdCaseUpdaterTest {
             .willReturn(noWarningsUpdateResponse);
         initMockData();
         prepareMockForSubmissionEventForCaseWorker()
-            .willThrow(new FeignException.UnprocessableEntity("Msg", "Body".getBytes()));
+            .willThrow(
+                    new FeignException.UnprocessableEntity("Msg", mock(Request.class),  "Body".getBytes())
+            );
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
@@ -460,7 +466,7 @@ class CcdCaseUpdaterTest {
             anyString(),
             anyString()
         ))
-            .willThrow(new FeignException.MethodNotAllowed("Msg", "Body".getBytes()));
+            .willThrow(new FeignException.MethodNotAllowed("Msg", mock(Request.class),  "Body".getBytes()));
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -527,7 +533,9 @@ class CcdCaseUpdaterTest {
             anyString(),
             anyString()
         ))
-            .willThrow(new FeignException.NotFound("case not found", "Body".getBytes()));
+            .willThrow(
+                    new FeignException.NotFound("case not found",  mock(Request.class), "Body".getBytes())
+            );
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
@@ -556,7 +564,7 @@ class CcdCaseUpdaterTest {
             anyString(),
             anyString()
         ))
-            .willThrow(new FeignException.BadRequest("invalid", "Body".getBytes()));
+            .willThrow(new FeignException.BadRequest("invalid", mock(Request.class),  "Body".getBytes()));
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
