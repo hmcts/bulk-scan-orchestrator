@@ -2,17 +2,17 @@
   "id" : "dbd698ed-4dea-45b9-b18b-75be79eed00c",
   "name" : "oauth2_token",
   "request" : {
-    "url" : "/oauth2/token",
+    "url" : "/o/token",
     "method" : "POST",
     "bodyPatterns" : [ {
-      "equalTo" : "code=FuKdnrw4NHppHvgq&grant_type=authorization_code&redirect_uri=http%3A%2F%2Flocalhost%2Freceiver&client_secret=123456&client_id=bsp",
+      "equalTo" : "password=Password12&grant_type=password&scope=openid&client_secret=123456&redirect_uri=http%3A%2F%2Flocalhost%2Freceiver&client_id=bsp&username=bulkscan%2Bccd%40gmail.com",
       "caseInsensitive" : false
     } ]
   },
   "response" : {
     "status" : 200,
-    "body" : "{\"access_token\":\"eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJwMTY1bzNlY2c1dmExMjJ1anFiZWwxNmMzaCIsInN1YiI6IjY0MCIsImlhdCI6MTUzOTAwNzY1NiwiZXhwIjoxNTM5MDM2NDU2LCJkYXRhIjoiY2FzZXdvcmtlci1idWxrc2NhbixjYXNld29ya2VyLGNhc2V3b3JrZXItYnVsa3NjYW4tbG9hMSxjYXNld29ya2VyLWxvYTEiLCJ0eXBlIjoiQUNDRVNTIiwiaWQiOiI2NDAiLCJmb3JlbmFtZSI6IkJ1bGtzY2FuIiwic3VybmFtZSI6IkNhc2V3b3JrZXIiLCJkZWZhdWx0LXNlcnZpY2UiOiJDQ0QiLCJsb2EiOjEsImRlZmF1bHQtdXJsIjoiaHR0cHM6Ly9sb2NhbGhvc3Q6OTAwMC9wb2MvY2NkIiwiZ3JvdXAiOiJjYXNld29ya2VyLWJ1bGtzY2FuIn0.q6hDG0Z1Qbinwtl8TgeDrAVV0LlCTRtbQqBYoMjd03k\",\"token_type\":\"Bearer\",\"expires_in\":28800}",
-    "headers" : {
+    "body" : "{\"access_token\":\"eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJwMTY1bzNlY2c1dmExMjJ1anFiZWwxNmMzaCIsInN1YiI6IjY0MCIsImlhdCI6MTUzOTAwNzY1NiwiZXhwIjoxNTM5MDM2NDU2LCJkYXRhIjoiY2FzZXdvcmtlci1idWxrc2NhbixjYXNld29ya2VyLGNhc2V3b3JrZXItYnVsa3NjYW4tbG9hMSxjYXNld29ya2VyLWxvYTEiLCJ0eXBlIjoiQUNDRVNTIiwiaWQiOiI2NDAiLCJmb3JlbmFtZSI6IkJ1bGtzY2FuIiwic3VybmFtZSI6IkNhc2V3b3JrZXIiLCJkZWZhdWx0LXNlcnZpY2UiOiJDQ0QiLCJsb2EiOjEsImRlZmF1bHQtdXJsIjoiaHR0cHM6Ly9sb2NhbGhvc3Q6OTAwMC9wb2MvY2NkIiwiZ3JvdXAiOiJjYXNld29ya2VyLWJ1bGtzY2FuIn0.q6hDG0Z1Qbinwtl8TgeDrAVV0LlCTRtbQqBYoMjd03k\",\n  \"refresh_token\":\"NlLWJzcC1zeXN0ZW0tdXBkYXRlQGhtY3RzLm5ldCIsImN0cyI6Ik9BVVRIMl9TVEFURUxfyJdXaI5YUO6bNxmby3jkqRVUMe25nOwWMiOyqoZDg3ehMGJuSqMguQwMrg1kc8RB6ZtVugPctVgW_ffE9EYc3i8yfTqq8rUvxDJIdCT4jkArwuitcvSmUg2XCTy_YoqdwQcGZD5vI3Wya1polA\",\n  \"id_token\":\"oiUlMyNTYifQ.eyJhdF9oYXNoIjoibFpJWlg1M3BzRnVCZWlpMllLWTFBUSIsInN1YiI6ImRpdRVmxt1h2dGD9dAPBYSR6G0LEP_N5MUUCahVMDQeSBawzwW54AOsm4wwd5UUV_Xn8tAvovt4g-iZQGwBsi6t_FTLLYiPzapL-12jKtoCKtFmyLlfcBXTLaPywi8oFfinCRaVQ83BiKtIXuImGrYN8WeZVtvZwAQzmHqA4PoDJBzOJWptL-Z63wVFoQZy2AHaFLcR_Yv07w\",\n  \"token_type\":\"Bearer\",\n  \"scope\": \"openid\",\n  \"expires_in\":28800}",
+   "headers" : {
       "X-Application-Context" : "application",
       "Content-Type" : "application/json;charset=UTF-8",
       "Vary" : "Accept-Encoding",
