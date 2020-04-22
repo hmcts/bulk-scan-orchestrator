@@ -42,7 +42,7 @@ class CcdAuthenticatorFactoryTest {
     void should_sucessfully_return_authInfo() {
         given(users.getUser(eq(JURSIDICTION))).willReturn(USER_CREDS);
         given(tokenGenerator.generate()).willReturn(SERVICE_TOKEN);
-        given(idamClient.getAccessToken(eq(USER_NAME), eq(PASSWORD))).willReturn(USER_TOKEN);
+        given(idamClient.authenticateUser(eq(USER_NAME), eq(PASSWORD))).willReturn(USER_TOKEN);
         given(idamClient.getUserDetails(USER_TOKEN)).willReturn(USER_DETAILS);
 
         CcdAuthenticator authenticator = service.createForJurisdiction(JURSIDICTION);

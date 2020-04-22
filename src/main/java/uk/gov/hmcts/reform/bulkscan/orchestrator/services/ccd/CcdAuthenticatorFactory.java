@@ -28,7 +28,7 @@ public class CcdAuthenticatorFactory {
 
     public CcdAuthenticator createForJurisdiction(String jurisdiction) {
         Credential user = users.getUser(jurisdiction);
-        String userToken = idamClient.getAccessToken(user.getUsername(), user.getPassword());
+        String userToken = idamClient.authenticateUser(user.getUsername(), user.getPassword());
         UserDetails userDetails = idamClient.getUserDetails(userToken);
 
         //TODO: RPE-738 the userToken needs a to be cached and timed-out.
