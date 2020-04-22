@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,7 +36,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdVali
 
 @SpringBootTest
 @ActiveProfiles("nosb") // no servicebus queue handler registration
-@Disabled
 class CreateCaseTest {
 
     private static final String DISPLAY_WARNINGS_FIELD = "displayWarnings";
