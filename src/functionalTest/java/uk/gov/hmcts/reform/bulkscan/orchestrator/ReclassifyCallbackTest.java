@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ActiveProfiles("nosb") // no servicebus queue handler registration
+@Disabled
 public class ReclassifyCallbackTest {
 
     private static final String JOURNEY_CLASSIFICATION_FIELD_NAME = "journeyClassification";
