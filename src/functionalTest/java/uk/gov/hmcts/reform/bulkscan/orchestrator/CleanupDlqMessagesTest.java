@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
@@ -25,7 +24,6 @@ import static org.awaitility.Awaitility.await;
 @SpringBootTest
 @ActiveProfiles("nosb")  // no servicebus queue handler registration
 @Import(FunctionalQueueConfig.class)
-@Disabled
 public class CleanupDlqMessagesTest {
     private static final Logger LOG = LoggerFactory.getLogger(CleanupDlqMessagesTest.class);
 

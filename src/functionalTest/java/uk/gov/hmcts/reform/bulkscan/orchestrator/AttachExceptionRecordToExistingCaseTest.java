@@ -4,7 +4,6 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,7 +46,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 
 @SpringBootTest
 @ActiveProfiles("nosb") // no servicebus queue handler registration
-@Disabled
 class AttachExceptionRecordToExistingCaseTest {
 
     @Value("${test-url}")
