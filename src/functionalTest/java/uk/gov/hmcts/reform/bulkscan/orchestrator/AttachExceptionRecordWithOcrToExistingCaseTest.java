@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +37,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 
 @SpringBootTest
 @ActiveProfiles("nosb")
+@Disabled
 class AttachExceptionRecordWithOcrToExistingCaseTest {
 
     @Value("${test-url}")
