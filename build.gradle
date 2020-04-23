@@ -209,6 +209,8 @@ dependencies {
     exclude group: 'net.minidev', module: 'json-smart' // most up-to-date libraries use v2.* now. this one brings in 1.3
   }
   compile group: 'io.vavr', name: 'vavr', version: '0.10.2'
+  compile group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '2.8.1'
+  compile 'com.auth0:java-jwt:3.10.2'
 
   annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
 
