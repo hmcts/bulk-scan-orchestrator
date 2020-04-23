@@ -68,6 +68,7 @@ class AttachCaseCallbackServiceTest {
     private static final String IDAM_TOKEN = "IDAM_TOKEN";
     private static final String USER_ID = "USER_ID";
     private static final String EXISTING_CASE_ID = "12345";
+    private static final String EXISTING_CASE_TYPE = "Bulk_Scanned";
 
     private ExceptionRecord exceptionRecord;
     private ServiceConfigItem configItem;
@@ -85,6 +86,13 @@ class AttachCaseCallbackServiceTest {
         ))
         .build();
 
+    private static final CaseDetails EXISTING_CASE_DETAILS = CaseDetails.builder()
+        .jurisdiction(JURISDICTION)
+        .caseTypeId(EXISTING_CASE_TYPE)
+        .id(Long.parseLong(EXISTING_CASE_ID))
+        .data(emptyMap())
+        .build();
+
     @BeforeEach
     void setUp() {
         attachCaseCallbackService = new AttachCaseCallbackService(
@@ -97,7 +105,7 @@ class AttachCaseCallbackServiceTest {
 
         exceptionRecord = getExceptionRecord();
         given(exceptionRecordValidator.getValidation(CASE_DETAILS)).willReturn(Validation.valid(exceptionRecord));
-        given(ccdApi.getCase(anyString(), anyString())).willReturn(CaseDetails.builder().data(emptyMap()).build());
+        given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);
         configItem = new ServiceConfigItem();
         configItem.setUpdateUrl("url");
         given(serviceConfigProvider.getConfig("bulkscan")).willReturn(configItem);
@@ -106,8 +114,9 @@ class AttachCaseCallbackServiceTest {
     @Test
     void process_should_process_supplementary_evidence_with_ocr() {
         // given
-        given(ccdCaseUpdater.updateCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID))
-            .willReturn(new ProcessResult(emptyMap()));
+        given(ccdCaseUpdater.updateCase(
+            exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE
+        )).willReturn(new ProcessResult(emptyMap()));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachCaseCallbackService.process(
@@ -120,15 +129,17 @@ class AttachCaseCallbackServiceTest {
 
         // then
         assertThat(res.isRight()).isTrue();
-        verify(ccdCaseUpdater).updateCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID);
+        verify(ccdCaseUpdater)
+            .updateCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE);
         verify(paymentsProcessor).updatePayments(CASE_DETAILS, Long.parseLong(EXISTING_CASE_ID));
     }
 
     @Test
     void process_should_not_update_case_if_error_occurs() {
         // given
-        given(ccdCaseUpdater.updateCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID))
-            .willReturn(new ProcessResult(asList("warning1"), asList("error1")));
+        given(ccdCaseUpdater.updateCase(
+            exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE
+        )).willReturn(new ProcessResult(asList("warning1"), asList("error1")));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachCaseCallbackService.process(
@@ -144,7 +155,8 @@ class AttachCaseCallbackServiceTest {
         assertThat(res.getLeft().getWarnings()).isEqualTo(asList("warning1"));
         assertThat(res.getLeft().getErrors()).isEqualTo(asList("error1"));
 
-        verify(ccdCaseUpdater).updateCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID);
+        verify(ccdCaseUpdater)
+            .updateCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE);
         verifyNoInteractions(paymentsProcessor);
     }
 

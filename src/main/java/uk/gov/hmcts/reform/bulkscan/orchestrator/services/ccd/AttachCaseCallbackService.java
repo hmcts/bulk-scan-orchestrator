@@ -447,6 +447,8 @@ public class AttachCaseCallbackService {
             callBackEvent.exceptionRecordId
         );
 
+        CaseDetails targetCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
+
         ServiceConfigItem serviceConfigItem = getServiceConfig(exceptionRecordDetails);
         ProcessResult processResult = ccdCaseUpdater.updateCase(
             callBackEvent.exceptionRecord,
@@ -454,7 +456,8 @@ public class AttachCaseCallbackService {
             ignoreWarnings,
             callBackEvent.idamToken,
             callBackEvent.userId,
-            targetCaseCcdRef
+            targetCaseCcdRef,
+            targetCase.getCaseTypeId()
         );
 
         if (!processResult.getErrors().isEmpty() || !processResult.getWarnings().isEmpty()) {

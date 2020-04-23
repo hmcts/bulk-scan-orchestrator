@@ -194,7 +194,6 @@ class AttachExceptionRecordWithOcrTest {
         String invalidCaseId = "1234";
         setUpCaseSearchByCcdId(okJson(mapper.writeValueAsString(exceptionRecord(null))));
         setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
-        setUpCcdStartEvent(badRequest(), invalidCaseId);
 
         // request with invalid case reference
         byte[] requestBody = getRequestBodyWithAttachToCaseRef(
@@ -203,7 +202,7 @@ class AttachExceptionRecordWithOcrTest {
 
         postWithBody(requestBody)
             .statusCode(OK.value())
-            .body(RESPONSE_FIELD_ERRORS, hasItem("Invalid case ID: " + invalidCaseId));
+            .body(RESPONSE_FIELD_ERRORS, hasItem("Could not find case: " + invalidCaseId));
     }
 
     @DisplayName("Should return with the correct error message when start event fails with case not found response")
@@ -221,7 +220,7 @@ class AttachExceptionRecordWithOcrTest {
 
         postWithBody(requestBody)
             .statusCode(OK.value())
-            .body(RESPONSE_FIELD_ERRORS, hasItem("No case found for case ID: " + caseReference));
+            .body(RESPONSE_FIELD_ERRORS, hasItem("Could not find case: " + caseReference));
     }
 
     @DisplayName("Should fail correctly if ccd is down")
