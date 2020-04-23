@@ -4,5 +4,3 @@ supported_jurisdictions = ["SSCS", "BULKSCAN", "DIVORCE", "PROBATE", "CMC"]
 
 transformation_url_probate = "http://probate-back-office-demo.service.core-compute-demo.internal"
 update_url_probate = "http://probate-back-office-demo.service.core-compute-demo.internal"
-
-enable_ase = true
