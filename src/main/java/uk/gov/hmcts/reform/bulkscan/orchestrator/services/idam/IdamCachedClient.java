@@ -30,7 +30,7 @@ public class IdamCachedClient {
     public IdamCachedClient(
             IdamClient idamClient,
             JurisdictionToUserMapping users,
-            @Value("${idam.cache.refresh-before-expire-in-sec}") long refreshTokenBeforeExpiry
+            @Value("${idam.client.cache.refresh-before-expire-in-sec}") long refreshTokenBeforeExpiry
     ) {
         this.idamClient = idamClient;
         this.users = users;
