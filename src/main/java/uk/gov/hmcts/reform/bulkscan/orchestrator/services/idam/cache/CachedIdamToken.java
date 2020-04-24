@@ -2,11 +2,11 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.cache;
 
 public class CachedIdamToken {
 
-    public final String token;
+    public final String accessToken;
     public final long expiresIn;
 
-    public CachedIdamToken(String token, long expiresIn) {
-        this.token = token;
+    public CachedIdamToken(String accessToken, long expiresIn) {
+        this.accessToken = accessToken;
         this.expiresIn = expiresIn;
     }
 }

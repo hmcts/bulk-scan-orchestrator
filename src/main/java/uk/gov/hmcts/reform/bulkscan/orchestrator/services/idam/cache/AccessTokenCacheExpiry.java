@@ -21,17 +21,17 @@ public class AccessTokenCacheExpiry implements Expiry<String, CachedIdamToken> {
 
     @Override
     public long expireAfterCreate(
-        @NonNull String key,
-        @NonNull CachedIdamToken tokenResp,
+        @NonNull String jurisdiction,
+        @NonNull CachedIdamToken cachedIdamToken,
         long currentTime
     ) {
-        return TimeUnit.SECONDS.toNanos(tokenResp.expiresIn - refreshTokenBeforeExpiry);
+        return TimeUnit.SECONDS.toNanos(cachedIdamToken.expiresIn - refreshTokenBeforeExpiry);
     }
 
     @Override
     public long expireAfterUpdate(
-        @NonNull String key,
-        @NonNull CachedIdamToken value,
+        @NonNull String jurisdiction,
+        @NonNull CachedIdamToken cachedIdamToken,
         long currentTime,
         @NonNegative long currentDuration
     ) {
@@ -40,8 +40,8 @@ public class AccessTokenCacheExpiry implements Expiry<String, CachedIdamToken> {
 
     @Override
     public long expireAfterRead(
-        @NonNull String key,
-        @NonNull CachedIdamToken value,
+        @NonNull String jurisdiction,
+        @NonNull CachedIdamToken cachedIdamToken,
         long currentTime,
         @NonNegative long currentDuration
     ) {
