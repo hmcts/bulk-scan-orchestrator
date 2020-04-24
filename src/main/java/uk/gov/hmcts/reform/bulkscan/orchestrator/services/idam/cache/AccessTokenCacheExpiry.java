@@ -4,9 +4,11 @@ import com.github.benmanes.caffeine.cache.Expiry;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
 
+@Component
 public class AccessTokenCacheExpiry implements Expiry<String, CachedIdamToken> {
 
     private final long refreshTokenBeforeExpiry;
