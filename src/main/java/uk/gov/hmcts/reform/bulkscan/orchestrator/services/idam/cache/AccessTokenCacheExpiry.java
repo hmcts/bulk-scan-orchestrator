@@ -14,36 +14,36 @@ public class AccessTokenCacheExpiry implements Expiry<String, CachedIdamToken> {
     private final long refreshTokenBeforeExpiry;
 
     public AccessTokenCacheExpiry(
-            @Value("${idam.client.cache.refresh-before-expire-in-sec}") long refreshTokenBeforeExpiry
+        @Value("${idam.client.cache.refresh-before-expire-in-sec}") long refreshTokenBeforeExpiry
     ) {
         this.refreshTokenBeforeExpiry = refreshTokenBeforeExpiry;
     }
 
     @Override
     public long expireAfterCreate(
-            @NonNull String key,
-            @NonNull CachedIdamToken tokenResp,
-            long currentTime
+        @NonNull String key,
+        @NonNull CachedIdamToken tokenResp,
+        long currentTime
     ) {
         return TimeUnit.SECONDS.toNanos(tokenResp.expiresIn - refreshTokenBeforeExpiry);
     }
 
     @Override
     public long expireAfterUpdate(
-            @NonNull String key,
-            @NonNull CachedIdamToken value,
-            long currentTime,
-            @NonNegative long currentDuration
+        @NonNull String key,
+        @NonNull CachedIdamToken value,
+        long currentTime,
+        @NonNegative long currentDuration
     ) {
         return currentDuration;
     }
 
     @Override
     public long expireAfterRead(
-            @NonNull String key,
-            @NonNull CachedIdamToken value,
-            long currentTime,
-            @NonNegative long currentDuration
+        @NonNull String key,
+        @NonNull CachedIdamToken value,
+        long currentTime,
+        @NonNegative long currentDuration
     ) {
         return currentDuration;
     }
