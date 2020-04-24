@@ -28,7 +28,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.badRequestEntity;
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
-import static com.github.tomakehurst.wiremock.client.WireMock.notFound;
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.serverError;
@@ -187,12 +186,11 @@ class AttachExceptionRecordWithOcrTest {
         postWithBody(requestBody).statusCode(INTERNAL_SERVER_ERROR.value());
     }
 
-    @DisplayName("Should return with the correct error message when start event fails for invalid case reference")
+    @DisplayName("Should return with the correct error message when service case reference is invalid")
     @Test
     void should_return_correct_error_for_the_invalid_case_id() throws Exception {
-        String invalidCaseId = "1234";
+        String invalidCaseId = "10a67";
         setUpCaseSearchByCcdId(okJson(mapper.writeValueAsString(exceptionRecord(null))));
-        setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
 
         // request with invalid case reference
         byte[] requestBody = getRequestBodyWithAttachToCaseRef(
@@ -201,25 +199,23 @@ class AttachExceptionRecordWithOcrTest {
 
         postWithBody(requestBody)
             .statusCode(OK.value())
-            .body(RESPONSE_FIELD_ERRORS, hasItem("Could not find case: " + invalidCaseId));
+            .body(RESPONSE_FIELD_ERRORS, hasItem(String.format("Invalid case reference: '%s'", invalidCaseId)));
     }
 
-    @DisplayName("Should return with the correct error message when start event fails with case not found response")
+    @DisplayName("Should return with the correct error message when service case doesn't exist")
     @Test
     void should_return_correct_error_when_no_case_found_for_the_case_id() throws Exception {
-        String caseReference = "1234123412341234";
+        String targetCaseReference = "1234123412341234";
         setUpCaseSearchByCcdId(okJson(mapper.writeValueAsString(exceptionRecord(null))));
-        setUpClientUpdate(getResponseBody("client-update-ok-no-warnings.json"));
-        setUpCcdStartEvent(notFound(), caseReference);
 
         // request with case id which does not exist
         byte[] requestBody = getRequestBodyWithAttachToCaseRef(
-            "valid-supplementary-evidence-with-ocr.json", caseReference
+            "valid-supplementary-evidence-with-ocr.json", targetCaseReference
         );
 
         postWithBody(requestBody)
             .statusCode(OK.value())
-            .body(RESPONSE_FIELD_ERRORS, hasItem("Could not find case: " + caseReference));
+            .body(RESPONSE_FIELD_ERRORS, hasItem("Could not find case: " + targetCaseReference));
     }
 
     @DisplayName("Should fail correctly if ccd is down")
