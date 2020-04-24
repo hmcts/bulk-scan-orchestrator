@@ -1,19 +1,15 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.cache;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.Expiry;
-import org.checkerframework.checker.index.qual.NonNegative;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.exceptions.InvalidTokenException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.Credential;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.JurisdictionToUserMapping;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
-
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class IdamCachedClient {
@@ -25,18 +21,16 @@ public class IdamCachedClient {
 
     private final IdamClient idamClient;
     private final JurisdictionToUserMapping users;
-    private long refreshTokenBeforeExpiry;
 
     public IdamCachedClient(
             IdamClient idamClient,
             JurisdictionToUserMapping users,
-            @Value("${idam.client.cache.refresh-before-expire-in-sec}") long refreshTokenBeforeExpiry
+            AccessTokenCacheExpiry accessTokenCacheExpiry
     ) {
         this.idamClient = idamClient;
         this.users = users;
-        this.refreshTokenBeforeExpiry = refreshTokenBeforeExpiry;
         this.accessTokenCache = Caffeine.newBuilder()
-                .expireAfter(new AccessTokenCacheExpiry())
+                .expireAfter(accessTokenCacheExpiry)
                 .build();
     }
 
@@ -73,35 +67,4 @@ public class IdamCachedClient {
         return expires.asLong();
     }
 
-    private class AccessTokenCacheExpiry implements Expiry<String, CachedIdamToken> {
-
-        @Override
-        public long expireAfterCreate(
-                @NonNull String key,
-                @NonNull CachedIdamToken tokenResp,
-                long currentTime
-        ) {
-            return TimeUnit.SECONDS.toNanos(tokenResp.expiresIn - refreshTokenBeforeExpiry);
-        }
-
-        @Override
-        public long expireAfterUpdate(
-                @NonNull String key,
-                @NonNull CachedIdamToken value,
-                long currentTime,
-                @NonNegative long currentDuration
-        ) {
-            return currentDuration;
-        }
-
-        @Override
-        public long expireAfterRead(
-                @NonNull String key,
-                @NonNull CachedIdamToken value,
-                long currentTime,
-                @NonNegative long currentDuration
-        ) {
-            return currentDuration;
-        }
-    }
 }

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.cache;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -6,6 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.exceptions.InvalidTokenException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.Credential;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.JurisdictionToUserMapping;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 
 import java.util.concurrent.TimeUnit;
@@ -51,7 +53,7 @@ class IdamCachedClientTest {
         this.idamCachedClient = new IdamCachedClient(
                 idamClient,
                 users,
-                refreshTokenBeforeExpiry
+                new AccessTokenCacheExpiry(refreshTokenBeforeExpiry)
         );
     }
 
@@ -151,7 +153,7 @@ class IdamCachedClientTest {
         IdamCachedClient idamCachedClientQuickExpiry = new IdamCachedClient(
                 idamClient,
                 users,
-                28798
+                new AccessTokenCacheExpiry(28798)
         );
 
         String jurisdiction = "probate";

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.cache;
 
 public class CachedIdamToken {
 
