@@ -200,7 +200,7 @@ dependencies {
   compile group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformLogging
   compile group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
   compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '3.1.1'
-  compile group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '1.3.2'
+  compile group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '1.4.2'
   compile group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: '4.6.4'
   compile group: 'uk.gov.hmcts.reform', name: 'health-spring-boot-starter', version:'0.0.5'
   compile group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version:'0.0.4'
@@ -209,6 +209,9 @@ dependencies {
     exclude group: 'net.minidev', module: 'json-smart' // most up-to-date libraries use v2.* now. this one brings in 1.3
   }
   compile group: 'io.vavr', name: 'vavr', version: '0.10.2'
+  compile group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '2.8.1'
+  compile group: 'com.auth0',name: 'java-jwt' ,version :'3.10.2'
+
 
   annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
 
