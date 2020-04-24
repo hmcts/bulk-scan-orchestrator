@@ -40,6 +40,8 @@ idam:
     id: 'bsp'
     secret: 123456
     redirect_uri: http://localhost/receiver
+    cache:
+      refresh-before-expire-in-sec: 300
   users:
     bulkscan:
       username: ${IDAM_USER_NAME:bulkscan+ccd@gmail.com}
