@@ -189,7 +189,7 @@ class AttachExceptionRecordWithOcrTest {
     @DisplayName("Should return with the correct error message when service case reference is invalid")
     @Test
     void should_return_correct_error_for_the_invalid_case_id() throws Exception {
-        String invalidCaseId = "10a67";
+        String invalidCaseId = "abc";
         setUpCaseSearchByCcdId(okJson(mapper.writeValueAsString(exceptionRecord(null))));
 
         // request with invalid case reference
