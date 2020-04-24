@@ -261,7 +261,7 @@ class CcdCaseUpdaterTest {
             .willReturn(noWarningsUpdateResponse);
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willThrow(
-            new FeignException.BadRequest("Msg", mock(Request.class), "Body".getBytes())
+                new FeignException.BadRequest("Msg", mock(Request.class), "Body".getBytes())
         );
 
         // when
@@ -295,7 +295,7 @@ class CcdCaseUpdaterTest {
         initMockData();
         prepareMockForSubmissionEventForCaseWorker()
             .willThrow(
-                new FeignException.UnprocessableEntity("Msg", mock(Request.class), "Body".getBytes())
+                    new FeignException.UnprocessableEntity("Msg", mock(Request.class),  "Body".getBytes())
             );
 
         // when
@@ -363,15 +363,15 @@ class CcdCaseUpdaterTest {
 
         // when
         Throwable exception = catchThrowable(() ->
-            ccdCaseUpdater.updateCase(
-                exceptionRecord,
-                configItem,
-                true,
-                "idamToken",
-                "userId",
-                EXISTING_CASE_ID,
-                EXISTING_CASE_TYPE_ID
-            )
+                ccdCaseUpdater.updateCase(
+                    exceptionRecord,
+                    configItem,
+                    true,
+                    "idamToken",
+                    "userId",
+                    EXISTING_CASE_ID,
+                    EXISTING_CASE_TYPE_ID
+                )
         );
 
         // then
@@ -478,7 +478,7 @@ class CcdCaseUpdaterTest {
             anyString(),
             anyString()
         ))
-            .willThrow(new FeignException.MethodNotAllowed("Msg", mock(Request.class), "Body".getBytes()));
+            .willThrow(new FeignException.MethodNotAllowed("Msg", mock(Request.class),  "Body".getBytes()));
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -548,7 +548,7 @@ class CcdCaseUpdaterTest {
             anyString()
         ))
             .willThrow(
-                new FeignException.NotFound("case not found", mock(Request.class), "Body".getBytes())
+                    new FeignException.NotFound("case not found",  mock(Request.class), "Body".getBytes())
             );
 
         // when
@@ -579,7 +579,7 @@ class CcdCaseUpdaterTest {
             anyString(),
             anyString()
         ))
-            .willThrow(new FeignException.BadRequest("invalid", mock(Request.class), "Body".getBytes()));
+            .willThrow(new FeignException.BadRequest("invalid", mock(Request.class),  "Body".getBytes()));
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
