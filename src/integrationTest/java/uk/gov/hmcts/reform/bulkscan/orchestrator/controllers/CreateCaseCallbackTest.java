@@ -175,7 +175,12 @@ class CreateCaseCallbackTest {
         postWithBody(getRequestBody("valid-exception.json"))
             .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
             // 1539007368674134 is from valid-exception.json
-            .body("message", equalTo("Failed to create new case for exception record with Id 1539007368674134"));
+            .body(
+                "message",
+                equalTo(
+                    "Failed to create new case for exception record with Id 1539007368674134. Service: bulkscan"
+                )
+            );
     }
 
     @ParameterizedTest
