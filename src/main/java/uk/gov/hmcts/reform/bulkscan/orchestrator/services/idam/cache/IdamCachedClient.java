@@ -42,8 +42,8 @@ public class IdamCachedClient {
             .expireAfter(accessTokenCacheExpiry)
             .writer(new CacheWriter<String, CachedIdamToken>() {
                 @Override
-                public void write(@NonNull String jurisdiction, @NonNull CachedIdamToken value) {
-                    log.info("Write access token to cache for jurisdiction: {}", jurisdiction);
+                public void write(@NonNull String key, @NonNull CachedIdamToken value) {
+                    throw new UnsupportedOperationException("Cache put() or replace() not supported.");
                 }
 
                 @Override
@@ -53,7 +53,9 @@ public class IdamCachedClient {
                             + "Access token removed for jurisdiction: {}, cause: {} ",
                         jurisdiction,
                         cause);
-                    userDetailsCache.invalidate(cachedIdamToken.accessToken);
+                    if (cachedIdamToken.accessToken != null) {
+                        userDetailsCache.invalidate(cachedIdamToken.accessToken);
+                    }
                 }
 
                 }
