@@ -58,7 +58,7 @@ public class IdamCachedClient {
     }
 
     private CachedIdamToken retrieveToken(String jurisdiction) {
-        log.info("Retrieve access token for jurisdiction: {} ", jurisdiction);
+        log.info("Retrieve access token for jurisdiction: {} from IDAM", jurisdiction);
         Credential user = users.getUser(jurisdiction);
         String tokenWithBearer = idamClient.authenticateUser(
             user.getUsername(),
@@ -102,7 +102,7 @@ public class IdamCachedClient {
     }
 
     private UserDetails retrieveUserDetails(String accessToken) {
-        log.info("Retrieve user details");
+        log.info("Retrieve user details from IDAM");
         return idamClient.getUserDetails(accessToken);
     }
 
