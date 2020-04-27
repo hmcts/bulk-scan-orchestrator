@@ -42,7 +42,7 @@ public class IdamCachedClient {
             .writer(new CacheWriter<String, CachedIdamToken>() {
                 @Override
                 public void write(@NonNull String key, @NonNull CachedIdamToken value) {
-                    throw new UnsupportedOperationException("Cache put() or replace() not supported.");
+                    log.warn("Cache put() or replace() called, not recommended");
                 }
 
                 @Override
