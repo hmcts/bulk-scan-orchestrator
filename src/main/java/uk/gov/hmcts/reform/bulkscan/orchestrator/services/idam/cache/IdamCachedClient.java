@@ -53,7 +53,7 @@ public class IdamCachedClient {
                             + "Access token removed for jurisdiction: {}, cause: {} ",
                         jurisdiction,
                         cause);
-                    if (cachedIdamToken.accessToken != null) {
+                    if (cachedIdamToken != null) {
                         userDetailsCache.invalidate(cachedIdamToken.accessToken);
                     }
                 }
@@ -117,4 +117,7 @@ public class IdamCachedClient {
         return idamClient.getUserDetails(accessToken);
     }
 
+    public void maintainCaches(){
+
+    }
 }
