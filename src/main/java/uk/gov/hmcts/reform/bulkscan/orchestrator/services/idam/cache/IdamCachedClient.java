@@ -43,7 +43,7 @@ public class IdamCachedClient {
             .writer(new CacheWriter<String, CachedIdamToken>() {
                 @Override
                 public void write(@NonNull String jurisdiction, @NonNull CachedIdamToken value) {
-
+                    log.info("Write access token to cache for jurisdiction: {}", jurisdiction);
                 }
 
                 @Override
