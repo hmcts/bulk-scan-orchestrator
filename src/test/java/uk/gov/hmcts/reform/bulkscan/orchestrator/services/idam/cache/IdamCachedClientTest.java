@@ -241,20 +241,19 @@ class IdamCachedClientTest {
         given(idamClient.authenticateUser(USERNAME, PASSWORD)).willReturn(JWT, JWT2);
 
         UserDetails expectedUserDetails1 =  new UserDetails("12","q@a.com","","",null);
+        UserDetails expectedUserDetails2 = USER_DETAILS;
 
-        given(idamClient.getUserDetails(JWT)).willReturn(expectedUserDetails1, USER_DETAILS);
+        given(idamClient.getUserDetails(JWT)).willReturn(expectedUserDetails1, expectedUserDetails2);
 
-        String token1 =
-            idamCachedClient.getAccessToken(jurisdiction1);
-        UserDetails userDetails = idamCachedClient
-            .getUserDetails(token1);
+        String token1 = idamCachedClient.getAccessToken(jurisdiction1);
+        UserDetails userDetailsBefore = idamCachedClient.getUserDetails(token1);
 
         idamCachedClient.removeAccessTokenFromCache(jurisdiction1);
 
-        assertThat(userDetails).isEqualTo(expectedUserDetails1);
+        assertThat(userDetailsBefore).isEqualTo(expectedUserDetails1);
 
-        UserDetails userDetails2 = idamCachedClient.getUserDetails(token1);
-        assertThat(userDetails2).usingRecursiveComparison().isEqualTo(USER_DETAILS);
+        UserDetails userDetailsBeforeInvalidating = idamCachedClient.getUserDetails(token1);
+        assertThat(userDetailsBeforeInvalidating).usingRecursiveComparison().isEqualTo(expectedUserDetails2);
         verify(idamClient, times(2)).getUserDetails(any());
 
     }
