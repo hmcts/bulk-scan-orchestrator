@@ -210,21 +210,17 @@ class IdamCachedClientTest {
 
     @Test
     public void should_get_userDetail_when_no_error() {
-
         given(idamClient.getUserDetails(JWT)).willReturn(USER_DETAILS);
 
         UserDetails userDetails1 =
             idamCachedClient.getUserDetails(JWT);
 
         assertThat(userDetails1).usingRecursiveComparison().isEqualTo(USER_DETAILS);
-
         verify(idamClient).getUserDetails(any());
-
     }
 
     @Test
     public void should_retrieve_userDetail_from_cache_when_value_in_cache() {
-
         given(idamClient.getUserDetails(JWT)).willReturn(USER_DETAILS);
 
         UserDetails userDetails1 =
@@ -234,14 +230,11 @@ class IdamCachedClientTest {
 
         assertThat(userDetails1).usingRecursiveComparison().isEqualTo(USER_DETAILS);
         assertThat(userDetails2).usingRecursiveComparison().isEqualTo(userDetails1);
-
         verify(idamClient).getUserDetails(any());
-
     }
 
     @Test
     public void should_invalidate_userDetail_when_cached_token_removed_from_cache() {
-
         String jurisdiction1 = "divorce";
 
         given(users.getUser(jurisdiction1)).willReturn(new Credential(USERNAME, PASSWORD));
