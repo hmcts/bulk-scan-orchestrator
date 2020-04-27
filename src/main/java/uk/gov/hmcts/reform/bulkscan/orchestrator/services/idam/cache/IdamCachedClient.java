@@ -57,7 +57,7 @@ public class IdamCachedClient {
         accessTokenCache.invalidate(jurisdiction);
     }
 
-    public void cleanUpCaches() {
+    public void maintainCaches() {
         accessTokenCache.cleanUp();
         userDetailsCache.cleanUp();
     }

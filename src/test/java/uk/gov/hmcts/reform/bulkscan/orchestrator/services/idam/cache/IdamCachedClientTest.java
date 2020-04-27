@@ -250,7 +250,7 @@ class IdamCachedClientTest {
         assertThat(userDetailsBefore).isEqualTo(expectedUserDetails1);
 
         idamCachedClient.removeAccessTokenFromCache(jurisdiction1);
-        idamCachedClient.cleanUpCaches();
+        idamCachedClient.maintainCaches();
 
         UserDetails userDetailsAfterInvalidating = idamCachedClient.getUserDetails(token1);
         assertThat(userDetailsAfterInvalidating).usingRecursiveComparison().isEqualTo(expectedUserDetails2);
