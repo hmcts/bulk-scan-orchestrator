@@ -74,6 +74,10 @@ public class IdamCachedClient {
         return cachedIdamToken.accessToken;
     }
 
+    //for sonar, will remove
+    public void putCachedAccessToken(String jurisdiction, CachedIdamToken cachedIdamToken ){
+        this.accessTokenCache.put(jurisdiction, cachedIdamToken);
+    }
     public void removeAccessTokenFromCache(String jurisdiction) {
         log.info("Remove access token from cache for jurisdiction: {} ", jurisdiction);
         accessTokenCache.invalidate(jurisdiction);
@@ -106,7 +110,6 @@ public class IdamCachedClient {
         return expires.asLong();
     }
 
-
     public UserDetails getUserDetails(String accessToken) {
         log.info("Get user details");
         return this.userDetailsCache.get(accessToken, this::retrieveUserDetails);
@@ -115,9 +118,5 @@ public class IdamCachedClient {
     private UserDetails retrieveUserDetails(String accessToken) {
         log.info("Retrieve user details from IDAM");
         return idamClient.getUserDetails(accessToken);
-    }
-
-    public void maintainCaches(){
-
     }
 }

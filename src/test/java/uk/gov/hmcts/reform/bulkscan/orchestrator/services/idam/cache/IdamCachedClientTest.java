@@ -160,6 +160,15 @@ class IdamCachedClientTest {
     }
 
     @Test
+    void should_throw_exception_when_put_to_cache() {
+        String jurisdiction = "probate";
+
+        assertThatThrownBy(() -> idamCachedClient.putCachedAccessToken(jurisdiction, new CachedIdamToken("ssa",23)))
+            .isInstanceOf(UnsupportedOperationException.class)
+            .hasMessageContaining("Cache put() or replace() not supported.");
+    }
+
+    @Test
     void should_create_token_when_cache_is_expired() throws InterruptedException {
 
         IdamCachedClient idamCachedClientQuickExpiry = new IdamCachedClient(
