@@ -79,6 +79,10 @@ public class IdamCachedClient {
         accessTokenCache.invalidate(jurisdiction);
     }
 
+    public void cleanUpAccessTokenCache() {
+        accessTokenCache.cleanUp();
+    }
+
     private CachedIdamToken retrieveToken(String jurisdiction) {
         log.info("Retrieve access token for jurisdiction: {} from IDAM", jurisdiction);
         Credential user = users.getUser(jurisdiction);
@@ -106,6 +110,18 @@ public class IdamCachedClient {
         return expires.asLong();
     }
 
+    private void onCachedIdamTokenRemoval(
+        String jurisdiction,
+        CachedIdamToken cachedIdamToken,
+        RemovalCause cause
+    ) {
+        log.info("On access token removal invalidate user details. "
+                + "Access token removed for jurisdiction: {}, cause: {} ",
+            jurisdiction,
+            cause);
+        userDetailsCache.invalidate(cachedIdamToken.accessToken);
+    }
+
     public UserDetails getUserDetails(String accessToken) {
         log.info("Get user details");
         return this.userDetailsCache.get(accessToken, this::retrieveUserDetails);
@@ -115,4 +131,5 @@ public class IdamCachedClient {
         log.info("Retrieve user details from IDAM");
         return idamClient.getUserDetails(accessToken);
     }
+
 }
