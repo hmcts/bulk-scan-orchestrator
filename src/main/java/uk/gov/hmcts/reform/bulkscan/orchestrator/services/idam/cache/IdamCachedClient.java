@@ -76,7 +76,7 @@ public class IdamCachedClient {
 
     //for sonar, will remove
     public void putCachedAccessToken(String jurisdiction, CachedIdamToken cachedIdamToken) {
-        this.accessTokenCache.put(jurisdiction, cachedIdamToken);
+        accessTokenCache.put(jurisdiction, cachedIdamToken);
     }
 
     public void removeAccessTokenFromCache(String jurisdiction) {
