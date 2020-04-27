@@ -41,7 +41,7 @@ public class IdamCachedClient {
     }
 
     public void removeAccessTokenFromCache(String jurisdiction) {
-        this.accessTokenCache.invalidate(jurisdiction);
+        accessTokenCache.invalidate(jurisdiction);
     }
 
     private CachedIdamToken retrieveToken(String jurisdiction) {
