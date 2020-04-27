@@ -51,9 +51,7 @@ public class IdamCachedClient {
                     @NonNull CachedIdamToken cachedIdamToken,
                     @NonNull RemovalCause cause
                 ) {
-                    log.info(
-                        "Invalidate user details,"
-                            + "Access token deleted for jurisdiction: {}, cause: {} ",
+                    log.info("Access token deleted for jurisdiction: {}, cause: {}, Invalidate user details.",
                         jurisdiction,
                         cause
                     );
