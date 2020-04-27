@@ -110,18 +110,6 @@ public class IdamCachedClient {
         return expires.asLong();
     }
 
-    private void onCachedIdamTokenRemoval(
-        String jurisdiction,
-        CachedIdamToken cachedIdamToken,
-        RemovalCause cause
-    ) {
-        log.info("On access token removal invalidate user details. "
-                + "Access token removed for jurisdiction: {}, cause: {} ",
-            jurisdiction,
-            cause);
-        userDetailsCache.invalidate(cachedIdamToken.accessToken);
-    }
-
     public UserDetails getUserDetails(String accessToken) {
         log.info("Get user details");
         return this.userDetailsCache.get(accessToken, this::retrieveUserDetails);
