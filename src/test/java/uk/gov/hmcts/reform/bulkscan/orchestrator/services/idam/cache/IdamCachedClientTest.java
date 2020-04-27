@@ -176,4 +176,24 @@ class IdamCachedClientTest {
         verify(users, times(2)).getUser(any());
         verify(idamClient, times(2)).authenticateUser(any(), any());
     }
+
+    @Test
+    void should_create_new_token_when_token_removed_from_cache() {
+
+        String jurisdiction = "probate";
+
+        given(users.getUser(jurisdiction)).willReturn(new Credential(USERNAME, PASSWORD));
+        given(idamClient.authenticateUser(USERNAME, PASSWORD)).willReturn(JWT, JWT2);
+        String token1 = idamCachedClient.getAccessToken(jurisdiction);
+
+        idamCachedClient.removeAccessTokenFromCache(jurisdiction);
+
+        String token2 = idamCachedClient.getAccessToken(jurisdiction);
+
+        assertThat(JWT).isEqualTo(token1);
+        assertThat(JWT2).isEqualTo(token2);
+        assertThat(token1).isNotEqualTo(token2);
+        verify(users, times(2)).getUser(any());
+        verify(idamClient, times(2)).authenticateUser(any(), any());
+    }
 }

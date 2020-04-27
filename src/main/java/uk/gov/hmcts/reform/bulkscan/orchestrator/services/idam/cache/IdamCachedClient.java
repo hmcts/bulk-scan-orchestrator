@@ -40,6 +40,10 @@ public class IdamCachedClient {
         return cachedIdamToken.accessToken;
     }
 
+    public void removeAccessTokenFromCache(String jurisdiction) {
+        this.accessTokenCache.invalidate(jurisdiction);
+    }
+
     private CachedIdamToken retrieveToken(String jurisdiction) {
         Credential user = users.getUser(jurisdiction);
         String tokenWithBearer = idamClient.authenticateUser(
