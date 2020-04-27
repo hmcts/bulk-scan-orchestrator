@@ -8,7 +8,6 @@ import com.github.benmanes.caffeine.cache.CacheWriter;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.RemovalCause;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -41,27 +40,29 @@ public class IdamCachedClient {
         this.accessTokenCache = Caffeine.newBuilder()
             .expireAfter(accessTokenCacheExpiry)
             .writer(new CacheWriter<String, CachedIdamToken>() {
-                        @Override
-                        public void write(@NonNull String key, @NonNull CachedIdamToken value) {
-                            throw new UnsupportedOperationException(
-                                "Cache put() or replace() not supported.");
-                        }
+                @Override
+                public void write(@NonNull String key, @NonNull CachedIdamToken value) {
+                    throw new UnsupportedOperationException("Cache put() or replace() not supported.");
+                }
 
-                        @Override
-                        public void delete(@NonNull String jurisdiction,
-                            @NonNull CachedIdamToken cachedIdamToken,
-                            @NonNull RemovalCause cause) {
-                            log.info("On access token removal invalidate user details. "
-                                    + "Access token removed for jurisdiction: {}, cause: {} ",
-                                jurisdiction,
-                                cause);
-                            userDetailsCache.invalidate(cachedIdamToken.accessToken);
-                        }
-                    }
+                @Override
+                public void delete(
+                    @NonNull String jurisdiction,
+                    @NonNull CachedIdamToken cachedIdamToken,
+                    @NonNull RemovalCause cause
+                ) {
+                    log.info(
+                        "On access token removal invalidate user details. "
+                            + "Access token removed for jurisdiction: {}, cause: {} ",
+                        jurisdiction,
+                        cause);
+                    userDetailsCache.invalidate(cachedIdamToken.accessToken);
+                }
+            }
             )
             .build();
 
-        this.userDetailsCache =  Caffeine.newBuilder()
+        this.userDetailsCache = Caffeine.newBuilder()
             .maximumSize(200)
             .build();
     }
