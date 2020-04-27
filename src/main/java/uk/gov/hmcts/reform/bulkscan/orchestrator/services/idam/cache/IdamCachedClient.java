@@ -55,7 +55,8 @@ public class IdamCachedClient {
                         "On delete token removal, invalidate user details. "
                             + "Access token deleted for jurisdiction: {}, cause: {} ",
                         jurisdiction,
-                        cause);
+                        cause
+                    );
                     userDetailsCache.invalidate(cachedIdamToken.accessToken);
                 }
             }
