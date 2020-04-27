@@ -234,8 +234,7 @@ class IdamCachedClientTest {
     }
 
     @Test
-    public void should_invalidate_userDetail_when_cached_token_removed_from_cache()
-        throws InterruptedException {
+    public void should_invalidate_userDetail_when_cached_token_removed_from_cache() {
         String jurisdiction1 = "divorce";
 
         given(users.getUser(jurisdiction1)).willReturn(new Credential(USERNAME, PASSWORD));
