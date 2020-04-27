@@ -234,8 +234,8 @@ class CreateCaseCallbackTest {
             .body(
                 "message",
                 equalTo(
-                    "Failed to receive transformed exception record from "
-                        + "bulkscan client for exception record 1539007368674134"
+                    "Failed to receive transformed exception record from service "
+                        + "bulkscan for exception record 1539007368674134"
                 )
             );
     }
