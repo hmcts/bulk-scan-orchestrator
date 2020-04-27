@@ -55,6 +55,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 class CcdCaseUpdaterTest {
 
     private static final String EXISTING_CASE_ID = "existing_case_id";
+    private static final String EXISTING_CASE_TYPE_ID = "existing_case_type";
 
     private CcdCaseUpdater ccdCaseUpdater;
 
@@ -133,7 +134,8 @@ class CcdCaseUpdaterTest {
             true,
             "idamToken",
             "userId",
-            EXISTING_CASE_ID
+            EXISTING_CASE_ID,
+            EXISTING_CASE_TYPE_ID
         );
 
         // then
@@ -160,7 +162,8 @@ class CcdCaseUpdaterTest {
             true,
             "idamToken",
             "userId",
-            EXISTING_CASE_ID
+            EXISTING_CASE_ID,
+            EXISTING_CASE_TYPE_ID
         );
 
         // then
@@ -184,7 +187,8 @@ class CcdCaseUpdaterTest {
             false,
             "idamToken",
             "userId",
-            EXISTING_CASE_ID
+            EXISTING_CASE_ID,
+            EXISTING_CASE_TYPE_ID
         );
 
         // then
@@ -211,7 +215,8 @@ class CcdCaseUpdaterTest {
             false,
             "idamToken",
             "userId",
-            EXISTING_CASE_ID
+            EXISTING_CASE_ID,
+            EXISTING_CASE_TYPE_ID
         );
 
         // then
@@ -237,7 +242,8 @@ class CcdCaseUpdaterTest {
             true,
             "idamToken",
             "userId",
-            EXISTING_CASE_ID
+            EXISTING_CASE_ID,
+            EXISTING_CASE_TYPE_ID
         );
 
         // then
@@ -266,7 +272,8 @@ class CcdCaseUpdaterTest {
                     true,
                     "idamToken",
                     "userId",
-                    EXISTING_CASE_ID
+                    EXISTING_CASE_ID,
+                    EXISTING_CASE_TYPE_ID
                 ),
             CallbackException.class
         );
@@ -298,7 +305,8 @@ class CcdCaseUpdaterTest {
             true,
             "idamToken",
             "userId",
-            EXISTING_CASE_ID
+            EXISTING_CASE_ID,
+            EXISTING_CASE_TYPE_ID
         );
 
         // then
@@ -320,14 +328,15 @@ class CcdCaseUpdaterTest {
 
         // when
         CallbackException exception = catchThrowableOfType(() ->
-            ccdCaseUpdater.updateCase(
-                exceptionRecord,
-                configItem,
-                true,
-                "idamToken",
-                "userId",
-                EXISTING_CASE_ID
-            ),
+                ccdCaseUpdater.updateCase(
+                    exceptionRecord,
+                    configItem,
+                    true,
+                    "idamToken",
+                    "userId",
+                    EXISTING_CASE_ID,
+                    EXISTING_CASE_TYPE_ID
+                ),
             CallbackException.class
         );
 
@@ -360,7 +369,8 @@ class CcdCaseUpdaterTest {
                     true,
                     "idamToken",
                     "userId",
-                    EXISTING_CASE_ID
+                    EXISTING_CASE_ID,
+                    EXISTING_CASE_TYPE_ID
                 )
         );
 
@@ -399,7 +409,8 @@ class CcdCaseUpdaterTest {
                     true,
                     "idamToken",
                     "userId",
-                    EXISTING_CASE_ID
+                    EXISTING_CASE_ID,
+                    EXISTING_CASE_TYPE_ID
                 ),
             CallbackException.class
         );
@@ -446,7 +457,8 @@ class CcdCaseUpdaterTest {
             true,
             "idamToken",
             "userId",
-            EXISTING_CASE_ID
+            EXISTING_CASE_ID,
+            EXISTING_CASE_TYPE_ID
         );
 
         // then
@@ -476,7 +488,8 @@ class CcdCaseUpdaterTest {
                     true,
                     "idamToken",
                     "userId",
-                    EXISTING_CASE_ID
+                    EXISTING_CASE_ID,
+                    EXISTING_CASE_TYPE_ID
                 ),
             CallbackException.class
         );
@@ -510,7 +523,8 @@ class CcdCaseUpdaterTest {
                     true,
                     "idamToken",
                     "userId",
-                    EXISTING_CASE_ID
+                    EXISTING_CASE_ID,
+                    EXISTING_CASE_TYPE_ID
                 ),
             CallbackException.class
         );
@@ -544,7 +558,8 @@ class CcdCaseUpdaterTest {
             true,
             "idamToken",
             "userId",
-            "1234123412341234"
+            "1234123412341234",
+            EXISTING_CASE_TYPE_ID
         );
 
         // then
@@ -573,7 +588,8 @@ class CcdCaseUpdaterTest {
             true,
             "idamToken",
             "userId",
-            "1234"
+            "1234",
+            EXISTING_CASE_TYPE_ID
         );
 
         // then
