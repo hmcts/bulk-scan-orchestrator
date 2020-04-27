@@ -5,11 +5,13 @@ import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.RemovalCause;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.exceptions.InvalidTokenException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.Credential;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.JurisdictionToUserMapping;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 @Service
 public class IdamCachedClient {
@@ -18,6 +20,7 @@ public class IdamCachedClient {
     public static final String EXPIRES_IN = "expires_in";
 
     private static Cache<String, CachedIdamToken> accessTokenCache;
+    private static Cache<String, UserDetails> userDetailsCache;
 
     private final IdamClient idamClient;
     private final JurisdictionToUserMapping users;
@@ -31,6 +34,11 @@ public class IdamCachedClient {
         this.users = users;
         this.accessTokenCache = Caffeine.newBuilder()
             .expireAfter(accessTokenCacheExpiry)
+            .removalListener(this::onCachedIdamTokenRemoval)
+            .build();
+
+        this.userDetailsCache =  Caffeine.newBuilder()
+            .maximumSize(200)
             .build();
     }
 
@@ -68,6 +76,22 @@ public class IdamCachedClient {
         }
 
         return expires.asLong();
+    }
+
+    private void onCachedIdamTokenRemoval(
+        String jurisdiction,
+        CachedIdamToken cachedIdamToken,
+        RemovalCause cause
+    ) {
+        userDetailsCache.invalidate(cachedIdamToken.accessToken);
+    }
+
+    public UserDetails getUserDetails(String accessToken) {
+        return this.userDetailsCache.get(accessToken, this::retrieveUserDetails);
+    }
+
+    private UserDetails retrieveUserDetails(String accessToken) {
+        return idamClient.getUserDetails(accessToken);
     }
 
 }
