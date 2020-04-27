@@ -41,25 +41,24 @@ public class IdamCachedClient {
         this.accessTokenCache = Caffeine.newBuilder()
             .expireAfter(accessTokenCacheExpiry)
             .writer(new CacheWriter<String, CachedIdamToken>() {
-                @Override
-                public void write(@NonNull String key, @NonNull CachedIdamToken value) {
-                    throw new UnsupportedOperationException("Cache put() or replace() not supported.");
-                }
+                        @Override
+                        public void write(@NonNull String key, @NonNull CachedIdamToken value) {
+                            throw new UnsupportedOperationException(
+                                "Cache put() or replace() not supported.");
+                        }
 
-                @Override
-                public void delete(@NonNull String jurisdiction, @Nullable CachedIdamToken cachedIdamToken,
-                    @NonNull RemovalCause cause) {
-                    log.info("On access token removal invalidate user details. "
-                            + "Access token removed for jurisdiction: {}, cause: {} ",
-                        jurisdiction,
-                        cause);
-                    if (cachedIdamToken != null) {
-                        userDetailsCache.invalidate(cachedIdamToken.accessToken);
+                        @Override
+                        public void delete(@NonNull String jurisdiction,
+                            @NonNull CachedIdamToken cachedIdamToken,
+                            @NonNull RemovalCause cause) {
+                            log.info("On access token removal invalidate user details. "
+                                    + "Access token removed for jurisdiction: {}, cause: {} ",
+                                jurisdiction,
+                                cause);
+                            userDetailsCache.invalidate(cachedIdamToken.accessToken);
+                        }
                     }
-                }
-
-                }
-                )
+            )
             .build();
 
         this.userDetailsCache =  Caffeine.newBuilder()
