@@ -79,10 +79,6 @@ public class IdamCachedClient {
         accessTokenCache.invalidate(jurisdiction);
     }
 
-    public void cleanUpAccessTokenCache() {
-        accessTokenCache.cleanUp();
-    }
-
     private CachedIdamToken retrieveToken(String jurisdiction) {
         log.info("Retrieve access token for jurisdiction: {} from IDAM", jurisdiction);
         Credential user = users.getUser(jurisdiction);
