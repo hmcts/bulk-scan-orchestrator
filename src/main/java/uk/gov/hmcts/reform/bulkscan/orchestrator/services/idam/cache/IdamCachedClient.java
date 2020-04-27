@@ -52,7 +52,7 @@ public class IdamCachedClient {
                     @NonNull RemovalCause cause
                 ) {
                     log.info(
-                        "Invalidate user details,  "
+                        "Invalidate user details,"
                             + "Access token deleted for jurisdiction: {}, cause: {} ",
                         jurisdiction,
                         cause
