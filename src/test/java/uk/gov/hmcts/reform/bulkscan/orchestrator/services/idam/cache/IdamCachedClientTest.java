@@ -233,28 +233,4 @@ class IdamCachedClientTest {
         verify(idamClient).getUserDetails(any());
     }
 
-    @Test
-    public void should_invalidate_userDetail_when_cached_token_removed_from_cache() {
-        String jurisdiction1 = "divorce";
-
-        given(users.getUser(jurisdiction1)).willReturn(new Credential(USERNAME, PASSWORD));
-        given(idamClient.authenticateUser(USERNAME, PASSWORD)).willReturn(JWT, JWT2);
-
-        UserDetails expectedUserDetails1 =  new UserDetails("12","q@a.com","","",null);
-        UserDetails expectedUserDetails2 = USER_DETAILS;
-
-        given(idamClient.getUserDetails(JWT)).willReturn(expectedUserDetails1, expectedUserDetails2);
-
-        String token1 = idamCachedClient.getAccessToken(jurisdiction1);
-        UserDetails userDetailsBefore = idamCachedClient.getUserDetails(token1);
-        assertThat(userDetailsBefore).isEqualTo(expectedUserDetails1);
-
-        idamCachedClient.removeAccessTokenFromCache(jurisdiction1);
-        idamCachedClient.cleanUpAccessTokenCache();
-
-        UserDetails userDetailsAfterInvalidating = idamCachedClient.getUserDetails(token1);
-        assertThat(userDetailsAfterInvalidating).usingRecursiveComparison().isEqualTo(expectedUserDetails2);
-        verify(idamClient, times(2)).getUserDetails(any());
-
-    }
 }
