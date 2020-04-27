@@ -63,7 +63,8 @@ public class CcdCaseUpdater {
         boolean ignoreWarnings,
         String idamToken,
         String userId,
-        String existingCaseId
+        String existingCaseId,
+        String existingCaseTypeId
     ) {
         log.info(
             "Start updating case for service {} with case Id {} from exception record {}",
@@ -80,7 +81,7 @@ public class CcdCaseUpdater {
                 s2sToken,
                 userId,
                 exceptionRecord.poBoxJurisdiction,
-                exceptionRecord.caseTypeId,
+                existingCaseTypeId,
                 existingCaseId,
                 EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR
             );
