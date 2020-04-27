@@ -42,7 +42,7 @@ public class IdamCachedClient {
             .writer(new CacheWriter<String, CachedIdamToken>() {
                 @Override
                 public void write(@NonNull String key, @NonNull CachedIdamToken value) {
-                    log.warn("Cache put() or replace() called, not recommended");
+                    throw new UnsupportedOperationException("Cache put() or replace() not supported.");
                 }
 
                 @Override
@@ -52,8 +52,8 @@ public class IdamCachedClient {
                     @NonNull RemovalCause cause
                 ) {
                     log.info(
-                        "On access token removal invalidate user details. "
-                            + "Access token removed for jurisdiction: {}, cause: {} ",
+                        "On delete token removal, invalidate user details. "
+                            + "Access token deleted for jurisdiction: {}, cause: {} ",
                         jurisdiction,
                         cause);
                     userDetailsCache.invalidate(cachedIdamToken.accessToken);
