@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class AccessTokenCacheExpiry implements Expiry<String, CachedIdamToken> {
+public class AccessTokenCacheExpiry implements Expiry<String, CachedIdamCredential> {
 
     private final long refreshTokenBeforeExpiry;
 
@@ -22,16 +22,16 @@ public class AccessTokenCacheExpiry implements Expiry<String, CachedIdamToken> {
     @Override
     public long expireAfterCreate(
         @NonNull String jurisdiction,
-        @NonNull CachedIdamToken cachedIdamToken,
+        @NonNull CachedIdamCredential cachedIdamCredential,
         long currentTime
     ) {
-        return TimeUnit.SECONDS.toNanos(cachedIdamToken.expiresIn - refreshTokenBeforeExpiry);
+        return TimeUnit.SECONDS.toNanos(cachedIdamCredential.expiresIn - refreshTokenBeforeExpiry);
     }
 
     @Override
     public long expireAfterUpdate(
         @NonNull String jurisdiction,
-        @NonNull CachedIdamToken cachedIdamToken,
+        @NonNull CachedIdamCredential cachedIdamCredential,
         long currentTime,
         @NonNegative long currentDuration
     ) {
@@ -41,7 +41,7 @@ public class AccessTokenCacheExpiry implements Expiry<String, CachedIdamToken> {
     @Override
     public long expireAfterRead(
         @NonNull String jurisdiction,
-        @NonNull CachedIdamToken cachedIdamToken,
+        @NonNull CachedIdamCredential cachedIdamCredential,
         long currentTime,
         @NonNegative long currentDuration
     ) {
