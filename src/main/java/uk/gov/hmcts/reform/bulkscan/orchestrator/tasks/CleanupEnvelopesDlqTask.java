@@ -111,10 +111,10 @@ public class CleanupEnvelopesDlqTask {
 
     private boolean canBeCompleted(IMessage message) {
         Instant cutoff = Instant.now().minus(this.ttl);
-        Map<String, String> messageProperties = message.getProperties();
+        Map<String, Object> messageProperties = message.getProperties();
 
-        if (isNotEmpty(messageProperties) && isNotEmpty(messageProperties.get("deadLetteredAt"))) {
-            Instant deadLetteredAt = Instant.parse(messageProperties.get("deadLetteredAt"));
+        if (isNotEmpty(messageProperties) && isNotEmpty((String)messageProperties.get("deadLetteredAt"))) {
+            Instant deadLetteredAt = Instant.parse((String)messageProperties.get("deadLetteredAt"));
 
             log.info(
                 "Checking if DLQ message can be completed. "
