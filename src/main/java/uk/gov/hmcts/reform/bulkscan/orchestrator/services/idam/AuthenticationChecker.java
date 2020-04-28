@@ -46,10 +46,9 @@ public class AuthenticationChecker {
 
     private JurisdictionConfigurationStatus checkSignIn(String jurisdiction, Credential credential) {
         try {
-            String token = idamClient
-                .authenticateUser(credential.getUsername(), credential.getPassword());
+            idamClient.authenticateUser(credential.getUsername(), credential.getPassword());
 
-            log.info("Successful authentication of {} jurisdiction, token: {}", jurisdiction , token);
+            log.info("Successful authentication of {} jurisdiction", jurisdiction);
 
             return new JurisdictionConfigurationStatus(jurisdiction, true);
         } catch (FeignException e) {
