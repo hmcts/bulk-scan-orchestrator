@@ -6,6 +6,8 @@ import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
 import com.microsoft.azure.servicebus.MessageBody;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
+import feign.FeignException;
+import feign.Request;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -108,6 +110,23 @@ class EnvelopeEventProcessorTest {
 
         // and
         willThrow(new RuntimeException()).given(envelopeHandler).handleEnvelope(any());
+
+        assertThatCode(() -> processor.processNextMessage()).doesNotThrowAnyException();
+    }
+
+    @Test
+    public void should_not_throw_exception_when_feign_exception_thrown() throws Exception {
+        // given
+        willReturn(getValidMessage()).given(messageReceiver).receive();
+        Request request = mock(Request.class);
+
+        // and
+        willThrow(new FeignException.UnprocessableEntity(
+            "Some message",
+            request,
+            "Some error".getBytes())
+        )
+            .given(envelopeHandler).handleEnvelope(any());
 
         assertThatCode(() -> processor.processNextMessage()).doesNotThrowAnyException();
     }
