@@ -96,7 +96,8 @@ class IdamCachedClientTest {
 
         given(users.getUser(jurisdiction1)).willReturn(new Credential(USERNAME, PASSWORD));
         given(idamApi.authenticateUser(USERNAME, PASSWORD)).willReturn(JWT);
-        given(idamApi.getUserDetails(JWT)).willReturn(USER_DETAILS);
+        UserDetails expectedUserDetails1 = USER_DETAILS;
+        given(idamApi.getUserDetails(JWT)).willReturn(expectedUserDetails1);
 
         UserDetails expectedUserDetails2 =  new UserDetails("12","q@a.com","","",null);
         given(users.getUser(jurisdiction2)).willReturn(new Credential(USERNAME + 2, PASSWORD + 2));
@@ -109,7 +110,7 @@ class IdamCachedClientTest {
             idamCachedClient.getIdamCredentials(jurisdiction2);
 
         assertThat(cachedIdamCredential1.accessToken).isEqualTo(JWT);
-        assertThat(cachedIdamCredential1.userDetails).isEqualTo(USER_DETAILS);
+        assertThat(cachedIdamCredential1.userDetails).isEqualTo(expectedUserDetails1);
         assertThat(cachedIdamCredential2.accessToken).isEqualTo(JWT2);
         assertThat(cachedIdamCredential2.userDetails).isEqualTo(expectedUserDetails2);
 
@@ -184,7 +185,8 @@ class IdamCachedClientTest {
 
         given(users.getUser(jurisdiction)).willReturn(new Credential(USERNAME, PASSWORD));
         given(idamApi.authenticateUser(USERNAME, PASSWORD)).willReturn(JWT, JWT2);
-        given(idamApi.getUserDetails(JWT)).willReturn(USER_DETAILS);
+        UserDetails expectedUserDetails1 = USER_DETAILS;
+        given(idamApi.getUserDetails(JWT)).willReturn(expectedUserDetails1);
         UserDetails expectedUserDetails2 =  new UserDetails("12","q@a.com","","",null);
         given(idamApi.getUserDetails(JWT2)).willReturn(expectedUserDetails2);
 
@@ -197,7 +199,7 @@ class IdamCachedClientTest {
             idamCachedClientQuickExpiry.getIdamCredentials(jurisdiction);
 
         assertThat(cachedIdamCredential1.accessToken).isEqualTo(JWT);
-        assertThat(cachedIdamCredential1.userDetails).isEqualTo(USER_DETAILS);
+        assertThat(cachedIdamCredential1.userDetails).isEqualTo(expectedUserDetails1);
         assertThat(cachedIdamCredential2.accessToken).isEqualTo(JWT2);
         assertThat(cachedIdamCredential2.userDetails).isEqualTo(expectedUserDetails2);
 
@@ -213,7 +215,8 @@ class IdamCachedClientTest {
 
         given(users.getUser(jurisdiction)).willReturn(new Credential(USERNAME, PASSWORD));
         given(idamApi.authenticateUser(USERNAME, PASSWORD)).willReturn(JWT, JWT2);
-        given(idamApi.getUserDetails(JWT)).willReturn(USER_DETAILS);
+        UserDetails expectedUserDetails1 = USER_DETAILS;
+        given(idamApi.getUserDetails(JWT)).willReturn(expectedUserDetails1);
         UserDetails expectedUserDetails2 =  new UserDetails("1122","12q@a.com","joe","doe",null);
 
         given(idamApi.getUserDetails(JWT2)).willReturn(expectedUserDetails2);
@@ -225,7 +228,7 @@ class IdamCachedClientTest {
         CachedIdamCredential cachedIdamCredential2 = idamCachedClient.getIdamCredentials(jurisdiction);
 
         assertThat(cachedIdamCredential1.accessToken).isEqualTo(JWT);
-        assertThat(cachedIdamCredential1.userDetails).isEqualTo(USER_DETAILS);
+        assertThat(cachedIdamCredential1.userDetails).isEqualTo(expectedUserDetails1);
         assertThat(cachedIdamCredential1.accessToken).isEqualTo(JWT);
         assertThat(cachedIdamCredential2.userDetails).isEqualTo(expectedUserDetails2);
 
