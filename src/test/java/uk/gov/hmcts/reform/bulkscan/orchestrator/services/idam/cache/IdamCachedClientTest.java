@@ -66,7 +66,7 @@ class IdamCachedClientTest {
         this.idamCachedClient = new IdamCachedClient(
             idamApi,
             users,
-            new AccessTokenCacheExpiry(refreshTokenBeforeExpiry)
+            new IdamCacheExpiry(refreshTokenBeforeExpiry)
         );
     }
 
@@ -177,7 +177,7 @@ class IdamCachedClientTest {
         IdamCachedClient idamCachedClientQuickExpiry = new IdamCachedClient(
             idamApi,
             users,
-            new AccessTokenCacheExpiry(28798)
+            new IdamCacheExpiry(28798)
         );
 
         String jurisdiction = "probate";

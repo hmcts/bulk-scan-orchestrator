@@ -29,12 +29,12 @@ public class IdamCachedClient {
     public IdamCachedClient(
         IdamClient idamClient,
         JurisdictionToUserMapping users,
-        AccessTokenCacheExpiry accessTokenCacheExpiry
+        IdamCacheExpiry idamCacheExpiry
     ) {
         this.idamClient = idamClient;
         this.users = users;
         idamCache = Caffeine.newBuilder()
-            .expireAfter(accessTokenCacheExpiry)
+            .expireAfter(idamCacheExpiry)
             .build();
     }
 

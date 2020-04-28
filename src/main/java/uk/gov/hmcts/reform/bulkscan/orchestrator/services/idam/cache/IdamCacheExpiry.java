@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class AccessTokenCacheExpiry implements Expiry<String, CachedIdamCredential> {
+public class IdamCacheExpiry implements Expiry<String, CachedIdamCredential> {
 
     private final long refreshTokenBeforeExpiry;
 
-    public AccessTokenCacheExpiry(
+    public IdamCacheExpiry(
         @Value("${idam.client.cache.refresh-before-expire-in-sec}") long refreshTokenBeforeExpiry
     ) {
         this.refreshTokenBeforeExpiry = refreshTokenBeforeExpiry;

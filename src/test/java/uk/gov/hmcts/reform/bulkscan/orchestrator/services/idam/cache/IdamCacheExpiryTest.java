@@ -8,9 +8,9 @@ import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class AccessTokenCacheExpiryTest {
+class IdamCacheExpiryTest {
 
-    private AccessTokenCacheExpiry accessTokenCacheExpiry = new AccessTokenCacheExpiry(20);
+    private IdamCacheExpiry idamCacheExpiry = new IdamCacheExpiry(20);
 
     private static final UserDetails USER_DETAILS = new UserDetails(
         "12",
@@ -28,7 +28,7 @@ class AccessTokenCacheExpiryTest {
     })
     void expireAfterCreate(long expireIn, long currentTime, long result) {
         CachedIdamCredential cachedIdamCredential = new CachedIdamCredential("token", USER_DETAILS, expireIn);
-        long remainingTime = accessTokenCacheExpiry.expireAfterCreate(
+        long remainingTime = idamCacheExpiry.expireAfterCreate(
             "key_9090",
             cachedIdamCredential,
             currentTime
@@ -46,7 +46,7 @@ class AccessTokenCacheExpiryTest {
     void expireAfterUpdate(long expireIn, long currentTime, long currentDuration, long result) {
         CachedIdamCredential cachedIdamCredential = new CachedIdamCredential("token", USER_DETAILS, expireIn);
 
-        long remainingTime = accessTokenCacheExpiry.expireAfterUpdate(
+        long remainingTime = idamCacheExpiry.expireAfterUpdate(
             "key_32x",
             cachedIdamCredential,
             currentTime,
@@ -65,7 +65,7 @@ class AccessTokenCacheExpiryTest {
     void expireAfterRead(long expireIn, long currentTime, long currentDuration, long result) {
         CachedIdamCredential cachedIdamCredential = new CachedIdamCredential("token", USER_DETAILS, expireIn);
 
-        long remainingTime = accessTokenCacheExpiry.expireAfterRead(
+        long remainingTime = idamCacheExpiry.expireAfterRead(
             "21321",
             cachedIdamCredential,
             currentTime,
