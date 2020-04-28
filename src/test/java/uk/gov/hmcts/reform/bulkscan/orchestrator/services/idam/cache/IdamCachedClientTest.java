@@ -9,7 +9,9 @@ import uk.gov.hmcts.reform.authorisation.exceptions.InvalidTokenException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.Credential;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.JurisdictionToUserMapping;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -50,6 +52,14 @@ class IdamCachedClientTest {
     private static final String USERNAME = "userxxx";
 
     private static final String PASSWORD = "passs123";
+
+    private static final UserDetails USER_DETAILS = new UserDetails(
+        "12",
+        "q@a.com",
+        "name_x",
+        "surname_y",
+        Arrays.asList("role1, role2", "role3")
+    );
 
     @BeforeEach
     private void setUp() {
@@ -195,5 +205,55 @@ class IdamCachedClientTest {
         assertThat(token1).isNotEqualTo(token2);
         verify(users, times(2)).getUser(any());
         verify(idamClient, times(2)).authenticateUser(any(), any());
+    }
+
+
+    @Test
+    public void should_get_userDetail_when_no_error() {
+        given(idamClient.getUserDetails(JWT)).willReturn(USER_DETAILS);
+
+        UserDetails userDetails1 =
+            idamCachedClient.getUserDetails(JWT);
+
+        assertThat(userDetails1).usingRecursiveComparison().isEqualTo(USER_DETAILS);
+        verify(idamClient).getUserDetails(any());
+    }
+
+    @Test
+    public void should_retrieve_userDetail_from_cache_when_value_in_cache() {
+        given(idamClient.getUserDetails(JWT)).willReturn(USER_DETAILS);
+
+        UserDetails userDetails1 =
+            idamCachedClient.getUserDetails(JWT);
+        UserDetails userDetails2 =
+            idamCachedClient.getUserDetails(JWT);
+
+        assertThat(userDetails1).usingRecursiveComparison().isEqualTo(USER_DETAILS);
+        assertThat(userDetails2).usingRecursiveComparison().isEqualTo(userDetails1);
+        verify(idamClient).getUserDetails(any());
+    }
+
+    @Test
+    public void should_invalidate_userDetail_when_cached_token_removed_from_cache() {
+        String jurisdiction1 = "divorce";
+
+        given(users.getUser(jurisdiction1)).willReturn(new Credential(USERNAME, PASSWORD));
+        given(idamClient.authenticateUser(USERNAME, PASSWORD)).willReturn(JWT, JWT2);
+
+        UserDetails expectedUserDetails1 =  new UserDetails("12","q@a.com","","",null);
+        UserDetails expectedUserDetails2 = USER_DETAILS;
+
+        given(idamClient.getUserDetails(JWT)).willReturn(expectedUserDetails1, expectedUserDetails2);
+
+        String token1 = idamCachedClient.getAccessToken(jurisdiction1);
+        UserDetails userDetailsBefore = idamCachedClient.getUserDetails(token1);
+        assertThat(userDetailsBefore).isEqualTo(expectedUserDetails1);
+
+        idamCachedClient.removeAccessTokenFromCache(jurisdiction1);
+
+        UserDetails userDetailsAfterInvalidating = idamCachedClient.getUserDetails(token1);
+        assertThat(userDetailsAfterInvalidating).usingRecursiveComparison().isEqualTo(expectedUserDetails2);
+        verify(idamClient, times(2)).getUserDetails(any());
+
     }
 }
