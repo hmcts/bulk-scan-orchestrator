@@ -11,7 +11,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.out.JurisdictionConfigurationStatus;
-import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.cache.CachedIdamCredential;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.cache.IdamCachedClient;
 
 import java.util.Collections;
 import java.util.Map;
@@ -25,6 +26,8 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_DETAILS;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_TOKEN;
 
 @ExtendWith(MockitoExtension.class)
 class AuthenticationCheckerTest {
@@ -48,8 +51,14 @@ class AuthenticationCheckerTest {
         )
     );
 
+    private static final CachedIdamCredential CACHED_IDAM_CREDENTIAL = new CachedIdamCredential(
+        USER_TOKEN,
+        USER_DETAILS,
+        28800L
+    );
+
     @Mock
-    private IdamClient idamClient;
+    private IdamCachedClient idamClient;
 
     private AuthenticationChecker authenticationChecker;
 
@@ -63,11 +72,10 @@ class AuthenticationCheckerTest {
 
     @Test
     void checkSignInForJurisdiction_should_return_success_for_successfully_authenticated_jurisdiction() {
-        willReturn("token")
+        willReturn(CACHED_IDAM_CREDENTIAL)
             .given(idamClient)
-            .authenticateUser(
-                SUCCESSFUL_JURISDICTION_USERNAME,
-                SUCCESSFUL_JURISDICTION_PASSWORD
+            .getIdamCredentials(
+                SUCCESSFUL_JURISDICTION
             );
 
 
@@ -86,7 +94,7 @@ class AuthenticationCheckerTest {
 
         willThrow(exception)
             .given(idamClient)
-            .authenticateUser(LOCKED_ACCOUNT_JURISDICTION_USERNAME, LOCKED_ACCOUNT_JURISDICTION_PASSWORD);
+            .getIdamCredentials(LOCKED_ACCOUNT_JURISDICTION);
 
         JurisdictionConfigurationStatus status =
             authenticationChecker.checkSignInForJurisdiction(LOCKED_ACCOUNT_JURISDICTION);
@@ -113,7 +121,7 @@ class AuthenticationCheckerTest {
                 )
             );
 
-        verify(idamClient, never()).authenticateUser(anyString(), anyString());
+        verify(idamClient, never()).getIdamCredentials(anyString());
     }
 
     @Test
@@ -121,7 +129,7 @@ class AuthenticationCheckerTest {
         String errorMessage = "test exception";
         RuntimeException exception = new RuntimeException(errorMessage);
 
-        willThrow(exception).given(idamClient).authenticateUser(any(), any());
+        willThrow(exception).given(idamClient).getIdamCredentials(any());
 
         assertThat(authenticationChecker.checkSignInForJurisdiction(LOCKED_ACCOUNT_JURISDICTION))
             .isEqualToComparingFieldByField(new JurisdictionConfigurationStatus(
@@ -134,13 +142,13 @@ class AuthenticationCheckerTest {
 
     @Test
     void checkSignInForAllJurisdictions_should_return_statuses_of_all_jurisdictions() {
-        willReturn("token")
+        willReturn(CACHED_IDAM_CREDENTIAL)
             .given(idamClient)
-            .authenticateUser(SUCCESSFUL_JURISDICTION_USERNAME, SUCCESSFUL_JURISDICTION_PASSWORD);
+            .getIdamCredentials(SUCCESSFUL_JURISDICTION);
 
         willThrow(createFeignException(HttpStatus.LOCKED.value()))
             .given(idamClient)
-            .authenticateUser(LOCKED_ACCOUNT_JURISDICTION_USERNAME, LOCKED_ACCOUNT_JURISDICTION_PASSWORD);
+            .getIdamCredentials(LOCKED_ACCOUNT_JURISDICTION);
 
         assertThat(authenticationChecker.checkSignInForAllJurisdictions())
             .extracting(status -> tuple(status.jurisdiction, status.isCorrect, status.errorResponseStatus))
