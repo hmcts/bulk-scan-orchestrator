@@ -49,7 +49,7 @@ public class AuthenticationChecker {
             String token = idamClient
                 .authenticateUser(credential.getUsername(), credential.getPassword());
 
-            log.info("Successful authentication of {} jurisdiction, token: {}", jurisdiction , token);
+            log.info("Successful authentication of {} jurisdiction, token: {}", jurisdiction, token);
 
             return new JurisdictionConfigurationStatus(jurisdiction, true);
         } catch (FeignException e) {
