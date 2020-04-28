@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.out.JurisdictionConfigurationStatus;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.cache.IdamCachedClient;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,11 +18,11 @@ public class AuthenticationChecker {
     private static final Logger log = LoggerFactory.getLogger(AuthenticationChecker.class);
 
     private final JurisdictionToUserMapping jurisdictionMapping;
-    private final IdamCachedClient idamClient;
+    private final IdamClient idamClient;
 
     public AuthenticationChecker(
         JurisdictionToUserMapping jurisdictionMapping,
-        IdamCachedClient idamClient
+        IdamClient idamClient
     ) {
         this.jurisdictionMapping = jurisdictionMapping;
         this.idamClient = idamClient;
@@ -46,7 +46,7 @@ public class AuthenticationChecker {
 
     private JurisdictionConfigurationStatus checkSignIn(String jurisdiction, Credential credential) {
         try {
-            idamClient.getIdamCredentials(jurisdiction);
+            idamClient.authenticateUser(credential.getUsername(), credential.getPassword());
 
             log.info("Successful authentication of {} jurisdiction", jurisdiction);
 
