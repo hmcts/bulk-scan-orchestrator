@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
+import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -90,6 +91,9 @@ public class EnvelopeEventProcessor {
             } catch (InvalidMessageException ex) {
                 log.error("Rejected message with ID {}, because it's invalid", message.getMessageId(), ex);
                 return new MessageProcessingResult(UNRECOVERABLE_FAILURE, ex);
+            } catch (FeignException ex) {
+                logFeignException(message, envelope, ex);
+                return new MessageProcessingResult(POTENTIALLY_RECOVERABLE_FAILURE);
             } catch (Exception ex) {
                 logMessageProcessingError(message, envelope, ex);
                 return new MessageProcessingResult(POTENTIALLY_RECOVERABLE_FAILURE);
@@ -194,6 +198,24 @@ public class EnvelopeEventProcessor {
             envelope.caseRef == null ? "Legacy Case" : "Case",
             envelope.caseRef == null ? envelope.legacyCaseRef : envelope.caseRef
         );
+    }
+
+    private void logFeignException(
+        IMessage message,
+        Envelope envelope,
+        FeignException exception
+    ) {
+        String baseMessage = String.format(
+            "Failed to process message with ID %s."
+                + " CCD response: %s",
+            message.getMessageId(),
+            exception.contentUTF8());
+
+        String fullMessage = envelope != null
+            ? baseMessage + String.format(" Envelope ID: %s, File name: %s", envelope.id, envelope.zipFileName)
+            : baseMessage;
+
+        log.error(fullMessage, exception);
     }
 
     private void logMessageProcessingError(IMessage message, Envelope envelope, Exception exception) {
