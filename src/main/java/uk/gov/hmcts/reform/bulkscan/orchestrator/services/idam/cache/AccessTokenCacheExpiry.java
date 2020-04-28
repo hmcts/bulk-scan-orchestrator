@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class IdamCacheExpiry implements Expiry<String, CachedIdamCredential> {
+public class AccessTokenCacheExpiry implements Expiry<String, CachedIdamToken> {
 
     private final long refreshTokenBeforeExpiry;
 
-    public IdamCacheExpiry(
+    public AccessTokenCacheExpiry(
         @Value("${idam.client.cache.refresh-before-expire-in-sec}") long refreshTokenBeforeExpiry
     ) {
         this.refreshTokenBeforeExpiry = refreshTokenBeforeExpiry;
@@ -22,16 +22,16 @@ public class IdamCacheExpiry implements Expiry<String, CachedIdamCredential> {
     @Override
     public long expireAfterCreate(
         @NonNull String jurisdiction,
-        @NonNull CachedIdamCredential cachedIdamCredential,
+        @NonNull CachedIdamToken cachedIdamToken,
         long currentTime
     ) {
-        return TimeUnit.SECONDS.toNanos(cachedIdamCredential.expiresIn - refreshTokenBeforeExpiry);
+        return TimeUnit.SECONDS.toNanos(cachedIdamToken.expiresIn - refreshTokenBeforeExpiry);
     }
 
     @Override
     public long expireAfterUpdate(
         @NonNull String jurisdiction,
-        @NonNull CachedIdamCredential cachedIdamCredential,
+        @NonNull CachedIdamToken cachedIdamToken,
         long currentTime,
         @NonNegative long currentDuration
     ) {
@@ -41,7 +41,7 @@ public class IdamCacheExpiry implements Expiry<String, CachedIdamCredential> {
     @Override
     public long expireAfterRead(
         @NonNull String jurisdiction,
-        @NonNull CachedIdamCredential cachedIdamCredential,
+        @NonNull CachedIdamToken cachedIdamToken,
         long currentTime,
         @NonNegative long currentDuration
     ) {
