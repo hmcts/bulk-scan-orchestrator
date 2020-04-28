@@ -21,7 +21,7 @@ public class IdamCachedClient {
     public static final String BEARER_AUTH_TYPE = "Bearer ";
     public static final String EXPIRES_IN = "expires_in";
 
-    private static Cache<String, CachedIdamCredential> idamCache;
+    private Cache<String, CachedIdamCredential> idamCache;
 
     private final IdamClient idamClient;
     private final JurisdictionToUserMapping users;
@@ -33,20 +33,19 @@ public class IdamCachedClient {
     ) {
         this.idamClient = idamClient;
         this.users = users;
-        idamCache = Caffeine.newBuilder()
+        this.idamCache = Caffeine.newBuilder()
             .expireAfter(idamCacheExpiry)
             .build();
     }
 
     public CachedIdamCredential getIdamCredentials(String jurisdiction) {
         log.info("Getting idam credential for jurisdiction: {} ", jurisdiction);
-        CachedIdamCredential cachedIdamCredential = idamCache.get(jurisdiction, this::retrieveIdamInfo);
-        return cachedIdamCredential;
+        return this.idamCache.get(jurisdiction, this::retrieveIdamInfo);
     }
 
     public void removeAccessTokenFromCache(String jurisdiction) {
         log.info("Removing idam credential from cache for jurisdiction: {} ", jurisdiction);
-        idamCache.invalidate(jurisdiction);
+        this.idamCache.invalidate(jurisdiction);
     }
 
     private CachedIdamCredential retrieveIdamInfo(String jurisdiction) {

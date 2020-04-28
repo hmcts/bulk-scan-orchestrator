@@ -193,6 +193,7 @@ class IdamCachedClientTest {
         CachedIdamCredential cachedIdamCredential1 =
             idamCachedClientQuickExpiry.getIdamCredentials(jurisdiction);
 
+        //2 seconds expiry, wait expiry
         TimeUnit.SECONDS.sleep(3);
 
         CachedIdamCredential cachedIdamCredential2 =
