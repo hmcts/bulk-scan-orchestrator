@@ -2,13 +2,23 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.cache;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+
+import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class AccessTokenCacheExpiryTest {
+class IdamCacheExpiryTest {
 
-    private AccessTokenCacheExpiry accessTokenCacheExpiry = new AccessTokenCacheExpiry(20);
+    private IdamCacheExpiry idamCacheExpiry = new IdamCacheExpiry(20);
 
+    private static final UserDetails USER_DETAILS = new UserDetails(
+        "12",
+        "q@a.com",
+        "name_x",
+        "surname_y",
+        Arrays.asList("role1, role2", "role3")
+    );
 
     @ParameterizedTest
     @CsvSource({
@@ -17,10 +27,10 @@ class AccessTokenCacheExpiryTest {
         "22, 0, 2000000000"
     })
     void expireAfterCreate(long expireIn, long currentTime, long result) {
-        CachedIdamToken cachedIdamToken = new CachedIdamToken("token", expireIn);
-        long remainingTime = accessTokenCacheExpiry.expireAfterCreate(
+        CachedIdamCredential cachedIdamCredential = new CachedIdamCredential("token", USER_DETAILS, expireIn);
+        long remainingTime = idamCacheExpiry.expireAfterCreate(
             "key_9090",
-            cachedIdamToken,
+            cachedIdamCredential,
             currentTime
         );
         assertThat(remainingTime).isEqualTo(result);
@@ -34,11 +44,11 @@ class AccessTokenCacheExpiryTest {
         "22, 0, 420, 420"
     })
     void expireAfterUpdate(long expireIn, long currentTime, long currentDuration, long result) {
-        CachedIdamToken cachedIdamToken = new CachedIdamToken("token", expireIn);
+        CachedIdamCredential cachedIdamCredential = new CachedIdamCredential("token", USER_DETAILS, expireIn);
 
-        long remainingTime = accessTokenCacheExpiry.expireAfterUpdate(
+        long remainingTime = idamCacheExpiry.expireAfterUpdate(
             "key_32x",
-            cachedIdamToken,
+            cachedIdamCredential,
             currentTime,
             currentDuration
         );
@@ -53,11 +63,11 @@ class AccessTokenCacheExpiryTest {
         "22, 0, 120, 120"
     })
     void expireAfterRead(long expireIn, long currentTime, long currentDuration, long result) {
-        CachedIdamToken cachedIdamToken = new CachedIdamToken("token", expireIn);
+        CachedIdamCredential cachedIdamCredential = new CachedIdamCredential("token", USER_DETAILS, expireIn);
 
-        long remainingTime = accessTokenCacheExpiry.expireAfterRead(
+        long remainingTime = idamCacheExpiry.expireAfterRead(
             "21321",
-            cachedIdamToken,
+            cachedIdamCredential,
             currentTime,
             currentDuration
         );
