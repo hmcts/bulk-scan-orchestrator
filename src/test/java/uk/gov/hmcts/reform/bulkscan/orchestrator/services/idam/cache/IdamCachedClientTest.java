@@ -209,7 +209,6 @@ class IdamCachedClientTest {
 
     @Test
     void should_create_new_token_when_token_removed_from_cache() {
-
         String jurisdiction = "probate";
 
         given(users.getUser(jurisdiction)).willReturn(new Credential(USERNAME, PASSWORD));
