@@ -206,23 +206,22 @@ public class EnvelopeEventProcessor {
         FeignException exception
     ) {
         String baseMessage = String.format(
-            "Failed to process message with ID %s."
-                + " CCD response: %s",
+            "Failed to process message with ID %s. CCD response: %s",
             message.getMessageId(),
             exception.contentUTF8());
 
-        String fullMessage = envelope != null
-            ? baseMessage + String.format(" Envelope ID: %s, File name: %s", envelope.id, envelope.zipFileName)
-            : baseMessage;
-
-        log.error(fullMessage, exception);
+        logErrorMessage(envelope, exception, baseMessage);
     }
 
     private void logMessageProcessingError(IMessage message, Envelope envelope, Exception exception) {
         String baseMessage = String.format("Failed to process message with ID %s.", message.getMessageId());
 
+        logErrorMessage(envelope, exception, baseMessage);
+    }
+
+    private void logErrorMessage(Envelope envelope, Exception exception, String baseMessage) {
         String fullMessage = envelope != null
-            ? baseMessage + String.format(" Envelope ID: %s, File name: %s", envelope.id, envelope.zipFileName)
+            ? baseMessage + String.format(", Envelope ID: %s, File name: %s", envelope.id, envelope.zipFileName)
             : baseMessage;
 
         log.error(fullMessage, exception);
