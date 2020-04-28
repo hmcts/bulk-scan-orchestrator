@@ -355,7 +355,13 @@ public class CcdApi {
             );
         } catch (FeignException e) {
             throw new CcdCallException(
-                String.format("Could not attach documents for case ref: %s Error: %s", caseRef, e.status()), e
+                String.format(
+                    "Could not attach documents for case ref: %s, CCD response: %s, Error: %s",
+                    caseRef,
+                    e.contentUTF8(),
+                    e.status()
+                ),
+                e
             );
         }
     }
