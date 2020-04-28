@@ -39,24 +39,25 @@ public class IdamCachedClient {
     }
 
     public CachedIdamCredential getIdamCredentials(String jurisdiction) {
-        log.info("Get access token for jurisdiction: {} ", jurisdiction);
+        log.info("Get idam credential for jurisdiction: {} ", jurisdiction);
         CachedIdamCredential cachedIdamCredential = idamCache.get(jurisdiction, this::retrieveIdamInfo);
         return cachedIdamCredential;
     }
 
     public void removeAccessTokenFromCache(String jurisdiction) {
-        log.info("Remove access token from cache for jurisdiction: {} ", jurisdiction);
+        log.info("Remove idam credential from cache for jurisdiction: {} ", jurisdiction);
         idamCache.invalidate(jurisdiction);
     }
 
     private CachedIdamCredential retrieveIdamInfo(String jurisdiction) {
-        log.info("Retrieve access token for jurisdiction: {} from IDAM", jurisdiction);
+        log.info("Retrieving access token for jurisdiction: {} from IDAM", jurisdiction);
         Credential user = users.getUser(jurisdiction);
         String tokenWithBearer = idamClient.authenticateUser(
             user.getUsername(),
             user.getPassword()
         );
 
+        log.info("Retrieving user details for jurisdiction: {} from IDAM", jurisdiction);
         UserDetails userDetails = idamClient.getUserDetails(tokenWithBearer);
         return new CachedIdamCredential(tokenWithBearer, userDetails, stripExpiryFromBearerToken(tokenWithBearer));
     }
