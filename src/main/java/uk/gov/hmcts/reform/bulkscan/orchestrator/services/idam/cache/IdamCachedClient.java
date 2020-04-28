@@ -39,13 +39,13 @@ public class IdamCachedClient {
     }
 
     public CachedIdamCredential getIdamCredentials(String jurisdiction) {
-        log.info("Get idam credential for jurisdiction: {} ", jurisdiction);
+        log.info("Getting idam credential for jurisdiction: {} ", jurisdiction);
         CachedIdamCredential cachedIdamCredential = idamCache.get(jurisdiction, this::retrieveIdamInfo);
         return cachedIdamCredential;
     }
 
     public void removeAccessTokenFromCache(String jurisdiction) {
-        log.info("Remove idam credential from cache for jurisdiction: {} ", jurisdiction);
+        log.info("Removing idam credential from cache for jurisdiction: {} ", jurisdiction);
         idamCache.invalidate(jurisdiction);
     }
 

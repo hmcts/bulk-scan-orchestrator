@@ -229,7 +229,7 @@ class IdamCachedClientTest {
 
         assertThat(cachedIdamCredential1.accessToken).isEqualTo(JWT);
         assertThat(cachedIdamCredential1.userDetails).isEqualTo(expectedUserDetails1);
-        assertThat(cachedIdamCredential1.accessToken).isEqualTo(JWT);
+        assertThat(cachedIdamCredential2.accessToken).isEqualTo(JWT2);
         assertThat(cachedIdamCredential2.userDetails).isEqualTo(expectedUserDetails2);
 
         verify(users, times(2)).getUser(any());
