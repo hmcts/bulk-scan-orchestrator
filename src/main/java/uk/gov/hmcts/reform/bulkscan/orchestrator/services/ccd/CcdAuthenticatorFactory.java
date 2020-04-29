@@ -31,4 +31,8 @@ public class CcdAuthenticatorFactory {
             () -> idamCredentials.accessToken
         );
     }
+
+    public void removeFromCache(String jurisdiction) {
+        idamClient.removeAccessTokenFromCache(jurisdiction);
+    }
 }

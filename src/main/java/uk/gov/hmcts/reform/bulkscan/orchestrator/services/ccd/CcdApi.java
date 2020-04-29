@@ -59,7 +59,31 @@ public class CcdApi {
 
     private CaseDetails retrieveCase(String caseRef, String jurisdiction) {
         CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
-        return feignCcdApi.getCase(authenticator.getUserToken(), authenticator.getServiceToken(), caseRef);
+        try {
+            return feignCcdApi
+                .getCase(authenticator.getUserToken(), authenticator.getServiceToken(), caseRef);
+        } catch (FeignException ex) {
+            removeFromIdamCache(ex, jurisdiction);
+            throw ex;
+        }
+    }
+
+    private SearchResult searchCases(
+        String jurisdiction,
+        String caseType,
+        String searchString) {
+        CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
+        try {
+            return feignCcdApi.searchCases(
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                caseType,
+                searchString
+            );
+        } catch (FeignException ex) {
+            removeFromIdamCache(ex, jurisdiction);
+            throw ex;
+        }
     }
 
     private StartEventResponse startAttachScannedDocs(String caseRef,
@@ -145,11 +169,9 @@ public class CcdApi {
         } else {
             String jurisdiction = serviceConfig.getJurisdiction();
             String caseTypeIdsStr = String.join(",", serviceConfig.getCaseTypeIds());
-            CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
 
-            SearchResult searchResult = feignCcdApi.searchCases(
-                authenticator.getUserToken(),
-                authenticator.getServiceToken(),
+            SearchResult searchResult = searchCases(
+                jurisdiction,
                 caseTypeIdsStr,
                 format(SEARCH_BY_LEGACY_ID_QUERY_FORMAT, legacyId)
             );
@@ -219,11 +241,8 @@ public class CcdApi {
         String searchQuery
     ) {
         String jurisdiction = serviceConfig.getJurisdiction();
-        CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
-
-        SearchResult searchResult = feignCcdApi.searchCases(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
+        SearchResult searchResult = searchCases(
+            jurisdiction,
             caseTypeIdsStr,
             searchQuery
         );
@@ -270,14 +289,19 @@ public class CcdApi {
         String caseTypeId,
         String eventTypeId
     ) {
-        return feignCcdApi.startForCaseworker(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
-            jurisdiction,
-            caseTypeId,
-            eventTypeId
-        );
+        try {
+            return feignCcdApi.startForCaseworker(
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                authenticator.getUserDetails().getId(),
+                jurisdiction,
+                caseTypeId,
+                eventTypeId
+            );
+        } catch (FeignException ex) {
+            removeFromIdamCache(ex, jurisdiction);
+            throw ex;
+        }
     }
 
     public StartEventResponse startEventForAttachScannedDocs(
@@ -305,6 +329,7 @@ public class CcdApi {
                 e
             );
         } catch (FeignException e) {
+            removeFromIdamCache(e, jurisdiction);
             throw new CcdCallException(
                 String.format("Could not attach documents for case ref: %s Error: %s", caseRef, e.status()), e
             );
@@ -317,15 +342,21 @@ public class CcdApi {
         String caseTypeId,
         CaseDataContent caseDataContent
     ) {
-        return feignCcdApi.submitForCaseworker(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
-            jurisdiction,
-            caseTypeId,
-            true,
-            caseDataContent
-        );
+        try {
+            return feignCcdApi.submitForCaseworker(
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                authenticator.getUserDetails().getId(),
+                jurisdiction,
+                caseTypeId,
+                true,
+                caseDataContent
+            );
+        } catch (FeignException ex) {
+            removeFromIdamCache(ex, jurisdiction);
+            throw ex;
+        }
+
     }
 
     public CaseDetails submitEventForAttachScannedDocs(
@@ -354,9 +385,16 @@ public class CcdApi {
                 e
             );
         } catch (FeignException e) {
+            removeFromIdamCache(e, jurisdiction);
             throw new CcdCallException(
                 String.format("Could not attach documents for case ref: %s Error: %s", caseRef, e.status()), e
             );
+        }
+    }
+
+    private void removeFromIdamCache(FeignException ex, String jurisdiction) {
+        if (ex.status() == 403 || ex.status() == 401) {
+            authenticatorFactory.removeFromCache(jurisdiction);
         }
     }
 }
