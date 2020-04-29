@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.util.List;
 
@@ -51,6 +53,13 @@ class CaseRetrievalTest {
 
     private CcdApi ccdApi;
 
+    private static final CcdAuthenticator CCD_AUTHENTICATOR =
+        new CcdAuthenticator(
+            () -> "service_token",
+            new UserDetails("12", "forname", "", null, null),
+            () -> "ey_token"
+        );
+
     @BeforeEach
     public void setUp() {
         WireMock.reset();
@@ -72,7 +81,7 @@ class CaseRetrievalTest {
     }
 
     @Test
-    public void getCase_should_return_CcdCallException_when_403_exception() {
+    public void getCase_should_return_CcdCallException_when_403_error() {
         // given
         givenThat(get(GET_CASE_URL).willReturn(aResponse().withStatus(403)));
 
@@ -217,5 +226,80 @@ class CaseRetrievalTest {
         // then
         assertThat(ids).containsExactly(foundId1);
         WireMock.verify(postRequestedFor(urlEqualTo(CASE_SEARCH_URL)));
+    }
+
+    @Test
+    public void startEvent_should_return_FeignException_when_401_error() {
+        // given
+
+        givenThat(get("/caseworkers/12/jurisdictions/BULKSCAN/case-types/99/event-triggers/eventId/token")
+            .willReturn(aResponse().withStatus(401)));
+
+        // when
+        assertThatThrownBy(() -> ccdApi.startEvent(CCD_AUTHENTICATOR, JURISDICTION, "99", "eventId"))
+            .isInstanceOf(FeignException.class)
+            .hasMessageContaining("401 Unauthorized");
+
+        Mockito.verify(authenticatorFactory).removeFromCache(JURISDICTION);
+    }
+
+    @Test
+    public void startEventForAttachScannedDocs_should_return_CcdCallException_when_401_error() {
+        // given
+
+        givenThat(get("/caseworkers/12/jurisdictions/BULKSCAN/case-types/77/cases/2/event-triggers/eventId/token")
+            .willReturn(aResponse().withStatus(401)));
+
+        // when
+        assertThatThrownBy(
+            () -> ccdApi.startEventForAttachScannedDocs(CCD_AUTHENTICATOR, JURISDICTION, "77", "2", "eventId"))
+            .isInstanceOf(CcdCallException.class)
+            .hasMessageContaining("Could not attach documents for case ref: 2 Error: 401");
+        Mockito.verify(authenticatorFactory).removeFromCache(JURISDICTION);
+    }
+
+    @Test
+    public void submitEventForAttachScannedDocs_should_return_CcdCallException_when_http_403_error() {
+        // given
+
+        givenThat(
+            post("/caseworkers/12/jurisdictions/BULKSCAN/case-types/23/cases/98/events?ignore-warning=true")
+            .willReturn(aResponse().withStatus(403))
+        );
+
+        // when
+        assertThatThrownBy(
+            () -> ccdApi.submitEventForAttachScannedDocs(
+                CCD_AUTHENTICATOR,
+                JURISDICTION,
+                "23",
+                "98",
+                CaseDataContent.builder().eventToken("eventtoken").build()
+            )
+        )
+            .isInstanceOf(CcdCallException.class)
+            .hasMessageContaining("Could not attach documents for case ref: 98 Error: 403");
+        Mockito.verify(authenticatorFactory).removeFromCache(JURISDICTION);
+    }
+
+    @Test
+    public void submitEvent_should_return_FeignException_when_http_403_error() {
+        // given
+        givenThat(
+            post("/caseworkers/12/jurisdictions/BULKSCAN/case-types/casetypeid/cases?ignore-warning=true")
+                .willReturn(aResponse().withStatus(403))
+        );
+
+        // when
+        assertThatThrownBy(() -> ccdApi.submitEvent(
+            CCD_AUTHENTICATOR,
+            JURISDICTION,
+            "casetypeid",
+            CaseDataContent.builder().eventToken("eventtoken").build()
+            )
+        )
+            .isInstanceOf(FeignException.class)
+            .hasMessageContaining("403 Forbidden");
+        Mockito.verify(authenticatorFactory).removeFromCache(JURISDICTION);
     }
 }
