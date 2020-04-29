@@ -1,8 +1,10 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import feign.FeignException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
@@ -23,6 +25,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.willReturn;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.fileContentAsString;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
@@ -37,7 +40,7 @@ class CaseRetrievalTest {
 
     private static final String TEST_SERVICE_NAME = "bulkscan";
 
-    @Autowired
+    @SpyBean
     private CcdAuthenticatorFactory authenticatorFactory;
 
     @Autowired
@@ -69,6 +72,21 @@ class CaseRetrievalTest {
     }
 
     @Test
+    public void getCase_should_return_CcdCallException_when_403_exception() {
+        // given
+        givenThat(get(GET_CASE_URL).willReturn(aResponse().withStatus(403)));
+
+        // when
+        assertThatThrownBy(() -> ccdApi.getCase(CASE_REF, JURISDICTION))
+            .isInstanceOf(CcdCallException.class)
+            .hasMessageContaining("Internal Error: Could not retrieve case: 1539007368674134 Error: 403");
+
+        // then
+        WireMock.verify(getRequestedFor(urlEqualTo(GET_CASE_URL)));
+        Mockito.verify(authenticatorFactory).removeFromCache(JURISDICTION);
+    }
+
+    @Test
     public void getCaseRefsByLegacyId_should_call_ccd_to_retrieve_ccd_ids_by_legacy_id() {
         // given
         givenThat(post(CASE_SEARCH_URL).willReturn(aResponse().withBody(
@@ -80,6 +98,22 @@ class CaseRetrievalTest {
 
         // then
         WireMock.verify(postRequestedFor(urlEqualTo(CASE_SEARCH_URL)));
+    }
+
+    @Test
+    public void getCaseRefsByLegacyId_should_return_feignException_when_401_error() {
+        // given
+        givenThat(post(CASE_SEARCH_URL).willReturn(aResponse().withStatus(401)));
+
+        // when
+        assertThatThrownBy(() -> ccdApi.getCaseRefsByLegacyId("legacy-id-123", TEST_SERVICE_NAME))
+            .isInstanceOf(FeignException.class)
+            .hasMessageContaining("401 Unauthorized");
+
+
+        // then
+        WireMock.verify(postRequestedFor(urlEqualTo(CASE_SEARCH_URL)));
+        Mockito.verify(authenticatorFactory).removeFromCache(JURISDICTION);
     }
 
     @Test
@@ -112,6 +146,20 @@ class CaseRetrievalTest {
         // then
         assertThat(ids).isEmpty();
         WireMock.verify(postRequestedFor(urlEqualTo(EXCEPTION_RECORD_SEARCH_URL)));
+    }
+
+    @Test
+    public void getExceptionRecordRefsByEnvelopeId_should_return_feignException_when_403_errro() {
+        // given
+        givenThat(post(EXCEPTION_RECORD_SEARCH_URL).willReturn(aResponse().withStatus(403)));
+
+        // when
+        assertThatThrownBy(() -> ccdApi.getExceptionRecordRefsByEnvelopeId("envelope-id-123", TEST_SERVICE_NAME))
+            .isInstanceOf(FeignException.class)
+            .hasMessageContaining("403 Forbidden");
+        // then
+        WireMock.verify(postRequestedFor(urlEqualTo(EXCEPTION_RECORD_SEARCH_URL)));
+        Mockito.verify(authenticatorFactory).removeFromCache(JURISDICTION);
     }
 
     @Test
