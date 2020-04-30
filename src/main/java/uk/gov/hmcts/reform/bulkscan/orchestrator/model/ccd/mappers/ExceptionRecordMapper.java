@@ -127,7 +127,11 @@ public class ExceptionRecordMapper {
 
         for (String surnameOcrFieldName : surnameOcrFieldNameList) {
 
-            LOGGER.info("For Envelope id: {}, Searching surname by ocr field name: {}", envelope.id, surnameOcrFieldName);
+            LOGGER.info(
+                "For Envelope id: {}, Searching surname by ocr field name: {}",
+                envelope.id,
+                surnameOcrFieldName
+            );
 
             List<String> surnameList = envelope.ocrData
                 .stream()
