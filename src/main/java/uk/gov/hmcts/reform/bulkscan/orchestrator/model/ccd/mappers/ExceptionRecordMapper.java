@@ -102,7 +102,15 @@ public class ExceptionRecordMapper {
     }
 
     private String extractSurnameFromOcrData(Envelope envelope) {
+        LOGGER.info(
+            "Extracting surname from ocr data, Envelope id: {}, Container: {} Form type: {}",
+            envelope.id,
+            envelope.container,
+            envelope.formType
+        );
+
         if (CollectionUtils.isEmpty(envelope.ocrData)) {
+            LOGGER.info("There is no ocr data to extract surname, Envelope id: {}", envelope.id);
             return null;
         }
 
@@ -113,12 +121,13 @@ public class ExceptionRecordMapper {
 
 
         if (surnameOcrFieldNameList.isEmpty()) {
+            LOGGER.info("Ocr surname field name config empty, Envelope id: {} ", envelope.id);
             return null;
         }
 
         for (String surnameOcrFieldName : surnameOcrFieldNameList) {
 
-            LOGGER.info("Surname search by ocr field name {}", surnameOcrFieldName);
+            LOGGER.info("For Envelope id: {}, Searching surname by ocr field name: {}", envelope.id, surnameOcrFieldName);
 
             List<String> surnameList = envelope.ocrData
                 .stream()
