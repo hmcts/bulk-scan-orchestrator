@@ -106,7 +106,7 @@ class CcdCaseUpdaterTest {
             exceptionRecordFinalizer
         );
 
-        caseUpdateDetails = new CaseUpdateDetails("event_id", new HashMap<String, String>());
+        caseUpdateDetails = new CaseUpdateDetails(null, new HashMap<String, String>());
         exceptionRecord = getExceptionRecord();
 
         noWarningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());

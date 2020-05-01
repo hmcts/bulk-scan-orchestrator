@@ -71,7 +71,6 @@ class CaseUpdateClientResponseValidationTest {
 
         // then
         expectViolations(
-            tuple("caseDetails.eventId", "must not be empty"),
             tuple("caseDetails.caseData", "must not be null")
         );
     }
@@ -82,7 +81,7 @@ class CaseUpdateClientResponseValidationTest {
         serverRespondsWith(
             new SuccessfulUpdateResponse(
                 new CaseUpdateDetails(
-                    "some-event-type",
+                    null,
                     ImmutableMap.of("key", "value")
                 ),
                 emptyList()
