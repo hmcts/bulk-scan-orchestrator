@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.logging.AppInsights;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EnvelopeHandler;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeEventProcessor;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeProcessingResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.NotificationSendingException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.ProcessedEnvelopeNotifier;
 
@@ -36,6 +37,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelopeJson;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.EXCEPTION_RECORD;
 
 @ExtendWith(MockitoExtension.class)
 class EnvelopeEventProcessorTest {
@@ -49,7 +51,7 @@ class EnvelopeEventProcessorTest {
     private AppInsights appInsights;
 
     @Mock
-    EnvelopeHandler envelopeHandler;
+    private EnvelopeHandler envelopeHandler;
 
     @Mock
     private ProcessedEnvelopeNotifier processedEnvelopeNotifier;
@@ -117,7 +119,8 @@ class EnvelopeEventProcessorTest {
         // given
         IMessage validMessage = getValidMessage();
         given(messageReceiver.receive()).willReturn(validMessage);
-
+        given(envelopeHandler.handleEnvelope(any()))
+            .willReturn(new EnvelopeProcessingResult(3221L, EXCEPTION_RECORD));
         // when
         processor.processNextMessage();
 
@@ -165,10 +168,12 @@ class EnvelopeEventProcessorTest {
         String exceptionMessage = "test exception";
         willThrow(new NotificationSendingException(exceptionMessage, null))
             .given(processedEnvelopeNotifier)
-            .notify(any());
+            .notify(any(), any(), any());
 
         IMessage validMessage = getValidMessage();
         given(messageReceiver.receive()).willReturn(validMessage);
+        given(envelopeHandler.handleEnvelope(any()))
+            .willReturn(new EnvelopeProcessingResult(3211321L, EXCEPTION_RECORD));
 
 
         // when
@@ -246,12 +251,14 @@ class EnvelopeEventProcessorTest {
         );
         given(message.getLockToken()).willReturn(UUID.randomUUID());
         given(messageReceiver.receive()).willReturn(message);
+        given(envelopeHandler.handleEnvelope(any()))
+            .willReturn(new EnvelopeProcessingResult(3211321L, EXCEPTION_RECORD));
 
         // when
         processor.processNextMessage();
 
         // then
-        verify(processedEnvelopeNotifier).notify(envelopeId);
+        verify(processedEnvelopeNotifier).notify(envelopeId, 3211321L, EXCEPTION_RECORD);
     }
 
     @Test
