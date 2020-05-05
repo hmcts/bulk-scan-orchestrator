@@ -121,7 +121,8 @@ class IdamCachedClientTest {
     }
 
     @Test
-    void should_retrieve_token_from_cache_when_value_in_cache() {
+    void should_retrieve_token_from_cache_when_value_in_cache_case_insensitive() {
+        String jurisdictionCaps = "BULKSCAN";
         String jurisdiction = "bulkscan";
 
         given(users.getUser(jurisdiction)).willReturn(new Credential(USERNAME, PASSWORD));
@@ -129,7 +130,7 @@ class IdamCachedClientTest {
         given(idamApi.getUserDetails(JWT)).willReturn(USER_DETAILS);
 
         CachedIdamCredential cachedIdamCredential1 =
-            idamCachedClient.getIdamCredentials(jurisdiction);
+            idamCachedClient.getIdamCredentials(jurisdictionCaps);
 
         CachedIdamCredential cachedIdamCredential2 =
             idamCachedClient.getIdamCredentials(jurisdiction);
