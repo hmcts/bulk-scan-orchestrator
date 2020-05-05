@@ -9,10 +9,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseFinder;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.PaymentsProcessor;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeProcessResult;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
@@ -26,6 +28,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.ProcessedCcdType.AUTO_ATTACHED_CASE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.ProcessedCcdType.EXCEPTION_RECORD;
 
 @ExtendWith(MockitoExtension.class)
 class EnvelopeHandlerTest {
@@ -64,11 +68,16 @@ class EnvelopeHandlerTest {
         Envelope envelope = envelope(SUPPLEMENTARY_EVIDENCE, JURSIDICTION, CASE_REF);
         given(caseFinder.findCase(envelope)).willReturn(Optional.of(caseDetails));
         given(attachDocsToSupplementaryEvidence.attach(envelope, caseDetails)).willReturn(true);
+        Long ccdId = 321394383L;
+        given(caseDetails.getId()).willReturn(ccdId);
 
         // when
-        envelopeHandler.handleEnvelope(envelope);
+        EnvelopeProcessResult envelopeProcessResult = envelopeHandler.handleEnvelope(envelope);
 
         // then
+        assertThat(AUTO_ATTACHED_CASE).isEqualTo(envelopeProcessResult.processedCcdType);
+        assertThat(ccdId).isEqualTo(envelopeProcessResult.ccdId);
+
         verify(attachDocsToSupplementaryEvidence).attach(envelope, caseDetails);
         verify(paymentsProcessor).createPayments(envelope, caseDetails.getId(), false);
     }
@@ -81,9 +90,12 @@ class EnvelopeHandlerTest {
         given(createExceptionRecord.tryCreateFrom(envelope)).willReturn(CASE_ID);
 
         // when
-        envelopeHandler.handleEnvelope(envelope);
+        EnvelopeProcessResult envelopeProcessResult = envelopeHandler.handleEnvelope(envelope);
 
         // then
+        assertThat(EXCEPTION_RECORD).isEqualTo(envelopeProcessResult.processedCcdType);
+        assertThat(CASE_ID).isEqualTo(envelopeProcessResult.ccdId);
+
         verify(createExceptionRecord).tryCreateFrom(envelope);
         verify(paymentsProcessor).createPayments(envelope, CASE_ID, true);
     }
@@ -95,9 +107,12 @@ class EnvelopeHandlerTest {
         given(createExceptionRecord.tryCreateFrom(envelope)).willReturn(CASE_ID);
 
         // when
-        envelopeHandler.handleEnvelope(envelope);
+        EnvelopeProcessResult envelopeProcessResult = envelopeHandler.handleEnvelope(envelope);
 
         // then
+        assertThat(EXCEPTION_RECORD).isEqualTo(envelopeProcessResult.processedCcdType);
+        assertThat(CASE_ID).isEqualTo(envelopeProcessResult.ccdId);
+
         verify(createExceptionRecord).tryCreateFrom(envelope);
         verify(paymentsProcessor).createPayments(envelope, CASE_ID, true);
     }
@@ -109,9 +124,12 @@ class EnvelopeHandlerTest {
         given(createExceptionRecord.tryCreateFrom(envelope)).willReturn(CASE_ID);
 
         // when
-        envelopeHandler.handleEnvelope(envelope);
+        EnvelopeProcessResult envelopeProcessResult = envelopeHandler.handleEnvelope(envelope);
 
         // then
+        assertThat(EXCEPTION_RECORD).isEqualTo(envelopeProcessResult.processedCcdType);
+        assertThat(CASE_ID).isEqualTo(envelopeProcessResult.ccdId);
+
         verify(createExceptionRecord).tryCreateFrom(envelope);
         verify(caseFinder, never()).findCase(any());
         verify(paymentsProcessor).createPayments(envelope, CASE_ID, true);
@@ -124,9 +142,12 @@ class EnvelopeHandlerTest {
         given(createExceptionRecord.tryCreateFrom(envelope)).willReturn(CASE_ID);
 
         // when
-        envelopeHandler.handleEnvelope(envelope);
+        EnvelopeProcessResult envelopeProcessResult = envelopeHandler.handleEnvelope(envelope);
 
         // then
+        assertThat(EXCEPTION_RECORD).isEqualTo(envelopeProcessResult.processedCcdType);
+        assertThat(CASE_ID).isEqualTo(envelopeProcessResult.ccdId);
+
         verify(createExceptionRecord).tryCreateFrom(envelope);
         verify(paymentsProcessor).createPayments(envelope, CASE_ID, true);
     }
@@ -140,9 +161,12 @@ class EnvelopeHandlerTest {
         given(createExceptionRecord.tryCreateFrom(envelope)).willReturn(CASE_ID);
 
         // when
-        envelopeHandler.handleEnvelope(envelope);
+        EnvelopeProcessResult envelopeProcessResult = envelopeHandler.handleEnvelope(envelope);
 
         // then
+        assertThat(EXCEPTION_RECORD).isEqualTo(envelopeProcessResult.processedCcdType);
+        assertThat(CASE_ID).isEqualTo(envelopeProcessResult.ccdId);
+
         verify(attachDocsToSupplementaryEvidence).attach(envelope, caseDetails);
         verify(createExceptionRecord).tryCreateFrom(envelope);
         verify(paymentsProcessor).createPayments(envelope, CASE_ID, true);
