@@ -3,9 +3,9 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.pr
 public class EnvelopeProcessResult {
 
     public final Long ccdId;
-    public final ProcessedCcdType processedCcdType;
+    public final EnvelopeCcdAction processedCcdType;
 
-    public EnvelopeProcessResult(Long ccdId, ProcessedCcdType processedCcdType) {
+    public EnvelopeProcessResult(Long ccdId, EnvelopeCcdAction processedCcdType) {
         this.ccdId = ccdId;
         this.processedCcdType = processedCcdType;
     }

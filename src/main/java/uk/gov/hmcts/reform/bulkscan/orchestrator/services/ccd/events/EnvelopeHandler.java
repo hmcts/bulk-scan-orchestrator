@@ -11,8 +11,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.ProcessedCcdType.AUTO_ATTACHED_CASE;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.ProcessedCcdType.EXCEPTION_RECORD;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.AUTO_ATTACHED_CASE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.EXCEPTION_RECORD;
 
 @Service
 public class EnvelopeHandler {
@@ -46,7 +46,7 @@ public class EnvelopeHandler {
                     boolean docsAttached = evidenceAttacher.attach(envelope, existingCase);
                     if (docsAttached) {
                         paymentsProcessor.createPayments(envelope, existingCase.getId(), false);
-                        return  new EnvelopeProcessResult(existingCase.getId(),  AUTO_ATTACHED_CASE);
+                        return new EnvelopeProcessResult(existingCase.getId(),  AUTO_ATTACHED_CASE);
                     } else {
                         log.info(
                             "Creating exception record as supplementary evidence failed for envelope {} case {}",
@@ -55,8 +55,7 @@ public class EnvelopeHandler {
                         );
                     }
                 }
-
-                return  new EnvelopeProcessResult(createExceptionRecord(envelope),  EXCEPTION_RECORD);
+                return new EnvelopeProcessResult(createExceptionRecord(envelope), EXCEPTION_RECORD);
             case SUPPLEMENTARY_EVIDENCE_WITH_OCR:
             case EXCEPTION:
             case NEW_APPLICATION:
