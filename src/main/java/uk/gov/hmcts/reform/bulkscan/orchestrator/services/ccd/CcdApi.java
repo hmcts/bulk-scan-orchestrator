@@ -63,7 +63,7 @@ public class CcdApi {
             return feignCcdApi
                 .getCase(authenticator.getUserToken(), authenticator.getServiceToken(), caseRef);
         } catch (FeignException ex) {
-            removeFromIdamCacheIfAuthProblem(ex, jurisdiction);
+            removeFromIdamCacheIfAuthProblem(ex.status(), jurisdiction);
             throw ex;
         }
     }
@@ -81,7 +81,7 @@ public class CcdApi {
                 searchString
             );
         } catch (FeignException ex) {
-            removeFromIdamCacheIfAuthProblem(ex, jurisdiction);
+            removeFromIdamCacheIfAuthProblem(ex.status(), jurisdiction);
             throw ex;
         }
     }
@@ -299,7 +299,7 @@ public class CcdApi {
                 eventTypeId
             );
         } catch (FeignException ex) {
-            removeFromIdamCacheIfAuthProblem(ex, jurisdiction);
+            removeFromIdamCacheIfAuthProblem(ex.status(), jurisdiction);
             throw ex;
         }
     }
@@ -329,7 +329,7 @@ public class CcdApi {
                 e
             );
         } catch (FeignException e) {
-            removeFromIdamCacheIfAuthProblem(e, jurisdiction);
+            removeFromIdamCacheIfAuthProblem(e.status(), jurisdiction);
             throw new CcdCallException(
                 String.format("Could not attach documents for case ref: %s Error: %s", caseRef, e.status()), e
             );
@@ -353,7 +353,7 @@ public class CcdApi {
                 caseDataContent
             );
         } catch (FeignException ex) {
-            removeFromIdamCacheIfAuthProblem(ex, jurisdiction);
+            removeFromIdamCacheIfAuthProblem(ex.status(), jurisdiction);
             throw ex;
         }
 
@@ -385,15 +385,15 @@ public class CcdApi {
                 e
             );
         } catch (FeignException e) {
-            removeFromIdamCacheIfAuthProblem(e, jurisdiction);
+            removeFromIdamCacheIfAuthProblem(e.status(), jurisdiction);
             throw new CcdCallException(
                 String.format("Could not attach documents for case ref: %s Error: %s", caseRef, e.status()), e
             );
         }
     }
 
-    private void removeFromIdamCacheIfAuthProblem(FeignException ex, String jurisdiction) {
-        if (ex.status() == 403 || ex.status() == 401) {
+    private void removeFromIdamCacheIfAuthProblem(int status, String jurisdiction) {
+        if (status == 403 || status == 401) {
             authenticatorFactory.removeFromCache(jurisdiction);
         }
     }
