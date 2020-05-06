@@ -7,19 +7,24 @@ public class ProcessedEnvelope {
     @JsonProperty
     public final String id;
 
-    @JsonProperty("processed_ccd_reference")
-    public final Long processedCcdReference;
+    @JsonProperty("envelope_id")
+    public final String envelopeId;
 
-    @JsonProperty("processed_ccd_type")
-    public final EnvelopeCcdAction processedCcdType;
+    @JsonProperty("ccd_id")
+    public final Long ccdId;
+
+    @JsonProperty("envelope_ccd_action")
+    public final EnvelopeCcdAction envelopeCcdAction;
 
     public ProcessedEnvelope(
-        String id,
-        Long processedCcdReference,
-        EnvelopeCcdAction processedCcdType
+        String envelopeId,
+        Long ccdId,
+        EnvelopeCcdAction envelopeCcdAction
     ) {
-        this.id = id;
-        this.processedCcdReference = processedCcdReference;
-        this.processedCcdType = processedCcdType;
+        //Todo delete after processor changes
+        this.id = envelopeId;
+        this.envelopeId = envelopeId;
+        this.ccdId = ccdId;
+        this.envelopeCcdAction = envelopeCcdAction;
     }
 }
