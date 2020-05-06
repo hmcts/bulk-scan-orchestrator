@@ -63,7 +63,7 @@ public class CcdApi {
             return feignCcdApi
                 .getCase(authenticator.getUserToken(), authenticator.getServiceToken(), caseRef);
         } catch (FeignException ex) {
-            removeFromIdamCache(ex, jurisdiction);
+            removeFromIdamCacheIfAuthProblem(ex, jurisdiction);
             throw ex;
         }
     }
@@ -81,7 +81,7 @@ public class CcdApi {
                 searchString
             );
         } catch (FeignException ex) {
-            removeFromIdamCache(ex, jurisdiction);
+            removeFromIdamCacheIfAuthProblem(ex, jurisdiction);
             throw ex;
         }
     }
@@ -299,7 +299,7 @@ public class CcdApi {
                 eventTypeId
             );
         } catch (FeignException ex) {
-            removeFromIdamCache(ex, jurisdiction);
+            removeFromIdamCacheIfAuthProblem(ex, jurisdiction);
             throw ex;
         }
     }
@@ -329,7 +329,7 @@ public class CcdApi {
                 e
             );
         } catch (FeignException e) {
-            removeFromIdamCache(e, jurisdiction);
+            removeFromIdamCacheIfAuthProblem(e, jurisdiction);
             throw new CcdCallException(
                 String.format("Could not attach documents for case ref: %s Error: %s", caseRef, e.status()), e
             );
@@ -353,7 +353,7 @@ public class CcdApi {
                 caseDataContent
             );
         } catch (FeignException ex) {
-            removeFromIdamCache(ex, jurisdiction);
+            removeFromIdamCacheIfAuthProblem(ex, jurisdiction);
             throw ex;
         }
 
@@ -385,14 +385,14 @@ public class CcdApi {
                 e
             );
         } catch (FeignException e) {
-            removeFromIdamCache(e, jurisdiction);
+            removeFromIdamCacheIfAuthProblem(e, jurisdiction);
             throw new CcdCallException(
                 String.format("Could not attach documents for case ref: %s Error: %s", caseRef, e.status()), e
             );
         }
     }
 
-    private void removeFromIdamCache(FeignException ex, String jurisdiction) {
+    private void removeFromIdamCacheIfAuthProblem(FeignException ex, String jurisdiction) {
         if (ex.status() == 403 || ex.status() == 401) {
             authenticatorFactory.removeFromCache(jurisdiction);
         }
