@@ -169,7 +169,7 @@ ext["rest-assured.version"] = '4.2.0'
 dependencyManagement {
   dependencies {
     // CVE-2018-10237 - Unbounded memory allocation
-    dependencySet(group: 'com.google.guava', version: '28.2-jre') {
+    dependencySet(group: 'com.google.guava', version: '29.0-jre') {
       entry 'guava'
     }
     // solves: CVE-2017-13098, CVE-2018-1000180, CVE-2018-1000613
@@ -226,7 +226,7 @@ dependencies {
   }
   testCompile group: 'com.typesafe', name: 'config', version: '1.4.0'
   testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: '3.3.3'
-  testCompile group: 'org.assertj', name: 'assertj-core', version: '3.15.0'
+  testCompile group: 'org.assertj', name: 'assertj-core', version: '3.16.0'
   testCompile group: 'org.awaitility', name: 'awaitility', version: '4.0.2'
   testCompile group: 'io.rest-assured', name: 'rest-assured'
 
