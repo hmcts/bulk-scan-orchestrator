@@ -6,8 +6,10 @@ public class ProcessedEnvelope {
 
     @JsonProperty
     public final String id;
+
     @JsonProperty("processed_ccd_reference")
     public final Long processedCcdReference;
+
     @JsonProperty("processed_ccd_type")
     public final EnvelopeCcdAction processedCcdType;
 
