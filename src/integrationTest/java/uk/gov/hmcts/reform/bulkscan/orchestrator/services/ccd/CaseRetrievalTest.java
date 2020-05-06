@@ -4,6 +4,9 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import feign.FeignException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -80,15 +83,16 @@ class CaseRetrievalTest {
         WireMock.verify(getRequestedFor(urlEqualTo(GET_CASE_URL)));
     }
 
-    @Test
-    public void getCase_should_return_CcdCallException_when_403_error() {
+    @ParameterizedTest
+    @ValueSource(ints = {401, 403})
+    public void getCase_should_throw_ccdCallException_when_auth_error(int status) {
         // given
-        givenThat(get(GET_CASE_URL).willReturn(aResponse().withStatus(403)));
+        givenThat(get(GET_CASE_URL).willReturn(aResponse().withStatus(status)));
 
         // when
         assertThatThrownBy(() -> ccdApi.getCase(CASE_REF, JURISDICTION))
             .isInstanceOf(CcdCallException.class)
-            .hasMessageContaining("Internal Error: Could not retrieve case: 1539007368674134 Error: 403");
+            .hasMessageContaining("Internal Error: Could not retrieve case: 1539007368674134 Error: " + status);
 
         // then
         WireMock.verify(getRequestedFor(urlEqualTo(GET_CASE_URL)));
@@ -109,16 +113,16 @@ class CaseRetrievalTest {
         WireMock.verify(postRequestedFor(urlEqualTo(CASE_SEARCH_URL)));
     }
 
-    @Test
-    public void getCaseRefsByLegacyId_should_return_feignException_when_401_error() {
+    @ParameterizedTest
+    @CsvSource({"401,401 Unauthorized", "403,403 Forbidden"})
+    public void getCaseRefsByLegacyId_should_throw_feignException_when_auth_error(int status, String errorMessage) {
         // given
-        givenThat(post(CASE_SEARCH_URL).willReturn(aResponse().withStatus(401)));
+        givenThat(post(CASE_SEARCH_URL).willReturn(aResponse().withStatus(status)));
 
         // when
         assertThatThrownBy(() -> ccdApi.getCaseRefsByLegacyId("legacy-id-123", TEST_SERVICE_NAME))
             .isInstanceOf(FeignException.class)
-            .hasMessageContaining("401 Unauthorized");
-
+            .hasMessageContaining(errorMessage);
 
         // then
         WireMock.verify(postRequestedFor(urlEqualTo(CASE_SEARCH_URL)));
@@ -157,15 +161,20 @@ class CaseRetrievalTest {
         WireMock.verify(postRequestedFor(urlEqualTo(EXCEPTION_RECORD_SEARCH_URL)));
     }
 
-    @Test
-    public void getExceptionRecordRefsByEnvelopeId_should_return_feignException_when_403_errro() {
+    @ParameterizedTest
+    @CsvSource({"401,401 Unauthorized", "403,403 Forbidden"})
+    public void getExceptionRecordRefsByEnvelopeId_should_throw_feignException_when_auth_error(
+        int status,
+        String errorMessage
+    ) {
         // given
-        givenThat(post(EXCEPTION_RECORD_SEARCH_URL).willReturn(aResponse().withStatus(403)));
+        givenThat(post(EXCEPTION_RECORD_SEARCH_URL).willReturn(aResponse().withStatus(status)));
 
         // when
         assertThatThrownBy(() -> ccdApi.getExceptionRecordRefsByEnvelopeId("envelope-id-123", TEST_SERVICE_NAME))
             .isInstanceOf(FeignException.class)
-            .hasMessageContaining("403 Forbidden");
+            .hasMessageContaining(errorMessage);
+
         // then
         WireMock.verify(postRequestedFor(urlEqualTo(EXCEPTION_RECORD_SEARCH_URL)));
         Mockito.verify(authenticatorFactory).removeFromCache(JURISDICTION);
@@ -228,43 +237,42 @@ class CaseRetrievalTest {
         WireMock.verify(postRequestedFor(urlEqualTo(CASE_SEARCH_URL)));
     }
 
-    @Test
-    public void startEvent_should_return_FeignException_when_401_error() {
+    @ParameterizedTest
+    @CsvSource({"401,401 Unauthorized", "403,403 Forbidden"})
+    public void startEvent_should_throw_feignException_when_auth_error(int status, String errorMessage) {
         // given
-
         givenThat(get("/caseworkers/12/jurisdictions/BULKSCAN/case-types/99/event-triggers/eventId/token")
-            .willReturn(aResponse().withStatus(401)));
+            .willReturn(aResponse().withStatus(status)));
 
         // when
         assertThatThrownBy(() -> ccdApi.startEvent(CCD_AUTHENTICATOR, JURISDICTION, "99", "eventId"))
             .isInstanceOf(FeignException.class)
-            .hasMessageContaining("401 Unauthorized");
-
+            .hasMessageContaining(errorMessage);
         Mockito.verify(authenticatorFactory).removeFromCache(JURISDICTION);
     }
 
-    @Test
-    public void startEventForAttachScannedDocs_should_return_CcdCallException_when_401_error() {
+    @ParameterizedTest
+    @ValueSource(ints = {401, 403})
+    public void startEventForAttachScannedDocs_should_throw_ccdCallException_when_auth_error(int status) {
         // given
-
         givenThat(get("/caseworkers/12/jurisdictions/BULKSCAN/case-types/77/cases/2/event-triggers/eventId/token")
-            .willReturn(aResponse().withStatus(401)));
+            .willReturn(aResponse().withStatus(status)));
 
         // when
         assertThatThrownBy(
             () -> ccdApi.startEventForAttachScannedDocs(CCD_AUTHENTICATOR, JURISDICTION, "77", "2", "eventId"))
             .isInstanceOf(CcdCallException.class)
-            .hasMessageContaining("Could not attach documents for case ref: 2 Error: 401");
+            .hasMessageContaining("Could not attach documents for case ref: 2 Error: " + status);
         Mockito.verify(authenticatorFactory).removeFromCache(JURISDICTION);
     }
 
-    @Test
-    public void submitEventForAttachScannedDocs_should_return_CcdCallException_when_http_403_error() {
+    @ParameterizedTest
+    @ValueSource(ints = {401, 403})
+    public void submitEventForAttachScannedDocs_should_throw_CcdCallException_when_auth_error(int status) {
         // given
-
         givenThat(
             post("/caseworkers/12/jurisdictions/BULKSCAN/case-types/23/cases/98/events?ignore-warning=true")
-            .willReturn(aResponse().withStatus(403))
+            .willReturn(aResponse().withStatus(status))
         );
 
         // when
@@ -278,16 +286,18 @@ class CaseRetrievalTest {
             )
         )
             .isInstanceOf(CcdCallException.class)
-            .hasMessageContaining("Could not attach documents for case ref: 98 Error: 403");
+            .hasMessageContaining("Could not attach documents for case ref: 98 Error: " + status);
+        //then
         Mockito.verify(authenticatorFactory).removeFromCache(JURISDICTION);
     }
 
-    @Test
-    public void submitEvent_should_return_FeignException_when_http_403_error() {
+    @ParameterizedTest
+    @CsvSource({"401,401 Unauthorized", "403,403 Forbidden"})
+    public void submitEvent_should_throw_FeignException_when_auth_error(int status, String errorMessage) {
         // given
         givenThat(
             post("/caseworkers/12/jurisdictions/BULKSCAN/case-types/casetypeid/cases?ignore-warning=true")
-                .willReturn(aResponse().withStatus(403))
+                .willReturn(aResponse().withStatus(status))
         );
 
         // when
@@ -299,7 +309,7 @@ class CaseRetrievalTest {
             )
         )
             .isInstanceOf(FeignException.class)
-            .hasMessageContaining("403 Forbidden");
+            .hasMessageContaining(errorMessage);
         Mockito.verify(authenticatorFactory).removeFromCache(JURISDICTION);
     }
 }
