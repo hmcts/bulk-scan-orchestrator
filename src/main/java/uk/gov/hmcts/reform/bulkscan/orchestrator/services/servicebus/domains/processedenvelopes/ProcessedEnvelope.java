@@ -11,8 +11,11 @@ public class ProcessedEnvelope {
     @JsonProperty("processed_ccd_type")
     public final EnvelopeCcdAction processedCcdType;
 
-    public ProcessedEnvelope(String id, Long processedCcdReference,
-        EnvelopeCcdAction processedCcdType) {
+    public ProcessedEnvelope(
+        String id,
+        Long processedCcdReference,
+        EnvelopeCcdAction processedCcdType
+    ) {
         this.id = id;
         this.processedCcdReference = processedCcdReference;
         this.processedCcdType = processedCcdType;
