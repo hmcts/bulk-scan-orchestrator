@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.NotificationSendingException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.ProcessedEnvelopeNotifier;
 
@@ -23,6 +24,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.AUTO_ATTACHED_TO_CASE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.EXCEPTION_RECORD;
 
 @ExtendWith(MockitoExtension.class)
 class ProcessedEnvelopeNotifierTest {
@@ -42,9 +45,10 @@ class ProcessedEnvelopeNotifierTest {
         // given
         String envelopeId = UUID.randomUUID().toString();
         Instant startTime = Instant.now();
-
+        Long ccdId = 4342349506L;
+        EnvelopeCcdAction envelopeCcdAction = AUTO_ATTACHED_TO_CASE;
         // when
-        notifier.notify(envelopeId);
+        notifier.notify(envelopeId, ccdId, envelopeCcdAction);
 
         // then
         ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
@@ -58,10 +62,16 @@ class ProcessedEnvelopeNotifierTest {
 
         assertThat(message.getMessageId()).isEqualTo(envelopeId);
         assertThat(message.getContentType()).isEqualTo("application/json");
-
         String messageBodyJson = new String(MessageBodyRetriever.getBinaryData(message.getMessageBody()));
-        String expectedMessageBodyJson = String.format("{\"id\":\"%s\"}", envelopeId);
-        JSONAssert.assertEquals(expectedMessageBodyJson, messageBodyJson, JSONCompareMode.LENIENT);
+        String expectedMessageBodyJson =
+            String.format(
+                "{\"id\":\"%s\",\"envelope_id\":\"%s\",\"ccd_id\":%s,\"envelope_ccd_action\":\"%s\" }",
+                envelopeId,
+                envelopeId,
+                ccdId,
+                envelopeCcdAction
+            );
+        JSONAssert.assertEquals(expectedMessageBodyJson, messageBodyJson, JSONCompareMode.STRICT);
     }
 
     @Test
@@ -69,7 +79,7 @@ class ProcessedEnvelopeNotifierTest {
         ServiceBusException exceptionToThrow = new ServiceBusException(true, "test exception");
         willThrow(exceptionToThrow).given(queueClient).scheduleMessage(any(), any());
 
-        assertThatThrownBy(() -> notifier.notify("envelopeId123"))
+        assertThatThrownBy(() -> notifier.notify("envelopeId123", 2321L, EXCEPTION_RECORD))
             .isInstanceOf(NotificationSendingException.class)
             .hasMessage("An error occurred when trying to send notification about successfully processed envelope")
             .hasCause(exceptionToThrow);

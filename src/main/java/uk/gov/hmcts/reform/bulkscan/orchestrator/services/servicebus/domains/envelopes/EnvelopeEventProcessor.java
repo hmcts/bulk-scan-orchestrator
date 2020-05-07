@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.MessageBody
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.handler.MessageProcessingResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.handler.MessageProcessingResultType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeProcessingResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.IProcessedEnvelopeNotifier;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.InvalidMessageException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.MessageProcessingException;
@@ -83,8 +84,13 @@ public class EnvelopeEventProcessor {
             try {
                 envelope = parse(MessageBodyRetriever.getBinaryData(message.getMessageBody()));
                 logMessageParsed(message, envelope);
-                envelopeHandler.handleEnvelope(envelope);
-                processedEnvelopeNotifier.notify(envelope.id);
+                EnvelopeProcessingResult envelopeProcessingResult =
+                    envelopeHandler.handleEnvelope(envelope);
+                processedEnvelopeNotifier.notify(
+                    envelope.id,
+                    envelopeProcessingResult.ccdId,
+                    envelopeProcessingResult.envelopeCcdAction
+                );
                 log.info("Processed message with ID {}. File name: {}", message.getMessageId(), envelope.zipFileName);
                 return new MessageProcessingResult(SUCCESS);
             } catch (InvalidMessageException ex) {

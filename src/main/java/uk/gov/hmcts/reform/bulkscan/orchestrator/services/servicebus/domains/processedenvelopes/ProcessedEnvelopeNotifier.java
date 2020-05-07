@@ -34,10 +34,10 @@ public class ProcessedEnvelopeNotifier implements IProcessedEnvelopeNotifier {
         this.objectMapper = objectMapper;
     }
 
-    public void notify(String envelopeId) {
+    public void notify(String envelopeId, Long ccdId, EnvelopeCcdAction envelopeCcdAction) {
         try {
             String messageBody =
-                objectMapper.writeValueAsString(new ProcessedEnvelope(envelopeId));
+                objectMapper.writeValueAsString(new ProcessedEnvelope(envelopeId, ccdId, envelopeCcdAction));
 
             IMessage message = new Message(envelopeId, messageBody, APPLICATION_JSON.toString());
 

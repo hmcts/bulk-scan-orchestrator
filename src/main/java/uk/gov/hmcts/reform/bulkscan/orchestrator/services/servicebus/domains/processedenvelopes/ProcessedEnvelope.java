@@ -7,7 +7,24 @@ public class ProcessedEnvelope {
     @JsonProperty
     public final String id;
 
-    public ProcessedEnvelope(String id) {
-        this.id = id;
+    @JsonProperty("envelope_id")
+    public final String envelopeId;
+
+    @JsonProperty("ccd_id")
+    public final Long ccdId;
+
+    @JsonProperty("envelope_ccd_action")
+    public final EnvelopeCcdAction envelopeCcdAction;
+
+    public ProcessedEnvelope(
+        String envelopeId,
+        Long ccdId,
+        EnvelopeCcdAction envelopeCcdAction
+    ) {
+        //Todo delete after processor changes
+        this.id = envelopeId;
+        this.envelopeId = envelopeId;
+        this.ccdId = ccdId;
+        this.envelopeCcdAction = envelopeCcdAction;
     }
 }
