@@ -35,7 +35,7 @@ public class IdamCacheExpiry implements Expiry<String, CachedIdamCredential> {
         long currentTime,
         @NonNegative long currentDuration
     ) {
-        return currentDuration;
+        return TimeUnit.SECONDS.toNanos(cachedIdamCredential.expiresIn - refreshTokenBeforeExpiry);
     }
 
     @Override
