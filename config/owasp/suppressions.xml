@@ -89,6 +89,14 @@
 
   <suppress until="2021-01-05">
     <notes><![CDATA[
+   file name: wiremock-jre8-2.25.1.jar: jquery-3.4.1.min.js
+   ]]></notes>
+    <packageUrl regex="true">^pkg:javascript/jquery@.*$</packageUrl>
+    <vulnerabilityName>Regex in its jQuery.htmlPrefilter  sometimes may introduce XSS</vulnerabilityName>
+  </suppress>
+
+  <suppress until="2021-01-05">
+    <notes><![CDATA[
       This is only used for TESTING purposes.
     ]]></notes>
     <packageUrl regex="true">^pkg:javascript/handlebars@4\.0\.4.*$</packageUrl>
