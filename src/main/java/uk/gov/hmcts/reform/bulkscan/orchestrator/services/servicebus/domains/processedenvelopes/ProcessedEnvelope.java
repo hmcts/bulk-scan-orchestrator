@@ -4,9 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ProcessedEnvelope {
 
-    @JsonProperty
-    public final String id;
-
     @JsonProperty("envelope_id")
     public final String envelopeId;
 
@@ -21,8 +18,6 @@ public class ProcessedEnvelope {
         Long ccdId,
         EnvelopeCcdAction envelopeCcdAction
     ) {
-        //Todo delete after processor changes
-        this.id = envelopeId;
         this.envelopeId = envelopeId;
         this.ccdId = String.valueOf(ccdId);
         this.envelopeCcdAction = envelopeCcdAction;
