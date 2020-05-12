@@ -5,6 +5,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,21 +40,29 @@ class IdamCacheExpiryTest {
 
     @ParameterizedTest
     @CsvSource({
-        "20, 1212, 0, 0",
-        "2, 9812233, 1200, 1200",
-        "22, 0, 420, 420"
+        "20,  1212,    5,  0",
+        "100,  123, 1200, 80",
+        "22,   454,  420,  2"
     })
-    void expireAfterUpdate(long expireIn, long currentTime, long currentDuration, long result) {
-        CachedIdamCredential cachedIdamCredential = new CachedIdamCredential("token", USER_DETAILS, expireIn);
+    void should_update_remaining_time_when_cached_value_is_updated(
+        long expireIn,
+        long currentTime,
+        long currentSecondsLeft,
+        long expectedSecondsLeft
+    ) {
+        // given
+        CachedIdamCredential newCreds = new CachedIdamCredential("token", USER_DETAILS, expireIn);
 
-        long remainingTime = idamCacheExpiry.expireAfterUpdate(
-            "key_32x",
-            cachedIdamCredential,
+        // when
+        long remainingTimeNanos = idamCacheExpiry.expireAfterUpdate(
+            "someJurisdiction",
+            newCreds,
             currentTime,
-            currentDuration
+            TimeUnit.MILLISECONDS.toNanos(currentSecondsLeft)
         );
 
-        assertThat(remainingTime).isEqualTo(result);
+        // then
+        assertThat(remainingTimeNanos).isEqualTo(TimeUnit.SECONDS.toNanos(expectedSecondsLeft));
     }
 
     @ParameterizedTest
@@ -73,5 +82,4 @@ class IdamCacheExpiryTest {
         );
         assertThat(remainingTime).isEqualTo(result);
     }
-
 }

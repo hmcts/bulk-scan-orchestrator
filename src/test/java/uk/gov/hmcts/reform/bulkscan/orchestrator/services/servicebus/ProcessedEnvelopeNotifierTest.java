@@ -65,8 +65,7 @@ class ProcessedEnvelopeNotifierTest {
         String messageBodyJson = new String(MessageBodyRetriever.getBinaryData(message.getMessageBody()));
         String expectedMessageBodyJson =
             String.format(
-                "{\"id\":\"%s\",\"envelope_id\":\"%s\",\"ccd_id\":%s,\"envelope_ccd_action\":\"%s\" }",
-                envelopeId,
+                "{\"envelope_id\":\"%s\",\"ccd_id\":\"%s\",\"envelope_ccd_action\":\"%s\"}",
                 envelopeId,
                 ccdId,
                 envelopeCcdAction
