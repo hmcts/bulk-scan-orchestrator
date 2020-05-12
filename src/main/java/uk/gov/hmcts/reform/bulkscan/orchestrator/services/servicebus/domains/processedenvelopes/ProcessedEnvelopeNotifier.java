@@ -44,7 +44,7 @@ public class ProcessedEnvelopeNotifier implements IProcessedEnvelopeNotifier {
             // TODO: change back to `queueClient.send(message)` when BPS-694 is implemented
             queueClient.scheduleMessage(message, Instant.now().plusSeconds(10));
 
-            log.info("Sent message to processed envelopes queue. Envelope ID: {}", envelopeId);
+            log.info("Sent message to processed envelopes queue. Message Body: {}", messageBody);
         } catch (Exception ex) {
             throw new NotificationSendingException(
                 "An error occurred when trying to send notification about successfully processed envelope",
