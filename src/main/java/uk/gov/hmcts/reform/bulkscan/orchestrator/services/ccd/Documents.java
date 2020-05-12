@@ -60,6 +60,13 @@ public final class Documents {
             .orElse("");
     }
 
+    public static String getExceptionRecordReference(Map<String, Object> document) {
+        return (String) Optional.ofNullable(document)
+            .map(doc -> doc.get("value"))
+            .map(map -> ((Map) map).get("exceptionRecordReference"))
+            .orElse(null);
+    }
+
     static List<String> getDocumentNumbers(List<Map<String, Object>> documents) {
         return documents
             .stream()

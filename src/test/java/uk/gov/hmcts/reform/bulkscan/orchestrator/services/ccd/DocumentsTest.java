@@ -51,6 +51,31 @@ class DocumentsTest {
         assertThat(actual).isEqualTo("");
     }
 
+    @Test
+    void should_return_exception_record_reference_when_one_is_present() {
+        // given
+        String ref = "123";
+        Map<String, Object> document = ImmutableMap.of("value", ImmutableMap.of("exceptionRecordReference", ref));
+
+        // when
+        String actualRef = Documents.getExceptionRecordReference(document);
+
+        // then
+        assertThat(actualRef).isEqualTo(ref);
+    }
+
+    @Test
+    void should_return_null_as_exception_record_reference_when_one_is_not_present() {
+        // given
+        Map<String, Object> document = ImmutableMap.of("value", emptyMap());
+
+        // when
+        String actualRef = Documents.getExceptionRecordReference(document);
+
+        // then
+        assertThat(actualRef).isNull();
+    }
+
     private static Object[][] documentDuplicateTestParam() {
         return new Object[][]{
             {createCaseDetailsWith(), createDcnList(), ImmutableSet.<String>of()},
