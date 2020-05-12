@@ -50,7 +50,7 @@ public final class Documents {
             .collect(toSet());
     }
 
-    private static String getDocumentId(Map<String, Object> document) {
+    public static String getDocumentId(Map<String, Object> document) {
         return Optional.ofNullable(document)
             .map(doc -> doc.get("value"))
             .filter(item -> item instanceof Map)
