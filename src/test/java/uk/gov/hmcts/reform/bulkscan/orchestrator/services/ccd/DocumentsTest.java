@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.util.ExceptionRecordAttachDocumentConnectives;
@@ -16,6 +17,7 @@ import java.util.stream.Stream;
 import javax.validation.constraints.NotNull;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.getScannedDocuments;
@@ -23,6 +25,56 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.g
 class DocumentsTest {
     private static final String SCANNED_DOCUMENTS = "scannedDocuments";
     private static final String DOCUMENT_NUMBER = "id";
+
+    @Test
+    void should_return_document_control_number_when_one_is_present() {
+        // given
+        String expected = "123";
+        Map<String, Object> document = ImmutableMap.of("value", ImmutableMap.of("controlNumber", expected));
+
+        // when
+        String actual = Documents.getDocumentId(document);
+
+        // then
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void should_return_empty_string_as_document_control_number_when_one_is_not_present() {
+        // given
+        Map<String, Object> document = ImmutableMap.of("value", emptyMap());
+
+        // when
+        String actual = Documents.getDocumentId(document);
+
+        // then
+        assertThat(actual).isEqualTo("");
+    }
+
+    @Test
+    void should_return_exception_record_reference_when_one_is_present() {
+        // given
+        String ref = "123";
+        Map<String, Object> document = ImmutableMap.of("value", ImmutableMap.of("exceptionRecordReference", ref));
+
+        // when
+        String actualRef = Documents.getExceptionRecordReference(document);
+
+        // then
+        assertThat(actualRef).isEqualTo(ref);
+    }
+
+    @Test
+    void should_return_null_as_exception_record_reference_when_one_is_not_present() {
+        // given
+        Map<String, Object> document = ImmutableMap.of("value", emptyMap());
+
+        // when
+        String actualRef = Documents.getExceptionRecordReference(document);
+
+        // then
+        assertThat(actualRef).isNull();
+    }
 
     private static Object[][] documentDuplicateTestParam() {
         return new Object[][]{

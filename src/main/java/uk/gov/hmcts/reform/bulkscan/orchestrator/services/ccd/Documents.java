@@ -50,7 +50,7 @@ public final class Documents {
             .collect(toSet());
     }
 
-    private static String getDocumentId(Map<String, Object> document) {
+    public static String getDocumentId(Map<String, Object> document) {
         return Optional.ofNullable(document)
             .map(doc -> doc.get("value"))
             .filter(item -> item instanceof Map)
@@ -58,6 +58,13 @@ public final class Documents {
             .filter(item -> item instanceof String)
             .map(item -> (String) item)
             .orElse("");
+    }
+
+    public static String getExceptionRecordReference(Map<String, Object> document) {
+        return (String) Optional.ofNullable(document)
+            .map(doc -> doc.get("value"))
+            .map(map -> ((Map) map).get("exceptionRecordReference"))
+            .orElse(null);
     }
 
     static List<String> getDocumentNumbers(List<Map<String, Object>> documents) {
