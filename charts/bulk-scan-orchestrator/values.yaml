@@ -38,11 +38,8 @@ java:
         - idam-users-sscs-username
         - idam-users-sscs-password
         - envelopes-queue-listen-connection-string
-        - envelopes-staging-queue-listen-connection-string
         - payments-queue-send-connection-string
-        - payments-staging-queue-send-connection-string
         - processed-envelopes-queue-send-connection-string
-        - processed-envelopes-staging-queue-send-connection-string
         - envelopes-queue-max-delivery-count
         - app-insights-instrumentation-key
   image: hmctspublic.azurecr.io/bulk-scan/orchestrator:latest
