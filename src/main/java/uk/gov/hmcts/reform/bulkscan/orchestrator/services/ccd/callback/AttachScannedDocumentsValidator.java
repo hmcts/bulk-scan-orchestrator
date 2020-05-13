@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static java.util.stream.Collectors.toSet;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -106,13 +106,13 @@ public final class AttachScannedDocumentsValidator {
     }
 
     private static Set<String> findDocumentsIntersection(
-        Function<Map<String, Object>, Boolean> filterOnTargetCaseDocuments,
+        Predicate<Map<String, Object>> filterOnTargetCaseDocuments,
         List<Map<String, Object>> exceptionRecordDocuments,
         List<Map<String, Object>> targetCaseDocuments
     ) {
         Set<String> dcnsOfCaseDocumentsFromOtherSources = targetCaseDocuments
             .stream()
-            .filter(filterOnTargetCaseDocuments::apply)
+            .filter(filterOnTargetCaseDocuments)
             .map(Documents::getDocumentId)
             .collect(toSet());
 
