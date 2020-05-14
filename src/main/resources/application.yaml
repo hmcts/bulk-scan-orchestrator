@@ -78,6 +78,7 @@ service-config:
 
     - service: sscs
       jurisdiction: SSCS
+      transformation-url: ${TRANSFORMATION_URL_SSCS}
       case-type-ids: []
       form-type-to-surname-ocr-field-mappings:
         - formType: sscs1
