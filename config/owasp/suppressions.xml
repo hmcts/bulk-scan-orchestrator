@@ -20,7 +20,7 @@
 
   <suppress>
     <notes><![CDATA[No fix is available]]></notes>
-    <gav regex="true">^org\.springframework\.security:spring-security-crypto:5\.2\.2\.RELEASE$</gav>
+    <gav regex="true">^org\.springframework\.security:spring-security-crypto:5\.2\.4\.RELEASE$</gav>
     <cve>CVE-2018-1258</cve>
   </suppress>
 
@@ -85,6 +85,15 @@
     <filePath regex="true">.*spring-cloud-contract-wiremock-2\.2\.2\.RELEASE\.jar</filePath>
     <cve>CVE-2018-9116</cve>
     <cve>CVE-2018-9117</cve>
+  </suppress>
+
+  <!--test dependency-->
+  <suppress until="2021-01-05">
+    <notes><![CDATA[
+   file name: wiremock-jre8-2.25.1.jar: jquery-3.4.1.min.js
+   ]]></notes>
+    <packageUrl regex="true">^pkg:javascript/jquery@.*$</packageUrl>
+    <vulnerabilityName>Regex in its jQuery.htmlPrefilter  sometimes may introduce XSS</vulnerabilityName>
   </suppress>
 
   <suppress until="2021-01-05">

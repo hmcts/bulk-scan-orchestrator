@@ -56,7 +56,7 @@ public class FunctionalQueueConfig {
     @Profile("nosb") // apply only when Service Bus should not be used
     IProcessedEnvelopeNotifier testProcessedEnvelopeNotifier() {
         // return implementation that does nothing
-        return envelopeId -> {
+        return (envelopeId, ccdId, ccdAction) -> {
         };
     }
 

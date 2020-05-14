@@ -2,12 +2,10 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.respon
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 public class CaseUpdateDetails {
 
-    @NotEmpty
     public final String eventId;
 
     @NotNull

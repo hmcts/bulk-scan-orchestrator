@@ -6,9 +6,13 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseFinder;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.PaymentsProcessor;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeProcessingResult;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.Optional;
+
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.AUTO_ATTACHED_TO_CASE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.EXCEPTION_RECORD;
 
 @Service
 public class EnvelopeHandler {
@@ -32,7 +36,7 @@ public class EnvelopeHandler {
         this.paymentsProcessor = paymentsProcessor;
     }
 
-    public void handleEnvelope(Envelope envelope) {
+    public EnvelopeProcessingResult handleEnvelope(Envelope envelope) {
         switch (envelope.classification) {
             case SUPPLEMENTARY_EVIDENCE:
                 Optional<CaseDetails> caseDetailsFound = caseFinder.findCase(envelope);
@@ -42,23 +46,22 @@ public class EnvelopeHandler {
                     boolean docsAttached = evidenceAttacher.attach(envelope, existingCase);
                     if (docsAttached) {
                         paymentsProcessor.createPayments(envelope, existingCase.getId(), false);
+                        return new EnvelopeProcessingResult(existingCase.getId(),  AUTO_ATTACHED_TO_CASE);
                     } else {
                         log.info(
                             "Creating exception record as supplementary evidence failed for envelope {} case {}",
                             envelope.id,
                             existingCase.getId()
                         );
-                        createExceptionRecord(envelope);
+                        return new EnvelopeProcessingResult(createExceptionRecord(envelope), EXCEPTION_RECORD);
                     }
                 } else {
-                    createExceptionRecord(envelope);
+                    return new EnvelopeProcessingResult(createExceptionRecord(envelope), EXCEPTION_RECORD);
                 }
-                break;
             case SUPPLEMENTARY_EVIDENCE_WITH_OCR:
             case EXCEPTION:
             case NEW_APPLICATION:
-                createExceptionRecord(envelope);
-                break;
+                return new EnvelopeProcessingResult(createExceptionRecord(envelope), EXCEPTION_RECORD);
             default:
                 throw new UnknownClassificationException(
                     "Cannot determine CCD action for envelope - unknown classification: " + envelope.classification
@@ -66,9 +69,10 @@ public class EnvelopeHandler {
         }
     }
 
-    private void createExceptionRecord(Envelope envelope) {
+    private Long createExceptionRecord(Envelope envelope) {
         Long ccdId = exceptionRecordCreator.tryCreateFrom(envelope);
 
         paymentsProcessor.createPayments(envelope, ccdId, true);
+        return ccdId;
     }
 }

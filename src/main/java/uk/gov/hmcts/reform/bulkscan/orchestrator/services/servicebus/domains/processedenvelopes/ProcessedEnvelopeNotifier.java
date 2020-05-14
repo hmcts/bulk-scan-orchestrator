@@ -34,17 +34,17 @@ public class ProcessedEnvelopeNotifier implements IProcessedEnvelopeNotifier {
         this.objectMapper = objectMapper;
     }
 
-    public void notify(String envelopeId) {
+    public void notify(String envelopeId, Long ccdId, EnvelopeCcdAction envelopeCcdAction) {
         try {
             String messageBody =
-                objectMapper.writeValueAsString(new ProcessedEnvelope(envelopeId));
+                objectMapper.writeValueAsString(new ProcessedEnvelope(envelopeId, ccdId, envelopeCcdAction));
 
             IMessage message = new Message(envelopeId, messageBody, APPLICATION_JSON.toString());
 
             // TODO: change back to `queueClient.send(message)` when BPS-694 is implemented
             queueClient.scheduleMessage(message, Instant.now().plusSeconds(10));
 
-            log.info("Sent message to processed envelopes queue. Envelope ID: {}", envelopeId);
+            log.info("Sent message to processed envelopes queue. Message Body: {}", messageBody);
         } catch (Exception ex) {
             throw new NotificationSendingException(
                 "An error occurred when trying to send notification about successfully processed envelope",

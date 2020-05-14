@@ -5,5 +5,5 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.pr
  */
 public interface IProcessedEnvelopeNotifier {
 
-    void notify(String envelopeId);
+    void notify(String envelopeId, Long ccdId, EnvelopeCcdAction envelopeCcdAction);
 }

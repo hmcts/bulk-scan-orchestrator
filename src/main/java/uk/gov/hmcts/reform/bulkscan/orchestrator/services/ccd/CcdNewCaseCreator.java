@@ -61,7 +61,7 @@ public class CcdNewCaseCreator {
         String userId
     ) {
         log.info(
-            "Start creating new case for {} from exception record {}",
+            "Started creating new case for service {} from exception record {}",
             configItem.getService(),
             exceptionRecord.id
         );
@@ -77,7 +77,7 @@ public class CcdNewCaseCreator {
 
             if (!ignoreWarnings && !transformationResponse.warnings.isEmpty()) {
                 log.info(
-                    "Returned warnings after transforming exception record for {} from exception record {}",
+                    "Returned warnings after transforming exception record for service {} from exception record {}",
                     configItem.getService(),
                     exceptionRecord.id
                 );
@@ -85,7 +85,7 @@ public class CcdNewCaseCreator {
             }
 
             log.info(
-                "Successfully transformed exception record for {} from exception record {}",
+                "Successfully transformed exception record for service {} from exception record {}",
                 configItem.getService(),
                 exceptionRecord.id
             );
@@ -99,7 +99,7 @@ public class CcdNewCaseCreator {
             );
 
             log.info(
-                "Successfully created new case for {} with case ID {} from exception record {}",
+                "Successfully created new case for service {} with case ID {} from exception record {}",
                 configItem.getService(),
                 newCaseId,
                 exceptionRecord.id
@@ -127,7 +127,7 @@ public class CcdNewCaseCreator {
             throw new CallbackException(message, exception);
         } catch (RestClientException exception) {
             String message = format(
-                "Failed to receive transformed exception record from %s client for exception record %s",
+                "Failed to receive transformed exception record from service %s for exception record %s",
                 configItem.getService(),
                 exceptionRecord.id
             );
@@ -138,7 +138,11 @@ public class CcdNewCaseCreator {
         // rest of exceptions received from ccd and logged separately
         } catch (Exception exception) {
             throw new CallbackException(
-                format("Failed to create new case for exception record with Id %s", exceptionRecord.id),
+                format(
+                    "Failed to create new case for exception record with Id %s. Service: %s",
+                    exceptionRecord.id,
+                    configItem.getService()
+                ),
                 exception
             );
         }
