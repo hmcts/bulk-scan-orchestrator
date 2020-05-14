@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback;
 
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.DuplicateDocsException;
 
@@ -14,15 +15,16 @@ import java.util.function.Predicate;
 import static java.util.stream.Collectors.toSet;
 import static org.slf4j.LoggerFactory.getLogger;
 
-public final class AttachScannedDocumentsValidator {
+@Component
+public class AttachScannedDocumentsValidator {
 
     private static final Logger log = getLogger(AttachScannedDocumentsValidator.class);
 
-    private AttachScannedDocumentsValidator() {
-        // utility class constructor
+    public AttachScannedDocumentsValidator() {
+        // empty construct
     }
 
-    public static void verifyExceptionRecordAddsNoDuplicates(
+    public void verifyExceptionRecordAddsNoDuplicates(
         List<Map<String, Object>> targetCaseDocuments,
         List<Map<String, Object>> exceptionRecordDocuments,
         String exceptionRecordCcdRef,
@@ -53,7 +55,7 @@ public final class AttachScannedDocumentsValidator {
         }
     }
 
-    private static void logIfDocumentsAreAlreadyAttachedToCaseFromER(
+    private void logIfDocumentsAreAlreadyAttachedToCaseFromER(
         List<Map<String, Object>> targetCaseDocuments,
         List<Map<String, Object>> exceptionRecordDocuments,
         String exceptionRecordCcdRef,
@@ -81,7 +83,7 @@ public final class AttachScannedDocumentsValidator {
         }
     }
 
-    private static Set<String> getDcnsOfDocumentsAlreadyAttachedToCaseFromER(
+    private Set<String> getDcnsOfDocumentsAlreadyAttachedToCaseFromER(
         String exceptionRecordId,
         List<Map<String, Object>> exceptionRecordDocuments,
         List<Map<String, Object>> targetCaseDocuments
@@ -93,7 +95,7 @@ public final class AttachScannedDocumentsValidator {
         );
     }
 
-    private static Set<String> getDcnsOfClashingDocuments(
+    private Set<String> getDcnsOfClashingDocuments(
         String exceptionRecordId,
         List<Map<String, Object>> exceptionRecordDocuments,
         List<Map<String, Object>> targetCaseDocuments
@@ -105,7 +107,7 @@ public final class AttachScannedDocumentsValidator {
         );
     }
 
-    private static Set<String> findDocumentsIntersection(
+    private Set<String> findDocumentsIntersection(
         Predicate<Map<String, Object>> filterOnTargetCaseDocuments,
         List<Map<String, Object>> exceptionRecordDocuments,
         List<Map<String, Object>> targetCaseDocuments

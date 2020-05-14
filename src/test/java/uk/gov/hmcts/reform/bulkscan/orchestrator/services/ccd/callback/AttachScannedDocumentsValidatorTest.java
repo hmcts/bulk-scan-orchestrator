@@ -10,9 +10,10 @@ import java.util.Map;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.AttachScannedDocumentsValidator.verifyExceptionRecordAddsNoDuplicates;
 
 class AttachScannedDocumentsValidatorTest {
+
+    private static final AttachScannedDocumentsValidator VALIDATOR = new AttachScannedDocumentsValidator();
 
     @Test
     void should_do_nothing_when_all_documents_are_already_attached() {
@@ -29,7 +30,7 @@ class AttachScannedDocumentsValidatorTest {
         );
 
         // when, then
-        assertThatCode(() -> verifyExceptionRecordAddsNoDuplicates(
+        assertThatCode(() -> VALIDATOR.verifyExceptionRecordAddsNoDuplicates(
             targetCaseDocuments,
             exceptionRecordDocuments,
             exceptionRecordReference,
@@ -48,7 +49,7 @@ class AttachScannedDocumentsValidatorTest {
         );
 
         // when, then
-        assertThatCode(() -> verifyExceptionRecordAddsNoDuplicates(
+        assertThatCode(() -> VALIDATOR.verifyExceptionRecordAddsNoDuplicates(
             targetCaseDocuments,
             exceptionRecordDocuments,
             "exception-ref",
@@ -67,7 +68,7 @@ class AttachScannedDocumentsValidatorTest {
         );
 
         // when, then
-        assertThatCode(() -> verifyExceptionRecordAddsNoDuplicates(
+        assertThatCode(() -> VALIDATOR.verifyExceptionRecordAddsNoDuplicates(
             targetCaseDocuments,
             exceptionRecordDocuments,
             "exception-ref",
