@@ -31,7 +31,7 @@ class DocumentsTest {
     private static final String DOCUMENT_NUMBER = "id";
 
     @Test
-    void should_remove_all_documents_from_exception_record_because_all_of_them_are_already_in_target_case() {
+    void should_remove_all_documents_from_exception_record_when_all_of_them_are_already_in_target_case() {
         // given
         String exceptionRecordReference = "REF";
         List<Map<String, Object>> exceptionRecordDocuments = singletonList(
@@ -56,7 +56,7 @@ class DocumentsTest {
     }
 
     @Test
-    void should_remove_overlapping_documents_from_exception_record_because_they_are_already_in_target_case() {
+    void should_remove_overlapping_documents_from_exception_record_when_they_are_already_in_target_case() {
         // given
         String exceptionRecordReference = "REF";
         List<Map<String, Object>> exceptionRecordDocuments = ImmutableList.of(
@@ -94,7 +94,7 @@ class DocumentsTest {
     }
 
     @Test
-    void should_leave_all_documents_in_exception_record_because_there_is_nothing_matching_in_target_case() {
+    void should_leave_all_documents_in_exception_record_when_there_is_nothing_matching_in_target_case() {
         // given
         List<Map<String, Object>> exceptionRecordDocuments = ImmutableList.of(
             singletonMap("value", singletonMap("controlNumber", "e-123")),
