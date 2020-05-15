@@ -9,12 +9,14 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.validation.constraints.NotNull;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 public final class Documents {
@@ -40,6 +42,23 @@ public final class Documents {
                 existingCaseDocumentIds
             )
         );
+    }
+
+    static List<Map<String, Object>> removeAlreadyAttachedDocuments(
+        List<Map<String, Object>> exceptionRecordDocuments,
+        List<Map<String, Object>> targetCaseDocuments,
+        String exceptionRecordCcdRef
+    ) {
+        Set<String> dcnsOfCaseDocumentsFromThisExceptionRecord = targetCaseDocuments
+            .stream()
+            .filter(doc -> Objects.equals(getExceptionRecordReference(doc), exceptionRecordCcdRef))
+            .map(Documents::getDocumentId)
+            .collect(toSet());
+
+        return exceptionRecordDocuments
+            .stream()
+            .filter(doc -> !dcnsOfCaseDocumentsFromThisExceptionRecord.contains(getDocumentId(doc)))
+            .collect(toList());
     }
 
     @NotNull
