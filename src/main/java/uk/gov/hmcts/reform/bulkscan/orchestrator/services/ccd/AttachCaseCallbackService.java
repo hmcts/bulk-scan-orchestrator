@@ -76,11 +76,12 @@ public class AttachCaseCallbackService {
 
     private final PaymentsProcessor paymentsProcessor;
 
-    public AttachCaseCallbackService(ServiceConfigProvider serviceConfigProvider,
-                                     CcdApi ccdApi,
-                                     ExceptionRecordValidator exceptionRecordValidator,
-                                     CcdCaseUpdater ccdCaseUpdater,
-                                     PaymentsProcessor paymentsProcessor
+    public AttachCaseCallbackService(
+        ServiceConfigProvider serviceConfigProvider,
+        CcdApi ccdApi,
+        ExceptionRecordValidator exceptionRecordValidator,
+        CcdCaseUpdater ccdCaseUpdater,
+        PaymentsProcessor paymentsProcessor
     ) {
         this.serviceConfigProvider = serviceConfigProvider;
         this.ccdApi = ccdApi;
