@@ -213,7 +213,7 @@ dependencies {
   compile group: 'com.microsoft.azure', name: 'azure-servicebus', version: '1.2.18', {
     exclude group: 'net.minidev', module: 'json-smart' // most up-to-date libraries use v2.* now. this one brings in 1.3
   }
-  compile group: 'io.vavr', name: 'vavr', version: '0.10.2'
+  compile group: 'io.vavr', name: 'vavr', version: '0.10.3'
   compile group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '2.8.1'
   compile group: 'com.auth0',name: 'java-jwt' ,version :'3.10.2'
 
