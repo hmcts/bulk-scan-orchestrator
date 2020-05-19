@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUr
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.AttachScannedDocumentsValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ExceptionRecordValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
@@ -58,6 +59,9 @@ class AttachCaseCallbackServiceTest {
     @Mock
     private PaymentsProcessor paymentsProcessor;
 
+    @Mock
+    private AttachScannedDocumentsValidator scannedDocumentsValidator;
+
     private static final String JURISDICTION = "BULKSCAN";
     private static final String CASE_TYPE_EXCEPTION_RECORD = "BULKSCAN_ExceptionRecord";
     private static final String CASE_REF = "1539007368674134";
@@ -100,7 +104,8 @@ class AttachCaseCallbackServiceTest {
             ccdApi,
             exceptionRecordValidator,
             ccdCaseUpdater,
-            paymentsProcessor
+            paymentsProcessor,
+            scannedDocumentsValidator
         );
 
         exceptionRecord = getExceptionRecord();
