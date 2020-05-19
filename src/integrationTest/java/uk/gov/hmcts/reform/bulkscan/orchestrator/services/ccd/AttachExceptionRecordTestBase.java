@@ -67,7 +67,7 @@ public class AttachExceptionRecordTestBase {
 
     static final String DOCUMENT_FILENAME = "document.pdf";
     static final String DOCUMENT_NUMBER = "123456";
-    static final Map<String, Object> EXISTING_DOC = document(DOCUMENT_FILENAME, DOCUMENT_NUMBER);
+    static final Map<String, Object> EXISTING_DOC = document(DOCUMENT_FILENAME, DOCUMENT_NUMBER, EXCEPTION_RECORD_ID);
 
     private static final String CASE_URL = CASE_SUBMIT_URL + "/" + CASE_REF;
     private static final String START_EVENT_URL = CASE_URL + "/event-triggers/attachScannedDocs/token";
@@ -443,14 +443,26 @@ public class AttachExceptionRecordTestBase {
             .collect(toSet());
     }
 
+    private static Map<String, Object> document(
+        String filename,
+        String documentNumber,
+        Long exceptionRecordReference
+    ) {
+        ImmutableMap.Builder<Object, Object> doc = ImmutableMap
+            .builder()
+            .put("fileName", filename)
+            .put("controlNumber", documentNumber)
+            .put("someNumber", 3);
+
+        if (exceptionRecordReference != null) {
+            doc.put("exceptionRecordReference", Long.toString(exceptionRecordReference));
+        }
+
+        return ImmutableMap.of("value", doc.build());
+    }
+
     private static Map<String, Object> document(String filename, String documentNumber) {
-        return ImmutableMap.of(
-            "value", ImmutableMap.of(
-                "fileName", filename,
-                "controlNumber", documentNumber,
-                "someNumber", 3
-            )
-        );
+        return document(filename, documentNumber, null);
     }
 
     private void verifyRequestPattern(RequestPatternBuilder builder, String jsonPath, StringValuePattern pattern) {
