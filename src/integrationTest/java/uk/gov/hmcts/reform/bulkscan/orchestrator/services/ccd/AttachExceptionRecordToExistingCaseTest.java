@@ -154,7 +154,6 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
             .statusCode(500);
     }
 
-    @DisplayName("Should attach missing document and skip already attached one")
     @Test
     void should_attach_missing_document_and_skip_already_attached_one() {
         CallbackRequest callbackRequest = CallbackRequest
@@ -189,7 +188,6 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
         verify(exactly(1), submittedScannedRecords());
     }
 
-    @DisplayName("Should attach missing document and skip already attached one")
     @Test
     void should_fail_when_duplicate_found_with_mismatching_exception_record_reference() throws JsonProcessingException {
         long exceptionRecordId = EXCEPTION_RECORD_ID - 5; // so references can mismatch against actual case doc
