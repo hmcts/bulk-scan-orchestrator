@@ -1,17 +1,14 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.cache;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.interfaces.Claim;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.authorisation.exceptions.InvalidTokenException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.Credential;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.JurisdictionToUserMapping;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.models.TokenResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 @Service
@@ -51,30 +48,16 @@ public class IdamCachedClient {
     private CachedIdamCredential retrieveIdamInfo(String jurisdiction) {
         log.info("Retrieving access token for jurisdiction: {} from IDAM", jurisdiction);
         Credential user = users.getUser(jurisdiction);
-        String tokenWithBearer = idamClient.authenticateUser(
-            user.getUsername(),
-            user.getPassword()
-        );
+        TokenResponse tokenResponse = idamClient
+            .getAccessTokenResponse(
+                user.getUsername(),
+                user.getPassword()
+            );
 
         log.info("Retrieving user details for jurisdiction: {} from IDAM", jurisdiction);
+        String tokenWithBearer = BEARER_AUTH_TYPE + tokenResponse.accessToken;
         UserDetails userDetails = idamClient.getUserDetails(tokenWithBearer);
-        return new CachedIdamCredential(tokenWithBearer, userDetails, stripExpiryFromBearerToken(tokenWithBearer));
-    }
-
-    private long stripExpiryFromBearerToken(String tokenWithBearer) {
-        DecodedJWT jwt;
-        try {
-            jwt = JWT.decode(tokenWithBearer.replace(BEARER_AUTH_TYPE, ""));
-        } catch (Exception ex) {
-            throw new InvalidTokenException("Idam token decoding error.", ex);
-        }
-
-        Claim expires = jwt.getClaim(EXPIRES_IN);
-        if (expires.isNull()) {
-            throw new InvalidTokenException("Invalid idam token, 'expires_in' is missing.");
-        }
-
-        return expires.asLong();
+        return new CachedIdamCredential(tokenWithBearer, userDetails, Long.valueOf(tokenResponse.expiresIn));
     }
 
 }
