@@ -54,7 +54,12 @@ public class IdamCachedClient {
                 user.getPassword()
             );
 
-        log.info("Retrieving user details for jurisdiction: {} from IDAM", jurisdiction);
+        log.info(
+            "Retrieving user details for jurisdiction: {} from IDAM, token scope: {}",
+            jurisdiction,
+            tokenResponse.scope
+        );
+
         String tokenWithBearer = BEARER_AUTH_TYPE + tokenResponse.accessToken;
         UserDetails userDetails = idamClient.getUserDetails(tokenWithBearer);
         return new CachedIdamCredential(tokenWithBearer, userDetails, Long.valueOf(tokenResponse.expiresIn));
