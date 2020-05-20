@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.util.ExceptionRecordAttachDocumentConnectives;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.AttachScannedDocumentsValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ExceptionRecordValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
@@ -46,7 +46,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasUserId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.validatePayments;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.calculateDocumentConnectives;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.concatDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.getDocumentNumbers;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents.getScannedDocuments;
@@ -76,17 +75,22 @@ public class AttachCaseCallbackService {
 
     private final PaymentsProcessor paymentsProcessor;
 
-    public AttachCaseCallbackService(ServiceConfigProvider serviceConfigProvider,
-                                     CcdApi ccdApi,
-                                     ExceptionRecordValidator exceptionRecordValidator,
-                                     CcdCaseUpdater ccdCaseUpdater,
-                                     PaymentsProcessor paymentsProcessor
+    private final AttachScannedDocumentsValidator scannedDocumentsValidator;
+
+    public AttachCaseCallbackService(
+        ServiceConfigProvider serviceConfigProvider,
+        CcdApi ccdApi,
+        ExceptionRecordValidator exceptionRecordValidator,
+        CcdCaseUpdater ccdCaseUpdater,
+        PaymentsProcessor paymentsProcessor,
+        AttachScannedDocumentsValidator scannedDocumentsValidator
     ) {
         this.serviceConfigProvider = serviceConfigProvider;
         this.ccdApi = ccdApi;
         this.exceptionRecordValidator = exceptionRecordValidator;
         this.paymentsProcessor = paymentsProcessor;
         this.ccdCaseUpdater = ccdCaseUpdater;
+        this.scannedDocumentsValidator = scannedDocumentsValidator;
     }
 
     /**
@@ -388,24 +392,20 @@ public class AttachCaseCallbackService {
         CaseDetails theCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
         List<Map<String, Object>> targetCaseDocuments = getScannedDocuments(theCase);
 
-        ExceptionRecordAttachDocumentConnectives erDocumentConnectives = calculateDocumentConnectives(
+        scannedDocumentsValidator.verifyExceptionRecordAddsNoDuplicates(
+            targetCaseDocuments,
             callBackEvent.exceptionRecordDocuments,
-            targetCaseDocuments
+            Long.toString(callBackEvent.exceptionRecordId),
+            targetCaseCcdRef
         );
 
-        if (erDocumentConnectives.hasDuplicatesAndMissing()) {
-            // To be fixed along with https://tools.hmcts.net/jira/browse/BPS-1095
-            throw new DuplicateDocsException(
-                String.format(
-                    "Problem attaching to case %s: found %s duplicates and %s missing documents",
-                    targetCaseCcdRef,
-                    erDocumentConnectives.getExistingInTargetCase(),
-                    erDocumentConnectives.getToBeAttachedToTargetCase()
-                )
-            );
-        }
+        List<Map<String, Object>> documentsToAttach = Documents.removeAlreadyAttachedDocuments(
+            callBackEvent.exceptionRecordDocuments,
+            targetCaseDocuments,
+            Long.toString(callBackEvent.exceptionRecordId)
+        );
 
-        if (erDocumentConnectives.hasMissing()) {
+        if (!documentsToAttach.isEmpty()) {
             List<Map<String, Object>> newCaseDocuments = attachExceptionRecordReference(
                 callBackEvent.exceptionRecordDocuments,
                 callBackEvent.exceptionRecordId
