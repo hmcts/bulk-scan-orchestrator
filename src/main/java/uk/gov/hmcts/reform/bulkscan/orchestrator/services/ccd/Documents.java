@@ -26,7 +26,7 @@ public final class Documents {
         List<Map<String, Object>> targetCaseDocuments,
         String exceptionRecordCcdRef
     ) {
-        Set<String> dcnsOfCaseDocumentsFromThisExceptionRecord = targetCaseDocuments
+        Set<String> documentDcnsFromTargetCase = targetCaseDocuments
             .stream()
             .filter(doc -> Objects.equals(getExceptionRecordReference(doc), exceptionRecordCcdRef))
             .map(Documents::getDocumentId)
@@ -34,7 +34,7 @@ public final class Documents {
 
         return exceptionRecordDocuments
             .stream()
-            .filter(doc -> !dcnsOfCaseDocumentsFromThisExceptionRecord.contains(getDocumentId(doc)))
+            .filter(doc -> !documentDcnsFromTargetCase.contains(getDocumentId(doc)))
             .collect(toList());
     }
 

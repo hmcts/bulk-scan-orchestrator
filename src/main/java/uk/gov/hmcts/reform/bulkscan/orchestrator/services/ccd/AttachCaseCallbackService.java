@@ -408,7 +408,7 @@ public class AttachCaseCallbackService {
 
         if (!documentsToAttach.isEmpty()) {
             List<Map<String, Object>> newCaseDocuments = attachExceptionRecordReference(
-                callBackEvent.exceptionRecordDocuments,
+                documentsToAttach,
                 callBackEvent.exceptionRecordId
             );
 
@@ -502,6 +502,16 @@ public class AttachCaseCallbackService {
         List<Map<String, Object>> exceptionDocuments,
         Long exceptionRecordReference
     ) {
+        List<String> exceptionDocumentsDcns = exceptionDocuments
+            .stream()
+            .map(Documents::getDocumentId)
+            .collect(toList());
+        log.info(
+            "Attaching documents of {} exception record with following DCNs: {}",
+            exceptionRecordReference,
+            exceptionDocumentsDcns
+        );
+
         return exceptionDocuments
             .stream()
             .map(document -> {
