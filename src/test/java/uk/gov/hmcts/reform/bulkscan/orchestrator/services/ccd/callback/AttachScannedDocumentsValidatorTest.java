@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback;
 
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.DuplicateDocsException;
 
 import java.util.List;
 import java.util.Map;
