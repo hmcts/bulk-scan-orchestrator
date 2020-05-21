@@ -407,7 +407,7 @@ public class AttachCaseCallbackService {
 
         if (!documentsToAttach.isEmpty()) {
             List<Map<String, Object>> newCaseDocuments = attachExceptionRecordReference(
-                callBackEvent.exceptionRecordDocuments,
+                documentsToAttach,
                 callBackEvent.exceptionRecordId
             );
 
