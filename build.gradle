@@ -216,7 +216,7 @@ dependencies {
   compile group: 'uk.gov.hmcts.reform', name: 'health-spring-boot-starter', version:'0.0.5'
   compile group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version:'0.0.4'
 
-  compile group: 'com.microsoft.azure', name: 'azure-servicebus', version: '1.2.18', {
+  compile group: 'com.microsoft.azure', name: 'azure-servicebus', version: '3.3.0', {
     exclude group: 'net.minidev', module: 'json-smart' // most up-to-date libraries use v2.* now. this one brings in 1.3
   }
   compile group: 'io.vavr', name: 'vavr', version: '0.10.3'
