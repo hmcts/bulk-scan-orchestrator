@@ -78,22 +78,14 @@
   </suppress>
 
   <!-- this is for the TEST jar wiremock-standalone -->
-  <suppress until="2021-01-05">
-    <notes><![CDATA[
-        This is only used for TESTING purposes.
-      ]]></notes>
-    <filePath regex="true">.*spring-cloud-contract-wiremock-2\.2\.2\.RELEASE\.jar</filePath>
-    <cve>CVE-2018-9116</cve>
-    <cve>CVE-2018-9117</cve>
-  </suppress>
 
-  <!--test dependency-->
-  <suppress until="2021-01-05">
-    <notes><![CDATA[
-   file name: wiremock-jre8-2.25.1.jar: jquery-3.4.1.min.js
+  <suppress until="2020-10-01">
+  <notes><![CDATA[
+   file name: spring-cloud-contract-wiremock-2.2.3.RELEASE.jar
    ]]></notes>
-    <packageUrl regex="true">^pkg:javascript/jquery@.*$</packageUrl>
-    <vulnerabilityName>Regex in its jQuery.htmlPrefilter  sometimes may introduce XSS</vulnerabilityName>
+  <packageUrl regex="true">^pkg:maven/org\.springframework\.cloud/spring\-cloud\-contract\-wiremock@.*$</packageUrl>
+  <cve>CVE-2018-9116</cve>
+  <cve>CVE-2018-9117</cve>
   </suppress>
 
   <suppress until="2021-01-05">
