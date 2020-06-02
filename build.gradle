@@ -157,8 +157,6 @@ repositories {
 // enforces it's own (older) version which is not recommended.
 def versions = [
   reformLogging     : '5.1.5',
-  springBoot        : springBoot.class.package.implementationVersion,
-  springHystrix     : '2.2.1.RELEASE',
   springfoxSwagger  : '2.9.2',
   junit             : '5.6.0',
   junitPlatform     : '1.6.0',
@@ -189,7 +187,7 @@ dependencyManagement {
       entry 'log4j-to-slf4j'
       entry 'log4j-api'
     }
-    
+
     // CVE-2020-9484 present in 9.0.34
     dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.35') {
         entry 'tomcat-embed-core'
@@ -199,11 +197,11 @@ dependencyManagement {
 }
 
 dependencies {
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: versions.springBoot
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: versions.springBoot
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: versions.springBoot
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-json', version: versions.springBoot
-  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: versions.springHystrix
+  compile group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+  compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
+  compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
+  compile group: 'org.springframework.boot', name: 'spring-boot-starter-json'
+  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.2.3.RELEASE'
 
   compile group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
   compile group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
@@ -224,7 +222,7 @@ dependencies {
 
   annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
 
-  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot, {
+  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
     exclude group: 'junit', module: 'junit'
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
