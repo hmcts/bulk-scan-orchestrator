@@ -169,11 +169,13 @@ public class CcdNewCaseCreator {
 
             log.info(
                 "Started event for creating case from exception record. "
-                    + "Event ID: {}. Exception record ID: {}. Jurisdiction: {}. Case type: {}",
+                    + "Event ID: {}. Exception record ID: {}. Jurisdiction: {}. Case type: {}, "
+                    + "Start Event Id: {}",
                 caseCreationDetails.eventId,
                 exceptionRecord.id,
                 exceptionRecord.poBoxJurisdiction,
-                caseCreationDetails.caseTypeId
+                caseCreationDetails.caseTypeId,
+                eventResponse.getEventId()
             );
 
             return coreCaseDataApi.submitForCaseworker(
