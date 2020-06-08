@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.MessageBodyRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
@@ -20,8 +21,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import static org.apache.commons.collections4.MapUtils.isNotEmpty;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Deletes messages from envelopes Dead letter queue.
@@ -113,7 +113,7 @@ public class CleanupEnvelopesDlqTask {
         Instant cutoff = Instant.now().minus(this.ttl);
         Map<String, String> messageProperties = message.getProperties();
 
-        if (isNotEmpty(messageProperties) && isNotEmpty(messageProperties.get("deadLetteredAt"))) {
+        if (!CollectionUtils.isEmpty(messageProperties) && !isNullOrEmpty(messageProperties.get("deadLetteredAt"))) {
             Instant deadLetteredAt = Instant.parse(messageProperties.get("deadLetteredAt"));
 
             log.info(

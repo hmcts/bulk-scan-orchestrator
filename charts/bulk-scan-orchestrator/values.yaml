@@ -2,6 +2,7 @@ java:
   applicationPort: 8582
   ingressHost: bulk-scan-orchestrator-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
   aadIdentityName: bsp
+  readinessPath: '/health/readiness'
   environment:
     S2S_NAME: "bulk_scan_orchestrator"
     S2S_URL: "http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"

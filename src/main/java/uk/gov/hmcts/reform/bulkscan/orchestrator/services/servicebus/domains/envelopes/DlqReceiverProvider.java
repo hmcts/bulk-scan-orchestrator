@@ -5,7 +5,6 @@ import com.microsoft.azure.servicebus.IMessageReceiver;
 import com.microsoft.azure.servicebus.ReceiveMode;
 import com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -18,21 +17,21 @@ import java.util.function.Supplier;
 public class DlqReceiverProvider implements Supplier<IMessageReceiver> {
 
     private final String connectionString;
-    private final String queueName;
+    private final String entityPath;
 
     public DlqReceiverProvider(
         @Value("${azure.servicebus.envelopes.connection-string}") String connectionString,
         @Value("${azure.servicebus.envelopes.queue-name}") String queueName
     ) {
         this.connectionString = connectionString;
-        this.queueName = queueName;
+        this.entityPath = queueName + "/$deadletterqueue";
     }
 
     @Override
     public IMessageReceiver get() {
         try {
             return ClientFactory.createMessageReceiverFromConnectionStringBuilder(
-                new ConnectionStringBuilder(connectionString, StringUtils.join(queueName, "/$deadletterqueue")),
+                new ConnectionStringBuilder(connectionString, entityPath),
                 ReceiveMode.PEEKLOCK
             );
         } catch (InterruptedException e) {

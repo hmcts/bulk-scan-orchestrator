@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.env
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.absent;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.forbidden;
 import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
@@ -66,7 +67,7 @@ public class CaseUpdateClientTest {
             post(urlPathMatching(UPDATE_CASE_URL))
                 .withRequestBody(matchingJsonPath("$.case_details.id", equalTo("23")))
                 .withRequestBody(matchingJsonPath("$.case_details.case_type_id", equalTo("Bulk_Scanned")))
-                .withRequestBody(matchingJsonPath("$.case_details.case_data", equalTo(null)))
+                .withRequestBody(matchingJsonPath("$.case_details.case_data", absent()))
                 .withHeader("ServiceAuthorization", equalTo(s2sToken))
                 .willReturn(okJson(successResponse().toString()))
         );

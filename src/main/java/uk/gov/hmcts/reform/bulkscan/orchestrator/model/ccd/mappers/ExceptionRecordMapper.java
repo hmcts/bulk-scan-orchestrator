@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdKeyValue;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ExceptionRecord;
@@ -17,9 +17,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.env
 import java.util.EnumSet;
 import java.util.List;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.stream.Collectors.toList;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentMapper.getLocalDateTime;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentMapper.mapDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues.NO;
@@ -68,8 +67,8 @@ public class ExceptionRecordMapper {
             CollectionUtils.isEmpty(envelope.payments) ? NO : YES,
             CollectionUtils.isEmpty(envelope.payments) ? NO : YES,
             // Setting the values as "", as null values are not supported by ImmutableMap
-            isBlank(envelope.caseRef) ? "" : envelope.caseRef,
-            isBlank(envelope.legacyCaseRef) ? "" : envelope.legacyCaseRef,
+            isNullOrEmpty(envelope.caseRef) ? "" : envelope.caseRef,
+            isNullOrEmpty(envelope.legacyCaseRef) ? "" : envelope.legacyCaseRef,
             setDisplayCaseReferenceFlag(envelope.caseRef, envelope.classification),
             setDisplayCaseReferenceFlag(envelope.legacyCaseRef, envelope.classification),
             extractSurnameFromOcrData(envelope)
@@ -77,7 +76,7 @@ public class ExceptionRecordMapper {
     }
 
     private String setDisplayCaseReferenceFlag(String caseRef, Classification classification) {
-        if (isNotBlank(caseRef) && ALLOWED_CLASSIFICATIONS.contains(classification)) {
+        if (!isNullOrEmpty(caseRef) && ALLOWED_CLASSIFICATIONS.contains(classification)) {
             return YES;
         }
         return NO;
@@ -135,7 +134,7 @@ public class ExceptionRecordMapper {
 
             List<String> surnameList = envelope.ocrData
                 .stream()
-                .filter(ocrData -> ocrData.name.equals(surnameOcrFieldName) && StringUtils.isNotBlank(ocrData.value))
+                .filter(ocrData -> ocrData.name.equals(surnameOcrFieldName) && StringUtils.hasText(ocrData.value))
                 .map(ocrData -> ocrData.value)
                 .collect(toList());
 
