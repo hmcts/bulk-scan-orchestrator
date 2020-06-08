@@ -21,11 +21,11 @@
   ],
   "ocr_data": [
     {
-      "metadata_field_name": "first_name",
+      "metadata_field_name": "first_name_null",
       "metadata_field_value": null
     },
     {
-      "metadata_field_name": "last_name",
+      "metadata_field_name": "last_name_empty",
       "metadata_field_value": ""
     },
     {
