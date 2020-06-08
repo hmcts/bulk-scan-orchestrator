@@ -182,60 +182,60 @@ dependencyManagement {
 }
 
 dependencies {
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-web'
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-json'
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
-  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.2.3.RELEASE'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
+  implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.2.3.RELEASE'
 
-  compile group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
-  compile group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
+  implementation group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
+  implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
 
-  compile group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformLogging
-  compile group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
-  compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '3.1.2'
-  compile group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '1.5.3'
-  compile group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: '4.6.4'
-  compile group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version:'0.0.4'
+  implementation group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformLogging
+  implementation group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
+  implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '3.1.2'
+  implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '1.5.3'
+  implementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: '4.6.4'
+  implementation group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version:'0.0.4'
 
-  compile group: 'com.microsoft.azure', name: 'azure-servicebus', version: '1.2.18', {
+  implementation group: 'com.microsoft.azure', name: 'azure-servicebus', version: '1.2.18', {
     exclude group: 'net.minidev', module: 'json-smart' // most up-to-date libraries use v2.* now. this one brings in 1.3
   }
-  compile group: 'io.vavr', name: 'vavr', version: '0.10.3'
-  compile group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '2.8.1'
+  implementation group: 'io.vavr', name: 'vavr', version: '0.10.3'
+  implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '2.8.1'
 
   annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
 
-  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
+  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
     exclude group: 'junit', module: 'junit'
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
-  testCompile group: 'com.typesafe', name: 'config', version: '1.4.0'
-  testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: '3.3.3'
-  testCompile group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
-  testCompile group: 'org.awaitility', name: 'awaitility', version: '4.0.3'
-  testCompile group: 'io.rest-assured', name: 'rest-assured'
+  testImplementation group: 'com.typesafe', name: 'config', version: '1.4.0'
+  testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '3.3.3'
+  testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
+  testImplementation group: 'org.awaitility', name: 'awaitility', version: '4.0.3'
+  testImplementation group: 'io.rest-assured', name: 'rest-assured'
 
-  testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: versions.junit
-  testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: versions.junit
-  testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: versions.junit
-  testCompile group: 'org.junit.platform', name: 'junit-platform-commons', version: versions.junitPlatform
-  testCompile group: 'org.junit.platform', name: 'junit-platform-engine', version: versions.junitPlatform
+  testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: versions.junit
+  testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: versions.junit
+  testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: versions.junit
+  testImplementation group: 'org.junit.platform', name: 'junit-platform-commons', version: versions.junitPlatform
+  testImplementation group: 'org.junit.platform', name: 'junit-platform-engine', version: versions.junitPlatform
 
-  integrationTestCompile sourceSets.main.runtimeClasspath
-  integrationTestCompile sourceSets.test.runtimeClasspath
-  integrationTestCompile group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '2.2.3.RELEASE', {
+  integrationTestImplementation sourceSets.main.runtimeClasspath
+  integrationTestImplementation sourceSets.test.runtimeClasspath
+  integrationTestImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '2.2.3.RELEASE', {
     exclude group: 'com.github.tomakehurst', module: 'wiremock-jre8-standalone'
   }
   integrationTestImplementation group: 'com.github.tomakehurst', name: 'wiremock-jre8', version: '2.26.3'
 
-  functionalTestCompile sourceSets.main.runtimeClasspath
-  functionalTestCompile sourceSets.test.runtimeClasspath
-  functionalTestCompile group: 'uk.gov.hmcts.reform', name: 'document-management-client', version: '6.0.0'
+  functionalTestImplementation sourceSets.main.runtimeClasspath
+  functionalTestImplementation sourceSets.test.runtimeClasspath
+  functionalTestImplementation group: 'uk.gov.hmcts.reform', name: 'document-management-client', version: '6.0.0'
 
-  smokeTestCompile sourceSets.main.runtimeClasspath
-  smokeTestCompile sourceSets.test.runtimeClasspath
+  smokeTestImplementation sourceSets.main.runtimeClasspath
+  smokeTestImplementation sourceSets.test.runtimeClasspath
 }
 
 mainClassName = 'uk.gov.hmcts.reform.bulkscan.orchestrator.Application'
