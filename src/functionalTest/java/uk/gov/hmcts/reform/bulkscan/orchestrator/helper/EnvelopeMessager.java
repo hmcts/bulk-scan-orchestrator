@@ -66,6 +66,7 @@ public class EnvelopeMessager {
             updateCaseData.toString(),
             MediaType.APPLICATION_JSON_UTF8_VALUE
         );
+        message.getProperties().put("Diagnostic-Id","diagnostic-id-2");
         message.setCorrelationId("correlation-id-3122312");
         client.send(message);
 
