@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 import com.microsoft.azure.servicebus.Message;
 import com.microsoft.azure.servicebus.QueueClient;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
-import java.util.HashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,6 +17,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.FunctionalQueueConfig;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.UUID;
 
 @Service
