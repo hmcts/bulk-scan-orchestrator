@@ -64,6 +64,11 @@ public class EnvelopeEventProcessor {
         IMessage message = messageReceiver.receive();
 
         if (message != null) {
+            log.info("Diagnostic ID: {}, getProperties: {}, getCorrelationId: {}",
+                message.getProperties().get("Diagnostic-Id"),
+                message.getProperties(),
+                message.getCorrelationId());
+
             log.info("Started processing message with ID {}", message.getMessageId());
             MessageProcessingResult result = process(message);
             tryFinaliseProcessedMessage(message, result);
