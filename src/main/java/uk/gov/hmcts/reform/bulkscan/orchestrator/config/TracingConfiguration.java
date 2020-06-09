@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.logging;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
 
 import com.microsoft.applicationinsights.extensibility.TelemetryProcessor;
 import com.microsoft.applicationinsights.telemetry.RemoteDependencyTelemetry;
