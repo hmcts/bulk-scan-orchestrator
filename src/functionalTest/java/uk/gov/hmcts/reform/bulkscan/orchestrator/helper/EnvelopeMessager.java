@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 import com.microsoft.azure.servicebus.Message;
 import com.microsoft.azure.servicebus.QueueClient;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
+import java.util.HashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -66,7 +67,13 @@ public class EnvelopeMessager {
             updateCaseData.toString(),
             MediaType.APPLICATION_JSON_UTF8_VALUE
         );
-        message.getProperties().put("Diagnostic-Id","diagnostic-id-2");
+
+        if (message.getProperties() == null) {
+            message.setProperties(new HashMap<>());
+        }
+
+        message.getProperties().put("Diagnostic-Id", "diagnostic-id-2");
+
         message.setCorrelationId("correlation-id-3122312");
         client.send(message);
 
