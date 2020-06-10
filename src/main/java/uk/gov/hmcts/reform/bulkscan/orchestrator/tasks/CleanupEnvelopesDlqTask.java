@@ -31,6 +31,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 public class CleanupEnvelopesDlqTask {
 
     private static final Logger log = LoggerFactory.getLogger(CleanupEnvelopesDlqTask.class);
+    private static final String TASK_NAME = "delete-envelopes-dlq-messages";
 
     Supplier<IMessageReceiver> dlqReceiverProvider;
     private final Duration ttl;
@@ -45,7 +46,7 @@ public class CleanupEnvelopesDlqTask {
 
     @Scheduled(cron = "${scheduling.task.delete-envelopes-dlq-messages.cron}")
     public void deleteMessagesInEnvelopesDlq() throws ServiceBusException, InterruptedException {
-        log.info("Reading messages from envelopes Dead letter queue.");
+        log.info("Started {} job", TASK_NAME);
         IMessageReceiver messageReceiver = null;
 
         try {
@@ -82,6 +83,7 @@ public class CleanupEnvelopesDlqTask {
                 }
             }
         }
+        log.info("Finished {} job", TASK_NAME);
     }
 
     private void logMessage(IMessage msg) {
