@@ -17,6 +17,14 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 sourceSets {
+  contractTest {
+    java {
+      compileClasspath += main.output
+      runtimeClasspath += main.output
+      srcDir file('src/contractTest/java')
+    }
+    resources.srcDir file('src/contractTest/resources')
+  }
   functionalTest {
     java {
       compileClasspath += main.output
@@ -75,6 +83,12 @@ task smoke(type: Test) {
   description = "Runs Smoke Tests"
   testClassesDirs = sourceSets.smokeTest.output.classesDirs
   classpath = sourceSets.smokeTest.runtimeClasspath
+}
+
+task contract(type: Test) {
+  description = "Runs contracts tests"
+  testClassesDirs = sourceSets.contractTest.output.classesDirs
+  classpath = sourceSets.contractTest.runtimeClasspath
 }
 
 checkstyle {
