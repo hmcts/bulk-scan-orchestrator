@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.ImmutableList;
 import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -153,9 +154,8 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
             .statusCode(500);
     }
 
-    @DisplayName("Should fail correctly if document is duplicate or document is already attached")
     @Test
-    void should_fail_correctly_if_document_is_duplicate_or_document_is_already_attached() {
+    void should_attach_missing_document_and_skip_already_attached_one() {
         CallbackRequest callbackRequest = CallbackRequest
             .builder()
             .caseDetails(
@@ -176,6 +176,49 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
             .eventId(EVENT_ID_ATTACH_TO_CASE)
             .build();
 
+        ValidatableResponse response = given()
+            .body(callbackRequest)
+            .headers(userHeaders())
+            .post(CALLBACK_ATTACH_CASE_PATH)
+            .then()
+            .statusCode(200);
+
+        verifySuccessResponse(response, callbackRequest);
+        verify(exactly(1), startEventRequest());
+        verify(exactly(1), submittedScannedRecords());
+    }
+
+    @Test
+    void should_fail_when_duplicate_found_with_mismatching_exception_record_reference() throws JsonProcessingException {
+        long exceptionRecordId = EXCEPTION_RECORD_ID - 5; // so references can mismatch against actual case doc
+        mockCaseSearchByCcdId(
+            String.valueOf(exceptionRecordId),
+            // an exception record not attached to any case
+            okJson(
+                MAPPER.writeValueAsString(exceptionRecord(null))
+            )
+        );
+
+        CallbackRequest callbackRequest = CallbackRequest
+            .builder()
+            .caseDetails(
+                CaseDetails.builder()
+                    .jurisdiction(JURISDICTION)
+                    .id(exceptionRecordId)
+                    .caseTypeId(CASE_TYPE_EXCEPTION_RECORD)
+                    .data(
+                        exceptionDataWithDoc(
+                            ImmutableList.of(EXISTING_DOC),
+                            CASE_REF,
+                            null,
+                            null,
+                            false
+                        )
+                    ).build()
+            )
+            .eventId(EVENT_ID_ATTACH_TO_CASE)
+            .build();
+
         given()
             .body(callbackRequest)
             .headers(userHeaders())
@@ -183,10 +226,9 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
             .then()
             .statusCode(200)
             .body(RESPONSE_FIELD_ERRORS, hasItem(String.format(
-                "Problem attaching to case %s: found [%s] duplicates and [%s] missing documents",
+                "Documents with following control numbers are already present in the case %s and cannot be added: %s",
                 CASE_REF,
-                DOCUMENT_NUMBER,
-                EXCEPTION_RECORD_DOCUMENT_NUMBER
+                DOCUMENT_NUMBER
             )));
 
         verify(exactly(0), startEventRequest());

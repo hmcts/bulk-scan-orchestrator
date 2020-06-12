@@ -2,9 +2,9 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -209,7 +209,7 @@ public final class CallbackValidations {
 
     static boolean hasOcr(CaseDetails theCase) {
         return getOcrData(theCase)
-            .map(CollectionUtils::isNotEmpty)
+            .map(list -> !CollectionUtils.isEmpty(list))
             .orElse(false);
     }
 
