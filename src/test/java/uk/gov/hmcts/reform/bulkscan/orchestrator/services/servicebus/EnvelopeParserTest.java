@@ -31,8 +31,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.DatetimeHelper.toIso8601
 class EnvelopeParserTest {
 
     private Envelope envelope;
-    private Instant scannedAt = ZonedDateTime.parse("2018-10-01T00:00:00.100Z").toInstant();
-    private Instant deliveryDate = ZonedDateTime.parse("2018-10-01T00:00:00.100Z").toInstant();
+    private final Instant scannedAt = ZonedDateTime.parse("2018-10-01T00:00:00.100Z").toInstant();
+    private final Instant deliveryDate = ZonedDateTime.parse("2018-10-01T00:00:00.100Z").toInstant();
 
     @BeforeAll
     static void init() {
