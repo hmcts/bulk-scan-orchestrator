@@ -114,7 +114,9 @@ class EnvelopeParserTest {
         Envelope result = EnvelopeParser.parse(json.getBytes());
 
         // then
-        assertThat(result).isEqualToComparingFieldByFieldRecursively(envelope);
+        assertThat(result)
+            .usingRecursiveComparison()
+            .isEqualTo(envelope);
 
         assertThat(result.documents)
             .extracting(
@@ -180,7 +182,9 @@ class EnvelopeParserTest {
         Envelope result = EnvelopeParser.parse(json.getBytes());
 
         // then
-        assertThat(result).isEqualToComparingFieldByFieldRecursively(envelope);
+        assertThat(result)
+            .usingRecursiveComparison()
+            .isEqualTo(envelope);
     }
 
     @Test
