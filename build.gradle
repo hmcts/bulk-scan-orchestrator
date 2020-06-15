@@ -176,7 +176,7 @@ def versions = [
   junitPlatform     : '1.6.0',
 ]
 
-ext["rest-assured.version"] = '4.2.0'
+ext["rest-assured.version"] = '4.3.0'
 
 dependencyManagement {
   dependencies {
@@ -191,6 +191,13 @@ dependencyManagement {
     // align with jupiter version
     dependencySet(group: 'org.mockito', version: '3.3.3') {
       entry 'mockito-core'
+    }
+    // force junit5 deps to use groovy v3 which fixes reflective call errors for java 11
+    // rest assured 4.2 -> 4.3 jumps to groovy v3. junit v5.6 still on v2.5
+    dependencySet(group: 'org.codehaus.groovy', version: '3.0.2') {
+      entry 'groovy'
+      entry 'groovy-json'
+      entry 'groovy-xml'
     }
   }
 }
