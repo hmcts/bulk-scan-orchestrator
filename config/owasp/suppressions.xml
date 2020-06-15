@@ -106,4 +106,10 @@
     <vulnerabilityName>Regex in its jQuery.htmlPrefilter  sometimes may introduce XSS</vulnerabilityName>
   </suppress>
 
+  <suppress>
+    <notes><![CDATA[ used by PACT in tests ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty\.alpn/alpn\-api@.*$</packageUrl>
+    <cve>CVE-2007-5615</cve>
+  </suppress>
+
 </suppressions>
