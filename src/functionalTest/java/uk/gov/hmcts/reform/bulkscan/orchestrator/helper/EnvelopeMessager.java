@@ -64,7 +64,7 @@ public class EnvelopeMessager {
         Message message = new Message(
             envelopeId,
             updateCaseData.toString(),
-            MediaType.APPLICATION_JSON_UTF8_VALUE
+            MediaType.APPLICATION_JSON_VALUE
         );
         client.send(message);
 
