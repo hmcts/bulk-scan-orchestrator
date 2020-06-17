@@ -5,9 +5,19 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition;
  */
 public final class ExceptionRecordFields {
 
-    public static final String SEARCH_CASE_REFERENCE = "searchCaseReference";
-    public static final String SEARCH_CASE_REFERENCE_TYPE = "searchCaseReferenceType";
-    public static final String ATTACH_TO_CASE_REFERENCE = "attachToCaseReference";
+    /* searchCaseReference contains the target case reference for the requested searchCaseReferenceType */
+    public static final String SEARCH_CASE_REFERENCE = "searchCaseReference"; // ccd input field
+
+    /* searchCaseReferenceType value can be ccdCaseReference or externalCaseReference */
+    public static final String SEARCH_CASE_REFERENCE_TYPE = "searchCaseReferenceType"; // ccd input field
+
+    /*
+    attachToCaseReference contains the target case reference from the callback request.
+    It will have value only when searchCaseReference and searchCaseReferenceType fields don't exist.
+    attachToCaseReference field will be set to the ER case data after attaching the ER to the target case.
+    */
+    public static final String ATTACH_TO_CASE_REFERENCE = "attachToCaseReference"; // ccd input field
+
     public static final String SCANNED_DOCUMENTS = "scannedDocuments";
     public static final String EVIDENCE_HANDLED = "evidenceHandled";
     public static final String CASE_REFERENCE = "caseReference";

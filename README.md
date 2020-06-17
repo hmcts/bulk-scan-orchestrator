@@ -1,6 +1,7 @@
 # bulk-scan-orchestrator
 
-[![Build Status](https://travis-ci.org/hmcts/bulk-scan-orchestrator.svg?branch=master)](https://travis-ci.org/hmcts/bulk-scan-orchestrator)
+![](https://github.com/hmcts/bulk-scan-orchestrator/workflows/CI/badge.svg)
+[![](https://github.com/hmcts/bulk-scan-orchestrator/workflows/Publish%20Swagger%20Specs/badge.svg)](https://hmcts.github.io/reform-api-docs/swagger.html?url=https://hmcts.github.io/reform-api-docs/specs/bulk-scan-orchestrator.json)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/e9272daf4b714e4f95280916e763b6b2)](https://www.codacy.com/app/HMCTS/bulk-scan-orchestrator)
 
 ## Purpose

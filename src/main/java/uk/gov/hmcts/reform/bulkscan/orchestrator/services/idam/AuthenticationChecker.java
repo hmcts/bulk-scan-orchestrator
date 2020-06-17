@@ -60,7 +60,7 @@ public class AuthenticationChecker {
             );
 
             // temp fix until new version of idam-client is released
-            String desc = e.content() != null ? e.contentUTF8() : e.getMessage();
+            String desc = e.responseBody().map(voidBody -> e.contentUTF8()).orElse(e.getMessage());
             return new JurisdictionConfigurationStatus(jurisdiction, false, desc, e.status());
         } catch (Exception e) {
             log.error(
