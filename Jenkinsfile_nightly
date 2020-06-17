@@ -14,5 +14,6 @@ def component = "orchestrator"
 def channel = '#bsp-build-notices'
 
 withNightlyPipeline(type, product, component) {
-    enableSlackNotifications(channel)
+  enableMutationTest()
+  enableSlackNotifications(channel)
 }
