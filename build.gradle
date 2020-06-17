@@ -8,7 +8,7 @@ plugins {
   id 'org.springframework.boot' version '2.3.0.RELEASE'
   id 'com.github.ben-manes.versions' version '0.28.0'
   id 'org.sonarqube' version '3.0'
-  id "info.solidsoft.pitest" version '1.5.1'
+  id 'info.solidsoft.pitest' version '1.5.1'
 }
 
 group = 'uk.gov.hmcts.reform'
@@ -129,6 +129,7 @@ jacocoTestReport {
 project.tasks['sonarqube'].dependsOn jacocoTestReport
 
 pitest {
+  group = "Verification"
   pitestVersion.set('1.5.1')
   junit5PluginVersion.set('0.12')
   testSourceSets = [sourceSets.test]
@@ -158,7 +159,6 @@ pitest {
     'REMOVE_CONDITIONALS'
   ])
 }
-project.tasks['pitest'].group = "Verification"
 
 sonarqube {
   properties {
@@ -271,10 +271,6 @@ dependencies {
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: versions.junit
   testImplementation group: 'org.junit.platform', name: 'junit-platform-commons', version: versions.junitPlatform
   testImplementation group: 'org.junit.platform', name: 'junit-platform-engine', version: versions.junitPlatform
-
-  testCompile group: 'org.pitest', name: 'pitest', version: '1.5.1'
-  testCompile 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.5.1'
-  testCompile 'org.codehaus.sonar-plugins:sonar-pitest-plugin:0.5'
 
   integrationTestImplementation sourceSets.main.runtimeClasspath
   integrationTestImplementation sourceSets.test.runtimeClasspath
