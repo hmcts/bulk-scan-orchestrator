@@ -27,6 +27,13 @@ class TestCaseBuilder {
         return createCaseWith(b -> b.data(data));
     }
 
+    static CaseDetails caseWithTargetReference(Object attachToCaseReference, Object searchCaseReference) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("attachToCaseReference", attachToCaseReference);
+        data.put("searchCaseReference", searchCaseReference);
+        return createCaseWith(b -> b.data(data));
+    }
+
     static CaseDetails caseWithSearchCaseReferenceType(Object searchCaseReferenceType) {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put("searchCaseReferenceType", searchCaseReferenceType);
@@ -34,14 +41,16 @@ class TestCaseBuilder {
     }
 
     static CaseDetails caseWithCcdSearchCaseReference(Object searchCaseReference) {
-        return caseWithSearchCaseReference("ccdCaseReference", searchCaseReference);
+        return caseWithSearchCaseRefTypeAndCaseRef("ccdCaseReference", searchCaseReference);
     }
 
     static CaseDetails caseWithExternalSearchCaseReference(Object searchCaseReference) {
-        return caseWithSearchCaseReference("externalCaseReference", searchCaseReference);
+        return caseWithSearchCaseRefTypeAndCaseRef("externalCaseReference", searchCaseReference);
     }
 
-    static CaseDetails caseWithSearchCaseReference(Object searchCaseReferenceType, Object searchCaseReference) {
+    static CaseDetails caseWithSearchCaseRefTypeAndCaseRef(
+        Object searchCaseReferenceType, Object searchCaseReference
+    ) {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put("searchCaseReference", searchCaseReference);
         caseData.put("searchCaseReferenceType", searchCaseReferenceType);

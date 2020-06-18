@@ -128,6 +128,43 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
         verify(exactly(0), submittedScannedRecords());
     }
 
+    @Test
+    void should_callback_with_search_case_reference_when_attaching_without_search_case_reference_type() {
+        CallbackRequest callbackRequest = exceptionRecordCallbackRequest(
+            null,
+            null,
+            CASE_REF,
+            CASE_TYPE_EXCEPTION_RECORD
+        );
+
+        ValidatableResponse response =
+            given()
+                .body(callbackRequest)
+                .headers(userHeaders())
+                .post(CALLBACK_ATTACH_CASE_PATH)
+                .then()
+                .statusCode(200);
+
+        verifySuccessResponse(response, callbackRequest);
+        verifyRequestedAttachingToCase();
+    }
+
+    @Test
+    void should_callback_with_search_case_reference_when_attach_to_case_reference_also_exists() {
+        CallbackRequest callbackRequest = attachToCaseRequest("12345678", null, CASE_REF, EXISTING_DOC);
+
+        ValidatableResponse response = given()
+            .body(callbackRequest)
+            .headers(userHeaders())
+            .post(CALLBACK_ATTACH_CASE_PATH)
+            .then()
+            .statusCode(200);
+
+        verifySuccessResponse(response, callbackRequest);
+        verify(exactly(0), startEventRequest());
+        verify(exactly(0), submittedScannedRecords());
+    }
+
     @DisplayName("Should fail with the correct error when submit api call fails")
     @Test
     void should_fail_with_the_correct_error_when_submit_api_call_fails() {

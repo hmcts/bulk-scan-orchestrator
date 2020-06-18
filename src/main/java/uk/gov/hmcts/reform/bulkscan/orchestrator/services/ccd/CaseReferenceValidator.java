@@ -33,7 +33,14 @@ class CaseReferenceValidator {
     }
 
     @Nonnull
-    Validation<String, String> validateSearchCaseReference(CaseDetails theCase) {
+    Validation<String, String> validateTargetCaseReference(CaseDetails theCase) {
+        return getCaseRef(theCase, SEARCH_CASE_REFERENCE)
+            .map(this::validateCcdCaseRef)
+            .orElse(validateAttachToCaseReference(theCase));
+    }
+
+    @Nonnull
+    Validation<String, String> validateSearchCaseReferenceWithSearchType(CaseDetails theCase) {
         Validation<String, String> caseReferenceTypeValidation = validateCaseReferenceType(theCase);
 
         if (caseReferenceTypeValidation.isValid()) {
