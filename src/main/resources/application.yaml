@@ -21,14 +21,14 @@ azure:
   servicebus:
     envelopes:
       connection-string: ${ENVELOPES_QUEUE_CONNECTION_STRING}
-      queue-name: envelopes
+      queue-name: ${ENVELOPES_QUEUE_NAME}
       max-delivery-count: ${ENVELOPES_QUEUE_MAX_DELIVERY_COUNT}
     processed-envelopes:
       connection-string: ${PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING}
-      queue-name: processed-envelopes
+      queue-name: ${PROCESSED_ENVELOPES_QUEUE_NAME}
     payments:
       connection-string: ${PAYMENTS_QUEUE_CONNECTION_STRING}
-      queue-name: payments
+      queue-name: ${PAYMENTS_QUEUE_NAME}
       manual-retry-count: 2
 
 core_case_data:
