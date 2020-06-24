@@ -194,24 +194,19 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-    public void should_attach_exception_record_to_case_by_searchCaseReference_and_attachToCaseReference()
+    public void should_attach_exception_record_to_case_by_search_case_reference()
         throws Exception {
         //given
-        // set searchCaseReference as targetCase id
         CaseDetails targetCase = ccdCaseCreator.createCase(emptyList(), Instant.now());
-
-        // set attachToCaseReference value with attachToCaseDetails id, which should be ignored
-        CaseDetails attachToCaseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
 
         CaseDetails exceptionRecord =
             createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
         // when
-        // set searchCaseReference and attachToCaseReference to callback request
-        // and searchCaseReferenceType doesn't exist
+        // set searchCaseReference to the callback request data
+        // and searchCaseReferenceType and attachToCaseReference doesn't exist
         invokeCallbackEndpointWithSearchCaseRefAndAttachToCaseRef(
             targetCase,
-            attachToCaseDetails,
             exceptionRecord
         ).jsonPath()
             .getList("errors")
@@ -347,11 +342,9 @@ class AttachExceptionRecordToExistingCaseTest {
 
     private Response invokeCallbackEndpointWithSearchCaseRefAndAttachToCaseRef(
         CaseDetails searchCaseRefCaseDetails,
-        CaseDetails attachToCaseDetails,
         CaseDetails exceptionRecord
     ) {
         Map<String, Object> exceptionRecordData = new HashMap<>(exceptionRecord.getData());
-        exceptionRecordData.put("attachToCaseReference", String.valueOf(attachToCaseDetails.getId()));
         exceptionRecordData.put("searchCaseReference", String.valueOf(searchCaseRefCaseDetails.getId()));
 
         CaseDetails exceptionRecordWithSearchFields =
