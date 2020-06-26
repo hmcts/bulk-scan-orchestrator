@@ -206,7 +206,7 @@ class AttachExceptionRecordToExistingCaseTest {
         // set searchCaseReference to the callback request data
         // and searchCaseReferenceType and attachToCaseReference doesn't exist
         invokeCallbackEndpointWithSearchCaseRefAndAttachToCaseRef(
-            targetCase,
+            String.valueOf(targetCase.getId()),
             exceptionRecord
         ).jsonPath()
             .getList("errors")
@@ -341,11 +341,11 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     private Response invokeCallbackEndpointWithSearchCaseRefAndAttachToCaseRef(
-        CaseDetails searchCaseRefCaseDetails,
+        String searchCaseReference,
         CaseDetails exceptionRecord
     ) {
         Map<String, Object> exceptionRecordData = new HashMap<>(exceptionRecord.getData());
-        exceptionRecordData.put("searchCaseReference", String.valueOf(searchCaseRefCaseDetails.getId()));
+        exceptionRecordData.put("searchCaseReference", searchCaseReference);
 
         CaseDetails exceptionRecordWithSearchFields =
             exceptionRecord.toBuilder().data(exceptionRecordData).build();
@@ -368,7 +368,7 @@ class AttachExceptionRecordToExistingCaseTest {
             .header(CcdCallbackController.USER_ID, ccdAuthenticator.getUserDetails().getId())
             .body(callbackRequest)
             .when()
-            .post("/callback/attach_case?ignore-warning=true");
+            .post("/callback/attach_case?ignore-warning=false");
     }
 
     private Map<String, Object> exceptionRecordDataWithSearchFields(
