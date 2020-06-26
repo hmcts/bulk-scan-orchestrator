@@ -206,7 +206,7 @@ class AttachExceptionRecordToExistingCaseTest {
         // set searchCaseReference to the callback request data
         // and searchCaseReferenceType and attachToCaseReference doesn't exist
         invokeCallbackEndpointWithSearchCaseRefAndAttachToCaseRef(
-            String.valueOf(targetCase.getId()),
+            Long.toString(targetCase.getId()),
             exceptionRecord
         ).jsonPath()
             .getList("errors")
