@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionR
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.CcdCaseUpdateFinalizer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -31,6 +32,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import javax.validation.ConstraintViolationException;
 
 import static java.time.LocalDateTime.now;
@@ -89,6 +91,9 @@ class CcdCaseUpdaterTest {
     @Mock
     private ClientServiceErrorResponse clientServiceErrorResponse;
 
+    @Mock
+    private CcdCaseUpdateFinalizer ccdCaseUpdateFinalizer;
+
     private ExceptionRecord exceptionRecord;
 
     private SuccessfulUpdateResponse noWarningsUpdateResponse;
@@ -103,7 +108,8 @@ class CcdCaseUpdaterTest {
             coreCaseDataApi,
             caseUpdateClient,
             serviceResponseParser,
-            exceptionRecordFinalizer
+            exceptionRecordFinalizer,
+            ccdCaseUpdateFinalizer
         );
 
         caseUpdateDetails = new CaseUpdateDetails(null, new HashMap<String, String>());
@@ -122,9 +128,7 @@ class CcdCaseUpdaterTest {
         given(configItem.getUpdateUrl()).willReturn("url");
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
             .willReturn(noWarningsUpdateResponse);
-        initResponseMockData();
         initMockData();
-        prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
         given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong(), any())).willReturn(originalFields);
 
         // when
@@ -150,9 +154,9 @@ class CcdCaseUpdaterTest {
         given(configItem.getUpdateUrl()).willReturn("url");
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
             .willReturn(noWarningsUpdateResponse);
-        initResponseMockData();
+        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
+        given(eventResponse.getEventId()).willReturn(EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR);
         initMockData();
-        prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
         given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong(), any())).willReturn(originalFields);
 
         // when
@@ -203,9 +207,9 @@ class CcdCaseUpdaterTest {
         given(configItem.getUpdateUrl()).willReturn("url");
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
             .willReturn(noWarningsUpdateResponse);
-        initResponseMockData();
+        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
+        given(eventResponse.getEventId()).willReturn(EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR);
         initMockData();
-        prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
         given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong(), any())).willReturn(originalFields);
 
         // when
@@ -227,12 +231,23 @@ class CcdCaseUpdaterTest {
 
     @Test
     void updateCase_should_handle_conflict_response_from_ccd_api() {
-        initResponseMockData();
+        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
+        given(eventResponse.getEventId()).willReturn(EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR);
         given(configItem.getUpdateUrl()).willReturn("url");
         given(caseUpdateClient.updateCase(anyString(), any(CaseDetails.class), any(ExceptionRecord.class), anyString()))
             .willReturn(noWarningsUpdateResponse);
         initMockData();
-        prepareMockForSubmissionEventForCaseWorker()
+        given(ccdCaseUpdateFinalizer.updateCaseInCcd(
+            anyString(),
+            anyBoolean(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            any(ExceptionRecord.class),
+            any(CaseUpdateDetails.class),
+            any(StartEventResponse.class)
+        ))
             .willThrow(new FeignException.Conflict("Msg", mock(Request.class), "Body".getBytes()));
 
         // when
@@ -255,14 +270,24 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_handle_feign_exception() {
         // given
-        initResponseMockData();
+        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
+        given(eventResponse.getEventId()).willReturn(EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR);
         given(configItem.getUpdateUrl()).willReturn("url");
         given(caseUpdateClient.updateCase(anyString(), any(CaseDetails.class), any(ExceptionRecord.class), anyString()))
             .willReturn(noWarningsUpdateResponse);
         initMockData();
-        prepareMockForSubmissionEventForCaseWorker().willThrow(
-                new FeignException.BadRequest("Msg", mock(Request.class), "Body".getBytes())
-        );
+        given(ccdCaseUpdateFinalizer.updateCaseInCcd(
+            anyString(),
+            anyBoolean(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            any(ExceptionRecord.class),
+            any(CaseUpdateDetails.class),
+            any(StartEventResponse.class)
+        ))
+            .willThrow(new RuntimeException("Service response: Body"));
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -288,15 +313,26 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_handle_feign_unprocessable_entity() {
         // given
-        initResponseMockData();
+        given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
+        given(eventResponse.getEventId()).willReturn(EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR);
         given(configItem.getUpdateUrl()).willReturn("url");
         given(caseUpdateClient.updateCase(anyString(), any(CaseDetails.class), any(ExceptionRecord.class), anyString()))
             .willReturn(noWarningsUpdateResponse);
         initMockData();
-        prepareMockForSubmissionEventForCaseWorker()
-            .willThrow(
-                    new FeignException.UnprocessableEntity("Msg", mock(Request.class),  "Body".getBytes())
-            );
+        given(ccdCaseUpdateFinalizer.updateCaseInCcd(
+            anyString(),
+            anyBoolean(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            any(ExceptionRecord.class),
+            any(CaseUpdateDetails.class),
+            any(StartEventResponse.class)
+        ))
+            .willReturn(Optional.of("CCD returned 422 Unprocessable Entity response "
+                + "when trying to update case for some jurisdiction jurisdiction with case Id 0 "
+                + "based on exception record with Id 1. CCD response: Body"));
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
