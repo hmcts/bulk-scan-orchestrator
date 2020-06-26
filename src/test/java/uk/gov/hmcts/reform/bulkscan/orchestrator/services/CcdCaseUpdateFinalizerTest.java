@@ -198,11 +198,14 @@ class CcdCaseUpdateFinalizerTest {
         assertThat(caseDataContentCaptor.getValue().getEventToken()).isEqualTo(EVENT_TOKEN);
         assertThat(res).isNotEmpty();
         assertThat(res.get()).isEqualTo(
-            "CCD returned 422 Unprocessable Entity response when trying to update case "
-                + "for "+ PO_BOX_JURISDICTION +" jurisdiction "
-                + "with case Id " + EXISTING_CASE_ID + " "
-                + "based on exception record with Id " + EXCEPTION_RECORD_ID + ". "
-                + "CCD response: " + BODY
+            "CCD returned 422 Unprocessable Entity response when trying to update case for "
+                + PO_BOX_JURISDICTION
+                + " jurisdiction with case Id "
+                + EXISTING_CASE_ID
+                + " based on exception record with Id "
+                + EXCEPTION_RECORD_ID
+                + ". CCD response: "
+                + BODY
         );
     }
 
