@@ -103,12 +103,12 @@ public final class CallbackValidations {
 
     @Nonnull
     static Validation<String, String> hasSearchCaseReference(CaseDetails theCase) {
-        return caseRefValidator.validateSearchCaseReference(theCase);
+        return caseRefValidator.validateSearchCaseReferenceWithSearchType(theCase);
     }
 
     @Nonnull
-    static Validation<String, String> hasAttachToCaseReference(CaseDetails theCase) {
-        return caseRefValidator.validateAttachToCaseReference(theCase);
+    static Validation<String, String> hasTargetCaseReference(CaseDetails theCase) {
+        return caseRefValidator.validateTargetCaseReference(theCase);
     }
 
     @Nonnull

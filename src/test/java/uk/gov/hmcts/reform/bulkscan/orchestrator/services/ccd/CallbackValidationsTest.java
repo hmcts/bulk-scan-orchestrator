@@ -24,8 +24,9 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBui
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithCcdSearchCaseReference;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithDocument;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithExternalSearchCaseReference;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithSearchCaseReference;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithSearchCaseRefTypeAndCaseRef;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithSearchCaseReferenceType;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithTargetReference;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.createCaseWith;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.document;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.OCR_DATA;
@@ -59,6 +60,11 @@ class CallbackValidationsTest {
             {"null case reference", caseWithAttachReference(null), false, noReferenceSupplied},
             {"invalid type List", caseWithAttachReference(ImmutableList.of()), false, "Invalid case reference: '[]'"},
             {"invalid type Integer", caseWithAttachReference(5), false, "Invalid case reference: '5'"},
+            {"valid search case reference", caseWithTargetReference(null, "1234 234 393"), true, "1234234393"},
+            {"both search case reference and attach to case reference are null", caseWithTargetReference(null, null), false, "No case reference supplied"},
+            {"valid attach to case reference", caseWithTargetReference("1234 234 393", null), true, "1234234393"},
+            {"invalid search case ref and attach to case ref null", caseWithTargetReference(null, 56), false, "Invalid case reference: '56'"},
+            {"ignore attach to case ref when search case ref exists", caseWithTargetReference(56, "1234234393"), true, "1234234393"},
         };
     }
 
@@ -66,7 +72,7 @@ class CallbackValidationsTest {
     @MethodSource("attachToCaseReferenceTestParams")
     @DisplayName("Should accept and remove non 0-9 chars in the case reference")
     void attachToCaseReferenceTest(String caseReason, CaseDetails input, boolean valid, String realValue) {
-        checkValidation(input, valid, realValue, CallbackValidations::hasAttachToCaseReference, realValue);
+        checkValidation(input, valid, realValue, CallbackValidations::hasTargetCaseReference, realValue);
     }
 
     private static Object[][] searchCaseReferenceTestParams() {
@@ -77,7 +83,7 @@ class CallbackValidationsTest {
             {"null data", createCaseWith(b -> b.data(null)), false, noValidReferenceType},
             {"empty data", createCaseWith(b -> b.data(ImmutableMap.of())), false, noValidReferenceType},
             {"no search case reference type", createCaseWith(b -> b.data(ImmutableMap.of("searchCaseReference", "12345"))), false, noValidReferenceType},
-            {"invalid search case reference type", caseWithSearchCaseReference("invalid-type", "12345"), false, noValidReferenceType},
+            {"invalid search case reference type", caseWithSearchCaseRefTypeAndCaseRef("invalid-type", "12345"), false, noValidReferenceType},
 
             // test cases for case reference type == ccdCaseReference
             {"CCD ref: generic non number removal", caseWithCcdSearchCaseReference("£1234234393"), true, "1234234393"},
