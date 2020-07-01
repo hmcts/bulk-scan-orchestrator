@@ -31,6 +31,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getDocuments;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.setExceptionRecordIdToScannedDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR;
 
 @Service
@@ -114,6 +115,8 @@ public class CcdCaseUpdater {
                 exceptionRecord,
                 s2sToken
             );
+
+            setExceptionRecordIdToScannedDocuments(exceptionRecord, updateResponse.caseDetails);
 
             log.info(
                 "Successfully called case update endpoint of service {} to update case with case Id {} "
