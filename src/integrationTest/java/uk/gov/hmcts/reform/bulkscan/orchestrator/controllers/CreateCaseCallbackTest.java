@@ -28,10 +28,10 @@ import static com.google.common.io.Resources.toByteArray;
 import static io.restassured.RestAssured.given;
 import static java.util.Collections.emptyList;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.collection.IsMapWithSize.anEmptyMap;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -302,9 +302,10 @@ class CreateCaseCallbackTest {
     void should_respond_with_relevant_errors_when_create_case_callback_body_misses_content() {
         postWithBody(getRequestBody("invalid-empty-case-data.json"))
             .statusCode(OK.value())
-            .body("errors", containsInAnyOrder(
+            .body("errors", hasItems(
                 "Missing poBox",
                 "Missing journeyClassification",
+                "Missing Form Type",
                 "Missing deliveryDate",
                 "Missing openingDate"
             ));
