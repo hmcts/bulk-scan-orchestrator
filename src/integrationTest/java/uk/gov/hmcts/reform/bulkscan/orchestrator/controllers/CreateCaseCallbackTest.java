@@ -28,10 +28,10 @@ import static com.google.common.io.Resources.toByteArray;
 import static io.restassured.RestAssured.given;
 import static java.util.Collections.emptyList;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.collection.IsMapWithSize.anEmptyMap;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -120,6 +120,32 @@ class CreateCaseCallbackTest {
         );
 
         byte[] requestBody = getRequestBody("valid-exception.json");
+
+        postWithBody(requestBody)
+            .statusCode(OK.value())
+            .body("errors", empty())
+            .body("warnings", empty())
+            .body(
+                "data",
+                equalTo(
+                    expectedResponseExceptionRecordFields(
+                        requestBody,
+                        "1539007368674134" // from sample-case.json
+                    )
+                )
+            );
+    }
+
+    @Test
+    void should_create_case_if_classification_exception_without_form_type() throws IOException {
+        setUpTransformation(getTransformationResponseBody("ok-no-warnings.json"));
+        setUpCcdSearchResult(getCcdResponseBody("search-result-empty.json"));
+        setUpCcdCreateCase(
+            getCcdResponseBody("start-event.json"),
+            getCcdResponseBody("sample-case.json")
+        );
+
+        byte[] requestBody = getRequestBody("valid-exception-without-form-type.json");
 
         postWithBody(requestBody)
             .statusCode(OK.value())
@@ -276,10 +302,9 @@ class CreateCaseCallbackTest {
     void should_respond_with_relevant_errors_when_create_case_callback_body_misses_content() {
         postWithBody(getRequestBody("invalid-empty-case-data.json"))
             .statusCode(OK.value())
-            .body("errors", hasItems(
+            .body("errors", containsInAnyOrder(
                 "Missing poBox",
                 "Missing journeyClassification",
-                "Missing Form Type",
                 "Missing deliveryDate",
                 "Missing openingDate"
             ));

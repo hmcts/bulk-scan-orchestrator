@@ -514,12 +514,13 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
-    void should_report_errors_when_form_type_is_null() {
+    void should_report_errors_when_form_type_is_null_for_new_application_classification() {
         // given
         setUpTransformationUrl();
 
         Map<String, Object> data = basicCaseData();
         data.put("formType", null);
+        data.put("journeyClassification", NEW_APPLICATION.name());
 
         CaseDetails caseDetails = caseDetails(data);
 
@@ -538,6 +539,35 @@ class CreateCaseCallbackServiceTest {
             .matches(match);
 
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
+    }
+
+    @Test
+    void should_not_report_errors_when_form_type_is_null_for_exception_classification() {
+        // given
+        setUpTransformationUrl();
+
+        Map<String, Object> data = basicCaseData();
+        data.put("formType", null);
+
+        long newCaseId = 1;
+        given(ccdNewCaseCreator.createNewCase(
+            any(ExceptionRecord.class),
+            any(ServiceConfigItem.class),
+            anyBoolean(),
+            anyString(),
+            anyString()
+        )).willReturn(new CreateCaseResult(newCaseId));
+
+        // when
+        ProcessResult result =
+            service.process(
+                new CcdCallbackRequest(EVENT_ID_CREATE_NEW_CASE, caseDetails(data), true), // ignore warnings
+                IDAM_TOKEN,
+                USER_ID
+            );
+
+        assertThat(result.getErrors()).isEmpty();
+        assertThat(result.getWarnings()).isEmpty();
     }
 
     @ParameterizedTest(name = "Allowed to proceed: {0}. User ignores warnings: {1}")

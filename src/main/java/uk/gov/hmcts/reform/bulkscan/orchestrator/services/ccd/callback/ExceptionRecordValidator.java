@@ -31,6 +31,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJourneyClassification;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJurisdiction;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasPoBox;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 
 @Component
 public class ExceptionRecordValidator {
@@ -70,8 +71,15 @@ public class ExceptionRecordValidator {
         Validation<String, String> caseTypeIdValidation = hasCaseTypeId(caseDetails);
         Validation<String, String> poBoxValidation = hasPoBox(caseDetails);
         Validation<String, String> jurisdictionValidation = hasJurisdiction(caseDetails);
-        Validation<String, String> formTypeValidation = hasFormType(caseDetails);
         Validation<String, Classification> journeyClassificationValidation = hasJourneyClassification(caseDetails);
+
+        Validation<String, String> formTypeValidation;
+        if (journeyClassificationValidation.isValid() && !journeyClassificationValidation.get().equals(EXCEPTION)) {
+            formTypeValidation = hasFormType(caseDetails);
+        } else {
+            formTypeValidation = Validation.valid(null);
+        }
+
         Validation<String, LocalDateTime> deliveryDateValidation = hasDateField(caseDetails, "deliveryDate");
         Validation<String, LocalDateTime> openingDateValidation = hasDateField(caseDetails, "openingDate");
         Validation<String, List<ScannedDocument>> scannedDocumentsValidation = getScannedDocuments(caseDetails);
