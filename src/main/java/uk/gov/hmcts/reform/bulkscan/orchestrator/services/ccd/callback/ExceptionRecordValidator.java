@@ -74,10 +74,10 @@ public class ExceptionRecordValidator {
         Validation<String, Classification> journeyClassificationValidation = hasJourneyClassification(caseDetails);
 
         Validation<String, String> formTypeValidation;
-        if (journeyClassificationValidation.isValid() && !journeyClassificationValidation.get().equals(EXCEPTION)) {
-            formTypeValidation = hasFormType(caseDetails);
-        } else {
+        if (journeyClassificationValidation.isValid() && journeyClassificationValidation.get().equals(EXCEPTION)) {
             formTypeValidation = Validation.valid(null);
+        } else {
+            formTypeValidation = hasFormType(caseDetails);
         }
 
         Validation<String, LocalDateTime> deliveryDateValidation = hasDateField(caseDetails, "deliveryDate");
