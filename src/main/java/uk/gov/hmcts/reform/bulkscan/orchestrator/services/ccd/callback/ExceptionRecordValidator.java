@@ -74,6 +74,7 @@ public class ExceptionRecordValidator {
         Validation<String, Classification> journeyClassificationValidation = hasJourneyClassification(caseDetails);
 
         Validation<String, String> formTypeValidation;
+        // Exception journey classification may not have form type so skipping validation for it
         if (journeyClassificationValidation.isValid() && journeyClassificationValidation.get().equals(EXCEPTION)) {
             formTypeValidation = Validation.valid(null);
         } else {
