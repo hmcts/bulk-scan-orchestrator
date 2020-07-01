@@ -28,6 +28,7 @@ import javax.validation.ConstraintViolationException;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.logging.FeignExceptionLogger.debugCcdException;
 
 @Service
 public class CcdNewCaseCreator {
@@ -202,6 +203,7 @@ public class CcdNewCaseCreator {
                     .build()
             ).getId();
         } catch (FeignException exception) {
+            debugCcdException(log, exception, "Failed to call 'createNewCaseInCcd'");
             log.error(
                 "Failed to create new case for {} jurisdiction from exception record {}. Service response: {}",
                 exceptionRecord.poBoxJurisdiction,

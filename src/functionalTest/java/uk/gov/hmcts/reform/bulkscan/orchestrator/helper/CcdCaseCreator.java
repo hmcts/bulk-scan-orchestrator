@@ -45,11 +45,13 @@ public class CcdCaseCreator {
         this.supplementaryEvidenceMapper = supplementaryEvidenceMapper;
     }
 
+    // only used in tests
     public CaseDetails createCase(List<Document> documents, Instant deliveryDate) {
         String legacyId = "legacy-id-" + (long) (Math.random() * 100_000_000d);
         return createCase(legacyId, documents, deliveryDate);
     }
 
+    // only used privately here. is this class serving any purpose?
     public CaseDetails createCase(String legacyId, List<Document> documents, Instant deliveryDate) {
         log.info("Creating new case");
         CcdAuthenticator authenticator = ccdAuthenticatorFactory.createForJurisdiction(JURISDICTION);
