@@ -128,7 +128,8 @@ class ScannedDocumentsHelperTest {
         Map<String, Object> caseData = (Map<String, Object>) caseDetails.caseData;
         @SuppressWarnings("unchecked")
         List<uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument> updatedScannedDocuments =
-            (List<uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument>) caseData.get("scannedDocuments");
+            (List<uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument>)
+                caseData.get("scannedDocuments");
         assertThat(updatedScannedDocuments).hasSize(3);
         assertThat(updatedScannedDocuments.get(0).controlNumber).isEqualTo("1000");
         assertThat(updatedScannedDocuments.get(0).exceptionReference).isEqualTo("1");
@@ -165,7 +166,8 @@ class ScannedDocumentsHelperTest {
         Map<String, Object> caseData = (Map<String, Object>) caseDetails.caseData;
         @SuppressWarnings("unchecked")
         List<uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument> updatedScannedDocuments =
-            (List<uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument>) caseData.get("scannedDocuments");
+            (List<uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument>)
+                caseData.get("scannedDocuments");
         assertThat(updatedScannedDocuments).isEmpty();
     }
 
