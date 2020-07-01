@@ -4,7 +4,6 @@ import io.vavr.collection.Array;
 import io.vavr.collection.Seq;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
@@ -161,9 +160,8 @@ public class ExceptionRecordValidator {
     @SuppressWarnings("unchecked")
     private ScannedDocument mapScannedDocument(Map<String, Object> document) {
         Map<String, String> ccdUrl = (Map<String, String>) document.get("url");
-        String documentType = (String) document.get("type");
         return new ScannedDocument(
-            StringUtils.isNotEmpty(documentType) ? DocumentType.valueOf(documentType.toUpperCase()) : null,
+            DocumentType.valueOf(((String) document.get("type")).toUpperCase()),
             (String) document.get("subtype"),
             new DocumentUrl(
                 ccdUrl.get("document_url"),
