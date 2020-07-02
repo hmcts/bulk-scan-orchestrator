@@ -21,6 +21,7 @@ import javax.annotation.Nonnull;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.logging.FeignExceptionLogger.debugCcdException;
 
 /**
  * This class is intended to be a wrapper/adaptor/facade for the orchestrator -> CcdApi.
@@ -63,6 +64,7 @@ public class CcdApi {
             return feignCcdApi
                 .getCase(authenticator.getUserToken(), authenticator.getServiceToken(), caseRef);
         } catch (FeignException ex) {
+            debugCcdException(log, ex, "Failed to call 'getCase'");
             removeFromIdamCacheIfAuthProblem(ex.status(), jurisdiction);
             throw ex;
         }
@@ -81,6 +83,7 @@ public class CcdApi {
                 searchString
             );
         } catch (FeignException ex) {
+            debugCcdException(log, ex, "Failed to call 'searchCases'");
             removeFromIdamCacheIfAuthProblem(ex.status(), jurisdiction);
             throw ex;
         }
@@ -130,6 +133,7 @@ public class CcdApi {
 
             return response;
         } catch (FeignException e) {
+            debugCcdException(log, e, "Failed to call 'startAttachScannedDocs'");
             throw new CcdCallException(
                 format("Internal Error: start event call failed case: %s Error: %s", caseRef, e.status()), e
             );
@@ -228,6 +232,7 @@ public class CcdApi {
                 Event.builder().summary(eventSummary).id(event.getEventId()).build()
             );
         } catch (FeignException e) {
+            debugCcdException(log, e, "Failed to call 'attachCall' - `submitEventForCaseWorker`");
             throw new CcdCallException(
                 format("Internal Error: submitting attach file event failed case: %s Error: %s", caseRef, e.status()),
                 e
@@ -299,6 +304,7 @@ public class CcdApi {
                 eventTypeId
             );
         } catch (FeignException ex) {
+            debugCcdException(log, ex, "Failed to call 'startForCaseworker'");
             removeFromIdamCacheIfAuthProblem(ex.status(), jurisdiction);
             throw ex;
         }
@@ -329,6 +335,7 @@ public class CcdApi {
                 e
             );
         } catch (FeignException e) {
+            debugCcdException(log, e, "Failed to call 'startEventForCaseWorker'");
             removeFromIdamCacheIfAuthProblem(e.status(), jurisdiction);
             throw new CcdCallException(
                 String.format("Could not attach documents for case ref: %s Error: %s", caseRef, e.status()), e
@@ -353,6 +360,7 @@ public class CcdApi {
                 caseDataContent
             );
         } catch (FeignException ex) {
+            debugCcdException(log, ex, "Failed to call 'submitForCaseworker'");
             removeFromIdamCacheIfAuthProblem(ex.status(), jurisdiction);
             throw ex;
         }
@@ -385,6 +393,7 @@ public class CcdApi {
                 e
             );
         } catch (FeignException e) {
+            debugCcdException(log, e, "Failed to call 'submitEventForCaseWorker'");
             removeFromIdamCacheIfAuthProblem(e.status(), jurisdiction);
             throw new CcdCallException(
                 String.format("Could not attach documents for case ref: %s Error: %s", caseRef, e.status()), e
