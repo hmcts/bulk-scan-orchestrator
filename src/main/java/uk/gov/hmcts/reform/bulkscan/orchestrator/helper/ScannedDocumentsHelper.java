@@ -58,7 +58,7 @@ public class ScannedDocumentsHelper {
             .map(scannedDocument -> scannedDocument.controlNumber)
             .collect(toList());
         @SuppressWarnings("unchecked")
-        Map<String, Object> caseData = (Map<String, Object>) caseDetails.caseData;
+        var caseData = (Map<String, Object>) caseDetails.caseData;
 
         List<ScannedDocument> scannedDocuments = getScannedDocuments(caseData);
         List<ScannedDocument> updatedScannedDocuments = scannedDocuments.stream()
@@ -82,8 +82,7 @@ public class ScannedDocumentsHelper {
 
     @SuppressWarnings("unchecked")
     private static List<ScannedDocument> getScannedDocuments(Map<String, Object> caseData) {
-        List<Map<String, Object>> scannedDocuments =
-            (List<Map<String, Object>>) caseData.get(SCANNED_DOCUMENTS);
+        var scannedDocuments = (List<Map<String, Object>>) caseData.get(SCANNED_DOCUMENTS);
 
         return scannedDocuments == null
             ? emptyList()
