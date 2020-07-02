@@ -77,8 +77,6 @@ public class ExceptionRecordValidator {
         // Exception journey classification may not have form type so skipping validation for it
         if (journeyClassificationValidation.isValid() && journeyClassificationValidation.get().equals(EXCEPTION)) {
             formTypeValidation = Validation.valid(formTypeValidation.getOrNull());
-        } else {
-            formTypeValidation = hasFormType(caseDetails);
         }
 
         Validation<String, LocalDateTime> deliveryDateValidation = hasDateField(caseDetails, "deliveryDate");
