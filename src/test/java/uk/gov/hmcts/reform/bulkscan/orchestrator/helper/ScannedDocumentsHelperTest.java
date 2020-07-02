@@ -127,7 +127,7 @@ class ScannedDocumentsHelperTest {
         @SuppressWarnings("unchecked")
         Map<String, Object> caseData = (Map<String, Object>) caseDetails.caseData;
         @SuppressWarnings("unchecked")
-        List<uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument> updatedScannedDocuments =
+        var updatedScannedDocuments =
             (List<uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument>)
                 caseData.get("scannedDocuments");
         assertThat(updatedScannedDocuments).hasSize(3);
@@ -165,7 +165,7 @@ class ScannedDocumentsHelperTest {
         @SuppressWarnings("unchecked")
         Map<String, Object> caseData = (Map<String, Object>) caseDetails.caseData;
         @SuppressWarnings("unchecked")
-        List<uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument> updatedScannedDocuments =
+        var updatedScannedDocuments =
             (List<uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument>)
                 caseData.get("scannedDocuments");
         assertThat(updatedScannedDocuments).isEmpty();
