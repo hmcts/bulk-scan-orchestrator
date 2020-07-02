@@ -136,6 +136,32 @@ class CreateCaseCallbackTest {
             );
     }
 
+    @Test
+    void should_create_case_if_classification_exception_without_form_type() throws IOException {
+        setUpTransformation(getTransformationResponseBody("ok-no-warnings.json"));
+        setUpCcdSearchResult(getCcdResponseBody("search-result-empty.json"));
+        setUpCcdCreateCase(
+            getCcdResponseBody("start-event.json"),
+            getCcdResponseBody("sample-case.json")
+        );
+
+        byte[] requestBody = getRequestBody("valid-exception-without-form-type.json");
+
+        postWithBody(requestBody)
+            .statusCode(OK.value())
+            .body("errors", empty())
+            .body("warnings", empty())
+            .body(
+                "data",
+                equalTo(
+                    expectedResponseExceptionRecordFields(
+                        requestBody,
+                        "1539007368674134" // from sample-case.json
+                    )
+                )
+            );
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {
         "bad-case-data-field-is-empty.json",
