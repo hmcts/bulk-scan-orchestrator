@@ -28,6 +28,7 @@ public class CaseSearcher {
         this.coreCaseDataApi = coreCaseDataApi;
     }
 
+    // only used in tests
     public Optional<CaseDetails> findExceptionRecord(String poBox) {
         return search(
             SampleData.JURSIDICTION,
@@ -36,6 +37,7 @@ public class CaseSearcher {
         ).stream().findFirst();
     }
 
+    // only used in tests. single source code call - only used in tests too
     public List<CaseDetails> search(
         String jurisdiction,
         String caseTypeId,

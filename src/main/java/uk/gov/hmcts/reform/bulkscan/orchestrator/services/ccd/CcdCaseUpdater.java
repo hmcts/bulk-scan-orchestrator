@@ -32,6 +32,7 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.setExceptionRecordIdToScannedDocuments;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.logging.FeignExceptionLogger.debugCcdException;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR;
 
 @Service
@@ -187,6 +188,7 @@ public class CcdCaseUpdater {
             ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(singletonList(msg), emptyList());
             return new ProcessResult(errorResponse.warnings, errorResponse.errors);
         } catch (FeignException exception) {
+            debugCcdException(log, exception, "Failed to call 'updateCase'");
             log.error(
                 getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id)
                     + "Service response: {}",
@@ -314,6 +316,8 @@ public class CcdCaseUpdater {
         } catch (FeignException.Conflict exception) {
             throw exception;
         } catch (FeignException exception) {
+            debugCcdException(log, exception, "Failed to call 'updateCaseInCcd'");
+            // should service response be removed?
             String msg = format("Service response: %s", exception.contentUTF8());
             log.error(
                 "Failed to update case for {} jurisdiction "
