@@ -16,12 +16,11 @@ import java.util.Map;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SCANNED_DOCUMENTS;
 
 public class ScannedDocumentsHelper {
 
     private static final ObjectMapper objectMapper;
-
-    private static final String SCANNED_DOCUMENTS = "scannedDocuments";
 
     static {
         objectMapper = new ObjectMapper();
@@ -60,6 +59,7 @@ public class ScannedDocumentsHelper {
             .collect(toList());
         @SuppressWarnings("unchecked")
         Map<String, Object> caseData = (Map<String, Object>) caseDetails.caseData;
+
         List<ScannedDocument> scannedDocuments = getScannedDocuments(caseData);
         List<ScannedDocument> updatedScannedDocuments = scannedDocuments.stream()
             .map(scannedDocument ->
@@ -77,19 +77,17 @@ public class ScannedDocumentsHelper {
                     : scannedDocument
             )
             .collect(toList());
-        caseData.put("scannedDocuments", updatedScannedDocuments);
+        caseData.put(SCANNED_DOCUMENTS, updatedScannedDocuments);
     }
 
     @SuppressWarnings("unchecked")
     private static List<ScannedDocument> getScannedDocuments(Map<String, Object> caseData) {
         List<Map<String, Object>> scannedDocuments =
-            (List<Map<String, Object>>) caseData.get("scannedDocuments");
+            (List<Map<String, Object>>) caseData.get(SCANNED_DOCUMENTS);
 
-        if (scannedDocuments == null) {
-            return emptyList();
-        }
-
-        return scannedDocuments.stream()
+        return scannedDocuments == null
+            ? emptyList()
+            : scannedDocuments.stream()
             .map(ScannedDocumentsHelper::createScannedDocumentWithCcdData)
             .collect(toList());
     }
