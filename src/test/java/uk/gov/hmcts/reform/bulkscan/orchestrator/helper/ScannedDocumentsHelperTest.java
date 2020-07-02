@@ -102,12 +102,12 @@ class ScannedDocumentsHelperTest {
     void sets_exception_record_id_to_scanned_documents() throws Exception {
         // given
         //contains documents with control numbers 1000, 2000, 3000
-        CaseUpdateDetails caseDetails = getCaseUpdateDetails("case-data/multiple-scanned-docs.json");
-        List<ScannedDocument> scannedDocuments = asList(
+        var caseDetails = getCaseUpdateDetails("case-data/multiple-scanned-docs.json");
+        var scannedDocuments = asList(
             getScannedDocument("1000"),
             getScannedDocument("2000")
         );
-        ExceptionRecord exceptionRecord = new ExceptionRecord(
+        var exceptionRecord = new ExceptionRecord(
             EXCEPTION_REFERENCE,
             "caseTypeId",
             "poBox",
@@ -125,7 +125,7 @@ class ScannedDocumentsHelperTest {
 
         //then
         @SuppressWarnings("unchecked")
-        Map<String, Object> caseData = (Map<String, Object>) caseDetails.caseData;
+        var caseData = (Map<String, Object>) caseDetails.caseData;
         @SuppressWarnings("unchecked")
         var updatedScannedDocuments =
             (List<uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument>)
@@ -144,8 +144,8 @@ class ScannedDocumentsHelperTest {
     void setExceptionRecordIdToScannedDocuments_should_handle_null_scanned_documents() throws Exception {
         // given
         //contains documents with control numbers 1000, 2000, 3000
-        CaseUpdateDetails caseDetails = getCaseUpdateDetails("case-data/null-docs.json");
-        ExceptionRecord exceptionRecord = new ExceptionRecord(
+        var caseDetails = getCaseUpdateDetails("case-data/null-docs.json");
+        var exceptionRecord = new ExceptionRecord(
             EXCEPTION_REFERENCE,
             "caseTypeId",
             "poBox",
@@ -163,7 +163,7 @@ class ScannedDocumentsHelperTest {
 
         //then
         @SuppressWarnings("unchecked")
-        Map<String, Object> caseData = (Map<String, Object>) caseDetails.caseData;
+        var caseData = (Map<String, Object>) caseDetails.caseData;
         @SuppressWarnings("unchecked")
         var updatedScannedDocuments =
             (List<uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument>)
