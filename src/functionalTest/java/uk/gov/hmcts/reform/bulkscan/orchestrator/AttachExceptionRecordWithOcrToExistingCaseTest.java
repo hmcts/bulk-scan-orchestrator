@@ -92,6 +92,7 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
         CaseDetails updatedCase = ccdApi.getCase(caseId, existingCase.getJurisdiction());
 
         List<ScannedDocument> scannedDocuments = getScannedDocuments(updatedCase);
+        assertThat(scannedDocuments).hasSize(1);
         for (ScannedDocument scannedDocument: scannedDocuments) {
             assertThat(scannedDocument.exceptionReference).isEqualTo(String.valueOf(exceptionRecord.getId()));
         }
