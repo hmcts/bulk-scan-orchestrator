@@ -28,7 +28,7 @@ public class CcdAuthenticatorFactory {
         return new CcdAuthenticator(
             s2sTokenGenerator::generate,
             idamCredentials.userDetails,
-            () -> idamCredentials.accessToken
+            idamCredentials.accessToken
         );
     }
 
