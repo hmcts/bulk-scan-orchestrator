@@ -149,6 +149,39 @@ class AttachExceptionRecordToExistingCaseTest {
         );
     }
 
+    @Test
+    void should_set_exceptionRecordReference_in_scanned_documents() throws Exception {
+        //given
+        CaseDetails caseDetails =
+            ccdCaseCreator.createCase(
+                singletonList(
+                    new Document(
+                        "certificate1.pdf", "154565768", "other", null, Instant.now(), documentUuid, Instant.now()
+                    )),
+                Instant.now()
+            );
+        CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
+
+        // when
+        attachExceptionRecord(caseDetails, exceptionRecord, null);
+
+        //then
+        await("Exception record is attached to the case")
+            .atMost(60, TimeUnit.SECONDS)
+            .pollDelay(2, TimeUnit.SECONDS)
+            .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 2));
+
+        CaseDetails updatedCase = ccdApi.getCase(
+            String.valueOf(caseDetails.getId()),
+            caseDetails.getJurisdiction()
+        );
+        List<ScannedDocument> scannedDocuments = getScannedDocuments(updatedCase);
+        assertThat(scannedDocuments).hasSize(1);
+        for (ScannedDocument scannedDocument: scannedDocuments) {
+            assertThat(scannedDocument.exceptionReference).isEqualTo(String.valueOf(exceptionRecord.getId()));
+        }
+    }
+
     private void verifyIfExceptionRecordWithPendingPaymentsAttachesToCase(
         String fileName,
         boolean configAllowsAttachingToCase
