@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadServ
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseSearcher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.logging.appinsights.SyntheticHeaders;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -72,6 +74,27 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
 
         Map<String, String> address = (Map<String, String>) updatedCase.getData().get("address");
         assertThat(address.get("country")).isEqualTo(ocrCountry);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void should_set_exceptionRecordReference_in_scanned_documents() throws Exception {
+        //given
+        CaseDetails existingCase = ccdCaseCreator.createCase(emptyList(), now());
+        String caseId = String.valueOf(existingCase.getId());
+
+        CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-with-ocr-envelope.json");
+
+        // when
+        sendAttachRequest(exceptionRecord, caseId);
+
+        // then
+        CaseDetails updatedCase = ccdApi.getCase(caseId, existingCase.getJurisdiction());
+
+        List<ScannedDocument> scannedDocuments = getScannedDocuments(updatedCase);
+        for (ScannedDocument scannedDocument: scannedDocuments) {
+            assertThat(scannedDocument.exceptionReference).isEqualTo(String.valueOf(exceptionRecord.getId()));
+        }
     }
 
     @Test
