@@ -141,43 +141,6 @@ class ScannedDocumentsHelperTest {
     }
 
     @Test
-    void setExceptionRecordIdToScannedDocuments_should_handle_null_scanned_documents_in_exception() throws Exception {
-        // given
-        //contains documents with control numbers 1000, 2000, 3000
-        var caseDetails = getCaseUpdateDetails("case-data/multiple-scanned-docs.json");
-        var exceptionRecord = new ExceptionRecord(
-            EXCEPTION_REFERENCE,
-            "caseTypeId",
-            "poBox",
-            "poBoxJurisdiction",
-            Classification.EXCEPTION,
-            "formType",
-            now(),
-            now(),
-            null,
-            emptyList()
-        );
-
-        // when
-        ScannedDocumentsHelper.setExceptionRecordIdToScannedDocuments(exceptionRecord, caseDetails);
-
-        //then
-        @SuppressWarnings("unchecked")
-        var caseData = (Map<String, Object>) caseDetails.caseData;
-        @SuppressWarnings("unchecked")
-        var updatedScannedDocuments =
-            (List<uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument>)
-                caseData.get("scannedDocuments");
-        assertThat(updatedScannedDocuments).hasSize(3);
-        assertThat(updatedScannedDocuments.get(0).controlNumber).isEqualTo("1000");
-        assertThat(updatedScannedDocuments.get(0).exceptionReference).isNull();
-        assertThat(updatedScannedDocuments.get(1).controlNumber).isEqualTo("2000");
-        assertThat(updatedScannedDocuments.get(1).exceptionReference).isNull();
-        assertThat(updatedScannedDocuments.get(2).controlNumber).isEqualTo("3000");
-        assertThat(updatedScannedDocuments.get(2).exceptionReference).isNull();
-    }
-
-    @Test
     void setExceptionRecordIdToScannedDocuments_should_handle_empty_scanned_documents_in_exception() throws Exception {
         // given
         //contains documents with control numbers 1000, 2000, 3000
@@ -212,60 +175,6 @@ class ScannedDocumentsHelperTest {
         assertThat(updatedScannedDocuments.get(1).exceptionReference).isNull();
         assertThat(updatedScannedDocuments.get(2).controlNumber).isEqualTo("3000");
         assertThat(updatedScannedDocuments.get(2).exceptionReference).isNull();
-    }
-
-    @Test
-    void setExceptionRecordIdToScannedDocuments_should_handle_no_scanned_documents_in_case() throws Exception {
-        // given
-        var caseDetails = getCaseUpdateDetails("case-data/no-docs.json");
-        var exceptionRecord = new ExceptionRecord(
-            EXCEPTION_REFERENCE,
-            "caseTypeId",
-            "poBox",
-            "poBoxJurisdiction",
-            Classification.EXCEPTION,
-            "formType",
-            now(),
-            now(),
-            null,
-            emptyList()
-        );
-
-        // when
-        ScannedDocumentsHelper.setExceptionRecordIdToScannedDocuments(exceptionRecord, caseDetails);
-
-        //then
-        @SuppressWarnings("unchecked")
-        var caseData = (Map<String, Object>) caseDetails.caseData;
-        var updatedScannedDocuments = (List<?>) caseData.get("scannedDocuments");
-        assertThat(updatedScannedDocuments).isEmpty();
-    }
-
-    @Test
-    void setExceptionRecordIdToScannedDocuments_should_handle_empty_scanned_documents_in_case() throws Exception {
-        // given
-        var caseDetails = getCaseUpdateDetails("case-data/empty-docs.json");
-        var exceptionRecord = new ExceptionRecord(
-            EXCEPTION_REFERENCE,
-            "caseTypeId",
-            "poBox",
-            "poBoxJurisdiction",
-            Classification.EXCEPTION,
-            "formType",
-            now(),
-            now(),
-            null,
-            emptyList()
-        );
-
-        // when
-        ScannedDocumentsHelper.setExceptionRecordIdToScannedDocuments(exceptionRecord, caseDetails);
-
-        //then
-        @SuppressWarnings("unchecked")
-        var caseData = (Map<String, Object>) caseDetails.caseData;
-        var updatedScannedDocuments = (List<?>) caseData.get("scannedDocuments");
-        assertThat(updatedScannedDocuments).isEmpty();
     }
 
     private ScannedDocument getScannedDocument(String controlNumber) {

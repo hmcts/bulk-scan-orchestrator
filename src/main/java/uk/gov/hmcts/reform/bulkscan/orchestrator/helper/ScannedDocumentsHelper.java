@@ -55,22 +55,10 @@ public class ScannedDocumentsHelper {
         var caseData = (Map<String, Object>) caseDetails.caseData;
         List<ScannedDocument> scannedDocuments = getScannedDocuments(caseData);
 
-        if (exceptionRecord.scannedDocuments == null) {
-            // ensure scanned documents not null
-            caseData.put(SCANNED_DOCUMENTS, scannedDocuments);
-            return;
-        }
-
         List<String> exceptionRecordDcns = exceptionRecord.scannedDocuments
             .stream()
             .map(scannedDocument -> scannedDocument.controlNumber)
             .collect(toList());
-
-        if (exceptionRecordDcns.isEmpty()) {
-            // ensure scanned documents not null
-            caseData.put(SCANNED_DOCUMENTS, scannedDocuments);
-            return;
-        }
 
         List<ScannedDocument> updatedScannedDocuments = scannedDocuments.stream()
             .map(scannedDocument ->
