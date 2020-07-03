@@ -51,29 +51,40 @@ public class ScannedDocumentsHelper {
         ExceptionRecord exceptionRecord,
         CaseUpdateDetails caseDetails
     ) {
-        List<String> dcns = exceptionRecord.scannedDocuments == null
-            ? emptyList()
-            : exceptionRecord.scannedDocuments
+        @SuppressWarnings("unchecked")
+        var caseData = (Map<String, Object>) caseDetails.caseData;
+        List<ScannedDocument> scannedDocuments = getScannedDocuments(caseData);
+
+        if (exceptionRecord.scannedDocuments == null) {
+            // ensure scanned documents not null
+            caseData.put(SCANNED_DOCUMENTS, scannedDocuments);
+            return;
+        }
+
+        List<String> exceptionRecordDcns = exceptionRecord.scannedDocuments
             .stream()
             .map(scannedDocument -> scannedDocument.controlNumber)
             .collect(toList());
-        @SuppressWarnings("unchecked")
-        var caseData = (Map<String, Object>) caseDetails.caseData;
 
-        List<ScannedDocument> scannedDocuments = getScannedDocuments(caseData);
+        if (exceptionRecordDcns.isEmpty()) {
+            // ensure scanned documents not null
+            caseData.put(SCANNED_DOCUMENTS, scannedDocuments);
+            return;
+        }
+
         List<ScannedDocument> updatedScannedDocuments = scannedDocuments.stream()
             .map(scannedDocument ->
-                dcns.contains(scannedDocument.controlNumber)
+                exceptionRecordDcns.contains(scannedDocument.controlNumber)
                     ? new ScannedDocument(
-                    scannedDocument.fileName,
-                    scannedDocument.controlNumber,
-                    scannedDocument.type,
-                    scannedDocument.subtype,
-                    scannedDocument.scannedDate,
-                    scannedDocument.url,
-                    scannedDocument.deliveryDate,
-                    exceptionRecord.id
-                )
+                        scannedDocument.fileName,
+                        scannedDocument.controlNumber,
+                        scannedDocument.type,
+                        scannedDocument.subtype,
+                        scannedDocument.scannedDate,
+                        scannedDocument.url,
+                        scannedDocument.deliveryDate,
+                        exceptionRecord.id
+                      )
                     : scannedDocument
             )
             .collect(toList());
@@ -87,8 +98,8 @@ public class ScannedDocumentsHelper {
         return scannedDocuments == null
             ? emptyList()
             : scannedDocuments.stream()
-            .map(ScannedDocumentsHelper::createScannedDocumentWithCcdData)
-            .collect(toList());
+              .map(ScannedDocumentsHelper::createScannedDocumentWithCcdData)
+              .collect(toList());
     }
 
     static ScannedDocument createScannedDocumentWithCcdData(Map<String, Object> object) {

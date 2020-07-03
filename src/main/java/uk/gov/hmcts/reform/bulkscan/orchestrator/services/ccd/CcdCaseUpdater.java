@@ -117,8 +117,6 @@ public class CcdCaseUpdater {
                 s2sToken
             );
 
-            setExceptionRecordIdToScannedDocuments(exceptionRecord, updateResponse.caseDetails);
-
             log.info(
                 "Successfully called case update endpoint of service {} to update case with case Id {} "
                     + "based on exception record ref {}",
@@ -137,6 +135,8 @@ public class CcdCaseUpdater {
                 );
                 return new ProcessResult(updateResponse.warnings, emptyList());
             } else {
+                setExceptionRecordIdToScannedDocuments(exceptionRecord, updateResponse.caseDetails);
+
                 Optional<String> updateResult = updateCaseInCcd(
                     configItem.getService(),
                     ignoreWarnings,
