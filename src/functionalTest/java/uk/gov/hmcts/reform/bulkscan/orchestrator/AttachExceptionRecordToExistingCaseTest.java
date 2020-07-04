@@ -152,14 +152,7 @@ class AttachExceptionRecordToExistingCaseTest {
     @Test
     void should_set_exceptionRecordReference_in_scanned_documents() throws Exception {
         //given
-        CaseDetails caseDetails =
-            ccdCaseCreator.createCase(
-                singletonList(
-                    new Document(
-                        "certificate1.pdf", "154565768", "other", null, Instant.now(), documentUuid, Instant.now()
-                    )),
-                Instant.now()
-            );
+        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
         // when
