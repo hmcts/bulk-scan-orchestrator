@@ -162,12 +162,13 @@ class AttachExceptionRecordToExistingCaseTest {
         await("Exception record is attached to the case")
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
-            .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 2));
+            .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 1));
 
         CaseDetails updatedCase = ccdApi.getCase(
             String.valueOf(caseDetails.getId()),
             caseDetails.getJurisdiction()
         );
+
         List<ScannedDocument> scannedDocuments = getScannedDocuments(updatedCase);
         assertThat(scannedDocuments).hasSize(1);
         for (ScannedDocument scannedDocument: scannedDocuments) {
