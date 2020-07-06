@@ -118,19 +118,19 @@ public class SampleAppConsumerTest {
             .put("case_creation_details.case_data.address.postTown", "")
             .put("case_creation_details.case_data.address.county", "")
             .put("case_creation_details.case_data.address.country", "")
-            .put("case_creation_details.case_data.scannedDocuments[0].item.type", "Form")
-            .put("case_creation_details.case_data.scannedDocuments[0].item.subtype", "XYZ")
-            .put("case_creation_details.case_data.scannedDocuments[0].item.url.document_url", "url")
-            .put("case_creation_details.case_data.scannedDocuments[0].item.url.document_binary_url", "binary-url")
+            .put("case_creation_details.case_data.scannedDocuments[0].value.type", "Form")
+            .put("case_creation_details.case_data.scannedDocuments[0].value.subtype", "XYZ")
+            .put("case_creation_details.case_data.scannedDocuments[0].value.url.document_url", "url")
+            .put("case_creation_details.case_data.scannedDocuments[0].value.url.document_binary_url", "binary-url")
             .put(
-                "case_creation_details.case_data.scannedDocuments[0].item.url.document_filename",
+                "case_creation_details.case_data.scannedDocuments[0].value.url.document_filename",
                 "987654321-123456789.pdf"
             )
-            .put("case_creation_details.case_data.scannedDocuments[0].item.controlNumber", "987654321")
-            .put("case_creation_details.case_data.scannedDocuments[0].item.filename", "987654321-123456789.pdf")
-            .put("case_creation_details.case_data.scannedDocuments[0].item.scannedDate", "2019-08-01T00:01:02.345Z")
-            .put("case_creation_details.case_data.scannedDocuments[0].item.deliveryDate", "2019-08-01T01:02:03.456Z")
-            .put("case_creation_details.case_data.scannedDocuments[0].item.exceptionRecordReference", "id")
+            .put("case_creation_details.case_data.scannedDocuments[0].value.controlNumber", "987654321")
+            .put("case_creation_details.case_data.scannedDocuments[0].value.fileName", "987654321-123456789.pdf")
+            .put("case_creation_details.case_data.scannedDocuments[0].value.scannedDate", "2019-08-01T00:01:02.345")
+            .put("case_creation_details.case_data.scannedDocuments[0].value.deliveryDate", "2019-08-01T01:02:03.456")
+            .put("case_creation_details.case_data.scannedDocuments[0].value.exceptionRecordReference", "id")
             .put("case_creation_details.case_data.bulkScanCaseReference", "id")
             .build();
 
@@ -151,8 +151,8 @@ public class SampleAppConsumerTest {
             .put("case_creation_details.case_data", 9)
             .put("case_creation_details.case_data.address", 7)
             .put("case_creation_details.case_data.scannedDocuments[0]", 1)
-            .put("case_creation_details.case_data.scannedDocuments[0].item", 8)
-            .put("case_creation_details.case_data.scannedDocuments[0].item.url", 3)
+            .put("case_creation_details.case_data.scannedDocuments[0].value", 8)
+            .put("case_creation_details.case_data.scannedDocuments[0].value.url", 3)
             .build();
 
         assertThat(jsonPath.getList("case_creation_details.case_data.scannedDocuments")).hasSize(1);

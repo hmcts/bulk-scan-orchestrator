@@ -19,7 +19,7 @@
         "country": null
       },
       "scannedDocuments": [{
-        "item": {
+        "value": {
           "type": "Form",
           "subtype": "XYZ",
           "url": {
@@ -28,9 +28,9 @@
             "document_filename": "987654321-123456789.pdf"
           },
           "controlNumber": "987654321",
-          "filename": "987654321-123456789.pdf",
-          "scannedDate": "2019-08-01T00:01:02.345Z",
-          "deliveryDate": "2019-08-01T01:02:03.456Z",
+          "fileName": "987654321-123456789.pdf",
+          "scannedDate": "2019-08-01T00:01:02.345",
+          "deliveryDate": "2019-08-01T01:02:03.456",
           "exceptionRecordReference": "id"
         }
       }],
