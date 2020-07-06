@@ -58,18 +58,6 @@ public class CcdApi {
         this.serviceConfigProvider = serviceConfigProvider;
     }
 
-    private CaseDetails retrieveCase(String caseRef, String jurisdiction) {
-        CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
-        try {
-            return feignCcdApi
-                .getCase(authenticator.getUserToken(), authenticator.getServiceToken(), caseRef);
-        } catch (FeignException ex) {
-            debugCcdException(log, ex, "Failed to call 'getCase'");
-            removeFromIdamCacheIfAuthProblem(ex.status(), jurisdiction);
-            throw ex;
-        }
-    }
-
     private SearchResult searchCases(
         String jurisdiction,
         String caseType,
@@ -142,9 +130,14 @@ public class CcdApi {
 
     @Nonnull
     public CaseDetails getCase(String caseRef, String jurisdiction) {
+        CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
+
         try {
-            return retrieveCase(caseRef, jurisdiction);
+            return feignCcdApi.getCase(authenticator.getUserToken(), authenticator.getServiceToken(), caseRef);
         } catch (FeignException e) {
+            debugCcdException(log, e, "Failed to call 'getCase'");
+            removeFromIdamCacheIfAuthProblem(e.status(), jurisdiction);
+
             switch (e.status()) {
                 case 404:
                     throw new CaseNotFoundException("Could not find case: " + caseRef, e);
