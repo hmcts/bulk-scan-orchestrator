@@ -1,0 +1,43 @@
+{
+  "case_creation_details": {
+    "case_type_id": "Bulk_Scanned",
+    "event_id": "createCase",
+    "case_data": {
+      "legacyId": null,
+      "firstName": "FIRST",
+      "lastName": "NAME",
+      "dateOfBirth": "2000-01-01",
+      "contactNumber": null,
+      "email": null,
+      "address": {
+        "addressLine1": "102 Petty France",
+        "addressLine2": null,
+        "addressLine3": null,
+        "postCode": "SW1H 9AJ",
+        "postTown": null,
+        "county": null,
+        "country": null
+      },
+      "scannedDocuments": [{
+        "value": {
+          "type": "Form",
+          "subtype": "XYZ",
+          "url": {
+            "document_url": "url",
+            "document_binary_url": "binary-url",
+            "document_filename": "987654321-123456789.pdf"
+          },
+          "controlNumber": "987654321",
+          "fileName": "987654321-123456789.pdf",
+          "scannedDate": "2019-08-01T00:01:02.345",
+          "deliveryDate": "2019-08-01T01:02:03.456",
+          "exceptionRecordReference": "id"
+        }
+      }],
+      "bulkScanCaseReference": "id"
+    }
+  },
+  "warnings": [
+    "'email' is empty"
+  ]
+}

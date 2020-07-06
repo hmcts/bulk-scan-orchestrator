@@ -8,20 +8,20 @@ public class CcdAuthenticator {
 
     private final UserDetails userDetails;
     private final Supplier<String> serviceTokenSupplier;
-    private final Supplier<String> userTokenSupplier;
+    private final String userToken;
 
     public CcdAuthenticator(
         Supplier<String> serviceTokenSupplier,
         UserDetails userDetails,
-        Supplier<String> userTokenSupplier
+        String userToken
     ) {
         this.serviceTokenSupplier = serviceTokenSupplier;
         this.userDetails = userDetails;
-        this.userTokenSupplier = userTokenSupplier;
+        this.userToken = userToken;
     }
 
     public String getUserToken() {
-        return this.userTokenSupplier.get();
+        return this.userToken;
     }
 
     public String getServiceToken() {

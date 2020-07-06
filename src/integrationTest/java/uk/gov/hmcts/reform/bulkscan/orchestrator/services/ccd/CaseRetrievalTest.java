@@ -60,7 +60,7 @@ class CaseRetrievalTest {
         new CcdAuthenticator(
             () -> "service_token",
             new UserDetails("12", "forname", "", null, null),
-            () -> "ey_token"
+            "ey_token"
         );
 
     @BeforeEach
