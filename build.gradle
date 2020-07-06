@@ -290,6 +290,11 @@ dependencies {
 
   smokeTestImplementation sourceSets.main.runtimeClasspath
   smokeTestImplementation sourceSets.test.runtimeClasspath
+
+  contractTestImplementation sourceSets.main.runtimeClasspath
+  contractTestImplementation sourceSets.test.runtimeClasspath
+  contractTestImplementation group: 'io.rest-assured', name: 'rest-assured'
+  contractTestImplementation group: 'au.com.dius', name: 'pact-jvm-consumer-junit5', version: '4.0.10'
 }
 
 mainClassName = 'uk.gov.hmcts.reform.bulkscan.orchestrator.Application'
