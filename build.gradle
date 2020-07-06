@@ -70,6 +70,13 @@ test {
   failFast = true
 }
 
+task runAndPublishConsumerPactTests(type: Test){
+  testClassesDirs = sourceSets.contractTest.output.classesDirs
+  classpath = sourceSets.contractTest.runtimeClasspath
+}
+
+runAndPublishConsumerPactTests.finalizedBy pactPublish
+
 task functional(type: Test, description: 'Runs the functional tests.', group: 'Verification') {
   testClassesDirs = sourceSets.functionalTest.output.classesDirs
   classpath = sourceSets.functionalTest.runtimeClasspath
@@ -165,6 +172,13 @@ sonarqube {
     property "sonar.projectName", "Reform :: Bulk Scan Orchestrator"
     property "sonar.coverage.jacoco.xmlReportPaths", jacocoTestReport.reports.xml.destination.path
     property "sonar.coverage.exclusions", "**/config/**"
+  }
+}
+
+pact {
+  publish {
+    pactBrokerUrl = 'https://pact-broker.platform.hmcts.net'
+    version = '0.0.1'
   }
 }
 
