@@ -171,9 +171,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
         List<ScannedDocument> scannedDocuments = getScannedDocuments(updatedCase);
         assertThat(scannedDocuments).hasSize(1);
-        for (ScannedDocument scannedDocument: scannedDocuments) {
-            assertThat(scannedDocument.exceptionReference).isEqualTo(String.valueOf(exceptionRecord.getId()));
-        }
+        assertThat(scannedDocuments.get(0).exceptionReference).isEqualTo(String.valueOf(exceptionRecord.getId()));
     }
 
     private void verifyIfExceptionRecordWithPendingPaymentsAttachesToCase(
