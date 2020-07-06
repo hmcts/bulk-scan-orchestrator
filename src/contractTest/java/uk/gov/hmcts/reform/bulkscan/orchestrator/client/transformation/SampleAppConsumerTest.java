@@ -26,7 +26,7 @@ public class SampleAppConsumerTest {
 
     private static final String TEST_S2S_TOKEN = "pact-test-s2s-token";
 
-    @Pact(provider = "sample_app_exception_transformation", consumer = "bulk_scan_orchestrator")
+    @Pact(provider = "bulk_scan_sample_app", consumer = "bulk_scan_orchestrator")
     public RequestResponsePact validTransformationPact(PactDslWithProvider builder) throws Exception {
         return builder
             .uponReceiving("Request to transform Bulk Scan ExceptionRecord to a service case")
@@ -40,7 +40,7 @@ public class SampleAppConsumerTest {
             .toPact();
     }
 
-    @Pact(provider = "sample_app_exception_transformation", consumer = "bulk_scan_orchestrator")
+    @Pact(provider = "bulk_scan_sample_app", consumer = "bulk_scan_orchestrator")
     public RequestResponsePact invalidTransformationPact(PactDslWithProvider builder) throws Exception {
         return builder
             .uponReceiving("Request to validate invalid OCR with missing mandatory field 'last_name' for type PERSONAL")
