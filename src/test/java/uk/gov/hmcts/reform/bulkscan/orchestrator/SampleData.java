@@ -54,7 +54,7 @@ public class SampleData {
     public static final CcdAuthenticator AUTH_DETAILS = new CcdAuthenticator(
         () -> SERVICE_TOKEN,
         USER_DETAILS,
-        () -> USER_TOKEN
+        USER_TOKEN
     );
 
     public static final CaseDetails THE_CASE = CaseDetails.builder()
