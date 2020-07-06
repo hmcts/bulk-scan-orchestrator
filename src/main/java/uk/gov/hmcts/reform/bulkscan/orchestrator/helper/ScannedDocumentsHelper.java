@@ -61,9 +61,10 @@ public class ScannedDocumentsHelper {
             .collect(toList());
 
         List<ScannedDocument> updatedScannedDocuments = scannedDocuments.stream()
-            .map(scannedDocument ->
-                exceptionRecordDcns.contains(scannedDocument.controlNumber)
-                    ? new ScannedDocument(
+            .map(scannedDocument -> {
+                if (exceptionRecordDcns.contains(scannedDocument.controlNumber)) {
+                    // set exceptionReference if the document received with the exception record
+                    return new ScannedDocument(
                         scannedDocument.fileName,
                         scannedDocument.controlNumber,
                         scannedDocument.type,
@@ -72,9 +73,12 @@ public class ScannedDocumentsHelper {
                         scannedDocument.url,
                         scannedDocument.deliveryDate,
                         exceptionRecord.id
-                      )
-                    : scannedDocument
-            )
+                    );
+                } else {
+                    // do not update the document if it was received with some previous exception record
+                    return scannedDocument;
+                }
+            })
             .collect(toList());
         caseData.put(SCANNED_DOCUMENTS, updatedScannedDocuments);
     }
