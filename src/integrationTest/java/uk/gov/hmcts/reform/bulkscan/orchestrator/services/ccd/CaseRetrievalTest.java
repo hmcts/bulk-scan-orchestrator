@@ -253,7 +253,7 @@ class CaseRetrievalTest {
 
     @ParameterizedTest
     @ValueSource(ints = {401, 403})
-    public void startEventForAttachScannedDocs_should_throw_ccdCallException_when_auth_error(int status) {
+    public void attachScannedDocs_should_throw_ccdCallException_when_auth_error(int status) {
         // given
         givenThat(get("/caseworkers/12/jurisdictions/BULKSCAN/case-types/77/cases/2/event-triggers/eventId/token")
             .willReturn(aResponse().withStatus(status)));
