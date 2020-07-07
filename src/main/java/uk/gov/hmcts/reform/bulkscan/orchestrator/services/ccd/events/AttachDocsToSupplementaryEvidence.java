@@ -67,7 +67,7 @@ class AttachDocsToSupplementaryEvidence {
 
                 log.info("Attached documents from envelope to case. {}", loggingContext);
             } catch (UnableToAttachDocumentsException e) {
-                log.error("Failed to attach documents from envelope to case. {}", loggingContext);
+                log.error("Failed to attach documents from envelope to case. {}", loggingContext, e);
                 return false;
             }
         }
