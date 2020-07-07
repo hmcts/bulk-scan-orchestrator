@@ -31,6 +31,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getDocuments;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.setExceptionRecordIdToScannedDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.logging.FeignExceptionLogger.debugCcdException;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR;
 
@@ -134,6 +135,8 @@ public class CcdCaseUpdater {
                 );
                 return new ProcessResult(updateResponse.warnings, emptyList());
             } else {
+                setExceptionRecordIdToScannedDocuments(exceptionRecord, updateResponse.caseDetails);
+
                 Optional<String> updateResult = updateCaseInCcd(
                     configItem.getService(),
                     ignoreWarnings,
