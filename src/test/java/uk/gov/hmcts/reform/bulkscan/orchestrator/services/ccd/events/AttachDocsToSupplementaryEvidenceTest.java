@@ -16,10 +16,12 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -46,6 +48,7 @@ class AttachDocsToSupplementaryEvidenceTest {
         this.attacher = new AttachDocsToSupplementaryEvidence(mapper, ccdApi);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void should_start_and_submit_event_for_valid_envelope() {
         // given
@@ -65,10 +68,6 @@ class AttachDocsToSupplementaryEvidenceTest {
         given(startEventResponse.getCaseDetails()).willReturn(caseDetails);
         given(startEventResponse.getCaseDetails().getData()).willReturn(ccdData);
 
-        given(ccdApi.startEventForAttachScannedDocs(any(), any(), any(), any(), any()))
-            .willReturn(startEventResponse);
-        given(ccdApi.submitEventForAttachScannedDocs(any(), any(), any(), any(), any())).willReturn(caseDetails);
-
         String caseId = "1539007368674134";
         given(caseDetails.getId()).willReturn(Long.parseLong(caseId));
 
@@ -80,30 +79,26 @@ class AttachDocsToSupplementaryEvidenceTest {
         boolean docsAttached = attacher.attach(envelope, caseDetails);
 
         // then
-        verify(ccdApi).startEventForAttachScannedDocs(
-            AUTH_DETAILS,
-            envelope.jurisdiction,
-            CASE_TYPE_ID,
-            caseId,
-            EVENT_TYPE_ID
-        );
-        ArgumentCaptor<CaseDataContent> caseDataContentCaptor = ArgumentCaptor.forClass(CaseDataContent.class);
+        var caseDataBuilderCaptor = ArgumentCaptor.forClass(Function.class);
 
-        verify(ccdApi).submitEventForAttachScannedDocs(
+        verify(ccdApi).attachScannedDocs(
             eq(AUTH_DETAILS),
             eq(envelope.jurisdiction),
             eq(CASE_TYPE_ID),
             eq(caseId),
-            caseDataContentCaptor.capture()
+            eq(EVENT_TYPE_ID),
+            caseDataBuilderCaptor.capture(),
+            anyString()
         );
 
-        verify(mapper).map(emptyList(), envelope.documents, envelope.deliveryDate);
-
-        CaseDataContent caseDataContent = caseDataContentCaptor.getValue();
+        var caseDataContent = (CaseDataContent) caseDataBuilderCaptor.getValue().apply(startEventResponse);
         assertThat(caseDataContent.getEventToken()).isEqualTo(eventToken);
         assertThat(caseDataContent.getEvent().getId()).isEqualTo(EVENT_TYPE_ID);
         assertThat(caseDataContent.getEvent().getSummary()).isEqualTo("Attach scanned documents");
         assertThat(docsAttached).isTrue();
+
+        // and
+        verify(mapper).map(emptyList(), envelope.documents, envelope.deliveryDate);
     }
 
     @Test
