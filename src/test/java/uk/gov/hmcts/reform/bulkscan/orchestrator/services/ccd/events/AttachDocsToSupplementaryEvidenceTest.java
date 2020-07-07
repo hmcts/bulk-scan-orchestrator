@@ -114,6 +114,6 @@ class AttachDocsToSupplementaryEvidenceTest {
         attacher.attach(envelope, existingCase);
 
         // then
-        verify(ccdApi, never()).startEvent(any(), any(), any(), any());
+        verify(ccdApi, never()).attachScannedDocs(any(), any(), any(), any(), any(), any(), any());
     }
 }
