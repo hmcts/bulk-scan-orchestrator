@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.env
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
-import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.List;
 import java.util.Locale;
@@ -62,33 +61,31 @@ public class CreateExceptionRecord {
     }
 
     private Long createExceptionRecord(Envelope envelope) {
-        log.info("Creating exception record for envelope {}", envelope.id);
+        String loggingContext = String.format(
+            "Envelope ID: %s, file name: %s, service: %s",
+            envelope.id,
+            envelope.zipFileName,
+            envelope.container
+        );
+        log.info("Creating exception record. {}", loggingContext);
 
         CcdAuthenticator authenticator = ccdApi.authenticateJurisdiction(envelope.jurisdiction);
         String caseTypeId = envelope.container.toUpperCase(Locale.getDefault()) + "_" + CASE_TYPE;
 
-        StartEventResponse startEventResponse = ccdApi.startEvent(
+        CaseDetails caseDetails = ccdApi.createExceptionRecord(
             authenticator,
             envelope.jurisdiction,
             caseTypeId,
-            EVENT_TYPE_ID
-        );
-
-        log.info("Started event for envelope ID: {}. File name: {}", envelope.id, envelope.zipFileName);
-
-        CaseDetails caseDetails = ccdApi.submitEvent(
-            authenticator,
-            envelope.jurisdiction,
-            caseTypeId,
-            buildCaseDataContent(envelope, startEventResponse.getToken())
+            EVENT_TYPE_ID,
+            startEventResponse -> buildCaseDataContent(envelope, startEventResponse.getToken()),
+            loggingContext
         );
 
         log.info(
-            "Created Exception Record. Envelope ID: {}, file name: {}, case ID: {}, case type: {}",
-            envelope.id,
-            envelope.zipFileName,
+            "Created exception record. Case ID: {}, case type: {}. {}",
             caseDetails.getId(),
-            caseTypeId
+            caseTypeId,
+            loggingContext
         );
 
         return caseDetails.getId();
