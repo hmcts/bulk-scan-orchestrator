@@ -387,6 +387,7 @@ public class CcdApi {
             );
         } catch (FeignException e) {
             debugCcdException(log, e, "Failed to call 'submitEventForCaseWorker'");
+            log.error("CCD submitEventForCaseWorker for caseRef: {} ", caseRef, e);
             removeFromIdamCacheIfAuthProblem(e.status(), jurisdiction);
             throw new CcdCallException(
                 String.format("Could not attach documents for case ref: %s Error: %s", caseRef, e.status()), e
