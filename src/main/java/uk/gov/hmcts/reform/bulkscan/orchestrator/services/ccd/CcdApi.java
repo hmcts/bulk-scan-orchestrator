@@ -347,7 +347,7 @@ public class CcdApi {
                 e
             );
         } catch (FeignException e) {
-            debugCcdException(log, e, "Failed to call 'eventForCaseWorker'");
+            debugCcdException(log, e, "Failed to call 'attachScannedDocs'");
             removeFromIdamCacheIfAuthProblem(e.status(), jurisdiction);
 
             throw new CcdCallException(
