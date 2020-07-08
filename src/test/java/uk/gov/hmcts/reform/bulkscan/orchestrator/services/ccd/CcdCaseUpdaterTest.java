@@ -281,8 +281,8 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(callbackException.getMessage())
             .isEqualTo("Failed to update case for Service service with case Id existing_case_id "
-                + "based on exception record 1");
-        assertThat(callbackException.getCause().getMessage()).isEqualTo("Service response: Body");
+                + "based on exception record 1. Service response: Body");
+        assertThat(callbackException.getCause().getMessage()).isEqualTo("Msg");
     }
 
     @Test

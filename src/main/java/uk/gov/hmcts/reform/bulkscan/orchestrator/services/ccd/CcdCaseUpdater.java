@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Optional;
 import javax.validation.ConstraintViolationException;
@@ -190,12 +191,10 @@ public class CcdCaseUpdater {
         } catch (FeignException exception) {
             debugCcdException(log, exception, "Failed to call 'updateCase'");
             log.error(
-                getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id)
-                    + "Service response: {}",
+                getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id),
                 configItem.getService(),
                 existingCaseId,
                 exceptionRecord.id,
-                exception.contentUTF8(),
                 exception
             );
 
@@ -315,23 +314,14 @@ public class CcdCaseUpdater {
             return Optional.of(msg);
         } catch (FeignException.Conflict exception) {
             throw exception;
+        // translate any exception to generic to be handled above
         } catch (FeignException exception) {
-            debugCcdException(log, exception, "Failed to call 'updateCaseInCcd'");
-            // should service response be removed?
-            String msg = format("Service response: %s", exception.contentUTF8());
-            log.error(
-                "Failed to update case for {} jurisdiction "
-                    + "with case Id {} "
-                    + "based on exception record with Id {}. "
-                    + "{}",
-                exceptionRecord.poBoxJurisdiction,
-                existingCase.getId(),
-                exceptionRecord.id,
-                msg,
-                exception
+            throw new FeignException.FeignServerException(
+                0,
+                exception.getMessage(),
+                exception.request(),
+                exception.responseBody().map(ByteBuffer::array).orElse(new byte[]{})
             );
-
-            throw new RuntimeException(msg);
         }
     }
 
