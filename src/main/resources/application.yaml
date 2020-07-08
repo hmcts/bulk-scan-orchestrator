@@ -78,6 +78,20 @@ service-config:
           ocrFields:
             - last_name
 
+    - service: bulkscanauto # service name corresponds to the name of the container in Blob Storage
+        jurisdiction: BULKSCAN
+        transformation-url: ${TRANSFORMATION_URL_BULKSCAN}
+        update-url: ${UPDATE_URL_BULKSCAN}
+        case-type-ids:
+          - Bulk_Scanned
+        allow-creating-case-before-payments-are-processed: true
+        allow-attaching-to-case-before-payments-are-processed-for-classifications:
+          - SUPPLEMENTARY_EVIDENCE
+        form-type-to-surname-ocr-field-mappings:
+          - formType: PERSONAL
+            ocrFields:
+              - last_name
+
     - service: sscs
       jurisdiction: SSCS
       transformation-url: ${TRANSFORMATION_URL_SSCS}
