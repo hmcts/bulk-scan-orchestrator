@@ -14,7 +14,6 @@ import static io.vavr.control.Validation.invalid;
 import static java.lang.String.format;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.CCD_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.EXTERNAL_CASE_REFERENCE;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.ATTACH_TO_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SEARCH_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SEARCH_CASE_REFERENCE_TYPE;
 
@@ -26,17 +25,10 @@ class CaseReferenceValidator {
     );
 
     @Nonnull
-    Validation<String, String> validateAttachToCaseReference(CaseDetails theCase) {
-        return getCaseRef(theCase, ATTACH_TO_CASE_REFERENCE)
-            .map(this::validateCcdCaseRef)
-            .orElseGet(() -> invalid("No case reference supplied"));
-    }
-
-    @Nonnull
     Validation<String, String> validateTargetCaseReference(CaseDetails theCase) {
         return getCaseRef(theCase, SEARCH_CASE_REFERENCE)
             .map(this::validateCcdCaseRef)
-            .orElse(validateAttachToCaseReference(theCase));
+            .orElseGet(() -> invalid("No case reference supplied"));
     }
 
     @Nonnull
