@@ -76,7 +76,7 @@ class CcdNewCaseCreatorTest {
     }
 
     @Test
-    void should_return_new_case_id_when_successfully_executed_all_the_steps() throws Exception {
+    void should_return_new_case_id_when_successfully_executed_all_the_steps() {
         // given
         given(transformationClient.transformExceptionRecord(any(), any(), any()))
             .willReturn(
