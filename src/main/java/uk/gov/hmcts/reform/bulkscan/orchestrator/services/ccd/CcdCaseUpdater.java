@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 import javax.validation.ConstraintViolationException;
 
@@ -188,13 +187,25 @@ public class CcdCaseUpdater {
             ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(singletonList(msg), emptyList());
             return new ProcessResult(errorResponse.warnings, errorResponse.errors);
         } catch (FeignException.BadRequest exception) {
-            String msg = "Invalid case ID: " + existingCaseId;
+            // is there a better way?
+            boolean isStartEvent = exception.request().url().contains("event-triggers");
+
+            String msg = isStartEvent
+                ? "Invalid case ID: " + existingCaseId
+                : getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id);
+
             log.error(
-                "Invalid case ID: {} service: {} exception record id: {}",
-                existingCaseId, configItem.getService(), exceptionRecord.id, exception
+                "{}. Service: {}, exception record id: {}, response: {}",
+                msg, configItem.getService(), exceptionRecord.id, exception.contentUTF8(), exception
             );
+
             ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(singletonList(msg), emptyList());
-            return new ProcessResult(errorResponse.warnings, errorResponse.errors);
+
+            if (isStartEvent) {
+                return new ProcessResult(errorResponse.warnings, errorResponse.errors);
+            } else {
+                throw new CallbackException(msg, exception);
+            }
         } catch (FeignException exception) {
             debugCcdException(log, exception, "Failed to call 'updateCase'");
             log.error(
@@ -302,14 +313,6 @@ public class CcdCaseUpdater {
             );
         } catch (FeignException.Conflict | FeignException.UnprocessableEntity exception) {
             throw exception;
-        // translate any exception to generic to be handled above
-        } catch (FeignException exception) {
-            throw new FeignException.FeignServerException(
-                0,
-                exception.getMessage(),
-                exception.request(),
-                exception.responseBody().map(ByteBuffer::array).orElse(new byte[]{})
-            );
         }
     }
 

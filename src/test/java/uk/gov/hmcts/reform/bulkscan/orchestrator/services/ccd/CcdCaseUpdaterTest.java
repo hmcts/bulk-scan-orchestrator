@@ -260,9 +260,12 @@ class CcdCaseUpdaterTest {
         given(caseUpdateClient.updateCase(anyString(), any(CaseDetails.class), any(ExceptionRecord.class), anyString()))
             .willReturn(noWarningsUpdateResponse);
         initMockData();
+        var feignRequest = mock(Request.class);
         prepareMockForSubmissionEventForCaseWorker().willThrow(
-                new FeignException.BadRequest("Msg", mock(Request.class), "Body".getBytes())
+                new FeignException.BadRequest("Msg", feignRequest, "Body".getBytes())
         );
+        given(feignRequest.url())
+            .willReturn("/caseworkers/{uid}/jurisdictions/{jid}/case-types/{ctid}/cases/{cid}/events");
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -281,7 +284,7 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(callbackException.getMessage())
             .isEqualTo("Failed to update case for Service service with case Id existing_case_id "
-                + "based on exception record 1. Service response: Body");
+                + "based on exception record 1");
         assertThat(callbackException.getCause().getMessage()).isEqualTo("Msg");
     }
 
@@ -574,6 +577,7 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_handle_exception_when_start_event_returns_invalid_case_id_response() {
         // given
+        var feignRequest = mock(Request.class);
         given(coreCaseDataApi.startEventForCaseWorker(
             anyString(),
             anyString(),
@@ -583,7 +587,10 @@ class CcdCaseUpdaterTest {
             anyString(),
             anyString()
         ))
-            .willThrow(new FeignException.BadRequest("invalid", mock(Request.class),  "Body".getBytes()));
+            .willThrow(new FeignException.BadRequest("invalid", feignRequest,  "Body".getBytes()));
+        given(feignRequest.url()).willReturn(
+            "/caseworkers/{uid}/jurisdictions/{jid}/case-types/{ctid}/cases/{cid}/event-triggers/{etid}/token"
+        );
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
