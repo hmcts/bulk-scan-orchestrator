@@ -291,29 +291,26 @@ public class CcdCaseUpdater {
         CaseDetails existingCase = startEvent.getCaseDetails();
 
         final CaseDataContent caseDataContent = getCaseDataContent(exceptionRecord, caseUpdateDetails, startEvent);
-        try {
-            coreCaseDataApi.submitEventForCaseWorker(
-                idamToken,
-                s2sToken,
-                userId,
-                exceptionRecord.poBoxJurisdiction,
-                startEvent.getCaseDetails().getCaseTypeId(),
-                existingCaseId,
-                ignoreWarnings,
-                caseDataContent
-            );
 
-            log.info(
-                "Successfully updated case for service {} "
-                    + "with case Id {} "
-                    + "based on exception record ref {}",
-                service,
-                existingCase.getId(),
-                exceptionRecord.id
-            );
-        } catch (FeignException.Conflict | FeignException.UnprocessableEntity exception) {
-            throw exception;
-        }
+        coreCaseDataApi.submitEventForCaseWorker(
+            idamToken,
+            s2sToken,
+            userId,
+            exceptionRecord.poBoxJurisdiction,
+            startEvent.getCaseDetails().getCaseTypeId(),
+            existingCaseId,
+            ignoreWarnings,
+            caseDataContent
+        );
+
+        log.info(
+            "Successfully updated case for service {} "
+                + "with case Id {} "
+                + "based on exception record ref {}",
+            service,
+            existingCase.getId(),
+            exceptionRecord.id
+        );
     }
 
     private CaseDataContent getCaseDataContent(
