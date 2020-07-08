@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import javax.annotation.Nonnull;
 
 import static java.lang.String.format;
@@ -391,6 +392,44 @@ public class CcdApi {
             throw new CcdCallException(
                 String.format("Could not attach documents for case ref: %s Error: %s", caseRef, e.status()), e
             );
+        }
+    }
+
+    public long createNewCaseFromCallback(
+        String idamToken,
+        String s2sToken,
+        String userId,
+        String jurisdiction,
+        String caseTypeId,
+        String eventId,
+        Function<StartEventResponse, CaseDataContent> caseDataContentBuilder,
+        String logContext
+    ) {
+        try {
+            StartEventResponse eventResponse = feignCcdApi.startForCaseworker(
+                idamToken,
+                s2sToken,
+                userId,
+                jurisdiction,
+                caseTypeId,
+                eventId
+            );
+
+            log.info("Started event in CCD. Event: {}, case type: {}. {}", eventId, caseTypeId, logContext);
+
+            return feignCcdApi.submitForCaseworker(
+                idamToken,
+                s2sToken,
+                userId,
+                jurisdiction,
+                caseTypeId,
+                true,
+                caseDataContentBuilder.apply(eventResponse)
+            ).getId();
+        } catch (FeignException exception) {
+            debugCcdException(log, exception, "Failed to call 'createNewCaseFromCallback'");
+
+            throw exception;
         }
     }
 
