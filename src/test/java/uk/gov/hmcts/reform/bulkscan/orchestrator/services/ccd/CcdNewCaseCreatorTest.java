@@ -132,18 +132,6 @@ class CcdNewCaseCreatorTest {
         ServiceConfigItem configItem = getConfigItem();
         ExceptionRecord exceptionRecord = getExceptionRecord();
 
-        Map<String, Object> data = new HashMap<>();
-        // putting 6 via `ImmutableMap` is available from Java 9
-        data.put("poBox", "12345");
-        data.put("journeyClassification", EXCEPTION.name());
-        data.put("formType", "Form1");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
-        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
-
-        CaseDetails caseDetails = getCaseDetails(data);
-
         // when
         CreateCaseResult result = ccdNewCaseCreator.createNewCase(
             exceptionRecord,
@@ -186,15 +174,6 @@ class CcdNewCaseCreatorTest {
         data.put(ExceptionRecordFields.ENVELOPE_ID, "987");
         data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, "sample jurisdiction");
         return data;
-    }
-
-    private CaseDetails getCaseDetails(Map<String, Object> data) {
-        return TestCaseBuilder.createCaseWith(builder -> builder
-            .id(CASE_ID)
-            .caseTypeId(CASE_TYPE_ID)
-            .jurisdiction("some jurisdiction")
-            .data(data)
-        );
     }
 
     private ServiceConfigItem getConfigItem() {
