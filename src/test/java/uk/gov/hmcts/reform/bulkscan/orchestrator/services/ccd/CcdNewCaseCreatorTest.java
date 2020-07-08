@@ -95,9 +95,8 @@ class CcdNewCaseCreatorTest {
         given(coreCaseDataApi.startForCaseworker(any(), any(), any(), any(), any(), any()))
             .willReturn(startCcdEventResp);
 
-        Long newCaseId = 123L;
         CaseDetails newCaseDetails = mock(CaseDetails.class);
-        doReturn(newCaseId).when(newCaseDetails).getId();
+        doReturn(CASE_ID).when(newCaseDetails).getId();
 
         given(coreCaseDataApi.submitForCaseworker(any(), any(), any(), any(), any(), anyBoolean(), any()))
             .willReturn(newCaseDetails);
@@ -117,7 +116,7 @@ class CcdNewCaseCreatorTest {
                 );
 
         // then
-        assertThat(result.caseId).isEqualTo(newCaseId);
+        assertThat(result.caseId).isEqualTo(CASE_ID);
     }
 
     @Test
