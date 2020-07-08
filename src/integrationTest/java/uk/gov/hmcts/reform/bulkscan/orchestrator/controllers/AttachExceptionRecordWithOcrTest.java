@@ -64,6 +64,7 @@ class AttachExceptionRecordWithOcrTest {
     private static final String CASE_ID = "1539007368674134";
     private static final String SUPPLEMENTARY_EVIDENCE_WITH_OCR = "SUPPLEMENTARY_EVIDENCE_WITH_OCR";
     private static final String ATTACH_TO_CASE_REFERENCE_FIELD_NAME = "attachToCaseReference";
+    private static final String SEARCH_CASE_REFERENCE_FIELD_NAME = "searchCaseReference";
     private static final String JOURNEY_CLASSIFICATION = "journeyClassification";
 
     @LocalServerPort
@@ -235,7 +236,7 @@ class AttachExceptionRecordWithOcrTest {
         caseData.put("poBox", "PO 12345");
         caseData.put(JOURNEY_CLASSIFICATION, SUPPLEMENTARY_EVIDENCE_WITH_OCR);
         caseData.put("formType", "B123");
-        caseData.put(ATTACH_TO_CASE_REFERENCE_FIELD_NAME, CASE_ID);
+        caseData.put(SEARCH_CASE_REFERENCE_FIELD_NAME, CASE_ID);
         return caseData;
     }
 
@@ -348,13 +349,13 @@ class AttachExceptionRecordWithOcrTest {
         return getFileContents("/request/", filename);
     }
 
-    private byte[] getRequestBodyWithAttachToCaseRef(String filename, String attachToCaseReference) throws Exception {
+    private byte[] getRequestBodyWithAttachToCaseRef(String filename, String searchCaseReference) throws Exception {
         String fileContent = new String(getFileContents("/request/", filename));
         JSONObject json = new JSONObject(fileContent);
         JSONObject caseData = json
             .getJSONObject("case_details")
             .getJSONObject("case_data");
-        caseData.put("attachToCaseReference", attachToCaseReference);
+        caseData.put(SEARCH_CASE_REFERENCE_FIELD_NAME, searchCaseReference);
         return json.toString().getBytes();
     }
 
