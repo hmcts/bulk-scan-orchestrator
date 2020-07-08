@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.Optional;
 import javax.validation.ConstraintViolationException;
 
 import static java.lang.String.format;
@@ -138,7 +137,7 @@ public class CcdCaseUpdater {
             } else {
                 setExceptionRecordIdToScannedDocuments(exceptionRecord, updateResponse.caseDetails);
 
-                Optional<String> updateResult = updateCaseInCcd(
+                updateCaseInCcd(
                     configItem.getService(),
                     ignoreWarnings,
                     idamToken,
@@ -149,11 +148,6 @@ public class CcdCaseUpdater {
                     updateResponse.caseDetails,
                     startEvent
                 );
-
-                if (updateResult.isPresent()) {
-                    // error
-                    return new ProcessResult(singletonList(updateResult.get()), emptyList());
-                }
 
                 return new ProcessResult(
                     exceptionRecordFinalizer.finalizeExceptionRecord(
@@ -166,17 +160,30 @@ public class CcdCaseUpdater {
         } catch (UnprocessableEntity exception) {
             ClientServiceErrorResponse errorResponse = serviceResponseParser.parseResponseBody(exception);
             return new ProcessResult(errorResponse.warnings, errorResponse.errors);
+        } catch (FeignException.UnprocessableEntity exception) {
+            String msg = getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id)
+                + " - CCD could not process request";
+            // is there a better way?
+            boolean isStartEvent = exception.request().url().contains("event-triggers");
+
+            log.error(msg, exception);
+
+            if (!isStartEvent) {
+                return new ProcessResult(singletonList(msg), emptyList());
+            } else {
+                throw new CallbackException(msg, exception);
+            }
         } catch (FeignException.Conflict exception) {
             String msg = getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id)
                 + " because it has been updated in the meantime";
-            log.error(msg);
+            log.error(msg, exception);
             ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(singletonList(msg), emptyList());
             return new ProcessResult(errorResponse.warnings, errorResponse.errors);
         } catch (FeignException.NotFound exception) {
             String msg = "No case found for case ID: " + existingCaseId;
             log.error(
                 "No case found for case ID: {} service: {} exception record id: {}",
-                existingCaseId, configItem.getService(), exceptionRecord.id
+                existingCaseId, configItem.getService(), exceptionRecord.id, exception
             );
             ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(singletonList(msg), emptyList());
             return new ProcessResult(errorResponse.warnings, errorResponse.errors);
@@ -258,10 +265,8 @@ public class CcdCaseUpdater {
 
     /**
      * Submits event to update the case.
-     *
-     * @return either error message in case of error or empty if no error detected
      */
-    private Optional<String> updateCaseInCcd(
+    private void updateCaseInCcd(
         String service,
         boolean ignoreWarnings,
         String idamToken,
@@ -295,24 +300,7 @@ public class CcdCaseUpdater {
                 existingCase.getId(),
                 exceptionRecord.id
             );
-
-            return Optional.empty();
-        } catch (FeignException.UnprocessableEntity exception) {
-            String msg = format(
-                "CCD returned 422 Unprocessable Entity response "
-                    + "when trying to update case for %s jurisdiction "
-                    + "with case Id %s "
-                    + "based on exception record with Id %s. "
-                    + "CCD response: %s",
-                exceptionRecord.poBoxJurisdiction,
-                existingCase.getId(),
-                exceptionRecord.id,
-                exception.contentUTF8()
-            );
-            log.error(msg, exception);
-
-            return Optional.of(msg);
-        } catch (FeignException.Conflict exception) {
+        } catch (FeignException.Conflict | FeignException.UnprocessableEntity exception) {
             throw exception;
         // translate any exception to generic to be handled above
         } catch (FeignException exception) {

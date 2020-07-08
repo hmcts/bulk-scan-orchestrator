@@ -293,10 +293,13 @@ class CcdCaseUpdaterTest {
         given(caseUpdateClient.updateCase(anyString(), any(CaseDetails.class), any(ExceptionRecord.class), anyString()))
             .willReturn(noWarningsUpdateResponse);
         initMockData();
+        var feignRequest = mock(Request.class);
         prepareMockForSubmissionEventForCaseWorker()
             .willThrow(
-                    new FeignException.UnprocessableEntity("Msg", mock(Request.class),  "Body".getBytes())
+                    new FeignException.UnprocessableEntity("Msg", feignRequest,  "Body".getBytes())
             );
+        given(feignRequest.url())
+            .willReturn("/caseworkers/{uid}/jurisdictions/{jid}/case-types/{ctid}/cases/{cid}/events");
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
@@ -310,9 +313,10 @@ class CcdCaseUpdaterTest {
         );
 
         // then
-        assertThat(res.getWarnings()).containsExactlyInAnyOrder("CCD returned 422 Unprocessable Entity response "
-            + "when trying to update case for some jurisdiction jurisdiction with case Id 0 based on exception record "
-            + "with Id 1. CCD response: Body");
+        assertThat(res.getWarnings()).containsExactlyInAnyOrder(
+            "Failed to update case for Service service with case Id existing_case_id based on exception record 1"
+                + " - CCD could not process request"
+        );
         assertThat(res.getErrors()).isEmpty();
     }
 
