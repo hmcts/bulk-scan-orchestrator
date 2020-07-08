@@ -76,7 +76,7 @@ class CcdNewCaseCreatorTest {
     }
 
     @Test
-    void should_call_payments_handler_when_case_has_payments() throws Exception {
+    void should_return_new_case_id_when_successfully_executed_all_the_steps() throws Exception {
         // given
         given(transformationClient.transformExceptionRecord(any(), any(), any()))
             .willReturn(
