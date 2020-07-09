@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.HttpClientErrorException;
@@ -17,12 +18,12 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import static java.time.LocalDateTime.now;
 import static java.util.Collections.emptyList;
@@ -30,12 +31,12 @@ import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 
@@ -58,7 +59,7 @@ class CcdNewCaseCreatorTest {
     private AuthTokenGenerator s2sTokenGenerator;
 
     @Mock
-    private CoreCaseDataApi coreCaseDataApi;
+    private CcdApi ccdApi;
 
     private CcdNewCaseCreator ccdNewCaseCreator;
 
@@ -71,13 +72,15 @@ class CcdNewCaseCreatorTest {
             transformationClient,
             serviceResponseParser,
             s2sTokenGenerator,
-            coreCaseDataApi
+            ccdApi
         );
     }
 
+    @SuppressWarnings("unchecked")
     @Test
-    void should_call_payments_handler_when_case_has_payments() throws Exception {
+    void should_return_new_case_id_when_successfully_executed_all_the_steps() {
         // given
+        given(s2sTokenGenerator.generate()).willReturn(randomUUID().toString());
         given(transformationClient.transformExceptionRecord(any(), any(), any()))
             .willReturn(
                 new SuccessfulTransformationResponse(
@@ -92,82 +95,12 @@ class CcdNewCaseCreatorTest {
 
         StartEventResponse startCcdEventResp = mock(StartEventResponse.class);
 
-        given(coreCaseDataApi.startForCaseworker(any(), any(), any(), any(), any(), any()))
-            .willReturn(startCcdEventResp);
-
-        Long newCaseId = 123L;
-        CaseDetails newCaseDetails = mock(CaseDetails.class);
-        doReturn(newCaseId).when(newCaseDetails).getId();
-
-        given(coreCaseDataApi.submitForCaseworker(any(), any(), any(), any(), any(), anyBoolean(), any()))
-            .willReturn(newCaseDetails);
+        given(ccdApi.createNewCaseFromCallback(
+            anyString(), anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString()
+        )).willReturn(CASE_ID);
 
         ServiceConfigItem configItem = getConfigItem();
         ExceptionRecord exceptionRecord = getExceptionRecord();
-
-        CaseDetails caseDetails = getCaseDetails(basicCaseData());
-
-        // when
-        CreateCaseResult result =
-            ccdNewCaseCreator
-                .createNewCase(
-                    exceptionRecord,
-                    configItem,
-                    true,
-                    IDAM_TOKEN,
-                    USER_ID
-                );
-
-        assertThat(result.caseId).isEqualTo(newCaseId);
-    }
-
-    @Test
-    void should_call_payments_handler_when_case_has_no_payments() throws Exception {
-        // given
-        given(transformationClient.transformExceptionRecord(any(), any(), any()))
-            .willReturn(
-                new SuccessfulTransformationResponse(
-                    new CaseCreationDetails(
-                        "some_case_type",
-                        "some_event_id",
-                        basicCaseData()
-                    ),
-                    emptyList()
-                )
-            );
-
-        StartEventResponse startCcdEventResp = mock(StartEventResponse.class);
-
-        given(coreCaseDataApi.startForCaseworker(any(), any(), any(), any(), any(), any()))
-            .willReturn(startCcdEventResp);
-
-        Long newCaseId = 123L;
-        CaseDetails newCaseDetails = mock(CaseDetails.class);
-        doReturn(newCaseId).when(newCaseDetails).getId();
-
-        given(coreCaseDataApi.submitForCaseworker(any(), any(), any(), any(), any(), anyBoolean(), any()))
-            .willReturn(newCaseDetails);
-
-        ServiceConfigItem configItem = getConfigItem();
-        ExceptionRecord exceptionRecord = getExceptionRecord();
-
-        Map<String, Object> data = new HashMap<>();
-
-        String envelopeId = "987";
-        String jurisdiction = "sample jurisdiction";
-
-        data.put("poBox", "12345");
-        data.put("journeyClassification", EXCEPTION.name());
-        data.put("formType", "A1");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
-        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
-        data.put(ExceptionRecordFields.CONTAINS_PAYMENTS, YesNoFieldValues.NO); // no payments!
-        data.put(ExceptionRecordFields.ENVELOPE_ID, envelopeId);
-        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, jurisdiction);
-
-        CaseDetails caseDetails = getCaseDetails(data);
 
         // when
         CreateCaseResult result =
@@ -181,7 +114,22 @@ class CcdNewCaseCreatorTest {
                 );
 
         // then
-        assertThat(result.caseId).isEqualTo(newCaseId);
+        assertThat(result.caseId).isEqualTo(CASE_ID);
+
+        // and
+        var caseDetailsBuilderCaptor = ArgumentCaptor.forClass(Function.class);
+        verify(ccdApi).createNewCaseFromCallback(
+            eq(IDAM_TOKEN),
+            anyString(),
+            eq(USER_ID),
+            eq(exceptionRecord.poBoxJurisdiction),
+            anyString(),
+            anyString(),
+            caseDetailsBuilderCaptor.capture(),
+            anyString()
+        );
+        assertThat(caseDetailsBuilderCaptor.getValue().apply(startCcdEventResp))
+            .isInstanceOf(CaseDataContent.class);
     }
 
     @Test
@@ -196,18 +144,6 @@ class CcdNewCaseCreatorTest {
 
         ServiceConfigItem configItem = getConfigItem();
         ExceptionRecord exceptionRecord = getExceptionRecord();
-
-        Map<String, Object> data = new HashMap<>();
-        // putting 6 via `ImmutableMap` is available from Java 9
-        data.put("poBox", "12345");
-        data.put("journeyClassification", EXCEPTION.name());
-        data.put("formType", "Form1");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
-        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("some key", "some value"));
-
-        CaseDetails caseDetails = getCaseDetails(data);
 
         // when
         CreateCaseResult result = ccdNewCaseCreator.createNewCase(
@@ -251,15 +187,6 @@ class CcdNewCaseCreatorTest {
         data.put(ExceptionRecordFields.ENVELOPE_ID, "987");
         data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, "sample jurisdiction");
         return data;
-    }
-
-    private CaseDetails getCaseDetails(Map<String, Object> data) {
-        return TestCaseBuilder.createCaseWith(builder -> builder
-            .id(CASE_ID)
-            .caseTypeId(CASE_TYPE_ID)
-            .jurisdiction("some jurisdiction")
-            .data(data)
-        );
     }
 
     private ServiceConfigItem getConfigItem() {

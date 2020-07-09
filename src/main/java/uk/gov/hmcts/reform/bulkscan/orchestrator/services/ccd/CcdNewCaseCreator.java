@@ -17,10 +17,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.res
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseResult;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
-import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +26,6 @@ import javax.validation.ConstraintViolationException;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.logging.FeignExceptionLogger.debugCcdException;
 
 @Service
 public class CcdNewCaseCreator {
@@ -39,18 +36,18 @@ public class CcdNewCaseCreator {
     private final TransformationClient transformationClient;
     private final ServiceResponseParser serviceResponseParser;
     private final AuthTokenGenerator s2sTokenGenerator;
-    private final CoreCaseDataApi coreCaseDataApi;
+    private final CcdApi ccdApi;
 
     public CcdNewCaseCreator(
         TransformationClient transformationClient,
         ServiceResponseParser serviceResponseParser,
         AuthTokenGenerator s2sTokenGenerator,
-        CoreCaseDataApi coreCaseDataApi
+        CcdApi ccdApi
     ) {
         this.transformationClient = transformationClient;
         this.serviceResponseParser = serviceResponseParser;
         this.s2sTokenGenerator = s2sTokenGenerator;
-        this.coreCaseDataApi = coreCaseDataApi;
+        this.ccdApi = ccdApi;
     }
 
     @SuppressWarnings("squid:S2139") // squid for exception handle + logging
@@ -138,6 +135,17 @@ public class CcdNewCaseCreator {
             throw new CallbackException(message, exception);
         // rest of exceptions received from ccd and logged separately
         } catch (Exception exception) {
+            var baseMessage = String.format(
+                "Failed to create new case for %s jurisdiction from exception record %s",
+                exceptionRecord.poBoxJurisdiction,
+                exceptionRecord.id
+            );
+            var finalMessage = exception instanceof FeignException
+                ? baseMessage + ". Service response: " + ((FeignException) exception).contentUTF8()
+                : baseMessage;
+
+            log.error(finalMessage, exception);
+
             throw new CallbackException(
                 format(
                     "Failed to create new case for exception record with Id %s. Service: %s",
@@ -149,7 +157,6 @@ public class CcdNewCaseCreator {
         }
     }
 
-    @SuppressWarnings("squid:S2139") // exception handle + logging
     private long createNewCaseInCcd(
         String idamToken,
         String s2sToken,
@@ -157,77 +164,52 @@ public class CcdNewCaseCreator {
         ExceptionRecord exceptionRecord,
         CaseCreationDetails caseCreationDetails
     ) {
-        try {
-            StartEventResponse eventResponse = coreCaseDataApi.startForCaseworker(
-                idamToken,
-                s2sToken,
-                userId,
-                exceptionRecord.poBoxJurisdiction,
-                caseCreationDetails.caseTypeId,
-                // when onboarding remind services to not configure about to submit callback for this event
-                caseCreationDetails.eventId
-            );
+        var loggingContext = String.format(
+            "Exception ID: %s, jurisdiction: %s, form type: %s",
+            exceptionRecord.id,
+            exceptionRecord.poBoxJurisdiction,
+            exceptionRecord.formType
+        );
 
-            log.info(
-                "Started event for creating case from exception record. "
-                    + "Event ID: {}. Exception record ID: {}. Jurisdiction: {}. Case type: {}, "
-                    + "Start Event Id: {}",
-                caseCreationDetails.eventId,
+        return ccdApi.createNewCaseFromCallback(
+            idamToken,
+            s2sToken,
+            userId,
+            exceptionRecord.poBoxJurisdiction,
+            caseCreationDetails.caseTypeId,
+            // when onboarding remind services to not configure about to submit callback for this event
+            caseCreationDetails.eventId,
+            startEventResponse -> getCaseDataContent(
+                caseCreationDetails.caseData,
                 exceptionRecord.id,
-                exceptionRecord.poBoxJurisdiction,
-                caseCreationDetails.caseTypeId,
-                eventResponse.getEventId()
-            );
-
-            return coreCaseDataApi.submitForCaseworker(
-                idamToken,
-                s2sToken,
-                userId,
-                exceptionRecord.poBoxJurisdiction,
-                caseCreationDetails.caseTypeId,
-                true,
-                CaseDataContent
-                    .builder()
-                    .caseReference(exceptionRecord.id)
-                    .data(caseDataWithExceptionRecordId(
-                        caseCreationDetails.caseData, exceptionRecord.id
-                    )) // set bulk scan case reference
-                    .event(Event
-                        .builder()
-                        .id(eventResponse.getEventId())
-                        .summary("Case created")
-                        .description("Case created from exception record ref " + exceptionRecord.id)
-                        .build()
-                    )
-                    .eventToken(eventResponse.getToken())
-                    .build()
-            ).getId();
-        } catch (FeignException exception) {
-            debugCcdException(log, exception, "Failed to call 'createNewCaseInCcd'");
-            log.error(
-                "Failed to create new case for {} jurisdiction from exception record {}. Service response: {}",
-                exceptionRecord.poBoxJurisdiction,
-                exceptionRecord.id,
-                exception.contentUTF8(),
-                exception
-            );
-
-            throw exception;
-        } catch (Exception exception) {
-            log.error(
-                "Failed to create new case for {} jurisdiction from exception record {}",
-                exceptionRecord.poBoxJurisdiction,
-                exceptionRecord.id,
-                exception
-            );
-
-            throw exception;
-        }
+                startEventResponse.getEventId(),
+                startEventResponse.getToken()
+            ),
+            loggingContext
+        );
     }
 
-    private Map<String, Object> caseDataWithExceptionRecordId(Map<String, Object> caseData, String exceptionRecordId) {
+    private CaseDataContent getCaseDataContent(
+        Map<String, Object> caseData,
+        String exceptionRecordId,
+        String eventId,
+        String eventToken
+    ) {
         Map<String, Object> data = new HashMap<>(caseData);
         data.put(EXCEPTION_RECORD_REFERENCE, exceptionRecordId);
-        return data;
+
+        return CaseDataContent
+            .builder()
+            .caseReference(exceptionRecordId)
+            .data(data)
+            .event(Event
+                .builder()
+                .id(eventId)
+                .summary("Case created")
+                .description("Case created from exception record ref " + exceptionRecordId)
+                .build()
+            )
+            .eventToken(eventToken)
+            .build();
     }
 }
