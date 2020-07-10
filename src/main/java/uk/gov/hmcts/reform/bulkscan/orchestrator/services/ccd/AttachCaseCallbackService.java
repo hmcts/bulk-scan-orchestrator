@@ -259,7 +259,7 @@ public class AttachCaseCallbackService {
             log.error(
                 "Failed to send update to payment processor for {} exception record {}",
                 callBackEvent.exceptionRecordJurisdiction,
-                exceptionRecordDetails.getId(),
+                callBackEvent.exceptionRecordId,
                 exception
             );
             return Either.left(ErrorsAndWarnings.withErrors(singletonList(PAYMENT_ERROR_MSG)));
@@ -426,7 +426,7 @@ public class AttachCaseCallbackService {
 
             log.info(
                 "Attached Exception Record to a case in CCD. ER ID: {}. Case ID: {}",
-                exceptionRecordDetails.getId(),
+                callBackEvent.exceptionRecordId,
                 theCase.getId()
             );
         }
