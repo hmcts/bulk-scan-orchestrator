@@ -107,20 +107,17 @@ public class AttachCaseCallbackService {
         String eventId,
         Boolean ignoreWarnings
     ) {
-        Validation<String, Void> eventIdValidation = isAttachToCaseEvent(eventId);
+        Validation<String, Void> canAccess = exceptionRecordValidator.mandatoryPrerequisites(
+            () -> isAttachToCaseEvent(eventId),
+            () -> canBeAttachedToCase(exceptionRecordDetails),
+            () -> hasIdamToken(requesterIdamToken).map(item -> null),
+            () -> hasUserId(requesterUserId).map(item -> null)
+        );
 
-        if (eventIdValidation.isInvalid()) {
-            String eventIdValidationError = eventIdValidation.getError();
-            log.warn("Validation error {}", eventIdValidationError);
-            return Either.left(ErrorsAndWarnings.withErrors(singletonList(eventIdValidationError)));
-        }
+        if (canAccess.isInvalid()) {
+            log.warn("Validation error: {}", canAccess.getError());
 
-        Validation<String, Void> classificationValidation = canBeAttachedToCase(exceptionRecordDetails);
-
-        if (classificationValidation.isInvalid()) {
-            String eventIdClassificationValidationError = classificationValidation.getError();
-            log.warn("Validation error {}", eventIdClassificationValidationError);
-            return Either.left(ErrorsAndWarnings.withErrors(singletonList(eventIdClassificationValidationError)));
+            return Either.left(ErrorsAndWarnings.withErrors(singletonList(canAccess.getError())));
         }
 
         return getValidation(exceptionRecordDetails, requesterIdamToken, requesterUserId)
