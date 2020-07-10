@@ -444,7 +444,7 @@ public class AttachCaseCallbackService {
     ) {
         CaseDetails targetCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
 
-        ServiceConfigItem serviceConfigItem = getServiceConfig(exceptionRecordDetails);
+        ServiceConfigItem serviceConfigItem = getServiceConfig(callBackEvent.service);
         ProcessResult processResult = ccdCaseUpdater.updateCase(
             callBackEvent.exceptionRecord,
             serviceConfigItem,
@@ -552,13 +552,9 @@ public class AttachCaseCallbackService {
         return merged;
     }
 
-    private ServiceConfigItem getServiceConfig(CaseDetails caseDetails) {
-        return hasServiceNameInCaseTypeId(caseDetails).flatMap(service -> Try
-            .of(() -> serviceConfigProvider.getConfig(service))
-            .toValidation()
-            .mapError(Throwable::getMessage)
-        )
+    private ServiceConfigItem getServiceConfig(String service) {
+        return Try.of(() -> serviceConfigProvider.getConfig(service))
             .filter(item -> !Strings.isNullOrEmpty(item.getUpdateUrl()))
-            .getOrElseThrow(() -> new CallbackException("Update URL is not configured")).get();
+            .getOrElseThrow(() -> new CallbackException("Update URL is not configured"));
     }
 }
