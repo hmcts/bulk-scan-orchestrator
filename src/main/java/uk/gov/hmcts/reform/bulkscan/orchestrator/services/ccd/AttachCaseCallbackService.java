@@ -122,9 +122,8 @@ public class AttachCaseCallbackService {
             log.warn("Validation error {}", eventIdClassificationValidationError);
             return Either.left(ErrorsAndWarnings.withErrors(singletonList(eventIdClassificationValidationError)));
         }
-        boolean useSearchCaseReference = isSearchCaseReferenceTypePresent(exceptionRecordDetails);
 
-        return getValidation(exceptionRecordDetails, useSearchCaseReference, requesterIdamToken, requesterUserId)
+        return getValidation(exceptionRecordDetails, requesterIdamToken, requesterUserId)
             .map(callBackEvent -> tryAttachToCase(callBackEvent, exceptionRecordDetails, ignoreWarnings))
             .map(attachCaseResult ->
                 attachCaseResult.map(modifiedFields ->
@@ -135,10 +134,12 @@ public class AttachCaseCallbackService {
 
     private Validation<Seq<String>, AttachToCaseEventData> getValidation(
         CaseDetails exceptionRecord,
-        boolean useSearchCaseReference,
         String requesterIdamToken,
         String requesterUserId
     ) {
+        boolean useSearchCaseReference = exceptionRecord.getData() != null
+            && exceptionRecord.getData().get(SEARCH_CASE_REFERENCE_TYPE) != null;
+
         Validation<String, String> caseReferenceTypeValidation = useSearchCaseReference
             ? hasSearchCaseReferenceType(exceptionRecord)
             : valid(CCD_CASE_REFERENCE);
@@ -533,11 +534,6 @@ public class AttachCaseCallbackService {
             getDocumentNumbers(exceptionDocuments),
             theCase.getId()
         );
-    }
-
-    private boolean isSearchCaseReferenceTypePresent(CaseDetails exceptionRecord) {
-        return exceptionRecord.getData() != null
-            && exceptionRecord.getData().get(SEARCH_CASE_REFERENCE_TYPE) != null;
     }
 
     private Map<String, Object> mergeCaseFields(
