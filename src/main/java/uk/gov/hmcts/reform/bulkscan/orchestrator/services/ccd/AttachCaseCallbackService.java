@@ -288,12 +288,13 @@ public class AttachCaseCallbackService {
             Optional<ErrorsAndWarnings> attachResult = attachCaseByCcdId(
                 callBackEvent,
                 callBackEvent.targetCaseRef,
-                exceptionRecordDetails,
                 ignoreWarnings
             );
 
             if (attachResult.isPresent()) {
                 return Either.left(attachResult.get());
+            } else {
+                paymentsProcessor.updatePayments(exceptionRecordDetails, callBackEvent.targetCaseRef);
             }
 
             targetCaseCcdId = callBackEvent.targetCaseRef;
@@ -325,12 +326,13 @@ public class AttachCaseCallbackService {
                 callBackEvent.exceptionRecordId
             );
 
-            attachCaseByCcdId(
+            if (attachCaseByCcdId(
                 callBackEvent,
                 targetCaseCcdId,
-                exceptionRecordDetails,
                 ignoreWarnings
-            );
+            ).isEmpty()) {
+                paymentsProcessor.updatePayments(exceptionRecordDetails, targetCaseCcdId);
+            }
 
             return targetCaseCcdId;
         } else if (targetCaseCcdIds.isEmpty()) {
@@ -351,7 +353,6 @@ public class AttachCaseCallbackService {
     private Optional<ErrorsAndWarnings> attachCaseByCcdId(
         AttachToCaseEventData callBackEvent,
         String targetCaseCcdRef,
-        CaseDetails exceptionRecordDetails,
         boolean ignoreWarnings
     ) {
         log.info(
@@ -365,8 +366,7 @@ public class AttachCaseCallbackService {
             case SUPPLEMENTARY_EVIDENCE:
                 updateSupplementaryEvidence(
                     callBackEvent,
-                    targetCaseCcdRef,
-                    exceptionRecordDetails
+                    targetCaseCcdRef
                 );
                 return Optional.empty();
 
@@ -374,7 +374,6 @@ public class AttachCaseCallbackService {
                 return updateSupplementaryEvidenceWithOcr(
                     callBackEvent,
                     targetCaseCcdRef,
-                    exceptionRecordDetails,
                     ignoreWarnings
                 );
 
@@ -385,8 +384,7 @@ public class AttachCaseCallbackService {
 
     private void updateSupplementaryEvidence(
         AttachToCaseEventData callBackEvent,
-        String targetCaseCcdRef,
-        CaseDetails exceptionRecordDetails
+        String targetCaseCcdRef
     ) {
         CaseDetails theCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
         List<Map<String, Object>> targetCaseDocuments = getScannedDocuments(theCase);
@@ -430,14 +428,11 @@ public class AttachCaseCallbackService {
                 theCase.getId()
             );
         }
-
-        paymentsProcessor.updatePayments(exceptionRecordDetails, theCase.getId());
     }
 
     private Optional<ErrorsAndWarnings> updateSupplementaryEvidenceWithOcr(
         AttachToCaseEventData callBackEvent,
         String targetCaseCcdRef,
-        CaseDetails exceptionRecordDetails,
         boolean ignoreWarnings
     ) {
         CaseDetails targetCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
@@ -459,8 +454,6 @@ public class AttachCaseCallbackService {
                 processResult.getWarnings()
             ));
         } else {
-            paymentsProcessor.updatePayments(exceptionRecordDetails, Long.parseLong(targetCaseCcdRef));
-
             return Optional.empty();
         }
     }

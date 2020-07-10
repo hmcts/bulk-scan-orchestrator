@@ -28,6 +28,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -119,6 +120,7 @@ class AttachCaseCallbackServiceTest {
     @Test
     void process_should_process_supplementary_evidence_with_ocr() {
         // given
+        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
         given(ccdCaseUpdater.updateCase(
             exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE
         )).willReturn(new ProcessResult(emptyMap()));
@@ -136,12 +138,13 @@ class AttachCaseCallbackServiceTest {
         assertThat(res.isRight()).isTrue();
         verify(ccdCaseUpdater)
             .updateCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE);
-        verify(paymentsProcessor).updatePayments(CASE_DETAILS, Long.parseLong(EXISTING_CASE_ID));
+        verify(paymentsProcessor).updatePayments(CASE_DETAILS, EXISTING_CASE_ID);
     }
 
     @Test
     void process_should_not_update_case_if_error_occurs() {
         // given
+        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
         given(ccdCaseUpdater.updateCase(
             exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE
         )).willReturn(new ProcessResult(asList("warning1"), asList("error1")));
