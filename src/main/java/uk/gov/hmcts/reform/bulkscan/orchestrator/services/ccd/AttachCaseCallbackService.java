@@ -239,7 +239,11 @@ public class AttachCaseCallbackService {
                 callBackEvent.targetCaseRef
             );
 
-            return attachToCase(callBackEvent, exceptionRecordDetails, ignoreWarnings);
+            return attachToCase(callBackEvent, ignoreWarnings)
+                .peek(map -> paymentsProcessor.updatePayments(
+                    exceptionRecordDetails,
+                    (String) map.get(ATTACH_TO_CASE_REFERENCE)
+                ));
         } catch (AlreadyAttachedToCaseException
             | DuplicateDocsException
             | CaseNotFoundException
@@ -277,41 +281,32 @@ public class AttachCaseCallbackService {
 
     private Either<ErrorsAndWarnings, Map<String, Object>> attachToCase(
         AttachToCaseEventData callBackEvent,
-        CaseDetails exceptionRecordDetails,
         boolean ignoreWarnings
     ) {
-        String targetCaseCcdId;
+        Either<ErrorsAndWarnings, String> attachResult;
 
         if (EXTERNAL_CASE_REFERENCE.equals(callBackEvent.targetCaseRefType)) {
-            targetCaseCcdId = attachCaseByLegacyId(callBackEvent, exceptionRecordDetails, ignoreWarnings);
+            attachResult = attachCaseByLegacyId(callBackEvent, ignoreWarnings);
         } else {
-            Optional<ErrorsAndWarnings> attachResult = attachCaseByCcdId(
+            attachResult = attachCaseByCcdId(
                 callBackEvent,
                 callBackEvent.targetCaseRef,
                 ignoreWarnings
-            );
-
-            if (attachResult.isPresent()) {
-                return Either.left(attachResult.get());
-            } else {
-                paymentsProcessor.updatePayments(exceptionRecordDetails, callBackEvent.targetCaseRef);
-            }
-
-            targetCaseCcdId = callBackEvent.targetCaseRef;
+            ).map(Either::<ErrorsAndWarnings, String>left).orElse(Either.right(callBackEvent.targetCaseRef));
         }
 
-        log.info(
-            "Completed the process of attaching exception record to a case. ER ID: {}. Case ID: {}",
-            callBackEvent.exceptionRecordId,
-            callBackEvent.targetCaseRef
-        );
-
-        return Either.right(ImmutableMap.of(ATTACH_TO_CASE_REFERENCE, targetCaseCcdId));
+        return attachResult
+            .peek(targetCaseRef -> log.info(
+                "Completed the process of attaching exception record to a case. ER ID: {}. Case ID: {}",
+                callBackEvent.exceptionRecordId,
+                targetCaseRef
+            ))
+            .map(targetCaseRef -> ImmutableMap.of(ATTACH_TO_CASE_REFERENCE, targetCaseRef));
     }
 
-    private String attachCaseByLegacyId(
+    // target case ref on the right
+    private Either<ErrorsAndWarnings, String> attachCaseByLegacyId(
         AttachToCaseEventData callBackEvent,
-        CaseDetails exceptionRecordDetails,
         boolean ignoreWarnings
     ) {
         List<Long> targetCaseCcdIds = ccdApi.getCaseRefsByLegacyId(callBackEvent.targetCaseRef, callBackEvent.service);
@@ -326,15 +321,11 @@ public class AttachCaseCallbackService {
                 callBackEvent.exceptionRecordId
             );
 
-            if (attachCaseByCcdId(
+            return attachCaseByCcdId(
                 callBackEvent,
                 targetCaseCcdId,
                 ignoreWarnings
-            ).isEmpty()) {
-                paymentsProcessor.updatePayments(exceptionRecordDetails, targetCaseCcdId);
-            }
-
-            return targetCaseCcdId;
+            ).map(Either::<ErrorsAndWarnings, String>left).orElse(Either.right(targetCaseCcdId));
         } else if (targetCaseCcdIds.isEmpty()) {
             throw new CaseNotFoundException(
                 String.format("No case found for legacy case reference %s", callBackEvent.targetCaseRef)
