@@ -240,10 +240,11 @@ public class AttachCaseCallbackService {
             );
 
             return attachToCase(callBackEvent, ignoreWarnings)
-                .peek(map -> paymentsProcessor.updatePayments(
+                .peek(attachToCaseRef -> paymentsProcessor.updatePayments(
                     exceptionRecordDetails,
-                    (String) map.get(ATTACH_TO_CASE_REFERENCE)
-                ));
+                    attachToCaseRef
+                ))
+                .map(attachToCaseRef -> ImmutableMap.of(ATTACH_TO_CASE_REFERENCE, attachToCaseRef));
         } catch (AlreadyAttachedToCaseException
             | DuplicateDocsException
             | CaseNotFoundException
@@ -279,7 +280,8 @@ public class AttachCaseCallbackService {
         }
     }
 
-    private Either<ErrorsAndWarnings, Map<String, Object>> attachToCase(
+    // target case ref on the right
+    private Either<ErrorsAndWarnings, String> attachToCase(
         AttachToCaseEventData callBackEvent,
         boolean ignoreWarnings
     ) {
@@ -300,8 +302,7 @@ public class AttachCaseCallbackService {
                 "Completed the process of attaching exception record to a case. ER ID: {}. Case ID: {}",
                 callBackEvent.exceptionRecordId,
                 targetCaseRef
-            ))
-            .map(targetCaseRef -> ImmutableMap.of(ATTACH_TO_CASE_REFERENCE, targetCaseRef));
+            ));
     }
 
     // target case ref on the right
