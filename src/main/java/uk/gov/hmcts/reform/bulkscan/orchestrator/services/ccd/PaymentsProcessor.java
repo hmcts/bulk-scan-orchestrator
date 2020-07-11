@@ -3,16 +3,12 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.UpdatePaymentsData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.IPaymentsPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.CreatePaymentsCommand;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.UpdatePaymentsCommand;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-
-import java.util.Objects;
 
 import static java.util.stream.Collectors.toList;
 
@@ -52,34 +48,30 @@ public class PaymentsProcessor {
         }
     }
 
-    public void updatePayments(CaseDetails exceptionRecord, String newCaseId) {
-        boolean containsPayments =
-            Objects.equals(
-                exceptionRecord.getData().get(ExceptionRecordFields.CONTAINS_PAYMENTS),
-                YesNoFieldValues.YES
-            );
+    public void updatePayments(
+        UpdatePaymentsData updatePaymentsData,
+        String exceptionRecordId,
+        String jurisdiction,
+        String newCaseId
+    ) {
+        if (updatePaymentsData.containsPayments) {
 
-        if (containsPayments) {
-
-            log.info("Contains Payments, sending payment update message. ER id: {}", exceptionRecord.getId());
-
-            String envelopeId = exceptionRecord.getData().get(ExceptionRecordFields.ENVELOPE_ID).toString();
-            String jurisdiction = exceptionRecord.getData().get(ExceptionRecordFields.PO_BOX_JURISDICTION).toString();
+            log.info("Contains Payments, sending payment update message. ER id: {}", exceptionRecordId);
 
             paymentsPublisher.send(
                 new UpdatePaymentsCommand(
-                    Long.toString(exceptionRecord.getId()),
+                    exceptionRecordId,
                     newCaseId,
-                    envelopeId,
+                    updatePaymentsData.envelopeId,
                     jurisdiction
                 )
             );
-            log.info("Finished sending payment update message. ER id: {}", exceptionRecord.getId());
+            log.info("Finished sending payment update message. ER id: {}", exceptionRecordId);
 
         } else {
             log.info(
                 "Exception record has no payments, not sending update command. ER id: {}",
-                exceptionRecord.getId()
+                exceptionRecordId
             );
         }
     }

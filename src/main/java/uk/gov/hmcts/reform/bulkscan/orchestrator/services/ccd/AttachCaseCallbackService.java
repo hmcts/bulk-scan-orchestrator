@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackE
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.DuplicateDocsException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ExceptionRecordValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.UpdatePaymentsData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
@@ -241,7 +242,9 @@ public class AttachCaseCallbackService {
 
             return attachToCase(callBackEvent, ignoreWarnings)
                 .peek(map -> paymentsProcessor.updatePayments(
-                    exceptionRecordDetails,
+                    UpdatePaymentsData.create(exceptionRecordDetails),
+                    Long.toString(callBackEvent.exceptionRecordId),
+                    callBackEvent.exceptionRecordJurisdiction,
                     (String) map.get(ATTACH_TO_CASE_REFERENCE)
                 ));
         } catch (AlreadyAttachedToCaseException
