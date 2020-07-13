@@ -286,7 +286,11 @@ public class AttachCaseCallbackService {
         boolean ignoreWarnings
     ) {
         String targetCaseRef = EXTERNAL_CASE_REFERENCE.equals(callBackEvent.targetCaseRefType)
-            ? getTargetCaseRefFromLegacyId(callBackEvent)
+            ? getTargetCaseRefFromLegacyId(
+                callBackEvent.targetCaseRef,
+                callBackEvent.service,
+                callBackEvent.exceptionRecordId
+            )
             : callBackEvent.targetCaseRef;
 
         return attachCaseByCcdId(callBackEvent, targetCaseRef, ignoreWarnings)
@@ -302,15 +306,15 @@ public class AttachCaseCallbackService {
             });
     }
 
-    private String getTargetCaseRefFromLegacyId(AttachToCaseEventData callBackEvent) {
-        List<Long> targetCaseCcdIds = ccdApi.getCaseRefsByLegacyId(callBackEvent.targetCaseRef, callBackEvent.service);
+    private String getTargetCaseRefFromLegacyId(String targetCaseRef, String service, long exceptionRecordId) {
+        List<Long> targetCaseCcdIds = ccdApi.getCaseRefsByLegacyId(targetCaseRef, service);
 
         if (targetCaseCcdIds.size() > 1) {
             throw new MultipleCasesFoundException(
                 String.format(
                     "Multiple cases (%s) found for the given legacy case reference: %s",
                     targetCaseCcdIds.stream().map(String::valueOf).collect(joining(", ")),
-                    callBackEvent.targetCaseRef
+                    targetCaseRef
                 )
             );
         } else {
@@ -322,15 +326,15 @@ public class AttachCaseCallbackService {
                         log.info(
                             "Found case with CCD ID '{}' for legacy ID '{}' (attaching exception record '{}')",
                             targetCaseCcdId,
-                            callBackEvent.targetCaseRef,
-                            callBackEvent.exceptionRecordId
+                            targetCaseRef,
+                            exceptionRecordId
                         );
 
                         return Long.toString(targetCaseCcdId);
                     }
                 )
                 .orElseThrow(() -> new CaseNotFoundException(
-                    String.format("No case found for legacy case reference %s", callBackEvent.targetCaseRef)
+                    String.format("No case found for legacy case reference %s", targetCaseRef)
                 ));
         }
     }
