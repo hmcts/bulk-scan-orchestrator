@@ -4,10 +4,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.Excepti
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.Objects;
-import java.util.Optional;
 
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.CONTAINS_PAYMENTS;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues.NO;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues.YES;
 
 public final class UpdatePaymentsData {
@@ -22,7 +20,7 @@ public final class UpdatePaymentsData {
 
     public static UpdatePaymentsData create(CaseDetails caseDetails) {
         var containsPayments = Objects.equals(
-            Optional.ofNullable(caseDetails.getData().get(CONTAINS_PAYMENTS)).orElse(NO),
+            caseDetails.getData().get(CONTAINS_PAYMENTS),
             YES
         );
 
