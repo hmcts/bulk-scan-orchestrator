@@ -286,7 +286,7 @@ public class AttachCaseCallbackService {
         boolean ignoreWarnings
     ) {
         String targetCaseRef = EXTERNAL_CASE_REFERENCE.equals(callBackEvent.targetCaseRefType)
-            ? attachCaseByLegacyId(callBackEvent, ignoreWarnings)
+            ? getTargetCaseRefFromLegacyId(callBackEvent, ignoreWarnings)
             : callBackEvent.targetCaseRef;
 
         return attachCaseByCcdId(callBackEvent, targetCaseRef, ignoreWarnings)
@@ -302,7 +302,7 @@ public class AttachCaseCallbackService {
             });
     }
 
-    private String attachCaseByLegacyId(
+    private String getTargetCaseRefFromLegacyId(
         AttachToCaseEventData callBackEvent,
         boolean ignoreWarnings
     ) {
