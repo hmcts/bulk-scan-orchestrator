@@ -380,6 +380,78 @@ public class CcdApi {
 
     }
 
+    public CaseDetails submitEventForAttachScannedDocs(
+        CcdAuthenticator authenticator,
+        String jurisdiction,
+        String caseTypeId,
+        String caseRef,
+        CaseDataContent caseDataContent
+    ) {
+        try {
+            return feignCcdApi.submitEventForCaseWorker(
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                authenticator.getUserDetails().getId(),
+                jurisdiction,
+                caseTypeId,
+                caseRef,
+                true,
+                caseDataContent
+            );
+        } catch (FeignException.NotFound e) {
+            throw new UnableToAttachDocumentsException(
+                String.format(
+                    "Attach documents submit failed for case type: %s and case ref: %s", caseTypeId, caseRef
+                ),
+                e
+            );
+        } catch (FeignException e) {
+            debugCcdException(log, e, "Failed to call 'submitEventForCaseWorker'");
+            removeFromIdamCacheIfAuthProblem(e.status(), jurisdiction);
+            throw new CcdCallException(
+                String.format("Could not attach documents for case ref: %s Error: %s", caseRef, e.status()), e
+            );
+        }
+    }
+
+    public long createNewCaseFromCallback(
+        String idamToken,
+        String s2sToken,
+        String userId,
+        String jurisdiction,
+        String caseTypeId,
+        String eventId,
+        Function<StartEventResponse, CaseDataContent> caseDataContentBuilder,
+        String logContext
+    ) {
+        try {
+            StartEventResponse eventResponse = feignCcdApi.startForCaseworker(
+                idamToken,
+                s2sToken,
+                userId,
+                jurisdiction,
+                caseTypeId,
+                eventId
+            );
+
+            log.info("Started event in CCD. Event: {}, case type: {}. {}", eventId, caseTypeId, logContext);
+
+            return feignCcdApi.submitForCaseworker(
+                idamToken,
+                s2sToken,
+                userId,
+                jurisdiction,
+                caseTypeId,
+                true,
+                caseDataContentBuilder.apply(eventResponse)
+            ).getId();
+        } catch (FeignException exception) {
+            debugCcdException(log, exception, "Failed to call 'createNewCaseFromCallback'");
+
+            throw exception;
+        }
+    }
+
     private void removeFromIdamCacheIfAuthProblem(int status, String jurisdiction) {
         if (status == 403 || status == 401) {
             authenticatorFactory.removeFromCache(jurisdiction);
