@@ -229,6 +229,11 @@ public class AttachCaseCallbackService {
         boolean ignoreWarnings
     ) {
         try {
+            verifyExceptionRecordIsNotAttachedToCase(
+                callBackEvent.exceptionRecordJurisdiction,
+                callBackEvent.exceptionRecordId
+            );
+
             log.info(
                 "Attaching exception record '{}' to a case by reference type '{}' and reference '{}'",
                 callBackEvent.exceptionRecordId,
@@ -385,11 +390,6 @@ public class AttachCaseCallbackService {
         String targetCaseCcdRef,
         CaseDetails exceptionRecordDetails
     ) {
-        verifyExceptionRecordIsNotAttachedToCase(
-            callBackEvent.exceptionRecordJurisdiction,
-            callBackEvent.exceptionRecordId
-        );
-
         CaseDetails theCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
         List<Map<String, Object>> targetCaseDocuments = getScannedDocuments(theCase);
 
@@ -442,12 +442,6 @@ public class AttachCaseCallbackService {
         CaseDetails exceptionRecordDetails,
         boolean ignoreWarnings
     ) {
-
-        verifyExceptionRecordIsNotAttachedToCase(
-            callBackEvent.exceptionRecordJurisdiction,
-            callBackEvent.exceptionRecordId
-        );
-
         CaseDetails targetCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
 
         ServiceConfigItem serviceConfigItem = getServiceConfig(exceptionRecordDetails);
