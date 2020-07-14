@@ -20,12 +20,12 @@ public class ExceptionRecordFinalizer {
 
     public Map<String, Object> finalizeExceptionRecord(
         Map<String, Object> originalFields,
-        Long caseReference,
+        String caseReference,
         CcdCallbackType callbackType
     ) {
         Map<String, Object> fieldsToUpdate =
             ImmutableMap.<String, Object>builder()
-                .put(getCaseReferenceFieldName(callbackType), Long.toString(caseReference))
+                .put(getCaseReferenceFieldName(callbackType), caseReference)
                 .put(DISPLAY_WARNINGS, YesNoFieldValues.NO)
                 .put(OCR_DATA_VALIDATION_WARNINGS, emptyList())
                 .build();

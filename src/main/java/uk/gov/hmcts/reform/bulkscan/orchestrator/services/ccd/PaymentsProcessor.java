@@ -52,7 +52,7 @@ public class PaymentsProcessor {
         }
     }
 
-    public void updatePayments(CaseDetails exceptionRecord, long newCaseId) {
+    public void updatePayments(CaseDetails exceptionRecord, String newCaseId) {
         boolean containsPayments =
             Objects.equals(
                 exceptionRecord.getData().get(ExceptionRecordFields.CONTAINS_PAYMENTS),
@@ -69,7 +69,7 @@ public class PaymentsProcessor {
             paymentsPublisher.send(
                 new UpdatePaymentsCommand(
                     Long.toString(exceptionRecord.getId()),
-                    Long.toString(newCaseId),
+                    newCaseId,
                     envelopeId,
                     jurisdiction
                 )

@@ -43,7 +43,6 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -125,7 +124,8 @@ class CcdCaseUpdaterTest {
         initResponseMockData();
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
-        given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong(), any())).willReturn(originalFields);
+        given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyString(), any()))
+            .willReturn(originalFields);
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
@@ -153,7 +153,8 @@ class CcdCaseUpdaterTest {
         initResponseMockData();
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
-        given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong(), any())).willReturn(originalFields);
+        given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyString(), any()))
+            .willReturn(originalFields);
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
@@ -206,7 +207,8 @@ class CcdCaseUpdaterTest {
         initResponseMockData();
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
-        given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong(), any())).willReturn(originalFields);
+        given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyString(), any()))
+            .willReturn(originalFields);
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
