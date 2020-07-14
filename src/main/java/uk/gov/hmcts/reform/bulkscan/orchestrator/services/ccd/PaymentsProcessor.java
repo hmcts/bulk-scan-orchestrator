@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.UpdatePaymentsData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.IPaymentsPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.CreatePaymentsCommand;
@@ -49,12 +49,12 @@ public class PaymentsProcessor {
     }
 
     public void updatePayments(
-        UpdatePaymentsData updatePaymentsData,
+        PaymentsHelper paymentsHelper,
         String exceptionRecordId,
         String jurisdiction,
         String newCaseId
     ) {
-        if (updatePaymentsData.containsPayments) {
+        if (paymentsHelper.containsPayments) {
 
             log.info("Contains Payments, sending payment update message. ER id: {}", exceptionRecordId);
 
@@ -62,7 +62,7 @@ public class PaymentsProcessor {
                 new UpdatePaymentsCommand(
                     exceptionRecordId,
                     newCaseId,
-                    updatePaymentsData.envelopeId,
+                    paymentsHelper.envelopeId,
                     jurisdiction
                 )
             );

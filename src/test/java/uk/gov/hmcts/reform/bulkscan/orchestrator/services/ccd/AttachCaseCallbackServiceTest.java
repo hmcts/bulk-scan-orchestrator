@@ -17,8 +17,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDoc
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.AttachScannedDocumentsValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ExceptionRecordValidator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.UpdatePaymentsData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -149,7 +149,7 @@ class AttachCaseCallbackServiceTest {
             .updateCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE);
 
         // and
-        var paymentsDataCaptor = ArgumentCaptor.forClass(UpdatePaymentsData.class);
+        var paymentsDataCaptor = ArgumentCaptor.forClass(PaymentsHelper.class);
         verify(paymentsProcessor)
             .updatePayments(paymentsDataCaptor.capture(), eq(CASE_REF), eq(JURISDICTION), eq(EXISTING_CASE_ID));
         assertThat(paymentsDataCaptor.getValue()).satisfies(data -> {

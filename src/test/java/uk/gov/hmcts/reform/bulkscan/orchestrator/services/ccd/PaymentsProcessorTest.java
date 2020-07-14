@@ -7,7 +7,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.UpdatePaymentsData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
@@ -126,7 +126,7 @@ class PaymentsProcessorTest {
                 );
 
         // when
-        paymentsProcessor.updatePayments(UpdatePaymentsData.create(caseDetails), CASE_ID, jurisdiction, NEW_CASE_ID);
+        paymentsProcessor.updatePayments(PaymentsHelper.create(caseDetails), CASE_ID, jurisdiction, NEW_CASE_ID);
 
         // then
         ArgumentCaptor<UpdatePaymentsCommand> cmd = ArgumentCaptor.forClass(UpdatePaymentsCommand.class);
@@ -159,7 +159,7 @@ class PaymentsProcessorTest {
 
 
         // when
-        paymentsProcessor.updatePayments(UpdatePaymentsData.create(caseDetails), CASE_ID, jurisdiction, NEW_CASE_ID);
+        paymentsProcessor.updatePayments(PaymentsHelper.create(caseDetails), CASE_ID, jurisdiction, NEW_CASE_ID);
 
         // then
         verify(paymentsPublisher, never()).send(any());
