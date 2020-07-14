@@ -123,7 +123,7 @@ public class CleanupEnvelopesDlqTask {
                 "Checking if DLQ message can be completed. "
                     + "MessageId: {}, dead lettered time: {}, ttl: {}, current time: {}",
                 message.getMessageId(),
-                deadLetteredAt.toString(),
+                deadLetteredAt,
                 this.ttl,
                 Instant.now()
             );
