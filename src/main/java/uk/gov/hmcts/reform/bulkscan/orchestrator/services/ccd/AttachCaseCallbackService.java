@@ -309,7 +309,20 @@ public class AttachCaseCallbackService {
     private String getTargetCaseRefFromLegacyId(String targetCaseRef, String service, long exceptionRecordId) {
         List<Long> targetCaseCcdIds = ccdApi.getCaseRefsByLegacyId(targetCaseRef, service);
 
-        if (targetCaseCcdIds.size() > 1) {
+        if (targetCaseCcdIds.size() == 1) {
+            log.info(
+                "Found case with CCD ID '{}' for legacy ID '{}' (attaching exception record '{}')",
+                targetCaseCcdIds.get(0),
+                targetCaseRef,
+                exceptionRecordId
+            );
+
+            return Long.toString(targetCaseCcdIds.get(0));
+        } else if (targetCaseCcdIds.isEmpty()) {
+            throw new CaseNotFoundException(
+                String.format("No case found for legacy case reference %s", targetCaseRef)
+            );
+        } else {
             throw new MultipleCasesFoundException(
                 String.format(
                     "Multiple cases (%s) found for the given legacy case reference: %s",
@@ -317,25 +330,6 @@ public class AttachCaseCallbackService {
                     targetCaseRef
                 )
             );
-        } else {
-            return targetCaseCcdIds
-                .stream()
-                .findFirst()
-                .map(
-                    targetCaseCcdId -> {
-                        log.info(
-                            "Found case with CCD ID '{}' for legacy ID '{}' (attaching exception record '{}')",
-                            targetCaseCcdId,
-                            targetCaseRef,
-                            exceptionRecordId
-                        );
-
-                        return Long.toString(targetCaseCcdId);
-                    }
-                )
-                .orElseThrow(() -> new CaseNotFoundException(
-                    String.format("No case found for legacy case reference %s", targetCaseRef)
-                ));
         }
     }
 
