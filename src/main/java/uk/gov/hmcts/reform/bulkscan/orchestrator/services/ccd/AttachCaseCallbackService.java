@@ -351,19 +351,26 @@ public class AttachCaseCallbackService {
             callBackEvent.exceptionRecordId,
             targetCaseCcdRef
         );
+        CaseDetails targetCase;
 
         switch (callBackEvent.classification) {
             case EXCEPTION:
             case SUPPLEMENTARY_EVIDENCE:
+                targetCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
+
                 updateSupplementaryEvidence(
                     callBackEvent,
+                    targetCase,
                     targetCaseCcdRef
                 );
                 return Optional.empty();
 
             case SUPPLEMENTARY_EVIDENCE_WITH_OCR:
+                targetCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
+
                 return updateSupplementaryEvidenceWithOcr(
                     callBackEvent,
+                    targetCase,
                     targetCaseCcdRef,
                     ignoreWarnings
                 );
@@ -375,10 +382,10 @@ public class AttachCaseCallbackService {
 
     private void updateSupplementaryEvidence(
         AttachToCaseEventData callBackEvent,
+        CaseDetails targetCase,
         String targetCaseCcdRef
     ) {
-        CaseDetails theCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
-        List<Map<String, Object>> targetCaseDocuments = getScannedDocuments(theCase);
+        List<Map<String, Object>> targetCaseDocuments = getScannedDocuments(targetCase);
 
         scannedDocumentsValidator.verifyExceptionRecordAddsNoDuplicates(
             targetCaseDocuments,
@@ -400,34 +407,33 @@ public class AttachCaseCallbackService {
             );
 
             StartEventResponse ccdStartEvent =
-                ccdApi.startAttachScannedDocs(theCase, callBackEvent.idamToken, callBackEvent.userId);
+                ccdApi.startAttachScannedDocs(targetCase, callBackEvent.idamToken, callBackEvent.userId);
 
             Map<String, Object> newCaseData = buildCaseData(newCaseDocuments, targetCaseDocuments);
 
             ccdApi.attachExceptionRecord(
-                theCase,
+                targetCase,
                 callBackEvent.idamToken,
                 callBackEvent.userId,
                 newCaseData,
-                createEventSummary(theCase, callBackEvent.exceptionRecordId, newCaseDocuments),
+                createEventSummary(targetCase, callBackEvent.exceptionRecordId, newCaseDocuments),
                 ccdStartEvent
             );
 
             log.info(
                 "Attached Exception Record to a case in CCD. ER ID: {}. Case ID: {}",
                 callBackEvent.exceptionRecordId,
-                theCase.getId()
+                targetCase.getId()
             );
         }
     }
 
     private Optional<ErrorsAndWarnings> updateSupplementaryEvidenceWithOcr(
         AttachToCaseEventData callBackEvent,
+        CaseDetails targetCase,
         String targetCaseCcdRef,
         boolean ignoreWarnings
     ) {
-        CaseDetails targetCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
-
         ServiceConfigItem serviceConfigItem = getServiceConfig(callBackEvent.service);
         ProcessResult processResult = ccdCaseUpdater.updateCase(
             callBackEvent.exceptionRecord,
