@@ -31,8 +31,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 class PaymentsProcessorTest {
     private static final long CCD_REFERENCE = 20L;
     private static final String SERVICE = "service";
-    private static final long CASE_ID = 123;
-    private static final long NEW_CASE_ID = 1L;
+    private static final String CASE_ID = "123";
+    private static final String NEW_CASE_ID = "1";
     private static final String CASE_TYPE_ID = SERVICE + "_ExceptionRecord";
 
     @Mock
@@ -127,7 +127,7 @@ class PaymentsProcessorTest {
         CaseDetails caseDetails =
             TestCaseBuilder
                 .createCaseWith(builder -> builder
-                    .id(CASE_ID)
+                    .id(Long.valueOf(CASE_ID))
                     .caseTypeId(CASE_TYPE_ID)
                     .jurisdiction("some jurisdiction")
                     .data(data)
@@ -139,8 +139,8 @@ class PaymentsProcessorTest {
         // then
         ArgumentCaptor<UpdatePaymentsCommand> cmd = ArgumentCaptor.forClass(UpdatePaymentsCommand.class);
         verify(paymentsPublisher).send(cmd.capture());
-        assertThat(cmd.getValue().exceptionRecordRef).isEqualTo(Long.toString(CASE_ID));
-        assertThat(cmd.getValue().newCaseRef).isEqualTo(Long.toString(NEW_CASE_ID));
+        assertThat(cmd.getValue().exceptionRecordRef).isEqualTo(CASE_ID);
+        assertThat(cmd.getValue().newCaseRef).isEqualTo(NEW_CASE_ID);
         assertThat(cmd.getValue().envelopeId).isEqualTo(envelopeId);
         assertThat(cmd.getValue().jurisdiction).isEqualTo(jurisdiction);
     }
@@ -167,7 +167,7 @@ class PaymentsProcessorTest {
         CaseDetails caseDetails =
             TestCaseBuilder
                 .createCaseWith(builder -> builder
-                    .id(CASE_ID)
+                    .id(Long.valueOf(CASE_ID))
                     .caseTypeId(CASE_TYPE_ID)
                     .jurisdiction("some jurisdiction")
                     .data(data)
@@ -175,7 +175,7 @@ class PaymentsProcessorTest {
 
 
         // when
-        paymentsProcessor.updatePayments(caseDetails, 1L);
+        paymentsProcessor.updatePayments(caseDetails, NEW_CASE_ID);
 
         // then
         verify(paymentsPublisher, never()).send(any());

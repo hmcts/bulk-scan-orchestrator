@@ -107,24 +107,20 @@ public class AttachCaseCallbackService {
         String eventId,
         Boolean ignoreWarnings
     ) {
-        Validation<String, Void> eventIdValidation = isAttachToCaseEvent(eventId);
+        Validation<String, Void> canAccess = exceptionRecordValidator.mandatoryPrerequisites(
+            () -> isAttachToCaseEvent(eventId),
+            () -> canBeAttachedToCase(exceptionRecordDetails),
+            () -> hasIdamToken(requesterIdamToken).map(item -> null),
+            () -> hasUserId(requesterUserId).map(item -> null)
+        );
 
-        if (eventIdValidation.isInvalid()) {
-            String eventIdValidationError = eventIdValidation.getError();
-            log.warn("Validation error {}", eventIdValidationError);
-            return Either.left(ErrorsAndWarnings.withErrors(singletonList(eventIdValidationError)));
+        if (canAccess.isInvalid()) {
+            log.warn("Validation error: {}", canAccess.getError());
+
+            return Either.left(ErrorsAndWarnings.withErrors(singletonList(canAccess.getError())));
         }
 
-        Validation<String, Void> classificationValidation = canBeAttachedToCase(exceptionRecordDetails);
-
-        if (classificationValidation.isInvalid()) {
-            String eventIdClassificationValidationError = classificationValidation.getError();
-            log.warn("Validation error {}", eventIdClassificationValidationError);
-            return Either.left(ErrorsAndWarnings.withErrors(singletonList(eventIdClassificationValidationError)));
-        }
-        boolean useSearchCaseReference = isSearchCaseReferenceTypePresent(exceptionRecordDetails);
-
-        return getValidation(exceptionRecordDetails, useSearchCaseReference, requesterIdamToken, requesterUserId)
+        return getValidation(exceptionRecordDetails, requesterIdamToken, requesterUserId)
             .map(callBackEvent -> tryAttachToCase(callBackEvent, exceptionRecordDetails, ignoreWarnings))
             .map(attachCaseResult ->
                 attachCaseResult.map(modifiedFields ->
@@ -135,10 +131,12 @@ public class AttachCaseCallbackService {
 
     private Validation<Seq<String>, AttachToCaseEventData> getValidation(
         CaseDetails exceptionRecord,
-        boolean useSearchCaseReference,
         String requesterIdamToken,
         String requesterUserId
     ) {
+        boolean useSearchCaseReference = exceptionRecord.getData() != null
+            && exceptionRecord.getData().get(SEARCH_CASE_REFERENCE_TYPE) != null;
+
         Validation<String, String> caseReferenceTypeValidation = useSearchCaseReference
             ? hasSearchCaseReferenceType(exceptionRecord)
             : valid(CCD_CASE_REFERENCE);
@@ -241,7 +239,11 @@ public class AttachCaseCallbackService {
                 callBackEvent.targetCaseRef
             );
 
-            return attachToCase(callBackEvent, exceptionRecordDetails, ignoreWarnings);
+            return attachToCase(callBackEvent, ignoreWarnings)
+                .peek(map -> paymentsProcessor.updatePayments(
+                    exceptionRecordDetails,
+                    (String) map.get(ATTACH_TO_CASE_REFERENCE)
+                ));
         } catch (AlreadyAttachedToCaseException
             | DuplicateDocsException
             | CaseNotFoundException
@@ -261,7 +263,7 @@ public class AttachCaseCallbackService {
             log.error(
                 "Failed to send update to payment processor for {} exception record {}",
                 callBackEvent.exceptionRecordJurisdiction,
-                exceptionRecordDetails.getId(),
+                callBackEvent.exceptionRecordId,
                 exception
             );
             return Either.left(ErrorsAndWarnings.withErrors(singletonList(PAYMENT_ERROR_MSG)));
@@ -279,40 +281,32 @@ public class AttachCaseCallbackService {
 
     private Either<ErrorsAndWarnings, Map<String, Object>> attachToCase(
         AttachToCaseEventData callBackEvent,
-        CaseDetails exceptionRecordDetails,
         boolean ignoreWarnings
     ) {
-        String targetCaseCcdId;
+        Either<ErrorsAndWarnings, String> attachResult;
 
         if (EXTERNAL_CASE_REFERENCE.equals(callBackEvent.targetCaseRefType)) {
-            targetCaseCcdId = attachCaseByLegacyId(callBackEvent, exceptionRecordDetails, ignoreWarnings);
+            attachResult = attachCaseByLegacyId(callBackEvent, ignoreWarnings);
         } else {
-            Optional<ErrorsAndWarnings> attachResult = attachCaseByCcdId(
+            attachResult = attachCaseByCcdId(
                 callBackEvent,
                 callBackEvent.targetCaseRef,
-                exceptionRecordDetails,
                 ignoreWarnings
-            );
-
-            if (attachResult.isPresent()) {
-                return Either.left(attachResult.get());
-            }
-
-            targetCaseCcdId = callBackEvent.targetCaseRef;
+            ).map(Either::<ErrorsAndWarnings, String>left).orElse(Either.right(callBackEvent.targetCaseRef));
         }
 
-        log.info(
-            "Completed the process of attaching exception record to a case. ER ID: {}. Case ID: {}",
-            callBackEvent.exceptionRecordId,
-            callBackEvent.targetCaseRef
-        );
-
-        return Either.right(ImmutableMap.of(ATTACH_TO_CASE_REFERENCE, targetCaseCcdId));
+        return attachResult
+            .peek(targetCaseRef -> log.info(
+                "Completed the process of attaching exception record to a case. ER ID: {}. Case ID: {}",
+                callBackEvent.exceptionRecordId,
+                targetCaseRef
+            ))
+            .map(targetCaseRef -> ImmutableMap.of(ATTACH_TO_CASE_REFERENCE, targetCaseRef));
     }
 
-    private String attachCaseByLegacyId(
+    // target case ref on the right
+    private Either<ErrorsAndWarnings, String> attachCaseByLegacyId(
         AttachToCaseEventData callBackEvent,
-        CaseDetails exceptionRecordDetails,
         boolean ignoreWarnings
     ) {
         List<Long> targetCaseCcdIds = ccdApi.getCaseRefsByLegacyId(callBackEvent.targetCaseRef, callBackEvent.service);
@@ -327,14 +321,11 @@ public class AttachCaseCallbackService {
                 callBackEvent.exceptionRecordId
             );
 
-            attachCaseByCcdId(
+            return attachCaseByCcdId(
                 callBackEvent,
                 targetCaseCcdId,
-                exceptionRecordDetails,
                 ignoreWarnings
-            );
-
-            return targetCaseCcdId;
+            ).map(Either::<ErrorsAndWarnings, String>left).orElse(Either.right(targetCaseCcdId));
         } else if (targetCaseCcdIds.isEmpty()) {
             throw new CaseNotFoundException(
                 String.format("No case found for legacy case reference %s", callBackEvent.targetCaseRef)
@@ -353,7 +344,6 @@ public class AttachCaseCallbackService {
     private Optional<ErrorsAndWarnings> attachCaseByCcdId(
         AttachToCaseEventData callBackEvent,
         String targetCaseCcdRef,
-        CaseDetails exceptionRecordDetails,
         boolean ignoreWarnings
     ) {
         log.info(
@@ -367,8 +357,7 @@ public class AttachCaseCallbackService {
             case SUPPLEMENTARY_EVIDENCE:
                 updateSupplementaryEvidence(
                     callBackEvent,
-                    targetCaseCcdRef,
-                    exceptionRecordDetails
+                    targetCaseCcdRef
                 );
                 return Optional.empty();
 
@@ -376,7 +365,6 @@ public class AttachCaseCallbackService {
                 return updateSupplementaryEvidenceWithOcr(
                     callBackEvent,
                     targetCaseCcdRef,
-                    exceptionRecordDetails,
                     ignoreWarnings
                 );
 
@@ -387,8 +375,7 @@ public class AttachCaseCallbackService {
 
     private void updateSupplementaryEvidence(
         AttachToCaseEventData callBackEvent,
-        String targetCaseCcdRef,
-        CaseDetails exceptionRecordDetails
+        String targetCaseCcdRef
     ) {
         CaseDetails theCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
         List<Map<String, Object>> targetCaseDocuments = getScannedDocuments(theCase);
@@ -428,23 +415,20 @@ public class AttachCaseCallbackService {
 
             log.info(
                 "Attached Exception Record to a case in CCD. ER ID: {}. Case ID: {}",
-                exceptionRecordDetails.getId(),
+                callBackEvent.exceptionRecordId,
                 theCase.getId()
             );
         }
-
-        paymentsProcessor.updatePayments(exceptionRecordDetails, theCase.getId());
     }
 
     private Optional<ErrorsAndWarnings> updateSupplementaryEvidenceWithOcr(
         AttachToCaseEventData callBackEvent,
         String targetCaseCcdRef,
-        CaseDetails exceptionRecordDetails,
         boolean ignoreWarnings
     ) {
         CaseDetails targetCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
 
-        ServiceConfigItem serviceConfigItem = getServiceConfig(exceptionRecordDetails);
+        ServiceConfigItem serviceConfigItem = getServiceConfig(callBackEvent.service);
         ProcessResult processResult = ccdCaseUpdater.updateCase(
             callBackEvent.exceptionRecord,
             serviceConfigItem,
@@ -461,8 +445,6 @@ public class AttachCaseCallbackService {
                 processResult.getWarnings()
             ));
         } else {
-            paymentsProcessor.updatePayments(exceptionRecordDetails, Long.parseLong(targetCaseCcdRef));
-
             return Optional.empty();
         }
     }
@@ -535,51 +517,6 @@ public class AttachCaseCallbackService {
         );
     }
 
-    private boolean isSearchCaseReferenceTypePresent(CaseDetails exceptionRecord) {
-        return exceptionRecord.getData() != null
-            && exceptionRecord.getData().get(SEARCH_CASE_REFERENCE_TYPE) != null;
-    }
-
-    /**
-     * Information received in the callback call for the attach event.
-     */
-    private static class AttachToCaseEventData {
-        public final String exceptionRecordJurisdiction;
-        public final String service;
-        public final String targetCaseRef;
-        public final String targetCaseRefType;
-        public final Long exceptionRecordId;
-        public final List<Map<String, Object>> exceptionRecordDocuments;
-        public final String idamToken;
-        public final String userId;
-        public final Classification classification;
-        public final ExceptionRecord exceptionRecord;
-
-        public AttachToCaseEventData(
-            String exceptionRecordJurisdiction,
-            String service,
-            String targetCaseRefType,
-            String targetCaseRef,
-            Long exceptionRecordId,
-            List<Map<String, Object>> exceptionRecordDocuments,
-            String idamToken,
-            String userId,
-            Classification classification,
-            ExceptionRecord exceptionRecord
-        ) {
-            this.exceptionRecordJurisdiction = exceptionRecordJurisdiction;
-            this.service = service;
-            this.targetCaseRefType = targetCaseRefType;
-            this.targetCaseRef = targetCaseRef;
-            this.exceptionRecordId = exceptionRecordId;
-            this.exceptionRecordDocuments = exceptionRecordDocuments;
-            this.idamToken = idamToken;
-            this.userId = userId;
-            this.classification = classification;
-            this.exceptionRecord = exceptionRecord;
-        }
-    }
-
     private Map<String, Object> mergeCaseFields(
         Map<String, Object> originalFields,
         Map<String, Object> modifiedFields
@@ -592,13 +529,9 @@ public class AttachCaseCallbackService {
         return merged;
     }
 
-    private ServiceConfigItem getServiceConfig(CaseDetails caseDetails) {
-        return hasServiceNameInCaseTypeId(caseDetails).flatMap(service -> Try
-            .of(() -> serviceConfigProvider.getConfig(service))
-            .toValidation()
-            .mapError(Throwable::getMessage)
-        )
+    private ServiceConfigItem getServiceConfig(String service) {
+        return Try.of(() -> serviceConfigProvider.getConfig(service))
             .filter(item -> !Strings.isNullOrEmpty(item.getUpdateUrl()))
-            .getOrElseThrow(() -> new CallbackException("Update URL is not configured")).get();
+            .getOrElseThrow(() -> new CallbackException("Update URL is not configured"));
     }
 }

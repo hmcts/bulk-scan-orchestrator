@@ -195,7 +195,7 @@ public class CreateCaseCallbackService {
                 return tryPublishPaymentMessageAndFinalise(
                     configItem.getService(),
                     exceptionRecordData,
-                    result.caseId
+                    Long.toString(result.caseId)
                 );
             }
         }
@@ -204,7 +204,7 @@ public class CreateCaseCallbackService {
     private ProcessResult tryPublishPaymentMessageAndFinalise(
         String serviceName,
         CaseDetails exceptionRecordData,
-        long caseId
+        String caseId
     ) {
         try {
             paymentsProcessor.updatePayments(exceptionRecordData, caseId);
