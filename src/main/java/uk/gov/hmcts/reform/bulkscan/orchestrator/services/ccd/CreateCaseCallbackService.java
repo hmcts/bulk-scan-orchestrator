@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ExceptionRecordValidator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
@@ -207,7 +208,14 @@ public class CreateCaseCallbackService {
         String caseId
     ) {
         try {
-            paymentsProcessor.updatePayments(exceptionRecordData, caseId);
+            paymentsProcessor.updatePayments(
+                PaymentsHelper.create(
+                    exceptionRecordData
+                ),
+                Long.toString(exceptionRecordData.getId()),
+                exceptionRecordData.getJurisdiction(),
+                caseId
+            );
 
             return new ProcessResult(
                 exceptionRecordFinalizer.finalizeExceptionRecord(
