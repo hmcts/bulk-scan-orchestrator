@@ -358,20 +358,14 @@ public class AttachCaseCallbackService {
             case SUPPLEMENTARY_EVIDENCE:
                 targetCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
 
-                updateSupplementaryEvidence(
-                    callBackEvent,
-                    targetCase
-                );
+                updateSupplementaryEvidence(callBackEvent, targetCase);
+
                 return Optional.empty();
 
             case SUPPLEMENTARY_EVIDENCE_WITH_OCR:
                 targetCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
 
-                return updateSupplementaryEvidenceWithOcr(
-                    callBackEvent,
-                    targetCase,
-                    ignoreWarnings
-                );
+                return updateSupplementaryEvidenceWithOcr(callBackEvent, targetCase, ignoreWarnings);
 
             default:
                 throw new CallbackException("Invalid Journey Classification: " + callBackEvent.classification);
