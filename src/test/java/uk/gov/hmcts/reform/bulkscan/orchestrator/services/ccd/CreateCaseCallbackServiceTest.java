@@ -634,7 +634,7 @@ class CreateCaseCallbackServiceTest {
         // then
         assertThat(result.getErrors()).isEmpty();
         assertThat(result.getWarnings()).isEmpty();
-        verify(paymentsProcessor).updatePayments(any(), eq(Long.toString(newCaseId)));
+        verify(paymentsProcessor).updatePayments(any(), anyString(), anyString(), eq(Long.toString(newCaseId)));
     }
 
     @Test
@@ -655,7 +655,7 @@ class CreateCaseCallbackServiceTest {
         )).willReturn(new CreateCaseResult(newCaseId));
 
         willThrow(PaymentsPublishingException.class).given(paymentsProcessor)
-            .updatePayments(any(), eq(Long.toString(newCaseId)));
+            .updatePayments(any(), anyString(), anyString(), eq(Long.toString(newCaseId)));
 
         // when
         ProcessResult result =

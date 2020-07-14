@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.AttachSca
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.DuplicateDocsException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ExceptionRecordValidator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
@@ -240,10 +241,13 @@ public class AttachCaseCallbackService {
             );
 
             return attachToCase(callBackEvent, ignoreWarnings)
-                .peek(map -> paymentsProcessor.updatePayments(
-                    exceptionRecordDetails,
-                    (String) map.get(ATTACH_TO_CASE_REFERENCE)
-                ));
+                .peek(attachToCaseRef -> paymentsProcessor.updatePayments(
+                    PaymentsHelper.create(exceptionRecordDetails),
+                    Long.toString(callBackEvent.exceptionRecordId),
+                    callBackEvent.exceptionRecordJurisdiction,
+                    attachToCaseRef
+                ))
+                .map(attachToCaseRef -> ImmutableMap.of(ATTACH_TO_CASE_REFERENCE, attachToCaseRef));
         } catch (AlreadyAttachedToCaseException
             | DuplicateDocsException
             | CaseNotFoundException
@@ -279,7 +283,8 @@ public class AttachCaseCallbackService {
         }
     }
 
-    private Either<ErrorsAndWarnings, Map<String, Object>> attachToCase(
+    // target case ref on the right
+    private Either<ErrorsAndWarnings, String> attachToCase(
         AttachToCaseEventData callBackEvent,
         boolean ignoreWarnings
     ) {
@@ -300,8 +305,7 @@ public class AttachCaseCallbackService {
                 "Completed the process of attaching exception record to a case. ER ID: {}. Case ID: {}",
                 callBackEvent.exceptionRecordId,
                 targetCaseRef
-            ))
-            .map(targetCaseRef -> ImmutableMap.of(ATTACH_TO_CASE_REFERENCE, targetCaseRef));
+            ));
     }
 
     // target case ref on the right
