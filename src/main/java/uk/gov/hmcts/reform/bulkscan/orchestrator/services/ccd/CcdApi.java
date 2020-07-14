@@ -304,15 +304,18 @@ public class CcdApi {
         }
     }
 
-    public StartEventResponse startEventForAttachScannedDocs(
+    // ideally should be more generic. need custom exception handling
+    public void attachScannedDocs(
         CcdAuthenticator authenticator,
         String jurisdiction,
         String caseTypeId,
         String caseRef,
-        String eventTypeId
+        String eventTypeId,
+        Function<StartEventResponse, CaseDataContent> caseDataContentBuilder,
+        String logContext
     ) {
         try {
-            return feignCcdApi.startEventForCaseWorker(
+            StartEventResponse eventResponse = feignCcdApi.startEventForCaseWorker(
                 authenticator.getUserToken(),
                 authenticator.getServiceToken(),
                 authenticator.getUserDetails().getId(),
@@ -321,16 +324,32 @@ public class CcdApi {
                 caseRef,
                 eventTypeId
             );
+
+            log.info("Started event in CCD. Event: {}, case type: {}. {}", eventTypeId, caseTypeId, logContext);
+
+            CaseDataContent caseData = caseDataContentBuilder.apply(eventResponse);
+
+            feignCcdApi.submitEventForCaseWorker(
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                authenticator.getUserDetails().getId(),
+                jurisdiction,
+                caseTypeId,
+                caseRef,
+                true,
+                caseData
+            );
         } catch (FeignException.NotFound e) {
             throw new UnableToAttachDocumentsException(
                 String.format(
-                    "Attach documents start event failed for case type: %s and case ref: %s", caseTypeId, caseRef
+                    "Event failed. Event: %s, case type: %s, case ref: %s", eventTypeId, caseTypeId, caseRef
                 ),
                 e
             );
         } catch (FeignException e) {
-            debugCcdException(log, e, "Failed to call 'startEventForCaseWorker'");
+            debugCcdException(log, e, "Failed to call 'attachScannedDocs'");
             removeFromIdamCacheIfAuthProblem(e.status(), jurisdiction);
+
             throw new CcdCallException(
                 String.format("Could not attach documents for case ref: %s Error: %s", caseRef, e.status()), e
             );
