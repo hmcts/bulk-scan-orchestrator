@@ -24,7 +24,9 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFi
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.HashMap;
@@ -393,26 +395,28 @@ public class AttachCaseCallbackService {
                 documentsToAttach,
                 callBackEvent.exceptionRecordId
             );
+            String loggingContext = String.format(
+                "Exception record ID: %d, Case ID: %d, service: %s",
+                callBackEvent.exceptionRecordId,
+                theCase.getId(),
+                callBackEvent.service
+            );
 
-            StartEventResponse ccdStartEvent =
-                ccdApi.startAttachScannedDocs(theCase, callBackEvent.idamToken, callBackEvent.userId);
-
-            Map<String, Object> newCaseData = buildCaseData(newCaseDocuments, targetCaseDocuments);
-
-            ccdApi.attachExceptionRecord(
+            ccdApi.attachSupplementaryEvidenceFromCallback(
                 theCase,
                 callBackEvent.idamToken,
                 callBackEvent.userId,
-                newCaseData,
-                createEventSummary(theCase, callBackEvent.exceptionRecordId, newCaseDocuments),
-                ccdStartEvent
+                startEventResponse -> buildCaseData(
+                    newCaseDocuments,
+                    targetCaseDocuments,
+                    startEventResponse,
+                    callBackEvent.exceptionRecordId,
+                    theCase.getId()
+                ),
+                loggingContext
             );
 
-            log.info(
-                "Attached Exception Record to a case in CCD. ER ID: {}. Case ID: {}",
-                callBackEvent.exceptionRecordId,
-                theCase.getId()
-            );
+            log.info("Attached Exception Record to a case in CCD. {}", loggingContext);
         }
     }
 
@@ -444,12 +448,34 @@ public class AttachCaseCallbackService {
         }
     }
 
-    private Map<String, Object> buildCaseData(
+    private CaseDataContent buildCaseData(
         List<Map<String, Object>> exceptionDocuments,
-        List<Map<String, Object>> existingDocuments
+        List<Map<String, Object>> existingDocuments,
+        StartEventResponse startEventResponse,
+        long exceptionRecordId,
+        long targetCaseId
     ) {
         List<Object> documents = concatDocuments(exceptionDocuments, existingDocuments);
-        return ImmutableMap.of(SCANNED_DOCUMENTS, documents, EVIDENCE_HANDLED, YesNoFieldValues.NO);
+        var eventSummary = String.format(
+            "Attaching exception record (%d) document numbers: %s to case: %d",
+            exceptionRecordId,
+            getDocumentNumbers(exceptionDocuments),
+            targetCaseId
+        );
+
+        return CaseDataContent.builder()
+            .data(ImmutableMap.of(
+                SCANNED_DOCUMENTS, documents,
+                EVIDENCE_HANDLED, YesNoFieldValues.NO
+            ))
+            .event(Event
+                .builder()
+                .summary(eventSummary)
+                .id(startEventResponse.getEventId())
+                .build()
+            )
+            .eventToken(startEventResponse.getToken())
+            .build();
     }
 
     private void verifyExceptionRecordIsNotAttachedToCase(
@@ -497,19 +523,6 @@ public class AttachCaseCallbackService {
                 return ImmutableMap.<String, Object>of("value", copiedDocumentContent);
             })
             .collect(toList());
-    }
-
-    private String createEventSummary(
-        CaseDetails theCase,
-        Long exceptionRecordId,
-        List<Map<String, Object>> exceptionDocuments
-    ) {
-        return String.format(
-            "Attaching exception record(%d) document numbers:%s to case:%d",
-            exceptionRecordId,
-            getDocumentNumbers(exceptionDocuments),
-            theCase.getId()
-        );
     }
 
     private Map<String, Object> mergeCaseFields(

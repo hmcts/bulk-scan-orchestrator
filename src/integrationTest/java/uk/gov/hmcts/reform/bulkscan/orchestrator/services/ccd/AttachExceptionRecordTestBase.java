@@ -168,7 +168,7 @@ public class AttachExceptionRecordTestBase {
             submittedScannedRecords(),
             "$.event.summary",
             WireMock.equalTo(String.format(
-                "Attaching exception record(%d) document numbers:[%s] to case:%s",
+                "Attaching exception record (%d) document numbers: [%s] to case: %s",
                 EXCEPTION_RECORD_ID,
                 EXCEPTION_RECORD_DOCUMENT_NUMBER,
                 CASE_REF
