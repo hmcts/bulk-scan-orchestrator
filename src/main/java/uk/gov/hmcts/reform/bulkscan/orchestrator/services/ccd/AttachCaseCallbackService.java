@@ -360,8 +360,7 @@ public class AttachCaseCallbackService {
 
                 updateSupplementaryEvidence(
                     callBackEvent,
-                    targetCase,
-                    targetCaseCcdRef
+                    targetCase
                 );
                 return Optional.empty();
 
@@ -371,7 +370,6 @@ public class AttachCaseCallbackService {
                 return updateSupplementaryEvidenceWithOcr(
                     callBackEvent,
                     targetCase,
-                    targetCaseCcdRef,
                     ignoreWarnings
                 );
 
@@ -382,8 +380,7 @@ public class AttachCaseCallbackService {
 
     private void updateSupplementaryEvidence(
         AttachToCaseEventData callBackEvent,
-        CaseDetails targetCase,
-        String targetCaseCcdRef
+        CaseDetails targetCase
     ) {
         List<Map<String, Object>> targetCaseDocuments = getScannedDocuments(targetCase);
 
@@ -391,7 +388,7 @@ public class AttachCaseCallbackService {
             targetCaseDocuments,
             callBackEvent.exceptionRecordDocuments,
             Long.toString(callBackEvent.exceptionRecordId),
-            targetCaseCcdRef
+            Long.toString(targetCase.getId())
         );
 
         List<Map<String, Object>> documentsToAttach = Documents.removeAlreadyAttachedDocuments(
@@ -431,7 +428,6 @@ public class AttachCaseCallbackService {
     private Optional<ErrorsAndWarnings> updateSupplementaryEvidenceWithOcr(
         AttachToCaseEventData callBackEvent,
         CaseDetails targetCase,
-        String targetCaseCcdRef,
         boolean ignoreWarnings
     ) {
         ServiceConfigItem serviceConfigItem = getServiceConfig(callBackEvent.service);
@@ -441,7 +437,7 @@ public class AttachCaseCallbackService {
             ignoreWarnings,
             callBackEvent.idamToken,
             callBackEvent.userId,
-            targetCaseCcdRef,
+            Long.toString(targetCase.getId()),
             targetCase.getCaseTypeId()
         );
 
