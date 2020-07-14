@@ -23,10 +23,10 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.validation.ConstraintViolationException;
 
-import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -137,7 +137,7 @@ public class CcdCaseUpdater {
             } else {
                 setExceptionRecordIdToScannedDocuments(exceptionRecord, updateResponse.caseDetails);
 
-                Optional<String> updateResult = updateCaseInCcd(
+                Optional<String> errorMsg = updateCaseInCcd(
                     configItem.getService(),
                     ignoreWarnings,
                     idamToken,
@@ -149,18 +149,17 @@ public class CcdCaseUpdater {
                     startEvent
                 );
 
-                if (updateResult.isPresent()) {
-                    // error
-                    return new ProcessResult(singletonList(updateResult.get()), emptyList());
-                }
-
-                return new ProcessResult(
-                    exceptionRecordFinalizer.finalizeExceptionRecord(
+                if (errorMsg.isPresent()) {
+                    return new ProcessResult(singletonList(errorMsg.get()), emptyList());
+                } else {
+                    var updatedExceptionRecordData = exceptionRecordFinalizer.finalizeExceptionRecord(
                         existingCase.getData(),
                         Long.toString(existingCase.getId()),
                         CcdCallbackType.ATTACHING_SUPPLEMENTARY_EVIDENCE
-                    )
-                );
+                    );
+
+                    return new ProcessResult(updatedExceptionRecordData);
+                }
             }
         } catch (UnprocessableEntity exception) {
             ClientServiceErrorResponse errorResponse = serviceResponseParser.parseResponseBody(exception);
@@ -200,7 +199,7 @@ public class CcdCaseUpdater {
             );
 
             throw new CallbackException(
-                format(
+                String.format(
                     "%s. Service response: %s",
                     getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id),
                     exception.contentUTF8()
@@ -247,10 +246,8 @@ public class CcdCaseUpdater {
     }
 
     private String getErrorMessage(String service, String existingCaseId, String exceptionRecordId) {
-        return format(
-            "Failed to update case for %s service "
-                + "with case Id %s "
-                + "based on exception record %s",
+        return String.format(
+            "Failed to update case for %s service with case Id %s based on exception record %s",
             service,
             existingCaseId,
             exceptionRecordId
@@ -275,7 +272,7 @@ public class CcdCaseUpdater {
     ) {
         CaseDetails existingCase = startEvent.getCaseDetails();
 
-        final CaseDataContent caseDataContent = getCaseDataContent(exceptionRecord, caseUpdateDetails, startEvent);
+        final CaseDataContent caseDataContent = buildCaseDataContent(exceptionRecord, caseUpdateDetails, startEvent);
         try {
             coreCaseDataApi.submitEventForCaseWorker(
                 idamToken,
@@ -289,9 +286,7 @@ public class CcdCaseUpdater {
             );
 
             log.info(
-                "Successfully updated case for service {} "
-                    + "with case Id {} "
-                    + "based on exception record ref {}",
+                "Successfully updated case for service {} with case Id {} based on exception record ref {}",
                 service,
                 existingCase.getId(),
                 exceptionRecord.id
@@ -299,7 +294,7 @@ public class CcdCaseUpdater {
 
             return Optional.empty();
         } catch (FeignException.UnprocessableEntity exception) {
-            String msg = format(
+            String msg = String.format(
                 "CCD returned 422 Unprocessable Entity response "
                     + "when trying to update case for %s jurisdiction "
                     + "with case Id %s "
@@ -318,7 +313,7 @@ public class CcdCaseUpdater {
         } catch (FeignException exception) {
             debugCcdException(log, exception, "Failed to call 'updateCaseInCcd'");
             // should service response be removed?
-            String msg = format("Service response: %s", exception.contentUTF8());
+            String msg = String.format("Service response: %s", exception.contentUTF8());
             log.error(
                 "Failed to update case for {} jurisdiction "
                     + "with case Id {} "
@@ -335,7 +330,7 @@ public class CcdCaseUpdater {
         }
     }
 
-    private CaseDataContent getCaseDataContent(
+    private CaseDataContent buildCaseDataContent(
         ExceptionRecord exceptionRecord,
         CaseUpdateDetails caseUpdateDetails,
         StartEventResponse startEvent
@@ -344,26 +339,15 @@ public class CcdCaseUpdater {
             .builder()
             .caseReference(exceptionRecord.id)
             .data(caseUpdateDetails.caseData)
-            .event(getEvent(exceptionRecord, startEvent.getCaseDetails().getId(), startEvent.getEventId()))
+            .event(Event
+                .builder()
+                .id(startEvent.getEventId())
+                .summary(String.format("Case updated, case Id %s", startEvent.getCaseDetails().getId()))
+                .description(String.format("Case updated based on exception record ref %s", exceptionRecord.id))
+                .build()
+            )
             .eventToken(startEvent.getToken())
             .build();
     }
 
-    private Event getEvent(
-        ExceptionRecord exceptionRecord,
-        Long existingCaseId,
-        String eventId
-    ) {
-        return Event
-            .builder()
-            .id(eventId)
-            .summary(format("Case updated, case Id %s", existingCaseId))
-            .description(
-                format(
-                    "Case updated based on exception record ref %s",
-                    exceptionRecord.id
-                )
-            )
-            .build();
-    }
 }
