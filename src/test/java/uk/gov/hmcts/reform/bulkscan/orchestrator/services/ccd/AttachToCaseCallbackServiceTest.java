@@ -61,6 +61,9 @@ class AttachToCaseCallbackServiceTest {
     private ExceptionRecordValidator exceptionRecordValidator;
 
     @Mock
+    private ExceptionRecordFinalizer exceptionRecordFinalizer;
+
+    @Mock
     private CcdCaseUpdater ccdCaseUpdater;
 
     @Mock
@@ -113,6 +116,7 @@ class AttachToCaseCallbackServiceTest {
             serviceConfigProvider,
             ccdApi,
             exceptionRecordValidator,
+            exceptionRecordFinalizer,
             ccdCaseUpdater,
             paymentsProcessor,
             scannedDocumentsValidator
@@ -156,6 +160,13 @@ class AttachToCaseCallbackServiceTest {
             assertThat(data.containsPayments).isEqualTo(CASE_DETAILS.getData().get(CONTAINS_PAYMENTS).equals(YES));
             assertThat(data.envelopeId).isEqualTo(BULKSCAN_ENVELOPE_ID);
         });
+
+        // and exception record should be finalized
+        verify(exceptionRecordFinalizer).finalizeExceptionRecord(
+            CASE_DETAILS.getData(),
+            EXISTING_CASE_ID,
+            CcdCallbackType.ATTACHING_SUPPLEMENTARY_EVIDENCE
+        );
     }
 
     @Test
