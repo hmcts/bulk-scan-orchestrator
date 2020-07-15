@@ -7,6 +7,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
@@ -25,14 +26,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentsProcessorTest {
     private static final long CCD_REFERENCE = 20L;
     private static final String SERVICE = "service";
-    private static final long CASE_ID = 123;
-    private static final long NEW_CASE_ID = 1L;
+    private static final String CASE_ID = "123";
+    private static final String NEW_CASE_ID = "1";
     private static final String CASE_TYPE_ID = SERVICE + "_ExceptionRecord";
 
     @Mock
@@ -113,34 +113,26 @@ class PaymentsProcessorTest {
         String envelopeId = "987";
         String jurisdiction = "sample jurisdiction";
 
-        data.put("poBox", "12345");
-        data.put("journeyClassification", EXCEPTION.name());
-        data.put("formType", "A1");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
-        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
         data.put(ExceptionRecordFields.CONTAINS_PAYMENTS, YesNoFieldValues.YES);
         data.put(ExceptionRecordFields.ENVELOPE_ID, envelopeId);
-        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, jurisdiction);
 
         CaseDetails caseDetails =
             TestCaseBuilder
                 .createCaseWith(builder -> builder
-                    .id(CASE_ID)
+                    .id(Long.valueOf(CASE_ID))
                     .caseTypeId(CASE_TYPE_ID)
                     .jurisdiction("some jurisdiction")
                     .data(data)
                 );
 
         // when
-        paymentsProcessor.updatePayments(caseDetails, NEW_CASE_ID);
+        paymentsProcessor.updatePayments(PaymentsHelper.create(caseDetails), CASE_ID, jurisdiction, NEW_CASE_ID);
 
         // then
         ArgumentCaptor<UpdatePaymentsCommand> cmd = ArgumentCaptor.forClass(UpdatePaymentsCommand.class);
         verify(paymentsPublisher).send(cmd.capture());
-        assertThat(cmd.getValue().exceptionRecordRef).isEqualTo(Long.toString(CASE_ID));
-        assertThat(cmd.getValue().newCaseRef).isEqualTo(Long.toString(NEW_CASE_ID));
+        assertThat(cmd.getValue().exceptionRecordRef).isEqualTo(CASE_ID);
+        assertThat(cmd.getValue().newCaseRef).isEqualTo(NEW_CASE_ID);
         assertThat(cmd.getValue().envelopeId).isEqualTo(envelopeId);
         assertThat(cmd.getValue().jurisdiction).isEqualTo(jurisdiction);
     }
@@ -153,21 +145,13 @@ class PaymentsProcessorTest {
         String envelopeId = "987";
         String jurisdiction = "sample jurisdiction";
 
-        data.put("poBox", "12345");
-        data.put("journeyClassification", EXCEPTION.name());
-        data.put("formType", "A1");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
-        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
         data.put(ExceptionRecordFields.CONTAINS_PAYMENTS, YesNoFieldValues.NO); // no payments!
         data.put(ExceptionRecordFields.ENVELOPE_ID, envelopeId);
-        data.put(ExceptionRecordFields.PO_BOX_JURISDICTION, jurisdiction);
 
         CaseDetails caseDetails =
             TestCaseBuilder
                 .createCaseWith(builder -> builder
-                    .id(CASE_ID)
+                    .id(Long.valueOf(CASE_ID))
                     .caseTypeId(CASE_TYPE_ID)
                     .jurisdiction("some jurisdiction")
                     .data(data)
@@ -175,7 +159,7 @@ class PaymentsProcessorTest {
 
 
         // when
-        paymentsProcessor.updatePayments(caseDetails, 1L);
+        paymentsProcessor.updatePayments(PaymentsHelper.create(caseDetails), CASE_ID, jurisdiction, NEW_CASE_ID);
 
         // then
         verify(paymentsPublisher, never()).send(any());
