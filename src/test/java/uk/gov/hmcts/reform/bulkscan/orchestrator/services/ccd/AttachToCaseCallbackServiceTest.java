@@ -47,9 +47,9 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
 @ExtendWith(MockitoExtension.class)
-class AttachCaseCallbackServiceTest {
+class AttachToCaseCallbackServiceTest {
 
-    private AttachCaseCallbackService attachCaseCallbackService;
+    private AttachToCaseCallbackService attachToCaseCallbackService;
 
     @Mock
     private ServiceConfigProvider serviceConfigProvider;
@@ -109,7 +109,7 @@ class AttachCaseCallbackServiceTest {
 
     @BeforeEach
     void setUp() {
-        attachCaseCallbackService = new AttachCaseCallbackService(
+        attachToCaseCallbackService = new AttachToCaseCallbackService(
             serviceConfigProvider,
             ccdApi,
             exceptionRecordValidator,
@@ -135,7 +135,7 @@ class AttachCaseCallbackServiceTest {
         )).willReturn(new ProcessResult(emptyMap()));
 
         // when
-        Either<ErrorsAndWarnings, Map<String, Object>> res = attachCaseCallbackService.process(
+        Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
             CASE_DETAILS,
             IDAM_TOKEN,
             USER_ID,
@@ -167,7 +167,7 @@ class AttachCaseCallbackServiceTest {
         )).willReturn(new ProcessResult(asList("warning1"), asList("error1")));
 
         // when
-        Either<ErrorsAndWarnings, Map<String, Object>> res = attachCaseCallbackService.process(
+        Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
             CASE_DETAILS,
             IDAM_TOKEN,
             USER_ID,
