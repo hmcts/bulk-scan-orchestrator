@@ -135,7 +135,7 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(res.getErrors()).isEmpty();
         assertThat(res.getWarnings()).isEmpty();
-        assertThat(res.getExceptionRecordData()).isEqualTo(originalFields);
+        assertThat(res.getExceptionRecordData()).isEmpty();
     }
 
     @Test
@@ -162,7 +162,7 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(res.getErrors()).isEmpty();
         assertThat(res.getWarnings()).isEmpty();
-        assertThat(res.getExceptionRecordData()).isEqualTo(originalFields);
+        assertThat(res.getExceptionRecordData()).isEmpty();
     }
 
     @Test
@@ -214,7 +214,7 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(res.getErrors()).isEmpty();
         assertThat(res.getWarnings()).isEmpty();
-        assertThat(res.getExceptionRecordData()).isEqualTo(originalFields);
+        assertThat(res.getExceptionRecordData()).isEmpty();
     }
 
     @Test
