@@ -312,10 +312,10 @@ class CcdCaseUpdaterTest {
         );
 
         // then
-        assertThat(res.getWarnings()).containsExactlyInAnyOrder("CCD returned 422 Unprocessable Entity response "
+        assertThat(res.getErrors()).containsExactlyInAnyOrder("CCD returned 422 Unprocessable Entity response "
             + "when trying to update case for some jurisdiction jurisdiction with case Id 0 based on exception record "
             + "with Id 1. CCD response: Body");
-        assertThat(res.getErrors()).isEmpty();
+        assertThat(res.getWarnings()).isEmpty();
     }
 
     @Test

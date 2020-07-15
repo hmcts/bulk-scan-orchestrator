@@ -149,7 +149,7 @@ public class CcdCaseUpdater {
                 );
 
                 if (errorMsg.isPresent()) {
-                    return new ProcessResult(singletonList(errorMsg.get()), emptyList());
+                    return new ProcessResult(emptyList(), singletonList(errorMsg.get()));
                 } else {
                     var updatedExceptionRecordData = exceptionRecordFinalizer.finalizeExceptionRecord(
                         existingCase.getData(),
