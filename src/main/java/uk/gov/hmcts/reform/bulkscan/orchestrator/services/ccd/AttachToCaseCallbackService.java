@@ -121,11 +121,11 @@ public class AttachToCaseCallbackService {
 
         return getValidation(exceptionRecordDetails, requesterIdamToken, requesterUserId)
             .map(callBackEvent -> tryAttachToCase(callBackEvent, exceptionRecordDetails, ignoreWarnings))
-            .map(errorsOrRef -> errorsOrRef.map(caseRef -> finalizeExceptionRecordData(exceptionRecordDetails, caseRef)))
+            .map(errorsOrRef -> errorsOrRef.map(caseRef -> finalizeExceptionRecData(exceptionRecordDetails, caseRef)))
             .getOrElseGet(errors -> Either.left(ErrorsAndWarnings.withErrors(errors.toJavaList())));
     }
 
-    private Map<String, Object> finalizeExceptionRecordData(CaseDetails exceptionRec, String caseRef) {
+    private Map<String, Object> finalizeExceptionRecData(CaseDetails exceptionRec, String caseRef) {
         return exceptionRecordFinalizer
             .finalizeExceptionRecord(
                 exceptionRec.getData(),
