@@ -318,11 +318,11 @@ class CcdCaseUpdaterTest {
         );
 
         // then
-        assertThat(res.getWarnings()).containsExactlyInAnyOrder(
+        assertThat(res.getErrors()).containsExactlyInAnyOrder(
             "Failed to update case for Service service with case Id existing_case_id based on exception record 1"
                 + " - CCD could not process request"
         );
-        assertThat(res.getErrors()).isEmpty();
+        assertThat(res.getWarnings()).isEmpty();
     }
 
     @Test
