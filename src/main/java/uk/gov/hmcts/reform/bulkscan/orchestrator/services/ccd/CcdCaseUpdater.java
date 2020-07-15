@@ -166,6 +166,10 @@ public class CcdCaseUpdater {
 
             log.error(msg, exception);
 
+            // Returning `ProcessResult` vs `CallbackException` is different
+            // Before combining start/submit events to CCD API it was handled differently
+            // To keep same outcome - trying to recognise which is which hence the `isStartEvent` param
+            // Can be reviewed separately once all this is nicely gone out of the game from here
             if (!isStartEvent) {
                 return new ProcessResult(emptyList(), singletonList(msg));
             } else {
@@ -200,6 +204,10 @@ public class CcdCaseUpdater {
 
             ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(singletonList(msg), emptyList());
 
+            // Returning `ProcessResult` vs `CallbackException` is different
+            // Before combining start/submit events to CCD API it was handled differently
+            // To keep same outcome - trying to recognise which is which hence the `isStartEvent` param
+            // Can be reviewed separately once all this is nicely gone out of the game from here
             if (isStartEvent) {
                 return new ProcessResult(errorResponse.warnings, errorResponse.errors);
             } else {
