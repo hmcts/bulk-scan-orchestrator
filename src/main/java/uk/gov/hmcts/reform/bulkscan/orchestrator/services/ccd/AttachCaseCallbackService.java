@@ -288,58 +288,49 @@ public class AttachCaseCallbackService {
         AttachToCaseEventData callBackEvent,
         boolean ignoreWarnings
     ) {
-        Either<ErrorsAndWarnings, String> attachResult;
-
-        if (EXTERNAL_CASE_REFERENCE.equals(callBackEvent.targetCaseRefType)) {
-            attachResult = attachCaseByLegacyId(callBackEvent, ignoreWarnings);
-        } else {
-            attachResult = attachCaseByCcdId(
-                callBackEvent,
+        String targetCaseRef = EXTERNAL_CASE_REFERENCE.equals(callBackEvent.targetCaseRefType)
+            ? getTargetCaseRefFromLegacyId(
                 callBackEvent.targetCaseRef,
-                ignoreWarnings
-            ).map(Either::<ErrorsAndWarnings, String>left).orElse(Either.right(callBackEvent.targetCaseRef));
-        }
+                callBackEvent.service,
+                callBackEvent.exceptionRecordId
+            )
+            : callBackEvent.targetCaseRef;
 
-        return attachResult
-            .peek(targetCaseRef -> log.info(
-                "Completed the process of attaching exception record to a case. ER ID: {}. Case ID: {}",
-                callBackEvent.exceptionRecordId,
-                targetCaseRef
-            ));
+        return attachCaseByCcdId(callBackEvent, targetCaseRef, ignoreWarnings)
+            .map(Either::<ErrorsAndWarnings, String>left)
+            .orElseGet(() -> {
+                log.info(
+                    "Completed the process of attaching exception record to a case. ER ID: {}. Case ID: {}",
+                    callBackEvent.exceptionRecordId,
+                    targetCaseRef
+                );
+
+                return Either.right(targetCaseRef);
+            });
     }
 
-    // target case ref on the right
-    private Either<ErrorsAndWarnings, String> attachCaseByLegacyId(
-        AttachToCaseEventData callBackEvent,
-        boolean ignoreWarnings
-    ) {
-        List<Long> targetCaseCcdIds = ccdApi.getCaseRefsByLegacyId(callBackEvent.targetCaseRef, callBackEvent.service);
+    private String getTargetCaseRefFromLegacyId(String targetCaseRef, String service, long exceptionRecordId) {
+        List<Long> targetCaseCcdIds = ccdApi.getCaseRefsByLegacyId(targetCaseRef, service);
 
         if (targetCaseCcdIds.size() == 1) {
-            String targetCaseCcdId = targetCaseCcdIds.get(0).toString();
-
             log.info(
                 "Found case with CCD ID '{}' for legacy ID '{}' (attaching exception record '{}')",
-                targetCaseCcdId,
-                callBackEvent.targetCaseRef,
-                callBackEvent.exceptionRecordId
+                targetCaseCcdIds.get(0),
+                targetCaseRef,
+                exceptionRecordId
             );
 
-            return attachCaseByCcdId(
-                callBackEvent,
-                targetCaseCcdId,
-                ignoreWarnings
-            ).map(Either::<ErrorsAndWarnings, String>left).orElse(Either.right(targetCaseCcdId));
+            return Long.toString(targetCaseCcdIds.get(0));
         } else if (targetCaseCcdIds.isEmpty()) {
             throw new CaseNotFoundException(
-                String.format("No case found for legacy case reference %s", callBackEvent.targetCaseRef)
+                String.format("No case found for legacy case reference %s", targetCaseRef)
             );
         } else {
             throw new MultipleCasesFoundException(
                 String.format(
                     "Multiple cases (%s) found for the given legacy case reference: %s",
                     targetCaseCcdIds.stream().map(String::valueOf).collect(joining(", ")),
-                    callBackEvent.targetCaseRef
+                    targetCaseRef
                 )
             );
         }
