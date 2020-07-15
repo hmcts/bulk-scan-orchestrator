@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import java.util.List;
 import javax.validation.ConstraintViolationException;
 
-import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -151,7 +150,7 @@ public class CcdCaseUpdater {
                 return new ProcessResult(
                     exceptionRecordFinalizer.finalizeExceptionRecord(
                         existingCase.getData(),
-                        existingCase.getId(),
+                        Long.toString(existingCase.getId()),
                         CcdCallbackType.ATTACHING_SUPPLEMENTARY_EVIDENCE
                     )
                 );
@@ -168,7 +167,7 @@ public class CcdCaseUpdater {
             log.error(msg, exception);
 
             if (!isStartEvent) {
-                return new ProcessResult(singletonList(msg), emptyList());
+                return new ProcessResult(emptyList(), singletonList(msg));
             } else {
                 throw new CallbackException(msg, exception);
             }
@@ -217,7 +216,7 @@ public class CcdCaseUpdater {
             );
 
             throw new CallbackException(
-                format(
+                String.format(
                     "%s. Service response: %s",
                     getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id),
                     exception.contentUTF8()
@@ -264,10 +263,8 @@ public class CcdCaseUpdater {
     }
 
     private String getErrorMessage(String service, String existingCaseId, String exceptionRecordId) {
-        return format(
-            "Failed to update case for %s service "
-                + "with case Id %s "
-                + "based on exception record %s",
+        return String.format(
+            "Failed to update case for %s service with case Id %s based on exception record %s",
             service,
             existingCaseId,
             exceptionRecordId
@@ -290,7 +287,7 @@ public class CcdCaseUpdater {
     ) {
         CaseDetails existingCase = startEvent.getCaseDetails();
 
-        final CaseDataContent caseDataContent = getCaseDataContent(exceptionRecord, caseUpdateDetails, startEvent);
+        final CaseDataContent caseDataContent = buildCaseDataContent(exceptionRecord, caseUpdateDetails, startEvent);
 
         coreCaseDataApi.submitEventForCaseWorker(
             idamToken,
@@ -313,7 +310,7 @@ public class CcdCaseUpdater {
         );
     }
 
-    private CaseDataContent getCaseDataContent(
+    private CaseDataContent buildCaseDataContent(
         ExceptionRecord exceptionRecord,
         CaseUpdateDetails caseUpdateDetails,
         StartEventResponse startEvent
@@ -322,26 +319,15 @@ public class CcdCaseUpdater {
             .builder()
             .caseReference(exceptionRecord.id)
             .data(caseUpdateDetails.caseData)
-            .event(getEvent(exceptionRecord, startEvent.getCaseDetails().getId(), startEvent.getEventId()))
+            .event(Event
+                .builder()
+                .id(startEvent.getEventId())
+                .summary(String.format("Case updated, case Id %s", startEvent.getCaseDetails().getId()))
+                .description(String.format("Case updated based on exception record ref %s", exceptionRecord.id))
+                .build()
+            )
             .eventToken(startEvent.getToken())
             .build();
     }
 
-    private Event getEvent(
-        ExceptionRecord exceptionRecord,
-        Long existingCaseId,
-        String eventId
-    ) {
-        return Event
-            .builder()
-            .id(eventId)
-            .summary(format("Case updated, case Id %s", existingCaseId))
-            .description(
-                format(
-                    "Case updated based on exception record ref %s",
-                    exceptionRecord.id
-                )
-            )
-            .build();
-    }
 }
