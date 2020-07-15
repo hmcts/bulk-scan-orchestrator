@@ -6,7 +6,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.AttachCaseCallbackService;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.AttachToCaseCallbackService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CreateCaseCallbackService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.ReclassifyCallbackService;
 
@@ -21,7 +21,7 @@ class CcdCallbackControllerAttachToCaseTest {
 
     @Autowired MockMvc mvc;
 
-    @MockBean AttachCaseCallbackService attachService;
+    @MockBean AttachToCaseCallbackService attachService;
     @MockBean CreateCaseCallbackService createService;
     @MockBean ReclassifyCallbackService reclassifyCallbackService;
 
