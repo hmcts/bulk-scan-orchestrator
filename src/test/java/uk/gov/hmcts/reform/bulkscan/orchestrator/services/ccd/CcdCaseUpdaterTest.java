@@ -71,9 +71,6 @@ class CcdCaseUpdaterTest {
     private CoreCaseDataApi coreCaseDataApi;
 
     @Mock
-    private ExceptionRecordFinalizer exceptionRecordFinalizer;
-
-    @Mock
     private ServiceConfigItem configItem;
 
     @Mock
@@ -101,8 +98,7 @@ class CcdCaseUpdaterTest {
             authTokenGenerator,
             coreCaseDataApi,
             caseUpdateClient,
-            serviceResponseParser,
-            exceptionRecordFinalizer
+            serviceResponseParser
         );
 
         caseUpdateDetails = new CaseUpdateDetails(null, new HashMap<String, String>());
@@ -124,8 +120,6 @@ class CcdCaseUpdaterTest {
         initResponseMockData();
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
-        given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyString(), any()))
-            .willReturn(originalFields);
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
@@ -153,8 +147,6 @@ class CcdCaseUpdaterTest {
         initResponseMockData();
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
-        given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyString(), any()))
-            .willReturn(originalFields);
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
@@ -207,8 +199,6 @@ class CcdCaseUpdaterTest {
         initResponseMockData();
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
-        given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyString(), any()))
-            .willReturn(originalFields);
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
