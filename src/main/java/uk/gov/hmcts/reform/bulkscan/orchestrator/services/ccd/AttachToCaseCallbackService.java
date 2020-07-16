@@ -515,18 +515,6 @@ public class AttachToCaseCallbackService {
         );
     }
 
-    private Map<String, Object> mergeCaseFields(
-        Map<String, Object> originalFields,
-        Map<String, Object> modifiedFields
-    ) {
-        Map<String, Object> merged = new HashMap<>(
-            Maps.difference(originalFields, modifiedFields).entriesOnlyOnLeft()
-        );
-
-        merged.putAll(modifiedFields);
-        return merged;
-    }
-
     private ServiceConfigItem getServiceConfig(String service) {
         return Try.of(() -> serviceConfigProvider.getConfig(service))
             .filter(item -> !Strings.isNullOrEmpty(item.getUpdateUrl()))
