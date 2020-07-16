@@ -373,40 +373,6 @@ public class CcdApi {
         }
     }
 
-    public CaseDetails submitEventForAttachScannedDocs(
-        CcdAuthenticator authenticator,
-        String jurisdiction,
-        String caseTypeId,
-        String caseRef,
-        CaseDataContent caseDataContent
-    ) {
-        try {
-            return feignCcdApi.submitEventForCaseWorker(
-                authenticator.getUserToken(),
-                authenticator.getServiceToken(),
-                authenticator.getUserDetails().getId(),
-                jurisdiction,
-                caseTypeId,
-                caseRef,
-                true,
-                caseDataContent
-            );
-        } catch (FeignException.NotFound e) {
-            throw new UnableToAttachDocumentsException(
-                String.format(
-                    "Attach documents submit failed for case type: %s and case ref: %s", caseTypeId, caseRef
-                ),
-                e
-            );
-        } catch (FeignException e) {
-            debugCcdException(log, e, "Failed to call 'submitEventForCaseWorker'");
-            removeFromIdamCacheIfAuthProblem(e.status(), jurisdiction);
-            throw new CcdCallException(
-                String.format("Could not attach documents for case ref: %s Error: %s", caseRef, e.status()), e
-            );
-        }
-    }
-
     public long createNewCaseFromCallback(
         String idamToken,
         String s2sToken,
