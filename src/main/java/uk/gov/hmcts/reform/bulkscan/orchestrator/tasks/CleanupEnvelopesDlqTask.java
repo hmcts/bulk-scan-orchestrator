@@ -52,8 +52,8 @@ public class CleanupEnvelopesDlqTask {
             int completedCount = 0;
             IMessage message = messageReceiver.receive();
             while (message != null) {
+                logMessage(message);
                 if (canBeCompleted(message)) {
-                    logMessage(message);
                     messageReceiver.complete(message.getLockToken());
                     completedCount++;
                     log.info(
