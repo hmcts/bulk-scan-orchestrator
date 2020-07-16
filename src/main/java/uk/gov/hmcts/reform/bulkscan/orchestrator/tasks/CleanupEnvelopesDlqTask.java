@@ -118,8 +118,8 @@ public class CleanupEnvelopesDlqTask {
             ? null
             : (String) messageProperties.get("deadLetteredAt");
 
-        log.info("test deadLetteredAtStr -->", deadLetteredAtStr);
-        log.info("cutoff -->", cutoff);
+        log.info("test deadLetteredAtStr {}:", deadLetteredAtStr);
+        log.info("cutoff {}:", cutoff);
 
         if (deadLetteredAtStr != null) {
             Instant deadLetteredAt = Instant.parse(deadLetteredAtStr);
