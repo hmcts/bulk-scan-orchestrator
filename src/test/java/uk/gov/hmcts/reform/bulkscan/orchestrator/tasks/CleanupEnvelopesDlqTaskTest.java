@@ -69,7 +69,7 @@ class CleanupEnvelopesDlqTaskTest {
             .willReturn(
                 ImmutableMap.of(
                     "deadLetteredAt",
-                    LocalDateTime.now().minus(ttl.plusSeconds(10)).toInstant(UTC)
+                    LocalDateTime.now().minus(ttl.plusSeconds(10)).toInstant(UTC).toString()
                 )
             );
         given(messageReceiver.receive()).willReturn(message).willReturn(null);
@@ -113,7 +113,7 @@ class CleanupEnvelopesDlqTaskTest {
             .willReturn(
                 ImmutableMap.of(
                     "deadLetteredAt",
-                    LocalDateTime.now().minus(ttl.minusSeconds(5)).toInstant(UTC)
+                    LocalDateTime.now().minus(ttl.minusSeconds(5)).toInstant(UTC).toString()
                 )
             );
         given(messageReceiver.receive()).willReturn(message).willReturn(null);

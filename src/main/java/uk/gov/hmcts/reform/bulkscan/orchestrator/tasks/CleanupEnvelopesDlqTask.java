@@ -112,12 +112,13 @@ public class CleanupEnvelopesDlqTask {
         Instant cutoff = Instant.now().minus(this.ttl);
         Map<String, Object> messageProperties = message.getProperties();
 
-        Instant deadLetteredAt =
+        String deadLetteredAtStr =
             messageProperties == null
             ? null
-            : (Instant) messageProperties.get("deadLetteredAt");
+            : (String) messageProperties.get("deadLetteredAt");
 
-        if (deadLetteredAt != null) {
+        if (deadLetteredAtStr != null) {
+            Instant deadLetteredAt = Instant.parse(deadLetteredAtStr);
 
             log.info(
                 "Checking if DLQ message can be completed. "

@@ -168,7 +168,7 @@ public class EnvelopeEventProcessor {
             message.getLockToken(),
             reason,
             description,
-            ImmutableMap.of("deadLetteredAt", Instant.now())
+            ImmutableMap.of("deadLetteredAt", Instant.now().toString())
         );
 
         log.info("Message with ID {} has been dead-lettered", message.getMessageId());
