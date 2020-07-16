@@ -282,14 +282,17 @@ public class CcdApi {
         return authenticatorFactory.createForJurisdiction(jurisdiction);
     }
 
-    public StartEventResponse startEvent(
+    // ideally should be more generic. atm just used in creating new exception record as auto event
+    public CaseDetails createExceptionRecord(
         CcdAuthenticator authenticator,
         String jurisdiction,
         String caseTypeId,
-        String eventTypeId
+        String eventTypeId,
+        Function<StartEventResponse, CaseDataContent> caseDataContentBuilder,
+        String logContext
     ) {
         try {
-            return feignCcdApi.startForCaseworker(
+            StartEventResponse eventResponse = feignCcdApi.startForCaseworker(
                 authenticator.getUserToken(),
                 authenticator.getServiceToken(),
                 authenticator.getUserDetails().getId(),
@@ -297,8 +300,22 @@ public class CcdApi {
                 caseTypeId,
                 eventTypeId
             );
+
+            log.info("Started event in CCD. Event: {}, case type: {}. {}", eventTypeId, caseTypeId, logContext);
+
+            CaseDataContent caseData = caseDataContentBuilder.apply(eventResponse);
+
+            return feignCcdApi.submitForCaseworker(
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                authenticator.getUserDetails().getId(),
+                jurisdiction,
+                caseTypeId,
+                true,
+                caseData
+            );
         } catch (FeignException ex) {
-            debugCcdException(log, ex, "Failed to call 'startForCaseworker'");
+            debugCcdException(log, ex, "Failed to call 'createExceptionRecord'");
             removeFromIdamCacheIfAuthProblem(ex.status(), jurisdiction);
             throw ex;
         }
@@ -354,30 +371,6 @@ public class CcdApi {
                 String.format("Could not attach documents for case ref: %s Error: %s", caseRef, e.status()), e
             );
         }
-    }
-
-    public CaseDetails submitEvent(
-        CcdAuthenticator authenticator,
-        String jurisdiction,
-        String caseTypeId,
-        CaseDataContent caseDataContent
-    ) {
-        try {
-            return feignCcdApi.submitForCaseworker(
-                authenticator.getUserToken(),
-                authenticator.getServiceToken(),
-                authenticator.getUserDetails().getId(),
-                jurisdiction,
-                caseTypeId,
-                true,
-                caseDataContent
-            );
-        } catch (FeignException ex) {
-            debugCcdException(log, ex, "Failed to call 'submitForCaseworker'");
-            removeFromIdamCacheIfAuthProblem(ex.status(), jurisdiction);
-            throw ex;
-        }
-
     }
 
     public CaseDetails submitEventForAttachScannedDocs(

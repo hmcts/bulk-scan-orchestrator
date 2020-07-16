@@ -245,9 +245,19 @@ class CaseRetrievalTest {
             .willReturn(aResponse().withStatus(status)));
 
         // when
-        assertThatThrownBy(() -> ccdApi.startEvent(CCD_AUTHENTICATOR, JURISDICTION, "99", "eventId"))
+        assertThatThrownBy(() -> ccdApi.createExceptionRecord(
+            CCD_AUTHENTICATOR,
+            JURISDICTION,
+            "99",
+            "eventId",
+            startEventResponse -> CaseDataContent.builder().eventToken("eventtoken").build(),
+            "log context"
+        ))
+            // then
             .isInstanceOf(FeignException.class)
             .hasMessageContaining(errorMessage);
+
+        // and
         Mockito.verify(authenticatorFactory).removeFromCache(JURISDICTION);
     }
 
@@ -275,28 +285,6 @@ class CaseRetrievalTest {
             .hasMessageContaining("Could not attach documents for case ref: 2 Error: " + status);
 
         // and
-        Mockito.verify(authenticatorFactory).removeFromCache(JURISDICTION);
-    }
-
-    @ParameterizedTest
-    @CsvSource({"401,401 Unauthorized", "403,403 Forbidden"})
-    public void submitEvent_should_throw_FeignException_when_auth_error(int status, String errorMessage) {
-        // given
-        givenThat(
-            post("/caseworkers/12/jurisdictions/BULKSCAN/case-types/casetypeid/cases?ignore-warning=true")
-                .willReturn(aResponse().withStatus(status))
-        );
-
-        // when
-        assertThatThrownBy(() -> ccdApi.submitEvent(
-            CCD_AUTHENTICATOR,
-            JURISDICTION,
-            "casetypeid",
-            CaseDataContent.builder().eventToken("eventtoken").build()
-            )
-        )
-            .isInstanceOf(FeignException.class)
-            .hasMessageContaining(errorMessage);
         Mockito.verify(authenticatorFactory).removeFromCache(JURISDICTION);
     }
 }
