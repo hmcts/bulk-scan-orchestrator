@@ -61,25 +61,20 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
 @Service
-public class AttachCaseCallbackService {
+public class AttachToCaseCallbackService {
 
     public static final String PAYMENT_ERROR_MSG = "Payment references cannot be processed. Please try again later";
 
-    private static final Logger log = LoggerFactory.getLogger(AttachCaseCallbackService.class);
+    private static final Logger log = LoggerFactory.getLogger(AttachToCaseCallbackService.class);
 
     private final ServiceConfigProvider serviceConfigProvider;
-
     private final CcdApi ccdApi;
-
     private final ExceptionRecordValidator exceptionRecordValidator;
-
     private final CcdCaseUpdater ccdCaseUpdater;
-
     private final PaymentsProcessor paymentsProcessor;
-
     private final AttachScannedDocumentsValidator scannedDocumentsValidator;
 
-    public AttachCaseCallbackService(
+    public AttachToCaseCallbackService(
         ServiceConfigProvider serviceConfigProvider,
         CcdApi ccdApi,
         ExceptionRecordValidator exceptionRecordValidator,
@@ -123,8 +118,8 @@ public class AttachCaseCallbackService {
 
         return getValidation(exceptionRecordDetails, requesterIdamToken, requesterUserId)
             .map(callBackEvent -> tryAttachToCase(callBackEvent, exceptionRecordDetails, ignoreWarnings))
-            .map(attachCaseResult ->
-                attachCaseResult.map(modifiedFields ->
+            .map(attachToCaseResult ->
+                attachToCaseResult.map(modifiedFields ->
                     mergeCaseFields(exceptionRecordDetails.getData(), modifiedFields))
             )
             .getOrElseGet(errors -> Either.left(ErrorsAndWarnings.withErrors(errors.toJavaList())));
@@ -296,7 +291,7 @@ public class AttachCaseCallbackService {
             )
             : callBackEvent.targetCaseRef;
 
-        return attachCaseByCcdId(callBackEvent, targetCaseRef, ignoreWarnings)
+        return attachToCaseByCcdId(callBackEvent, targetCaseRef, ignoreWarnings)
             .map(Either::<ErrorsAndWarnings, String>left)
             .orElseGet(() -> {
                 log.info(
@@ -336,7 +331,7 @@ public class AttachCaseCallbackService {
         }
     }
 
-    private Optional<ErrorsAndWarnings> attachCaseByCcdId(
+    private Optional<ErrorsAndWarnings> attachToCaseByCcdId(
         AttachToCaseEventData callBackEvent,
         String targetCaseCcdRef,
         boolean ignoreWarnings

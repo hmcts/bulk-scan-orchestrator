@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.AttachCaseCallbackService;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.AttachToCaseCallbackService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CreateCaseCallbackService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.ErrorsAndWarnings;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.ReclassifyCallbackService;
@@ -24,7 +24,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RequestMapping(path = "/callback", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 public class CcdCallbackController {
 
-    private final AttachCaseCallbackService attachCaseCallbackService;
+    private final AttachToCaseCallbackService attachToCaseCallbackService;
     private final CreateCaseCallbackService createCaseCallbackService;
     private final ReclassifyCallbackService reclassifyCallbackService;
 
@@ -32,11 +32,11 @@ public class CcdCallbackController {
 
     @Autowired
     public CcdCallbackController(
-        AttachCaseCallbackService attachCaseCallbackService,
+        AttachToCaseCallbackService attachToCaseCallbackService,
         CreateCaseCallbackService createCaseCallbackService,
         ReclassifyCallbackService reclassifyCallbackService
     ) {
-        this.attachCaseCallbackService = attachCaseCallbackService;
+        this.attachToCaseCallbackService = attachToCaseCallbackService;
         this.createCaseCallbackService = createCaseCallbackService;
         this.reclassifyCallbackService = reclassifyCallbackService;
     }
@@ -49,7 +49,7 @@ public class CcdCallbackController {
     ) {
         if (callback != null && callback.getCaseDetails() != null) {
 
-            return attachCaseCallbackService
+            return attachToCaseCallbackService
                 .process(
                     callback.getCaseDetails(),
                     idamToken,
