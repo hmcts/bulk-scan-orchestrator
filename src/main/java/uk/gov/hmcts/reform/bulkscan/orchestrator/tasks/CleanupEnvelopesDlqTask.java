@@ -85,6 +85,11 @@ public class CleanupEnvelopesDlqTask {
 
     private void logMessage(IMessage msg) {
         try {
+
+            if (msg.getMessageBody() == null) {
+                log.info("msg.getMessageBody() null");
+                return;
+            }
             Envelope envelope = EnvelopeParser.parse(
                 MessageBodyRetriever.getBinaryData(msg.getMessageBody())
             );
@@ -118,7 +123,7 @@ public class CleanupEnvelopesDlqTask {
             ? null
             : (String) messageProperties.get("deadLetteredAt");
 
-        log.info("test deadLetteredAtStr {}:", deadLetteredAtStr);
+        log.info("test deadLetteredAtStr {}", deadLetteredAtStr);
         log.info("cutoff {}:", cutoff);
 
         if (deadLetteredAtStr != null) {
