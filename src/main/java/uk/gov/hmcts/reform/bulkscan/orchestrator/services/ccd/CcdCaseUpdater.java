@@ -42,20 +42,17 @@ public class CcdCaseUpdater {
     private final CoreCaseDataApi coreCaseDataApi;
     private final CaseUpdateClient caseUpdateClient;
     private final ServiceResponseParser serviceResponseParser;
-    private final ExceptionRecordFinalizer exceptionRecordFinalizer;
 
     public CcdCaseUpdater(
         AuthTokenGenerator s2sTokenGenerator,
         CoreCaseDataApi coreCaseDataApi,
         CaseUpdateClient caseUpdateClient,
-        ServiceResponseParser serviceResponseParser,
-        ExceptionRecordFinalizer exceptionRecordFinalizer
+        ServiceResponseParser serviceResponseParser
     ) {
         this.s2sTokenGenerator = s2sTokenGenerator;
         this.coreCaseDataApi = coreCaseDataApi;
         this.caseUpdateClient = caseUpdateClient;
         this.serviceResponseParser = serviceResponseParser;
-        this.exceptionRecordFinalizer = exceptionRecordFinalizer;
     }
 
     public ProcessResult updateCase(
@@ -151,13 +148,7 @@ public class CcdCaseUpdater {
                 if (errorMsg.isPresent()) {
                     return new ProcessResult(singletonList(errorMsg.get()), emptyList());
                 } else {
-                    var updatedExceptionRecordData = exceptionRecordFinalizer.finalizeExceptionRecord(
-                        existingCase.getData(),
-                        Long.toString(existingCase.getId()),
-                        CcdCallbackType.ATTACHING_SUPPLEMENTARY_EVIDENCE
-                    );
-
-                    return new ProcessResult(updatedExceptionRecordData);
+                    return new ProcessResult(emptyList(), emptyList());
                 }
             }
         } catch (UnprocessableEntity exception) {

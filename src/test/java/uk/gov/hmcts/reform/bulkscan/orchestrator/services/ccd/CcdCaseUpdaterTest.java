@@ -43,7 +43,6 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -69,9 +68,6 @@ class CcdCaseUpdaterTest {
 
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
-
-    @Mock
-    private ExceptionRecordFinalizer exceptionRecordFinalizer;
 
     @Mock
     private ServiceConfigItem configItem;
@@ -101,8 +97,7 @@ class CcdCaseUpdaterTest {
             authTokenGenerator,
             coreCaseDataApi,
             caseUpdateClient,
-            serviceResponseParser,
-            exceptionRecordFinalizer
+            serviceResponseParser
         );
 
         caseUpdateDetails = new CaseUpdateDetails(null, new HashMap<String, String>());
@@ -124,8 +119,6 @@ class CcdCaseUpdaterTest {
         initResponseMockData();
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
-        given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyString(), any()))
-            .willReturn(originalFields);
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
@@ -141,7 +134,7 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(res.getErrors()).isEmpty();
         assertThat(res.getWarnings()).isEmpty();
-        assertThat(res.getExceptionRecordData()).isEqualTo(originalFields);
+        assertThat(res.getExceptionRecordData()).isEmpty();
     }
 
     @Test
@@ -153,8 +146,6 @@ class CcdCaseUpdaterTest {
         initResponseMockData();
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
-        given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyString(), any()))
-            .willReturn(originalFields);
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
@@ -170,7 +161,7 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(res.getErrors()).isEmpty();
         assertThat(res.getWarnings()).isEmpty();
-        assertThat(res.getExceptionRecordData()).isEqualTo(originalFields);
+        assertThat(res.getExceptionRecordData()).isEmpty();
     }
 
     @Test
@@ -207,8 +198,6 @@ class CcdCaseUpdaterTest {
         initResponseMockData();
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
-        given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyString(), any()))
-            .willReturn(originalFields);
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
@@ -224,7 +213,7 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(res.getErrors()).isEmpty();
         assertThat(res.getWarnings()).isEmpty();
-        assertThat(res.getExceptionRecordData()).isEqualTo(originalFields);
+        assertThat(res.getExceptionRecordData()).isEmpty();
     }
 
     @Test

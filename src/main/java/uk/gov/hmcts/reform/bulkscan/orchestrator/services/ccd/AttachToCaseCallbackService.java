@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import io.vavr.collection.Array;
 import io.vavr.collection.Seq;
 import io.vavr.control.Either;
@@ -70,6 +69,7 @@ public class AttachToCaseCallbackService {
     private final ServiceConfigProvider serviceConfigProvider;
     private final CcdApi ccdApi;
     private final ExceptionRecordValidator exceptionRecordValidator;
+    private final ExceptionRecordFinalizer exceptionRecordFinalizer;
     private final CcdCaseUpdater ccdCaseUpdater;
     private final PaymentsProcessor paymentsProcessor;
     private final AttachScannedDocumentsValidator scannedDocumentsValidator;
@@ -78,6 +78,7 @@ public class AttachToCaseCallbackService {
         ServiceConfigProvider serviceConfigProvider,
         CcdApi ccdApi,
         ExceptionRecordValidator exceptionRecordValidator,
+        ExceptionRecordFinalizer exceptionRecordFinalizer,
         CcdCaseUpdater ccdCaseUpdater,
         PaymentsProcessor paymentsProcessor,
         AttachScannedDocumentsValidator scannedDocumentsValidator
@@ -85,6 +86,7 @@ public class AttachToCaseCallbackService {
         this.serviceConfigProvider = serviceConfigProvider;
         this.ccdApi = ccdApi;
         this.exceptionRecordValidator = exceptionRecordValidator;
+        this.exceptionRecordFinalizer = exceptionRecordFinalizer;
         this.paymentsProcessor = paymentsProcessor;
         this.ccdCaseUpdater = ccdCaseUpdater;
         this.scannedDocumentsValidator = scannedDocumentsValidator;
@@ -118,11 +120,17 @@ public class AttachToCaseCallbackService {
 
         return getValidation(exceptionRecordDetails, requesterIdamToken, requesterUserId)
             .map(callBackEvent -> tryAttachToCase(callBackEvent, exceptionRecordDetails, ignoreWarnings))
-            .map(attachToCaseResult ->
-                attachToCaseResult.map(modifiedFields ->
-                    mergeCaseFields(exceptionRecordDetails.getData(), modifiedFields))
-            )
+            .map(errorsOrRef -> errorsOrRef.map(caseRef -> finalizeExceptionRecData(exceptionRecordDetails, caseRef)))
             .getOrElseGet(errors -> Either.left(ErrorsAndWarnings.withErrors(errors.toJavaList())));
+    }
+
+    private Map<String, Object> finalizeExceptionRecData(CaseDetails exceptionRec, String caseRef) {
+        return exceptionRecordFinalizer
+            .finalizeExceptionRecord(
+                exceptionRec.getData(),
+                caseRef,
+                CcdCallbackType.ATTACHING_SUPPLEMENTARY_EVIDENCE
+            );
     }
 
     private Validation<Seq<String>, AttachToCaseEventData> getValidation(
@@ -214,10 +222,10 @@ public class AttachToCaseCallbackService {
     /**
      * Attaches exception record to a case.
      *
-     * @return Either a map of fields that should be modified in CCD when processing was successful,
+     * @return Either an ID of case to which exception record was attached, when processing was successful,
      *         or the list of errors, in case of errors
      */
-    private Either<ErrorsAndWarnings, Map<String, Object>> tryAttachToCase(
+    private Either<ErrorsAndWarnings, String> tryAttachToCase(
         AttachToCaseEventData callBackEvent,
         CaseDetails exceptionRecordDetails,
         boolean ignoreWarnings
@@ -241,8 +249,7 @@ public class AttachToCaseCallbackService {
                     Long.toString(callBackEvent.exceptionRecordId),
                     callBackEvent.exceptionRecordJurisdiction,
                     attachToCaseRef
-                ))
-                .map(attachToCaseRef -> ImmutableMap.of(ATTACH_TO_CASE_REFERENCE, attachToCaseRef));
+                ));
         } catch (AlreadyAttachedToCaseException
             | DuplicateDocsException
             | CaseNotFoundException
@@ -505,18 +512,6 @@ public class AttachToCaseCallbackService {
             getDocumentNumbers(exceptionDocuments),
             theCase.getId()
         );
-    }
-
-    private Map<String, Object> mergeCaseFields(
-        Map<String, Object> originalFields,
-        Map<String, Object> modifiedFields
-    ) {
-        Map<String, Object> merged = new HashMap<>(
-            Maps.difference(originalFields, modifiedFields).entriesOnlyOnLeft()
-        );
-
-        merged.putAll(modifiedFields);
-        return merged;
     }
 
     private ServiceConfigItem getServiceConfig(String service) {
