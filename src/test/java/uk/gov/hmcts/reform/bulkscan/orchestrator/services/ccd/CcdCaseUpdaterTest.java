@@ -30,7 +30,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.HashMap;
-import java.util.Map;
 import javax.validation.ConstraintViolationException;
 
 import static java.time.LocalDateTime.now;
@@ -57,32 +56,13 @@ class CcdCaseUpdaterTest {
 
     private CcdCaseUpdater ccdCaseUpdater;
 
-    @Mock
-    private CaseUpdateClient caseUpdateClient;
-
-    @Mock
-    private ServiceResponseParser serviceResponseParser;
-
-    @Mock
-    private AuthTokenGenerator authTokenGenerator;
-
-    @Mock
-    private CoreCaseDataApi coreCaseDataApi;
-
-    @Mock
-    private ServiceConfigItem configItem;
-
-    @Mock
-    private CaseDetails existingCase;
-
-    @Mock
-    private StartEventResponse eventResponse;
-
-    @Mock
-    private Map<String, Object> originalFields;
-
-    @Mock
-    private ClientServiceErrorResponse clientServiceErrorResponse;
+    @Mock private CaseUpdateClient caseUpdateClient;
+    @Mock private ServiceResponseParser serviceResponseParser;
+    @Mock private AuthTokenGenerator authTokenGenerator;
+    @Mock private CoreCaseDataApi coreCaseDataApi;
+    @Mock private ServiceConfigItem configItem;
+    @Mock private CaseDetails existingCase;
+    @Mock private StartEventResponse eventResponse;
 
     private ExceptionRecord exceptionRecord;
 
