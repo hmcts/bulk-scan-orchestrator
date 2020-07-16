@@ -103,7 +103,8 @@ public class CleanupEnvelopesDlqTask {
             // Not logging the exception as it prints the sensitive information from the envelope
             log.error(
                 "An error occurred while parsing the dlq message with messageId: {}",
-                msg.getMessageId()
+                msg.getMessageId(),
+                e
             );
         }
     }
@@ -116,6 +117,9 @@ public class CleanupEnvelopesDlqTask {
             messageProperties == null
             ? null
             : (String) messageProperties.get("deadLetteredAt");
+
+        log.info("test deadLetteredAtStr -->" , deadLetteredAtStr);
+        log.info("cutoff -->" , cutoff);
 
         if (deadLetteredAtStr != null) {
             Instant deadLetteredAt = Instant.parse(deadLetteredAtStr);
