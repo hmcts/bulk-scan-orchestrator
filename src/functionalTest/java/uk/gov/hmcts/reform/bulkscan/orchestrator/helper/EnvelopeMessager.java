@@ -61,6 +61,9 @@ public class EnvelopeMessager {
         document.put("url", documentUrl);
         document.put("uuid", StringUtils.substringAfterLast(documentUrl, "/")); //extract uuid from document url
 
+        System.out.println("document " + document.toString());
+        System.out.println("updateCaseData.toString() " + updateCaseData.toString());
+
         Message message = new Message(
             envelopeId,
             updateCaseData.toString(),
