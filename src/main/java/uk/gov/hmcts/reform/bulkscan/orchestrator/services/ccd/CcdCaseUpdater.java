@@ -145,11 +145,10 @@ public class CcdCaseUpdater {
                     startEvent
                 );
 
-                if (errorMsg.isPresent()) {
-                    return new ProcessResult(singletonList(errorMsg.get()), emptyList());
-                } else {
-                    return new ProcessResult(emptyList(), emptyList());
-                }
+                return new ProcessResult(
+                    errorMsg.stream().collect(toList()),
+                    emptyList()
+                );
             }
         } catch (UnprocessableEntity exception) {
             ClientServiceErrorResponse errorResponse = serviceResponseParser.parseResponseBody(exception);
