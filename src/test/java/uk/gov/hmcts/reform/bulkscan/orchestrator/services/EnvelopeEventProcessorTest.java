@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.startsWith;
@@ -150,7 +151,7 @@ class EnvelopeEventProcessorTest {
             eq(message.getLockToken()),
             eq(DEAD_LETTER_REASON_PROCESSING_ERROR),
             contains(JsonParseException.class.getSimpleName()),
-            any()
+            anyMap()
         );
         verify(appInsights).trackDeadLetteredMessage(
             eq(message),
@@ -231,7 +232,7 @@ class EnvelopeEventProcessorTest {
             eq(validMessage.getLockToken()),
             eq("Too many deliveries"),
             eq("Reached limit of message delivery count of 1"),
-            any()
+            anyMap()
         );
         verify(appInsights).trackDeadLetteredMessage(
             validMessage,

@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.MessageBodyRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
@@ -20,8 +19,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import java.util.function.Supplier;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Deletes messages from envelopes Dead letter queue.
@@ -113,10 +110,15 @@ public class CleanupEnvelopesDlqTask {
 
     private boolean canBeCompleted(IMessage message) {
         Instant cutoff = Instant.now().minus(this.ttl);
-        Map<String, String> messageProperties = message.getProperties();
+        Map<String, Object> messageProperties = message.getProperties();
 
-        if (!CollectionUtils.isEmpty(messageProperties) && !isNullOrEmpty(messageProperties.get("deadLetteredAt"))) {
-            Instant deadLetteredAt = Instant.parse(messageProperties.get("deadLetteredAt"));
+        String deadLetteredAtStr =
+            messageProperties == null
+                ? null
+                : (String) messageProperties.get("deadLetteredAt");
+
+        if (deadLetteredAtStr != null) {
+            Instant deadLetteredAt = Instant.parse(deadLetteredAtStr);
 
             log.info(
                 "Checking if DLQ message can be completed. "
