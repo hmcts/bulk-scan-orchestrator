@@ -237,7 +237,7 @@ dependencyManagement {
       entry 'bcprov-jdk15on'
     }
     // align with jupiter version
-    dependencySet(group: 'org.mockito', version: '3.4.2') {
+    dependencySet(group: 'org.mockito', version: '3.4.4') {
       entry 'mockito-core'
     }
     // force junit5 deps to use groovy v3 which fixes reflective call errors for java 11
