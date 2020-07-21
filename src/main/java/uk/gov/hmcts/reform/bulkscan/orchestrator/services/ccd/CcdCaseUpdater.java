@@ -295,8 +295,7 @@ public class CcdCaseUpdater {
                 exception.contentUTF8()
             );
             log.error(msg, exception);
-
-            return Optional.of(msg);
+            throw new RuntimeException();
         } catch (FeignException.Conflict exception) {
             throw exception;
         } catch (FeignException exception) {
