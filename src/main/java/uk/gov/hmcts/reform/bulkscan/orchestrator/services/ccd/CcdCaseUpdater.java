@@ -136,15 +136,20 @@ public class CcdCaseUpdater {
                 setExceptionRecordIdToScannedDocuments(exceptionRecord, updateResponse.caseDetails);
 
                 updateCaseInCcd(
-                    configItem.getService(),
                     ignoreWarnings,
                     idamToken,
                     s2sToken,
                     userId,
-                    existingCaseId,
                     exceptionRecord,
                     updateResponse.caseDetails,
                     startEvent
+                );
+
+                log.info(
+                    "Successfully updated case for service {} with case Id {} based on exception record ref {}",
+                    configItem.getService(),
+                    existingCase.getId(),
+                    exceptionRecord.id
                 );
 
                 return NO_ERRORS_OR_WARNINGS_PROCESS_RESULT;
@@ -246,12 +251,10 @@ public class CcdCaseUpdater {
      * Submits event to update the case.
      */
     private void updateCaseInCcd(
-        String service,
         boolean ignoreWarnings,
         String idamToken,
         String s2sToken,
         String userId,
-        String existingCaseId,
         ExceptionRecord exceptionRecord,
         CaseUpdateDetails caseUpdateDetails,
         StartEventResponse startEvent
@@ -266,16 +269,9 @@ public class CcdCaseUpdater {
                 userId,
                 exceptionRecord.poBoxJurisdiction,
                 startEvent.getCaseDetails().getCaseTypeId(),
-                existingCaseId,
+                startEvent.getCaseDetails().getId().toString(),
                 ignoreWarnings,
                 caseDataContent
-            );
-
-            log.info(
-                "Successfully updated case for service {} with case Id {} based on exception record ref {}",
-                service,
-                existingCase.getId(),
-                exceptionRecord.id
             );
         } catch (FeignException.UnprocessableEntity exception) {
             String msg = String.format(
