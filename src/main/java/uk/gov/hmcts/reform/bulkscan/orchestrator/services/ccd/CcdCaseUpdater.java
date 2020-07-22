@@ -208,12 +208,6 @@ public class CcdCaseUpdater {
                 "Invalid case-update response. " + errorMessage,
                 exc
             );
-        } catch (CcdCallException exception) {
-            log.error(exception.getMessage(), exception.getCause());
-            throw new CallbackException(
-                getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id),
-                exception
-            );
         } catch (Exception exception) {
             throw new CallbackException(
                 getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id),
