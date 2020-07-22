@@ -12,7 +12,7 @@ import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeEventProcessor;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeMessageProcessor;
 
 import java.util.concurrent.TimeUnit;
 
@@ -48,7 +48,7 @@ class ExceptionRecordCreationTest {
     private IMessageReceiver messageReceiver;
 
     @Autowired
-    private EnvelopeEventProcessor envelopeEventProcessor;
+    private EnvelopeMessageProcessor envelopeMessageProcessor;
 
     @BeforeEach
     void before() {
@@ -72,7 +72,7 @@ class ExceptionRecordCreationTest {
     void should_create_exception_record_for_supplementary_evidence_when_case_record_is_not_found() throws Exception {
         given(messageReceiver.receive()).willReturn(messageFromFile("supplementary-evidence-example.json"));
 
-        envelopeEventProcessor.processNextMessage();
+        envelopeMessageProcessor.processNextMessage();
 
         await()
             .atMost(30, TimeUnit.SECONDS)
@@ -93,7 +93,7 @@ class ExceptionRecordCreationTest {
 
         given(messageReceiver.receive()).willReturn(incompleteSupplementaryMessage);
 
-        envelopeEventProcessor.processNextMessage();
+        envelopeMessageProcessor.processNextMessage();
 
         await()
             .atMost(30, TimeUnit.SECONDS)
@@ -110,7 +110,7 @@ class ExceptionRecordCreationTest {
     void should_create_exception_record_for_new_exception_case_type() throws Exception {
         given(messageReceiver.receive()).willReturn(messageFromFile("exception-example.json"));
 
-        envelopeEventProcessor.processNextMessage();
+        envelopeMessageProcessor.processNextMessage();
 
         await()
             .atMost(30, TimeUnit.SECONDS)
@@ -127,7 +127,7 @@ class ExceptionRecordCreationTest {
     void should_create_exception_record_for_new_application_case_type() throws Exception {
         given(messageReceiver.receive()).willReturn(messageFromFile("new-application-example.json"));
 
-        envelopeEventProcessor.processNextMessage();
+        envelopeMessageProcessor.processNextMessage();
 
         await()
             .atMost(30, TimeUnit.SECONDS)
@@ -144,7 +144,7 @@ class ExceptionRecordCreationTest {
     void should_create_exception_record_for_supplementary_evidence_with_ocr() throws Exception {
         given(messageReceiver.receive()).willReturn(messageFromFile("supplementary-evidence-with-ocr-example.json"));
 
-        envelopeEventProcessor.processNextMessage();
+        envelopeMessageProcessor.processNextMessage();
 
         await()
             .atMost(30, TimeUnit.SECONDS)

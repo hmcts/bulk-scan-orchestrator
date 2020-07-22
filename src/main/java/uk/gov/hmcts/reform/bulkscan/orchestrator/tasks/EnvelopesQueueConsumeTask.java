@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.QueueProcessingReadinessChecker;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.LogInAttemptRejectedException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeEventProcessor;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeMessageProcessor;
 
 @Service
 @ConditionalOnProperty(value = "scheduling.task.consume-envelopes-queue.enabled", matchIfMissing = true)
@@ -16,14 +16,14 @@ public class EnvelopesQueueConsumeTask {
     private static final Logger log = LoggerFactory.getLogger(EnvelopesQueueConsumeTask.class);
     private static final String TASK_NAME = "consume-envelopes-queue";
 
-    private final EnvelopeEventProcessor envelopeEventProcessor;
+    private final EnvelopeMessageProcessor envelopeMessageProcessor;
     private final QueueProcessingReadinessChecker processingReadinessChecker;
 
     public EnvelopesQueueConsumeTask(
-        EnvelopeEventProcessor envelopeEventProcessor,
+        EnvelopeMessageProcessor envelopeMessageProcessor,
         QueueProcessingReadinessChecker processingReadinessChecker
     ) {
-        this.envelopeEventProcessor = envelopeEventProcessor;
+        this.envelopeMessageProcessor = envelopeMessageProcessor;
         this.processingReadinessChecker = processingReadinessChecker;
     }
 
@@ -35,7 +35,7 @@ public class EnvelopesQueueConsumeTask {
             boolean queueMayHaveMessages = true;
 
             while (queueMayHaveMessages && isReadyForConsumingMessages()) {
-                queueMayHaveMessages = envelopeEventProcessor.processNextMessage();
+                queueMayHaveMessages = envelopeMessageProcessor.processNextMessage();
             }
         } catch (InterruptedException exception) {
             logTaskError(exception);

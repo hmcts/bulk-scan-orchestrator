@@ -13,7 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.logging.AppInsights;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.EnvelopeHandler;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeEventProcessor;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeMessageProcessor;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeProcessingResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.NotificationSendingException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.ProcessedEnvelopeNotifier;
@@ -41,7 +41,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.EXCEPTION_RECORD;
 
 @ExtendWith(MockitoExtension.class)
-class EnvelopeEventProcessorTest {
+class EnvelopeMessageProcessorTest {
 
     private static final String DEAD_LETTER_REASON_PROCESSING_ERROR = "Message processing error";
 
@@ -57,11 +57,11 @@ class EnvelopeEventProcessorTest {
     @Mock
     private ProcessedEnvelopeNotifier processedEnvelopeNotifier;
 
-    private EnvelopeEventProcessor processor;
+    private EnvelopeMessageProcessor processor;
 
     @BeforeEach
     void before() throws Exception {
-        processor = new EnvelopeEventProcessor(
+        processor = new EnvelopeMessageProcessor(
             envelopeHandler,
             processedEnvelopeNotifier,
             messageReceiver,
@@ -210,7 +210,7 @@ class EnvelopeEventProcessorTest {
         IMessage validMessage = getValidMessage();
         given(messageReceiver.receive()).willReturn(validMessage);
 
-        processor = new EnvelopeEventProcessor(
+        processor = new EnvelopeMessageProcessor(
             envelopeHandler,
             processedEnvelopeNotifier,
             messageReceiver,
@@ -291,7 +291,7 @@ class EnvelopeEventProcessorTest {
     public void should_not_treat_heartbeat_messages_as_envelopes() throws Exception {
         // given
         IMessage message = mock(IMessage.class);
-        given(message.getLabel()).willReturn(EnvelopeEventProcessor.HEARTBEAT_LABEL);
+        given(message.getLabel()).willReturn(EnvelopeMessageProcessor.HEARTBEAT_LABEL);
 
         given(messageReceiver.receive()).willReturn(message);
 
