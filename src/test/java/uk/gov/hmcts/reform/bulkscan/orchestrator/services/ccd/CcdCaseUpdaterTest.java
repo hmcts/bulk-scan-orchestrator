@@ -30,7 +30,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.HashMap;
-import java.util.Map;
 import javax.validation.ConstraintViolationException;
 
 import static java.time.LocalDateTime.now;
@@ -43,8 +42,6 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -59,35 +56,13 @@ class CcdCaseUpdaterTest {
 
     private CcdCaseUpdater ccdCaseUpdater;
 
-    @Mock
-    private CaseUpdateClient caseUpdateClient;
-
-    @Mock
-    private ServiceResponseParser serviceResponseParser;
-
-    @Mock
-    private AuthTokenGenerator authTokenGenerator;
-
-    @Mock
-    private CoreCaseDataApi coreCaseDataApi;
-
-    @Mock
-    private ExceptionRecordFinalizer exceptionRecordFinalizer;
-
-    @Mock
-    private ServiceConfigItem configItem;
-
-    @Mock
-    private CaseDetails existingCase;
-
-    @Mock
-    private StartEventResponse eventResponse;
-
-    @Mock
-    private Map<String, Object> originalFields;
-
-    @Mock
-    private ClientServiceErrorResponse clientServiceErrorResponse;
+    @Mock private CaseUpdateClient caseUpdateClient;
+    @Mock private ServiceResponseParser serviceResponseParser;
+    @Mock private AuthTokenGenerator authTokenGenerator;
+    @Mock private CoreCaseDataApi coreCaseDataApi;
+    @Mock private ServiceConfigItem configItem;
+    @Mock private CaseDetails existingCase;
+    @Mock private StartEventResponse eventResponse;
 
     private ExceptionRecord exceptionRecord;
 
@@ -102,8 +77,7 @@ class CcdCaseUpdaterTest {
             authTokenGenerator,
             coreCaseDataApi,
             caseUpdateClient,
-            serviceResponseParser,
-            exceptionRecordFinalizer
+            serviceResponseParser
         );
 
         caseUpdateDetails = new CaseUpdateDetails(null, new HashMap<String, String>());
@@ -125,7 +99,6 @@ class CcdCaseUpdaterTest {
         initResponseMockData();
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
-        given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong(), any())).willReturn(originalFields);
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
@@ -141,7 +114,7 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(res.getErrors()).isEmpty();
         assertThat(res.getWarnings()).isEmpty();
-        assertThat(res.getExceptionRecordData()).isEqualTo(originalFields);
+        assertThat(res.getExceptionRecordData()).isEmpty();
     }
 
     @Test
@@ -153,7 +126,6 @@ class CcdCaseUpdaterTest {
         initResponseMockData();
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
-        given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong(), any())).willReturn(originalFields);
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
@@ -169,7 +141,7 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(res.getErrors()).isEmpty();
         assertThat(res.getWarnings()).isEmpty();
-        assertThat(res.getExceptionRecordData()).isEqualTo(originalFields);
+        assertThat(res.getExceptionRecordData()).isEmpty();
     }
 
     @Test
@@ -206,7 +178,6 @@ class CcdCaseUpdaterTest {
         initResponseMockData();
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
-        given(exceptionRecordFinalizer.finalizeExceptionRecord(anyMap(), anyLong(), any())).willReturn(originalFields);
 
         // when
         ProcessResult res = ccdCaseUpdater.updateCase(
@@ -222,7 +193,7 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(res.getErrors()).isEmpty();
         assertThat(res.getWarnings()).isEmpty();
-        assertThat(res.getExceptionRecordData()).isEqualTo(originalFields);
+        assertThat(res.getExceptionRecordData()).isEmpty();
     }
 
     @Test

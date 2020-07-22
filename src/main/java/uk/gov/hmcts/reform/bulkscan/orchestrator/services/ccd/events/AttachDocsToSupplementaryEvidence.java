@@ -55,27 +55,19 @@ class AttachDocsToSupplementaryEvidence {
             try {
                 CcdAuthenticator authenticator = ccdApi.authenticateJurisdiction(envelope.jurisdiction);
 
-                StartEventResponse startEventResp = ccdApi.startEventForAttachScannedDocs(
+                ccdApi.attachScannedDocs(
                     authenticator,
                     envelope.jurisdiction,
                     existingCase.getCaseTypeId(),
-                    existingCase.getId().toString(),
-                    EVENT_TYPE_ID
-                );
-
-                log.info("Started event in CCD to attach supplementary evidence to case. {}", loggingContext);
-
-                ccdApi.submitEventForAttachScannedDocs(
-                    authenticator,
-                    envelope.jurisdiction,
-                    existingCase.getCaseTypeId(),
-                    existingCase.getId().toString(),
-                    buildCaseDataContent(envelope, startEventResp)
+                    Long.toString(existingCase.getId()),
+                    EVENT_TYPE_ID,
+                    startEventResponse -> buildCaseDataContent(envelope, startEventResponse),
+                    loggingContext
                 );
 
                 log.info("Attached documents from envelope to case. {}", loggingContext);
             } catch (UnableToAttachDocumentsException e) {
-                log.error("Failed to attach documents from envelope to case. {}", loggingContext);
+                log.error("Failed to attach documents from envelope to case. {}", loggingContext, e);
                 return false;
             }
         }

@@ -53,6 +53,9 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURISDICTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.CcdCallbackController.USER_ID;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.DISPLAY_WARNINGS;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.OCR_DATA_VALIDATION_WARNINGS;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues.NO;
 
 public class AttachExceptionRecordTestBase {
 
@@ -198,11 +201,15 @@ public class AttachExceptionRecordTestBase {
         Map<String, Object> responseData = responseJson.getMap(RESPONSE_FIELD_DATA);
         assertThat(responseData).isNotNull();
         assertThat(responseData.get(ATTACH_TO_CASE_REFERENCE_FIELD_NAME)).isEqualTo(CASE_REF);
+        assertThat(responseData.get(DISPLAY_WARNINGS)).isEqualTo(NO);
+        assertThat(responseData.get(OCR_DATA_VALIDATION_WARNINGS)).isEqualTo(emptyList());
 
         assertMapsAreEqualIgnoringFields(
             responseData,
             request.getCaseDetails().getData(),
-            ATTACH_TO_CASE_REFERENCE_FIELD_NAME
+            ATTACH_TO_CASE_REFERENCE_FIELD_NAME,
+            DISPLAY_WARNINGS,
+            OCR_DATA_VALIDATION_WARNINGS
         );
     }
 

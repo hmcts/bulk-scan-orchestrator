@@ -14,7 +14,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 
 class ExceptionRecordFinalizerTest {
 
-    private static final long CASE_ID = 100L;
+    private static final String CASE_ID = "100";
     private static final String FIELD_1 = "field1";
 
     public static final String FIELD_CASE_REFERENCE = "caseReference";
@@ -51,7 +51,7 @@ class ExceptionRecordFinalizerTest {
         );
 
         assertThat(res.get("field1")).isEqualTo("value1");
-        assertThat(res.get(FIELD_CASE_REFERENCE)).isEqualTo(Long.toString(CASE_ID));
+        assertThat(res.get(FIELD_CASE_REFERENCE)).isEqualTo(CASE_ID);
         assertThat(res.get(FIELD_DISPLAY_WARNINGS)).isEqualTo(NO);
         assertThat(res.get(FIELD_OCR_DATA_VALIDATION_WARNINGS)).isEqualTo(emptyList());
     }
@@ -80,7 +80,7 @@ class ExceptionRecordFinalizerTest {
         );
         assertThat(res.get("field1")).isEqualTo("value1");
         assertThat(res.get("field2")).isEqualTo(null);
-        assertThat(res.get(FIELD_CASE_REFERENCE)).isEqualTo(Long.toString(CASE_ID));
+        assertThat(res.get(FIELD_CASE_REFERENCE)).isEqualTo(CASE_ID);
         assertThat(res.get(FIELD_DISPLAY_WARNINGS)).isEqualTo(NO);
         assertThat(res.get(FIELD_OCR_DATA_VALIDATION_WARNINGS)).isEqualTo(emptyList());
     }
@@ -110,7 +110,7 @@ class ExceptionRecordFinalizerTest {
         );
 
         assertThat(res.get("field1")).isEqualTo("value1");
-        assertThat(res.get(FIELD_CASE_REFERENCE)).isEqualTo(Long.toString(CASE_ID));
+        assertThat(res.get(FIELD_CASE_REFERENCE)).isEqualTo(CASE_ID);
         assertThat(res.get(FIELD_DISPLAY_WARNINGS)).isEqualTo(NO);
         assertThat(res.get(FIELD_OCR_DATA_VALIDATION_WARNINGS)).isEqualTo(emptyList());
     }
@@ -128,7 +128,7 @@ class ExceptionRecordFinalizerTest {
         );
 
         // then
-        assertThat(res.get(FIELD_CASE_REFERENCE)).isEqualTo(Long.toString(CASE_ID));
+        assertThat(res.get(FIELD_CASE_REFERENCE)).isEqualTo(CASE_ID);
         assertThat(res).doesNotContainKeys(FIELD_ATTACH_TO_CASE_REFERENCE);
     }
 
@@ -145,7 +145,7 @@ class ExceptionRecordFinalizerTest {
         );
 
         // then
-        assertThat(res.get(FIELD_ATTACH_TO_CASE_REFERENCE)).isEqualTo(Long.toString(CASE_ID));
+        assertThat(res.get(FIELD_ATTACH_TO_CASE_REFERENCE)).isEqualTo(CASE_ID);
         assertThat(res).doesNotContainKeys(FIELD_CASE_REFERENCE);
     }
 }

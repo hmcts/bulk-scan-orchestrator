@@ -245,71 +245,46 @@ class CaseRetrievalTest {
             .willReturn(aResponse().withStatus(status)));
 
         // when
-        assertThatThrownBy(() -> ccdApi.startEvent(CCD_AUTHENTICATOR, JURISDICTION, "99", "eventId"))
+        assertThatThrownBy(() -> ccdApi.createExceptionRecord(
+            CCD_AUTHENTICATOR,
+            JURISDICTION,
+            "99",
+            "eventId",
+            startEventResponse -> CaseDataContent.builder().eventToken("eventtoken").build(),
+            "log context"
+        ))
+            // then
             .isInstanceOf(FeignException.class)
             .hasMessageContaining(errorMessage);
+
+        // and
         Mockito.verify(authenticatorFactory).removeFromCache(JURISDICTION);
     }
 
     @ParameterizedTest
     @ValueSource(ints = {401, 403})
-    public void startEventForAttachScannedDocs_should_throw_ccdCallException_when_auth_error(int status) {
+    public void attachScannedDocs_should_throw_ccdCallException_when_auth_error(int status) {
         // given
         givenThat(get("/caseworkers/12/jurisdictions/BULKSCAN/case-types/77/cases/2/event-triggers/eventId/token")
             .willReturn(aResponse().withStatus(status)));
 
         // when
         assertThatThrownBy(
-            () -> ccdApi.startEventForAttachScannedDocs(CCD_AUTHENTICATOR, JURISDICTION, "77", "2", "eventId"))
-            .isInstanceOf(CcdCallException.class)
-            .hasMessageContaining("Could not attach documents for case ref: 2 Error: " + status);
-        Mockito.verify(authenticatorFactory).removeFromCache(JURISDICTION);
-    }
-
-    @ParameterizedTest
-    @ValueSource(ints = {401, 403})
-    public void submitEventForAttachScannedDocs_should_throw_CcdCallException_when_auth_error(int status) {
-        // given
-        givenThat(
-            post("/caseworkers/12/jurisdictions/BULKSCAN/case-types/23/cases/98/events?ignore-warning=true")
-            .willReturn(aResponse().withStatus(status))
-        );
-
-        // when
-        assertThatThrownBy(
-            () -> ccdApi.submitEventForAttachScannedDocs(
+            () -> ccdApi.attachScannedDocs(
                 CCD_AUTHENTICATOR,
                 JURISDICTION,
-                "23",
-                "98",
-                CaseDataContent.builder().eventToken("eventtoken").build()
+                "77",
+                "2",
+                "eventId",
+                startEvent -> CaseDataContent.builder().eventToken("eventtoken").build(),
+                "log context"
             )
         )
+            // then
             .isInstanceOf(CcdCallException.class)
-            .hasMessageContaining("Could not attach documents for case ref: 98 Error: " + status);
-        //then
-        Mockito.verify(authenticatorFactory).removeFromCache(JURISDICTION);
-    }
+            .hasMessageContaining("Could not attach documents for case ref: 2 Error: " + status);
 
-    @ParameterizedTest
-    @CsvSource({"401,401 Unauthorized", "403,403 Forbidden"})
-    public void submitEvent_should_throw_FeignException_when_auth_error(int status, String errorMessage) {
-        // given
-        givenThat(
-            post("/caseworkers/12/jurisdictions/BULKSCAN/case-types/casetypeid/cases?ignore-warning=true")
-                .willReturn(aResponse().withStatus(status))
-        );
-
-        // when
-        assertThatThrownBy(() -> ccdApi.submitEvent(
-            CCD_AUTHENTICATOR,
-            JURISDICTION,
-            "casetypeid",
-            CaseDataContent.builder().eventToken("eventtoken").build()
-            )
-        )
-            .isInstanceOf(FeignException.class)
-            .hasMessageContaining(errorMessage);
+        // and
         Mockito.verify(authenticatorFactory).removeFromCache(JURISDICTION);
     }
 }

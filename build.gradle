@@ -5,8 +5,8 @@ plugins {
   id 'jacoco'
   id 'io.spring.dependency-management' version '1.0.9.RELEASE'
   id 'org.owasp.dependencycheck' version '5.3.2.1'
-  id 'org.springframework.boot' version '2.3.1.RELEASE'
-  id 'com.github.ben-manes.versions' version '0.28.0'
+  id 'org.springframework.boot' version '2.3.1.RELEASE' // review tomcat managed dependency
+  id 'com.github.ben-manes.versions' version '0.29.0'
   id 'org.sonarqube' version '3.0'
   id 'info.solidsoft.pitest' version '1.5.1'
   id 'au.com.dius.pact' version '4.1.6'
@@ -233,11 +233,11 @@ dependencyManagement {
       entry 'guava'
     }
     // solves: CVE-2017-13098, CVE-2018-1000180, CVE-2018-1000613
-    dependencySet(group: 'org.bouncycastle', version: '1.65.01') {
+    dependencySet(group: 'org.bouncycastle', version: '1.66') {
       entry 'bcprov-jdk15on'
     }
     // align with jupiter version
-    dependencySet(group: 'org.mockito', version: '3.3.3') {
+    dependencySet(group: 'org.mockito', version: '3.4.4') {
       entry 'mockito-core'
     }
     // force junit5 deps to use groovy v3 which fixes reflective call errors for java 11
@@ -246,6 +246,12 @@ dependencyManagement {
       entry 'groovy'
       entry 'groovy-json'
       entry 'groovy-xml'
+    }
+    // CVE-2020-13934, CVE-2020-13935 until 9.0.36 (inclusive)
+    // review together with spring boot update
+    dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.37') {
+      entry 'tomcat-embed-core'
+      entry 'tomcat-embed-websocket'
     }
   }
 }
@@ -268,7 +274,7 @@ dependencies {
   implementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: '4.7.2'
   implementation group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version:'0.1.0'
 
-  implementation group: 'com.microsoft.azure', name: 'azure-servicebus', version: '1.2.18', {
+  implementation group: 'com.microsoft.azure', name: 'azure-servicebus', version: '3.4.0',{
     exclude group: 'net.minidev', module: 'json-smart' // most up-to-date libraries use v2.* now. this one brings in 1.3
   }
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.3'
@@ -281,7 +287,7 @@ dependencies {
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
   testImplementation group: 'com.typesafe', name: 'config', version: '1.4.0'
-  testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '3.3.3'
+  testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '3.4.2'
   testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
   testImplementation group: 'org.awaitility', name: 'awaitility', version: '4.0.3'
   testImplementation group: 'io.rest-assured', name: 'rest-assured'

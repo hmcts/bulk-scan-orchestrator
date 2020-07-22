@@ -34,6 +34,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.serverError;
 import static com.google.common.io.Resources.getResource;
 import static com.google.common.io.Resources.toByteArray;
 import static io.restassured.RestAssured.given;
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -42,6 +43,9 @@ import static org.springframework.http.HttpStatus.OK;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_EXCEPTION_RECORD;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURISDICTION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.DISPLAY_WARNINGS;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.OCR_DATA_VALIDATION_WARNINGS;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues.NO;
 
 @AutoConfigureWireMock(port = 0)
 @IntegrationTest
@@ -252,11 +256,15 @@ class AttachExceptionRecordWithOcrTest {
         Map<String, Object> responseData = responseJson.getMap(RESPONSE_FIELD_DATA);
         assertThat(responseData).isNotNull();
         assertThat(responseData.get(ATTACH_TO_CASE_REFERENCE_FIELD_NAME)).isEqualTo(CASE_REF);
+        assertThat(responseData.get(DISPLAY_WARNINGS)).isEqualTo(NO);
+        assertThat(responseData.get(OCR_DATA_VALIDATION_WARNINGS)).isEqualTo(emptyList());
 
         assertMapsAreEqualIgnoringFields(
             responseData,
             requestData,
             ATTACH_TO_CASE_REFERENCE_FIELD_NAME,
+            DISPLAY_WARNINGS,
+            OCR_DATA_VALIDATION_WARNINGS,
             "deliveryDate",
             "openingDate",
             "scannedDocuments",

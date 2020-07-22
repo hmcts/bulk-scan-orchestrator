@@ -107,8 +107,11 @@ class CreateCaseTest {
         // the same case is returned
         assertThat(caseCcdId2).isEqualTo(caseCcdId);
         List<Long> caseIds2 = ccdApi.getCaseRefsByBulkScanCaseReference(bulkScanCaseReference, "bulkscan");
-        assertThat(caseIds2.size()).isEqualTo(1);
-        assertThat(caseIds2.get(0)).isEqualTo(createdCase.getId());
+        assertThat(caseIds2)
+            .as("Should return same case for '%s' bulkscan case", bulkScanCaseReference)
+            .hasSize(1)
+            .first()
+            .isEqualTo(createdCase.getId());
     }
 
     @Test

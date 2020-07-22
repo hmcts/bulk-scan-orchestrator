@@ -34,7 +34,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -57,7 +56,7 @@ class CreateCaseCallbackServiceTest {
     private static final String IDAM_TOKEN = "idam-token";
     private static final String USER_ID = "user-id";
     private static final String SERVICE = "service";
-    private static final long CASE_ID = 123;
+    private static final String CASE_ID = "123";
     private static final String CASE_TYPE_ID = SERVICE + "_ExceptionRecord";
     private static final ExceptionRecordValidator VALIDATOR = new ExceptionRecordValidator();
 
@@ -105,7 +104,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException).hasMessage("The some event event is not supported. Please contact service team");
 
         verify(serviceConfigProvider, never()).getConfig(anyString());
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
 
     @Test
@@ -127,7 +126,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException).hasMessage("No case type ID supplied");
 
         verify(serviceConfigProvider, never()).getConfig(anyString());
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
 
     @Test
@@ -150,7 +149,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException).hasMessage("Case type ID () has invalid format");
 
         verify(serviceConfigProvider, never()).getConfig(anyString());
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
 
     @Test
@@ -173,7 +172,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException.getCause()).isNull();
         assertThat(callbackException).hasMessage("oh no");
 
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
 
     @Test
@@ -196,7 +195,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException.getCause()).isNull();
         assertThat(callbackException).hasMessage("Transformation URL is not configured");
 
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
 
     @Test
@@ -205,7 +204,7 @@ class CreateCaseCallbackServiceTest {
         setUpTransformationUrl();
 
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
-            .id(CASE_ID)
+            .id(Long.valueOf(CASE_ID))
             .caseTypeId(CASE_TYPE_ID)
             .jurisdiction("some jurisdiction")
         );
@@ -231,7 +230,7 @@ class CreateCaseCallbackServiceTest {
         setUpTransformationUrl();
 
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
-            .id(CASE_ID)
+            .id(Long.valueOf(CASE_ID))
             .caseTypeId(CASE_TYPE_ID)
             .jurisdiction("some jurisdiction")
         );
@@ -282,7 +281,7 @@ class CreateCaseCallbackServiceTest {
             )
         );
 
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
 
     @Test
@@ -310,7 +309,7 @@ class CreateCaseCallbackServiceTest {
             )
         );
 
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
 
     @Test
@@ -318,11 +317,11 @@ class CreateCaseCallbackServiceTest {
         // given
         setUpTransformationUrl();
 
-        when(ccdApi.getCaseRefsByBulkScanCaseReference(Long.toString(CASE_ID), null))
+        when(ccdApi.getCaseRefsByBulkScanCaseReference(CASE_ID, null))
             .thenReturn(asList(345L));
         Map<String, Object> caseData = basicCaseData();
         Map<String, Object> finalizedCaseData = new HashMap<>();
-        when(exceptionRecordFinalizer.finalizeExceptionRecord(caseData, 345L, CASE_CREATION))
+        when(exceptionRecordFinalizer.finalizeExceptionRecord(caseData, "345", CASE_CREATION))
             .thenReturn(finalizedCaseData);
 
         // when
@@ -337,14 +336,14 @@ class CreateCaseCallbackServiceTest {
         assertThat(result.getWarnings()).isEmpty();
         assertThat(result.getErrors()).isEmpty();
 
-        verify(exceptionRecordFinalizer).finalizeExceptionRecord(caseData, 345L, CASE_CREATION);
+        verify(exceptionRecordFinalizer).finalizeExceptionRecord(caseData, "345", CASE_CREATION);
     }
 
     @Test
     void should_return_error_if_multiple_cases_exist_in_ccd_for_a_given_exception_record() throws Exception {
         setUpTransformationUrl();
 
-        when(ccdApi.getCaseRefsByBulkScanCaseReference(Long.toString(CASE_ID), null))
+        when(ccdApi.getCaseRefsByBulkScanCaseReference(CASE_ID, null))
             .thenReturn(asList(345L, 456L));
 
         assertThatThrownBy(
@@ -357,7 +356,7 @@ class CreateCaseCallbackServiceTest {
             .isInstanceOf(MultipleCasesFoundException.class)
             .hasMessage("Multiple cases (345, 456) found for the given bulk scan case reference: 123");
 
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
 
     @Test
@@ -381,7 +380,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(result.getWarnings()).isEmpty();
         assertThat(result.getErrors()).containsOnly("Missing journeyClassification");
 
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
 
     @Test
@@ -405,7 +404,7 @@ class CreateCaseCallbackServiceTest {
             "Invalid journeyClassification. Error: No enum constant " + Classification.class.getName() + ".EXCEPTIONS"
         );
 
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
 
     @Test
@@ -436,7 +435,7 @@ class CreateCaseCallbackServiceTest {
         data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
 
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
-            .id(CASE_ID)
+            .id(Long.valueOf(CASE_ID))
             .caseTypeId(CASE_TYPE_ID)
             .jurisdiction("some jurisdiction")
             .data(data)
@@ -453,7 +452,7 @@ class CreateCaseCallbackServiceTest {
             "Invalid scannedDocuments format. Error: No enum constant " + DocumentType.class.getName() + ".OTHERS"
         );
 
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
 
     @Test
@@ -489,7 +488,7 @@ class CreateCaseCallbackServiceTest {
         ))));
 
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
-            .id(CASE_ID)
+            .id(Long.valueOf(CASE_ID))
             .caseTypeId(CASE_TYPE_ID)
             .jurisdiction("some jurisdiction")
             .data(data)
@@ -510,7 +509,7 @@ class CreateCaseCallbackServiceTest {
             .asString()
             .matches(match);
 
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
 
     @Test
@@ -538,7 +537,7 @@ class CreateCaseCallbackServiceTest {
             .asString()
             .matches(match);
 
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyLong(), any());
+        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
 
     @Test
@@ -635,7 +634,7 @@ class CreateCaseCallbackServiceTest {
         // then
         assertThat(result.getErrors()).isEmpty();
         assertThat(result.getWarnings()).isEmpty();
-        verify(paymentsProcessor).updatePayments(any(), eq(newCaseId));
+        verify(paymentsProcessor).updatePayments(any(), anyString(), anyString(), eq(Long.toString(newCaseId)));
     }
 
     @Test
@@ -655,7 +654,8 @@ class CreateCaseCallbackServiceTest {
             anyString()
         )).willReturn(new CreateCaseResult(newCaseId));
 
-        willThrow(PaymentsPublishingException.class).given(paymentsProcessor).updatePayments(any(), eq(newCaseId));
+        willThrow(PaymentsPublishingException.class).given(paymentsProcessor)
+            .updatePayments(any(), anyString(), anyString(), eq(Long.toString(newCaseId)));
 
         // when
         ProcessResult result =
@@ -702,7 +702,7 @@ class CreateCaseCallbackServiceTest {
 
     private CaseDetails caseDetails(Map<String, Object> data) {
         return TestCaseBuilder.createCaseWith(builder -> builder
-            .id(CASE_ID)
+            .id(Long.valueOf(CASE_ID))
             .caseTypeId(CASE_TYPE_ID)
             .jurisdiction("some jurisdiction")
             .data(data)
