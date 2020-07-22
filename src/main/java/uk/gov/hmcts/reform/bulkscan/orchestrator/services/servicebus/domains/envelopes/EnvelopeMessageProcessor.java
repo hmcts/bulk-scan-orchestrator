@@ -29,9 +29,9 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 
 @Service
 // TODO: change name to EnvelopeMessageProcessor
-public class EnvelopeEventProcessor {
+public class EnvelopeMessageProcessor {
 
-    private static final Logger log = LoggerFactory.getLogger(EnvelopeEventProcessor.class);
+    private static final Logger log = LoggerFactory.getLogger(EnvelopeMessageProcessor.class);
 
     public static final String HEARTBEAT_LABEL = "heartbeat";
 
@@ -41,7 +41,7 @@ public class EnvelopeEventProcessor {
     private final int maxDeliveryCount;
     private final AppInsights appInsights;
 
-    public EnvelopeEventProcessor(
+    public EnvelopeMessageProcessor(
         EnvelopeHandler envelopeHandler,
         IProcessedEnvelopeNotifier processedEnvelopeNotifier,
         IMessageReceiver messageReceiver,
