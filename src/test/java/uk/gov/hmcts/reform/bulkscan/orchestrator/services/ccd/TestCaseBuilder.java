@@ -27,9 +27,8 @@ class TestCaseBuilder {
         return createCaseWith(b -> b.data(data));
     }
 
-    static CaseDetails caseWithTargetReference(Object attachToCaseReference, Object searchCaseReference) {
+    static CaseDetails caseWithTargetReference(Object searchCaseReference) {
         Map<String, Object> data = new HashMap<>();
-        data.put("attachToCaseReference", attachToCaseReference);
         data.put("searchCaseReference", searchCaseReference);
         return createCaseWith(b -> b.data(data));
     }

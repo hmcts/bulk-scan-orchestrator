@@ -19,7 +19,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithAttachReference;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithAwaitingPaymentsAndClassification;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithCcdSearchCaseReference;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithDocument;
@@ -48,23 +47,19 @@ class CallbackValidationsTest {
     private static Object[][] attachToCaseReferenceTestParams() {
         String noReferenceSupplied = "No case reference supplied";
         return new Object[][]{
-            {"generic non number removal", caseWithAttachReference("£1234234393"), true, "1234234393"},
-            {"- removal", caseWithAttachReference("1234-234-393"), true, "1234234393"},
-            {"space removal", caseWithAttachReference("1234 234 393"), true, "1234234393"},
-            {"prefix and post fix spaces removal", caseWithAttachReference("  AH 234 393 "), true, "234393"},
-            {"No numbers supplied", caseWithAttachReference("#"), false, "Invalid case reference: '#'"},
-            {"empty string", caseWithAttachReference(""), false, "Invalid case reference: ''"},
+            {"generic non number removal", caseWithTargetReference("£1234234393"), true, "1234234393"},
+            {"- removal", caseWithTargetReference("1234-234-393"), true, "1234234393"},
+            {"space removal", caseWithTargetReference("1234 234 393"), true, "1234234393"},
+            {"prefix and post fix spaces removal", caseWithTargetReference("  AH 234 393 "), true, "234393"},
+            {"No numbers supplied", caseWithTargetReference("#"), false, "Invalid case reference: '#'"},
+            {"empty string", caseWithTargetReference(""), false, "Invalid case reference: ''"},
             {"null case details", null, false, noReferenceSupplied},
             {"null data", createCaseWith(b -> b.data(null)), false, noReferenceSupplied},
             {"empty data", createCaseWith(b -> b.data(ImmutableMap.of())), false, noReferenceSupplied},
-            {"null case reference", caseWithAttachReference(null), false, noReferenceSupplied},
-            {"invalid type List", caseWithAttachReference(ImmutableList.of()), false, "Invalid case reference: '[]'"},
-            {"invalid type Integer", caseWithAttachReference(5), false, "Invalid case reference: '5'"},
-            {"valid search case reference", caseWithTargetReference(null, "1234 234 393"), true, "1234234393"},
-            {"both search case reference and attach to case reference are null", caseWithTargetReference(null, null), false, "No case reference supplied"},
-            {"valid attach to case reference", caseWithTargetReference("1234 234 393", null), true, "1234234393"},
-            {"invalid search case ref and attach to case ref null", caseWithTargetReference(null, 56), false, "Invalid case reference: '56'"},
-            {"ignore attach to case ref when search case ref exists", caseWithTargetReference(56, "1234234393"), true, "1234234393"},
+            {"null case reference", caseWithTargetReference(null), false, noReferenceSupplied},
+            {"invalid type List", caseWithTargetReference(ImmutableList.of()), false, "Invalid case reference: '[]'"},
+            {"invalid type Integer", caseWithTargetReference(5), false, "Invalid case reference: '5'"},
+            {"valid search case reference", caseWithTargetReference("1234 234 393"), true, "1234234393"},
         };
     }
 

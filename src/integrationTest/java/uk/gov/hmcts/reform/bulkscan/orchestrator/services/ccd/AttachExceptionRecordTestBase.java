@@ -293,9 +293,8 @@ public class AttachExceptionRecordTestBase {
 
     CallbackRequest exceptionRecordCallbackRequestWithPayment() {
         return exceptionRecordCallbackRequest(
+            null,
             CASE_REF,
-            null,
-            null,
             CASE_TYPE_EXCEPTION_RECORD,
             EXCEPTION_RECORD_DOC,
             true
@@ -304,9 +303,8 @@ public class AttachExceptionRecordTestBase {
 
     CallbackRequest exceptionRecordCallbackRequest(String caseReference) {
         return exceptionRecordCallbackRequest(
+            null,
             caseReference,
-            null,
-            null,
             CASE_TYPE_EXCEPTION_RECORD,
             EXCEPTION_RECORD_DOC,
             false
@@ -314,13 +312,11 @@ public class AttachExceptionRecordTestBase {
     }
 
     CallbackRequest exceptionRecordCallbackRequest(
-        String attachToCaseReference,
         String searchCaseReferenceType,
         String searchCaseReference,
         String caseTypeId
     ) {
         return exceptionRecordCallbackRequest(
-            attachToCaseReference,
             searchCaseReferenceType,
             searchCaseReference,
             caseTypeId,
@@ -330,7 +326,6 @@ public class AttachExceptionRecordTestBase {
     }
 
     CallbackRequest exceptionRecordCallbackRequest(
-        String attachToCaseReference,
         String searchCaseReferenceType,
         String searchCaseReference,
         String caseTypeId,
@@ -341,7 +336,7 @@ public class AttachExceptionRecordTestBase {
             .builder()
             .caseDetails(
                 exceptionRecord(
-                    attachToCaseReference,
+                    null,
                     searchCaseReferenceType,
                     searchCaseReference,
                     caseTypeId,
@@ -393,7 +388,7 @@ public class AttachExceptionRecordTestBase {
         }
 
         caseData.put("scannedDocuments", ImmutableList.of(EXCEPTION_RECORD_DOC));
-        caseData.put("attachToCaseReference", CASE_REF);
+        caseData.put("searchCaseReference", CASE_REF);
         return caseData;
     }
 
