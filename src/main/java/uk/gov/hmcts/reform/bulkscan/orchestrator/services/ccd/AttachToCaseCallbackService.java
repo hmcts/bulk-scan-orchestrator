@@ -62,7 +62,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 @Service
 public class AttachToCaseCallbackService {
 
-    public static final String PAYMENT_ERROR_MSG = "Payment references cannot be processed. Please try again later";
+    private static final String PAYMENT_ERROR_MSG = "Payment references cannot be processed. Please try again later";
 
     private static final Logger log = LoggerFactory.getLogger(AttachToCaseCallbackService.class);
 

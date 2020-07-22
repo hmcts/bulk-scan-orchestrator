@@ -135,12 +135,12 @@ class AttachToCaseCallbackServiceTest {
         // given
         given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
         given(ccdCaseUpdater.updateCase(
-            exceptionRecord,
-            configItem,
-            true,
-            new RequestCredentials(IDAM_TOKEN, USER_ID),
-            EXISTING_CASE_ID,
-            EXISTING_CASE_TYPE
+            eq(exceptionRecord),
+            eq(configItem),
+            eq(true),
+            any(RequestCredentials.class),
+            eq(EXISTING_CASE_ID),
+            eq(EXISTING_CASE_TYPE)
         )).willReturn(new ProcessResult(emptyMap()));
 
         // when
@@ -156,12 +156,12 @@ class AttachToCaseCallbackServiceTest {
         assertThat(res.isRight()).isTrue();
         verify(ccdCaseUpdater)
             .updateCase(
-                exceptionRecord,
-                configItem,
-                true,
-                new RequestCredentials(IDAM_TOKEN, USER_ID),
-                EXISTING_CASE_ID,
-                EXISTING_CASE_TYPE
+                eq(exceptionRecord),
+                eq(configItem),
+                eq(true),
+                any(RequestCredentials.class),
+                eq(EXISTING_CASE_ID),
+                eq(EXISTING_CASE_TYPE)
             );
 
         // and
@@ -186,12 +186,12 @@ class AttachToCaseCallbackServiceTest {
         // given
         given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
         given(ccdCaseUpdater.updateCase(
-            exceptionRecord,
-            configItem,
-            true,
-            new RequestCredentials(IDAM_TOKEN, USER_ID),
-            EXISTING_CASE_ID,
-            EXISTING_CASE_TYPE
+            eq(exceptionRecord),
+            eq(configItem),
+            eq(true),
+            any(RequestCredentials.class),
+            eq(EXISTING_CASE_ID),
+            eq(EXISTING_CASE_TYPE)
         )).willReturn(new ProcessResult(asList("warning1"), asList("error1")));
 
         // when
@@ -210,12 +210,12 @@ class AttachToCaseCallbackServiceTest {
 
         verify(ccdCaseUpdater)
             .updateCase(
-                exceptionRecord,
-                configItem,
-                true,
-                new RequestCredentials(IDAM_TOKEN, USER_ID),
-                EXISTING_CASE_ID,
-                EXISTING_CASE_TYPE
+                eq(exceptionRecord),
+                eq(configItem),
+                eq(true),
+                any(RequestCredentials.class),
+                eq(EXISTING_CASE_ID),
+                eq(EXISTING_CASE_TYPE)
             );
         verifyNoInteractions(paymentsProcessor);
     }
