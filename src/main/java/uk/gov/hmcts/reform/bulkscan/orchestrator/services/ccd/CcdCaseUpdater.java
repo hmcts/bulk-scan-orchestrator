@@ -208,6 +208,12 @@ public class CcdCaseUpdater {
                 "Invalid case-update response. " + errorMessage,
                 exc
             );
+        } catch (CcdCallException exception) {
+            log.error(exception.getMessage(), exception.getCause());
+            throw new CallbackException(
+                getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id),
+                exception
+            );
         } catch (Exception exception) {
             throw new CallbackException(
                 getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id),
@@ -244,8 +250,6 @@ public class CcdCaseUpdater {
 
     /**
      * Submits event to update the case.
-     *
-     * @return either error message in case of error or empty if no error detected
      */
     private void updateCaseInCcd(
         String service,
@@ -291,8 +295,7 @@ public class CcdCaseUpdater {
                 exceptionRecord.id,
                 exception.contentUTF8()
             );
-            log.error(msg, exception);
-            throw new RuntimeException(msg);
+            throw new CcdCallException(msg, exception);
         } catch (FeignException.Conflict exception) {
             throw exception;
         } catch (FeignException exception) {
