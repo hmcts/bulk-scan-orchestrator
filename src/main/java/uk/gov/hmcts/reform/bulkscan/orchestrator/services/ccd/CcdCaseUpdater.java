@@ -137,9 +137,8 @@ public class CcdCaseUpdater {
 
                 updateCaseInCcd(
                     ignoreWarnings,
-                    idamToken,
-                    s2sToken,
-                    userId,
+                    new Credentials(idamToken, s2sToken, userId),
+                    existingCaseId,
                     exceptionRecord,
                     updateResponse.caseDetails,
                     startEvent
@@ -252,9 +251,8 @@ public class CcdCaseUpdater {
      */
     private void updateCaseInCcd(
         boolean ignoreWarnings,
-        String idamToken,
-        String s2sToken,
-        String userId,
+        Credentials credentials,
+        String existingCaseId,
         ExceptionRecord exceptionRecord,
         CaseUpdateDetails caseUpdateDetails,
         StartEventResponse startEvent
@@ -264,12 +262,12 @@ public class CcdCaseUpdater {
         final CaseDataContent caseDataContent = buildCaseDataContent(exceptionRecord, caseUpdateDetails, startEvent);
         try {
             coreCaseDataApi.submitEventForCaseWorker(
-                idamToken,
-                s2sToken,
-                userId,
+                credentials.idamToken,
+                credentials.s2sToken,
+                credentials.userId,
                 exceptionRecord.poBoxJurisdiction,
                 startEvent.getCaseDetails().getCaseTypeId(),
-                startEvent.getCaseDetails().getId().toString(),
+                existingCaseId,
                 ignoreWarnings,
                 caseDataContent
             );
@@ -328,4 +326,15 @@ public class CcdCaseUpdater {
             .build();
     }
 
+    class Credentials {
+        final String idamToken;
+        final String s2sToken;
+        final String userId;
+
+        Credentials(String idamToken, String s2sToken, String userId) {
+            this.idamToken = idamToken;
+            this.s2sToken = s2sToken;
+            this.userId = userId;
+        }
+    }
 }
