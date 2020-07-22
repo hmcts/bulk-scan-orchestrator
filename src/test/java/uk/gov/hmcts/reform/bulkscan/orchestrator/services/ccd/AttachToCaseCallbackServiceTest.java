@@ -135,7 +135,12 @@ class AttachToCaseCallbackServiceTest {
         // given
         given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
         given(ccdCaseUpdater.updateCase(
-            exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE
+            exceptionRecord,
+            configItem,
+            true,
+            new RequestCredentials(IDAM_TOKEN, USER_ID),
+            EXISTING_CASE_ID,
+            EXISTING_CASE_TYPE
         )).willReturn(new ProcessResult(emptyMap()));
 
         // when
@@ -150,7 +155,14 @@ class AttachToCaseCallbackServiceTest {
         // then
         assertThat(res.isRight()).isTrue();
         verify(ccdCaseUpdater)
-            .updateCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE);
+            .updateCase(
+                exceptionRecord,
+                configItem,
+                true,
+                new RequestCredentials(IDAM_TOKEN, USER_ID),
+                EXISTING_CASE_ID,
+                EXISTING_CASE_TYPE
+            );
 
         // and
         var paymentsDataCaptor = ArgumentCaptor.forClass(PaymentsHelper.class);
@@ -174,7 +186,12 @@ class AttachToCaseCallbackServiceTest {
         // given
         given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
         given(ccdCaseUpdater.updateCase(
-            exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE
+            exceptionRecord,
+            configItem,
+            true,
+            new RequestCredentials(IDAM_TOKEN, USER_ID),
+            EXISTING_CASE_ID,
+            EXISTING_CASE_TYPE
         )).willReturn(new ProcessResult(asList("warning1"), asList("error1")));
 
         // when
@@ -192,7 +209,14 @@ class AttachToCaseCallbackServiceTest {
         assertThat(res.getLeft().getErrors()).isEqualTo(asList("error1"));
 
         verify(ccdCaseUpdater)
-            .updateCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE);
+            .updateCase(
+                exceptionRecord,
+                configItem,
+                true,
+                new RequestCredentials(IDAM_TOKEN, USER_ID),
+                EXISTING_CASE_ID,
+                EXISTING_CASE_TYPE
+            );
         verifyNoInteractions(paymentsProcessor);
     }
 

@@ -430,8 +430,7 @@ public class AttachToCaseCallbackService {
             callBackEvent.exceptionRecord,
             serviceConfigItem,
             ignoreWarnings,
-            callBackEvent.idamToken,
-            callBackEvent.userId,
+            new RequestCredentials(callBackEvent.idamToken, callBackEvent.userId),
             targetCaseCcdRef,
             targetCase.getCaseTypeId()
         );

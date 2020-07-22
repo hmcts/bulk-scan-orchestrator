@@ -59,8 +59,7 @@ public class CcdCaseUpdater {
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,
         boolean ignoreWarnings,
-        String idamToken,
-        String userId,
+        RequestCredentials requestCredentials,
         String existingCaseId,
         String existingCaseTypeId
     ) {
@@ -73,11 +72,12 @@ public class CcdCaseUpdater {
 
         try {
             String s2sToken = s2sTokenGenerator.generate();
+            requestCredentials.setS2sToken(s2sToken);
 
             StartEventResponse startEvent = coreCaseDataApi.startEventForCaseWorker(
-                idamToken,
-                s2sToken,
-                userId,
+                requestCredentials.idamToken,
+                requestCredentials.s2sToken,
+                requestCredentials.userId,
                 exceptionRecord.poBoxJurisdiction,
                 existingCaseTypeId,
                 existingCaseId,
@@ -136,9 +136,7 @@ public class CcdCaseUpdater {
                 Optional<String> errorMsg = updateCaseInCcd(
                     configItem.getService(),
                     ignoreWarnings,
-                    idamToken,
-                    s2sToken,
-                    userId,
+                    requestCredentials,
                     existingCaseId,
                     exceptionRecord,
                     updateResponse.caseDetails,
@@ -251,9 +249,7 @@ public class CcdCaseUpdater {
     private Optional<String> updateCaseInCcd(
         String service,
         boolean ignoreWarnings,
-        String idamToken,
-        String s2sToken,
-        String userId,
+        RequestCredentials requestCredentials,
         String existingCaseId,
         ExceptionRecord exceptionRecord,
         CaseUpdateDetails caseUpdateDetails,
@@ -264,9 +260,9 @@ public class CcdCaseUpdater {
         final CaseDataContent caseDataContent = buildCaseDataContent(exceptionRecord, caseUpdateDetails, startEvent);
         try {
             coreCaseDataApi.submitEventForCaseWorker(
-                idamToken,
-                s2sToken,
-                userId,
+                requestCredentials.idamToken,
+                requestCredentials.s2sToken,
+                requestCredentials.userId,
                 exceptionRecord.poBoxJurisdiction,
                 startEvent.getCaseDetails().getCaseTypeId(),
                 existingCaseId,

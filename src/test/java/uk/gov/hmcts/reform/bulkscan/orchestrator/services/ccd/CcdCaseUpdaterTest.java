@@ -105,8 +105,7 @@ class CcdCaseUpdaterTest {
             exceptionRecord,
             configItem,
             true,
-            "idamToken",
-            "userId",
+            new RequestCredentials("idamToken", "userId"),
             EXISTING_CASE_ID,
             EXISTING_CASE_TYPE_ID
         );
@@ -132,8 +131,7 @@ class CcdCaseUpdaterTest {
             exceptionRecord,
             configItem,
             true,
-            "idamToken",
-            "userId",
+            new RequestCredentials("idamToken", "userId"),
             EXISTING_CASE_ID,
             EXISTING_CASE_TYPE_ID
         );
@@ -157,8 +155,7 @@ class CcdCaseUpdaterTest {
             exceptionRecord,
             configItem,
             false,
-            "idamToken",
-            "userId",
+            new RequestCredentials("idamToken", "userId"),
             EXISTING_CASE_ID,
             EXISTING_CASE_TYPE_ID
         );
@@ -184,8 +181,7 @@ class CcdCaseUpdaterTest {
             exceptionRecord,
             configItem,
             false,
-            "idamToken",
-            "userId",
+            new RequestCredentials("idamToken", "userId"),
             EXISTING_CASE_ID,
             EXISTING_CASE_TYPE_ID
         );
@@ -211,8 +207,7 @@ class CcdCaseUpdaterTest {
             exceptionRecord,
             configItem,
             true,
-            "idamToken",
-            "userId",
+            new RequestCredentials("idamToken", "userId"),
             EXISTING_CASE_ID,
             EXISTING_CASE_TYPE_ID
         );
@@ -241,8 +236,7 @@ class CcdCaseUpdaterTest {
                     exceptionRecord,
                     configItem,
                     true,
-                    "idamToken",
-                    "userId",
+                    new RequestCredentials("idamToken", "userId"),
                     EXISTING_CASE_ID,
                     EXISTING_CASE_TYPE_ID
                 ),
@@ -274,8 +268,7 @@ class CcdCaseUpdaterTest {
             exceptionRecord,
             configItem,
             true,
-            "idamToken",
-            "userId",
+            new RequestCredentials("idamToken", "userId"),
             EXISTING_CASE_ID,
             EXISTING_CASE_TYPE_ID
         );
@@ -303,8 +296,7 @@ class CcdCaseUpdaterTest {
                     exceptionRecord,
                     configItem,
                     true,
-                    "idamToken",
-                    "userId",
+                    new RequestCredentials("idamToken", "userId"),
                     EXISTING_CASE_ID,
                     EXISTING_CASE_TYPE_ID
                 ),
@@ -338,8 +330,7 @@ class CcdCaseUpdaterTest {
                     exceptionRecord,
                     configItem,
                     true,
-                    "idamToken",
-                    "userId",
+                    new RequestCredentials("idamToken", "userId"),
                     EXISTING_CASE_ID,
                     EXISTING_CASE_TYPE_ID
                 )
@@ -378,8 +369,7 @@ class CcdCaseUpdaterTest {
                     exceptionRecord,
                     configItem,
                     true,
-                    "idamToken",
-                    "userId",
+                    new RequestCredentials("idamToken", "userId"),
                     EXISTING_CASE_ID,
                     EXISTING_CASE_TYPE_ID
                 ),
@@ -426,8 +416,7 @@ class CcdCaseUpdaterTest {
             exceptionRecord,
             configItem,
             true,
-            "idamToken",
-            "userId",
+            new RequestCredentials("idamToken", "userId"),
             EXISTING_CASE_ID,
             EXISTING_CASE_TYPE_ID
         );
@@ -457,8 +446,7 @@ class CcdCaseUpdaterTest {
                     exceptionRecord,
                     configItem,
                     true,
-                    "idamToken",
-                    "userId",
+                    new RequestCredentials("idamToken", "userId"),
                     EXISTING_CASE_ID,
                     EXISTING_CASE_TYPE_ID
                 ),
@@ -492,8 +480,7 @@ class CcdCaseUpdaterTest {
                     exceptionRecord,
                     configItem,
                     true,
-                    "idamToken",
-                    "userId",
+                    new RequestCredentials("idamToken", "userId"),
                     EXISTING_CASE_ID,
                     EXISTING_CASE_TYPE_ID
                 ),
@@ -527,8 +514,7 @@ class CcdCaseUpdaterTest {
             exceptionRecord,
             configItem,
             true,
-            "idamToken",
-            "userId",
+            new RequestCredentials("idamToken", "userId"),
             "1234123412341234",
             EXISTING_CASE_TYPE_ID
         );
@@ -557,8 +543,7 @@ class CcdCaseUpdaterTest {
             exceptionRecord,
             configItem,
             true,
-            "idamToken",
-            "userId",
+            new RequestCredentials("idamToken", "userId"),
             "1234",
             EXISTING_CASE_TYPE_ID
         );
