@@ -28,7 +28,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.handler.MessageProcessingResultType.UNRECOVERABLE_FAILURE;
 
 @Service
-// TODO: change name to EnvelopeMessageProcessor
 public class EnvelopeMessageProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(EnvelopeMessageProcessor.class);
