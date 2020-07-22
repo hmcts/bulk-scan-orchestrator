@@ -7,9 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.UnprocessableCaseDataException;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 import static org.springframework.http.ResponseEntity.status;
 
 @ControllerAdvice
@@ -21,6 +23,12 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<ErrorResponse> handleInvalidRequestException(Exception exception) {
         log.error("Received invalid request", exception);
         return status(BAD_REQUEST).body(new ErrorResponse(exception.getMessage()));
+    }
+
+    @ExceptionHandler(UnprocessableCaseDataException.class)
+    protected ResponseEntity<ErrorResponse> handleUnprocessableCaseDataException(Exception exception) {
+        log.error("Received unprocessable callback request", exception);
+        return status(UNPROCESSABLE_ENTITY).body(new ErrorResponse(exception.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)

@@ -213,6 +213,8 @@ public class CaseUpdateClientTest {
         return new ExceptionRecord(
             "id",
             "some_case_type",
+            "envelopeId123",
+            false,
             "poBox",
             "BULKSCAN",
             Classification.NEW_APPLICATION,

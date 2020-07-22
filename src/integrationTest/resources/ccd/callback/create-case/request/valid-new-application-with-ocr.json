@@ -14,6 +14,7 @@
       "formType": "B123",
       "deliveryDate": "2018-01-02T12:34:56",
       "openingDate": "2018-01-03T12:34:56Z",
+      "envelopeId": "f3593054-cbbc-11ea-87d0-0242ac130003",
       "scanOCRData": [
         {
           "value": {

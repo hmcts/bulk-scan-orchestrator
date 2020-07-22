@@ -1,4 +1,5 @@
 {
+  "event_id": "attachToExistingCase",
   "case_details": {
     "id": 1539007368674134,
     "jurisdiction": "BULKSCAN",
@@ -10,11 +11,29 @@
     "security_level": 0,
     "case_data": {
       "poBox": "PO 12345",
-      "journeyClassification": "EXCEPTION",
+      "journeyClassification": "SUPPLEMENTARY_EVIDENCE_WITH_OCR",
       "formType": "B123",
       "deliveryDate": "2018-01-02T12:34:56.123Z",
       "openingDate": "2018-01-03T12:34:56.123Z",
-      "envelopeId": "302b16df-3dc0-4158-b269-d85a4e22fd70",
+      "attachToCaseReference": "1539007368674134",
+      "scannedDocuments": [
+        {
+          "value": {
+            "fileName": "fileName",
+            "controlNumber": "654321",
+            "type": "cherished",
+            "url": {
+              "document_url": "document_url",
+              "document_binary_url": "document_binary_url",
+              "document_filename": "document_filename"
+            },
+            "subtype": "subtype",
+            "scannedDate": "2018-01-03T12:34:56.123Z",
+            "uuid": "uuid",
+            "deliveryDate": "2018-01-03T12:34:56.123Z"
+          }
+        }
+      ],
       "scanOCRData": [
         {
           "value": {
@@ -33,6 +52,5 @@
     "security_classification": "PUBLIC",
     "callback_response_status": ""
   },
-  "event_id": "createNewCase",
-  "ignore_warning": false
+  "ignore_warning": true
 }
