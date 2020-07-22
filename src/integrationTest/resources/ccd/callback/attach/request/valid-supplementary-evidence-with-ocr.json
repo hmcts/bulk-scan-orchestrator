@@ -15,7 +15,7 @@
       "formType": "B123",
       "deliveryDate": "2018-01-02T12:34:56.123Z",
       "openingDate": "2018-01-03T12:34:56.123Z",
-      "attachToCaseReference": "1539007368674134",
+      "searchCaseReference": "1539007368674134",
       "scannedDocuments": [
         {
           "value": {

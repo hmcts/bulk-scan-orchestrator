@@ -43,7 +43,7 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
 
     @DisplayName("Should successfully callback with correct information")
     @Test
-    void should_callback_with_correct_information_when_attaching_by_attachToCaseReference() {
+    void should_callback_with_correct_information_when_attaching_without_search_case_reference_type() {
         CallbackRequest callbackRequest = exceptionRecordCallbackRequest(CASE_REF);
 
         ValidatableResponse response =
@@ -61,7 +61,6 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
     @Test
     void should_callback_with_correct_information_when_attaching_by_ccd_search_case_reference() {
         CallbackRequest callbackRequest = exceptionRecordCallbackRequest(
-            null,
             CASE_REFERENCE_TYPE_CCD,
             CASE_REF,
             CASE_TYPE_EXCEPTION_RECORD
@@ -94,7 +93,6 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
         );
 
         CallbackRequest callbackRequest = exceptionRecordCallbackRequest(
-            null,
             CASE_REFERENCE_TYPE_EXTERNAL,
             legacyId,
             CASE_TYPE_EXCEPTION_RECORD
@@ -114,7 +112,7 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
 
     @Test
     void should_callback_with_correct_information_when_all_documents_have_already_been_attached() {
-        CallbackRequest callbackRequest = attachToCaseRequest(CASE_REF, null, null, EXISTING_DOC);
+        CallbackRequest callbackRequest = attachToCaseRequest(null, CASE_REF, EXISTING_DOC);
 
         ValidatableResponse response = given()
             .body(callbackRequest)
@@ -126,27 +124,6 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
         verifySuccessResponse(response, callbackRequest);
         verify(exactly(0), startEventRequest());
         verify(exactly(0), submittedScannedRecords());
-    }
-
-    @Test
-    void should_callback_with_search_case_reference_when_attaching_without_search_case_reference_type() {
-        CallbackRequest callbackRequest = exceptionRecordCallbackRequest(
-            null,
-            null,
-            CASE_REF,
-            CASE_TYPE_EXCEPTION_RECORD
-        );
-
-        ValidatableResponse response =
-            given()
-                .body(callbackRequest)
-                .headers(userHeaders())
-                .post(CALLBACK_ATTACH_CASE_PATH)
-                .then()
-                .statusCode(200);
-
-        verifySuccessResponse(response, callbackRequest);
-        verifyRequestedAttachingToCase();
     }
 
     @DisplayName("Should fail with the correct error when submit api call fails")
@@ -187,9 +164,9 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
                     .data(
                         exceptionDataWithDoc(
                             ImmutableList.of(EXISTING_DOC, EXCEPTION_RECORD_DOC),
+                            null,
+                            null,
                             CASE_REF,
-                            null,
-                            null,
                             false
                         )
                     ).build()
@@ -230,9 +207,9 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
                     .data(
                         exceptionDataWithDoc(
                             ImmutableList.of(EXISTING_DOC),
+                            null,
+                            null,
                             CASE_REF,
-                            null,
-                            null,
                             false
                         )
                     ).build()
@@ -278,7 +255,6 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
         given()
             .body(
                 exceptionRecordCallbackRequest(
-                    null,
                     CASE_REFERENCE_TYPE_CCD,
                     nonExistingCaseRef,
                     CASE_TYPE_EXCEPTION_RECORD
@@ -305,7 +281,6 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
         given()
             .body(
                 exceptionRecordCallbackRequest(
-                    null,
                     CASE_REFERENCE_TYPE_EXTERNAL,
                     nonExistingLegacyId,
                     CASE_TYPE_EXCEPTION_RECORD
@@ -336,7 +311,6 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
         given()
             .body(
                 exceptionRecordCallbackRequest(
-                    null,
                     CASE_REFERENCE_TYPE_EXTERNAL,
                     legacyId,
                     CASE_TYPE_EXCEPTION_RECORD
@@ -366,9 +340,8 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
         given()
             .body(
                 exceptionRecordCallbackRequest(
+                    null,
                     CASE_REF,
-                    null,
-                    null,
                     "invalid-case-type"
                 )
             )
@@ -384,7 +357,7 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
         given()
             .body(
                 exceptionRecordCallbackRequest(
-                    null, "invalid-reference-type",
+                    "invalid-reference-type",
                     "search-case-reference",
                     CASE_TYPE_EXCEPTION_RECORD
                 )
@@ -401,7 +374,6 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
         given()
             .body(
                 exceptionRecordCallbackRequest(
-                    null,
                     CASE_REFERENCE_TYPE_CCD,
                     "invalid-ccd-reference",
                     CASE_TYPE_EXCEPTION_RECORD
@@ -606,18 +578,16 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
             .build();
     }
 
-    private CallbackRequest attachToCaseRequest(String attachToCaseReference) {
-        return attachToCaseRequest(attachToCaseReference, null, null, EXCEPTION_RECORD_DOC);
+    private CallbackRequest attachToCaseRequest(String searchCaseReference) {
+        return attachToCaseRequest(null, searchCaseReference, EXCEPTION_RECORD_DOC);
     }
 
     private CallbackRequest attachToCaseRequest(
-        String attachToCaseReference,
         String searchCaseReferenceType,
         String searchCaseReference,
         Map<String, Object> document
     ) {
         return exceptionRecordCallbackRequest(
-            attachToCaseReference,
             searchCaseReferenceType,
             searchCaseReference,
             CASE_TYPE_EXCEPTION_RECORD,

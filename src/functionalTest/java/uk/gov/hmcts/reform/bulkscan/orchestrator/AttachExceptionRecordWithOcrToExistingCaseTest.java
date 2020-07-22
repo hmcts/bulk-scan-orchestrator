@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.empty;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getScannedDocuments;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.ATTACH_TO_CASE_REFERENCE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SEARCH_CASE_REFERENCE;
 
 @SpringBootTest
 @ActiveProfiles("nosb")
@@ -123,7 +123,7 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
 
     private Response invokeAttachWithOcrEndpoint(CaseDetails exceptionRecord, String targetCaseId) {
         Map<String, Object> data = new HashMap<>(exceptionRecord.getData());
-        data.put(ATTACH_TO_CASE_REFERENCE, targetCaseId);
+        data.put(SEARCH_CASE_REFERENCE, targetCaseId);
 
         CallbackRequest request = CallbackRequest
             .builder()

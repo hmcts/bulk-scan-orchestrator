@@ -219,34 +219,6 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
-    public void should_attach_exception_record_to_case_by_search_case_reference()
-        throws Exception {
-        //given
-        CaseDetails targetCase = ccdCaseCreator.createCase(emptyList(), Instant.now());
-
-        CaseDetails exceptionRecord =
-            createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
-
-        // when
-        // set searchCaseReference to the callback request data
-        // and searchCaseReferenceType and attachToCaseReference doesn't exist
-        invokeCallbackEndpointWithSearchCaseRefAndAttachToCaseRef(
-            Long.toString(targetCase.getId()),
-            exceptionRecord
-        ).jsonPath()
-            .getList("errors")
-            .isEmpty();
-
-        //then
-        await("Exception record is attached to the case with searchCaseReference")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollDelay(2, TimeUnit.SECONDS)
-            .until(() -> isExceptionRecordAttachedToTheCase(targetCase, 1));
-
-        verifyExistingCaseIsUpdatedWithExceptionRecordData(targetCase, exceptionRecord, 1);
-    }
-
-    @Test
     public void should_attach_exception_record_to_case_by_search_case_reference_and_payment() throws Exception {
         //given
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
@@ -365,37 +337,6 @@ class AttachExceptionRecordToExistingCaseTest {
             .post("/callback/attach_case?ignore-warning=true");
     }
 
-    private Response invokeCallbackEndpointWithSearchCaseRefAndAttachToCaseRef(
-        String searchCaseReference,
-        CaseDetails exceptionRecord
-    ) {
-        Map<String, Object> exceptionRecordData = new HashMap<>(exceptionRecord.getData());
-        exceptionRecordData.put("searchCaseReference", searchCaseReference);
-
-        CaseDetails exceptionRecordWithSearchFields =
-            exceptionRecord.toBuilder().data(exceptionRecordData).build();
-
-        CallbackRequest callbackRequest = CallbackRequest
-            .builder()
-            .eventId("attachToExistingCase")
-            .caseDetails(exceptionRecordWithSearchFields)
-            .build();
-
-        CcdAuthenticator ccdAuthenticator = ccdAuthenticatorFactory.createForJurisdiction("BULKSCAN");
-
-        return RestAssured
-            .given()
-            .relaxedHTTPSValidation()
-            .baseUri(testUrl)
-            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-            .header(SyntheticHeaders.SYNTHETIC_TEST_SOURCE, "Bulk Scan Orchestrator Functional test")
-            .header(AUTHORIZATION, ccdAuthenticator.getUserToken())
-            .header(CcdCallbackController.USER_ID, ccdAuthenticator.getUserDetails().getId())
-            .body(callbackRequest)
-            .when()
-            .post("/callback/attach_case?ignore-warning=false");
-    }
-
     private Map<String, Object> exceptionRecordDataWithSearchFields(
         CaseDetails targetCaseDetails,
         CaseDetails exceptionRecord,
@@ -405,7 +346,7 @@ class AttachExceptionRecordToExistingCaseTest {
         Map<String, Object> exceptionRecordData = new HashMap<>(exceptionRecord.getData());
 
         if (searchCaseReferenceType == null) {
-            exceptionRecordData.put("attachToCaseReference", String.valueOf(targetCaseDetails.getId()));
+            exceptionRecordData.put("searchCaseReference", String.valueOf(targetCaseDetails.getId()));
         } else {
             exceptionRecordData.put("searchCaseReferenceType", searchCaseReferenceType);
 
