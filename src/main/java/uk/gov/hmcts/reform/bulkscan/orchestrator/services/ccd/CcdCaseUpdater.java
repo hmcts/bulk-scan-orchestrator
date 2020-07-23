@@ -136,9 +136,7 @@ public class CcdCaseUpdater {
                 Optional<String> errorMsg = updateCaseInCcd(
                     configItem.getService(),
                     ignoreWarnings,
-                    idamToken,
-                    s2sToken,
-                    userId,
+                    new CcdRequestCredentials(idamToken, s2sToken, userId),
                     existingCaseId,
                     exceptionRecord,
                     updateResponse.caseDetails,
@@ -251,9 +249,7 @@ public class CcdCaseUpdater {
     private Optional<String> updateCaseInCcd(
         String service,
         boolean ignoreWarnings,
-        String idamToken,
-        String s2sToken,
-        String userId,
+        CcdRequestCredentials ccdRequestCredentials,
         String existingCaseId,
         ExceptionRecord exceptionRecord,
         CaseUpdateDetails caseUpdateDetails,
@@ -264,9 +260,9 @@ public class CcdCaseUpdater {
         final CaseDataContent caseDataContent = buildCaseDataContent(exceptionRecord, caseUpdateDetails, startEvent);
         try {
             coreCaseDataApi.submitEventForCaseWorker(
-                idamToken,
-                s2sToken,
-                userId,
+                ccdRequestCredentials.idamToken,
+                ccdRequestCredentials.s2sToken,
+                ccdRequestCredentials.userId,
                 exceptionRecord.poBoxJurisdiction,
                 startEvent.getCaseDetails().getCaseTypeId(),
                 existingCaseId,
@@ -338,5 +334,4 @@ public class CcdCaseUpdater {
             .eventToken(startEvent.getToken())
             .build();
     }
-
 }
