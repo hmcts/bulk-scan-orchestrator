@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.List;
+import java.util.Optional;
 import javax.validation.ConstraintViolationException;
 
 import static java.util.Collections.emptyList;
@@ -57,7 +58,7 @@ public class CcdCaseUpdater {
         this.serviceResponseParser = serviceResponseParser;
     }
 
-    public ProcessResult updateCase(
+    public Optional<ErrorsAndWarnings> updateCase(
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,
         boolean ignoreWarnings,
@@ -105,7 +106,7 @@ public class CcdCaseUpdater {
                     exceptionRecord.id,
                     existingCase.getId()
                 );
-                return NO_ERRORS_OR_WARNINGS_PROCESS_RESULT;
+                return Optional.empty();
             }
 
             SuccessfulUpdateResponse updateResponse = caseUpdateClient.updateCase(
@@ -131,7 +132,7 @@ public class CcdCaseUpdater {
                     existingCase.getId(),
                     exceptionRecord.id
                 );
-                return new ProcessResult(updateResponse.warnings, emptyList());
+                return Optional.of(ErrorsAndWarnings.withErrorsAndWarnings(emptyList(), updateResponse.warnings));
             } else {
                 setExceptionRecordIdToScannedDocuments(exceptionRecord, updateResponse.caseDetails);
 
@@ -151,17 +152,17 @@ public class CcdCaseUpdater {
                     exceptionRecord.id
                 );
 
-                return NO_ERRORS_OR_WARNINGS_PROCESS_RESULT;
+                return Optional.empty();
             }
         } catch (UnprocessableEntity exception) {
             ClientServiceErrorResponse errorResponse = serviceResponseParser.parseResponseBody(exception);
-            return new ProcessResult(errorResponse.warnings, errorResponse.errors);
+            return Optional.of(ErrorsAndWarnings.withErrorsAndWarnings(errorResponse.errors, errorResponse.warnings));
         } catch (FeignException.Conflict exception) {
             String msg = getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id)
                 + " because it has been updated in the meantime";
             log.error(msg);
             ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(singletonList(msg), emptyList());
-            return new ProcessResult(errorResponse.warnings, errorResponse.errors);
+            return Optional.of(ErrorsAndWarnings.withErrorsAndWarnings(errorResponse.errors, errorResponse.warnings));
         } catch (FeignException.NotFound exception) {
             String msg = "No case found for case ID: " + existingCaseId;
             log.error(
@@ -169,7 +170,7 @@ public class CcdCaseUpdater {
                 existingCaseId, configItem.getService(), exceptionRecord.id
             );
             ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(singletonList(msg), emptyList());
-            return new ProcessResult(errorResponse.warnings, errorResponse.errors);
+            return Optional.of(ErrorsAndWarnings.withErrorsAndWarnings(errorResponse.errors, errorResponse.warnings));
         } catch (FeignException.BadRequest exception) {
             String msg = "Invalid case ID: " + existingCaseId;
             log.error(
@@ -177,7 +178,7 @@ public class CcdCaseUpdater {
                 existingCaseId, configItem.getService(), exceptionRecord.id, exception
             );
             ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(singletonList(msg), emptyList());
-            return new ProcessResult(errorResponse.warnings, errorResponse.errors);
+            return Optional.of(ErrorsAndWarnings.withErrorsAndWarnings(errorResponse.errors, errorResponse.warnings));
         } catch (FeignException exception) {
             debugCcdException(log, exception, "Failed to call 'updateCase'");
             log.error(

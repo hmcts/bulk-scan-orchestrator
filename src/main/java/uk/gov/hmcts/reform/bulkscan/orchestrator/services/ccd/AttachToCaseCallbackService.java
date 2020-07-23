@@ -426,7 +426,7 @@ public class AttachToCaseCallbackService {
         CaseDetails targetCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
 
         ServiceConfigItem serviceConfigItem = getServiceConfig(callBackEvent.service);
-        ProcessResult processResult = ccdCaseUpdater.updateCase(
+        return ccdCaseUpdater.updateCase(
             callBackEvent.exceptionRecord,
             serviceConfigItem,
             ignoreWarnings,
@@ -435,15 +435,6 @@ public class AttachToCaseCallbackService {
             targetCaseCcdRef,
             targetCase.getCaseTypeId()
         );
-
-        if (!processResult.getErrors().isEmpty() || !processResult.getWarnings().isEmpty()) {
-            return Optional.of(ErrorsAndWarnings.withErrorsAndWarnings(
-                processResult.getErrors(),
-                processResult.getWarnings()
-            ));
-        } else {
-            return Optional.empty();
-        }
     }
 
     private Map<String, Object> buildCaseData(
