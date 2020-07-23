@@ -249,7 +249,6 @@ public class CcdCaseUpdater {
     /**
      * Submits event to update the case.
      */
-    @SuppressWarnings("squid:S00107") // number of params
     private void updateCaseInCcd(
         boolean ignoreWarnings,
         CcdRequestCredentials ccdRequestCredentials,
