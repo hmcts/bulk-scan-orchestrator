@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionR
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -37,9 +36,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdVali
 @Service
 public class CcdCaseUpdater {
     private static final Logger log = LoggerFactory.getLogger(CcdCaseUpdater.class);
-
-    private static final ProcessResult NO_ERRORS_OR_WARNINGS_PROCESS_RESULT =
-        new ProcessResult(emptyList(), emptyList());
 
     private final AuthTokenGenerator s2sTokenGenerator;
     private final CoreCaseDataApi coreCaseDataApi;
