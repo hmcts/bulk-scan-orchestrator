@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdate;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdateDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.ExistingCaseDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
@@ -55,8 +56,9 @@ public class CaseUpdateClient {
             existingCase.getCaseTypeId(),
             existingCase.getData()
         );
+        var caseUpdateDetails = new CaseUpdateDetails(exceptionRecord, null);
 
-        CaseUpdate caseUpdate = new CaseUpdate(exceptionRecord, false, null, existingCaseDetails);
+        CaseUpdate caseUpdate = new CaseUpdate(exceptionRecord, false, caseUpdateDetails, existingCaseDetails);
 
         log.info(
             "Requesting service to update case, caseTypeId: {}, case id: {}, exception id: {}",

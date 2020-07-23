@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.reques
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
 
@@ -44,27 +45,16 @@ public class CaseUpdateDetails {
     @JsonProperty(value = "ocr_data_fields", required = true)
     public final List<OcrDataField> ocrDataFields;
 
-    public CaseUpdateDetails(
-        String exceptionRecordCaseTypeId,
-        String exceptionRecordId,
-        String envelopeId,
-        String poBox,
-        String poBoxJurisdiction,
-        String formType,
-        LocalDateTime deliveryDate,
-        LocalDateTime openingTime,
-        List<ScannedDocument> scannedDocuments,
-        List<OcrDataField> ocrDataFields
-    ) {
-        this.exceptionRecordCaseTypeId = exceptionRecordCaseTypeId;
-        this.exceptionRecordId = exceptionRecordId;
+    public CaseUpdateDetails(ExceptionRecord exceptionRecord, String envelopeId) {
+        this.exceptionRecordCaseTypeId = exceptionRecord.caseTypeId;
+        this.exceptionRecordId = exceptionRecord.id;
         this.envelopeId = envelopeId;
-        this.poBox = poBox;
-        this.poBoxJurisdiction = poBoxJurisdiction;
-        this.formType = formType;
-        this.deliveryDate = deliveryDate;
-        this.openingTime = openingTime;
-        this.scannedDocuments = scannedDocuments;
-        this.ocrDataFields = ocrDataFields;
+        this.poBox = exceptionRecord.poBox;
+        this.poBoxJurisdiction = exceptionRecord.poBoxJurisdiction;
+        this.formType = exceptionRecord.formType;
+        this.deliveryDate = exceptionRecord.deliveryDate;
+        this.openingTime = exceptionRecord.openingDate;
+        this.scannedDocuments = exceptionRecord.scannedDocuments;
+        this.ocrDataFields = exceptionRecord.ocrDataFields;
     }
 }
