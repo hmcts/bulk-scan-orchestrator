@@ -89,9 +89,7 @@ public class CcdNewCaseCreator {
             );
 
             long newCaseId = createNewCaseInCcd(
-                idamToken,
-                s2sToken,
-                userId,
+                new CcdRequestCredentials(idamToken, s2sToken, userId),
                 exceptionRecord,
                 transformationResponse.caseCreationDetails
             );
@@ -158,9 +156,7 @@ public class CcdNewCaseCreator {
     }
 
     private long createNewCaseInCcd(
-        String idamToken,
-        String s2sToken,
-        String userId,
+        CcdRequestCredentials ccdRequestCredentials,
         ExceptionRecord exceptionRecord,
         CaseCreationDetails caseCreationDetails
     ) {
@@ -172,9 +168,9 @@ public class CcdNewCaseCreator {
         );
 
         return ccdApi.createNewCaseFromCallback(
-            idamToken,
-            s2sToken,
-            userId,
+            ccdRequestCredentials.idamToken,
+            ccdRequestCredentials.s2sToken,
+            ccdRequestCredentials.userId,
             exceptionRecord.poBoxJurisdiction,
             caseCreationDetails.caseTypeId,
             // when onboarding remind services to not configure about to submit callback for this event
