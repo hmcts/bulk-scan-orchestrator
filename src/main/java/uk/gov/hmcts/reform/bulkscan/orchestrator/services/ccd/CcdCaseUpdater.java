@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.List;
-import java.util.Optional;
 import javax.validation.ConstraintViolationException;
 
 import static java.util.Collections.emptyList;
@@ -37,6 +36,9 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdVali
 @Service
 public class CcdCaseUpdater {
     private static final Logger log = LoggerFactory.getLogger(CcdCaseUpdater.class);
+
+    private static final ProcessResult NO_ERRORS_OR_WARNINGS_PROCESS_RESULT =
+        new ProcessResult(emptyList(), emptyList());
 
     private final AuthTokenGenerator s2sTokenGenerator;
     private final CoreCaseDataApi coreCaseDataApi;
@@ -103,7 +105,7 @@ public class CcdCaseUpdater {
                     exceptionRecord.id,
                     existingCase.getId()
                 );
-                return new ProcessResult(emptyList(), emptyList());
+                return NO_ERRORS_OR_WARNINGS_PROCESS_RESULT;
             }
 
             SuccessfulUpdateResponse updateResponse = caseUpdateClient.updateCase(
@@ -133,8 +135,7 @@ public class CcdCaseUpdater {
             } else {
                 setExceptionRecordIdToScannedDocuments(exceptionRecord, updateResponse.caseDetails);
 
-                Optional<String> errorMsg = updateCaseInCcd(
-                    configItem.getService(),
+                updateCaseInCcd(
                     ignoreWarnings,
                     idamToken,
                     s2sToken,
@@ -145,10 +146,14 @@ public class CcdCaseUpdater {
                     startEvent
                 );
 
-                return new ProcessResult(
-                    errorMsg.stream().collect(toList()),
-                    emptyList()
+                log.info(
+                    "Successfully updated case for service {} with case Id {} based on exception record ref {}",
+                    configItem.getService(),
+                    existingCase.getId(),
+                    exceptionRecord.id
                 );
+
+                return NO_ERRORS_OR_WARNINGS_PROCESS_RESULT;
             }
         } catch (UnprocessableEntity exception) {
             ClientServiceErrorResponse errorResponse = serviceResponseParser.parseResponseBody(exception);
@@ -245,11 +250,9 @@ public class CcdCaseUpdater {
 
     /**
      * Submits event to update the case.
-     *
-     * @return either error message in case of error or empty if no error detected
      */
-    private Optional<String> updateCaseInCcd(
-        String service,
+    @SuppressWarnings("squid:S00107") // number of params
+    private void updateCaseInCcd(
         boolean ignoreWarnings,
         String idamToken,
         String s2sToken,
@@ -273,15 +276,6 @@ public class CcdCaseUpdater {
                 ignoreWarnings,
                 caseDataContent
             );
-
-            log.info(
-                "Successfully updated case for service {} with case Id {} based on exception record ref {}",
-                service,
-                existingCase.getId(),
-                exceptionRecord.id
-            );
-
-            return Optional.empty();
         } catch (FeignException.UnprocessableEntity exception) {
             String msg = String.format(
                 "CCD returned 422 Unprocessable Entity response "
@@ -294,9 +288,7 @@ public class CcdCaseUpdater {
                 exceptionRecord.id,
                 exception.contentUTF8()
             );
-            log.error(msg, exception);
-
-            return Optional.of(msg);
+            throw new CcdCallException(msg, exception);
         } catch (FeignException.Conflict exception) {
             throw exception;
         } catch (FeignException exception) {
@@ -338,5 +330,4 @@ public class CcdCaseUpdater {
             .eventToken(startEvent.getToken())
             .build();
     }
-
 }
