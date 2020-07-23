@@ -13,7 +13,7 @@ import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeEventProcessor;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeMessageProcessor;
 
 import java.util.concurrent.TimeUnit;
 
@@ -49,7 +49,7 @@ class SupplementaryEvidenceCreatorTest {
     private IMessageReceiver messageReceiver;
 
     @Autowired
-    private EnvelopeEventProcessor envelopeEventProcessor;
+    private EnvelopeMessageProcessor envelopeMessageProcessor;
 
     private static final String CREATE_EXCEPTION_RECORD_SUBMIT_URL = Environment.CASE_SUBMIT_URL
         .replace(CASE_TYPE_BULK_SCAN, CASE_TYPE_EXCEPTION_RECORD);
@@ -77,7 +77,7 @@ class SupplementaryEvidenceCreatorTest {
     @Test
     void should_call_ccd_to_attach_supplementary_evidence_for_caseworker() throws Exception {
         // when
-        envelopeEventProcessor.processNextMessage();
+        envelopeMessageProcessor.processNextMessage();
 
         // then
         await()
@@ -99,7 +99,7 @@ class SupplementaryEvidenceCreatorTest {
         stubCreateExceptionCcdEvents();
 
         // when
-        envelopeEventProcessor.processNextMessage();
+        envelopeMessageProcessor.processNextMessage();
 
         // then
         await()
@@ -119,7 +119,7 @@ class SupplementaryEvidenceCreatorTest {
         stubCreateExceptionCcdEvents();
 
         // when
-        envelopeEventProcessor.processNextMessage();
+        envelopeMessageProcessor.processNextMessage();
 
         // then
         await()
