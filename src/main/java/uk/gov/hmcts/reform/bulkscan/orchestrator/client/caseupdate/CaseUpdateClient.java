@@ -56,7 +56,7 @@ public class CaseUpdateClient {
             existingCase.getData()
         );
 
-        CaseUpdate caseUpdate = new CaseUpdate(exceptionRecord, existingCaseDetails);
+        CaseUpdate caseUpdate = new CaseUpdate(exceptionRecord, false, null, existingCaseDetails);
 
         log.info(
             "Requesting service to update case, caseTypeId: {}, case id: {}, exception id: {}",
