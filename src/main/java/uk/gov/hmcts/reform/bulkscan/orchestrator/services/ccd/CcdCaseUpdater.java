@@ -137,7 +137,9 @@ public class CcdCaseUpdater {
 
                 updateCaseInCcd(
                     ignoreWarnings,
-                    new Credentials(idamToken, s2sToken, userId),
+                    idamToken,
+                    s2sToken,
+                    userId,
                     existingCaseId,
                     exceptionRecord,
                     updateResponse.caseDetails,
@@ -249,9 +251,12 @@ public class CcdCaseUpdater {
     /**
      * Submits event to update the case.
      */
+    @SuppressWarnings("squid:S00107") // number of params
     private void updateCaseInCcd(
         boolean ignoreWarnings,
-        Credentials credentials,
+        String idamToken,
+        String s2sToken,
+        String userId,
         String existingCaseId,
         ExceptionRecord exceptionRecord,
         CaseUpdateDetails caseUpdateDetails,
@@ -262,9 +267,9 @@ public class CcdCaseUpdater {
         final CaseDataContent caseDataContent = buildCaseDataContent(exceptionRecord, caseUpdateDetails, startEvent);
         try {
             coreCaseDataApi.submitEventForCaseWorker(
-                credentials.idamToken,
-                credentials.s2sToken,
-                credentials.userId,
+                idamToken,
+                s2sToken,
+                userId,
                 exceptionRecord.poBoxJurisdiction,
                 startEvent.getCaseDetails().getCaseTypeId(),
                 existingCaseId,
@@ -324,17 +329,5 @@ public class CcdCaseUpdater {
             )
             .eventToken(startEvent.getToken())
             .build();
-    }
-
-    class Credentials {
-        final String idamToken;
-        final String s2sToken;
-        final String userId;
-
-        Credentials(String idamToken, String s2sToken, String userId) {
-            this.idamToken = idamToken;
-            this.s2sToken = s2sToken;
-            this.userId = userId;
-        }
     }
 }
