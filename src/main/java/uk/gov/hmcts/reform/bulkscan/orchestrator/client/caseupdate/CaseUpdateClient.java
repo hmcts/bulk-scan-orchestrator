@@ -7,8 +7,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdate;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdateDetails;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdateRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.ExistingCaseDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
@@ -58,18 +58,18 @@ public class CaseUpdateClient {
         );
         var caseUpdateDetails = new CaseUpdateDetails(exceptionRecord, null);
 
-        CaseUpdate caseUpdate = new CaseUpdate(exceptionRecord, false, caseUpdateDetails, existingCaseDetails);
+        var caseUpdateRequest = new CaseUpdateRequest(exceptionRecord, false, caseUpdateDetails, existingCaseDetails);
 
         log.info(
             "Requesting service to update case, caseTypeId: {}, case id: {}, exception id: {}",
-            caseUpdate.caseDetails.caseTypeId,
-            caseUpdate.caseDetails.id,
-            caseUpdate.exceptionRecord.id
+            caseUpdateRequest.caseDetails.caseTypeId,
+            caseUpdateRequest.caseDetails.id,
+            caseUpdateRequest.exceptionRecord.id
         );
 
         SuccessfulUpdateResponse response = restTemplate.postForObject(
             url,
-            new HttpEntity<>(caseUpdate, headers),
+            new HttpEntity<>(caseUpdateRequest, headers),
             SuccessfulUpdateResponse.class
         );
 

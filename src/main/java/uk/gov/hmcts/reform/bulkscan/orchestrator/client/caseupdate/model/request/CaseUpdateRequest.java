@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 
-public class CaseUpdate {
+public class CaseUpdateRequest {
 
     // commenting out as it won't compile. keeping so it is clear for us
     // @Deprecated(forRemoval = true, since = "Once all clients migrate to 'case_update_details' object")
@@ -22,7 +22,7 @@ public class CaseUpdate {
     @JsonProperty("case_details")
     public final ExistingCaseDetails caseDetails;
 
-    public CaseUpdate(
+    public CaseUpdateRequest(
         ExceptionRecord exceptionRecord,
         boolean isAutomatedProcess,
         CaseUpdateDetails caseUpdateDetails,
