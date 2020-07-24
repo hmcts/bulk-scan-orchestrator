@@ -40,6 +40,10 @@ public class ServiceConfigItem {
 
     private Map<String, List<String>> formTypeToSurnameOcrFieldMappings = new HashMap<>();
 
+    private boolean autoCaseCreationEnabled = false;
+    private boolean autoCaseUpdateEnabled = false;
+    private boolean caseDefinitionHasEnvelopeIds = false;
+
     // region getters & setters
 
     public String getService() {
@@ -118,6 +122,30 @@ public class ServiceConfigItem {
                     }
                 )
             );
+    }
+
+    public boolean getAutoCaseCreationEnabled() {
+        return autoCaseCreationEnabled;
+    }
+
+    public void setAutoCaseCreationEnabled(boolean autoCaseCreationEnabled) {
+        this.autoCaseCreationEnabled = autoCaseCreationEnabled;
+    }
+
+    public boolean getAutoCaseUpdateEnabled() {
+        return autoCaseUpdateEnabled;
+    }
+
+    public void setAutoCaseUpdateEnabled(boolean autoCaseUpdateEnabled) {
+        this.autoCaseUpdateEnabled = autoCaseUpdateEnabled;
+    }
+
+    public boolean getCaseDefinitionHasEnvelopeIds() {
+        return caseDefinitionHasEnvelopeIds;
+    }
+
+    public void setCaseDefinitionHasEnvelopeIds(boolean caseDefinitionHasEnvelopeIds) {
+        this.caseDefinitionHasEnvelopeIds = caseDefinitionHasEnvelopeIds;
     }
 
     // endregion
