@@ -270,21 +270,28 @@ class CcdCaseUpdaterTest {
             );
 
         // when
-        ProcessResult res = ccdCaseUpdater.updateCase(
-            exceptionRecord,
-            configItem,
-            true,
-            "idamToken",
-            "userId",
-            EXISTING_CASE_ID,
-            EXISTING_CASE_TYPE_ID
+        CallbackException exception = catchThrowableOfType(() ->
+                ccdCaseUpdater.updateCase(
+                    exceptionRecord,
+                    configItem,
+                    true,
+                    "idamToken",
+                    "userId",
+                    EXISTING_CASE_ID,
+                    EXISTING_CASE_TYPE_ID
+                ),
+            CallbackException.class
         );
 
         // then
-        assertThat(res.getWarnings()).containsExactlyInAnyOrder("CCD returned 422 Unprocessable Entity response "
-            + "when trying to update case for some jurisdiction jurisdiction with case Id 0 based on exception record "
-            + "with Id 1. CCD response: Body");
-        assertThat(res.getErrors()).isEmpty();
+        assertThat(exception)
+            .hasCauseInstanceOf(RuntimeException.class)
+            .hasMessage(
+                "Failed to update case for %s service with case Id %s based on exception record %s",
+                configItem.getService(),
+                EXISTING_CASE_ID,
+                exceptionRecord.id
+            );
     }
 
     @Test

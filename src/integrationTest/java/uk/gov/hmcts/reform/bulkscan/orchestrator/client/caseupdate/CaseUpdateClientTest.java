@@ -30,6 +30,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.absent;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.forbidden;
 import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
+import static com.github.tomakehurst.wiremock.client.WireMock.notMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.serverError;
@@ -65,6 +66,9 @@ public class CaseUpdateClientTest {
 
         stubFor(
             post(urlPathMatching(UPDATE_CASE_URL))
+                // new fields not present yet as we only create structure but not serialize them:
+                .withRequestBody(notMatching("(\"case_update_details\"|\"is_automated_process\")"))
+                // previous verifications:
                 .withRequestBody(matchingJsonPath("$.case_details.id", equalTo("23")))
                 .withRequestBody(matchingJsonPath("$.case_details.case_type_id", equalTo("Bulk_Scanned")))
                 .withRequestBody(matchingJsonPath("$.case_details.case_data", absent()))
