@@ -50,10 +50,9 @@ public class TransformationClient {
         throw new ConstraintViolationException(violations);
     }
 
-    private String getUrl(String baseUrl) {
+    private String getUrl(String transformationUrl) {
         return UriComponentsBuilder
-            .fromHttpUrl(baseUrl)
-            .path("/transform-exception-record")
+            .fromHttpUrl(transformationUrl)
             .build()
             .toString();
     }
