@@ -35,7 +35,7 @@ public class CaseUpdateClient {
     }
 
     public SuccessfulUpdateResponse updateCase(
-        String baseUrl,
+        String updateUrl,
         CaseDetails existingCase,
         ExceptionRecord exceptionRecord,
         String s2sToken
@@ -45,8 +45,7 @@ public class CaseUpdateClient {
 
         String url =
             UriComponentsBuilder
-                .fromHttpUrl(baseUrl)
-                .path("/update-case")
+                .fromHttpUrl(updateUrl)
                 .build()
                 .toString();
 
