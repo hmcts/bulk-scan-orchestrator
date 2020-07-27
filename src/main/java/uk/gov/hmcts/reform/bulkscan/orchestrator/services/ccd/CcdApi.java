@@ -60,7 +60,8 @@ public class CcdApi {
     private SearchResult searchCases(
         String jurisdiction,
         String caseType,
-        String searchString) {
+        String searchString
+    ) {
         CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
         try {
             return feignCcdApi.searchCases(
@@ -76,12 +77,14 @@ public class CcdApi {
         }
     }
 
-    private StartEventResponse startAttachScannedDocs(String caseRef,
-                                                      String serviceToken,
-                                                      String idamToken,
-                                                      String userId,
-                                                      String jurisdiction,
-                                                      String caseTypeId) {
+    private StartEventResponse startAttachScannedDocs(
+        String caseRef,
+        String serviceToken,
+        String idamToken,
+        String userId,
+        String jurisdiction,
+        String caseTypeId
+    ) {
         return feignCcdApi.startEventForCaseWorker(
             idamToken,
             serviceToken,
@@ -198,7 +201,7 @@ public class CcdApi {
         return getCaseRefs(serviceConfig, caseTypeIdsStr, searchQuery);
     }
 
-    void attachExceptionRecord(
+    public void attachExceptionRecord(
         CaseDetails theCase,
         String idamToken,
         String userId,
@@ -251,15 +254,17 @@ public class CcdApi {
             .collect(toList());
     }
 
-    private void attachCall(String caseRef,
-                            String serviceToken,
-                            String idamToken,
-                            String userId,
-                            Map<String, Object> data,
-                            String eventToken,
-                            String jurisdiction,
-                            String caseTypeId,
-                            Event eventInfo) {
+    private void attachCall(
+        String caseRef,
+        String serviceToken,
+        String idamToken,
+        String userId,
+        Map<String, Object> data,
+        String eventToken,
+        String jurisdiction,
+        String caseTypeId,
+        Event eventInfo
+    ) {
         feignCcdApi.submitEventForCaseWorker(
             idamToken,
             serviceToken,
