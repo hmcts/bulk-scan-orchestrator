@@ -63,13 +63,14 @@ public class CcdApi {
         try {
             //TODO We don't need to login here as we just need the service token
             CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(theCase.getJurisdiction());
-            StartEventResponse response = startAttachScannedDocs(
-                caseRef,
-                authenticator.getServiceToken(),
+            StartEventResponse response = feignCcdApi.startEventForCaseWorker(
                 idamToken,
+                authenticator.getServiceToken(),
                 userId,
                 theCase.getJurisdiction(),
-                theCase.getCaseTypeId()
+                theCase.getCaseTypeId(),
+                caseRef,
+                EventIds.ATTACH_SCANNED_DOCS
             );
 
             log.info(
@@ -350,25 +351,6 @@ public class CcdApi {
             removeFromIdamCacheIfAuthProblem(ex.status(), jurisdiction);
             throw ex;
         }
-    }
-
-    private StartEventResponse startAttachScannedDocs(
-        String caseRef,
-        String serviceToken,
-        String idamToken,
-        String userId,
-        String jurisdiction,
-        String caseTypeId
-    ) {
-        return feignCcdApi.startEventForCaseWorker(
-            idamToken,
-            serviceToken,
-            userId,
-            jurisdiction,
-            caseTypeId,
-            caseRef,
-            EventIds.ATTACH_SCANNED_DOCS
-        );
     }
 
     private List<Long> getCaseRefs(
