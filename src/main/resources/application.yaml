@@ -77,6 +77,9 @@ service-config:
         - formType: PERSONAL
           ocrFields:
             - last_name
+      auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_BULKSCAN}
+      auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_BULKSCAN}
+      case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_BULKSCAN}
 
     - service: bulkscanauto # service name corresponds to the name of the container in Blob Storage
       jurisdiction: BULKSCAN
@@ -91,6 +94,9 @@ service-config:
         - formType: PERSONAL
           ocrFields:
             - last_name
+      auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_BULKSCANAUTO}
+      auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_BULKSCANAUTO}
+      case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_BULKSCANAUTO}
 
     - service: sscs
       jurisdiction: SSCS
@@ -109,6 +115,9 @@ service-config:
           ocrFields:
             - person2_last_name
             - person1_last_name
+      auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_SSCS}
+      auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_SSCS}
+      case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_SSCS}
 
     - service: probate
       jurisdiction: PROBATE
@@ -120,6 +129,9 @@ service-config:
         - StandingSearch
         - WillLodgement
       allow-creating-case-before-payments-are-processed: true
+      auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_PROBATE}
+      auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_PROBATE}
+      case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_PROBATE}
 
     - service: divorce
       jurisdiction: DIVORCE
@@ -128,6 +140,9 @@ service-config:
         - DIVORCE_NOTICE_OF_ACTING
       transformation-url: ${TRANSFORMATION_URL_DIVORCE}
       allow-creating-case-before-payments-are-processed: true
+      auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_DIVORCE}
+      auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_DIVORCE}
+      case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_DIVORCE}
 
     - service: finrem
       jurisdiction: DIVORCE
@@ -136,15 +151,24 @@ service-config:
         - FinancialRemedyContested
       transformation-url: ${TRANSFORMATION_URL_FINREM}
       allow-creating-case-before-payments-are-processed: true
+      auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_FINREM}
+      auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_FINREM}
+      case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_FINREM}
 
     - service: cmc
       jurisdiction: CMC
       case-type-ids:
         - MoneyClaimCase
+      auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_CMC}
+      auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_CMC}
+      case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_CMC}
 
     - service: publiclaw
       jurisdiction: PUBLICLAW
       case-type-ids: []
+      auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_PUBLICLAW}
+      auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_PUBLICLAW}
+      case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_PUBLICLAW}
 
 scheduling:
   task:
