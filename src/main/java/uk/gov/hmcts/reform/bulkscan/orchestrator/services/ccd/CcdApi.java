@@ -176,16 +176,19 @@ public class CcdApi {
         try {
             //TODO We don't need to login here as we just need the service token
             CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
-            attachCall(
-                caseRef,
-                authenticator.getServiceToken(),
+            feignCcdApi.submitEventForCaseWorker(
                 idamToken,
+                authenticator.getServiceToken(),
                 userId,
-                data,
-                event.getToken(),
                 jurisdiction,
                 caseTypeId,
-                Event.builder().summary(eventSummary).id(event.getEventId()).build()
+                caseRef,
+                true,
+                CaseDataContent.builder()
+                    .data(data)
+                    .event(Event.builder().summary(eventSummary).id(event.getEventId()).build())
+                    .eventToken(event.getToken())
+                    .build()
             );
         } catch (FeignException e) {
             debugCcdException(log, e, "Failed to call 'attachCall' - `submitEventForCaseWorker`");
@@ -385,33 +388,6 @@ public class CcdApi {
             .stream()
             .map(CaseDetails::getId)
             .collect(toList());
-    }
-
-    private void attachCall(
-        String caseRef,
-        String serviceToken,
-        String idamToken,
-        String userId,
-        Map<String, Object> data,
-        String eventToken,
-        String jurisdiction,
-        String caseTypeId,
-        Event eventInfo
-    ) {
-        feignCcdApi.submitEventForCaseWorker(
-            idamToken,
-            serviceToken,
-            userId,
-            jurisdiction,
-            caseTypeId,
-            caseRef,
-            true,
-            CaseDataContent.builder()
-                .data(data)
-                .event(eventInfo)
-                .eventToken(eventToken)
-                .build()
-        );
     }
 
     private void removeFromIdamCacheIfAuthProblem(int status, String jurisdiction) {
