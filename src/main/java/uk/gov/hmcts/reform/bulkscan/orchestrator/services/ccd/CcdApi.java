@@ -57,45 +57,6 @@ public class CcdApi {
         this.serviceConfigProvider = serviceConfigProvider;
     }
 
-    private SearchResult searchCases(
-        String jurisdiction,
-        String caseType,
-        String searchString
-    ) {
-        CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
-        try {
-            return feignCcdApi.searchCases(
-                authenticator.getUserToken(),
-                authenticator.getServiceToken(),
-                caseType,
-                searchString
-            );
-        } catch (FeignException ex) {
-            debugCcdException(log, ex, "Failed to call 'searchCases'");
-            removeFromIdamCacheIfAuthProblem(ex.status(), jurisdiction);
-            throw ex;
-        }
-    }
-
-    private StartEventResponse startAttachScannedDocs(
-        String caseRef,
-        String serviceToken,
-        String idamToken,
-        String userId,
-        String jurisdiction,
-        String caseTypeId
-    ) {
-        return feignCcdApi.startEventForCaseWorker(
-            idamToken,
-            serviceToken,
-            userId,
-            jurisdiction,
-            caseTypeId,
-            caseRef,
-            EventIds.ATTACH_SCANNED_DOCS
-        );
-    }
-
     @Nonnull
     StartEventResponse startAttachScannedDocs(CaseDetails theCase, String idamToken, String userId) {
         String caseRef = String.valueOf(theCase.getId());
@@ -235,52 +196,6 @@ public class CcdApi {
         }
     }
 
-    private List<Long> getCaseRefs(
-        ServiceConfigItem serviceConfig,
-        String caseTypeIdsStr,
-        String searchQuery
-    ) {
-        String jurisdiction = serviceConfig.getJurisdiction();
-        SearchResult searchResult = searchCases(
-            jurisdiction,
-            caseTypeIdsStr,
-            searchQuery
-        );
-
-        return searchResult
-            .getCases()
-            .stream()
-            .map(CaseDetails::getId)
-            .collect(toList());
-    }
-
-    private void attachCall(
-        String caseRef,
-        String serviceToken,
-        String idamToken,
-        String userId,
-        Map<String, Object> data,
-        String eventToken,
-        String jurisdiction,
-        String caseTypeId,
-        Event eventInfo
-    ) {
-        feignCcdApi.submitEventForCaseWorker(
-            idamToken,
-            serviceToken,
-            userId,
-            jurisdiction,
-            caseTypeId,
-            caseRef,
-            true,
-            CaseDataContent.builder()
-                .data(data)
-                .event(eventInfo)
-                .eventToken(eventToken)
-                .build()
-        );
-    }
-
     public CcdAuthenticator authenticateJurisdiction(String jurisdiction) {
         return authenticatorFactory.createForJurisdiction(jurisdiction);
     }
@@ -412,6 +327,91 @@ public class CcdApi {
 
             throw exception;
         }
+    }
+
+    private SearchResult searchCases(
+        String jurisdiction,
+        String caseType,
+        String searchString
+    ) {
+        CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
+        try {
+            return feignCcdApi.searchCases(
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                caseType,
+                searchString
+            );
+        } catch (FeignException ex) {
+            debugCcdException(log, ex, "Failed to call 'searchCases'");
+            removeFromIdamCacheIfAuthProblem(ex.status(), jurisdiction);
+            throw ex;
+        }
+    }
+
+    private StartEventResponse startAttachScannedDocs(
+        String caseRef,
+        String serviceToken,
+        String idamToken,
+        String userId,
+        String jurisdiction,
+        String caseTypeId
+    ) {
+        return feignCcdApi.startEventForCaseWorker(
+            idamToken,
+            serviceToken,
+            userId,
+            jurisdiction,
+            caseTypeId,
+            caseRef,
+            EventIds.ATTACH_SCANNED_DOCS
+        );
+    }
+
+    private List<Long> getCaseRefs(
+        ServiceConfigItem serviceConfig,
+        String caseTypeIdsStr,
+        String searchQuery
+    ) {
+        String jurisdiction = serviceConfig.getJurisdiction();
+        SearchResult searchResult = searchCases(
+            jurisdiction,
+            caseTypeIdsStr,
+            searchQuery
+        );
+
+        return searchResult
+            .getCases()
+            .stream()
+            .map(CaseDetails::getId)
+            .collect(toList());
+    }
+
+    private void attachCall(
+        String caseRef,
+        String serviceToken,
+        String idamToken,
+        String userId,
+        Map<String, Object> data,
+        String eventToken,
+        String jurisdiction,
+        String caseTypeId,
+        Event eventInfo
+    ) {
+        feignCcdApi.submitEventForCaseWorker(
+            idamToken,
+            serviceToken,
+            userId,
+            jurisdiction,
+            caseTypeId,
+            caseRef,
+            true,
+            CaseDataContent.builder()
+                .data(data)
+                .event(eventInfo)
+                .eventToken(eventToken)
+                .build()
+        );
     }
 
     private void removeFromIdamCacheIfAuthProblem(int status, String jurisdiction) {
