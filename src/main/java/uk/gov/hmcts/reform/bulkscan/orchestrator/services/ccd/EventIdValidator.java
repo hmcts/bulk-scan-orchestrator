@@ -13,16 +13,10 @@ import static java.util.Arrays.asList;
 
 public final class EventIdValidator {
 
-    public static final String EVENT_ID_ATTACH_TO_CASE = "attachToExistingCase";
-    public static final String EVENT_ID_EXTEND_CAVEAT_CASE = "extendCaveatCase";
-    public static final String EVENT_ID_EXTEND_BULK_SCAN_CASE = "extendBulkScanCase";
-    public static final String EVENT_ID_CREATE_NEW_CASE = "createNewCase";
-    public static final String EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR = "attachScannedDocsWithOcr";
-
     private static final List<String> ATTACH_TO_CASE_EVENT_IDS = asList(
-        EVENT_ID_ATTACH_TO_CASE,
-        EVENT_ID_EXTEND_CAVEAT_CASE,
-        EVENT_ID_EXTEND_BULK_SCAN_CASE
+        EventIds.ATTACH_TO_CASE,
+        EventIds.EXTEND_CAVEAT_CASE,
+        EventIds.EXTEND_BULK_SCAN_CASE
     );
 
     private EventIdValidator() {
@@ -36,7 +30,7 @@ public final class EventIdValidator {
 
     @Nonnull
     static Validation<String, Void> isCreateNewCaseEvent(String eventId) {
-        return hasValidEventId(EVENT_ID_CREATE_NEW_CASE::equals, eventId);
+        return hasValidEventId(EventIds.CREATE_NEW_CASE::equals, eventId);
     }
 
     @Nonnull

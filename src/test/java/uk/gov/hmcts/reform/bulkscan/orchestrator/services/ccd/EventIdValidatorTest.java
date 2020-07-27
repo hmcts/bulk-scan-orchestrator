@@ -5,7 +5,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_CREATE_NEW_CASE;
 
 class EventIdValidatorTest {
 
@@ -31,8 +30,8 @@ class EventIdValidatorTest {
     private static Object[][] createCaseEventIdTestParams() {
         return new Object[][]{
             {"Invalid 'Create Case' event id", "invalid_event_id", false},
-            {"Valid 'Create Case' event id", EVENT_ID_CREATE_NEW_CASE.toUpperCase(), false},
-            {"Valid 'Create Case' event id", EVENT_ID_CREATE_NEW_CASE, true}
+            {"Valid 'Create Case' event id", EventIds.CREATE_NEW_CASE.toUpperCase(), false},
+            {"Valid 'Create Case' event id", EventIds.CREATE_NEW_CASE, true}
         };
     }
 

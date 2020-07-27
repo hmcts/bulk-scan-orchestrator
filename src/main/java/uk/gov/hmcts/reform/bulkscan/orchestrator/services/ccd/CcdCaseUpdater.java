@@ -31,7 +31,6 @@ import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.setExceptionRecordIdToScannedDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.logging.FeignExceptionLogger.debugCcdException;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR;
 
 @Service
 public class CcdCaseUpdater {
@@ -80,7 +79,7 @@ public class CcdCaseUpdater {
                 exceptionRecord.poBoxJurisdiction,
                 existingCaseTypeId,
                 existingCaseId,
-                EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR
+                EventIds.ATTACH_SCANNED_DOCS_WITH_OCR
             );
 
             log.info(

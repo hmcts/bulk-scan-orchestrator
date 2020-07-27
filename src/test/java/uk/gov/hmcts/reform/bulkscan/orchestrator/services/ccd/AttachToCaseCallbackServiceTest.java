@@ -37,7 +37,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidationsTest.JOURNEY_CLASSIFICATION;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_ATTACH_TO_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.CONTAINS_PAYMENTS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.ENVELOPE_ID;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.OCR_DATA;
@@ -143,7 +142,7 @@ class AttachToCaseCallbackServiceTest {
             CASE_DETAILS,
             IDAM_TOKEN,
             USER_ID,
-            EVENT_ID_ATTACH_TO_CASE,
+            EventIds.ATTACH_TO_CASE,
             true
         );
 
@@ -184,7 +183,7 @@ class AttachToCaseCallbackServiceTest {
             CASE_DETAILS,
             IDAM_TOKEN,
             USER_ID,
-            EVENT_ID_ATTACH_TO_CASE,
+            EventIds.ATTACH_TO_CASE,
             true
         );
 

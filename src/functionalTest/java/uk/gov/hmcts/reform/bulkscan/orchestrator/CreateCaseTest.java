@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIds;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -32,7 +33,6 @@ import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.BULK_SCANNED_CASE_TYPE;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_CREATE_NEW_CASE;
 
 @SpringBootTest
 @ActiveProfiles("nosb") // no servicebus queue handler registration
@@ -145,7 +145,7 @@ class CreateCaseTest {
 
         CallbackRequest callbackRequest = CallbackRequest
             .builder()
-            .eventId(EVENT_ID_CREATE_NEW_CASE)
+            .eventId(EventIds.CREATE_NEW_CASE)
             .caseDetails(exceptionRecordWithSearchFields)
             .build();
 
