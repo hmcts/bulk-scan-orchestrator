@@ -176,7 +176,7 @@ class AttachToCaseCallbackServiceTest {
         given(ccdCaseUpdater.updateCase(
             exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE
         )).willReturn(
-            Optional.of(ErrorsAndWarnings.withErrorsAndWarnings(asList("error1"), asList("warning1")))
+            Optional.of(new ErrorsAndWarnings(asList("error1"), asList("warning1")))
         );
 
         // when
