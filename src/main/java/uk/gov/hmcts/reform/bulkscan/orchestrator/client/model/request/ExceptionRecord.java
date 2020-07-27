@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 
@@ -14,6 +15,7 @@ public class ExceptionRecord {
     @Deprecated
     public final String id;
 
+    @JsonIgnore
     @JsonProperty("exception_record_id")
     public final String exceptionRecordId;
 
@@ -24,12 +26,15 @@ public class ExceptionRecord {
     @JsonProperty("case_type_id")
     public final String caseTypeId;
 
+    @JsonIgnore
     @JsonProperty("exception_record_case_type_id")
     public final String exceptionRecordCaseTypeId;
 
+    @JsonIgnore
     @JsonProperty("envelope_id")
     public final String envelopeId;
 
+    @JsonIgnore
     @JsonProperty("is_automated_process")
     public final boolean isAutomatedProcess;
 
