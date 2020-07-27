@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.ExceptionRecordMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIds;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -21,7 +22,6 @@ public class CreateExceptionRecord {
     private static final Logger log = LoggerFactory.getLogger(CreateExceptionRecord.class);
 
     public static final String CASE_TYPE = "ExceptionRecord";
-    private static final String EVENT_TYPE_ID = "createException";
     private static final String EVENT_SUMMARY = "Create an exception record";
 
     private final ExceptionRecordMapper mapper;
@@ -76,7 +76,7 @@ public class CreateExceptionRecord {
             authenticator,
             envelope.jurisdiction,
             caseTypeId,
-            EVENT_TYPE_ID,
+            EventIds.CREATE_EXCEPTION,
             startEventResponse -> buildCaseDataContent(envelope, startEventResponse.getToken()),
             loggingContext
         );
@@ -95,7 +95,7 @@ public class CreateExceptionRecord {
         return CaseDataContent.builder()
             .eventToken(startEventResponseToken)
             .event(Event.builder()
-                .id(EVENT_TYPE_ID)
+                .id(EventIds.CREATE_EXCEPTION)
                 .summary(EVENT_SUMMARY)
                 .build())
             .data(mapper.mapEnvelope(envelope))
