@@ -23,13 +23,13 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDoc
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.HashMap;
+import java.util.Optional;
 import javax.validation.ConstraintViolationException;
 
 import static java.time.LocalDateTime.now;
@@ -101,7 +101,7 @@ class CcdCaseUpdaterTest {
         prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
 
         // when
-        ProcessResult res = ccdCaseUpdater.updateCase(
+        Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
             exceptionRecord,
             configItem,
             true,
@@ -112,9 +112,7 @@ class CcdCaseUpdaterTest {
         );
 
         // then
-        assertThat(res.getErrors()).isEmpty();
-        assertThat(res.getWarnings()).isEmpty();
-        assertThat(res.getExceptionRecordData()).isEmpty();
+        assertThat(res).isEmpty();
     }
 
     @Test
@@ -128,7 +126,7 @@ class CcdCaseUpdaterTest {
         prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
 
         // when
-        ProcessResult res = ccdCaseUpdater.updateCase(
+        Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
             exceptionRecord,
             configItem,
             true,
@@ -139,9 +137,7 @@ class CcdCaseUpdaterTest {
         );
 
         // then
-        assertThat(res.getErrors()).isEmpty();
-        assertThat(res.getWarnings()).isEmpty();
-        assertThat(res.getExceptionRecordData()).isEmpty();
+        assertThat(res).isEmpty();
     }
 
     @Test
@@ -153,7 +149,7 @@ class CcdCaseUpdaterTest {
         initMockData();
 
         // when
-        ProcessResult res = ccdCaseUpdater.updateCase(
+        Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
             exceptionRecord,
             configItem,
             false,
@@ -164,9 +160,9 @@ class CcdCaseUpdaterTest {
         );
 
         // then
-        assertThat(res.getErrors()).isEmpty();
-        assertThat(res.getWarnings()).containsOnly("warning1");
-        assertThat(res.getExceptionRecordData()).isEmpty();
+        assertThat(res).isNotEmpty();
+        assertThat(res.get().getErrors()).isEmpty();
+        assertThat(res.get().getWarnings()).containsOnly("warning1");
     }
 
     @Test
@@ -180,7 +176,7 @@ class CcdCaseUpdaterTest {
         prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
 
         // when
-        ProcessResult res = ccdCaseUpdater.updateCase(
+        Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
             exceptionRecord,
             configItem,
             false,
@@ -191,9 +187,7 @@ class CcdCaseUpdaterTest {
         );
 
         // then
-        assertThat(res.getErrors()).isEmpty();
-        assertThat(res.getWarnings()).isEmpty();
-        assertThat(res.getExceptionRecordData()).isEmpty();
+        assertThat(res).isEmpty();
     }
 
     @Test
@@ -207,7 +201,7 @@ class CcdCaseUpdaterTest {
             .willThrow(new FeignException.Conflict("Msg", mock(Request.class), "Body".getBytes()));
 
         // when
-        ProcessResult res = ccdCaseUpdater.updateCase(
+        Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
             exceptionRecord,
             configItem,
             true,
@@ -218,9 +212,10 @@ class CcdCaseUpdaterTest {
         );
 
         // then
-        assertThat(res.getErrors()).containsExactlyInAnyOrder("Failed to update case for Service service "
+        assertThat(res).isNotEmpty();
+        assertThat(res.get().getErrors()).containsExactlyInAnyOrder("Failed to update case for Service service "
             + "with case Id existing_case_id based on exception record 1 because it has been updated in the meantime");
-        assertThat(res.getWarnings()).isEmpty();
+        assertThat(res.get().getWarnings()).isEmpty();
     }
 
     @Test
@@ -429,7 +424,7 @@ class CcdCaseUpdaterTest {
             .willReturn(new ClientServiceErrorResponse(asList("error1", "error2"), emptyList()));
 
         // when
-        ProcessResult res = ccdCaseUpdater.updateCase(
+        Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
             exceptionRecord,
             configItem,
             true,
@@ -440,8 +435,9 @@ class CcdCaseUpdaterTest {
         );
 
         // then
-        assertThat(res.getErrors()).containsExactlyInAnyOrder("error1", "error2");
-        assertThat(res.getWarnings()).isEmpty();
+        assertThat(res).isNotEmpty();
+        assertThat(res.get().getErrors()).containsExactlyInAnyOrder("error1", "error2");
+        assertThat(res.get().getWarnings()).isEmpty();
     }
 
     @Test
@@ -530,7 +526,7 @@ class CcdCaseUpdaterTest {
             );
 
         // when
-        ProcessResult res = ccdCaseUpdater.updateCase(
+        Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
             exceptionRecord,
             configItem,
             true,
@@ -541,8 +537,9 @@ class CcdCaseUpdaterTest {
         );
 
         // then
-        assertThat(res.getErrors()).containsOnly("No case found for case ID: 1234123412341234");
-        assertThat(res.getWarnings()).isEmpty();
+        assertThat(res).isNotEmpty();
+        assertThat(res.get().getErrors()).containsOnly("No case found for case ID: 1234123412341234");
+        assertThat(res.get().getWarnings()).isEmpty();
     }
 
     @Test
@@ -560,7 +557,7 @@ class CcdCaseUpdaterTest {
             .willThrow(new FeignException.BadRequest("invalid", mock(Request.class),  "Body".getBytes()));
 
         // when
-        ProcessResult res = ccdCaseUpdater.updateCase(
+        Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
             exceptionRecord,
             configItem,
             true,
@@ -571,8 +568,9 @@ class CcdCaseUpdaterTest {
         );
 
         // then
-        assertThat(res.getErrors()).containsOnly("Invalid case ID: 1234");
-        assertThat(res.getWarnings()).isEmpty();
+        assertThat(res).isNotEmpty();
+        assertThat(res.get().getErrors()).containsOnly("Invalid case ID: 1234");
+        assertThat(res.get().getWarnings()).isEmpty();
     }
 
     private BDDMyOngoingStubbing<CaseDetails> prepareMockForSubmissionEventForCaseWorker() {

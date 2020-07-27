@@ -18,11 +18,11 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.AttachScannedDocumentsValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ExceptionRecordValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static java.time.LocalDateTime.now;
 import static java.util.Arrays.asList;
@@ -136,7 +136,7 @@ class AttachToCaseCallbackServiceTest {
         given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
         given(ccdCaseUpdater.updateCase(
             exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE
-        )).willReturn(new ProcessResult(emptyMap()));
+        )).willReturn(Optional.empty());
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -175,7 +175,9 @@ class AttachToCaseCallbackServiceTest {
         given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
         given(ccdCaseUpdater.updateCase(
             exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE
-        )).willReturn(new ProcessResult(asList("warning1"), asList("error1")));
+        )).willReturn(
+            Optional.of(new ErrorsAndWarnings(asList("error1"), asList("warning1")))
+        );
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
