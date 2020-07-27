@@ -8,17 +8,13 @@ public class ErrorsAndWarnings {
     private final List<String> errors;
     private final List<String> warnings;
 
-    private ErrorsAndWarnings(List<String> errors, List<String> warnings) {
+    public ErrorsAndWarnings(List<String> errors, List<String> warnings) {
         this.errors = errors;
         this.warnings = warnings;
     }
 
     static ErrorsAndWarnings withErrors(List<String> errors) {
         return new ErrorsAndWarnings(errors, emptyList());
-    }
-
-    static ErrorsAndWarnings withErrorsAndWarnings(List<String> errors, List<String> warnings) {
-        return new ErrorsAndWarnings(errors, warnings);
     }
 
     public List<String> getErrors() {

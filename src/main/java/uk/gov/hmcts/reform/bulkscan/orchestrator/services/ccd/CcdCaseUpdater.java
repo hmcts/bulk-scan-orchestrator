@@ -128,7 +128,7 @@ public class CcdCaseUpdater {
                     existingCase.getId(),
                     exceptionRecord.id
                 );
-                return Optional.of(ErrorsAndWarnings.withErrorsAndWarnings(emptyList(), updateResponse.warnings));
+                return Optional.of(new ErrorsAndWarnings(emptyList(), updateResponse.warnings));
             } else {
                 setExceptionRecordIdToScannedDocuments(exceptionRecord, updateResponse.caseDetails);
 
@@ -152,13 +152,13 @@ public class CcdCaseUpdater {
             }
         } catch (UnprocessableEntity exception) {
             ClientServiceErrorResponse errorResponse = serviceResponseParser.parseResponseBody(exception);
-            return Optional.of(ErrorsAndWarnings.withErrorsAndWarnings(errorResponse.errors, errorResponse.warnings));
+            return Optional.of(new ErrorsAndWarnings(errorResponse.errors, errorResponse.warnings));
         } catch (FeignException.Conflict exception) {
             String msg = getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id)
                 + " because it has been updated in the meantime";
             log.error(msg);
             ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(singletonList(msg), emptyList());
-            return Optional.of(ErrorsAndWarnings.withErrorsAndWarnings(errorResponse.errors, errorResponse.warnings));
+            return Optional.of(new ErrorsAndWarnings(errorResponse.errors, errorResponse.warnings));
         } catch (FeignException.NotFound exception) {
             String msg = "No case found for case ID: " + existingCaseId;
             log.error(
@@ -166,7 +166,7 @@ public class CcdCaseUpdater {
                 existingCaseId, configItem.getService(), exceptionRecord.id
             );
             ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(singletonList(msg), emptyList());
-            return Optional.of(ErrorsAndWarnings.withErrorsAndWarnings(errorResponse.errors, errorResponse.warnings));
+            return Optional.of(new ErrorsAndWarnings(errorResponse.errors, errorResponse.warnings));
         } catch (FeignException.BadRequest exception) {
             String msg = "Invalid case ID: " + existingCaseId;
             log.error(
@@ -174,7 +174,7 @@ public class CcdCaseUpdater {
                 existingCaseId, configItem.getService(), exceptionRecord.id, exception
             );
             ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(singletonList(msg), emptyList());
-            return Optional.of(ErrorsAndWarnings.withErrorsAndWarnings(errorResponse.errors, errorResponse.warnings));
+            return Optional.of(new ErrorsAndWarnings(errorResponse.errors, errorResponse.warnings));
         } catch (FeignException exception) {
             debugCcdException(log, exception, "Failed to call 'updateCase'");
             log.error(
