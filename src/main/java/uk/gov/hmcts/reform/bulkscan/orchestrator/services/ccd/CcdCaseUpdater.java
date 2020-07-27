@@ -157,24 +157,21 @@ public class CcdCaseUpdater {
             String msg = getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id)
                 + " because it has been updated in the meantime";
             log.error(msg);
-            ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(singletonList(msg), emptyList());
-            return Optional.of(new ErrorsAndWarnings(errorResponse.errors, errorResponse.warnings));
+            return Optional.of(new ErrorsAndWarnings(singletonList(msg), emptyList()));
         } catch (FeignException.NotFound exception) {
             String msg = "No case found for case ID: " + existingCaseId;
             log.error(
                 "No case found for case ID: {} service: {} exception record id: {}",
                 existingCaseId, configItem.getService(), exceptionRecord.id
             );
-            ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(singletonList(msg), emptyList());
-            return Optional.of(new ErrorsAndWarnings(errorResponse.errors, errorResponse.warnings));
+            return Optional.of(new ErrorsAndWarnings(singletonList(msg), emptyList()));
         } catch (FeignException.BadRequest exception) {
             String msg = "Invalid case ID: " + existingCaseId;
             log.error(
                 "Invalid case ID: {} service: {} exception record id: {}",
                 existingCaseId, configItem.getService(), exceptionRecord.id, exception
             );
-            ClientServiceErrorResponse errorResponse = new ClientServiceErrorResponse(singletonList(msg), emptyList());
-            return Optional.of(new ErrorsAndWarnings(errorResponse.errors, errorResponse.warnings));
+            return Optional.of(new ErrorsAndWarnings(singletonList(msg), emptyList()));
         } catch (FeignException exception) {
             debugCcdException(log, exception, "Failed to call 'updateCase'");
             log.error(
