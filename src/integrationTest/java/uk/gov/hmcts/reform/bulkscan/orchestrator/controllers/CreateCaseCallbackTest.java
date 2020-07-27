@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIds;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -36,7 +37,6 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.collection.IsMapWithSize.anEmptyMap;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_CREATE_NEW_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 
@@ -83,7 +83,7 @@ class CreateCaseCallbackTest {
     void should_not_create_case_if_classification_new_application_without_ocr_data() {
         postWithBody(getRequestBody("invalid-new-application-without-ocr.json"))
             .statusCode(OK.value())
-            .body("errors", contains("Event " + EVENT_ID_CREATE_NEW_CASE + " not allowed "
+            .body("errors", contains("Event " + EventIds.CREATE_NEW_CASE + " not allowed "
                 + "for the current journey classification " + NEW_APPLICATION.name() + " without OCR"))
             .body("warnings", empty())
             .body("data", anEmptyMap());
@@ -93,7 +93,7 @@ class CreateCaseCallbackTest {
     void should_not_create_case_if_classification_exception_without_ocr_data() {
         postWithBody(getRequestBody("invalid-exception-without-ocr.json"))
             .statusCode(OK.value())
-            .body("errors", contains("Event " + EVENT_ID_CREATE_NEW_CASE + " not allowed "
+            .body("errors", contains("Event " + EventIds.CREATE_NEW_CASE + " not allowed "
                 + "for the current journey classification " + EXCEPTION.name() + " without OCR"))
             .body("warnings", empty())
             .body("data.", anEmptyMap());

@@ -44,7 +44,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdCallbackType.CASE_CREATION;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_CREATE_NEW_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
@@ -115,7 +114,7 @@ class CreateCaseCallbackServiceTest {
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
             service.process(new CcdCallbackRequest(
-                EVENT_ID_CREATE_NEW_CASE,
+                EventIds.CREATE_NEW_CASE,
                 caseDetails,
                 true
             ), IDAM_TOKEN, USER_ID),
@@ -137,7 +136,7 @@ class CreateCaseCallbackServiceTest {
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
             service.process(new CcdCallbackRequest(
-                EVENT_ID_CREATE_NEW_CASE,
+                EventIds.CREATE_NEW_CASE,
                 caseDetails,
                 true
             ), IDAM_TOKEN, USER_ID),
@@ -161,7 +160,7 @@ class CreateCaseCallbackServiceTest {
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
             service.process(new CcdCallbackRequest(
-                EVENT_ID_CREATE_NEW_CASE,
+                EventIds.CREATE_NEW_CASE,
                 caseDetails,
                 true
             ), IDAM_TOKEN, USER_ID),
@@ -184,7 +183,7 @@ class CreateCaseCallbackServiceTest {
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
             service.process(new CcdCallbackRequest(
-                EVENT_ID_CREATE_NEW_CASE,
+                EventIds.CREATE_NEW_CASE,
                 caseDetails,
                 true
             ), IDAM_TOKEN, USER_ID),
@@ -212,7 +211,7 @@ class CreateCaseCallbackServiceTest {
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
             service.process(new CcdCallbackRequest(
-                EVENT_ID_CREATE_NEW_CASE,
+                EventIds.CREATE_NEW_CASE,
                 caseDetails,
                 true
             ), null, USER_ID),
@@ -238,7 +237,7 @@ class CreateCaseCallbackServiceTest {
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
             service.process(new CcdCallbackRequest(
-                EVENT_ID_CREATE_NEW_CASE,
+                EventIds.CREATE_NEW_CASE,
                 caseDetails,
                 true
             ), IDAM_TOKEN, null),
@@ -266,7 +265,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
-            EVENT_ID_CREATE_NEW_CASE,
+            EventIds.CREATE_NEW_CASE,
             caseDetails(data),
             true
         ), IDAM_TOKEN, USER_ID);
@@ -276,7 +275,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(result.getErrors()).containsOnly(
             String.format(
                 "Event %s not allowed for the current journey classification %s without OCR",
-                EVENT_ID_CREATE_NEW_CASE,
+                EventIds.CREATE_NEW_CASE,
                 NEW_APPLICATION.name()
             )
         );
@@ -294,7 +293,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
-            EVENT_ID_CREATE_NEW_CASE,
+            EventIds.CREATE_NEW_CASE,
             caseDetails(data),
             true
         ), IDAM_TOKEN, USER_ID);
@@ -304,7 +303,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(result.getErrors()).containsOnly(
             String.format(
                 "Event %s not allowed for the current journey classification %s",
-                EVENT_ID_CREATE_NEW_CASE,
+                EventIds.CREATE_NEW_CASE,
                 SUPPLEMENTARY_EVIDENCE.name()
             )
         );
@@ -326,7 +325,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
-            EVENT_ID_CREATE_NEW_CASE,
+            EventIds.CREATE_NEW_CASE,
             caseDetails(caseData),
             true
         ), IDAM_TOKEN, USER_ID);
@@ -348,7 +347,7 @@ class CreateCaseCallbackServiceTest {
 
         assertThatThrownBy(
             () -> service.process(new CcdCallbackRequest(
-                EVENT_ID_CREATE_NEW_CASE,
+                EventIds.CREATE_NEW_CASE,
                 caseDetails(basicCaseData()),
                 true
             ), IDAM_TOKEN, USER_ID)
@@ -371,7 +370,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
-            EVENT_ID_CREATE_NEW_CASE,
+            EventIds.CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -395,7 +394,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
-            EVENT_ID_CREATE_NEW_CASE,
+            EventIds.CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -443,7 +442,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
-            EVENT_ID_CREATE_NEW_CASE,
+            EventIds.CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -496,7 +495,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
-            EVENT_ID_CREATE_NEW_CASE,
+            EventIds.CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -525,7 +524,7 @@ class CreateCaseCallbackServiceTest {
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
-            EVENT_ID_CREATE_NEW_CASE,
+            EventIds.CREATE_NEW_CASE,
             caseDetails,
             true
         ), IDAM_TOKEN, USER_ID);
@@ -560,7 +559,7 @@ class CreateCaseCallbackServiceTest {
         // when
         ProcessResult result =
             service.process(
-                new CcdCallbackRequest(EVENT_ID_CREATE_NEW_CASE, caseDetails(data), true), // ignore warnings
+                new CcdCallbackRequest(EventIds.CREATE_NEW_CASE, caseDetails(data), true), // ignore warnings
                 IDAM_TOKEN,
                 USER_ID
             );
@@ -590,7 +589,7 @@ class CreateCaseCallbackServiceTest {
         ProcessResult result =
             service
                 .process(
-                    new CcdCallbackRequest(EVENT_ID_CREATE_NEW_CASE, caseDetails(data), ignoresWarnings),
+                    new CcdCallbackRequest(EventIds.CREATE_NEW_CASE, caseDetails(data), ignoresWarnings),
                     IDAM_TOKEN,
                     USER_ID
                 );
@@ -626,7 +625,7 @@ class CreateCaseCallbackServiceTest {
         ProcessResult result =
             service
                 .process(
-                    new CcdCallbackRequest(EVENT_ID_CREATE_NEW_CASE, caseDetails(data), true), // ignore warnings
+                    new CcdCallbackRequest(EventIds.CREATE_NEW_CASE, caseDetails(data), true), // ignore warnings
                     IDAM_TOKEN,
                     USER_ID
                 );
@@ -661,7 +660,7 @@ class CreateCaseCallbackServiceTest {
         ProcessResult result =
             service
                 .process(
-                    new CcdCallbackRequest(EVENT_ID_CREATE_NEW_CASE, caseDetails(data), true), // ignore warnings
+                    new CcdCallbackRequest(EventIds.CREATE_NEW_CASE, caseDetails(data), true), // ignore warnings
                     IDAM_TOKEN,
                     USER_ID
                 );

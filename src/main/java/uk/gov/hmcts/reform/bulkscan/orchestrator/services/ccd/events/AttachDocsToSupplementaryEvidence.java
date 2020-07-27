@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.SupplementaryEvidenceMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIds;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -20,7 +21,6 @@ class AttachDocsToSupplementaryEvidence {
 
     private static final Logger log = LoggerFactory.getLogger(AttachDocsToSupplementaryEvidence.class);
 
-    public static final String EVENT_TYPE_ID = "attachScannedDocs";
     public static final String EVENT_SUMMARY = "Attach scanned documents";
 
     private final SupplementaryEvidenceMapper mapper;
@@ -60,7 +60,7 @@ class AttachDocsToSupplementaryEvidence {
                     envelope.jurisdiction,
                     existingCase.getCaseTypeId(),
                     Long.toString(existingCase.getId()),
-                    EVENT_TYPE_ID,
+                    EventIds.ATTACH_SCANNED_DOCS,
                     startEventResponse -> buildCaseDataContent(envelope, startEventResponse),
                     loggingContext
                 );
@@ -83,7 +83,7 @@ class AttachDocsToSupplementaryEvidence {
         return CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
             .event(Event.builder()
-                .id(EVENT_TYPE_ID)
+                .id(EventIds.ATTACH_SCANNED_DOCS)
                 .summary(EVENT_SUMMARY)
                 .build())
             .data(caseData)

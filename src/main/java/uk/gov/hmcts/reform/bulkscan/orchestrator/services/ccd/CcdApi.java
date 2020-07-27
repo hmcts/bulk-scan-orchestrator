@@ -34,8 +34,6 @@ public class CcdApi {
 
     public static final Logger log = LoggerFactory.getLogger(CcdApi.class);
 
-    public static final String EVENT_ID_ATTACH_SCANNED_DOCS = "attachScannedDocs";
-
     public static final String SEARCH_BY_LEGACY_ID_QUERY_FORMAT =
         "{\"query\": { \"match_phrase\" : { \"alias.previousServiceCaseReference\" : \"%s\" }}}";
 
@@ -94,7 +92,7 @@ public class CcdApi {
             jurisdiction,
             caseTypeId,
             caseRef,
-            EVENT_ID_ATTACH_SCANNED_DOCS
+            EventIds.ATTACH_SCANNED_DOCS
         );
     }
 
@@ -116,7 +114,7 @@ public class CcdApi {
             log.info(
                 "Started event to attach docs to case. "
                     + "Event ID: {}. Case ID: {}. Case type: {}. Jurisdiction: {}. Case state: {}",
-                EVENT_ID_ATTACH_SCANNED_DOCS,
+                EventIds.ATTACH_SCANNED_DOCS,
                 caseRef,
                 theCase.getCaseTypeId(),
                 theCase.getJurisdiction(),

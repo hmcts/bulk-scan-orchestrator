@@ -45,7 +45,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
 @ExtendWith(MockitoExtension.class)
@@ -293,7 +292,7 @@ class CcdCaseUpdaterTest {
     void updateCase_should_handle_rest_template_client_exception_for_i_o_exceptions() {
         // given
         given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
-        given(eventResponse.getEventId()).willReturn(EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR);
+        given(eventResponse.getEventId()).willReturn(EventIds.ATTACH_SCANNED_DOCS_WITH_OCR);
         given(configItem.getUpdateUrl()).willReturn("url");
         given(caseUpdateClient.updateCase(anyString(), any(CaseDetails.class), any(ExceptionRecord.class), anyString()))
             .willThrow(new RestClientException("I/O error"));
@@ -328,7 +327,7 @@ class CcdCaseUpdaterTest {
     void updateCase_should_handle_response_validation_exception() {
         // given
         given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
-        given(eventResponse.getEventId()).willReturn(EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR);
+        given(eventResponse.getEventId()).willReturn(EventIds.ATTACH_SCANNED_DOCS_WITH_OCR);
         given(configItem.getUpdateUrl()).willReturn("url");
         given(caseUpdateClient.updateCase(anyString(), any(CaseDetails.class), any(ExceptionRecord.class), anyString()))
             .willThrow(new ConstraintViolationException("validation error message", emptySet()));
@@ -602,7 +601,7 @@ class CcdCaseUpdaterTest {
 
     private void initResponseMockData() {
         given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
-        given(eventResponse.getEventId()).willReturn(EVENT_ID_ATTACH_SCANNED_DOCS_WITH_OCR);
+        given(eventResponse.getEventId()).willReturn(EventIds.ATTACH_SCANNED_DOCS_WITH_OCR);
         given(eventResponse.getToken()).willReturn("token");
     }
 
