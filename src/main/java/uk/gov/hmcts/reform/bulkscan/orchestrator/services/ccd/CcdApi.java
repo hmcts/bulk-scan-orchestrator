@@ -155,6 +155,21 @@ public class CcdApi {
         );
     }
 
+    public List<Long> getCaseRefsByEnvelopeId(String envelopeId, String service) {
+        ServiceConfigItem serviceConfig = serviceConfigProvider.getConfig(service);
+        return searchCases(
+            serviceConfig.getJurisdiction(),
+            String.join(",", serviceConfig.getCaseTypeIds()),
+            "      {"
+                + "  \"query\": {"
+                + "    \"term\" : {"
+                + "      \"data.bulkScanEnvelopes.value.id\" : \"" + envelopeId + "\""
+                + "    }"
+                + "  }"
+                + "}"
+        );
+    }
+
     public void attachExceptionRecord(
         CaseDetails theCase,
         String idamToken,
