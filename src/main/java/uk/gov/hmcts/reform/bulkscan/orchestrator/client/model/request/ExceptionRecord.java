@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 
@@ -8,10 +9,34 @@ import java.util.List;
 
 public class ExceptionRecord {
 
+    /**
+     * Deprecated. Use {@link #exceptionRecordId} instead.
+     */
+    @Deprecated
     public final String id;
 
+    @JsonIgnore
+    @JsonProperty("exception_record_id")
+    public final String exceptionRecordId;
+
+    /**
+     * Deprecated. Use {@link #exceptionRecordCaseTypeId} instead.
+     */
+    @Deprecated
     @JsonProperty("case_type_id")
     public final String caseTypeId;
+
+    @JsonIgnore
+    @JsonProperty("exception_record_case_type_id")
+    public final String exceptionRecordCaseTypeId;
+
+    @JsonIgnore
+    @JsonProperty("envelope_id")
+    public final String envelopeId;
+
+    @JsonIgnore
+    @JsonProperty("is_automated_process")
+    public final boolean isAutomatedProcess;
 
     @JsonProperty("po_box")
     public final String poBox;
@@ -38,8 +63,10 @@ public class ExceptionRecord {
     public final List<OcrDataField> ocrDataFields;
 
     public ExceptionRecord(
-        String id,
-        String caseTypeId,
+        String exceptionRecordId,
+        String exceptionRecordCaseTypeId,
+        String envelopeId,
+        boolean isAutomatedProcess,
         String poBox,
         String poBoxJurisdiction,
         Classification journeyClassification,
@@ -49,8 +76,12 @@ public class ExceptionRecord {
         List<ScannedDocument> scannedDocuments,
         List<OcrDataField> ocrDataFields
     ) {
-        this.id = id;
-        this.caseTypeId = caseTypeId;
+        this.id = exceptionRecordId;
+        this.exceptionRecordId = exceptionRecordId;
+        this.caseTypeId = exceptionRecordCaseTypeId;
+        this.exceptionRecordCaseTypeId = exceptionRecordCaseTypeId;
+        this.envelopeId = envelopeId;
+        this.isAutomatedProcess = isAutomatedProcess;
         this.poBox = poBox;
         this.poBoxJurisdiction = poBoxJurisdiction;
         this.journeyClassification = journeyClassification;

@@ -163,6 +163,8 @@ class CcdNewCaseCreatorTest {
         return new ExceptionRecord(
             "1",
             CASE_TYPE_ID,
+            "envelopeId123",
+            false,
             "12345",
             "some jurisdiction",
             EXCEPTION,

@@ -110,6 +110,8 @@ class ScannedDocumentsHelperTest {
         var exceptionRecord = new ExceptionRecord(
             EXCEPTION_REFERENCE,
             "caseTypeId",
+            "envelopeId123",
+            false,
             "poBox",
             "poBoxJurisdiction",
             Classification.EXCEPTION,
@@ -148,6 +150,8 @@ class ScannedDocumentsHelperTest {
         var exceptionRecord = new ExceptionRecord(
             EXCEPTION_REFERENCE,
             "caseTypeId",
+            "envelopeId123",
+            false,
             "poBox",
             "poBoxJurisdiction",
             Classification.EXCEPTION,

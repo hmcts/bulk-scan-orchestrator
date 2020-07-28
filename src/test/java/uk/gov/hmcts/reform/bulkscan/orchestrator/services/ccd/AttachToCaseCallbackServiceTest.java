@@ -211,6 +211,8 @@ class AttachToCaseCallbackServiceTest {
         return new ExceptionRecord(
             "1",
             "caseTypeId",
+            "envelopeId123",
+            false,
             "12345",
             "some jurisdiction",
             SUPPLEMENTARY_EVIDENCE_WITH_OCR,
