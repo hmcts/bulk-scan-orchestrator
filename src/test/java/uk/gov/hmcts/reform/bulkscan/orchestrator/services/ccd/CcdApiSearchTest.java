@@ -81,7 +81,7 @@ class CcdApiSearchTest {
 
         assertThat(idamTokenCaptor.getValue()).isEqualTo(idamToken);
         assertThat(s2sTokenCaptor.getValue()).isEqualTo(s2sToken);
-        assertThat(caseTypeCaptor.getValue()).isEqualTo("case-type-a,case-type-b"); //concatenated case types for current service
+        assertThat(caseTypeCaptor.getValue()).isEqualTo("case-type-a,case-type-b");
         assertThat(searchQueryCaptor.getValue()).contains(envelopeId);
     }
 
