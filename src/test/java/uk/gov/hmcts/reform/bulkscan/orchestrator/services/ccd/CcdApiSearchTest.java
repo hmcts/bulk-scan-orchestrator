@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
@@ -27,10 +28,10 @@ class CcdApiSearchTest {
 
     @Mock CcdAuthenticator ccdAuthenticator;
 
-    ArgumentCaptor<String> idamTokenCaptor = ArgumentCaptor.forClass(String.class);
-    ArgumentCaptor<String> s2sTokenCaptor = ArgumentCaptor.forClass(String.class);
-    ArgumentCaptor<String> caseTypeCaptor = ArgumentCaptor.forClass(String.class);
-    ArgumentCaptor<String> searchQueryCaptor = ArgumentCaptor.forClass(String.class);
+    @Captor ArgumentCaptor<String> idamTokenCaptor;
+    @Captor ArgumentCaptor<String> s2sTokenCaptor;
+    @Captor ArgumentCaptor<String> caseTypeCaptor;
+    @Captor ArgumentCaptor<String> searchQueryCaptor;
 
     CcdApi ccdApi;
 
