@@ -11,6 +11,7 @@ import org.assertj.core.util.Maps;
 import org.json.JSONObject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpHeaders;
@@ -40,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_EXCEPTION_RECORD;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURISDICTION;
@@ -68,6 +70,7 @@ class AttachExceptionRecordWithOcrTest {
     private static final String CASE_ID = "1539007368674134";
     private static final String SUPPLEMENTARY_EVIDENCE_WITH_OCR = "SUPPLEMENTARY_EVIDENCE_WITH_OCR";
     private static final String ATTACH_TO_CASE_REFERENCE_FIELD_NAME = "attachToCaseReference";
+    private static final String ENVELOPE_ID_FIELD_NAME = "envelopeId";
     private static final String SEARCH_CASE_REFERENCE_FIELD_NAME = "searchCaseReference";
     private static final String JOURNEY_CLASSIFICATION = "journeyClassification";
 
@@ -179,6 +182,21 @@ class AttachExceptionRecordWithOcrTest {
             .body(RESPONSE_FIELD_ERRORS, hasItem("Invalid journey classification NEW_APPLICATION"));
     }
 
+    @DisplayName("Should return a 422 response when envelope ID is missing")
+    @Test
+    void should_return_422_response_when_envelope_id_is_missing() throws Exception {
+        byte[] requestBody = getRequestBody("missing-envelope-id.json");
+
+        String responseBody = postWithBody(requestBody)
+            .statusCode(UNPROCESSABLE_ENTITY.value())
+            .extract()
+            .body()
+            .asString();
+
+        String expectedResponseBody = "{\"message\":\"Exception record is lacking envelopeId field\"}";
+        JSONAssert.assertEquals(expectedResponseBody, responseBody, false);
+    }
+
     @DisplayName("Should fail with the correct error when start event api call fails")
     @Test
     void should_fail_with_the_correct_error_when_start_event_api_call_fails() throws Exception {
@@ -241,6 +259,7 @@ class AttachExceptionRecordWithOcrTest {
         caseData.put(JOURNEY_CLASSIFICATION, SUPPLEMENTARY_EVIDENCE_WITH_OCR);
         caseData.put("formType", "B123");
         caseData.put(SEARCH_CASE_REFERENCE_FIELD_NAME, CASE_ID);
+        caseData.put(ENVELOPE_ID_FIELD_NAME, "2777a98c-cbb4-11ea-87d0-0242ac130003");
         return caseData;
     }
 

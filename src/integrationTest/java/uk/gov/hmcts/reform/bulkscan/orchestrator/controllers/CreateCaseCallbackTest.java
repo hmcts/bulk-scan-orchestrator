@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpHeaders;
@@ -37,6 +38,7 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.collection.IsMapWithSize.anEmptyMap;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 
@@ -309,6 +311,21 @@ class CreateCaseCallbackTest {
                 "Missing deliveryDate",
                 "Missing openingDate"
             ));
+    }
+
+    @Test
+    void should_return_422_response_when_envelope_id_is_missing_in_callback_case_data() throws Exception {
+        String responseBody = postWithBody(getRequestBody("missing-envelope-id.json"))
+            .statusCode(UNPROCESSABLE_ENTITY.value())
+            .extract()
+            .body()
+            .asString();
+
+        JSONAssert.assertEquals(
+            "{\"message\":\"Exception record is lacking envelopeId field\"}",
+            responseBody,
+            false
+        );
     }
 
     @Test

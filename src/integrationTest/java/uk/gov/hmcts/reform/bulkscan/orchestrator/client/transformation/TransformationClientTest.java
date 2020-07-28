@@ -216,6 +216,8 @@ public class TransformationClientTest {
         return new ExceptionRecord(
             "id",
             "some_case_type",
+            "envelope_id",
+            false,
             "poBox",
             "BULKSCAN",
             Classification.NEW_APPLICATION,
