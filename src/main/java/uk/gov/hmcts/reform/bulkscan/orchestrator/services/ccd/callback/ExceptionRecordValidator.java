@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.FORMATTER;
@@ -31,6 +32,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJourneyClassification;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJurisdiction;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasPoBox;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.ENVELOPE_ID;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 
 @Component
@@ -73,7 +75,7 @@ public class ExceptionRecordValidator {
         Validation<String, String> jurisdictionValidation = hasJurisdiction(caseDetails);
         Validation<String, Classification> journeyClassificationValidation = hasJourneyClassification(caseDetails);
 
-        Validation<String, String> formTypeValidation =  hasFormType(caseDetails);
+        Validation<String, String> formTypeValidation = hasFormType(caseDetails);
         // Exception journey classification may not have form type so skipping validation for it
         if (journeyClassificationValidation.isValid() && journeyClassificationValidation.get().equals(EXCEPTION)) {
             formTypeValidation = Validation.valid(formTypeValidation.getOrNull());
@@ -99,18 +101,22 @@ public class ExceptionRecordValidator {
 
         Seq<String> errors = getValidationErrors(validations);
         if (errors.isEmpty()) {
-            return Validation.valid(new ExceptionRecord(
-                exceptionRecordIdValidation.get(),
-                caseTypeIdValidation.get(),
-                poBoxValidation.get(),
-                jurisdictionValidation.get(),
-                journeyClassificationValidation.get(),
-                formTypeValidation.get(),
-                deliveryDateValidation.get(),
-                openingDateValidation.get(),
-                scannedDocumentsValidation.get(),
-                ocrDataFieldsValidation.get()
-            ));
+            return Validation.valid(
+                new ExceptionRecord(
+                    exceptionRecordIdValidation.get(),
+                    caseTypeIdValidation.get(),
+                    getEnvelopeId(caseDetails),
+                    false,
+                    poBoxValidation.get(),
+                    jurisdictionValidation.get(),
+                    journeyClassificationValidation.get(),
+                    formTypeValidation.get(),
+                    deliveryDateValidation.get(),
+                    openingDateValidation.get(),
+                    scannedDocumentsValidation.get(),
+                    ocrDataFieldsValidation.get()
+                )
+            );
         }
         return Validation.invalid(errors);
     }
@@ -134,6 +140,18 @@ public class ExceptionRecordValidator {
                 .map(this::mapScannedDocument)
                 .collect(toList())
         ).toValidation().mapError(throwable -> "Invalid scannedDocuments format. Error: " + throwable.getMessage());
+    }
+
+    private String getEnvelopeId(CaseDetails caseDetails) {
+        return Optional.ofNullable(caseDetails)
+            .map(CaseDetails::getData)
+            .map(data -> (String) data.get(ENVELOPE_ID))
+            .orElseThrow(
+                // we can't apply standard validation, as the caseworker doesn't even know about envelope ID field
+                () -> new UnprocessableCaseDataException(
+                    format("Exception record is lacking %s field", ENVELOPE_ID)
+                )
+            );
     }
 
     @SuppressWarnings("unchecked")

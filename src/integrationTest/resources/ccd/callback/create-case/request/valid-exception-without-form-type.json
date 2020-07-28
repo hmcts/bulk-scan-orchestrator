@@ -13,6 +13,7 @@
       "journeyClassification": "EXCEPTION",
       "deliveryDate": "2018-01-02T12:34:56.123",
       "openingDate": "2018-01-03T12:34:56.123Z",
+      "envelopeId": "e0c7b48e-624a-4b1f-ba3e-7a0d50d09e80",
       "scanOCRData": [
         {
           "value": {
