@@ -160,12 +160,12 @@ public class CcdApi {
         return searchCases(
             serviceConfig.getJurisdiction(),
             String.join(",", serviceConfig.getCaseTypeIds()),
-            "      {\n"
-                + "  \"query\": {\n"
-                + "    \"term\" : {\n"
-                + "      \"data.bulkScanEnvelopes.value.id\" : \"" + envelopeId + "\"\n"
-                + "    }\n"
-                + "  }\n"
+            "      {"
+                + "  \"query\": {"
+                + "    \"term\" : {"
+                + "      \"data.bulkScanEnvelopes.value.id\" : \"" + envelopeId + "\""
+                + "    }"
+                + "  }"
                 + "}"
         );
     }

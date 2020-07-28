@@ -48,7 +48,7 @@ class CcdApiSearchTest {
         String idamToken = "idam-token";
         String s2sToken = "s2s-token";
 
-        ServiceConfigItem serviceCfg = cfg("some-jurisdiction", asList("a", "b"));
+        var serviceCfg = serviceConfig("some-jurisdiction", asList("case-type-a", "case-type-b"));
 
         given(serviceConfigProvider.getConfig(service)).willReturn(serviceCfg);
 
@@ -81,11 +81,11 @@ class CcdApiSearchTest {
 
         assertThat(idamTokenCaptor.getValue()).isEqualTo(idamToken);
         assertThat(s2sTokenCaptor.getValue()).isEqualTo(s2sToken);
-        assertThat(caseTypeCaptor.getValue()).isEqualTo("a,b"); //concatenated case types for current service
+        assertThat(caseTypeCaptor.getValue()).isEqualTo("case-type-a,case-type-b"); //concatenated case types for current service
         assertThat(searchQueryCaptor.getValue()).contains(envelopeId);
     }
 
-    private ServiceConfigItem cfg(String jurisdiction, List<String> caseTypes) {
+    private ServiceConfigItem serviceConfig(String jurisdiction, List<String> caseTypes) {
         var cfg = new ServiceConfigItem();
         cfg.setJurisdiction(jurisdiction);
         cfg.setCaseTypeIds(caseTypes);
