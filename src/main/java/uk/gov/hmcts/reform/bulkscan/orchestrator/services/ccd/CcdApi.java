@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
-import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.List;
@@ -128,39 +127,32 @@ public class CcdApi {
 
             return emptyList();
         } else {
-            String jurisdiction = serviceConfig.getJurisdiction();
-            String caseTypeIdsStr = String.join(",", serviceConfig.getCaseTypeIds());
-
-            SearchResult searchResult = searchCases(
-                jurisdiction,
-                caseTypeIdsStr,
+            return searchCases(
+                serviceConfig.getJurisdiction(),
+                String.join(",", serviceConfig.getCaseTypeIds()),
                 format(SEARCH_BY_LEGACY_ID_QUERY_FORMAT, legacyId)
             );
-
-            return searchResult
-                .getCases()
-                .stream()
-                .map(CaseDetails::getId)
-                .collect(toList());
         }
     }
 
     public List<Long> getExceptionRecordRefsByEnvelopeId(String envelopeId, String service) {
-        ServiceConfigItem serviceConfig = serviceConfigProvider.getConfig(service);
-        final String caseTypeIdsStr = format("%s_ExceptionRecord", service.toUpperCase());
-        final String searchQuery = format(SEARCH_BY_ENVELOPE_ID_QUERY_FORMAT, envelopeId);
-
-        return getCaseRefs(serviceConfig, caseTypeIdsStr, searchQuery);
+        return searchCases(
+            serviceConfigProvider.getConfig(service).getJurisdiction(),
+            format("%s_ExceptionRecord", service.toUpperCase()),
+            format(SEARCH_BY_ENVELOPE_ID_QUERY_FORMAT, envelopeId)
+        );
     }
 
     public List<Long> getCaseRefsByBulkScanCaseReference(String bulkScanCaseReference, String service) {
         // 'bulkScanCaseReference' is the reference which SSCS is using to map
         // from which exception record service case was created
         ServiceConfigItem serviceConfig = serviceConfigProvider.getConfig(service);
-        final String caseTypeIdsStr = String.join(",", serviceConfig.getCaseTypeIds());
-        final String searchQuery = format(SEARCH_BY_BULK_SCAN_CASE_REFERENCE_QUERY_FORMAT, bulkScanCaseReference);
 
-        return getCaseRefs(serviceConfig, caseTypeIdsStr, searchQuery);
+        return searchCases(
+            serviceConfig.getJurisdiction(),
+            String.join(",", serviceConfig.getCaseTypeIds()),
+            format(SEARCH_BY_BULK_SCAN_CASE_REFERENCE_QUERY_FORMAT, bulkScanCaseReference)
+        );
     }
 
     public void attachExceptionRecord(
@@ -333,43 +325,31 @@ public class CcdApi {
         }
     }
 
-    private SearchResult searchCases(
+    private List<Long> searchCases(
         String jurisdiction,
         String caseType,
         String searchString
     ) {
         CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
         try {
-            return feignCcdApi.searchCases(
+            var searchResult = feignCcdApi.searchCases(
                 authenticator.getUserToken(),
                 authenticator.getServiceToken(),
                 caseType,
                 searchString
             );
+
+            return searchResult
+                .getCases()
+                .stream()
+                .map(CaseDetails::getId)
+                .collect(toList());
+
         } catch (FeignException ex) {
             debugCcdException(log, ex, "Failed to call 'searchCases'");
             removeFromIdamCacheIfAuthProblem(ex.status(), jurisdiction);
             throw ex;
         }
-    }
-
-    private List<Long> getCaseRefs(
-        ServiceConfigItem serviceConfig,
-        String caseTypeIdsStr,
-        String searchQuery
-    ) {
-        String jurisdiction = serviceConfig.getJurisdiction();
-        SearchResult searchResult = searchCases(
-            jurisdiction,
-            caseTypeIdsStr,
-            searchQuery
-        );
-
-        return searchResult
-            .getCases()
-            .stream()
-            .map(CaseDetails::getId)
-            .collect(toList());
     }
 
     private void removeFromIdamCacheIfAuthProblem(int status, String jurisdiction) {
