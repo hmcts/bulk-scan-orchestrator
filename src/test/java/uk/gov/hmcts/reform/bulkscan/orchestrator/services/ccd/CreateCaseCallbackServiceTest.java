@@ -59,20 +59,11 @@ class CreateCaseCallbackServiceTest {
     private static final String CASE_TYPE_ID = SERVICE + "_ExceptionRecord";
     private static final ExceptionRecordValidator VALIDATOR = new ExceptionRecordValidator();
 
-    @Mock
-    private ServiceConfigProvider serviceConfigProvider;
-
-    @Mock
-    private CcdApi ccdApi;
-
-    @Mock
-    private CcdNewCaseCreator ccdNewCaseCreator;
-
-    @Mock
-    private ExceptionRecordFinalizer exceptionRecordFinalizer;
-
-    @Mock
-    private  PaymentsProcessor paymentsProcessor;
+    @Mock ServiceConfigProvider serviceConfigProvider;
+    @Mock CcdApi ccdApi;
+    @Mock CcdNewCaseCreator ccdNewCaseCreator;
+    @Mock ExceptionRecordFinalizer exceptionRecordFinalizer;
+    @Mock PaymentsProcessor paymentsProcessor;
 
     private CreateCaseCallbackService service;
 
@@ -200,7 +191,7 @@ class CreateCaseCallbackServiceTest {
     @Test
     void should_not_allow_to_process_callback_when_idam_token_is_missing() {
         // given
-        setUpTransformationUrl();
+        setUpServiceConfig();
 
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
             .id(Long.valueOf(CASE_ID))
@@ -226,7 +217,7 @@ class CreateCaseCallbackServiceTest {
     @Test
     void should_not_allow_to_process_callback_when_user_id_is_missing() {
         // given
-        setUpTransformationUrl();
+        setUpServiceConfig();
 
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
             .id(Long.valueOf(CASE_ID))
@@ -252,7 +243,7 @@ class CreateCaseCallbackServiceTest {
     @Test
     void should_report_error_if_classification_new_application_with_documents_and_without_ocr_data() {
         // given
-        setUpTransformationUrl();
+        setUpServiceConfig();
 
         Map<String, Object> data = new HashMap<>();
         // putting 6 via `ImmutableMap` is available from Java 9
@@ -286,7 +277,7 @@ class CreateCaseCallbackServiceTest {
     @Test
     void should_report_error_if_classification_is_supplementary_evidence() {
         // given
-        setUpTransformationUrl();
+        setUpServiceConfig();
 
         Map<String, Object> data = basicCaseData();
         data.put("journeyClassification", SUPPLEMENTARY_EVIDENCE.name());
@@ -314,9 +305,9 @@ class CreateCaseCallbackServiceTest {
     @Test
     void should_return_existing_case_if_it_exists_in_ccd_for_a_given_exception_record() throws Exception {
         // given
-        setUpTransformationUrl();
+        setUpServiceConfig();
 
-        when(ccdApi.getCaseRefsByBulkScanCaseReference(CASE_ID, null))
+        when(ccdApi.getCaseRefsByBulkScanCaseReference(CASE_ID, SERVICE))
             .thenReturn(asList(345L));
         Map<String, Object> caseData = basicCaseData();
         Map<String, Object> finalizedCaseData = new HashMap<>();
@@ -340,9 +331,9 @@ class CreateCaseCallbackServiceTest {
 
     @Test
     void should_return_error_if_multiple_cases_exist_in_ccd_for_a_given_exception_record() throws Exception {
-        setUpTransformationUrl();
+        setUpServiceConfig();
 
-        when(ccdApi.getCaseRefsByBulkScanCaseReference(CASE_ID, null))
+        when(ccdApi.getCaseRefsByBulkScanCaseReference(CASE_ID, SERVICE))
             .thenReturn(asList(345L, 456L));
 
         assertThatThrownBy(
@@ -361,7 +352,7 @@ class CreateCaseCallbackServiceTest {
     @Test
     void should_warn_about_missing_classification() {
         // given
-        setUpTransformationUrl();
+        setUpServiceConfig();
 
         Map<String, Object> data = basicCaseData();
         data.remove("journeyClassification");
@@ -385,7 +376,7 @@ class CreateCaseCallbackServiceTest {
     @Test
     void should_report_errors_when_journey_classification_is_invalid() {
         // given
-        setUpTransformationUrl();
+        setUpServiceConfig();
 
         Map<String, Object> data = basicCaseData();
         data.put("journeyClassification", "EXCEPTIONS");
@@ -409,7 +400,7 @@ class CreateCaseCallbackServiceTest {
     @Test
     void should_report_errors_when_scanned_document_is_invalid() {
         // given
-        setUpTransformationUrl();
+        setUpServiceConfig();
 
         Map<String, Object> doc = new HashMap<>();
 
@@ -457,7 +448,7 @@ class CreateCaseCallbackServiceTest {
     @Test
     void should_report_errors_when_ocr_data_is_invalid() {
         // given
-        setUpTransformationUrl();
+        setUpServiceConfig();
 
         // modify scannedDocs to proof datetime field is bulletproof
         Map<String, Object> doc = new HashMap<>();
@@ -514,7 +505,7 @@ class CreateCaseCallbackServiceTest {
     @Test
     void should_report_errors_when_form_type_is_null_for_new_application_classification() {
         // given
-        setUpTransformationUrl();
+        setUpServiceConfig();
 
         Map<String, Object> data = basicCaseData();
         data.put("formType", null);
@@ -542,7 +533,7 @@ class CreateCaseCallbackServiceTest {
     @Test
     void should_not_report_errors_when_form_type_is_null_for_exception_classification() {
         // given
-        setUpTransformationUrl();
+        setUpServiceConfig();
 
         Map<String, Object> data = basicCaseData();
         data.put("formType", null);
@@ -670,16 +661,16 @@ class CreateCaseCallbackServiceTest {
         assertThat(result.getWarnings()).isEmpty();
     }
 
-    private void setUpTransformationUrl() {
-        ServiceConfigItem configItem = new ServiceConfigItem();
-        configItem.setTransformationUrl("url");
-        when(serviceConfigProvider.getConfig(SERVICE)).thenReturn(configItem);
+    private void setUpServiceConfig() {
+        setUpServiceConfig("some-url", false);
     }
 
     private void setUpServiceConfig(String transformationUrl, boolean allowCreatingCaseBeforePaymentsAreProcessed) {
-        ServiceConfigItem configItem = new ServiceConfigItem();
+        var configItem = new ServiceConfigItem();
+        configItem.setService(SERVICE);
         configItem.setTransformationUrl(transformationUrl);
         configItem.setAllowCreatingCaseBeforePaymentsAreProcessed(allowCreatingCaseBeforePaymentsAreProcessed);
+
         when(serviceConfigProvider.getConfig(SERVICE)).thenReturn(configItem);
     }
 
