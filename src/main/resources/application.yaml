@@ -80,6 +80,7 @@ service-config:
       auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_BULKSCAN}
       auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_BULKSCAN}
       case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_BULKSCAN}
+      search-cases-by-envelope-id: false
 
     - service: bulkscanauto # service name corresponds to the name of the container in Blob Storage
       jurisdiction: BULKSCAN
@@ -97,6 +98,7 @@ service-config:
       auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_BULKSCANAUTO}
       auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_BULKSCANAUTO}
       case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_BULKSCANAUTO}
+      search-cases-by-envelope-id: false
 
     - service: sscs
       jurisdiction: SSCS
@@ -118,6 +120,7 @@ service-config:
       auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_SSCS}
       auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_SSCS}
       case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_SSCS}
+      search-cases-by-envelope-id: false
 
     - service: probate
       jurisdiction: PROBATE
@@ -132,6 +135,7 @@ service-config:
       auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_PROBATE}
       auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_PROBATE}
       case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_PROBATE}
+      search-cases-by-envelope-id: false
 
     - service: divorce
       jurisdiction: DIVORCE
@@ -143,6 +147,7 @@ service-config:
       auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_DIVORCE}
       auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_DIVORCE}
       case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_DIVORCE}
+      search-cases-by-envelope-id: false
 
     - service: finrem
       jurisdiction: DIVORCE
@@ -154,6 +159,7 @@ service-config:
       auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_FINREM}
       auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_FINREM}
       case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_FINREM}
+      search-cases-by-envelope-id: false
 
     - service: cmc
       jurisdiction: CMC
@@ -162,6 +168,7 @@ service-config:
       auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_CMC}
       auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_CMC}
       case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_CMC}
+      search-cases-by-envelope-id: false
 
     - service: publiclaw
       jurisdiction: PUBLICLAW
@@ -169,6 +176,7 @@ service-config:
       auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_PUBLICLAW}
       auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_PUBLICLAW}
       case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_PUBLICLAW}
+      search-cases-by-envelope-id: false
 
 scheduling:
   task:

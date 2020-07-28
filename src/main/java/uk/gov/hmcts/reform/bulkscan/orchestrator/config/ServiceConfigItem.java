@@ -43,6 +43,7 @@ public class ServiceConfigItem {
     private boolean autoCaseCreationEnabled = false;
     private boolean autoCaseUpdateEnabled = false;
     private boolean caseDefinitionHasEnvelopeIds = false;
+    private boolean searchCasesByEnvelopeId = false;
 
     // region getters & setters
 
@@ -146,6 +147,14 @@ public class ServiceConfigItem {
 
     public void setCaseDefinitionHasEnvelopeIds(boolean caseDefinitionHasEnvelopeIds) {
         this.caseDefinitionHasEnvelopeIds = caseDefinitionHasEnvelopeIds;
+    }
+
+    public boolean getSearchCasesByEnvelopeId() {
+        return searchCasesByEnvelopeId;
+    }
+
+    public void setSearchCasesByEnvelopeId(boolean value) {
+        this.searchCasesByEnvelopeId = value;
     }
 
     // endregion
