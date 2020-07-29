@@ -57,10 +57,12 @@ class CreateCaseCallbackServiceTest {
     private static final String SERVICE = "service";
     private static final String CASE_ID = "123";
     private static final String CASE_TYPE_ID = SERVICE + "_ExceptionRecord";
+
+    // TODO: mock this!
     private static final ExceptionRecordValidator VALIDATOR = new ExceptionRecordValidator();
 
     @Mock ServiceConfigProvider serviceConfigProvider;
-    @Mock CcdApi ccdApi;
+    @Mock CaseFinder caseFinder;
     @Mock CcdNewCaseCreator ccdNewCaseCreator;
     @Mock ExceptionRecordFinalizer exceptionRecordFinalizer;
     @Mock PaymentsProcessor paymentsProcessor;
@@ -72,7 +74,7 @@ class CreateCaseCallbackServiceTest {
         service = new CreateCaseCallbackService(
             VALIDATOR,
             serviceConfigProvider,
-            ccdApi,
+            caseFinder,
             ccdNewCaseCreator,
             exceptionRecordFinalizer,
             paymentsProcessor
@@ -307,7 +309,7 @@ class CreateCaseCallbackServiceTest {
         // given
         setUpServiceConfig();
 
-        when(ccdApi.getCaseRefsByBulkScanCaseReference(CASE_ID, SERVICE))
+        when(caseFinder.findCases(any(), any()))
             .thenReturn(asList(345L));
         Map<String, Object> caseData = basicCaseData();
         Map<String, Object> finalizedCaseData = new HashMap<>();
@@ -333,7 +335,7 @@ class CreateCaseCallbackServiceTest {
     void should_return_error_if_multiple_cases_exist_in_ccd_for_a_given_exception_record() throws Exception {
         setUpServiceConfig();
 
-        when(ccdApi.getCaseRefsByBulkScanCaseReference(CASE_ID, SERVICE))
+        when(caseFinder.findCases(any(), any()))
             .thenReturn(asList(345L, 456L));
 
         assertThatThrownBy(
