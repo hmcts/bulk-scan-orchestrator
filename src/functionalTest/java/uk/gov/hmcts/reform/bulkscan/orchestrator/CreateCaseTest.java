@@ -13,8 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.CcdCallbackController;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadService;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseSearcher;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ExceptionRecordCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
@@ -26,7 +25,6 @@ import uk.gov.hmcts.reform.logging.appinsights.SyntheticHeaders;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
@@ -47,13 +45,10 @@ class CreateCaseTest {
     private String testUrl;
 
     @Autowired
+    private ExceptionRecordCreator exceptionRecordCreator;
+
+    @Autowired
     private CcdApi ccdApi;
-
-    @Autowired
-    private CaseSearcher caseSearcher;
-
-    @Autowired
-    private EnvelopeMessager envelopeMessager;
 
     @Autowired
     private DocumentManagementUploadService dmUploadService;
@@ -75,7 +70,10 @@ class CreateCaseTest {
     @Test
     public void should_idempotently_create_case_from_valid_exception_record() throws Exception {
         // given
-        CaseDetails exceptionRecord = createExceptionRecord("envelopes/new-envelope-create-case-with-evidence.json");
+        CaseDetails exceptionRecord = exceptionRecordCreator.createExceptionRecord(
+            "envelopes/new-envelope-create-case-with-evidence.json",
+            dmUrl
+        );
 
         // when
         // create case callback endpoint invoked first time
@@ -120,7 +118,10 @@ class CreateCaseTest {
     @Test
     public void should_clear_exception_record_warnings() throws Exception {
         // given
-        CaseDetails exceptionRecord = createExceptionRecord("envelopes/new-application-with-ocr-data-warnings.json");
+        CaseDetails exceptionRecord = exceptionRecordCreator.createExceptionRecord(
+            "envelopes/new-application-with-ocr-data-warnings.json",
+            dmUrl
+        );
 
         // warnings are present
         assertThat(exceptionRecord).isNotNull();
@@ -188,19 +189,4 @@ class CreateCaseTest {
         assertThat(callbackResponse.getData().containsKey(CASE_REFERENCE)).isTrue();
         return (String) callbackResponse.getData().get(CASE_REFERENCE);
     }
-
-    private CaseDetails createExceptionRecord(String resourceName) throws Exception {
-        // TODO use envelopeId for search
-        UUID poBox = UUID.randomUUID();
-
-        envelopeMessager.sendMessageFromFile(resourceName, "0000000000000000", null, poBox, dmUrl);
-
-        await("Exception record is created")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollDelay(2, TimeUnit.SECONDS)
-            .until(() -> caseSearcher.findExceptionRecord(poBox.toString()).isPresent());
-
-        return caseSearcher.findExceptionRecord(poBox.toString()).get();
-    }
-
 }
