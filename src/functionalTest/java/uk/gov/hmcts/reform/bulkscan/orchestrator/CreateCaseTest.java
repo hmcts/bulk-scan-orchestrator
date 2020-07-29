@@ -149,7 +149,7 @@ class CreateCaseTest {
                 CallbackRequest
                     .builder()
                     .eventId(EventIds.CREATE_NEW_CASE)
-                    .caseDetails(exceptionRecord.toBuilder().build())
+                    .caseDetails(exceptionRecord)
                     .build()
             )
             .when()
