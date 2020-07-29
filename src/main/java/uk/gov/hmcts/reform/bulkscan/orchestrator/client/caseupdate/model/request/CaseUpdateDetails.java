@@ -36,8 +36,8 @@ public class CaseUpdateDetails {
     @JsonProperty(value = "delivery_date", required = true)
     public final LocalDateTime deliveryDate;
 
-    @JsonProperty(value = "opening_time", required = true)
-    public final LocalDateTime openingTime;
+    @JsonProperty(value = "opening_date", required = true)
+    public final LocalDateTime openingDate;
 
     @JsonProperty(value = "scanned_documents", required = true)
     public final List<ScannedDocument> scannedDocuments;
@@ -53,7 +53,7 @@ public class CaseUpdateDetails {
         this.poBoxJurisdiction = exceptionRecord.poBoxJurisdiction;
         this.formType = exceptionRecord.formType;
         this.deliveryDate = exceptionRecord.deliveryDate;
-        this.openingTime = exceptionRecord.openingDate;
+        this.openingDate = exceptionRecord.openingDate;
         this.scannedDocuments = exceptionRecord.scannedDocuments;
         this.ocrDataFields = exceptionRecord.ocrDataFields;
     }
