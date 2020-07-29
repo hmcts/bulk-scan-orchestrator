@@ -4,6 +4,8 @@ import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -19,6 +21,12 @@ public class CaseFinder {
 
     public CaseFinder(CcdApi ccdApi) {
         this.ccdApi = ccdApi;
+    }
+
+    public List<Long> findCases(ExceptionRecord exceptionRecord, ServiceConfigItem serviceConfig) {
+        return serviceConfig.getSearchCasesByEnvelopeId()
+            ? ccdApi.getCaseRefsByEnvelopeId(exceptionRecord.envelopeId, serviceConfig.getService())
+            : ccdApi.getCaseRefsByBulkScanCaseReference(exceptionRecord.id, serviceConfig.getService());
     }
 
     public Optional<CaseDetails> findCase(Envelope envelope) {
