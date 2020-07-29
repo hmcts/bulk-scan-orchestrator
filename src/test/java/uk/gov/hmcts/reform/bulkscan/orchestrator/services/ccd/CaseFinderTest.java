@@ -3,9 +3,13 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -38,6 +42,40 @@ public class CaseFinderTest {
     @BeforeEach
     public void setUp() {
         caseFinder = new CaseFinder(ccdApi);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void should_call_appropriate_api_method_based_on_service_config(boolean searchCasesByEnvelopeId) {
+        // given
+        var serviceCfg = mock(ServiceConfigItem.class);
+        given(serviceCfg.getSearchCasesByEnvelopeId()).willReturn(searchCasesByEnvelopeId);
+        given(serviceCfg.getService()).willReturn("some-service-name");
+
+        var exceptionRecord = new ExceptionRecord(
+            "er-id",
+            null,
+            "envelope-id",
+            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            emptyList(),
+            emptyList()
+        );
+
+        // when
+        caseFinder.findCases(exceptionRecord, serviceCfg);
+
+        // then
+        if (searchCasesByEnvelopeId) {
+            verify(ccdApi).getCaseRefsByEnvelopeId("envelope-id", "some-service-name");
+        } else {
+            verify(ccdApi).getCaseRefsByBulkScanCaseReference("er-id", "some-service-name");
+        }
     }
 
     @Test
