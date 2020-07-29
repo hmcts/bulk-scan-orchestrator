@@ -43,25 +43,15 @@ class CreateCaseTest {
 
     private static final String CASE_REFERENCE = "caseReference";
 
-    @Value("${test-url}")
-    private String testUrl;
+    @Value("${test-url}") String testUrl;
 
-    @Autowired
-    private CcdApi ccdApi;
+    @Autowired CcdApi ccdApi;
+    @Autowired CaseSearcher caseSearcher;
+    @Autowired EnvelopeMessager envelopeMessager;
+    @Autowired DocumentManagementUploadService dmUploadService;
+    @Autowired CcdAuthenticatorFactory ccdAuthenticatorFactory;
 
-    @Autowired
-    private CaseSearcher caseSearcher;
-
-    @Autowired
-    private EnvelopeMessager envelopeMessager;
-
-    @Autowired
-    private DocumentManagementUploadService dmUploadService;
-
-    @Autowired
-    private CcdAuthenticatorFactory ccdAuthenticatorFactory;
-
-    private String dmUrl;
+    String dmUrl;
 
     @BeforeEach
     public void setUp() {
@@ -90,7 +80,7 @@ class CreateCaseTest {
         assertThat(createdCase.getData().get("email")).isEqualTo("hello@test.com");
 
         assertThat(createdCase.getData().get("bulkScanCaseReference")).isNotNull();
-        String bulkScanCaseReference = (String)createdCase.getData().get("bulkScanCaseReference");
+        String bulkScanCaseReference = (String) createdCase.getData().get("bulkScanCaseReference");
         assertThat(bulkScanCaseReference.equals(String.valueOf(exceptionRecord.getId())));
 
         await("Case is ingested")
@@ -129,7 +119,7 @@ class CreateCaseTest {
         assertThat(exceptionRecord.getData().get(OCR_DATA_VALIDATION_WARNINGS_FIELD)).asList().isNotEmpty();
 
         // when
-        AboutToStartOrSubmitCallbackResponse response = invokeCallbackEndpoint(exceptionRecord);
+        var response = invokeCallbackEndpoint(exceptionRecord);
 
         // then
         assertThat(response.getErrors()).isEmpty();
@@ -144,13 +134,6 @@ class CreateCaseTest {
     private AboutToStartOrSubmitCallbackResponse invokeCallbackEndpoint(
         CaseDetails exceptionRecord
     ) throws IOException {
-        CaseDetails exceptionRecordWithSearchFields = exceptionRecord.toBuilder().build();
-
-        CallbackRequest callbackRequest = CallbackRequest
-            .builder()
-            .eventId(EventIds.CREATE_NEW_CASE)
-            .caseDetails(exceptionRecordWithSearchFields)
-            .build();
 
         CcdAuthenticator ccdAuthenticator = ccdAuthenticatorFactory.createForJurisdiction("BULKSCAN");
 
@@ -162,24 +145,23 @@ class CreateCaseTest {
             .header(SyntheticHeaders.SYNTHETIC_TEST_SOURCE, "Bulk Scan Orchestrator Functional test")
             .header(AUTHORIZATION, ccdAuthenticator.getUserToken())
             .header(CcdCallbackController.USER_ID, ccdAuthenticator.getUserDetails().getId())
-            .body(callbackRequest)
+            .body(
+                CallbackRequest
+                    .builder()
+                    .eventId(EventIds.CREATE_NEW_CASE)
+                    .caseDetails(exceptionRecord.toBuilder().build())
+                    .build()
+            )
             .when()
             .post("/callback/create-new-case");
 
-        return parseCcdCallbackResponse(response);
+        assertThat(response.getStatusCode()).isEqualTo(200);
+
+        return new ObjectMapper().readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
     }
 
     private boolean caseIngested(String bulkScanCaseReference) {
         return ccdApi.getCaseRefsByBulkScanCaseReference(bulkScanCaseReference, "bulkscan").size() == 1;
-    }
-
-    private AboutToStartOrSubmitCallbackResponse parseCcdCallbackResponse(Response response) throws IOException {
-        assertThat(response.getStatusCode()).isEqualTo(200);
-
-        final AboutToStartOrSubmitCallbackResponse callbackResponse =
-            new ObjectMapper().readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
-
-        return callbackResponse;
     }
 
     private String getCaseCcdId(AboutToStartOrSubmitCallbackResponse callbackResponse) {
