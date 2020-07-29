@@ -41,8 +41,7 @@ class CreateCaseTest {
 
     private static final String CASE_REFERENCE = "caseReference";
 
-    @Value("${test-url}")
-    private String testUrl;
+    @Value("${test-url}") String testUrl;
 
     @Autowired ExceptionRecordCreator exceptionRecordCreator;
     @Autowired CcdApi ccdApi;
