@@ -255,6 +255,9 @@ class AttachExceptionRecordToExistingCaseTest {
 
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
 
+        // give ElasticSearch time to reach consistency
+        Thread.sleep(2000);
+
         // when
         attachExceptionRecord(caseDetails, exceptionRecord, searchCaseReferenceType);
 

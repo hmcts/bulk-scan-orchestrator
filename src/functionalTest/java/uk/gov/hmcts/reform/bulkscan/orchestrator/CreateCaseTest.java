@@ -98,6 +98,9 @@ class CreateCaseTest {
             .pollInterval(1, TimeUnit.SECONDS)
             .until(() -> caseIngested(bulkScanCaseReference));
 
+        // give ElasticSearch some time to reach consistency
+        Thread.sleep(2000);
+
         // when
         // create case callback endpoint invoked second time
         AboutToStartOrSubmitCallbackResponse callbackResponse2 = invokeCallbackEndpoint(exceptionRecord);
