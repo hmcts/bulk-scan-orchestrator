@@ -26,7 +26,7 @@ public class CaseFinder {
     public List<Long> findCases(ExceptionRecord exceptionRecord, ServiceConfigItem serviceConfig) {
         return serviceConfig.getSearchCasesByEnvelopeId()
             ? ccdApi.getCaseRefsByEnvelopeId(exceptionRecord.envelopeId, serviceConfig.getService())
-            : ccdApi.getCaseRefsByBulkScanCaseReference(exceptionRecord.id, serviceConfig.getService());
+            : ccdApi.getCaseRefsByBulkScanCaseReference(exceptionRecord.exceptionRecordId, serviceConfig.getService());
     }
 
     public Optional<CaseDetails> findCase(Envelope envelope) {
