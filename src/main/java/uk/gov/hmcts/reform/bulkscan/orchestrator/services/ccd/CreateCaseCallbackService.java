@@ -42,7 +42,7 @@ public class CreateCaseCallbackService {
 
     private final ExceptionRecordValidator validator;
     private final ServiceConfigProvider serviceConfigProvider;
-    private final CcdApi ccdApi;
+    private final CaseFinder caseFinder;
     private final CcdNewCaseCreator ccdNewCaseCreator;
     private final ExceptionRecordFinalizer exceptionRecordFinalizer;
     private final PaymentsProcessor paymentsProcessor;
@@ -50,14 +50,14 @@ public class CreateCaseCallbackService {
     public CreateCaseCallbackService(
         ExceptionRecordValidator validator,
         ServiceConfigProvider serviceConfigProvider,
-        CcdApi ccdApi,
+        CaseFinder caseFinder,
         CcdNewCaseCreator ccdNewCaseCreator,
         ExceptionRecordFinalizer exceptionRecordFinalizer,
         PaymentsProcessor paymentsProcessor
     ) {
         this.validator = validator;
         this.serviceConfigProvider = serviceConfigProvider;
-        this.ccdApi = ccdApi;
+        this.caseFinder = caseFinder;
         this.ccdNewCaseCreator = ccdNewCaseCreator;
         this.exceptionRecordFinalizer = exceptionRecordFinalizer;
         this.paymentsProcessor = paymentsProcessor;
@@ -167,7 +167,7 @@ public class CreateCaseCallbackService {
         } else if (awaitsPaymentProcessing && !configItem.allowCreatingCaseBeforePaymentsAreProcessed()) {
             return new ProcessResult(emptyList(), singletonList(AWAITING_PAYMENTS_MESSAGE));
         } else {
-            List<Long> ids = ccdApi.getCaseRefsByBulkScanCaseReference(exceptionRecord.id, configItem.getService());
+            List<Long> ids = caseFinder.findCases(exceptionRecord, configItem);
             CreateCaseResult result;
 
             if (ids.isEmpty()) {
