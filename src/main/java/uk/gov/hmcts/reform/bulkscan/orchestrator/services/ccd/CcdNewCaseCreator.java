@@ -31,7 +31,7 @@ import static java.util.Collections.emptyList;
 public class CcdNewCaseCreator {
     private static final Logger log = LoggerFactory.getLogger(CcdNewCaseCreator.class);
 
-    private static final String EXCEPTION_RECORD_REFERENCE = "bulkScanCaseReference";
+    public static final String EXCEPTION_RECORD_REFERENCE = "bulkScanCaseReference";
 
     private final TransformationClient transformationClient;
     private final ServiceResponseParser serviceResponseParser;

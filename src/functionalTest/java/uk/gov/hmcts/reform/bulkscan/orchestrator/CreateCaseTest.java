@@ -31,6 +31,7 @@ import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.BULK_SCANNED_CASE_TYPE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdNewCaseCreator.EXCEPTION_RECORD_REFERENCE;
 
 @SpringBootTest
 @ActiveProfiles("nosb") // no servicebus queue handler registration
@@ -69,7 +70,7 @@ class CreateCaseTest {
 
         // when
         // create case callback endpoint invoked first time
-        AboutToStartOrSubmitCallbackResponse callbackResponse = invokeCallbackEndpoint(exceptionRecord);
+        var callbackResponse = invokeCallbackEndpoint(exceptionRecord);
         String caseCcdId = getCaseCcdId(callbackResponse);
 
         // then
@@ -79,29 +80,29 @@ class CreateCaseTest {
         assertThat(createdCase.getData().get("lastName")).isEqualTo("value2");
         assertThat(createdCase.getData().get("email")).isEqualTo("hello@test.com");
 
-        assertThat(createdCase.getData().get("bulkScanCaseReference")).isNotNull();
-        String bulkScanCaseReference = (String) createdCase.getData().get("bulkScanCaseReference");
-        assertThat(bulkScanCaseReference.equals(String.valueOf(exceptionRecord.getId())));
+        assertThat(createdCase.getData().get(EXCEPTION_RECORD_REFERENCE)).isNotNull();
+        String caseExceptionRecordReference = (String) createdCase.getData().get(EXCEPTION_RECORD_REFERENCE);
+        assertThat(caseExceptionRecordReference.equals(String.valueOf(exceptionRecord.getId())));
 
         await("Case is ingested")
             .atMost(10, TimeUnit.SECONDS)
             .pollInterval(1, TimeUnit.SECONDS)
-            .until(() -> caseIngested(bulkScanCaseReference));
+            .until(() -> caseIngested(caseExceptionRecordReference));
 
         // give ElasticSearch some time to reach consistency
         Thread.sleep(2000);
 
         // when
         // create case callback endpoint invoked second time
-        AboutToStartOrSubmitCallbackResponse callbackResponse2 = invokeCallbackEndpoint(exceptionRecord);
+        var callbackResponse2 = invokeCallbackEndpoint(exceptionRecord);
         String caseCcdId2 = getCaseCcdId(callbackResponse2);
 
         // then
         // the same case is returned
         assertThat(caseCcdId2).isEqualTo(caseCcdId);
-        List<Long> caseIds2 = ccdApi.getCaseRefsByBulkScanCaseReference(bulkScanCaseReference, "bulkscan");
-        assertThat(caseIds2)
-            .as("Should return same case for '%s' bulkscan case", bulkScanCaseReference)
+        List<Long> caseIds = ccdApi.getCaseRefsByBulkScanCaseReference(caseExceptionRecordReference, "bulkscan");
+        assertThat(caseIds)
+            .as("Should find only one service case for exception record {}", caseExceptionRecordReference)
             .hasSize(1)
             .first()
             .isEqualTo(createdCase.getId());
