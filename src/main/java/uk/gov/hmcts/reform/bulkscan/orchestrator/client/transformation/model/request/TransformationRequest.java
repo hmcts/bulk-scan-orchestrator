@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.env
 import java.time.LocalDateTime;
 import java.util.List;
 
+@SuppressWarnings("Duplicates")
 public class TransformationRequest {
 
     /**
