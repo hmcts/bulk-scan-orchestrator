@@ -172,7 +172,9 @@ sonarqube {
   properties {
     property "sonar.projectName", "Reform :: Bulk Scan Orchestrator"
     property "sonar.coverage.jacoco.xmlReportPaths", jacocoTestReport.reports.xml.destination.path
-    property "sonar.coverage.exclusions", "**/config/**"
+    // TODO: remove the specific exclusions when those classes are used
+    property "sonar.coverage.exclusions", "**/config/**,**/caseupdate/model/request/ExceptionRecord.java,**/TransformationRequest.java,**/internal/ExceptionRecord.java"
+    property "sonar.cpd.exclusions", "**/caseupdate/model/request/ExceptionRecord.java,**/TransformationRequest.java,**/internal/ExceptionRecord.java"
   }
 }
 
