@@ -239,7 +239,7 @@ dependencyManagement {
       entry 'bcprov-jdk15on'
     }
     // align with jupiter version
-    dependencySet(group: 'org.mockito', version: '3.4.4') {
+    dependencySet(group: 'org.mockito', version: '3.4.6') {
       entry 'mockito-core'
     }
     // force junit5 deps to use groovy v3 which fixes reflective call errors for java 11
@@ -272,7 +272,7 @@ dependencies {
   implementation group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformLogging
   implementation group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
   implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '3.1.2'
-  implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '1.5.4'
+  implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: 'v1.5.5'
   implementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: '4.7.2'
   implementation group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version:'0.1.0'
 
@@ -289,7 +289,7 @@ dependencies {
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
   testImplementation group: 'com.typesafe', name: 'config', version: '1.4.0'
-  testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '3.4.2'
+  testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '3.4.6'
   testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
   testImplementation group: 'org.awaitility', name: 'awaitility', version: '4.0.3'
   testImplementation group: 'io.rest-assured', name: 'rest-assured'

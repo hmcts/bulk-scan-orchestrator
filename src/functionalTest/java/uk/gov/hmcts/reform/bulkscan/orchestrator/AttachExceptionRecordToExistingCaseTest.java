@@ -13,9 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.CcdCallbackController;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadService;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseSearcher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ExceptionRecordCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
@@ -29,7 +28,6 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -57,17 +55,13 @@ class AttachExceptionRecordToExistingCaseTest {
     @Value("${document_management.context-path}")
     private String dmContextPath;
 
+    @Autowired ExceptionRecordCreator exceptionRecordCreator;
+
     @Autowired
     private CcdApi ccdApi;
 
     @Autowired
     private CcdCaseCreator ccdCaseCreator;
-
-    @Autowired
-    private CaseSearcher caseSearcher;
-
-    @Autowired
-    private EnvelopeMessager envelopeMessager;
 
     @Autowired
     private DocumentManagementUploadService dmUploadService;
@@ -93,7 +87,10 @@ class AttachExceptionRecordToExistingCaseTest {
     public void should_attach_exception_record_to_the_existing_case_with_no_evidence() throws Exception {
         //given
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
-        CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
+        CaseDetails exceptionRecord = exceptionRecordCreator.createExceptionRecord(
+            "envelopes/supplementary-evidence-envelope.json",
+            dmUrl
+        );
 
         // when
         attachExceptionRecord(caseDetails, exceptionRecord, null);
@@ -118,7 +115,10 @@ class AttachExceptionRecordToExistingCaseTest {
                     )),
                 Instant.now()
             );
-        CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
+        CaseDetails exceptionRecord = exceptionRecordCreator.createExceptionRecord(
+            "envelopes/supplementary-evidence-envelope.json",
+            dmUrl
+        );
 
         // when
         attachExceptionRecord(caseDetails, exceptionRecord, null);
@@ -153,7 +153,10 @@ class AttachExceptionRecordToExistingCaseTest {
     void should_set_exceptionRecordReference_in_scanned_documents() throws Exception {
         //given
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
-        CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
+        CaseDetails exceptionRecord = exceptionRecordCreator.createExceptionRecord(
+            "envelopes/supplementary-evidence-envelope.json",
+            dmUrl
+        );
 
         // when
         attachExceptionRecord(caseDetails, exceptionRecord, null);
@@ -180,7 +183,7 @@ class AttachExceptionRecordToExistingCaseTest {
     ) throws Exception {
         //given
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), now()); // with no scanned documents
-        CaseDetails exceptionRecord = createExceptionRecord(fileName);
+        CaseDetails exceptionRecord = exceptionRecordCreator.createExceptionRecord(fileName, dmUrl);
 
         // when
         Response response = invokeCallbackEndpoint(caseDetails, exceptionRecord, null, true);
@@ -224,7 +227,10 @@ class AttachExceptionRecordToExistingCaseTest {
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
 
         CaseDetails exceptionRecord =
-            createExceptionRecord("envelopes/supplementary-evidence-envelope-with-payment.json");
+            exceptionRecordCreator.createExceptionRecord(
+                "envelopes/supplementary-evidence-envelope-with-payment.json",
+                dmUrl
+            );
 
         // when
         attachExceptionRecord(caseDetails, exceptionRecord, null, true);
@@ -253,7 +259,10 @@ class AttachExceptionRecordToExistingCaseTest {
         //given
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
 
-        CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-envelope.json");
+        CaseDetails exceptionRecord = exceptionRecordCreator.createExceptionRecord(
+            "envelopes/supplementary-evidence-envelope.json",
+            dmUrl
+        );
 
         // give ElasticSearch time to reach consistency
         Thread.sleep(2000);
@@ -367,19 +376,6 @@ class AttachExceptionRecordToExistingCaseTest {
         }
 
         return exceptionRecordData;
-    }
-
-    private CaseDetails createExceptionRecord(String resourceName) throws Exception {
-        UUID poBox = UUID.randomUUID();
-
-        envelopeMessager.sendMessageFromFile(resourceName, "0000000000000000", null, poBox, dmUrl);
-
-        await("Exception record is created")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollDelay(2, TimeUnit.SECONDS)
-            .until(() -> caseSearcher.findExceptionRecord(poBox.toString()).isPresent());
-
-        return caseSearcher.findExceptionRecord(poBox.toString()).get();
     }
 
     private Boolean isExceptionRecordAttachedToTheCase(CaseDetails caseDetails, int expectedScannedDocsSize) {
