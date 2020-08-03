@@ -8,7 +8,7 @@ import java.util.List;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
-public class ExceptionRecord implements CaseData {
+public class ExceptionRecord {
 
     @JsonProperty("journeyClassification")
     public final String classification;
