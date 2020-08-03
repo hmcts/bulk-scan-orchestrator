@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.SupplementaryEvidence;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.SupplementaryEvidenceMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
@@ -75,7 +75,7 @@ class AttachDocsToSupplementaryEvidence {
     }
 
     private CaseDataContent buildCaseDataContent(Envelope envelope, StartEventResponse startEventResponse) {
-        CaseData caseData = mapper.map(
+        SupplementaryEvidence caseData = mapper.map(
             getDocuments(startEventResponse.getCaseDetails()),
             envelope.documents,
             envelope.deliveryDate

@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd;
 
 import java.util.List;
 
-public class SupplementaryEvidence implements CaseData {
+public class SupplementaryEvidence {
 
     // This field should always be set to false aka YesOrNo
     // as adding supplementary evidence resets 'evidenceHandled' field in the case
