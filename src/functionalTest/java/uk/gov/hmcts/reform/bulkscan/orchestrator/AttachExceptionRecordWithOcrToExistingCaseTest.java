@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadServ
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseSearcher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
@@ -22,9 +23,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.logging.appinsights.SyntheticHeaders;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static java.time.Instant.now;
 import static java.util.Collections.emptyList;
@@ -72,6 +75,7 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
 
         Map<String, String> address = (Map<String, String>) updatedCase.getData().get("address");
         assertThat(address.get("country")).isEqualTo(ocrCountry);
+        verifyCaseUpdatedWithScannedDocuments(updatedCase, exceptionRecord);
     }
 
     @Test
@@ -144,5 +148,24 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
             .body(request)
             .when()
             .post("/callback/attach_case?ignore-warning=true");
+    }
+
+    private void verifyCaseUpdatedWithScannedDocuments(
+        CaseDetails updatedCase,
+        CaseDetails exceptionRecord
+    ) {
+        List<ScannedDocument> caseScannedDocuments = getScannedDocuments(updatedCase);
+        List<ScannedDocument> exceptionRecordDocuments = getScannedDocuments(exceptionRecord);
+
+        assertThat(caseScannedDocuments).isNotEmpty();
+        assertThat(exceptionRecordDocuments).isNotEmpty();
+
+        assertThat(caseScannedDocuments).containsAll(exceptionRecordDocuments);
+
+        List<ScannedDocument> updatedScannedDocuments = caseScannedDocuments
+            .stream()
+            .filter(document -> String.valueOf(exceptionRecord.getId()).equals(document.exceptionReference))
+            .collect(Collectors.toList());
+        assertThat(updatedScannedDocuments.size()).isEqualTo(exceptionRecordDocuments.size());
     }
 }
