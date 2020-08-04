@@ -9,7 +9,6 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.util.Collections.singletonList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.DatetimeHelper.toIso8601;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.JURSIDICTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.PO_BOX;
@@ -20,6 +19,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SEARCH_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues.YES;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 
 public class TestExceptionRecordCaseBuilder {
     private TestExceptionRecordCaseBuilder() {
@@ -79,12 +79,15 @@ public class TestExceptionRecordCaseBuilder {
     private static Map<String, Object> validCaseData() {
         Map<String, Object> data = new HashMap<>();
         data.put("poBox", PO_BOX);
-        data.put(JOURNEY_CLASSIFICATION, EXCEPTION.name());
+        data.put(JOURNEY_CLASSIFICATION, NEW_APPLICATION.name());
         data.put("deliveryDate", toIso8601(Instant.now()));
         data.put("openingDate", toIso8601(Instant.now()));
         data.put(SEARCH_CASE_REFERENCE, "123");
         data.put("formType", "personal");
-        data.put(OCR_DATA, singletonList(ImmutableMap.of("firstName", "John")));
+        data.put(
+            OCR_DATA,
+            ImmutableList.of(ImmutableMap.of("value", ImmutableMap.of("key", "firstName", "value", "John")))
+        );
         data.put(SCANNED_DOCUMENTS, ImmutableList.of(ImmutableMap.of("value", document())));
         data.put(CONTAINS_PAYMENTS, YES);
         data.put("envelopeId", "envelopeId123");

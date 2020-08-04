@@ -11,6 +11,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -30,7 +31,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.Te
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.TestExceptionRecordCaseBuilder.caseWithType;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.TestExceptionRecordCaseBuilder.createValidExceptionRecordCase;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.JOURNEY_CLASSIFICATION;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 
 class ExceptionRecordValidatorTest {
@@ -183,12 +183,19 @@ class ExceptionRecordValidatorTest {
             softly.assertThat(exceptionRecord.isAutomatedProcess).isFalse();
             softly.assertThat(exceptionRecord.poBox).isEqualTo(PO_BOX);
             softly.assertThat(exceptionRecord.poBoxJurisdiction).isEqualTo(JURSIDICTION);
-            softly.assertThat(exceptionRecord.journeyClassification).isEqualTo(EXCEPTION);
+            softly.assertThat(exceptionRecord.journeyClassification).isEqualTo(NEW_APPLICATION);
             softly.assertThat(exceptionRecord.formType).isEqualTo("personal");
             softly.assertThat(exceptionRecord.deliveryDate).isBefore(LocalDateTime.now());
             softly.assertThat(exceptionRecord.openingDate).isBefore(LocalDateTime.now());
             softly.assertThat(exceptionRecord.scannedDocuments).isNotEmpty();
             softly.assertThat(exceptionRecord.scannedDocuments.size()).isEqualTo(1);
+
+            // ocr data fields
+            softly.assertThat(exceptionRecord.ocrDataFields).isNotEmpty();
+            softly.assertThat(exceptionRecord.ocrDataFields.size()).isEqualTo(1);
+            OcrDataField ocrDataField = exceptionRecord.ocrDataFields.get(0);
+            softly.assertThat(ocrDataField.name).isEqualTo("firstName");
+            softly.assertThat(ocrDataField.value).isEqualTo("John");
 
             // scanned documents
             ScannedDocument document = exceptionRecord.scannedDocuments.get(0);
