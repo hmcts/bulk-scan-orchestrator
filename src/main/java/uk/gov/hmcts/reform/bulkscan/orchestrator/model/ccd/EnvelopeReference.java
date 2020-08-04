@@ -14,8 +14,8 @@ public class EnvelopeReference {
     public String action;
 
     public EnvelopeReference(
-        @JsonProperty("id") String id,
-        @JsonProperty("action") String action
+        @JsonProperty(value = "id", required = true) String id,
+        @JsonProperty(value = "action", required = true) String action
     ) {
         this.id = id;
         this.action = action;

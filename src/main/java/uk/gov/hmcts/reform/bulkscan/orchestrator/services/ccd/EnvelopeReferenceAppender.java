@@ -2,17 +2,15 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfiguration;
+import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.EnvelopeReference;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
@@ -24,20 +22,14 @@ import static java.util.stream.Collectors.toList;
 public class EnvelopeReferenceAppender {
 
     private final ObjectMapper objectMapper;
-    private final Set<String> enabledServices;
+    private final ServiceConfigProvider serviceConfigProvider;
 
     public EnvelopeReferenceAppender(
         ObjectMapper objectMapper,
-        ServiceConfiguration serviceConfiguration
+        ServiceConfigProvider serviceConfigProvider
     ) {
         this.objectMapper = objectMapper;
-
-        enabledServices = serviceConfiguration
-            .getServices()
-            .stream()
-            .filter(ServiceConfigItem::getCaseDefinitionHasEnvelopeIds)
-            .map(ServiceConfigItem::getService)
-            .collect(Collectors.toSet());
+        this.serviceConfigProvider = serviceConfigProvider;
     }
 
     /**
@@ -46,6 +38,11 @@ public class EnvelopeReferenceAppender {
      * <p>This collection represents bulkScanEnvelopes field in service case and the update will only take place
      * if the service supports this field (i.e. has it in all its CCD case definitions).</p>
      *
+     * @param service Name of the service that owns the case
+     * @param existingEnvelopeReferences Current value of the field that holds envelope references in case,
+     *                                   in raw format (after deserialising case data as Object)
+     * @param envelopeId Id of the envelope to be appended
+     * @param action Action that the envelope caused on the case - create/update
      * @return Updated collection, if envelope info was appended. Otherwise, if the CCD case definition
      *         for the service doesn't support envelope reference collection (bulkScanEnvelopes field),
      *         empty Optional is returned.
@@ -56,7 +53,7 @@ public class EnvelopeReferenceAppender {
         String envelopeId,
         CaseAction action
     ) {
-        if (enabledServices.contains(service)) {
+        if (serviceConfigProvider.getConfig(service).getCaseDefinitionHasEnvelopeIds()) {
             return Optional.of(
                 appendReference(existingEnvelopeReferences, envelopeId, action)
             );
@@ -70,22 +67,20 @@ public class EnvelopeReferenceAppender {
         String envelopeId,
         CaseAction action
     ) {
-        if (existingEnvelopeReferences == null || existingEnvelopeReferences.isEmpty()) {
+        if (CollectionUtils.isEmpty(existingEnvelopeReferences)) {
             return asList(
                 new CcdCollectionElement<>(new EnvelopeReference(envelopeId, action.value))
             );
         } else {
-            List<EnvelopeReference> updatedReferences = existingEnvelopeReferences
+            var updatedReferences = existingEnvelopeReferences
                 .stream()
                 .map(ref -> objectMapper.convertValue(ref.get("value"), EnvelopeReference.class))
+                .map(CcdCollectionElement::new)
                 .collect(toList());
 
-            updatedReferences.add(new EnvelopeReference(envelopeId, action.value));
+            updatedReferences.add(new CcdCollectionElement<>(new EnvelopeReference(envelopeId, action.value)));
 
-            return updatedReferences
-                .stream()
-                .map(ref -> new CcdCollectionElement<>(ref))
-                .collect(toList());
+            return updatedReferences;
         }
     }
 }

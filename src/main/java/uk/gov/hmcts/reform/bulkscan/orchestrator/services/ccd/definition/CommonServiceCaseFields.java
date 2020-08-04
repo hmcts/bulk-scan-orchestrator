@@ -3,9 +3,9 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition;
 /**
  * Names of the fields used by Bulk Scan in service CCD case definitions.
  */
-public class CommonCaseFields {
+public final class CommonServiceCaseFields {
 
-    private CommonCaseFields() {
+    private CommonServiceCaseFields() {
         // hiding the constructor - this class is for constants only
     }
 
