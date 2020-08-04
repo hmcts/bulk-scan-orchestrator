@@ -45,6 +45,7 @@ public class CaseUpdateDetails {
     @JsonProperty(value = "ocr_data_fields", required = true)
     public final List<OcrDataField> ocrDataFields;
 
+    // TODO: remove this constructor when the switch to the other one is done
     public CaseUpdateDetails(ExceptionRecord exceptionRecord, String envelopeId) {
         this.exceptionRecordCaseTypeId = exceptionRecord.caseTypeId;
         this.exceptionRecordId = exceptionRecord.id;
@@ -56,5 +57,29 @@ public class CaseUpdateDetails {
         this.openingDate = exceptionRecord.openingDate;
         this.scannedDocuments = exceptionRecord.scannedDocuments;
         this.ocrDataFields = exceptionRecord.ocrDataFields;
+    }
+
+    public CaseUpdateDetails(
+        String exceptionRecordCaseTypeId,
+        String exceptionRecordId,
+        String envelopeId,
+        String poBox,
+        String poBoxJurisdiction,
+        String formType,
+        LocalDateTime deliveryDate,
+        LocalDateTime openingDate,
+        List<ScannedDocument> scannedDocuments,
+        List<OcrDataField> ocrDataFields
+    ) {
+        this.exceptionRecordCaseTypeId = exceptionRecordCaseTypeId;
+        this.exceptionRecordId = exceptionRecordId;
+        this.envelopeId = envelopeId;
+        this.poBox = poBox;
+        this.poBoxJurisdiction = poBoxJurisdiction;
+        this.formType = formType;
+        this.deliveryDate = deliveryDate;
+        this.openingDate = openingDate;
+        this.scannedDocuments = scannedDocuments;
+        this.ocrDataFields = ocrDataFields;
     }
 }
