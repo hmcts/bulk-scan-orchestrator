@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadServ
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseSearcher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.logging.appinsights.SyntheticHeaders;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 import static java.time.Instant.now;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.empty;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getScannedDocuments;
@@ -71,7 +74,15 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
         CaseDetails updatedCase = ccdApi.getCase(caseId, existingCase.getJurisdiction());
 
         Map<String, String> address = (Map<String, String>) updatedCase.getData().get("address");
-        assertThat(address.get("country")).isEqualTo(ocrCountry);
+        assertThat(address.get("country"))
+            .as("Case was updated with OCR")
+            .isEqualTo(ocrCountry);
+
+        List<ScannedDocument> scannedDocuments = getScannedDocuments(updatedCase);
+        assertThat(scannedDocuments)
+            .as("Scanned document were updated with documents from Exception Record")
+            .extracting(doc -> tuple(doc.fileName, doc.controlNumber))
+            .containsExactly(tuple("certificate1.pdf", "1545657689")); // from exception record json loaded above
     }
 
     @Test
