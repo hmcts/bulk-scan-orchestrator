@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import io.vavr.collection.List;
 import io.vavr.collection.Seq;
 import io.vavr.control.Validation;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -36,20 +35,14 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 class ExceptionRecordValidatorTest {
 
     private static final String CASE_TYPE_EXCEPTION_RECORD = "BULKSCAN_ExceptionRecord";
-
-    private ExceptionRecordValidator validator;
-
-    @BeforeEach
-    public void setUp() {
-        validator = new ExceptionRecordValidator();
-    }
+    private static final ExceptionRecordValidator VALIDATOR = new ExceptionRecordValidator();
 
     @Test
     void should_map_to_exception_record_when_case_details_are_valid() {
         checkValidation(
             createValidExceptionRecordCase(),
             true,
-            validator::getValidation,
+            VALIDATOR::getValidation,
             null
         );
     }
@@ -66,7 +59,7 @@ class ExceptionRecordValidatorTest {
             + "cannot be cast to (class )?java.lang.String.*";
         checkValidationErrorMatches(
             caseWithData("scanOCRData", invalidOcrData),
-            validator::getValidation,
+            VALIDATOR::getValidation,
             errorPattern
         );
     }
@@ -90,7 +83,7 @@ class ExceptionRecordValidatorTest {
         checkValidation(
             input,
             false,
-            validator::getValidation,
+            VALIDATOR::getValidation,
             error
         );
     }
@@ -117,7 +110,7 @@ class ExceptionRecordValidatorTest {
     void should_return_errors_for_invalid_case_documents(String caseReason, CaseDetails input, String error) {
         checkValidationErrorMatches(
             input,
-            validator::getValidation,
+            VALIDATOR::getValidation,
             error
         );
     }
@@ -126,7 +119,7 @@ class ExceptionRecordValidatorTest {
     void should_throw_exception_when_envelopeId_is_missing() {
         CaseDetails caseDetails = caseWithData("envelopeId", null);
 
-        assertThatCode(() -> validator.getValidation(caseDetails))
+        assertThatCode(() -> VALIDATOR.getValidation(caseDetails))
             .isInstanceOf(UnprocessableCaseDataException.class)
             .hasMessage("Exception record is lacking envelopeId field");
     }
@@ -139,7 +132,15 @@ class ExceptionRecordValidatorTest {
     ) {
         Validation<Seq<String>, ExceptionRecord> validation = validationMethod.apply(input);
 
-        softAssertions(valid, errorString, validation);
+        if (valid) {
+            assertExceptionRecordMappings(validation);
+        } else {
+            assertSoftly(softly -> {
+                softly.assertThat(validation.isValid()).isFalse();
+                List<String> errors = validation.getError().toList();
+                softly.assertThat(errors).contains(errorString);
+            });
+        }
     }
 
     private void checkValidationErrorMatches(
@@ -155,22 +156,6 @@ class ExceptionRecordValidatorTest {
             softly.assertThat(errors.size()).isEqualTo(1);
             softly.assertThat(errors.get(0)).matches(errorMessagePattern);
         });
-    }
-
-    private void softAssertions(
-        boolean valid,
-        String errorString,
-        Validation<Seq<String>, ExceptionRecord> validation
-    ) {
-        if (valid) {
-            assertExceptionRecordMappings(validation);
-        } else {
-            assertSoftly(softly -> {
-                softly.assertThat(validation.isValid()).isFalse();
-                List<String> errors = validation.getError().toList();
-                softly.assertThat(errors).contains(errorString);
-            });
-        }
     }
 
     private void assertExceptionRecordMappings(Validation<Seq<String>, ExceptionRecord> validation) {
