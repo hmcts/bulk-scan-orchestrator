@@ -113,7 +113,7 @@ class SupplementaryEvidenceTest {
         assertThat(legacyId).isNotEmpty();
 
         await("The new case can be found by legacy ID")
-            .atMost(60, TimeUnit.SECONDS)
+            .atMost(120, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(1))
             .until(() -> !ccdApi.getCaseRefsByLegacyId(legacyId, TEST_SERVICE_NAME).isEmpty());
 
@@ -154,7 +154,7 @@ class SupplementaryEvidenceTest {
 
         // then
         await("Created new Exception record as attachScannedDocs event failed for BULKSCAN_ExceptionRecord case type")
-            .atMost(60, TimeUnit.SECONDS)
+            .atMost(120, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(2))
             .until(() -> findCasesByEnvelopeId(envelopeId).size() == 1);
     }
@@ -172,7 +172,7 @@ class SupplementaryEvidenceTest {
 
         // then
         await("Created new Exception record")
-            .atMost(60, TimeUnit.SECONDS)
+            .atMost(120, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
             .until(() -> findCasesByEnvelopeId(envelopeId).size() == 1);
 

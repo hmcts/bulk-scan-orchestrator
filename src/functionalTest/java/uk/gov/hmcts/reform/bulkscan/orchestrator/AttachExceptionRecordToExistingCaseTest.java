@@ -97,7 +97,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
         //then
         await("Exception record is attached to the case")
-            .atMost(60, TimeUnit.SECONDS)
+            .atMost(120, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
             .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 1));
 
@@ -125,7 +125,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
         //then
         await("Exception record is attached to the case")
-            .atMost(60, TimeUnit.SECONDS)
+            .atMost(120, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
             .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 2));
 
@@ -163,7 +163,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
         //then
         await("Exception record is attached to the case")
-            .atMost(60, TimeUnit.SECONDS)
+            .atMost(120, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
             .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 1));
 
@@ -237,7 +237,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
         //then
         await("Exception record is attached to the case")
-            .atMost(60, TimeUnit.SECONDS)
+            .atMost(120, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
             .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 1));
 
@@ -272,7 +272,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
         //then
         await("Exception record is attached to the case")
-            .atMost(60, TimeUnit.SECONDS)
+            .atMost(120, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
             .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 1));
 
