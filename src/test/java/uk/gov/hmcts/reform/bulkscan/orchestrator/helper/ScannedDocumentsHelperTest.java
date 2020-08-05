@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.fileContentAsBytes;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.objectMapper;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType.FORM;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getScannedDocuments;
 
 class ScannedDocumentsHelperTest {
 
@@ -99,6 +100,7 @@ class ScannedDocumentsHelperTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void sets_exception_record_id_to_scanned_documents() throws Exception {
         // given
         //contains documents with control numbers 1000, 2000, 3000
@@ -126,12 +128,8 @@ class ScannedDocumentsHelperTest {
         ScannedDocumentsHelper.setExceptionRecordIdToScannedDocuments(exceptionRecord, caseDetails);
 
         //then
-        @SuppressWarnings("unchecked")
         var caseData = (Map<String, Object>) caseDetails.caseData;
-        @SuppressWarnings("unchecked")
-        var updatedScannedDocuments =
-            (List<uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument>)
-                caseData.get("scannedDocuments");
+        var updatedScannedDocuments = getScannedDocuments(caseData);
         assertThat(updatedScannedDocuments).hasSize(3);
         assertThat(updatedScannedDocuments.get(0).controlNumber).isEqualTo("1000");
         assertThat(updatedScannedDocuments.get(0).exceptionReference).isEqualTo("1");
@@ -143,6 +141,7 @@ class ScannedDocumentsHelperTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void setExceptionRecordIdToScannedDocuments_should_handle_empty_scanned_documents_in_exception() throws Exception {
         // given
         //contains documents with control numbers 1000, 2000, 3000
@@ -166,12 +165,8 @@ class ScannedDocumentsHelperTest {
         ScannedDocumentsHelper.setExceptionRecordIdToScannedDocuments(exceptionRecord, caseDetails);
 
         //then
-        @SuppressWarnings("unchecked")
         var caseData = (Map<String, Object>) caseDetails.caseData;
-        @SuppressWarnings("unchecked")
-        var updatedScannedDocuments =
-            (List<uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument>)
-                caseData.get("scannedDocuments");
+        var updatedScannedDocuments = getScannedDocuments(caseData);
         assertThat(updatedScannedDocuments).hasSize(3);
         assertThat(updatedScannedDocuments.get(0).controlNumber).isEqualTo("1000");
         assertThat(updatedScannedDocuments.get(0).exceptionReference).isNull();

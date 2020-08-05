@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadServ
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseSearcher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.logging.appinsights.SyntheticHeaders;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -72,6 +74,9 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
 
         Map<String, String> address = (Map<String, String>) updatedCase.getData().get("address");
         assertThat(address.get("country")).isEqualTo(ocrCountry);
+        List<ScannedDocument> scannedDocuments = getScannedDocuments(updatedCase);
+        assertThat(scannedDocuments).isNotEmpty();
+        assertThat(scannedDocuments.get(0).exceptionReference).isEqualTo(Long.toString(exceptionRecord.getId()));
     }
 
     @Test
