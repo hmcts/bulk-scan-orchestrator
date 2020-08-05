@@ -12,12 +12,14 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentTy
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.function.Function;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.JURSIDICTION;
@@ -45,6 +47,30 @@ class ExceptionRecordValidatorTest {
             VALIDATOR::getValidation,
             null
         );
+    }
+
+    @Test
+    void should_return_errors_when_validations_fail() {
+        CaseDetails caseDetails = caseWithId(null);
+        Validation<String, Void> validation = VALIDATOR.mandatoryPrerequisites(
+            () -> VALIDATOR.getCaseId(caseDetails).map(item -> null),
+            () -> CallbackValidations.hasCaseTypeId(caseDetails).map(item -> null)
+        );
+
+        assertThat(validation.isInvalid()).isTrue();
+        assertThat(validation.getError()).isEqualTo("Exception case has no Id");
+    }
+
+    @Test
+    void should_not_return_errors_when_validations_are_success() {
+        CaseDetails caseDetails = createValidExceptionRecordCase();
+        Validation<String, Void> validation = VALIDATOR.mandatoryPrerequisites(
+            () -> VALIDATOR.getCaseId(caseDetails).map(item -> null),
+            () -> CallbackValidations.hasCaseTypeId(caseDetails).map(item -> null)
+        );
+
+        assertThat(validation.isInvalid()).isFalse();
+        assertThat(validation.get()).isNull();
     }
 
     @Test
