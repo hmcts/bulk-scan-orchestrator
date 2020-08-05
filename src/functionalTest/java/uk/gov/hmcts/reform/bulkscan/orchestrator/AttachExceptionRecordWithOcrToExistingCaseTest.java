@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,10 +19,12 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.logging.appinsights.SyntheticHeaders;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +33,9 @@ import java.util.concurrent.TimeUnit;
 
 import static java.time.Instant.now;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.empty;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getScannedDocuments;
@@ -75,8 +80,40 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
         Map<String, String> address = (Map<String, String>) updatedCase.getData().get("address");
         assertThat(address.get("country")).isEqualTo(ocrCountry);
         List<ScannedDocument> scannedDocuments = getScannedDocuments(updatedCase);
-        assertThat(scannedDocuments).isNotEmpty();
-        assertThat(scannedDocuments.get(0).exceptionReference).isEqualTo(Long.toString(exceptionRecord.getId()));
+        assertThat(scannedDocuments)
+            .as("Scanned document were updated with documents from Exception Record")
+            .extracting(doc -> tuple(doc.fileName, doc.controlNumber, doc.exceptionReference))
+            .containsExactly(
+                tuple("certificate1.pdf", "1545657689", Long.toString(exceptionRecord.getId()))
+            ); // from exception record json loaded above
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void should_update_case_with_existing_documents_with_ocr_and_exception_record_documents() throws Exception {
+        //given
+        CaseDetails existingCase = createCaseWithDocument();
+        String caseId = String.valueOf(existingCase.getId());
+
+        CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-with-ocr-envelope.json");
+        String ocrCountry = "sample_country"; // country from OCR data in exception record json loaded above
+
+        // when
+        sendAttachRequest(exceptionRecord, caseId);
+
+        // then
+        CaseDetails updatedCase = ccdApi.getCase(caseId, existingCase.getJurisdiction());
+
+        Map<String, String> address = (Map<String, String>) updatedCase.getData().get("address");
+        assertThat(address.get("country")).isEqualTo(ocrCountry);
+        List<ScannedDocument> scannedDocuments = getScannedDocuments(updatedCase);
+        assertThat(scannedDocuments)
+            .as("Scanned document were updated with documents from Exception Record")
+            .extracting(doc -> tuple(doc.fileName, doc.controlNumber, doc.exceptionReference))
+            .containsExactlyInAnyOrder(
+                tuple("evidence.pdf", "142525627", null),
+                tuple("certificate1.pdf", "1545657689", Long.toString(exceptionRecord.getId()))
+            );
     }
 
     @Test
@@ -149,5 +186,17 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
             .body(request)
             .when()
             .post("/callback/attach_case?ignore-warning=true");
+    }
+
+    private CaseDetails createCaseWithDocument() {
+        String dmUrlOriginal = dmUploadService.uploadToDmStore("original.pdf", "documents/supplementary-evidence.pdf");
+        String documentUuid = StringUtils.substringAfterLast(dmUrlOriginal, "/");
+
+        return ccdCaseCreator.createCase(
+            singletonList(
+                new Document("evidence.pdf", "142525627", "other", null, Instant.now(), documentUuid, Instant.now())
+            ),
+            Instant.now()
+        );
     }
 }
