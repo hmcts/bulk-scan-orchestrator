@@ -11,11 +11,11 @@ public class EnvelopeReference {
     public String id;
 
     @JsonProperty
-    public String action;
+    public CaseAction action;
 
     public EnvelopeReference(
         @JsonProperty(value = "id", required = true) String id,
-        @JsonProperty(value = "action", required = true) String action
+        @JsonProperty(value = "action", required = true) CaseAction action
     ) {
         this.id = id;
         this.action = action;

@@ -68,7 +68,7 @@ public class EnvelopeReferenceCollectionHelper {
         CaseAction action
     ) {
         return asList(
-            new CcdCollectionElement<>(new EnvelopeReference(envelopeId, action.value))
+            new CcdCollectionElement<>(new EnvelopeReference(envelopeId, action))
         );
     }
 }

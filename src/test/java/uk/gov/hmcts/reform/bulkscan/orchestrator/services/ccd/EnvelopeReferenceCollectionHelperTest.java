@@ -42,18 +42,18 @@ class EnvelopeReferenceCollectionHelperTest {
     void appendEnvelopeReference_should_return_new_list_when_null_is_provided() {
         // given
         String envelopeId = "envelopeId1";
-        CaseAction caseAction = CaseAction.UPDATE;
+        CaseAction action = CaseAction.UPDATE;
 
         // when
         var result = envelopeReferenceCollectionHelper.appendEnvelopeReference(
             null,
             envelopeId,
-            caseAction
+            action
         );
 
         // then
         var expectedResult = asList(
-            new CcdCollectionElement(new EnvelopeReference(envelopeId, "update"))
+            new CcdCollectionElement(new EnvelopeReference(envelopeId, action))
         );
 
         assertThat(result)
@@ -65,13 +65,13 @@ class EnvelopeReferenceCollectionHelperTest {
     void appendEnvelopeReference_should_append_envelope_reference_to_empty_list() {
         // given
         String envelopeId = "envelopeId1";
-        CaseAction caseAction = CaseAction.CREATE;
+        CaseAction action = CaseAction.CREATE;
 
         // when
-        var result = envelopeReferenceCollectionHelper.appendEnvelopeReference(emptyList(), envelopeId, caseAction);
+        var result = envelopeReferenceCollectionHelper.appendEnvelopeReference(emptyList(), envelopeId, action);
 
         // then
-        var expectedResult = asList(new CcdCollectionElement(new EnvelopeReference(envelopeId, "create")));
+        var expectedResult = asList(new CcdCollectionElement(new EnvelopeReference(envelopeId, action)));
 
         assertThat(result)
             .usingRecursiveFieldByFieldElementComparator()
@@ -95,9 +95,9 @@ class EnvelopeReferenceCollectionHelperTest {
 
         // then
         var expectedResult = asList(
-            new CcdCollectionElement(new EnvelopeReference("id1", "create")),
-            new CcdCollectionElement(new EnvelopeReference("id2", "update")),
-            new CcdCollectionElement(new EnvelopeReference("id3", "update"))
+            new CcdCollectionElement(new EnvelopeReference("id1", CaseAction.CREATE)),
+            new CcdCollectionElement(new EnvelopeReference("id2", CaseAction.UPDATE)),
+            new CcdCollectionElement(new EnvelopeReference("id3", CaseAction.UPDATE))
         );
 
         assertThat(result)
@@ -128,16 +128,14 @@ class EnvelopeReferenceCollectionHelperTest {
     @Test
     void singleEnvelopeReferenceList_should_return_single_element_list_with_provided_data() {
         String envelopeId = "envelope1";
+        CaseAction action = CaseAction.CREATE;
 
-        var result = envelopeReferenceCollectionHelper.singleEnvelopeReferenceList(
-            envelopeId,
-            CaseAction.CREATE
-        );
+        var result = envelopeReferenceCollectionHelper.singleEnvelopeReferenceList(envelopeId, action);
 
         assertThat(result)
             .usingRecursiveFieldByFieldElementComparator()
             .isEqualTo(
-                asList(new CcdCollectionElement(new EnvelopeReference(envelopeId, "create")))
+                asList(new CcdCollectionElement(new EnvelopeReference(envelopeId, action)))
             );
     }
 
