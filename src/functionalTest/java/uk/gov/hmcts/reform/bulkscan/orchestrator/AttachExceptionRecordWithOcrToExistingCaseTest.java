@@ -90,7 +90,7 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    void should_update_case_with_existing_documents_with_ocr_and_exception_record_documents() throws Exception {
+    void should_attach_ocr_data_and_scanned_documents_to_the_case_with_existing_documents() throws Exception {
         //given
         CaseDetails existingCase = createCaseWithDocument();
         String caseId = String.valueOf(existingCase.getId());
