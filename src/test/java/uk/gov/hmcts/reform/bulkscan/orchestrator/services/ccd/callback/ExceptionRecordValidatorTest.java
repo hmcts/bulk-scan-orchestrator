@@ -32,6 +32,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.Te
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.TestExceptionRecordCaseBuilder.caseWithType;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.TestExceptionRecordCaseBuilder.createValidExceptionRecordCase;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.JOURNEY_CLASSIFICATION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 
 class ExceptionRecordValidatorTest {
@@ -47,6 +48,18 @@ class ExceptionRecordValidatorTest {
             VALIDATOR::getValidation,
             null
         );
+    }
+
+    @Test
+    void should_not_return_errors_when_form_type_is_missing_for_exception_classification() {
+        Validation<Seq<String>, ExceptionRecord> validation = VALIDATOR.getValidation(
+            caseWithFormTypeAndClassification(
+                null,
+                EXCEPTION.name()
+            )
+        );
+        assertThat(validation.isValid()).isTrue();
+        assertThat(validation.get()).isNotNull();
     }
 
     @Test
