@@ -85,7 +85,7 @@ public class ScannedDocumentsHelper {
     }
 
     @SuppressWarnings("unchecked")
-    public static List<ScannedDocument> getScannedDocuments(Map<String, Object> caseData) {
+    static List<ScannedDocument> getScannedDocuments(Map<String, Object> caseData) {
         var scannedDocuments = (List<Map<String, Object>>) caseData.get(SCANNED_DOCUMENTS);
 
         return scannedDocuments == null

@@ -5,18 +5,15 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.respons
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.time.LocalDateTime.now;
 import static java.util.Arrays.asList;
@@ -25,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.fileContentAsBytes;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.objectMapper;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType.FORM;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getScannedDocuments;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SCANNED_DOCUMENTS;
 
 @SuppressWarnings("unchecked")
 class ScannedDocumentsHelperTest {
@@ -105,43 +102,6 @@ class ScannedDocumentsHelperTest {
     }
 
     @Test
-    void getScannedDocuments_should_handle_null_document_in_the_case() throws Exception {
-        // given
-        var caseDetails = getCaseUpdateDetails("case-data/null-doc.json");
-
-        // when
-        var scannedDocuments = ScannedDocumentsHelper.getScannedDocuments((Map<String, Object>) caseDetails.caseData);
-
-        // then
-        assertThat(scannedDocuments).hasSize(1);
-        assertThat(scannedDocuments.get(0)).isNull();
-    }
-
-    @Test
-    void getScannedDocuments_should_map_documents_in_the_case() throws Exception {
-        // given
-        var caseDetails = getCaseUpdateDetails("case-data/single-scanned-doc.json");
-
-        // when
-        var scannedDocuments = ScannedDocumentsHelper.getScannedDocuments((Map<String, Object>) caseDetails.caseData);
-
-        // then
-        assertThat(scannedDocuments).hasSize(1);
-        assertThat(scannedDocuments.get(0))
-            .isEqualToComparingFieldByField(
-                new uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument(
-                    "filename1.pdf",
-                    "1111001",
-                    "Other",
-                    null,
-                    toLocalDateTime(Instant.parse("2018-12-01T12:34:56.123Z")),
-                    new CcdDocument("https://doc-url-1.example.com/863c495e-d05b-4376-9951-ea489360db6f"),
-                    toLocalDateTime(Instant.parse("2018-12-02T12:30:56.123Z")),
-                    null
-                ));
-    }
-
-    @Test
     void sets_exception_record_id_to_scanned_documents() throws Exception {
         // given
         //contains documents with control numbers 1000, 2000, 3000
@@ -169,7 +129,7 @@ class ScannedDocumentsHelperTest {
         ScannedDocumentsHelper.setExceptionRecordIdToScannedDocuments(exceptionRecord, caseDetails);
 
         //then
-        var updatedScannedDocuments = getScannedDocuments((Map<String, Object>) caseDetails.caseData);
+        var updatedScannedDocuments = getScannedDocuments(caseDetails);
         assertThat(updatedScannedDocuments).hasSize(3);
         assertThat(updatedScannedDocuments.get(0).controlNumber).isEqualTo("1000");
         assertThat(updatedScannedDocuments.get(0).exceptionReference).isEqualTo("1");
@@ -204,8 +164,7 @@ class ScannedDocumentsHelperTest {
         ScannedDocumentsHelper.setExceptionRecordIdToScannedDocuments(exceptionRecord, caseDetails);
 
         //then
-        var caseData = (Map<String, Object>) caseDetails.caseData;
-        var updatedScannedDocuments = getScannedDocuments(caseData);
+        var updatedScannedDocuments = getScannedDocuments(caseDetails);
         assertThat(updatedScannedDocuments).hasSize(3);
         assertThat(updatedScannedDocuments.get(0).controlNumber).isEqualTo("1000");
         assertThat(updatedScannedDocuments.get(0).exceptionReference).isNull();
@@ -235,7 +194,16 @@ class ScannedDocumentsHelperTest {
         return objectMapper.readValue(fileContentAsBytes(resourceName), CaseUpdateDetails.class);
     }
 
-    private LocalDateTime toLocalDateTime(Instant instant) {
-        return ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDateTime();
+    private List<uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument> getScannedDocuments(
+        CaseUpdateDetails caseDetails
+    ) {
+        var caseData = (Map<String, Object>) caseDetails.caseData;
+        var scannedDocuments = (List<Map<String, Object>>) caseData.get(SCANNED_DOCUMENTS);
+        return scannedDocuments.stream().map(o ->
+            objectMapper.convertValue(
+                o.get("value"),
+                uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument.class
+            )
+        ).collect(Collectors.toList());
     }
 }
