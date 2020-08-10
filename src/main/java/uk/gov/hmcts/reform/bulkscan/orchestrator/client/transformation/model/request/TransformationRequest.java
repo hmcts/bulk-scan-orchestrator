@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
@@ -18,7 +17,6 @@ public class TransformationRequest {
     @Deprecated
     public final String id;
 
-    @JsonIgnore
     @JsonProperty("exception_record_id")
     public final String exceptionRecordId;
 
@@ -29,15 +27,12 @@ public class TransformationRequest {
     @JsonProperty("case_type_id")
     public final String caseTypeId;
 
-    @JsonIgnore
     @JsonProperty("exception_record_case_type_id")
     public final String exceptionRecordCaseTypeId;
 
-    @JsonIgnore
     @JsonProperty("envelope_id")
     public final String envelopeId;
 
-    @JsonIgnore
     @JsonProperty("is_automated_process")
     public final boolean isAutomatedProcess;
 
