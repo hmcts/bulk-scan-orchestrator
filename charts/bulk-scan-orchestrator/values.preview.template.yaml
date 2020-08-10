@@ -3,6 +3,12 @@ java:
     SB_CONN_STRING:
       secretRef: servicebus-secret-namespace-{{ .Release.Name }}
       key: connectionString
+    SB_ACCESS_KEY:
+      secretRef: servicebus-secret-namespace-{{ .Release.Name }}
+      key: primaryKey
+    SB_NAMESPACE:
+      secretRef: servicebus-secret-namespace-{{ .Release.Name }}
+      key: namespaceName
   environment:
     S2S_URL: "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
     IDAM_API_URL: "https://idam-api.aat.platform.hmcts.net"
@@ -12,10 +18,16 @@ java:
     TRANSFORMATION_URL_BULKSCAN: "http://bulk-scan-sample-app-aat.service.core-compute-aat.internal/transform-exception-record"
     UPDATE_URL_BULKSCAN: "http://bulk-scan-sample-app-aat.service.core-compute-aat.internal/update-case"
     UPDATE_URL_PROBATE: "http://probate-back-office-aat.service.core-compute-aat.internal/update-case"
+    QUEUE_ACCESS_KEY_LISTEN_NAME: "RootManageSharedAccessKey"
+    QUEUE_ACCESS_KEY_SEND_NAME: "RootManageSharedAccessKey"
+    QUEUE_NAMESPACE: "$(SB_NAMESPACE)"
     ENVELOPES_QUEUE_CONNECTION_STRING: "$(SB_CONN_STRING);EntityPath=envelopes"
+    ENVELOPES_QUEUE_READ_ACCESS_KEY: "$(SB_ACCESS_KEY)"
     ENVELOPES_QUEUE_MAX_DELIVERY_COUNT: "10"
     PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING: "$(SB_CONN_STRING);EntityPath=processed-envelopes"
+    PROCESSED_ENVELOPES_QUEUE_WRITE_ACCESS_KEY: "$(SB_ACCESS_KEY)"
     PAYMENTS_QUEUE_CONNECTION_STRING: "$(SB_CONN_STRING);EntityPath=payments"
+    PAYMENTS_QUEUE_WRITE_ACCESS_KEY: "$(SB_ACCESS_KEY)"
   keyVaults:
     "bulk-scan":
       secrets:
