@@ -3,8 +3,8 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.CaseUpdateDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -111,7 +111,6 @@ class ScannedDocumentsHelperTest {
             EXCEPTION_REFERENCE,
             "caseTypeId",
             "envelopeId123",
-            false,
             "poBox",
             "poBoxJurisdiction",
             Classification.EXCEPTION,
@@ -151,7 +150,6 @@ class ScannedDocumentsHelperTest {
             EXCEPTION_REFERENCE,
             "caseTypeId",
             "envelopeId123",
-            false,
             "poBox",
             "poBoxJurisdiction",
             Classification.EXCEPTION,
