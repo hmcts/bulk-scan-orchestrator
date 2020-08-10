@@ -5,6 +5,8 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -60,11 +62,15 @@ class CreateCaseTest {
         );
     }
 
+    @ParameterizedTest()
+    @ValueSource(strings = {"bulkscan", "bulkscanauto"})
     @Test
-    public void should_idempotently_create_case_from_valid_exception_record() throws Exception {
+    public void should_idempotently_create_case_from_valid_exception_record(String service) throws Exception {
         // given
+        String exceptionRecordResource = "envelopes/new-envelope-create-case-with-evidence-" + service + ".json";
+
         CaseDetails exceptionRecord = exceptionRecordCreator.createExceptionRecord(
-            "envelopes/new-envelope-create-case-with-evidence.json",
+            exceptionRecordResource,
             dmUrl
         );
 
@@ -87,7 +93,7 @@ class CreateCaseTest {
         await("Case is ingested")
             .atMost(10, TimeUnit.SECONDS)
             .pollInterval(1, TimeUnit.SECONDS)
-            .until(() -> caseIngested(caseExceptionRecordReference));
+            .until(() -> caseIngested(caseExceptionRecordReference, service));
 
         // give ElasticSearch some time to reach consistency
         Thread.sleep(2000);
@@ -100,7 +106,7 @@ class CreateCaseTest {
         // then
         // the same case is returned
         assertThat(caseCcdId2).isEqualTo(caseCcdId);
-        List<Long> caseIds = ccdApi.getCaseRefsByBulkScanCaseReference(caseExceptionRecordReference, "bulkscan");
+        List<Long> caseIds = ccdApi.getCaseRefsByBulkScanCaseReference(caseExceptionRecordReference, service);
         assertThat(caseIds)
             .as("Should find only one service case for exception record {}", caseExceptionRecordReference)
             .hasSize(1)
@@ -164,8 +170,8 @@ class CreateCaseTest {
         return new ObjectMapper().readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
     }
 
-    private boolean caseIngested(String bulkScanCaseReference) {
-        return ccdApi.getCaseRefsByBulkScanCaseReference(bulkScanCaseReference, "bulkscan").size() == 1;
+    private boolean caseIngested(String bulkScanCaseReference, String service) {
+        return ccdApi.getCaseRefsByBulkScanCaseReference(bulkScanCaseReference, service).size() == 1;
     }
 
     private String getCaseCcdId(AboutToStartOrSubmitCallbackResponse callbackResponse) {

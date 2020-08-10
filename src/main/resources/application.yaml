@@ -105,7 +105,7 @@ service-config:
       auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_BULKSCANAUTO}
       auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_BULKSCANAUTO}
       case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_BULKSCANAUTO}
-      search-cases-by-envelope-id: false
+      search-cases-by-envelope-id: true
 
     - service: sscs
       jurisdiction: SSCS
