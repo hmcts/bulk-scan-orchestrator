@@ -21,6 +21,9 @@ java:
     DELETE_ENVELOPES_DLQ_MESSAGES_ENABLED: "true"
     DELETE_ENVELOPES_DLQ_MESSAGES_CRON: "0 * * * * *"
     DELETE_ENVELOPES_DLQ_MESSAGES_TTL: "10s"
+    QUEUE_ACCESS_KEY_LISTEN_NAME: "ListenSharedAccessKey"
+    QUEUE_ACCESS_KEY_SEND_NAME: "SendSharedAccessKey"
+    QUEUE_NAMESPACE: "bulk-scan-servicebus-{{ .Values.global.environment }}"
     ENVELOPES_QUEUE_NAME: "envelopes"
     PROCESSED_ENVELOPES_QUEUE_NAME: "processed-envelopes"
     PAYMENTS_QUEUE_NAME: "payments"
@@ -67,8 +70,11 @@ java:
         - idam-users-sscs-username
         - idam-users-sscs-password
         - envelopes-queue-listen-connection-string
+        - envelopes-queue-listen-shared-access-key
         - payments-queue-send-connection-string
+        - payments-queue-send-shared-access-key
         - processed-envelopes-queue-send-connection-string
+        - processed-envelopes-queue-send-shared-access-key
         - envelopes-queue-max-delivery-count
         - app-insights-instrumentation-key
   image: hmctspublic.azurecr.io/bulk-scan/orchestrator:latest

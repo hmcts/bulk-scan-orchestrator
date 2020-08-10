@@ -7,11 +7,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdateDetails;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdateRequest;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.ExistingCaseDetails;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.CaseUpdateRequestCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.Set;
@@ -26,13 +24,16 @@ public class CaseUpdateClient {
 
     private final Validator validator;
     private final RestTemplate restTemplate;
+    private final CaseUpdateRequestCreator requestCreator;
 
     public CaseUpdateClient(
         Validator validator,
-        RestTemplate restTemplate
+        RestTemplate restTemplate,
+        CaseUpdateRequestCreator requestCreator
     ) {
         this.validator = validator;
         this.restTemplate = restTemplate;
+        this.requestCreator = requestCreator;
     }
 
     public SuccessfulUpdateResponse updateCase(
@@ -50,14 +51,7 @@ public class CaseUpdateClient {
                 .build()
                 .toString();
 
-        ExistingCaseDetails existingCaseDetails = new ExistingCaseDetails(
-            existingCase.getId().toString(),
-            existingCase.getCaseTypeId(),
-            existingCase.getData()
-        );
-        var caseUpdateDetails = new CaseUpdateDetails(exceptionRecord, null);
-
-        var caseUpdateRequest = new CaseUpdateRequest(exceptionRecord, false, caseUpdateDetails, existingCaseDetails);
+        var caseUpdateRequest = requestCreator.create(exceptionRecord, existingCase);
 
         log.info(
             "Requesting service to update case, caseTypeId: {}, case id: {}, exception id: {}",
