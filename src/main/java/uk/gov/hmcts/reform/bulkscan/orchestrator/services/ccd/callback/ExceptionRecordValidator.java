@@ -7,9 +7,9 @@ import io.vavr.control.Validation;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -106,7 +106,6 @@ public class ExceptionRecordValidator {
                     exceptionRecordIdValidation.get(),
                     caseTypeIdValidation.get(),
                     getEnvelopeId(caseDetails),
-                    false,
                     poBoxValidation.get(),
                     jurisdictionValidation.get(),
                     journeyClassificationValidation.get(),

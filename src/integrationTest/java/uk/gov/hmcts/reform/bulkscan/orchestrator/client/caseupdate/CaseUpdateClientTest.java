@@ -18,10 +18,10 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.respons
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -218,7 +218,6 @@ public class CaseUpdateClientTest {
             "id",
             "some_case_type",
             "envelopeId123",
-            false,
             "poBox",
             "BULKSCAN",
             Classification.NEW_APPLICATION,
