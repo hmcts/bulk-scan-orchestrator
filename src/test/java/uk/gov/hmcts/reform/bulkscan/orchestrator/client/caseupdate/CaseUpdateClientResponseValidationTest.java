@@ -5,13 +5,15 @@ import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.BDDMockito;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.RestTemplate;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.CaseUpdateRequestCreator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdateRequest;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.ExistingCaseDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.CaseUpdateDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import javax.validation.ConstraintViolationException;
@@ -25,19 +27,30 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class CaseUpdateClientResponseValidationTest {
 
     @Mock RestTemplate restTemplate;
+    @Mock CaseUpdateRequestCreator requestCreator;
+
     Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     CaseUpdateClient client;
 
     @BeforeEach
     void setUp() {
-        this.client = new CaseUpdateClient(validator, restTemplate);
+        CaseUpdateRequest caseUpdateRequest = new CaseUpdateRequest(
+            mock(uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord.class),
+            false,
+            mock(uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdateDetails.class),
+            mock(ExistingCaseDetails.class)
+        );
+
+        given(requestCreator.create(any(), any())).willReturn(caseUpdateRequest);
+        this.client = new CaseUpdateClient(validator, restTemplate, requestCreator);
     }
 
     @Test
@@ -103,7 +116,7 @@ class CaseUpdateClientResponseValidationTest {
     }
 
     void serverRespondsWith(SuccessfulUpdateResponse response) {
-        BDDMockito.given(restTemplate.postForObject(anyString(), any(), any()))
+        given(restTemplate.postForObject(anyString(), any(), any()))
             .willReturn(response);
     }
 
