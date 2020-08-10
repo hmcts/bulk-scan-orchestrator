@@ -5,8 +5,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.TransformationRequestCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 
 import java.util.Set;
 import javax.validation.ConstraintViolation;
@@ -18,13 +19,16 @@ public class TransformationClient {
 
     private final RestTemplate restTemplate;
     private final Validator validator;
+    private final TransformationRequestCreator requestCreator;
 
     public TransformationClient(
         RestTemplate restTemplate,
-        Validator validator
+        Validator validator,
+        TransformationRequestCreator requestCreator
     ) {
         this.restTemplate = restTemplate;
         this.validator = validator;
+        this.requestCreator = requestCreator;
     }
 
     public SuccessfulTransformationResponse transformExceptionRecord(
@@ -37,7 +41,7 @@ public class TransformationClient {
 
         SuccessfulTransformationResponse response = restTemplate.postForObject(
             getUrl(baseUrl),
-            new HttpEntity<>(exceptionRecord, headers),
+            new HttpEntity<>(requestCreator.create(exceptionRecord), headers),
             SuccessfulTransformationResponse.class
         );
 

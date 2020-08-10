@@ -3,10 +3,11 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang.StringUtils;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.CaseUpdateDetails;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -47,11 +48,11 @@ public class ScannedDocumentsHelper {
             .collect(toList());
     }
 
+    @SuppressWarnings("unchecked")
     public static void setExceptionRecordIdToScannedDocuments(
         ExceptionRecord exceptionRecord,
         CaseUpdateDetails caseDetails
     ) {
-        @SuppressWarnings("unchecked")
         var caseData = (Map<String, Object>) caseDetails.caseData;
         List<ScannedDocument> scannedDocuments = getScannedDocuments(caseData);
 
@@ -60,11 +61,11 @@ public class ScannedDocumentsHelper {
             .map(scannedDocument -> scannedDocument.controlNumber)
             .collect(toList());
 
-        List<ScannedDocument> updatedScannedDocuments = scannedDocuments.stream()
+        List<ImmutableMap<String, ScannedDocument>> updatedScannedDocuments = scannedDocuments.stream()
             .map(scannedDocument -> {
                 if (exceptionRecordDcns.contains(scannedDocument.controlNumber)) {
                     // set exceptionReference if the document received with the exception record
-                    return new ScannedDocument(
+                    return ImmutableMap.of("value", new ScannedDocument(
                         scannedDocument.fileName,
                         scannedDocument.controlNumber,
                         scannedDocument.type,
@@ -73,10 +74,10 @@ public class ScannedDocumentsHelper {
                         scannedDocument.url,
                         scannedDocument.deliveryDate,
                         exceptionRecord.id
-                    );
+                    ));
                 } else {
                     // do not update the document if it was received with some previous exception record
-                    return scannedDocument;
+                    return ImmutableMap.of("value", scannedDocument);
                 }
             })
             .collect(toList());
@@ -84,14 +85,14 @@ public class ScannedDocumentsHelper {
     }
 
     @SuppressWarnings("unchecked")
-    private static List<ScannedDocument> getScannedDocuments(Map<String, Object> caseData) {
+    static List<ScannedDocument> getScannedDocuments(Map<String, Object> caseData) {
         var scannedDocuments = (List<Map<String, Object>>) caseData.get(SCANNED_DOCUMENTS);
 
         return scannedDocuments == null
             ? emptyList()
             : scannedDocuments.stream()
-              .map(ScannedDocumentsHelper::createScannedDocumentWithCcdData)
-              .collect(toList());
+            .map(ScannedDocumentsHelper::createScannedDocumentWithCcdData)
+            .collect(toList());
     }
 
     static ScannedDocument createScannedDocumentWithCcdData(Map<String, Object> object) {
