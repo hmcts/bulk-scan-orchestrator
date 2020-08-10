@@ -63,7 +63,10 @@ class CreateCaseTest {
     }
 
     @ParameterizedTest()
-    @ValueSource(strings = {"bulkscan", "bulkscanauto"})
+    @ValueSource(strings = {
+        "bulkscan",     // search by 'bulkScanCaseReference' (old way)
+        "bulkscanauto"  // search by envelope Id (new way)
+    })
     @Test
     public void should_idempotently_create_case_from_valid_exception_record(String service) throws Exception {
         // given
