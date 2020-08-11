@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.EnvelopeReference;
@@ -12,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 
 @Service
@@ -33,33 +33,23 @@ public class EnvelopeReferenceCollectionHelper {
     }
 
     /**
-     * Appends envelope reference to the provided envelope references collection.
+     * Converts the raw CCD collection of envelope references into a strongly-typed version.
      *
-     * <p>This collection represents bulkScanEnvelopes field in service case</p>
-     *
-     * @param existingEnvelopeReferences Current value of the field that holds envelope references in case,
-     *                                   in raw format (after deserialising case data as Object)
-     * @param envelopeId                 Id of the envelope to be appended
-     * @param action                     Action that the envelope caused on the case - create/update
-     * @return Updated collection, serialisable to CCD-compatible format
+     * @param rawEnvelopeReferences Envelope references in case, in raw format
+     *                              (after deserialising case data as Object)
+     * @return Collection of strongly typed envelope references, serialisable to CCD-compatible format
      */
-    public List<CcdCollectionElement<EnvelopeReference>> appendEnvelopeReference(
-        List<Map<String, Object>> existingEnvelopeReferences,
-        String envelopeId,
-        CaseAction action
+    public List<CcdCollectionElement<EnvelopeReference>> parseEnvelopeReferences(
+        List<Map<String, Object>> rawEnvelopeReferences
     ) {
-        if (CollectionUtils.isEmpty(existingEnvelopeReferences)) {
-            return singleEnvelopeReferenceList(envelopeId, action);
+        if (rawEnvelopeReferences == null) {
+            return emptyList();
         } else {
-            var updatedReferences = existingEnvelopeReferences
+            return rawEnvelopeReferences
                 .stream()
                 .map(ref -> objectMapper.convertValue(ref.get("value"), EnvelopeReference.class))
                 .map(CcdCollectionElement::new)
                 .collect(toList());
-
-            updatedReferences.addAll(singleEnvelopeReferenceList(envelopeId, action));
-
-            return updatedReferences;
         }
     }
 

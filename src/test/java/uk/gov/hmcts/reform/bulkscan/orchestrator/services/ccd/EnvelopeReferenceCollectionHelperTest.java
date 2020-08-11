@@ -39,65 +39,32 @@ class EnvelopeReferenceCollectionHelperTest {
     }
 
     @Test
-    void appendEnvelopeReference_should_return_new_list_when_null_is_provided() {
-        // given
-        String envelopeId = "envelopeId1";
-        CaseAction action = CaseAction.UPDATE;
-
-        // when
-        var result = envelopeReferenceCollectionHelper.appendEnvelopeReference(
-            null,
-            envelopeId,
-            action
-        );
-
-        // then
-        var expectedResult = asList(
-            new CcdCollectionElement(new EnvelopeReference(envelopeId, action))
-        );
-
-        assertThat(result)
-            .usingRecursiveFieldByFieldElementComparator()
-            .isEqualTo(expectedResult);
+    void parseEnvelopeReferences_should_return_empty_list_when_null_is_provided() {
+        var result = envelopeReferenceCollectionHelper.parseEnvelopeReferences(null);
+        assertThat(result).isEmpty();
     }
 
     @Test
-    void appendEnvelopeReference_should_append_envelope_reference_to_empty_list() {
-        // given
-        String envelopeId = "envelopeId1";
-        CaseAction action = CaseAction.CREATE;
-
-        // when
-        var result = envelopeReferenceCollectionHelper.appendEnvelopeReference(emptyList(), envelopeId, action);
-
-        // then
-        var expectedResult = asList(new CcdCollectionElement(new EnvelopeReference(envelopeId, action)));
-
-        assertThat(result)
-            .usingRecursiveFieldByFieldElementComparator()
-            .isEqualTo(expectedResult);
+    void parseEnvelopeReferences_should_return_empty_list_when_empty_list_is_provided() {
+        var result = envelopeReferenceCollectionHelper.parseEnvelopeReferences(emptyList());
+        assertThat(result).isEmpty();
     }
 
     @Test
-    void appendEnvelopeReference_should_append_envelope_reference_to_non_empty_list() {
+    void parseEnvelopeReferences_should_parse_elements_of_non_empty_list() {
         // given
-        var existingEnvelopeReferences = Arrays.<Map<String, Object>>asList(
+        var rawEnvelopeReferences = Arrays.<Map<String, Object>>asList(
             singletonMap("value", ImmutableMap.of("id", "id1", "action", "create")),
             singletonMap("value", ImmutableMap.of("id", "id2", "action", "update"))
         );
 
         // when
-        var result = envelopeReferenceCollectionHelper.appendEnvelopeReference(
-            existingEnvelopeReferences,
-            "id3",
-            CaseAction.UPDATE
-        );
+        var result = envelopeReferenceCollectionHelper.parseEnvelopeReferences(rawEnvelopeReferences);
 
         // then
         var expectedResult = asList(
             new CcdCollectionElement(new EnvelopeReference("id1", CaseAction.CREATE)),
-            new CcdCollectionElement(new EnvelopeReference("id2", CaseAction.UPDATE)),
-            new CcdCollectionElement(new EnvelopeReference("id3", CaseAction.UPDATE))
+            new CcdCollectionElement(new EnvelopeReference("id2", CaseAction.UPDATE))
         );
 
         assertThat(result)
