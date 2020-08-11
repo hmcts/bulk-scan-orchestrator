@@ -23,7 +23,7 @@ public class DlqReceiverProvider implements Supplier<IMessageReceiver> {
 
     public DlqReceiverProvider(
         @Value("${azure.servicebus.namespace}") String namespace,
-        @Qualifier("envelopes-queue-config")QueueConfigurationProperties queueProperties
+        @Qualifier("envelopes-queue-config") QueueConfigurationProperties queueProperties
     ) {
         this.namespace = namespace;
         this.queueProperties = queueProperties;
