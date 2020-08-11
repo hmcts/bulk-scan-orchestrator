@@ -9,9 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -203,10 +203,9 @@ class ExceptionRecordValidatorTest {
         assertSoftly(softly -> {
             softly.assertThat(validation.isValid()).isTrue();
             ExceptionRecord exceptionRecord = validation.get();
-            softly.assertThat(exceptionRecord.exceptionRecordId).isEqualTo("1234");
-            softly.assertThat(exceptionRecord.exceptionRecordCaseTypeId).isEqualTo(CASE_TYPE_EXCEPTION_RECORD);
+            softly.assertThat(exceptionRecord.id).isEqualTo("1234");
+            softly.assertThat(exceptionRecord.caseTypeId).isEqualTo(CASE_TYPE_EXCEPTION_RECORD);
             softly.assertThat(exceptionRecord.envelopeId).isEqualTo("envelopeId123");
-            softly.assertThat(exceptionRecord.isAutomatedProcess).isFalse();
             softly.assertThat(exceptionRecord.poBox).isEqualTo(PO_BOX);
             softly.assertThat(exceptionRecord.poBoxJurisdiction).isEqualTo(JURSIDICTION);
             softly.assertThat(exceptionRecord.journeyClassification).isEqualTo(NEW_APPLICATION);
