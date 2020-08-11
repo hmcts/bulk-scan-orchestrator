@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidation
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,53 +41,68 @@ class ExceptionRecordValidatorTest {
 
     @Test
     void should_map_to_exception_record_when_case_details_are_valid() {
-        checkValidation(
-            createValidExceptionRecordCase(),
-            true,
-            VALIDATOR::getValidation,
-            null
-        );
+        // given
+        var validExceptionRecord = createValidExceptionRecordCase();
+
+        // when
+        var validation = VALIDATOR.getValidation(validExceptionRecord);
+
+        // then
+        assertExceptionRecordMappings(validation);
     }
 
     @Test
     void should_not_return_errors_when_form_type_is_missing_for_exception_classification() {
-        Validation<Seq<String>, ExceptionRecord> validation = VALIDATOR.getValidation(
-            caseWithFormTypeAndClassification(
-                null,
-                EXCEPTION.name()
-            )
+        // given
+        var caseDetails = caseWithFormTypeAndClassification(
+            null,
+            EXCEPTION.name()
         );
+
+        // when
+        var validation = VALIDATOR.getValidation(caseDetails);
+
+        // then
         assertThat(validation.isValid()).isTrue();
         assertThat(validation.get()).isNotNull();
     }
 
     @Test
     void should_return_errors_when_validations_fail() {
-        CaseDetails caseDetails = caseWithId(null);
-        Validation<String, Void> validation = VALIDATOR.mandatoryPrerequisites(
+        // given
+        var caseDetails = caseWithId(null);
+
+        // when
+        var validation = VALIDATOR.mandatoryPrerequisites(
             () -> VALIDATOR.getCaseId(caseDetails).map(item -> null),
             () -> CallbackValidations.hasCaseTypeId(caseDetails).map(item -> null)
         );
 
+        // then
         assertThat(validation.isInvalid()).isTrue();
         assertThat(validation.getError()).isEqualTo("Exception case has no Id");
     }
 
     @Test
     void should_not_return_errors_when_validations_are_success() {
-        CaseDetails caseDetails = createValidExceptionRecordCase();
-        Validation<String, Void> validation = VALIDATOR.mandatoryPrerequisites(
+        // given
+        var caseDetails = createValidExceptionRecordCase();
+
+        // when
+        var validation = VALIDATOR.mandatoryPrerequisites(
             () -> VALIDATOR.getCaseId(caseDetails).map(item -> null),
             () -> CallbackValidations.hasCaseTypeId(caseDetails).map(item -> null)
         );
 
+        // then
         assertThat(validation.isInvalid()).isFalse();
         assertThat(validation.get()).isNull();
     }
 
     @Test
     void should_return_error_when_case_details_contain_invalid_ocr_data() {
-        java.util.List<Map<String, Object>> invalidOcrData = ImmutableList.of(
+        // given
+        var invalidOcrData = ImmutableList.of(
             ImmutableMap.of("value", ImmutableMap.of(
                 "key", "first_name",
                 "value", 1
@@ -96,6 +110,8 @@ class ExceptionRecordValidatorTest {
 
         String errorPattern = "Invalid OCR data format. Error: (class )?java.lang.Integer "
             + "cannot be cast to (class )?java.lang.String.*";
+
+        // then
         checkValidationErrorMatches(
             caseWithData("scanOCRData", invalidOcrData),
             VALIDATOR::getValidation,
@@ -119,12 +135,15 @@ class ExceptionRecordValidatorTest {
     @ParameterizedTest(name = "{0}: input:{1} error:{2}")
     @MethodSource("invalidCaseDataTestParams")
     void should_return_errors_for_invalid_case_data(String caseReason, CaseDetails input, String error) {
-        checkValidation(
-            input,
-            false,
-            VALIDATOR::getValidation,
-            error
-        );
+        // when
+        var validation = VALIDATOR.getValidation(input);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(validation.isValid()).isFalse();
+            List<String> errors = validation.getError().toList();
+            softly.assertThat(errors).contains(error);
+        });
     }
 
     private static Object[][] invalidDocumentTestParams() {
@@ -156,30 +175,13 @@ class ExceptionRecordValidatorTest {
 
     @Test
     void should_throw_exception_when_envelopeId_is_missing() {
-        CaseDetails caseDetails = caseWithData("envelopeId", null);
+        // given
+        var caseDetails = caseWithData("envelopeId", null);
 
+        // then
         assertThatCode(() -> VALIDATOR.getValidation(caseDetails))
             .isInstanceOf(UnprocessableCaseDataException.class)
             .hasMessage("Exception record is lacking envelopeId field");
-    }
-
-    private void checkValidation(
-        CaseDetails input,
-        boolean valid,
-        Function<CaseDetails, Validation<Seq<String>, ExceptionRecord>> validationMethod,
-        String errorString
-    ) {
-        Validation<Seq<String>, ExceptionRecord> validation = validationMethod.apply(input);
-
-        if (valid) {
-            assertExceptionRecordMappings(validation);
-        } else {
-            assertSoftly(softly -> {
-                softly.assertThat(validation.isValid()).isFalse();
-                List<String> errors = validation.getError().toList();
-                softly.assertThat(errors).contains(errorString);
-            });
-        }
     }
 
     private void checkValidationErrorMatches(
