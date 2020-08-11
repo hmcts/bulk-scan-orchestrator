@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 
@@ -11,11 +10,9 @@ public class CaseUpdateRequest {
     @JsonProperty("exception_record")
     public final ExceptionRecord exceptionRecord;
 
-    @JsonIgnore
     @JsonProperty("is_automated_process")
     public final boolean isAutomatedProcess;
 
-    @JsonIgnore
     @JsonProperty("case_update_details")
     public final CaseUpdateDetails caseUpdateDetails;
 
