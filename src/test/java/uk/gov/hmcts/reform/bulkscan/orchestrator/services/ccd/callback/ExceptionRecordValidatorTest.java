@@ -34,6 +34,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 
+@SuppressWarnings("checkstyle:LineLength")
 class ExceptionRecordValidatorTest {
 
     private static final String CASE_TYPE_EXCEPTION_RECORD = "BULKSCAN_ExceptionRecord";
@@ -154,10 +155,7 @@ class ExceptionRecordValidatorTest {
             {"Invalid document scanned date", caseWithScannedDocumentData("scannedDate", "date"), invalidDateError},
             {"Invalid document delivery date", caseWithScannedDocumentData("deliveryDate", "date"), invalidDateError},
             {"Invalid scanned date format", caseWithScannedDocumentData("scannedDate", "010101"), invalidDateError},
-            {"Invalid delivery date format", caseWithScannedDocumentData(
-                "deliveryDate",
-                "01-01-122"
-            ), invalidDateError},
+            {"Invalid delivery date format", caseWithScannedDocumentData("deliveryDate", "01-01-122"), invalidDateError},
             {"Null delivery date format", caseWithScannedDocumentData("deliveryDate", null), invalidDateError},
             {"Null scanned date format", caseWithScannedDocumentData("scannedDate", null), invalidDateError},
         };
