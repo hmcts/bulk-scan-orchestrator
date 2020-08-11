@@ -23,18 +23,15 @@ azure:
     envelopes:
       access-key: ${ENVELOPES_QUEUE_READ_ACCESS_KEY}
       access-key-name: ${QUEUE_ACCESS_KEY_LISTEN_NAME}
-      connection-string: ${ENVELOPES_QUEUE_CONNECTION_STRING}
       queue-name: ${ENVELOPES_QUEUE_NAME}
       max-delivery-count: ${ENVELOPES_QUEUE_MAX_DELIVERY_COUNT}
     processed-envelopes:
       access-key: ${PROCESSED_ENVELOPES_QUEUE_WRITE_ACCESS_KEY}
       access-key-name: ${QUEUE_ACCESS_KEY_SEND_NAME}
-      connection-string: ${PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING}
       queue-name: ${PROCESSED_ENVELOPES_QUEUE_NAME}
     payments:
       access-key: ${PAYMENTS_QUEUE_WRITE_ACCESS_KEY}
       access-key-name: ${QUEUE_ACCESS_KEY_SEND_NAME}
-      connection-string: ${PAYMENTS_QUEUE_CONNECTION_STRING}
       queue-name: ${PAYMENTS_QUEUE_NAME}
       manual-retry-count: 2
 
