@@ -1,8 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,6 +39,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationResponseTestData.errorResponse;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationResponseTestData.invalidDataResponse;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationResponseTestData.successResponse;
 
 @AutoConfigureWireMock(port = 0)
 @IntegrationTest
@@ -241,30 +241,5 @@ public class TransformationClientTest {
                 new OcrDataField("name2", "value2")
             )
         );
-    }
-
-    private JSONObject successResponse() throws JSONException {
-        return new JSONObject()
-            .put("case_creation_details", new JSONObject()
-                .put("case_type_id", "some_case_type")
-                .put("event_id", "createCase")
-                .put(
-                    "case_data",
-                    new JSONObject()
-                        .put("case_field", "some value")
-                        .put("form_type", "d8")
-                ))
-            .put("warnings", new JSONArray());
-    }
-
-    private JSONObject errorResponse() throws Exception {
-        return new JSONObject()
-            .put("errors", new JSONArray().put("field1 is missing"))
-            .put("warnings", new JSONArray().put("field2 is missing"));
-    }
-
-    private JSONObject invalidDataResponse() throws Exception {
-        return new JSONObject()
-            .put("errors", new JSONArray().put("field1 is missing"));
     }
 }
