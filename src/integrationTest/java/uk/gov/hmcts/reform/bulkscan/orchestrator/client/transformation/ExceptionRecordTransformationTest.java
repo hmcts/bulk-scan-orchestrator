@@ -45,7 +45,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.Tr
 
 @AutoConfigureWireMock(port = 0)
 @IntegrationTest
-public class TransformationClientTest {
+public class ExceptionRecordTransformationTest {
 
     private static final String TRANSFORM_EXCEPTION_RECORD_URL = "/transform-exception-record";
 
