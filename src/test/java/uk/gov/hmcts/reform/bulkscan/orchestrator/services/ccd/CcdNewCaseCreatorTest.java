@@ -95,7 +95,7 @@ class CcdNewCaseCreatorTest {
 
         StartEventResponse startCcdEventResp = mock(StartEventResponse.class);
 
-        given(ccdApi.createNewCaseFromCallback(
+        given(ccdApi.createCase(
             anyString(), anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString()
         )).willReturn(CASE_ID);
 
@@ -118,7 +118,7 @@ class CcdNewCaseCreatorTest {
 
         // and
         var caseDetailsBuilderCaptor = ArgumentCaptor.forClass(Function.class);
-        verify(ccdApi).createNewCaseFromCallback(
+        verify(ccdApi).createCase(
             eq(IDAM_TOKEN),
             anyString(),
             eq(USER_ID),

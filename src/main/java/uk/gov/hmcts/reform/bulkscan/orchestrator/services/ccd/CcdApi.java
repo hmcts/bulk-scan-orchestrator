@@ -302,7 +302,7 @@ public class CcdApi {
         }
     }
 
-    public long createNewCaseFromCallback(
+    public long createCase(
         String idamToken,
         String s2sToken,
         String userId,
@@ -322,9 +322,14 @@ public class CcdApi {
                 eventId
             );
 
-            log.info("Started event in CCD. Event: {}, case type: {}. {}", eventId, caseTypeId, logContext);
+            log.info(
+                "Started case-creation event in CCD. Event: {}, case type: {}. {}",
+                eventId,
+                caseTypeId,
+                logContext
+            );
 
-            return feignCcdApi.submitForCaseworker(
+            long caseId = feignCcdApi.submitForCaseworker(
                 idamToken,
                 s2sToken,
                 userId,
@@ -332,7 +337,18 @@ public class CcdApi {
                 caseTypeId,
                 true,
                 caseDataContentBuilder.apply(eventResponse)
-            ).getId();
+            )
+                .getId();
+
+            log.info(
+                "Submitted case-creation event in CCD. Event: {}, case type: {}, case ID: {}. {}",
+                eventId,
+                caseTypeId,
+                caseId,
+                logContext
+            );
+
+            return caseId;
         } catch (FeignException exception) {
             debugCcdException(log, exception, "Failed to call 'createNewCaseFromCallback'");
 
