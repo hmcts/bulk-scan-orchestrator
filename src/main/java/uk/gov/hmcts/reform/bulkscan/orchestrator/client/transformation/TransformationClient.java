@@ -6,8 +6,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.TransformationRequestCreator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.TransformationRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 
 import java.util.Set;
 import javax.validation.ConstraintViolation;
@@ -31,9 +33,21 @@ public class TransformationClient {
         this.requestCreator = requestCreator;
     }
 
+    public SuccessfulTransformationResponse transformEnvelope(String baseUrl, Envelope envelope, String s2sToken) {
+        return callTransformationEndpoint(baseUrl, requestCreator.create(envelope), s2sToken);
+    }
+
     public SuccessfulTransformationResponse transformExceptionRecord(
         String baseUrl,
         ExceptionRecord exceptionRecord,
+        String s2sToken
+    ) {
+        return callTransformationEndpoint(baseUrl, requestCreator.create(exceptionRecord), s2sToken);
+    }
+
+    private SuccessfulTransformationResponse callTransformationEndpoint(
+        String baseUrl,
+        TransformationRequest transformationRequest,
         String s2sToken
     ) {
         HttpHeaders headers = new HttpHeaders();
@@ -41,7 +55,7 @@ public class TransformationClient {
 
         SuccessfulTransformationResponse response = restTemplate.postForObject(
             getUrl(baseUrl),
-            new HttpEntity<>(requestCreator.create(exceptionRecord), headers),
+            new HttpEntity<>(transformationRequest, headers),
             SuccessfulTransformationResponse.class
         );
 

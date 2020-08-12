@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.req
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validation;
@@ -55,7 +56,7 @@ class TransformationClientTest {
     }
 
     @Test
-    void should_use_request_creator_to_create_request_body() {
+    void transformExceptionRecord_should_use_request_creator_to_create_request_body() {
         // given
         TransformationRequest transformationRequest = mock(TransformationRequest.class);
         ExceptionRecord inputExceptionRecord = mock(ExceptionRecord.class);
@@ -82,20 +83,66 @@ class TransformationClientTest {
     }
 
     @Test
-    void should_return_valid_model() {
-        given(restTemplate.postForObject(anyString(), any(), any()))
-            .willReturn(sampleTransformationResponse());
+    void transformExceptionRecord_should_return_valid_model() {
+        var expectedResponse = sampleTransformationResponse();
 
-        assertThatCode(() -> transformationClient.transformExceptionRecord(URL, null, null))
-            .doesNotThrowAnyException();
+        given(restTemplate.postForObject(anyString(), any(), any())).willReturn(expectedResponse);
+
+        var response = transformationClient.transformExceptionRecord(URL, null, null);
+        assertThat(response).isSameAs(expectedResponse);
     }
 
     @Test
-    void should_throw_exception_when_model_is_invalid() {
+    void transformExceptionRecord_should_throw_exception_when_model_is_invalid() {
         given(restTemplate.postForObject(anyString(), any(), any()))
             .willReturn(new SuccessfulTransformationResponse(null, emptyList()));
 
         assertThatCode(() -> transformationClient.transformExceptionRecord(URL, null, null))
+            .isInstanceOf(ConstraintViolationException.class)
+            .hasMessage("caseCreationDetails: must not be null");
+    }
+
+    @Test
+    void transformEnvelope_should_use_request_creator_to_create_request_body() {
+        // given
+        TransformationRequest transformationRequest = mock(TransformationRequest.class);
+        Envelope inputEnvelope = mock(Envelope.class);
+        given(requestCreator.create(inputEnvelope)).willReturn(transformationRequest);
+
+        SuccessfulTransformationResponse expectedTransformationResponse = sampleTransformationResponse();
+        given(restTemplate.postForObject(anyString(), any(), any())).willReturn(expectedTransformationResponse);
+
+        // when
+        transformationClient.transformEnvelope(URL, inputEnvelope, "token123");
+
+        // then
+        var requestCaptor = ArgumentCaptor.forClass(HttpEntity.class);
+
+        verify(restTemplate).postForObject(
+            eq(URL),
+            requestCaptor.capture(),
+            eq(SuccessfulTransformationResponse.class)
+        );
+
+        assertThat(requestCaptor.getValue().getBody()).isSameAs(transformationRequest);
+    }
+
+    @Test
+    void transformEnvelope_should_return_response_when_valid() {
+        var expectedResponse = sampleTransformationResponse();
+
+        given(restTemplate.postForObject(anyString(), any(), any())).willReturn(expectedResponse);
+
+        var response = transformationClient.transformEnvelope(URL, mock(Envelope.class), "s2sToken1");
+        assertThat(response).isSameAs(expectedResponse);
+    }
+
+    @Test
+    void transformEnvelope_should_throw_exception_when_response_is_invalid() {
+        var responseWithNullDetails = new SuccessfulTransformationResponse(null, emptyList());
+        given(restTemplate.postForObject(anyString(), any(), any())).willReturn(responseWithNullDetails);
+
+        assertThatCode(() -> transformationClient.transformEnvelope(URL, mock(Envelope.class), "s2sToken1"))
             .isInstanceOf(ConstraintViolationException.class)
             .hasMessage("caseCreationDetails: must not be null");
     }
