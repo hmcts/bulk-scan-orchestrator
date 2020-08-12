@@ -167,7 +167,7 @@ public class CcdNewCaseCreator {
             exceptionRecord.formType
         );
 
-        return ccdApi.createNewCaseFromCallback(
+        return ccdApi.createCase(
             ccdRequestCredentials.idamToken,
             ccdRequestCredentials.s2sToken,
             ccdRequestCredentials.userId,
