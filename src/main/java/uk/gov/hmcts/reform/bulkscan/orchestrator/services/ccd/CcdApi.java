@@ -323,7 +323,7 @@ public class CcdApi {
             );
 
             log.info(
-                "Started case-creating event in CCD. Event: {}, case type: {}. {}",
+                "Started case-creation event in CCD. Event: {}, case type: {}. {}",
                 eventId,
                 caseTypeId,
                 logContext
@@ -341,7 +341,7 @@ public class CcdApi {
                 .getId();
 
             log.info(
-                "Submitted case-creating event in CCD. Event: {}, case type: {}, case ID: {}. {}",
+                "Submitted case-creation event in CCD. Event: {}, case type: {}, case ID: {}. {}",
                 eventId,
                 caseTypeId,
                 caseId,
