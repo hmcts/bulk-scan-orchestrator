@@ -10,7 +10,7 @@ import org.springframework.web.client.RestClientException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.CaseDataTransformer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
@@ -33,18 +33,18 @@ public class CcdNewCaseCreator {
 
     public static final String EXCEPTION_RECORD_REFERENCE = "bulkScanCaseReference";
 
-    private final TransformationClient transformationClient;
+    private final CaseDataTransformer caseDataTransformer;
     private final ServiceResponseParser serviceResponseParser;
     private final AuthTokenGenerator s2sTokenGenerator;
     private final CcdApi ccdApi;
 
     public CcdNewCaseCreator(
-        TransformationClient transformationClient,
+        CaseDataTransformer caseDataTransformer,
         ServiceResponseParser serviceResponseParser,
         AuthTokenGenerator s2sTokenGenerator,
         CcdApi ccdApi
     ) {
-        this.transformationClient = transformationClient;
+        this.caseDataTransformer = caseDataTransformer;
         this.serviceResponseParser = serviceResponseParser;
         this.s2sTokenGenerator = s2sTokenGenerator;
         this.ccdApi = ccdApi;
@@ -67,7 +67,7 @@ public class CcdNewCaseCreator {
         try {
             String s2sToken = s2sTokenGenerator.generate();
 
-            SuccessfulTransformationResponse transformationResponse = transformationClient.transformExceptionRecord(
+            SuccessfulTransformationResponse transformationResponse = caseDataTransformer.transformExceptionRecord(
                 configItem.getTransformationUrl(),
                 exceptionRecord,
                 s2sToken

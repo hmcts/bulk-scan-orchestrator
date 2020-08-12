@@ -8,11 +8,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.TransformationRequestCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.TransformationRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validation;
@@ -44,30 +42,23 @@ class TransformationClientTest {
     @Mock
     private RestTemplate restTemplate;
 
-    @Mock
-    private TransformationRequestCreator requestCreator;
-
     private TransformationClient transformationClient;
 
     @BeforeEach
     void setUp() {
-        transformationClient = new TransformationClient(restTemplate, validator, requestCreator);
+        transformationClient = new TransformationClient(restTemplate, validator);
     }
 
     @Test
-    void should_use_request_creator_to_create_request_body() {
+    void should_send_transformation_request_using_rest_template() {
         // given
         TransformationRequest transformationRequest = mock(TransformationRequest.class);
-        ExceptionRecord inputExceptionRecord = mock(ExceptionRecord.class);
-
-        given(requestCreator.create(inputExceptionRecord)).willReturn(transformationRequest);
 
         SuccessfulTransformationResponse expectedTransformationResponse = sampleTransformationResponse();
-
         given(restTemplate.postForObject(anyString(), any(), any())).willReturn(expectedTransformationResponse);
 
         // when
-        transformationClient.transformExceptionRecord(URL, inputExceptionRecord, "token123");
+        transformationClient.transformCaseData(URL, transformationRequest, "token123");
 
         // then
         var requestCaptor = ArgumentCaptor.forClass(HttpEntity.class);
@@ -86,7 +77,7 @@ class TransformationClientTest {
         given(restTemplate.postForObject(anyString(), any(), any()))
             .willReturn(sampleTransformationResponse());
 
-        assertThatCode(() -> transformationClient.transformExceptionRecord(URL, null, null))
+        assertThatCode(() -> transformationClient.transformCaseData(URL, null, null))
             .doesNotThrowAnyException();
     }
 
@@ -95,7 +86,7 @@ class TransformationClientTest {
         given(restTemplate.postForObject(anyString(), any(), any()))
             .willReturn(new SuccessfulTransformationResponse(null, emptyList()));
 
-        assertThatCode(() -> transformationClient.transformExceptionRecord(URL, null, null))
+        assertThatCode(() -> transformationClient.transformCaseData(URL, null, null))
             .isInstanceOf(ConstraintViolationException.class)
             .hasMessage("caseCreationDetails: must not be null");
     }
