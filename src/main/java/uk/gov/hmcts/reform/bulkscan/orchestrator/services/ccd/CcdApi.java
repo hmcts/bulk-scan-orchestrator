@@ -302,7 +302,7 @@ public class CcdApi {
         }
     }
 
-    public long createNewCaseFromCallback(
+    public long createCase(
         String idamToken,
         String s2sToken,
         String userId,
