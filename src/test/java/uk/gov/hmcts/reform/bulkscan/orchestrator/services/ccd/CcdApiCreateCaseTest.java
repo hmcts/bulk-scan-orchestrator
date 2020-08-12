@@ -26,6 +26,7 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
 public class CcdApiCreateCaseTest {
@@ -130,6 +131,23 @@ public class CcdApiCreateCaseTest {
             ccdApi.createCase("jurisdiction1", "caseTypeId1", "eventId1", caseDataContentBuilder, "logContext1")
         )
             .isSameAs(expectedException);
+    }
+
+    @Test
+    void createCase_should_not_attempt_to_create_case_when_authentication_details_retrieval_fails() {
+        // given
+        var expectedException = new FeignException.Unauthorized("test exception", mock(Request.class), null);
+        willThrow(expectedException)
+            .given(authenticatorFactory)
+            .createForJurisdiction(any());
+
+        // when
+        assertThatThrownBy(() ->
+            ccdApi.createCase("jurisdiction1", "caseTypeId1", "eventId1", caseDataContentBuilder, "logContext1")
+        )
+            .isSameAs(expectedException);
+
+        verifyNoInteractions(feignCcdApi);
     }
 
     private StartEventResponse setupStartForCaseworker() {
