@@ -303,6 +303,27 @@ public class CcdApi {
     }
 
     public long createCase(
+        String jurisdiction,
+        String caseTypeId,
+        String eventId,
+        Function<StartEventResponse, CaseDataContent> caseDataContentBuilder,
+        String logContext
+    ) {
+        CcdAuthenticator ccdAuthenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
+
+        return createCase(
+            ccdAuthenticator.getUserToken(),
+            ccdAuthenticator.getServiceToken(),
+            ccdAuthenticator.getUserDetails().getId(),
+            jurisdiction,
+            caseTypeId,
+            eventId,
+            caseDataContentBuilder,
+            logContext
+        );
+    }
+
+    public long createCase(
         String idamToken,
         String s2sToken,
         String userId,
