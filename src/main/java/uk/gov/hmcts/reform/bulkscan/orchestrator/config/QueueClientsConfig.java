@@ -24,7 +24,7 @@ public class QueueClientsConfig {
 
     @Bean("envelopes-queue-config")
     @ConfigurationProperties(prefix = "azure.servicebus.envelopes")
-    protected QueueConfigurationProperties envelopesQueueConfig() {
+    public QueueConfigurationProperties envelopesQueueConfig() {
         return new QueueConfigurationProperties();
     }
 

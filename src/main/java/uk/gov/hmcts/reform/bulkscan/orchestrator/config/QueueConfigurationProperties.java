@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
 
-class QueueConfigurationProperties {
+public class QueueConfigurationProperties {
 
     private String accessKey;
     private String accessKeyName;
