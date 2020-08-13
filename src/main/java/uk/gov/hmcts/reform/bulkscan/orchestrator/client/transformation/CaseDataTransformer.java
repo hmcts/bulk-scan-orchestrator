@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.TransformationRequestCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 
 @Component
 public class CaseDataTransformer {
@@ -27,6 +28,18 @@ public class CaseDataTransformer {
         return transformationClient.transformCaseData(
             baseUrl,
             requestCreator.create(exceptionRecord),
+            s2sToken
+        );
+    }
+
+    public SuccessfulTransformationResponse transformEnvelope(
+        String baseUrl,
+        Envelope envelope,
+        String s2sToken
+    ) {
+        return transformationClient.transformCaseData(
+            baseUrl,
+            requestCreator.create(envelope),
             s2sToken
         );
     }
