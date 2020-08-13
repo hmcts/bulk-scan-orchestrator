@@ -14,10 +14,10 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentTy
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.TransformationRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -47,7 +47,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.Tr
 @IntegrationTest
 public class TransformationClientTest {
 
-    private static final String TRANSFORM_EXCEPTION_RECORD_URL = "/transform-exception-record";
+    private static final String TRANSFORMATION_URL = "/transform-exception-record";
 
     @Autowired
     private TransformationClient client;
@@ -62,16 +62,16 @@ public class TransformationClientTest {
         String s2sToken = randomUUID().toString();
 
         stubFor(
-            post(urlPathMatching(TRANSFORM_EXCEPTION_RECORD_URL))
+            post(urlPathMatching(TRANSFORMATION_URL))
                 .withHeader("ServiceAuthorization", equalTo(s2sToken))
                 .withRequestBody(matchingJsonPath("scanned_documents[0].type", matching("[a-z]+")))
                 .willReturn(okJson(successResponse().toString()))
         );
 
         // when
-        SuccessfulTransformationResponse response = client.transformExceptionRecord(
+        SuccessfulTransformationResponse response = client.transformCaseData(
             transformationUrl,
-            exceptionRecordRequestData(),
+            sampleTransformationRequest(),
             s2sToken
         );
 
@@ -90,13 +90,13 @@ public class TransformationClientTest {
         // given
         String s2sToken = randomUUID().toString();
         stubFor(
-            post(urlPathMatching(TRANSFORM_EXCEPTION_RECORD_URL))
+            post(urlPathMatching(TRANSFORMATION_URL))
                 .withHeader("ServiceAuthorization", equalTo(s2sToken))
                 .willReturn(aResponse().withBody(errorResponse().toString()).withStatus(UNPROCESSABLE_ENTITY.value())));
 
         // when
         UnprocessableEntity exception = catchThrowableOfType(
-            () -> client.transformExceptionRecord(transformationUrl, exceptionRecordRequestData(), s2sToken),
+            () -> client.transformCaseData(transformationUrl, sampleTransformationRequest(), s2sToken),
             UnprocessableEntity.class
         );
 
@@ -112,13 +112,13 @@ public class TransformationClientTest {
         // given
         String s2sToken = randomUUID().toString();
         stubFor(
-            post(urlPathMatching(TRANSFORM_EXCEPTION_RECORD_URL))
+            post(urlPathMatching(TRANSFORMATION_URL))
                 .withHeader("ServiceAuthorization", equalTo(s2sToken))
                 .willReturn(aResponse().withBody(invalidDataResponse().toString()).withStatus(BAD_REQUEST.value())));
 
         // when
         BadRequest exception = catchThrowableOfType(
-            () -> client.transformExceptionRecord(transformationUrl, exceptionRecordRequestData(), s2sToken),
+            () -> client.transformCaseData(transformationUrl, sampleTransformationRequest(), s2sToken),
             BadRequest.class
         );
 
@@ -132,13 +132,13 @@ public class TransformationClientTest {
         // given
         String s2sToken = randomUUID().toString();
         stubFor(
-            post(urlPathMatching(TRANSFORM_EXCEPTION_RECORD_URL))
+            post(urlPathMatching(TRANSFORMATION_URL))
                 .withHeader("ServiceAuthorization", equalTo(s2sToken))
                 .willReturn(aResponse().withBody(new byte[]{}).withStatus(BAD_REQUEST.value())));
 
         // when
         BadRequest exception = catchThrowableOfType(
-            () -> client.transformExceptionRecord(transformationUrl, exceptionRecordRequestData(), s2sToken),
+            () -> client.transformCaseData(transformationUrl, sampleTransformationRequest(), s2sToken),
             BadRequest.class
         );
 
@@ -151,14 +151,14 @@ public class TransformationClientTest {
     public void should_throw_exception_for_unauthorised_service_auth_header() {
         // given
         stubFor(
-            post(urlPathMatching(TRANSFORM_EXCEPTION_RECORD_URL))
+            post(urlPathMatching(TRANSFORMATION_URL))
                 .willReturn(forbidden().withBody("Calling service is not authorised")));
 
         // when
         Forbidden exception = catchThrowableOfType(
-            () -> client.transformExceptionRecord(
+            () -> client.transformCaseData(
                 transformationUrl,
-                exceptionRecordRequestData(),
+                sampleTransformationRequest(),
                 randomUUID().toString()
             ),
             Forbidden.class
@@ -173,14 +173,14 @@ public class TransformationClientTest {
     public void should_throw_exception_for_invalid_service_auth_header() {
         // given
         stubFor(
-            post(urlPathMatching(TRANSFORM_EXCEPTION_RECORD_URL))
+            post(urlPathMatching(TRANSFORMATION_URL))
                 .willReturn(unauthorized().withBody("Invalid S2S token")));
 
         // when
         Unauthorized exception = catchThrowableOfType(
-            () -> client.transformExceptionRecord(
+            () -> client.transformCaseData(
                 transformationUrl,
-                exceptionRecordRequestData(),
+                sampleTransformationRequest(),
                 randomUUID().toString()
             ),
             Unauthorized.class
@@ -194,14 +194,14 @@ public class TransformationClientTest {
     public void should_throw_exception_for_server_exception() {
         // given
         stubFor(
-            post(urlPathMatching(TRANSFORM_EXCEPTION_RECORD_URL))
+            post(urlPathMatching(TRANSFORMATION_URL))
                 .willReturn(serverError().withBody("Internal Server error")));
 
         // when
         InternalServerError exception = catchThrowableOfType(
-            () -> client.transformExceptionRecord(
+            () -> client.transformCaseData(
                 transformationUrl,
-                exceptionRecordRequestData(),
+                sampleTransformationRequest(),
                 randomUUID().toString()
             ),
             InternalServerError.class
@@ -212,11 +212,12 @@ public class TransformationClientTest {
         assertThat(exception.getResponseBodyAsString()).contains("Internal Server error");
     }
 
-    private ExceptionRecord exceptionRecordRequestData() {
-        return new ExceptionRecord(
+    private TransformationRequest sampleTransformationRequest() {
+        return new TransformationRequest(
             "id",
             "some_case_type",
             "envelope_id",
+            false,
             "poBox",
             "BULKSCAN",
             Classification.NEW_APPLICATION,

@@ -10,7 +10,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationClient;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.CaseDataTransformer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
@@ -50,7 +50,7 @@ class CcdNewCaseCreatorTest {
     private static final String CASE_TYPE_ID = SERVICE + "_ExceptionRecord";
 
     @Mock
-    private TransformationClient transformationClient;
+    private CaseDataTransformer caseDataTransformer;
 
     @Mock
     private ServiceResponseParser serviceResponseParser;
@@ -69,7 +69,7 @@ class CcdNewCaseCreatorTest {
     @BeforeEach
     void setUp() {
         ccdNewCaseCreator = new CcdNewCaseCreator(
-            transformationClient,
+            caseDataTransformer,
             serviceResponseParser,
             s2sTokenGenerator,
             ccdApi
@@ -81,7 +81,7 @@ class CcdNewCaseCreatorTest {
     void should_return_new_case_id_when_successfully_executed_all_the_steps() {
         // given
         given(s2sTokenGenerator.generate()).willReturn(randomUUID().toString());
-        given(transformationClient.transformExceptionRecord(any(), any(), any()))
+        given(caseDataTransformer.transformExceptionRecord(any(), any(), any()))
             .willReturn(
                 new SuccessfulTransformationResponse(
                     new CaseCreationDetails(
@@ -139,7 +139,7 @@ class CcdNewCaseCreatorTest {
         given(serviceResponseParser.parseResponseBody(unprocessableEntity))
             .willReturn(new ClientServiceErrorResponse(singletonList("error"), singletonList("warning")));
         doThrow(unprocessableEntity)
-            .when(transformationClient)
+            .when(caseDataTransformer)
             .transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString());
 
         ServiceConfigItem configItem = getConfigItem();
