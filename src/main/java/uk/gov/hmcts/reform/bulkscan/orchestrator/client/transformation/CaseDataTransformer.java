@@ -22,25 +22,21 @@ public class CaseDataTransformer {
 
     public SuccessfulTransformationResponse transformExceptionRecord(
         String baseUrl,
-        ExceptionRecord exceptionRecord,
-        String s2sToken
+        ExceptionRecord exceptionRecord
     ) {
         return transformationClient.transformCaseData(
             baseUrl,
-            requestCreator.create(exceptionRecord),
-            s2sToken
+            requestCreator.create(exceptionRecord)
         );
     }
 
     public SuccessfulTransformationResponse transformEnvelope(
         String baseUrl,
-        Envelope envelope,
-        String s2sToken
+        Envelope envelope
     ) {
         return transformationClient.transformCaseData(
             baseUrl,
-            requestCreator.create(envelope),
-            s2sToken
+            requestCreator.create(envelope)
         );
     }
 }

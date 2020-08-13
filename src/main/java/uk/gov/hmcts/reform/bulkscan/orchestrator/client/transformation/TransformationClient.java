@@ -5,6 +5,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.TransformationRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 
@@ -18,19 +19,24 @@ public class TransformationClient {
 
     private final RestTemplate restTemplate;
     private final Validator validator;
+    private final AuthTokenGenerator s2sTokenGenerator;
 
-    public TransformationClient(RestTemplate restTemplate, Validator validator) {
+    public TransformationClient(
+        RestTemplate restTemplate,
+        Validator validator,
+        AuthTokenGenerator s2sTokenGenerator
+    ) {
         this.restTemplate = restTemplate;
         this.validator = validator;
+        this.s2sTokenGenerator = s2sTokenGenerator;
     }
 
     public SuccessfulTransformationResponse transformCaseData(
         String baseUrl,
-        TransformationRequest transformationRequest,
-        String s2sToken
+        TransformationRequest transformationRequest
     ) {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("ServiceAuthorization", s2sToken);
+        headers.add("ServiceAuthorization", s2sTokenGenerator.generate());
 
         SuccessfulTransformationResponse response = restTemplate.postForObject(
             getUrl(baseUrl),

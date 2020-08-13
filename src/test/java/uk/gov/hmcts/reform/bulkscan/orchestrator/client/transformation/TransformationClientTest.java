@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.client.RestTemplate;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.TransformationRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
@@ -42,11 +43,14 @@ class TransformationClientTest {
     @Mock
     private RestTemplate restTemplate;
 
+    @Mock
+    private AuthTokenGenerator s2sTokenGenerator;
+
     private TransformationClient transformationClient;
 
     @BeforeEach
     void setUp() {
-        transformationClient = new TransformationClient(restTemplate, validator);
+        transformationClient = new TransformationClient(restTemplate, validator, s2sTokenGenerator);
     }
 
     @Test
@@ -58,7 +62,7 @@ class TransformationClientTest {
         given(restTemplate.postForObject(anyString(), any(), any())).willReturn(expectedTransformationResponse);
 
         // when
-        transformationClient.transformCaseData(URL, transformationRequest, "token123");
+        transformationClient.transformCaseData(URL, transformationRequest);
 
         // then
         var requestCaptor = ArgumentCaptor.forClass(HttpEntity.class);
@@ -77,7 +81,7 @@ class TransformationClientTest {
         given(restTemplate.postForObject(anyString(), any(), any()))
             .willReturn(sampleTransformationResponse());
 
-        assertThatCode(() -> transformationClient.transformCaseData(URL, null, null))
+        assertThatCode(() -> transformationClient.transformCaseData(URL, null))
             .doesNotThrowAnyException();
     }
 
@@ -86,7 +90,7 @@ class TransformationClientTest {
         given(restTemplate.postForObject(anyString(), any(), any()))
             .willReturn(new SuccessfulTransformationResponse(null, emptyList()));
 
-        assertThatCode(() -> transformationClient.transformCaseData(URL, null, null))
+        assertThatCode(() -> transformationClient.transformCaseData(URL, null))
             .isInstanceOf(ConstraintViolationException.class)
             .hasMessage("caseCreationDetails: must not be null");
     }

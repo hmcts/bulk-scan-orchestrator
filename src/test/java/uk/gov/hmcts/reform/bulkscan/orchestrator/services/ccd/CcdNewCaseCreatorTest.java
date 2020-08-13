@@ -37,7 +37,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 
 @ExtendWith(MockitoExtension.class)
@@ -81,7 +80,7 @@ class CcdNewCaseCreatorTest {
     void should_return_new_case_id_when_successfully_executed_all_the_steps() {
         // given
         given(s2sTokenGenerator.generate()).willReturn(randomUUID().toString());
-        given(caseDataTransformer.transformExceptionRecord(any(), any(), any()))
+        given(caseDataTransformer.transformExceptionRecord(any(), any()))
             .willReturn(
                 new SuccessfulTransformationResponse(
                     new CaseCreationDetails(
@@ -135,12 +134,11 @@ class CcdNewCaseCreatorTest {
     @Test
     void should_throw_UnprocessableEntityException_when_transformation_client_returns_422() {
         // given
-        when(s2sTokenGenerator.generate()).thenReturn(randomUUID().toString());
         given(serviceResponseParser.parseResponseBody(unprocessableEntity))
             .willReturn(new ClientServiceErrorResponse(singletonList("error"), singletonList("warning")));
         doThrow(unprocessableEntity)
             .when(caseDataTransformer)
-            .transformExceptionRecord(anyString(), any(ExceptionRecord.class), anyString());
+            .transformExceptionRecord(anyString(), any(ExceptionRecord.class));
 
         ServiceConfigItem configItem = getConfigItem();
         ExceptionRecord exceptionRecord = getExceptionRecord();

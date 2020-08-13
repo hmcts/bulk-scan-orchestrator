@@ -46,33 +46,29 @@ class CaseDataTransformerTest {
         given(requestCreator.create(ArgumentMatchers.<ExceptionRecord>any())).willReturn(transformationRequest);
 
         SuccessfulTransformationResponse expectedResponse = mock(SuccessfulTransformationResponse.class);
-        given(transformationClient.transformCaseData(any(), any(), any())).willReturn(expectedResponse);
+        given(transformationClient.transformCaseData(any(), any())).willReturn(expectedResponse);
 
         String baseUrl = "baseUrl1";
         String s2sToken = "s2sToken1";
 
         // when
-        var result = caseDataTransformer.transformExceptionRecord(baseUrl, exceptionRecord, s2sToken);
+        var result = caseDataTransformer.transformExceptionRecord(baseUrl, exceptionRecord);
 
         // then
         assertThat(result).isEqualTo(expectedResponse);
         verify(requestCreator).create(exceptionRecord);
-        verify(transformationClient).transformCaseData(baseUrl, transformationRequest, s2sToken);
+        verify(transformationClient).transformCaseData(baseUrl, transformationRequest);
     }
 
     @Test
     void transformExceptionRecord_should_rethrow_exception_when_client_fails() {
         HttpClientErrorException.BadRequest expectedException = mock(HttpClientErrorException.BadRequest.class);
 
-        willThrow(expectedException).given(transformationClient).transformCaseData(any(), any(), any());
+        willThrow(expectedException).given(transformationClient).transformCaseData(any(), any());
 
         // when
         assertThatThrownBy(() ->
-            caseDataTransformer.transformExceptionRecord(
-                "baseUrl1",
-                mock(ExceptionRecord.class),
-                "s2sToken1"
-            )
+            caseDataTransformer.transformExceptionRecord("baseUrl1", mock(ExceptionRecord.class))
         )
             .isSameAs(expectedException);
     }
@@ -86,33 +82,28 @@ class CaseDataTransformerTest {
         given(requestCreator.create(ArgumentMatchers.<Envelope>any())).willReturn(transformationRequest);
 
         SuccessfulTransformationResponse expectedResponse = mock(SuccessfulTransformationResponse.class);
-        given(transformationClient.transformCaseData(any(), any(), any())).willReturn(expectedResponse);
+        given(transformationClient.transformCaseData(any(), any())).willReturn(expectedResponse);
 
         String baseUrl = "baseUrl1";
-        String s2sToken = "s2sToken1";
 
         // when
-        var result = caseDataTransformer.transformEnvelope(baseUrl, envelope, s2sToken);
+        var result = caseDataTransformer.transformEnvelope(baseUrl, envelope);
 
         // then
         assertThat(result).isEqualTo(expectedResponse);
         verify(requestCreator).create(envelope);
-        verify(transformationClient).transformCaseData(baseUrl, transformationRequest, s2sToken);
+        verify(transformationClient).transformCaseData(baseUrl, transformationRequest);
     }
 
     @Test
     void transformEnvelope_should_rethrow_exception_when_client_fails() {
         HttpClientErrorException.BadRequest expectedException = mock(HttpClientErrorException.BadRequest.class);
 
-        willThrow(expectedException).given(transformationClient).transformCaseData(any(), any(), any());
+        willThrow(expectedException).given(transformationClient).transformCaseData(any(), any());
 
         // when
         assertThatThrownBy(() ->
-            caseDataTransformer.transformEnvelope(
-                "baseUrl1",
-                mock(Envelope.class),
-                "s2sToken1"
-            )
+            caseDataTransformer.transformEnvelope("baseUrl1", mock(Envelope.class))
         )
             .isSameAs(expectedException);
     }

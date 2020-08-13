@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException.BadRequest;
@@ -10,6 +11,7 @@ import org.springframework.web.client.HttpClientErrorException.Forbidden;
 import org.springframework.web.client.HttpClientErrorException.Unauthorized;
 import org.springframework.web.client.HttpClientErrorException.UnprocessableEntity;
 import org.springframework.web.client.HttpServerErrorException.InternalServerError;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.OcrDataField;
@@ -37,6 +39,7 @@ import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationResponseTestData.errorResponse;
@@ -49,6 +52,9 @@ public class TransformationClientTest {
 
     private static final String TRANSFORMATION_URL = "/transform-exception-record";
 
+    @MockBean
+    private AuthTokenGenerator s2sTokenGenerator;
+
     @Autowired
     private TransformationClient client;
 
@@ -57,9 +63,8 @@ public class TransformationClientTest {
 
     @Test
     public void should_return_case_details_for_successful_transformation() throws Exception {
-
         // given
-        String s2sToken = randomUUID().toString();
+        String s2sToken = setupS2sTokenGeneratorToReturnOneToken();
 
         stubFor(
             post(urlPathMatching(TRANSFORMATION_URL))
@@ -71,8 +76,7 @@ public class TransformationClientTest {
         // when
         SuccessfulTransformationResponse response = client.transformCaseData(
             transformationUrl,
-            sampleTransformationRequest(),
-            s2sToken
+            sampleTransformationRequest()
         );
 
         // then
@@ -88,7 +92,8 @@ public class TransformationClientTest {
     @Test
     public void should_throw_unprocessable_entity_exception_for_unprocessable_entity_response() throws Exception {
         // given
-        String s2sToken = randomUUID().toString();
+        String s2sToken = setupS2sTokenGeneratorToReturnOneToken();
+
         stubFor(
             post(urlPathMatching(TRANSFORMATION_URL))
                 .withHeader("ServiceAuthorization", equalTo(s2sToken))
@@ -96,7 +101,7 @@ public class TransformationClientTest {
 
         // when
         UnprocessableEntity exception = catchThrowableOfType(
-            () -> client.transformCaseData(transformationUrl, sampleTransformationRequest(), s2sToken),
+            () -> client.transformCaseData(transformationUrl, sampleTransformationRequest()),
             UnprocessableEntity.class
         );
 
@@ -110,7 +115,8 @@ public class TransformationClientTest {
     @Test
     public void should_throw_invalid_case_data_exception_for_bad_request() throws Exception {
         // given
-        String s2sToken = randomUUID().toString();
+        String s2sToken = setupS2sTokenGeneratorToReturnOneToken();
+
         stubFor(
             post(urlPathMatching(TRANSFORMATION_URL))
                 .withHeader("ServiceAuthorization", equalTo(s2sToken))
@@ -118,7 +124,7 @@ public class TransformationClientTest {
 
         // when
         BadRequest exception = catchThrowableOfType(
-            () -> client.transformCaseData(transformationUrl, sampleTransformationRequest(), s2sToken),
+            () -> client.transformCaseData(transformationUrl, sampleTransformationRequest()),
             BadRequest.class
         );
 
@@ -130,7 +136,8 @@ public class TransformationClientTest {
     @Test
     public void should_throw_case_client_service_exception_when_unable_to_process_body() {
         // given
-        String s2sToken = randomUUID().toString();
+        String s2sToken = setupS2sTokenGeneratorToReturnOneToken();
+
         stubFor(
             post(urlPathMatching(TRANSFORMATION_URL))
                 .withHeader("ServiceAuthorization", equalTo(s2sToken))
@@ -138,7 +145,7 @@ public class TransformationClientTest {
 
         // when
         BadRequest exception = catchThrowableOfType(
-            () -> client.transformCaseData(transformationUrl, sampleTransformationRequest(), s2sToken),
+            () -> client.transformCaseData(transformationUrl, sampleTransformationRequest()),
             BadRequest.class
         );
 
@@ -158,8 +165,7 @@ public class TransformationClientTest {
         Forbidden exception = catchThrowableOfType(
             () -> client.transformCaseData(
                 transformationUrl,
-                sampleTransformationRequest(),
-                randomUUID().toString()
+                sampleTransformationRequest()
             ),
             Forbidden.class
         );
@@ -180,8 +186,7 @@ public class TransformationClientTest {
         Unauthorized exception = catchThrowableOfType(
             () -> client.transformCaseData(
                 transformationUrl,
-                sampleTransformationRequest(),
-                randomUUID().toString()
+                sampleTransformationRequest()
             ),
             Unauthorized.class
         );
@@ -201,8 +206,7 @@ public class TransformationClientTest {
         InternalServerError exception = catchThrowableOfType(
             () -> client.transformCaseData(
                 transformationUrl,
-                sampleTransformationRequest(),
-                randomUUID().toString()
+                sampleTransformationRequest()
             ),
             InternalServerError.class
         );
@@ -242,5 +246,11 @@ public class TransformationClientTest {
                 new OcrDataField("name2", "value2")
             )
         );
+    }
+
+    private String setupS2sTokenGeneratorToReturnOneToken() {
+        String s2sToken = randomUUID().toString();
+        given(s2sTokenGenerator.generate()).willReturn(s2sToken);
+        return s2sToken;
     }
 }

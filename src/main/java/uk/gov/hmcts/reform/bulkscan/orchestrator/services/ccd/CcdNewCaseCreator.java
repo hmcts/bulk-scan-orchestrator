@@ -65,13 +65,8 @@ public class CcdNewCaseCreator {
         );
 
         try {
-            String s2sToken = s2sTokenGenerator.generate();
-
-            SuccessfulTransformationResponse transformationResponse = caseDataTransformer.transformExceptionRecord(
-                configItem.getTransformationUrl(),
-                exceptionRecord,
-                s2sToken
-            );
+            SuccessfulTransformationResponse transformationResponse =
+                caseDataTransformer.transformExceptionRecord(configItem.getTransformationUrl(), exceptionRecord);
 
             if (!ignoreWarnings && !transformationResponse.warnings.isEmpty()) {
                 log.info(
@@ -89,7 +84,7 @@ public class CcdNewCaseCreator {
             );
 
             long newCaseId = createNewCaseInCcd(
-                new CcdRequestCredentials(idamToken, s2sToken, userId),
+                new CcdRequestCredentials(idamToken, s2sTokenGenerator.generate(), userId),
                 exceptionRecord,
                 transformationResponse.caseCreationDetails
             );
