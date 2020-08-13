@@ -11,7 +11,7 @@ class DlqReceiverProviderTest {
     private static final String NAMESPACE = "==namespace==";
 
     @Test
-    void asd() {
+    void should_fail_to_connect_to_dlq() {
         // given
         var queueProperties = getQueueProperties();
         var provider = new DlqReceiverProvider(NAMESPACE, queueProperties);
