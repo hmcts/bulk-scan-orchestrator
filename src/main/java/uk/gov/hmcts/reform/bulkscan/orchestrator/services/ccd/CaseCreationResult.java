@@ -4,6 +4,15 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CaseCreatio
 
 public final class CaseCreationResult {
 
+    private static final CaseCreationResult UNRECOVERABLE_FAILURE_RESULT =
+        new CaseCreationResult(CaseCreationResultType.UNRECOVERABLE_FAILURE, null);
+
+    private static final CaseCreationResult POTENTIALLY_RECOVERABLE_FAILURE_RESULT =
+        new CaseCreationResult(CaseCreationResultType.POTENTIALLY_RECOVERABLE_FAILURE, null);
+
+    private static final CaseCreationResult ABORTED_WITHOUT_FAILURE_RESULT =
+        new CaseCreationResult(CaseCreationResultType.ABORTED_WITHOUT_FAILURE, null);
+
     public final CaseCreationResultType resultType;
     public final Long caseCcdId;
 
@@ -12,8 +21,8 @@ public final class CaseCreationResult {
         this.caseCcdId = caseCcdId;
     }
 
-    public static CaseCreationResult createdCase(Long caseCcdId) {
-        return new CaseCreationResult(CaseCreationResultType.CREATED_CASE, caseCcdId);
+    public static CaseCreationResult caseCreated(Long caseCcdId) {
+        return new CaseCreationResult(CaseCreationResultType.CASE_CREATED, caseCcdId);
     }
 
     public static CaseCreationResult caseAlreadyExists(Long caseCcdId) {
@@ -21,14 +30,14 @@ public final class CaseCreationResult {
     }
 
     public static CaseCreationResult unrecoverableFailure() {
-        return new CaseCreationResult(CaseCreationResultType.UNRECOVERABLE_FAILURE, null);
+        return UNRECOVERABLE_FAILURE_RESULT;
     }
 
     public static CaseCreationResult potentiallyRecoverableFailure() {
-        return new CaseCreationResult(CaseCreationResultType.POTENTIALLY_RECOVERABLE_FAILURE, null);
+        return POTENTIALLY_RECOVERABLE_FAILURE_RESULT;
     }
 
     public static CaseCreationResult abortedWithoutFailure() {
-        return new CaseCreationResult(CaseCreationResultType.ABORTED_WITHOUT_FAILURE, null);
+        return ABORTED_WITHOUT_FAILURE_RESULT;
     }
 }

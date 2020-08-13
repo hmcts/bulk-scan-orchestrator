@@ -8,12 +8,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CaseCreationResultTest {
 
     @Test
-    void createdCase_returns_the_right_result() {
+    void caseCreated_returns_the_right_result() {
         long caseId = 1234L;
 
-        var result = CaseCreationResult.createdCase(caseId);
+        var result = CaseCreationResult.caseCreated(caseId);
 
-        assertThat(result.resultType).isEqualTo(CaseCreationResultType.CREATED_CASE);
+        assertThat(result.resultType).isEqualTo(CaseCreationResultType.CASE_CREATED);
         assertThat(result.caseCcdId).isEqualTo(caseId);
     }
 
