@@ -2,12 +2,12 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CaseCreationResultType;
 
-public class CaseCreationResult {
+public final class CaseCreationResult {
 
     public final CaseCreationResultType resultType;
     public final Long caseCcdId;
 
-    public CaseCreationResult(CaseCreationResultType resultType, Long caseCcdId) {
+    private CaseCreationResult(CaseCreationResultType resultType, Long caseCcdId) {
         this.resultType = resultType;
         this.caseCcdId = caseCcdId;
     }
