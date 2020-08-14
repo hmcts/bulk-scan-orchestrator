@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
@@ -110,7 +111,7 @@ class EnvelopeMessageProcessorTest {
         willReturn(getValidMessage()).given(messageReceiver).receive();
 
         // and
-        willThrow(new RuntimeException()).given(envelopeHandler).handleEnvelope(any());
+        willThrow(new RuntimeException()).given(envelopeHandler).handleEnvelope(any(), anyLong());
 
         assertThatCode(() -> processor.processNextMessage()).doesNotThrowAnyException();
     }
@@ -120,7 +121,7 @@ class EnvelopeMessageProcessorTest {
         // given
         IMessage validMessage = getValidMessage();
         given(messageReceiver.receive()).willReturn(validMessage);
-        given(envelopeHandler.handleEnvelope(any()))
+        given(envelopeHandler.handleEnvelope(any(), anyLong()))
             .willReturn(new EnvelopeProcessingResult(3221L, EXCEPTION_RECORD));
         // when
         processor.processNextMessage();
@@ -173,7 +174,7 @@ class EnvelopeMessageProcessorTest {
 
         IMessage validMessage = getValidMessage();
         given(messageReceiver.receive()).willReturn(validMessage);
-        given(envelopeHandler.handleEnvelope(any()))
+        given(envelopeHandler.handleEnvelope(any(), anyLong()))
             .willReturn(new EnvelopeProcessingResult(3211321L, EXCEPTION_RECORD));
 
 
@@ -194,7 +195,7 @@ class EnvelopeMessageProcessorTest {
         );
 
         // given an error occurs during message processing
-        willThrow(processingFailureCause).given(envelopeHandler).handleEnvelope(any());
+        willThrow(processingFailureCause).given(envelopeHandler).handleEnvelope(any(), anyLong());
 
         // when
         processor.processNextMessage();
@@ -222,7 +223,7 @@ class EnvelopeMessageProcessorTest {
         );
 
         // and an error occurs during message processing
-        willThrow(processingFailureCause).given(envelopeHandler).handleEnvelope(any());
+        willThrow(processingFailureCause).given(envelopeHandler).handleEnvelope(any(), anyLong());
 
         // when
         processor.processNextMessage();
@@ -252,7 +253,7 @@ class EnvelopeMessageProcessorTest {
         );
         given(message.getLockToken()).willReturn(UUID.randomUUID());
         given(messageReceiver.receive()).willReturn(message);
-        given(envelopeHandler.handleEnvelope(any()))
+        given(envelopeHandler.handleEnvelope(any(), anyLong()))
             .willReturn(new EnvelopeProcessingResult(3211321L, EXCEPTION_RECORD));
 
         // when
@@ -269,7 +270,7 @@ class EnvelopeMessageProcessorTest {
 
         // and
         Exception processingFailureCause = new RuntimeException("test exception");
-        willThrow(processingFailureCause).given(envelopeHandler).handleEnvelope(any());
+        willThrow(processingFailureCause).given(envelopeHandler).handleEnvelope(any(), anyLong());
 
         // when
         processor.processNextMessage();
