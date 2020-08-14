@@ -183,7 +183,7 @@ class TransformationRequestCreatorTest {
                 "subtype2",
                 Instant.now().plusSeconds(2),
                 "uuid1",
-                Instant.now().plusSeconds(3)
+                null
             )
         );
     }
@@ -196,6 +196,8 @@ class TransformationRequestCreatorTest {
     }
 
     private LocalDateTime toLocalDateTime(Instant instant) {
-        return ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDateTime();
+        return instant == null
+            ? null
+            : ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDateTime();
     }
 }
