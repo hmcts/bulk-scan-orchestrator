@@ -119,6 +119,10 @@ public class TransformationRequestCreator {
     }
 
     private LocalDateTime toLocalDateTime(Instant instant) {
-        return ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDateTime();
+        if (instant == null) {
+            return null;
+        } else {
+            return ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDateTime();
+        }
     }
 }
