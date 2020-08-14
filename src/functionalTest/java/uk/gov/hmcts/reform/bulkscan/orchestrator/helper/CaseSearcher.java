@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFa
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CreateExceptionRecord;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 
 import java.util.List;
 import java.util.Map;
@@ -54,5 +55,22 @@ public class CaseSearcher {
             caseTypeId,
             searchCriteria
         );
+    }
+
+    public List<CaseDetails> searchByEnvelopeId(
+        String jurisdiction,
+        String caseTypeId,
+        String envelopeId
+    ) {
+        CcdAuthenticator authenticator = factory.createForJurisdiction(jurisdiction);
+
+        SearchResult searchResult = coreCaseDataApi.searchCases(
+            authenticator.getUserToken(),
+            authenticator.getServiceToken(),
+            caseTypeId,
+            "{\"query\":{\"match_phrase\":{\"data.bulkScanEnvelopes.value.id\":\"" + envelopeId + "\"}}}"
+        );
+
+        return searchResult.getCases();
     }
 }
