@@ -20,6 +20,9 @@ import static org.mockito.Mockito.mock;
 
 public class FunctionalQueueConfig {
 
+    @Value("${queue.envelopes.name}")
+    private String queueName;
+
     @Value("${queue.envelopes.write-access-key}")
     private String queueWriteAccessKey;
 
@@ -38,7 +41,7 @@ public class FunctionalQueueConfig {
     @Bean
     public QueueClient testWriteClient() throws ServiceBusException, InterruptedException {
         return new QueueClient(
-            new ConnectionStringBuilder(queueNamespace, "envelopes", queueWriteAccessKeyName, queueWriteAccessKey),
+            new ConnectionStringBuilder(queueNamespace, queueName, queueWriteAccessKeyName, queueWriteAccessKey),
             ReceiveMode.PEEKLOCK
         );
     }
@@ -50,7 +53,7 @@ public class FunctionalQueueConfig {
                 return ClientFactory.createMessageReceiverFromConnectionStringBuilder(
                     new ConnectionStringBuilder(
                         queueNamespace,
-                        StringUtils.join("envelopes", "/$deadletterqueue"),
+                        StringUtils.join(queueName, "/$deadletterqueue"),
                         queueReadAccessKeyName,
                         queueReadAccessKey
                     ),
