@@ -22,9 +22,9 @@ def nonPrSecrets = [
     secret('idam-users-bulkscan-username', 'IDAM_USER_NAME'),
     secret('idam-users-bulkscan-password', 'IDAM_USER_PASSWORD'),
     secret('idam-client-secret', 'IDAM_CLIENT_SECRET'),
-    secret('envelopes-staging-queue-send-connection-string', 'ENVELOPES_QUEUE_WRITE_CONN_STRING'),
-    secret('envelopes-staging-queue-listen-connection-string', 'ENVELOPES_QUEUE_READ_CONN_STRING'),
-    secret('payments-staging-queue-send-connection-string', 'PAYMENTS_QUEUE_WRITE_CONN_STRING')
+    secret('envelopes-staging-queue-send-shared-access-key', 'ENVELOPES_QUEUE_WRITE_ACCESS_KEY'),
+    secret('envelopes-staging-queue-listen-shared-access-key', 'ENVELOPES_QUEUE_READ_ACCESS_KEY'),
+    secret('payments-staging-queue-send-shared-access-key', 'PAYMENTS_QUEUE_WRITE_ACCESS_KEY')
   ]
 ]
 def prSecrets = [
@@ -56,6 +56,11 @@ withPipeline(type, product, component) {
     env.CORE_CASE_DATA_API_URL = 'http://ccd-data-store-api-aat.service.core-compute-aat.internal'
     env.IDAM_API_URL = 'https://idam-api.aat.platform.hmcts.net'
     env.IDAM_CLIENT_REDIRECT_URI = 'https://bulk-scan-orchestrator-aat.service.core-compute-aat.internal/oauth2/callback'
+    env.QUEUE_NAMESPACE = "bulk-scan-servicebus-aat"
+    env.QUEUE_ENVELOPES_NAME = "envelopes-staging"
+    env.QUEUE_PAYMENTS_NAME = "payments-staging"
+    env.QUEUE_READ_ACCESS_KEY_NAME = 'ListenSharedAccessKey'
+    env.QUEUE_WRITE_ACCESS_KEY_NAME = 'SendSharedAccessKey'
   }
 
   before('smoketest:preview') {
@@ -72,10 +77,15 @@ withPipeline(type, product, component) {
       kubectl.login()
 
       // Get envelopes queue connection string
-      def sbConnectionStr = kubectl.getSecret(sbNamespaceSecret, namespace, "{.data.connectionString}")
-      env.ENVELOPES_QUEUE_WRITE_CONN_STRING = "${sbConnectionStr};EntityPath=envelopes"
-      env.ENVELOPES_QUEUE_READ_CONN_STRING = "${sbConnectionStr};EntityPath=envelopes"
-      env.PAYMENTS_QUEUE_WRITE_CONN_STRING = "${sbConnectionStr};EntityPath=payments"
+      def sbPrimaryKey = kubectl.getSecret(sbNamespaceSecret, namespace, "{.data.primaryKey}")
+      env.ENVELOPES_QUEUE_WRITE_ACCESS_KEY = sbPrimaryKey
+      env.ENVELOPES_QUEUE_READ_ACCESS_KEY = sbPrimaryKey
+      env.PAYMENTS_QUEUE_WRITE_ACCESS_KEY = sbPrimaryKey
+      env.QUEUE_NAMESPACE = kubectl.getSecret(sbNamespaceSecret, namespace, "{.data.namespaceName}")
+      env.QUEUE_ENVELOPES_NAME = "envelopes"
+      env.QUEUE_PAYMENTS_NAME = "payments"
+      env.QUEUE_READ_ACCESS_KEY_NAME = 'RootManageSharedAccessKey'
+      env.QUEUE_WRITE_ACCESS_KEY_NAME = 'RootManageSharedAccessKey'
     }
   }
 
