@@ -85,7 +85,7 @@ public class AutomaticCaseCreationTest {
         // verify case fields correspond to values from the test file
         assertThat(getCaseDataForField(caseDetails, "firstName")).isEqualTo("John");
         assertThat(getCaseDataForField(caseDetails, "lastName")).isEqualTo("Smith");
-        assertThat(getCaseDataForField(caseDetails, "email")).isEqualTo("jsmith12345@example.com");
+        assertThat(getCaseDataForField(caseDetails, "email")).isEqualTo("jsmith1@example.com");
 
         // make sure the exception record wasn't created
         assertThat(findExceptionRecords(poBox, ENABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID)).isEmpty();
