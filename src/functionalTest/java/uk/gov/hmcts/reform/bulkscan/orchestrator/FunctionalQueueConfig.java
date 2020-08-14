@@ -20,16 +20,28 @@ import static org.mockito.Mockito.mock;
 
 public class FunctionalQueueConfig {
 
-    @Value("${queue.envelopes.write-connection-string}")
-    private String queueWriteConnectionString;
+    @Value("${queue.envelopes.name}")
+    private String queueName;
 
-    @Value("${queue.envelopes.read-connection-string}")
-    private String queueReadConnectionString;
+    @Value("${queue.envelopes.write-access-key}")
+    private String queueWriteAccessKey;
+
+    @Value("${queue.envelopes.read-access-key}")
+    private String queueReadAccessKey;
+
+    @Value("${queue.read-access-key-name}")
+    private String queueReadAccessKeyName;
+
+    @Value("${queue.write-access-key-name}")
+    private String queueWriteAccessKeyName;
+
+    @Value("${queue.namespace}")
+    private String queueNamespace;
 
     @Bean
     public QueueClient testWriteClient() throws ServiceBusException, InterruptedException {
         return new QueueClient(
-            new ConnectionStringBuilder(queueWriteConnectionString),
+            new ConnectionStringBuilder(queueNamespace, queueName, queueWriteAccessKeyName, queueWriteAccessKey),
             ReceiveMode.PEEKLOCK
         );
     }
@@ -39,7 +51,12 @@ public class FunctionalQueueConfig {
         return () -> {
             try {
                 return ClientFactory.createMessageReceiverFromConnectionStringBuilder(
-                    new ConnectionStringBuilder(StringUtils.join(queueReadConnectionString, "/$deadletterqueue")),
+                    new ConnectionStringBuilder(
+                        queueNamespace,
+                        StringUtils.join(queueName, "/$deadletterqueue"),
+                        queueReadAccessKeyName,
+                        queueReadAccessKey
+                    ),
                     ReceiveMode.PEEKLOCK
                 );
             } catch (InterruptedException e) {
