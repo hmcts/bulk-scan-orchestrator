@@ -19,10 +19,21 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getCaseDataForField;
 
 @SpringBootTest
 @ActiveProfiles("nosb")  // no servicebus queue handler registration
 public class AutomaticCaseCreationTest {
+
+    private static final String SERVICE_CASE_JURISDICTION = "BULKSCAN";
+    private static final String SERVICE_CASE_TYPE_ID = "Bulk_Scanned";
+
+    // case type ID for exception records related to service which is disabled for automatic case creation
+    private static final String DISABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID = "BULKSCAN_ExceptionRecord";
+
+    // case type ID for exception records related to service which is enabled for automatic case creation
+    private static final String ENABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID = "BULKSCANAUTO_ExceptionRecord";
+
 
     @Autowired
     private CaseSearcher caseSearcher;
@@ -43,7 +54,6 @@ public class AutomaticCaseCreationTest {
         );
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void should_create_case_when_envelope_data_is_valid() throws Exception {
         // when
@@ -56,22 +66,25 @@ public class AutomaticCaseCreationTest {
         await("Wait for service case to be created")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
-            .until(() -> !caseSearcher.searchByEnvelopeId("BULKSCAN", "Bulk_Scanned", envelopeId).isEmpty());
+            .until(() ->
+                !caseSearcher.searchByEnvelopeId(
+                    SERVICE_CASE_JURISDICTION,
+                    SERVICE_CASE_TYPE_ID,
+                    envelopeId
+                )
+                    .isEmpty()
+            );
 
-        var cases = caseSearcher.searchByEnvelopeId("BULKSCAN", "Bulk_Scanned", envelopeId);
+        var cases = caseSearcher.searchByEnvelopeId(SERVICE_CASE_JURISDICTION, SERVICE_CASE_TYPE_ID, envelopeId);
+
         assertThat(cases.size()).isEqualTo(1);
         CaseDetails caseDetails = cases.get(0);
 
-        List<Map<String, Object>> envelopeReferences =
-            (List<Map<String, Object>>) caseDetails.getData().get("bulkScanEnvelopeReferences");
+        assertCorrectEnvelopeReferences(envelopeId, caseDetails);
 
-        assertThat(envelopeReferences.size()).isOne();
-        assertThat(envelopeReferences.get(0).get("value")).isEqualTo(
-            ImmutableMap.of(
-                "id", envelopeId,
-                "action", "create"
-            )
-        );
+        assertThat(getCaseDataForField(caseDetails, "firstName")).isEqualTo("John");
+        assertThat(getCaseDataForField(caseDetails, "lastName")).isEqualTo("Smith");
+        assertThat(getCaseDataForField(caseDetails, "email")).isEqualTo("jsmith@example.com");
     }
 
     @Test
@@ -80,16 +93,19 @@ public class AutomaticCaseCreationTest {
         UUID poBox = UUID.randomUUID();
 
         // when
-        sendEnvelopeMessage("envelopes/valid-new-application-bulkscan.json", poBox);
+        String envelopeId = sendEnvelopeMessage("envelopes/valid-new-application-bulkscan.json", poBox);
 
         // then
         await("Wait for exception record to be created")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
-            .until(() -> !findExceptionRecords(poBox, "BULKSCAN_ExceptionRecord").isEmpty());
+            .until(() -> !findExceptionRecords(poBox, DISABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID).isEmpty());
 
-        var exceptionRecords = findExceptionRecords(poBox, "BULKSCAN_ExceptionRecord");
+        var exceptionRecords = findExceptionRecords(poBox, DISABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID);
         assertThat(exceptionRecords.size()).isOne();
+
+        var serviceCases = caseSearcher.searchByEnvelopeId(SERVICE_CASE_JURISDICTION, SERVICE_CASE_TYPE_ID, envelopeId);
+        assertThat(serviceCases).isEmpty();
     }
 
     @Test
@@ -98,16 +114,19 @@ public class AutomaticCaseCreationTest {
         UUID poBox = UUID.randomUUID();
 
         // when
-        sendEnvelopeMessage("envelopes/invalid-new-application-bulkscanauto.json", poBox);
+        String envelopeId = sendEnvelopeMessage("envelopes/invalid-new-application-bulkscanauto.json", poBox);
 
         // then
         await("Wait for exception record to be created")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
-            .until(() -> !findExceptionRecords(poBox, "BULKSCANAUTO_ExceptionRecord").isEmpty());
+            .until(() -> !findExceptionRecords(poBox, ENABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID).isEmpty());
 
-        var exceptionRecords = findExceptionRecords(poBox, "BULKSCANAUTO_ExceptionRecord");
+        var exceptionRecords = findExceptionRecords(poBox, ENABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID);
         assertThat(exceptionRecords.size()).isOne();
+
+        var serviceCases = caseSearcher.searchByEnvelopeId(SERVICE_CASE_JURISDICTION, SERVICE_CASE_TYPE_ID, envelopeId);
+        assertThat(serviceCases).isEmpty();
     }
 
     private String sendEnvelopeMessage(String resourcePath, UUID poBox) throws Exception {
@@ -122,9 +141,23 @@ public class AutomaticCaseCreationTest {
 
     private List<CaseDetails> findExceptionRecords(UUID poBox, String caseTypeId) {
         return caseSearcher.search(
-            "BULKSCAN",
+            SERVICE_CASE_JURISDICTION,
             caseTypeId,
             ImmutableMap.of("case.poBox", poBox.toString())
+        );
+    }
+
+    @SuppressWarnings("unchecked")
+    private void assertCorrectEnvelopeReferences(String envelopeId, CaseDetails caseDetails) {
+        List<Map<String, Object>> envelopeReferences =
+            (List<Map<String, Object>>) caseDetails.getData().get("bulkScanEnvelopeReferences");
+
+        assertThat(envelopeReferences.size()).isOne();
+        assertThat(envelopeReferences.get(0).get("value")).isEqualTo(
+            ImmutableMap.of(
+                "id", envelopeId,
+                "action", "create"
+            )
         );
     }
 }
