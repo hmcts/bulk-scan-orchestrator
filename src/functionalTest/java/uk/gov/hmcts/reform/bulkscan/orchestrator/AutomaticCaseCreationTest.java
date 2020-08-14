@@ -63,7 +63,7 @@ public class AutomaticCaseCreationTest {
         String envelopeId = sendEnvelopeMessage("envelopes/valid-new-application-bulkscanauto.json", poBox);
 
         // then
-        await("Wait for service case to be created")
+        await("Wait for service case to be created. Envelope ID: " + envelopeId)
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
             .until(() ->
@@ -82,6 +82,7 @@ public class AutomaticCaseCreationTest {
 
         assertCorrectEnvelopeReferences(envelopeId, caseDetails);
 
+        // verify case fields correspond to values from the test file
         assertThat(getCaseDataForField(caseDetails, "firstName")).isEqualTo("John");
         assertThat(getCaseDataForField(caseDetails, "lastName")).isEqualTo("Smith");
         assertThat(getCaseDataForField(caseDetails, "email")).isEqualTo("jsmith12345@example.com");
@@ -99,7 +100,7 @@ public class AutomaticCaseCreationTest {
         String envelopeId = sendEnvelopeMessage("envelopes/valid-new-application-bulkscan.json", poBox);
 
         // then
-        await("Wait for exception record to be created")
+        await("Wait for exception record to be created. Envelope ID: " + envelopeId)
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
             .until(() -> !findExceptionRecords(poBox, DISABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID).isEmpty());
@@ -120,7 +121,7 @@ public class AutomaticCaseCreationTest {
         String envelopeId = sendEnvelopeMessage("envelopes/invalid-new-application-bulkscanauto.json", poBox);
 
         // then
-        await("Wait for exception record to be created")
+        await("Wait for exception record to be created. Envelope ID: " + envelopeId)
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
             .until(() -> !findExceptionRecords(poBox, ENABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID).isEmpty());
