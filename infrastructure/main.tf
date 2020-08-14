@@ -60,15 +60,6 @@ locals {
     S2S_NAME    = "${var.s2s_name}"
     S2S_SECRET  = "${data.azurerm_key_vault_secret.s2s_secret.value}"
 
-    ENVELOPES_QUEUE_CONNECTION_STRING           = "${data.azurerm_key_vault_secret.envelopes_queue_listen_conn_str.value}"
-
-    // max delivery count for application is smaller than the actual queue setting,
-    // because we want to make sure it's the app that dead-letters the message
-    ENVELOPES_QUEUE_MAX_DELIVERY_COUNT          = "${data.azurerm_key_vault_secret.envelopes_queue_max_delivery_count.value - 5}"
-    PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING = "${data.azurerm_key_vault_secret.processed_envelopes_queue_send_conn_str.value}"
-
-    PAYMENTS_QUEUE_CONNECTION_STRING = "${data.azurerm_key_vault_secret.payments_queue_send_conn_str.value}"
-
     IDAM_API_URL              = "${var.idam_api_url}"
     IDAM_CLIENT_SECRET        = "${data.azurerm_key_vault_secret.idam_client_secret.value}"
     IDAM_CLIENT_REDIRECT_URI  = "${var.idam_client_redirect_uri}"
@@ -139,31 +130,6 @@ data "azurerm_key_vault_secret" "idam_client_secret" {
 data "azurerm_key_vault_secret" "s2s_secret" {
   key_vault_id = "${data.azurerm_key_vault.s2s_key_vault.id}"
   name      = "microservicekey-bulk-scan-orchestrator"
-}
-
-data "azurerm_key_vault_secret" "envelopes_queue_send_conn_str" {
-  key_vault_id = "${data.azurerm_key_vault.key_vault.id}"
-  name         = "envelopes-queue-send-connection-string"
-}
-
-data "azurerm_key_vault_secret" "envelopes_queue_listen_conn_str" {
-  key_vault_id = "${data.azurerm_key_vault.key_vault.id}"
-  name         = "envelopes-queue-listen-connection-string"
-}
-
-data "azurerm_key_vault_secret" "envelopes_queue_max_delivery_count" {
-  key_vault_id = "${data.azurerm_key_vault.key_vault.id}"
-  name         = "envelopes-queue-max-delivery-count"
-}
-
-data "azurerm_key_vault_secret" "processed_envelopes_queue_send_conn_str" {
-  key_vault_id = "${data.azurerm_key_vault.key_vault.id}"
-  name         = "processed-envelopes-queue-send-connection-string"
-}
-
-data "azurerm_key_vault_secret" "payments_queue_send_conn_str" {
-  key_vault_id = "${data.azurerm_key_vault.key_vault.id}"
-  name         = "payments-queue-send-connection-string"
 }
 
 # Copy orchestrator s2s secret from s2s key vault to bulkscan key vault
