@@ -70,7 +70,7 @@ public class CaseSearcher {
             caseTypeId,
             "{"
                 + "  \"query\": {"
-                + "    \"term\" : {"
+                + "    \"match_phrase\" : {"
                 + "      \"data.bulkScanEnvelopes.value.id\" : \"" + envelopeId + "\""
                 + "    }"
                 + "  }"

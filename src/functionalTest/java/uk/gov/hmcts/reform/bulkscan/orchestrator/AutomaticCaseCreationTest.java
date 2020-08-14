@@ -84,7 +84,7 @@ public class AutomaticCaseCreationTest {
 
         assertThat(getCaseDataForField(caseDetails, "firstName")).isEqualTo("John");
         assertThat(getCaseDataForField(caseDetails, "lastName")).isEqualTo("Smith");
-        assertThat(getCaseDataForField(caseDetails, "email")).isEqualTo("jsmith@example.com");
+        assertThat(getCaseDataForField(caseDetails, "email")).isEqualTo("jsmith12345@example.com");
     }
 
     @Test
@@ -150,7 +150,7 @@ public class AutomaticCaseCreationTest {
     @SuppressWarnings("unchecked")
     private void assertCorrectEnvelopeReferences(String envelopeId, CaseDetails caseDetails) {
         List<Map<String, Object>> envelopeReferences =
-            (List<Map<String, Object>>) caseDetails.getData().get("bulkScanEnvelopeReferences");
+            (List<Map<String, Object>>) caseDetails.getData().get("bulkScanEnvelopes");
 
         assertThat(envelopeReferences.size()).isOne();
         assertThat(envelopeReferences.get(0).get("value")).isEqualTo(
