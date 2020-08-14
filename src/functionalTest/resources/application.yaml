@@ -11,11 +11,14 @@ spring:
     name: Bulk Scan Orchestrator Functional Tests
 
 queue:
+  namespace: ${QUEUE_NAMESPACE}
+  read-access-key-name: ${QUEUE_READ_ACCESS_KEY_NAME}
+  write-access-key-name: ${QUEUE_WRITE_ACCESS_KEY_NAME}
   envelopes:
-    write-connection-string: ${ENVELOPES_QUEUE_WRITE_CONN_STRING}
-    read-connection-string: ${ENVELOPES_QUEUE_READ_CONN_STRING}
+    write-access-key: ${ENVELOPES_QUEUE_WRITE_ACCESS_KEY}
+    read-access-key: ${ENVELOPES_QUEUE_READ_ACCESS_KEY}
   payments:
-    write-connection-string: ${PAYMENTS_QUEUE_WRITE_CONN_STRING}
+    write-access-key: ${PAYMENTS_QUEUE_WRITE_ACCESS_KEY}
 
 # because functional tests load up SpringBootTest
 azure:
