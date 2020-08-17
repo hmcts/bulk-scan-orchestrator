@@ -162,7 +162,7 @@ public class CcdApi {
             String.join(",", serviceConfig.getCaseTypeIds()),
             "      {"
                 + "  \"query\": {"
-                + "    \"term\" : {"
+                + "    \"match_phrase\" : {"
                 + "      \"data.bulkScanEnvelopes.value.id\" : \"" + envelopeId + "\""
                 + "    }"
                 + "  }"
