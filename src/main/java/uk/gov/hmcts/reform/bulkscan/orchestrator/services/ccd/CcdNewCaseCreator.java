@@ -10,7 +10,7 @@ import org.springframework.web.client.RestClientException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.CaseDataTransformer;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.ExceptionRecordTransformer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
@@ -33,18 +33,18 @@ public class CcdNewCaseCreator {
 
     public static final String EXCEPTION_RECORD_REFERENCE = "bulkScanCaseReference";
 
-    private final CaseDataTransformer caseDataTransformer;
+    private final ExceptionRecordTransformer exceptionRecordTransformer;
     private final ServiceResponseParser serviceResponseParser;
     private final AuthTokenGenerator s2sTokenGenerator;
     private final CcdApi ccdApi;
 
     public CcdNewCaseCreator(
-        CaseDataTransformer caseDataTransformer,
+        ExceptionRecordTransformer exceptionRecordTransformer,
         ServiceResponseParser serviceResponseParser,
         AuthTokenGenerator s2sTokenGenerator,
         CcdApi ccdApi
     ) {
-        this.caseDataTransformer = caseDataTransformer;
+        this.exceptionRecordTransformer = exceptionRecordTransformer;
         this.serviceResponseParser = serviceResponseParser;
         this.s2sTokenGenerator = s2sTokenGenerator;
         this.ccdApi = ccdApi;
@@ -66,7 +66,7 @@ public class CcdNewCaseCreator {
 
         try {
             SuccessfulTransformationResponse transformationResponse =
-                caseDataTransformer.transformExceptionRecord(configItem.getTransformationUrl(), exceptionRecord);
+                exceptionRecordTransformer.transformExceptionRecord(configItem.getTransformationUrl(), exceptionRecord);
 
             if (!ignoreWarnings && !transformationResponse.warnings.isEmpty()) {
                 log.info(
