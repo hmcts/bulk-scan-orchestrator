@@ -42,7 +42,29 @@ public class EnvelopeMessager {
         UUID poBox,
         String documentUrl
     ) throws JSONException, InterruptedException, ServiceBusException {
-        String envelopeId = UUID.randomUUID().toString();
+        return sendMessageFromFile(
+            jsonFileName,
+            caseRef,
+            legacyCaseRef,
+            poBox,
+            documentUrl,
+            UUID.randomUUID().toString()
+        );
+    }
+
+    /**
+     * Sends a message, with content from the given file, to the queue.
+     *
+     * @return Envelope/message ID
+     */
+    public String sendMessageFromFile(
+        String jsonFileName,
+        String caseRef,
+        String legacyCaseRef,
+        UUID poBox,
+        String documentUrl,
+        String envelopeId
+    ) throws JSONException, InterruptedException, ServiceBusException {
         String messageContent =
             SampleData.fileContentAsString(jsonFileName)
                 .replace(ENVELOPE_ID_PLACEHOLDER, envelopeId);

@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 
 @Service
 public class CcdCaseCreator {
@@ -45,21 +46,23 @@ public class CcdCaseCreator {
         this.supplementaryEvidenceMapper = supplementaryEvidenceMapper;
     }
 
-    // only used in tests
     public CaseDetails createCase(List<Document> documents, Instant deliveryDate) {
-        String legacyId = "legacy-id-" + (long) (Math.random() * 100_000_000d);
-        return createCase(legacyId, documents, deliveryDate);
+        return createCase(documents, deliveryDate, emptyMap());
     }
 
-    // only used privately here. is this class serving any purpose?
-    public CaseDetails createCase(String legacyId, List<Document> documents, Instant deliveryDate) {
+    public CaseDetails createCase(
+        List<Document> documents,
+        Instant deliveryDate,
+        Map<String, Object> fieldsToOverwrite
+    ) {
         log.info("Creating new case");
         CcdAuthenticator authenticator = ccdAuthenticatorFactory.createForJurisdiction(JURISDICTION);
 
         StartEventResponse startEventResponse = startEventForCreateCase(authenticator);
         log.info("Started {} event for creating a new case", startEventResponse.getEventId());
 
-        CaseDataContent caseDataContent = prepareCaseData(startEventResponse, documents, legacyId, deliveryDate);
+        CaseDataContent caseDataContent =
+            prepareCaseData(startEventResponse, documents, deliveryDate, fieldsToOverwrite);
 
         CaseDetails caseDetails = submitNewCase(authenticator, caseDataContent);
         log.info("Submitted {} event for creating a new case", startEventResponse.getEventId());
@@ -70,8 +73,8 @@ public class CcdCaseCreator {
     private CaseDataContent prepareCaseData(
         StartEventResponse startEventResponse,
         List<Document> documents,
-        String legacyId,
-        Instant deliveryDate
+        Instant deliveryDate,
+        Map<String, Object> fieldsToOverwrite
     ) {
         SupplementaryEvidence supplementaryEvidence =
             supplementaryEvidenceMapper.map(emptyList(), documents, deliveryDate);
@@ -80,8 +83,11 @@ public class CcdCaseCreator {
         eventData.put("evidenceHandled", supplementaryEvidence.evidenceHandled);
         eventData.put("scannedDocuments", supplementaryEvidence.scannedDocuments);
 
-        if (legacyId != null) {
-            eventData.put("legacyId", legacyId);
+        String legacyId = "legacy-id-" + (long) (Math.random() * 100_000_000d);
+        eventData.put("legacyId", legacyId);
+
+        if (fieldsToOverwrite != null) {
+            eventData.putAll(fieldsToOverwrite);
         }
 
         return CaseDataContent.builder()
