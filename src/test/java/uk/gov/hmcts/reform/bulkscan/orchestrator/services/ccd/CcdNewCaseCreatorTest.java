@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -14,28 +16,34 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.Exception
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.EnvelopeReference;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import static com.google.common.collect.Maps.newHashMap;
+import static java.lang.String.format;
 import static java.time.LocalDateTime.now;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 
@@ -60,6 +68,9 @@ class CcdNewCaseCreatorTest {
     @Mock
     private CcdApi ccdApi;
 
+    @Mock
+    private EnvelopeReferenceCollectionHelper envelopeReferenceCollectionHelper;
+
     private CcdNewCaseCreator ccdNewCaseCreator;
 
     @Mock
@@ -71,7 +82,8 @@ class CcdNewCaseCreatorTest {
             exceptionRecordTransformer,
             serviceResponseParser,
             s2sTokenGenerator,
-            ccdApi
+            ccdApi,
+            envelopeReferenceCollectionHelper
         );
     }
 
@@ -79,20 +91,16 @@ class CcdNewCaseCreatorTest {
     @Test
     void should_return_new_case_id_when_successfully_executed_all_the_steps() {
         // given
-        given(s2sTokenGenerator.generate()).willReturn(randomUUID().toString());
-        given(exceptionRecordTransformer.transformExceptionRecord(any(), any()))
-            .willReturn(
-                new SuccessfulTransformationResponse(
-                    new CaseCreationDetails(
-                        "some_case_type",
-                        "some_event_id",
-                        basicCaseData()
-                    ),
-                    emptyList()
-                )
-            );
+        var s2sToken = "s2s-token1";
 
-        StartEventResponse startCcdEventResp = mock(StartEventResponse.class);
+        var expectedTransformationResponse = new SuccessfulTransformationResponse(
+            new CaseCreationDetails("some_case_type", "some_event_id", basicCaseData()),
+            emptyList()
+        );
+
+        given(s2sTokenGenerator.generate()).willReturn(s2sToken);
+        given(exceptionRecordTransformer.transformExceptionRecord(any(), any()))
+            .willReturn(expectedTransformationResponse);
 
         given(ccdApi.createCase(
             anyString(), anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString()
@@ -103,32 +111,59 @@ class CcdNewCaseCreatorTest {
 
         // when
         CreateCaseResult result =
-            ccdNewCaseCreator
-                .createNewCase(
-                    exceptionRecord,
-                    configItem,
-                    true,
-                    IDAM_TOKEN,
-                    USER_ID
-                );
+            ccdNewCaseCreator.createNewCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID);
 
         // then
         assertThat(result.caseId).isEqualTo(CASE_ID);
 
         // and
-        var caseDetailsBuilderCaptor = ArgumentCaptor.forClass(Function.class);
+        var expectedLogContext = format(
+            "Exception ID: %s, jurisdiction: %s, form type: %s",
+            exceptionRecord.id,
+            exceptionRecord.poBoxJurisdiction,
+            exceptionRecord.formType
+        );
+
         verify(ccdApi).createCase(
             eq(IDAM_TOKEN),
-            anyString(),
+            eq(s2sToken),
             eq(USER_ID),
             eq(exceptionRecord.poBoxJurisdiction),
-            anyString(),
-            anyString(),
-            caseDetailsBuilderCaptor.capture(),
-            anyString()
+            eq(expectedTransformationResponse.caseCreationDetails.caseTypeId),
+            eq(expectedTransformationResponse.caseCreationDetails.eventId),
+            any(),
+            eq(expectedLogContext)
         );
-        assertThat(caseDetailsBuilderCaptor.getValue().apply(startCcdEventResp))
-            .isInstanceOf(CaseDataContent.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void should_provide_correct_case_data_for_ccd(boolean isServiceEnabledForAutoCaseCreation) {
+        // given
+        var transformationResponse = new SuccessfulTransformationResponse(
+            new CaseCreationDetails("case_type_1", "event_id_1", basicCaseData()),
+            emptyList()
+        );
+
+        given(s2sTokenGenerator.generate()).willReturn("s2s-token1");
+        given(exceptionRecordTransformer.transformExceptionRecord(any(), any())).willReturn(transformationResponse);
+
+        ExceptionRecord exceptionRecord = getExceptionRecord();
+
+        // trigger case creation to capture data content builder which was passed to CCD client
+        ccdNewCaseCreator.createNewCase(exceptionRecord, getConfigItem(), true, IDAM_TOKEN, USER_ID);
+
+        var caseDetailsBuilderCaptor = ArgumentCaptor.forClass(Function.class);
+        verify(ccdApi).createCase(any(), any(), any(), any(), any(), any(), caseDetailsBuilderCaptor.capture(), any());
+
+        // then
+        assertCaseDataContentBuilderCreatesCorrectResult(
+            caseDetailsBuilderCaptor.getValue(),
+            exceptionRecord.id,
+            transformationResponse,
+            isServiceEnabledForAutoCaseCreation
+        );
     }
 
     @Test
@@ -188,9 +223,84 @@ class CcdNewCaseCreatorTest {
         return data;
     }
 
+    private void assertCaseDataContentBuilderCreatesCorrectResult(
+        Function<StartEventResponse, CaseDataContent> caseDetailsBuilder,
+        String exceptionRecordId,
+        SuccessfulTransformationResponse transformationResponse,
+        boolean isServiceEnabledForAutoCaseCreation
+    ) {
+        // given
+        var envelopeReferences =
+            asList(new CcdCollectionElement<>(new EnvelopeReference("envelopeId1", CaseAction.CREATE)));
+
+        setupEnvelopeReferenceCollectionHelper(isServiceEnabledForAutoCaseCreation, envelopeReferences);
+
+        var expectedCaseData = getExpectedCaseDataToPassToCcd(
+            transformationResponse,
+            exceptionRecordId,
+            isServiceEnabledForAutoCaseCreation,
+            envelopeReferences
+        );
+
+        StartEventResponse startEventResponse = sampleStartEventResponse();
+
+        // when
+        var result = caseDetailsBuilder.apply(startEventResponse);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getData()).usingRecursiveComparison().isEqualTo(expectedCaseData);
+        assertThat(result.getEventToken()).isEqualTo(startEventResponse.getToken());
+        assertThat(result.getEvent().getId()).isEqualTo(startEventResponse.getEventId());
+        assertThat(result.getEvent().getSummary()).isEqualTo("Case created");
+        assertThat(result.getEvent().getDescription())
+            .isEqualTo("Case created from exception record ref " + exceptionRecordId);
+    }
+
+    private HashMap<String, Object> getExpectedCaseDataToPassToCcd(
+        SuccessfulTransformationResponse transformationResponse,
+        String exceptionRecordId,
+        boolean isServiceEnabledForAutoCaseCreation,
+        List<CcdCollectionElement<EnvelopeReference>> expectedEnvelopeReferences
+    ) {
+        var expectedCaseData = newHashMap(transformationResponse.caseCreationDetails.caseData);
+
+        if (isServiceEnabledForAutoCaseCreation) {
+            expectedCaseData.put("bulkScanEnvelopes", expectedEnvelopeReferences);
+        }
+
+        expectedCaseData.put("bulkScanCaseReference", exceptionRecordId);
+        return expectedCaseData;
+    }
+
+    private void setupEnvelopeReferenceCollectionHelper(
+        boolean isServiceEnabledForAutoCaseCreation,
+        List<CcdCollectionElement<EnvelopeReference>> envelopeReferencesToReturn
+    ) {
+        given(envelopeReferenceCollectionHelper.serviceSupportsEnvelopeReferences(any()))
+            .willReturn(isServiceEnabledForAutoCaseCreation);
+
+        if (isServiceEnabledForAutoCaseCreation) {
+            given(envelopeReferenceCollectionHelper.singleEnvelopeReferenceList(any(), any()))
+                .willReturn(envelopeReferencesToReturn);
+        }
+    }
+
     private ServiceConfigItem getConfigItem() {
         ServiceConfigItem configItem = new ServiceConfigItem();
         configItem.setTransformationUrl("url");
         return configItem;
+    }
+
+    private StartEventResponse sampleStartEventResponse() {
+        return StartEventResponse.builder().caseDetails(
+            CaseDetails
+                .builder()
+                .caseTypeId("caseTypeId1")
+                .jurisdiction("jurisdiction1")
+                .build())
+            .eventId("eventId1")
+            .token("eventToken1")
+            .build();
     }
 }
