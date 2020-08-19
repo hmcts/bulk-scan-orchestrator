@@ -186,7 +186,7 @@ class AttachExceptionRecordToExistingCaseTest {
     ) throws Exception {
         //given
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), now()); // with no scanned documents
-        CaseDetails exceptionRecord = exceptionRecordCreator.createExceptionRecord(SampleData.CONTAINER, fileName, dmUrl);
+        var exceptionRecord = exceptionRecordCreator.createExceptionRecord(SampleData.CONTAINER, fileName, dmUrl);
 
         // when
         Response response = invokeCallbackEndpoint(caseDetails, exceptionRecord, null, true);
