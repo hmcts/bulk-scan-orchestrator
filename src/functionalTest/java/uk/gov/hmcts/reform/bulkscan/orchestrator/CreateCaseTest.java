@@ -80,9 +80,8 @@ class CreateCaseTest {
         assertThat(createdCase.getData().get("lastName")).isEqualTo("value2");
         assertThat(createdCase.getData().get("email")).isEqualTo("hello@test.com");
 
-        assertThat(createdCase.getData().get(BULK_SCAN_CASE_REFERENCE_FIELD)).isNotNull();
         String caseExceptionRecordReference = (String) createdCase.getData().get(BULK_SCAN_CASE_REFERENCE_FIELD);
-        assertThat(caseExceptionRecordReference.equals(String.valueOf(exceptionRecord.getId())));
+        assertThat(caseExceptionRecordReference).isEqualTo(String.valueOf(exceptionRecord.getId()));
 
         await("Case is ingested")
             .atMost(10, TimeUnit.SECONDS)

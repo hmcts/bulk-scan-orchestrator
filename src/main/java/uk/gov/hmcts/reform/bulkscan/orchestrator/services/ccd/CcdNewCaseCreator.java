@@ -182,7 +182,8 @@ public class CcdNewCaseCreator {
                 exceptionRecord.id,
                 exceptionRecord.envelopeId,
                 startEventResponse,
-                service
+                service,
+                loggingContext
             ),
             loggingContext
         );
@@ -193,10 +194,11 @@ public class CcdNewCaseCreator {
         String exceptionRecordId,
         String envelopeId,
         StartEventResponse startEventResponse,
-        String service
+        String service,
+        String loggingContext
     ) {
         Map<String, Object> completeCaseData =
-            setBulkScanSpecificFieldsInCaseData(caseData, service, exceptionRecordId, envelopeId);
+            setBulkScanSpecificFieldsInCaseData(caseData, service, exceptionRecordId, envelopeId, loggingContext);
 
         return CaseDataContent
             .builder()
@@ -217,7 +219,8 @@ public class CcdNewCaseCreator {
         Map<String, Object> caseData,
         String service,
         String exceptionRecordId,
-        String envelopeId
+        String envelopeId,
+        String loggingContext
     ) {
         Map<String, Object> updatedCaseData = new HashMap<>(caseData);
         updatedCaseData.put(BULK_SCAN_CASE_REFERENCE, exceptionRecordId);
@@ -226,6 +229,18 @@ public class CcdNewCaseCreator {
             updatedCaseData.put(
                 BULK_SCAN_ENVELOPES,
                 envelopeReferenceCollectionHelper.singleEnvelopeReferenceList(envelopeId, CaseAction.CREATE)
+            );
+
+            log.info("{} field was set in new case data for service service {}",
+                BULK_SCAN_ENVELOPES,
+                service,
+                loggingContext
+            );
+        } else {
+            log.info("{} field was not set in new case data for service service {} - not supported by this service",
+                BULK_SCAN_ENVELOPES,
+                service,
+                loggingContext
             );
         }
 
