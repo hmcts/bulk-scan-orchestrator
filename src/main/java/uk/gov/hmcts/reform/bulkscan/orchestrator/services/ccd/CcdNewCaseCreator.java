@@ -239,7 +239,7 @@ public class CcdNewCaseCreator {
             );
         } else {
             log.info(
-                "{} field was not set in new case data for service {} - not supported by this service",
+                "{} field was NOT set in new case data for service {} - not supported by this service",
                 BULK_SCAN_ENVELOPES,
                 service,
                 loggingContext
