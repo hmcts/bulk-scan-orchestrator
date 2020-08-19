@@ -42,20 +42,20 @@ public class CcdNewCaseCreator {
     private final ServiceResponseParser serviceResponseParser;
     private final AuthTokenGenerator s2sTokenGenerator;
     private final CcdApi ccdApi;
-    private final EnvelopeReferenceCollectionHelper envelopeReferenceCollectionHelper;
+    private final EnvelopeReferenceHelper envelopeReferenceHelper;
 
     public CcdNewCaseCreator(
         ExceptionRecordTransformer exceptionRecordTransformer,
         ServiceResponseParser serviceResponseParser,
         AuthTokenGenerator s2sTokenGenerator,
         CcdApi ccdApi,
-        EnvelopeReferenceCollectionHelper envelopeReferenceCollectionHelper
+        EnvelopeReferenceHelper envelopeReferenceHelper
     ) {
         this.exceptionRecordTransformer = exceptionRecordTransformer;
         this.serviceResponseParser = serviceResponseParser;
         this.s2sTokenGenerator = s2sTokenGenerator;
         this.ccdApi = ccdApi;
-        this.envelopeReferenceCollectionHelper = envelopeReferenceCollectionHelper;
+        this.envelopeReferenceHelper = envelopeReferenceHelper;
     }
 
     @SuppressWarnings("squid:S2139") // squid for exception handle + logging
@@ -228,7 +228,7 @@ public class CcdNewCaseCreator {
         Map<String, Object> updatedCaseData = new HashMap<>(caseData);
         updatedCaseData.put(BULK_SCAN_CASE_REFERENCE, exceptionRecordId);
 
-        if (envelopeReferenceCollectionHelper.serviceSupportsEnvelopeReferences(service)) {
+        if (envelopeReferenceHelper.serviceSupportsEnvelopeReferences(service)) {
             updatedCaseData.put(
                 BULK_SCAN_ENVELOPES,
                 asList(new CcdCollectionElement<>(new EnvelopeReference(envelopeId, CaseAction.CREATE)))

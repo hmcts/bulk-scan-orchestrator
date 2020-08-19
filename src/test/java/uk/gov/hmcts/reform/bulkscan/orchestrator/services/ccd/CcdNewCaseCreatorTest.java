@@ -69,7 +69,7 @@ class CcdNewCaseCreatorTest {
     private CcdApi ccdApi;
 
     @Mock
-    private EnvelopeReferenceCollectionHelper envelopeReferenceCollectionHelper;
+    private EnvelopeReferenceHelper envelopeReferenceHelper;
 
     private CcdNewCaseCreator ccdNewCaseCreator;
 
@@ -83,7 +83,7 @@ class CcdNewCaseCreatorTest {
             serviceResponseParser,
             s2sTokenGenerator,
             ccdApi,
-            envelopeReferenceCollectionHelper
+            envelopeReferenceHelper
         );
     }
 
@@ -235,7 +235,7 @@ class CcdNewCaseCreatorTest {
         var envelopeReferences =
             asList(new CcdCollectionElement<>(new EnvelopeReference(envelopeId, CaseAction.CREATE)));
 
-        given(envelopeReferenceCollectionHelper.serviceSupportsEnvelopeReferences(any()))
+        given(envelopeReferenceHelper.serviceSupportsEnvelopeReferences(any()))
             .willReturn(isServiceEnabledForAutoCaseCreation);
 
         var expectedCaseData = getExpectedCaseDataToPassToCcd(
