@@ -139,7 +139,7 @@ class ExceptionRecordCreationTest {
         await("Exception record being created")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
-            .until(() -> caseSearcher.findExceptionRecord(randomPoBox.toString()).isPresent());
+            .until(() -> caseSearcher.findExceptionRecord(randomPoBox.toString(), SampleData.CONTAINER).isPresent());
     }
 
     @DisplayName("Should create ExceptionRecord when classification is SUPPLEMENTARY_EVIDENCE_WITH_OCR")
