@@ -92,20 +92,6 @@ class EnvelopeReferenceCollectionHelperTest {
             .isFalse();
     }
 
-    @Test
-    void singleEnvelopeReferenceList_should_return_single_element_list_with_provided_data() {
-        String envelopeId = "envelope1";
-        CaseAction action = CaseAction.CREATE;
-
-        var result = envelopeReferenceCollectionHelper.singleEnvelopeReferenceList(envelopeId, action);
-
-        assertThat(result)
-            .usingRecursiveFieldByFieldElementComparator()
-            .isEqualTo(
-                asList(new CcdCollectionElement(new EnvelopeReference(envelopeId, action)))
-            );
-    }
-
     private void setupCaseDefinitionHasEnvelopeIds(String serviceName, boolean caseDefinitionHasEnvelopeIds) {
         ServiceConfigItem serviceConfigItem = new ServiceConfigItem();
         serviceConfigItem.setCaseDefinitionHasEnvelopeIds(caseDefinitionHasEnvelopeIds);

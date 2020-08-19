@@ -62,8 +62,6 @@ class AutoCaseCreatorTest {
     @Mock
     private ServiceConfigProvider serviceConfigProvider;
     @Mock
-    private EnvelopeReferenceCollectionHelper envelopeReferenceCollectionHelper;
-    @Mock
     private ServiceConfigItem serviceConfigItem;
 
     private AutoCaseCreator autoCaseCreator;
@@ -73,12 +71,7 @@ class AutoCaseCreatorTest {
         given(serviceConfigItem.getAutoCaseCreationEnabled()).willReturn(true);
         given(serviceConfigProvider.getConfig(any())).willReturn(serviceConfigItem);
 
-        autoCaseCreator = new AutoCaseCreator(
-            envelopeTransformer,
-            ccdApi,
-            serviceConfigProvider,
-            envelopeReferenceCollectionHelper
-        );
+        autoCaseCreator = new AutoCaseCreator(envelopeTransformer, ccdApi, serviceConfigProvider);
     }
 
     @Test
@@ -88,7 +81,7 @@ class AutoCaseCreatorTest {
         var result = autoCaseCreator.createCase(envelope(1));
 
         assertThat(result).usingRecursiveComparison().isEqualTo(abortedWithoutFailure());
-        verifyNoInteractions(envelopeTransformer, ccdApi, envelopeReferenceCollectionHelper);
+        verifyNoInteractions(envelopeTransformer, ccdApi);
     }
 
     @Test
@@ -157,12 +150,6 @@ class AutoCaseCreatorTest {
         var transformationResponse = sampleSuccessfulTransformationResponse();
         given(envelopeTransformer.transformEnvelope(any())).willReturn(right(transformationResponse));
 
-        var expectedBulkScanEnvelopeReferences =
-            asList(new CcdCollectionElement<>(new EnvelopeReference("envRefId1", CaseAction.CREATE)));
-
-        given(envelopeReferenceCollectionHelper.singleEnvelopeReferenceList(any(), any()))
-            .willReturn(expectedBulkScanEnvelopeReferences);
-
         Envelope envelope = envelope(1);
 
         // run case creation, so that the content builder is created and captured by this test
@@ -176,8 +163,7 @@ class AutoCaseCreatorTest {
         verifyCaseDataContentBuilderProducesCorrectResult(
             caseDataContentBuilderCaptor.getValue(),
             envelope,
-            transformationResponse,
-            expectedBulkScanEnvelopeReferences
+            transformationResponse
         );
     }
 
@@ -273,8 +259,7 @@ class AutoCaseCreatorTest {
     private void verifyCaseDataContentBuilderProducesCorrectResult(
         Function<StartEventResponse, CaseDataContent> caseDataContentBuilder,
         Envelope inputEnvelope,
-        SuccessfulTransformationResponse transformationResponse,
-        List<CcdCollectionElement<EnvelopeReference>> receivedBulkScanEnvelopeReferences
+        SuccessfulTransformationResponse transformationResponse
     ) {
         // given
         StartEventResponse startEventResponse = sampleStartEventResponse();
@@ -292,9 +277,11 @@ class AutoCaseCreatorTest {
         assertThat(event.getSummary()).isEqualTo("Case created");
         assertThat(event.getDescription()).isEqualTo("Case created from envelope " + inputEnvelope.id);
 
-        assertThat(caseDataContent.getData()).isEqualTo(
-            getExpectedCaseDataInCaseCreationEvent(transformationResponse, receivedBulkScanEnvelopeReferences)
-        );
+        assertThat(caseDataContent.getData())
+            .usingRecursiveComparison()
+            .isEqualTo(
+                getExpectedCaseDataInCaseCreationEvent(transformationResponse, inputEnvelope.id)
+            );
     }
 
     private FeignException ccdErrorResponseException(HttpStatus status) {
@@ -311,11 +298,16 @@ class AutoCaseCreatorTest {
 
     private Map<String, Object> getExpectedCaseDataInCaseCreationEvent(
         SuccessfulTransformationResponse transformationResponse,
-        List<CcdCollectionElement<EnvelopeReference>> bulkScanEnvelopeReferences
+        String envelopeId
     ) {
         Map<String, Object> expectedCaseData = new HashMap<>();
         expectedCaseData.putAll(transformationResponse.caseCreationDetails.caseData);
-        expectedCaseData.put("bulkScanEnvelopes", bulkScanEnvelopeReferences);
+
+        expectedCaseData.put(
+            "bulkScanEnvelopes",
+            asList(new CcdCollectionElement<>(new EnvelopeReference(envelopeId, CaseAction.CREATE)))
+        );
+
         return expectedCaseData;
     }
 

@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.EnvelopeTransformer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.EnvelopeReference;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseCreationResult.abortedWithoutFailure;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseCreationResult.caseAlreadyExists;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseCreationResult.caseCreated;
@@ -32,18 +35,15 @@ public class AutoCaseCreator {
     private final EnvelopeTransformer envelopeTransformer;
     private final CcdApi ccdApi;
     private final ServiceConfigProvider serviceConfigProvider;
-    private final EnvelopeReferenceCollectionHelper envelopeReferenceCollectionHelper;
 
     public AutoCaseCreator(
         EnvelopeTransformer envelopeTransformer,
         CcdApi ccdApi,
-        ServiceConfigProvider serviceConfigProvider,
-        EnvelopeReferenceCollectionHelper envelopeReferenceCollectionHelper
+        ServiceConfigProvider serviceConfigProvider
     ) {
         this.envelopeTransformer = envelopeTransformer;
         this.ccdApi = ccdApi;
         this.serviceConfigProvider = serviceConfigProvider;
-        this.envelopeReferenceCollectionHelper = envelopeReferenceCollectionHelper;
     }
 
     public CaseCreationResult createCase(Envelope envelope) {
@@ -151,7 +151,7 @@ public class AutoCaseCreator {
 
         data.put(
             "bulkScanEnvelopes",
-            envelopeReferenceCollectionHelper.singleEnvelopeReferenceList(envelopeId, CaseAction.CREATE)
+            asList(new CcdCollectionElement<>(new EnvelopeReference(envelopeId, CaseAction.CREATE)))
         );
 
         return CaseDataContent

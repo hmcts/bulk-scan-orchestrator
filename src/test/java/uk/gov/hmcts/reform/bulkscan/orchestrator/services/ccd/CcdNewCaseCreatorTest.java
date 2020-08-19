@@ -161,6 +161,7 @@ class CcdNewCaseCreatorTest {
         assertCaseDataContentBuilderCreatesCorrectResult(
             caseDetailsBuilderCaptor.getValue(),
             exceptionRecord.id,
+            exceptionRecord.envelopeId,
             transformationResponse,
             isServiceEnabledForAutoCaseCreation
         );
@@ -226,14 +227,16 @@ class CcdNewCaseCreatorTest {
     private void assertCaseDataContentBuilderCreatesCorrectResult(
         Function<StartEventResponse, CaseDataContent> caseDetailsBuilder,
         String exceptionRecordId,
+        String envelopeId,
         SuccessfulTransformationResponse transformationResponse,
         boolean isServiceEnabledForAutoCaseCreation
     ) {
         // given
         var envelopeReferences =
-            asList(new CcdCollectionElement<>(new EnvelopeReference("envelopeId1", CaseAction.CREATE)));
+            asList(new CcdCollectionElement<>(new EnvelopeReference(envelopeId, CaseAction.CREATE)));
 
-        setupEnvelopeReferenceCollectionHelper(isServiceEnabledForAutoCaseCreation, envelopeReferences);
+        given(envelopeReferenceCollectionHelper.serviceSupportsEnvelopeReferences(any()))
+            .willReturn(isServiceEnabledForAutoCaseCreation);
 
         var expectedCaseData = getExpectedCaseDataToPassToCcd(
             transformationResponse,
@@ -271,19 +274,6 @@ class CcdNewCaseCreatorTest {
 
         expectedCaseData.put("bulkScanCaseReference", exceptionRecordId);
         return expectedCaseData;
-    }
-
-    private void setupEnvelopeReferenceCollectionHelper(
-        boolean isServiceEnabledForAutoCaseCreation,
-        List<CcdCollectionElement<EnvelopeReference>> envelopeReferencesToReturn
-    ) {
-        given(envelopeReferenceCollectionHelper.serviceSupportsEnvelopeReferences(any()))
-            .willReturn(isServiceEnabledForAutoCaseCreation);
-
-        if (isServiceEnabledForAutoCaseCreation) {
-            given(envelopeReferenceCollectionHelper.singleEnvelopeReferenceList(any(), any()))
-                .willReturn(envelopeReferencesToReturn);
-        }
     }
 
     private ServiceConfigItem getConfigItem() {
