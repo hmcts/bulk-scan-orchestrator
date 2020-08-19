@@ -3,8 +3,8 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.client;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdateDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdateRequest;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.ExistingCaseDetails;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 @Service
@@ -28,8 +28,6 @@ public class CaseUpdateRequestCreator {
         return new ExceptionRecord(
             exceptionRecord.id,
             exceptionRecord.caseTypeId,
-            exceptionRecord.envelopeId,
-            false,
             exceptionRecord.poBox,
             exceptionRecord.poBoxJurisdiction,
             exceptionRecord.journeyClassification,

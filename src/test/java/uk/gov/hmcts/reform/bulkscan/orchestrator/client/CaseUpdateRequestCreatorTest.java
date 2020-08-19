@@ -37,9 +37,8 @@ public class CaseUpdateRequestCreatorTest {
             "isAutomatedProcess"
         );
 
-        assertThat(request.exceptionRecord.exceptionRecordId).isEqualTo(exceptionRecord.id);
-        assertThat(request.exceptionRecord.exceptionRecordCaseTypeId).isEqualTo(exceptionRecord.caseTypeId);
-        assertThat(request.exceptionRecord.isAutomatedProcess).isFalse();
+        assertThat(request.exceptionRecord.id).isEqualTo(exceptionRecord.id);
+        assertThat(request.exceptionRecord.caseTypeId).isEqualTo(exceptionRecord.caseTypeId);
     }
 
     private void assertCaseUpdateDetailsMappedCorrectly(
