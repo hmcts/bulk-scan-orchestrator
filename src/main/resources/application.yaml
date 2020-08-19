@@ -23,18 +23,15 @@ azure:
     envelopes:
       access-key: ${ENVELOPES_QUEUE_READ_ACCESS_KEY}
       access-key-name: ${QUEUE_ACCESS_KEY_LISTEN_NAME}
-      connection-string: ${ENVELOPES_QUEUE_CONNECTION_STRING}
       queue-name: ${ENVELOPES_QUEUE_NAME}
       max-delivery-count: ${ENVELOPES_QUEUE_MAX_DELIVERY_COUNT}
     processed-envelopes:
       access-key: ${PROCESSED_ENVELOPES_QUEUE_WRITE_ACCESS_KEY}
       access-key-name: ${QUEUE_ACCESS_KEY_SEND_NAME}
-      connection-string: ${PROCESSED_ENVELOPES_QUEUE_CONNECTION_STRING}
       queue-name: ${PROCESSED_ENVELOPES_QUEUE_NAME}
     payments:
       access-key: ${PAYMENTS_QUEUE_WRITE_ACCESS_KEY}
       access-key-name: ${QUEUE_ACCESS_KEY_SEND_NAME}
-      connection-string: ${PAYMENTS_QUEUE_CONNECTION_STRING}
       queue-name: ${PAYMENTS_QUEUE_NAME}
       manual-retry-count: 2
 
@@ -87,7 +84,7 @@ service-config:
       auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_BULKSCAN}
       auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_BULKSCAN}
       case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_BULKSCAN}
-      search-cases-by-envelope-id: false
+      search-cases-by-envelope-id: ${CAN_SEARCH_CASES_BY_ENVELOPE_ID_BULKSCAN}
 
     - service: bulkscanauto # service name corresponds to the name of the container in Blob Storage
       jurisdiction: BULKSCAN
@@ -105,7 +102,7 @@ service-config:
       auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_BULKSCANAUTO}
       auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_BULKSCANAUTO}
       case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_BULKSCANAUTO}
-      search-cases-by-envelope-id: true
+      search-cases-by-envelope-id: ${CAN_SEARCH_CASES_BY_ENVELOPE_ID_BULKSCANAUTO}
 
     - service: sscs
       jurisdiction: SSCS
@@ -127,7 +124,7 @@ service-config:
       auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_SSCS}
       auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_SSCS}
       case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_SSCS}
-      search-cases-by-envelope-id: false
+      search-cases-by-envelope-id: ${CAN_SEARCH_CASES_BY_ENVELOPE_ID_SSCS}
 
     - service: probate
       jurisdiction: PROBATE
@@ -142,7 +139,7 @@ service-config:
       auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_PROBATE}
       auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_PROBATE}
       case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_PROBATE}
-      search-cases-by-envelope-id: false
+      search-cases-by-envelope-id: ${CAN_SEARCH_CASES_BY_ENVELOPE_ID_PROBATE}
 
     - service: divorce
       jurisdiction: DIVORCE
@@ -154,7 +151,7 @@ service-config:
       auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_DIVORCE}
       auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_DIVORCE}
       case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_DIVORCE}
-      search-cases-by-envelope-id: false
+      search-cases-by-envelope-id: ${CAN_SEARCH_CASES_BY_ENVELOPE_ID_DIVORCE}
 
     - service: finrem
       jurisdiction: DIVORCE
@@ -166,7 +163,7 @@ service-config:
       auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_FINREM}
       auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_FINREM}
       case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_FINREM}
-      search-cases-by-envelope-id: false
+      search-cases-by-envelope-id: ${CAN_SEARCH_CASES_BY_ENVELOPE_ID_FINREM}
 
     - service: cmc
       jurisdiction: CMC
@@ -175,7 +172,7 @@ service-config:
       auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_CMC}
       auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_CMC}
       case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_CMC}
-      search-cases-by-envelope-id: false
+      search-cases-by-envelope-id: ${CAN_SEARCH_CASES_BY_ENVELOPE_ID_CMC}
 
     - service: publiclaw
       jurisdiction: PUBLICLAW
@@ -183,7 +180,7 @@ service-config:
       auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_PUBLICLAW}
       auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_PUBLICLAW}
       case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_PUBLICLAW}
-      search-cases-by-envelope-id: false
+      search-cases-by-envelope-id: ${CAN_SEARCH_CASES_BY_ENVELOPE_ID_PUBLICLAW}
 
 scheduling:
   task:

@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,7 +7,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
@@ -21,7 +18,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.Excepti
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceNotConfiguredException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -349,216 +345,6 @@ class CreateCaseCallbackServiceTest {
             .hasMessage("Multiple cases (345, 456) found for the given bulk scan case reference: 123");
 
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
-    }
-
-    @Test
-    void should_warn_about_missing_classification() {
-        // given
-        setUpServiceConfig();
-
-        Map<String, Object> data = basicCaseData();
-        data.remove("journeyClassification");
-
-        CaseDetails caseDetails = caseDetails(data);
-
-        // when
-        ProcessResult result = service.process(new CcdCallbackRequest(
-            EventIds.CREATE_NEW_CASE,
-            caseDetails,
-            true
-        ), IDAM_TOKEN, USER_ID);
-
-        // then
-        assertThat(result.getWarnings()).isEmpty();
-        assertThat(result.getErrors()).containsOnly("Missing journeyClassification");
-
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
-    }
-
-    @Test
-    void should_report_errors_when_journey_classification_is_invalid() {
-        // given
-        setUpServiceConfig();
-
-        Map<String, Object> data = basicCaseData();
-        data.put("journeyClassification", "EXCEPTIONS");
-
-        CaseDetails caseDetails = caseDetails(data);
-
-        // when
-        ProcessResult result = service.process(new CcdCallbackRequest(
-            EventIds.CREATE_NEW_CASE,
-            caseDetails,
-            true
-        ), IDAM_TOKEN, USER_ID);
-
-        assertThat(result.getErrors()).containsOnly(
-            "Invalid journeyClassification. Error: No enum constant " + Classification.class.getName() + ".EXCEPTIONS"
-        );
-
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
-    }
-
-    @Test
-    void should_report_errors_when_scanned_document_is_invalid() {
-        // given
-        setUpServiceConfig();
-
-        Map<String, Object> doc = new HashMap<>();
-
-        // putting 6 via `ImmutableMap` is available from Java 9
-        doc.put("type", "Others");
-        doc.put("url", ImmutableMap.of(
-            "document_filename", "name"
-        ));
-        doc.put("controlNumber", "1234");
-        doc.put("fileName", "file");
-        doc.put("scannedDate", "2019-09-06T15:40:00.000Z");
-        doc.put("deliveryDate", "2019-09-06T15:40:00.001Z");
-
-        Map<String, Object> data = new HashMap<>();
-
-        data.put("poBox", "12345");
-        data.put("journeyClassification", EXCEPTION.name());
-        data.put("formType", "Form1");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", ImmutableList.of(ImmutableMap.of("value", doc)));
-        data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
-
-        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
-            .id(Long.valueOf(CASE_ID))
-            .caseTypeId(CASE_TYPE_ID)
-            .jurisdiction("some jurisdiction")
-            .data(data)
-        );
-
-        // when
-        ProcessResult result = service.process(new CcdCallbackRequest(
-            EventIds.CREATE_NEW_CASE,
-            caseDetails,
-            true
-        ), IDAM_TOKEN, USER_ID);
-
-        assertThat(result.getErrors()).containsOnly(
-            "Invalid scannedDocuments format. Error: No enum constant " + DocumentType.class.getName() + ".OTHERS"
-        );
-
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
-    }
-
-    @Test
-    void should_report_errors_when_ocr_data_is_invalid() {
-        // given
-        setUpServiceConfig();
-
-        // modify scannedDocs to proof datetime field is bulletproof
-        Map<String, Object> doc = new HashMap<>();
-
-        doc.put("type", "Other");
-        doc.put("url", ImmutableMap.of(
-            "document_url", "https://some-url",
-            "document_binary_url", "https://some-bin-url",
-            "document_filename", "some-name"
-        ));
-        doc.put("controlNumber", "1234");
-        doc.put("fileName", "file");
-        doc.put("scannedDate", "2019-09-06T15:40:00Z");
-        doc.put("deliveryDate", "2019-09-06T15:40:00");
-
-        Map<String, Object> data = new HashMap<>();
-
-        data.put("poBox", "12345");
-        data.put("journeyClassification", EXCEPTION.name());
-        data.put("formType", "Form1");
-        data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
-        data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", ImmutableList.of(ImmutableMap.of("value", doc)));
-        data.put("scanOCRData", ImmutableList.of(ImmutableMap.of("value", ImmutableMap.of(
-            "key", "k",
-            "value", 1
-        ))));
-
-        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
-            .id(Long.valueOf(CASE_ID))
-            .caseTypeId(CASE_TYPE_ID)
-            .jurisdiction("some jurisdiction")
-            .data(data)
-        );
-
-        // when
-        ProcessResult result = service.process(new CcdCallbackRequest(
-            EventIds.CREATE_NEW_CASE,
-            caseDetails,
-            true
-        ), IDAM_TOKEN, USER_ID);
-
-        String match =
-            "Invalid OCR data format. Error: (class )?java.lang.Integer cannot be cast to (class )?java.lang.String.*";
-        assertThat(result.getErrors())
-            .hasSize(1)
-            .element(0)
-            .asString()
-            .matches(match);
-
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
-    }
-
-    @Test
-    void should_report_errors_when_form_type_is_null_for_new_application_classification() {
-        // given
-        setUpServiceConfig();
-
-        Map<String, Object> data = basicCaseData();
-        data.put("formType", null);
-        data.put("journeyClassification", NEW_APPLICATION.name());
-
-        CaseDetails caseDetails = caseDetails(data);
-
-        // when
-        ProcessResult result = service.process(new CcdCallbackRequest(
-            EventIds.CREATE_NEW_CASE,
-            caseDetails,
-            true
-        ), IDAM_TOKEN, USER_ID);
-
-        String match = "Missing Form Type";
-        assertThat(result.getErrors())
-            .hasSize(1)
-            .element(0)
-            .asString()
-            .matches(match);
-
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
-    }
-
-    @Test
-    void should_not_report_errors_when_form_type_is_null_for_exception_classification() {
-        // given
-        setUpServiceConfig();
-
-        Map<String, Object> data = basicCaseData();
-        data.put("formType", null);
-
-        long newCaseId = 1;
-        given(ccdNewCaseCreator.createNewCase(
-            any(ExceptionRecord.class),
-            any(ServiceConfigItem.class),
-            anyBoolean(),
-            anyString(),
-            anyString()
-        )).willReturn(new CreateCaseResult(newCaseId));
-
-        // when
-        ProcessResult result =
-            service.process(
-                new CcdCallbackRequest(EventIds.CREATE_NEW_CASE, caseDetails(data), true), // ignore warnings
-                IDAM_TOKEN,
-                USER_ID
-            );
-
-        assertThat(result.getErrors()).isEmpty();
-        assertThat(result.getWarnings()).isEmpty();
     }
 
     @ParameterizedTest(name = "Allowed to proceed: {0}. User ignores warnings: {1}")

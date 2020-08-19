@@ -33,7 +33,6 @@ import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.BULK_SCANNED_CASE_TYPE;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdNewCaseCreator.EXCEPTION_RECORD_REFERENCE;
 
 @SpringBootTest
 @ActiveProfiles("nosb") // no servicebus queue handler registration
@@ -41,6 +40,7 @@ class CreateCaseTest {
 
     private static final String DISPLAY_WARNINGS_FIELD = "displayWarnings";
     private static final String OCR_DATA_VALIDATION_WARNINGS_FIELD = "ocrDataValidationWarnings";
+    private static final String BULK_SCAN_CASE_REFERENCE_FIELD = "bulkScanCaseReference";
 
     private static final String CASE_REFERENCE = "caseReference";
 
@@ -89,9 +89,8 @@ class CreateCaseTest {
         assertThat(createdCase.getData().get("lastName")).isEqualTo("value2");
         assertThat(createdCase.getData().get("email")).isEqualTo("hello@test.com");
 
-        assertThat(createdCase.getData().get(EXCEPTION_RECORD_REFERENCE)).isNotNull();
-        String caseExceptionRecordReference = (String) createdCase.getData().get(EXCEPTION_RECORD_REFERENCE);
-        assertThat(caseExceptionRecordReference.equals(String.valueOf(exceptionRecord.getId())));
+        String caseExceptionRecordReference = (String) createdCase.getData().get(BULK_SCAN_CASE_REFERENCE_FIELD);
+        assertThat(caseExceptionRecordReference).isEqualTo(String.valueOf(exceptionRecord.getId()));
 
         await("Case is ingested")
             .atMost(10, TimeUnit.SECONDS)

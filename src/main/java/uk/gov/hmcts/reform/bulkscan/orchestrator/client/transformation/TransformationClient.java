@@ -2,46 +2,45 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.TransformationRequestCreator;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request.TransformationRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 
 import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 
-@Component
+@Service
 public class TransformationClient {
 
     private final RestTemplate restTemplate;
     private final Validator validator;
-    private final TransformationRequestCreator requestCreator;
+    private final AuthTokenGenerator s2sTokenGenerator;
 
     public TransformationClient(
         RestTemplate restTemplate,
         Validator validator,
-        TransformationRequestCreator requestCreator
+        AuthTokenGenerator s2sTokenGenerator
     ) {
         this.restTemplate = restTemplate;
         this.validator = validator;
-        this.requestCreator = requestCreator;
+        this.s2sTokenGenerator = s2sTokenGenerator;
     }
 
-    public SuccessfulTransformationResponse transformExceptionRecord(
+    public SuccessfulTransformationResponse transformCaseData(
         String baseUrl,
-        ExceptionRecord exceptionRecord,
-        String s2sToken
+        TransformationRequest transformationRequest
     ) {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("ServiceAuthorization", s2sToken);
+        headers.add("ServiceAuthorization", s2sTokenGenerator.generate());
 
         SuccessfulTransformationResponse response = restTemplate.postForObject(
             getUrl(baseUrl),
-            new HttpEntity<>(requestCreator.create(exceptionRecord), headers),
+            new HttpEntity<>(transformationRequest, headers),
             SuccessfulTransformationResponse.class
         );
 

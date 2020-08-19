@@ -5,9 +5,11 @@ import com.microsoft.azure.servicebus.IMessageReceiver;
 import com.microsoft.azure.servicebus.ReceiveMode;
 import com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.QueueConfigurationProperties;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.ConnectionException;
 
 import java.util.function.Supplier;
@@ -16,22 +18,27 @@ import java.util.function.Supplier;
 @Profile("!nosb") // do not register handler for the nosb (test) profile
 public class DlqReceiverProvider implements Supplier<IMessageReceiver> {
 
-    private final String connectionString;
-    private final String entityPath;
+    private final String namespace;
+    private final QueueConfigurationProperties queueProperties;
 
     public DlqReceiverProvider(
-        @Value("${azure.servicebus.envelopes.connection-string}") String connectionString,
-        @Value("${azure.servicebus.envelopes.queue-name}") String queueName
+        @Value("${azure.servicebus.namespace}") String namespace,
+        @Qualifier("envelopes-queue-config") QueueConfigurationProperties queueProperties
     ) {
-        this.connectionString = connectionString;
-        this.entityPath = queueName + "/$deadletterqueue";
+        this.namespace = namespace;
+        this.queueProperties = queueProperties;
     }
 
     @Override
     public IMessageReceiver get() {
         try {
             return ClientFactory.createMessageReceiverFromConnectionStringBuilder(
-                new ConnectionStringBuilder(connectionString, entityPath),
+                new ConnectionStringBuilder(
+                    namespace,
+                    queueProperties.getQueueName() + "/$deadletterqueue",
+                    queueProperties.getAccessKeyName(),
+                    queueProperties.getAccessKey()
+                ),
                 ReceiveMode.PEEKLOCK
             );
         } catch (InterruptedException e) {

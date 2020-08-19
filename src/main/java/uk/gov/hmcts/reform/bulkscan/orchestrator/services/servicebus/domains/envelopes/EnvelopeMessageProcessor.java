@@ -84,7 +84,7 @@ public class EnvelopeMessageProcessor {
                 envelope = parse(MessageBodyRetriever.getBinaryData(message.getMessageBody()));
                 logMessageParsed(message, envelope);
                 EnvelopeProcessingResult envelopeProcessingResult =
-                    envelopeHandler.handleEnvelope(envelope);
+                    envelopeHandler.handleEnvelope(envelope, message.getDeliveryCount());
                 processedEnvelopeNotifier.notify(
                     envelope.id,
                     envelopeProcessingResult.ccdId,
