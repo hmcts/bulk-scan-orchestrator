@@ -232,7 +232,7 @@ public class CcdNewCaseCreator {
             );
 
             log.info(
-                "{} field was set in new case data for service {}",
+                "{} field was set in new case data for service {}. ()",
                 BULK_SCAN_ENVELOPES,
                 service,
                 loggingContext
@@ -242,7 +242,7 @@ public class CcdNewCaseCreator {
             updatedCaseData.remove(BULK_SCAN_ENVELOPES);
 
             log.info(
-                "{} field was NOT set in new case data for service {} - not supported by this service",
+                "{} field was NOT set in new case data for service {} - not supported by this service. {}",
                 BULK_SCAN_ENVELOPES,
                 service,
                 loggingContext
