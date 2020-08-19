@@ -15,12 +15,12 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 
 @Service
-public class EnvelopeReferenceCollectionHelper {
+public class EnvelopeReferenceHelper {
 
     private final ObjectMapper objectMapper;
     private final ServiceConfigProvider serviceConfigProvider;
 
-    public EnvelopeReferenceCollectionHelper(
+    public EnvelopeReferenceHelper(
         ObjectMapper objectMapper,
         ServiceConfigProvider serviceConfigProvider
     ) {

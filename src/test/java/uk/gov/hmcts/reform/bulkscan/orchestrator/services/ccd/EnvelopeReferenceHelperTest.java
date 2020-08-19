@@ -24,29 +24,29 @@ import static org.mockito.BDDMockito.given;
 
 @SuppressWarnings("unchecked")
 @ExtendWith(MockitoExtension.class)
-class EnvelopeReferenceCollectionHelperTest {
+class EnvelopeReferenceHelperTest {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Mock
     private ServiceConfigProvider serviceConfigProvider;
 
-    private EnvelopeReferenceCollectionHelper envelopeReferenceCollectionHelper;
+    private EnvelopeReferenceHelper envelopeReferenceHelper;
 
     @BeforeEach
     void setUp() {
-        envelopeReferenceCollectionHelper = new EnvelopeReferenceCollectionHelper(objectMapper, serviceConfigProvider);
+        envelopeReferenceHelper = new EnvelopeReferenceHelper(objectMapper, serviceConfigProvider);
     }
 
     @Test
     void parseEnvelopeReferences_should_return_empty_list_when_null_is_provided() {
-        var result = envelopeReferenceCollectionHelper.parseEnvelopeReferences(null);
+        var result = envelopeReferenceHelper.parseEnvelopeReferences(null);
         assertThat(result).isEmpty();
     }
 
     @Test
     void parseEnvelopeReferences_should_return_empty_list_when_empty_list_is_provided() {
-        var result = envelopeReferenceCollectionHelper.parseEnvelopeReferences(emptyList());
+        var result = envelopeReferenceHelper.parseEnvelopeReferences(emptyList());
         assertThat(result).isEmpty();
     }
 
@@ -59,7 +59,7 @@ class EnvelopeReferenceCollectionHelperTest {
         );
 
         // when
-        var result = envelopeReferenceCollectionHelper.parseEnvelopeReferences(rawEnvelopeReferences);
+        var result = envelopeReferenceHelper.parseEnvelopeReferences(rawEnvelopeReferences);
 
         // then
         var expectedResult = asList(
@@ -82,12 +82,12 @@ class EnvelopeReferenceCollectionHelperTest {
         setupCaseDefinitionHasEnvelopeIds(disabledServiceName, false);
 
         assertThat(
-            envelopeReferenceCollectionHelper.serviceSupportsEnvelopeReferences(enabledServiceName)
+            envelopeReferenceHelper.serviceSupportsEnvelopeReferences(enabledServiceName)
         )
             .isTrue();
 
         assertThat(
-            envelopeReferenceCollectionHelper.serviceSupportsEnvelopeReferences(disabledServiceName)
+            envelopeReferenceHelper.serviceSupportsEnvelopeReferences(disabledServiceName)
         )
             .isFalse();
     }
