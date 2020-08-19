@@ -43,7 +43,7 @@ class CaseUpdateClientResponseValidationTest {
     @BeforeEach
     void setUp() {
         CaseUpdateRequest caseUpdateRequest = new CaseUpdateRequest(
-            mock(uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ExceptionRecord.class),
+            mock(uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.ExceptionRecord.class),
             false,
             mock(uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdateDetails.class),
             mock(ExistingCaseDetails.class)
