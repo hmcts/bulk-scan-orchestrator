@@ -231,13 +231,15 @@ public class CcdNewCaseCreator {
                 envelopeReferenceCollectionHelper.singleEnvelopeReferenceList(envelopeId, CaseAction.CREATE)
             );
 
-            log.info("{} field was set in new case data for service service {}",
+            log.info(
+                "{} field was set in new case data for service {}",
                 BULK_SCAN_ENVELOPES,
                 service,
                 loggingContext
             );
         } else {
-            log.info("{} field was not set in new case data for service service {} - not supported by this service",
+            log.info(
+                "{} field was not set in new case data for service {} - not supported by this service",
                 BULK_SCAN_ENVELOPES,
                 service,
                 loggingContext
