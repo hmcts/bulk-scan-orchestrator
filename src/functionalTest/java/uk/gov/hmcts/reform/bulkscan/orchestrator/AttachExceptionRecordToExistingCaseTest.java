@@ -46,32 +46,16 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 @ActiveProfiles("nosb") // no servicebus queue handler registration
 class AttachExceptionRecordToExistingCaseTest {
 
-    @Value("${test-url}")
-    private String testUrl;
-
-    @Value("${document_management.url}")
-    private String documentManagementUrl;
-
-    @Value("${document_management.context-path}")
-    private String dmContextPath;
+    @Value("${test-url}") String testUrl;
 
     @Autowired ExceptionRecordCreator exceptionRecordCreator;
+    @Autowired CcdApi ccdApi;
+    @Autowired CcdCaseCreator ccdCaseCreator;
+    @Autowired DocumentManagementUploadService dmUploadService;
+    @Autowired CcdAuthenticatorFactory ccdAuthenticatorFactory;
 
-    @Autowired
-    private CcdApi ccdApi;
-
-    @Autowired
-    private CcdCaseCreator ccdCaseCreator;
-
-    @Autowired
-    private DocumentManagementUploadService dmUploadService;
-
-    @Autowired
-    private CcdAuthenticatorFactory ccdAuthenticatorFactory;
-
-    private String dmUrl;
-
-    private String documentUuid;
+    String dmUrl;
+    String documentUuid;
 
     @BeforeEach
     void setup() throws Exception {
