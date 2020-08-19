@@ -232,7 +232,7 @@ public class CcdNewCaseCreator {
             );
 
             log.info(
-                "{} field was set in new case data for service {}. ()",
+                "{} field was set in new case data for service {}. {}",
                 BULK_SCAN_ENVELOPES,
                 service,
                 loggingContext
