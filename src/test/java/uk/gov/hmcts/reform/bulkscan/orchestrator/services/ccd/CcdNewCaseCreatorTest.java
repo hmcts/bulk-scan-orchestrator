@@ -131,7 +131,7 @@ class CcdNewCaseCreatorTest {
             eq(exceptionRecord.poBoxJurisdiction),
             eq(expectedTransformationResponse.caseCreationDetails.caseTypeId),
             eq(expectedTransformationResponse.caseCreationDetails.eventId),
-            any(),
+            any(), // there's a separate test for this argument (case data content builder)
             eq(expectedLogContext)
         );
     }
