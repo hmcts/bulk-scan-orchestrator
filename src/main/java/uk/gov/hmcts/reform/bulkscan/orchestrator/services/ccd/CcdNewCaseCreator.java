@@ -238,6 +238,9 @@ public class CcdNewCaseCreator {
                 loggingContext
             );
         } else {
+            // if the value came from transformation service, it needs to be removed
+            updatedCaseData.remove(BULK_SCAN_ENVELOPES);
+
             log.info(
                 "{} field was NOT set in new case data for service {} - not supported by this service",
                 BULK_SCAN_ENVELOPES,
