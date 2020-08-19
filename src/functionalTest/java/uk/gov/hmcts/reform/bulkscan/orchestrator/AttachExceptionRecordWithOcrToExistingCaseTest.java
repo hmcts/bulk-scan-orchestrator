@@ -150,9 +150,9 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
         await("Exception record is created")
             .atMost(30, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
-            .until(() -> caseSearcher.findExceptionRecord(poBox.toString()).isPresent());
+            .until(() -> caseSearcher.findExceptionRecord(poBox.toString(), SampleData.CONTAINER).isPresent());
 
-        return caseSearcher.findExceptionRecord(poBox.toString()).get();
+        return caseSearcher.findExceptionRecord(poBox.toString(), SampleData.CONTAINER).get();
     }
 
     private void sendAttachRequest(CaseDetails exceptionRecord, String targetCaseId) {

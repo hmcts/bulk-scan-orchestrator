@@ -69,9 +69,9 @@ class ExceptionRecordCreationTest {
         await("Exception record being created")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
-            .until(() -> caseSearcher.findExceptionRecord(randomPoBox.toString()).isPresent());
+            .until(() -> caseSearcher.findExceptionRecord(randomPoBox.toString(), SampleData.CONTAINER).isPresent());
 
-        CaseDetails caseDetails = caseSearcher.findExceptionRecord(randomPoBox.toString()).get();
+        CaseDetails caseDetails = caseSearcher.findExceptionRecord(randomPoBox.toString(), SampleData.CONTAINER).get();
         assertThat(getCaseDataForField(caseDetails, "awaitingPaymentDCNProcessing")).isEqualTo("No");
         assertThat(getCaseDataForField(caseDetails, "containsPayments")).isEqualTo("No");
         assertThat(getCaseDataForField(caseDetails, "surname")).isNull();
@@ -96,9 +96,9 @@ class ExceptionRecordCreationTest {
         await("Exception record should be created")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
-            .until(() -> caseSearcher.findExceptionRecord(randomPoBox.toString()).isPresent());
+            .until(() -> caseSearcher.findExceptionRecord(randomPoBox.toString(), SampleData.CONTAINER).isPresent());
 
-        CaseDetails caseDetails = caseSearcher.findExceptionRecord(randomPoBox.toString()).get();
+        CaseDetails caseDetails = caseSearcher.findExceptionRecord(randomPoBox.toString(), SampleData.CONTAINER).get();
 
         // envelope ID from the JSON resource representing the test message
         assertThat(caseDetails.getData().get("envelopeId")).isEqualTo(messageEnvelopeId);
@@ -139,7 +139,7 @@ class ExceptionRecordCreationTest {
         await("Exception record being created")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
-            .until(() -> caseSearcher.findExceptionRecord(randomPoBox.toString()).isPresent());
+            .until(() -> caseSearcher.findExceptionRecord(randomPoBox.toString(), SampleData.CONTAINER).isPresent());
     }
 
     @DisplayName("Should create ExceptionRecord when classification is SUPPLEMENTARY_EVIDENCE_WITH_OCR")
