@@ -88,6 +88,7 @@ class AttachExceptionRecordToExistingCaseTest {
         //given
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
         CaseDetails exceptionRecord = exceptionRecordCreator.createExceptionRecord(
+            SampleData.CONTAINER,
             "envelopes/supplementary-evidence-envelope.json",
             dmUrl
         );
@@ -116,6 +117,7 @@ class AttachExceptionRecordToExistingCaseTest {
                 Instant.now()
             );
         CaseDetails exceptionRecord = exceptionRecordCreator.createExceptionRecord(
+            SampleData.CONTAINER,
             "envelopes/supplementary-evidence-envelope.json",
             dmUrl
         );
@@ -154,6 +156,7 @@ class AttachExceptionRecordToExistingCaseTest {
         //given
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
         CaseDetails exceptionRecord = exceptionRecordCreator.createExceptionRecord(
+            SampleData.CONTAINER,
             "envelopes/supplementary-evidence-envelope.json",
             dmUrl
         );
@@ -183,7 +186,7 @@ class AttachExceptionRecordToExistingCaseTest {
     ) throws Exception {
         //given
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), now()); // with no scanned documents
-        CaseDetails exceptionRecord = exceptionRecordCreator.createExceptionRecord(fileName, dmUrl);
+        CaseDetails exceptionRecord = exceptionRecordCreator.createExceptionRecord(SampleData.CONTAINER, fileName, dmUrl);
 
         // when
         Response response = invokeCallbackEndpoint(caseDetails, exceptionRecord, null, true);
@@ -228,6 +231,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
         CaseDetails exceptionRecord =
             exceptionRecordCreator.createExceptionRecord(
+                SampleData.CONTAINER,
                 "envelopes/supplementary-evidence-envelope-with-payment.json",
                 dmUrl
             );
@@ -260,6 +264,7 @@ class AttachExceptionRecordToExistingCaseTest {
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
 
         CaseDetails exceptionRecord = exceptionRecordCreator.createExceptionRecord(
+            SampleData.CONTAINER,
             "envelopes/supplementary-evidence-envelope.json",
             dmUrl
         );

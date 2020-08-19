@@ -72,6 +72,7 @@ class CreateCaseTest {
         String exceptionRecordResource = "envelopes/new-envelope-create-case-with-evidence-" + service + ".json";
 
         CaseDetails exceptionRecord = exceptionRecordCreator.createExceptionRecord(
+            service,
             exceptionRecordResource,
             dmUrl
         );
@@ -119,6 +120,7 @@ class CreateCaseTest {
     public void should_clear_exception_record_warnings() throws Exception {
         // given
         CaseDetails exceptionRecord = exceptionRecordCreator.createExceptionRecord(
+            SampleData.CONTAINER,
             "envelopes/new-application-with-ocr-data-warnings.json",
             dmUrl
         );
