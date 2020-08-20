@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.respons
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -22,15 +23,19 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.validation.ConstraintViolationException;
 
+import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.setExceptionRecordIdToScannedDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.logging.FeignExceptionLogger.debugCcdException;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ServiceCaseFields.BULK_SCAN_CASE_REFERENCE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ServiceCaseFields.BULK_SCAN_ENVELOPES;
 
 @Service
 public class CcdCaseUpdater {
@@ -40,17 +45,20 @@ public class CcdCaseUpdater {
     private final CoreCaseDataApi coreCaseDataApi;
     private final CaseUpdateClient caseUpdateClient;
     private final ServiceResponseParser serviceResponseParser;
+    private final EnvelopeReferenceHelper envelopeReferenceHelper;
 
     public CcdCaseUpdater(
         AuthTokenGenerator s2sTokenGenerator,
         CoreCaseDataApi coreCaseDataApi,
         CaseUpdateClient caseUpdateClient,
-        ServiceResponseParser serviceResponseParser
+        ServiceResponseParser serviceResponseParser,
+        EnvelopeReferenceHelper envelopeReferenceHelper
     ) {
         this.s2sTokenGenerator = s2sTokenGenerator;
         this.coreCaseDataApi = coreCaseDataApi;
         this.caseUpdateClient = caseUpdateClient;
         this.serviceResponseParser = serviceResponseParser;
+        this.envelopeReferenceHelper = envelopeReferenceHelper;
     }
 
     public Optional<ErrorsAndWarnings> updateCase(
@@ -129,14 +137,19 @@ public class CcdCaseUpdater {
                 );
                 return Optional.of(new ErrorsAndWarnings(emptyList(), updateResponse.warnings));
             } else {
-                setExceptionRecordIdToScannedDocuments(exceptionRecord, updateResponse.caseDetails);
+                Map<String, Object> updatedCaseData = setBulkScanSpecificFields(
+                    updateResponse.caseDetails,
+                    existingCase.getData(),
+                    exceptionRecord,
+                    configItem.getService()
+                );
 
                 updateCaseInCcd(
                     ignoreWarnings,
                     new CcdRequestCredentials(idamToken, s2sToken, userId),
                     existingCaseId,
                     exceptionRecord,
-                    updateResponse.caseDetails,
+                    updatedCaseData,
                     startEvent
                 );
 
@@ -213,6 +226,54 @@ public class CcdCaseUpdater {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> setBulkScanSpecificFields(
+        CaseUpdateDetails caseUpdateDetails,
+        Map<String, Object> originalCaseData,
+        ExceptionRecord exceptionRecord,
+        String service
+    ) {
+        var caseDataWithUpdatedScannedDocuments =
+            setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails);
+
+        return updateEnvelopeReferences(
+            caseDataWithUpdatedScannedDocuments,
+            originalCaseData,
+            exceptionRecord,
+            service
+        );
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> updateEnvelopeReferences(
+        Map<String, Object> transformedCaseData,
+        Map<String, Object> originalCaseData,
+        ExceptionRecord exceptionRecord,
+        String service
+    ) {
+        var updatedCaseData = newHashMap(transformedCaseData);
+
+        if (envelopeReferenceHelper.serviceSupportsEnvelopeReferences(service)) {
+            var envelopeReferences = envelopeReferenceHelper.parseEnvelopeReferences(
+                (List<Map<String, Object>>) originalCaseData.get(BULK_SCAN_CASE_REFERENCE)
+            );
+
+            envelopeReferences.addAll(
+                envelopeReferenceHelper.singleEnvelopeReferenceList(
+                    exceptionRecord.envelopeId,
+                    CaseAction.UPDATE
+                )
+            );
+
+            updatedCaseData.put(BULK_SCAN_ENVELOPES, envelopeReferences);
+        } else {
+            // make sure the field isn't included, as the service doesn't support it
+            updatedCaseData.remove(BULK_SCAN_ENVELOPES);
+        }
+
+        return updatedCaseData;
+    }
+
     private boolean isExceptionAlreadyAttached(
         CaseDetails existingCase,
         ExceptionRecord exceptionRecord
@@ -247,12 +308,13 @@ public class CcdCaseUpdater {
         CcdRequestCredentials ccdRequestCredentials,
         String existingCaseId,
         ExceptionRecord exceptionRecord,
-        CaseUpdateDetails caseUpdateDetails,
+        Map<String, Object> caseData,
         StartEventResponse startEvent
     ) {
         CaseDetails existingCase = startEvent.getCaseDetails();
 
-        final CaseDataContent caseDataContent = buildCaseDataContent(exceptionRecord, caseUpdateDetails, startEvent);
+        final CaseDataContent caseDataContent = buildCaseDataContent(exceptionRecord, caseData, startEvent);
+
         try {
             coreCaseDataApi.submitEventForCaseWorker(
                 ccdRequestCredentials.idamToken,
@@ -301,13 +363,13 @@ public class CcdCaseUpdater {
 
     private CaseDataContent buildCaseDataContent(
         ExceptionRecord exceptionRecord,
-        CaseUpdateDetails caseUpdateDetails,
+        Map<String, Object> caseData,
         StartEventResponse startEvent
     ) {
         return CaseDataContent
             .builder()
             .caseReference(exceptionRecord.id)
-            .data(caseUpdateDetails.caseData)
+            .data(caseData)
             .event(Event
                 .builder()
                 .id(startEvent.getEventId())

@@ -125,10 +125,13 @@ class ScannedDocumentsHelperTest {
         );
 
         // when
-        ScannedDocumentsHelper.setExceptionRecordIdToScannedDocuments(exceptionRecord, caseDetails);
+        var updatedCaseData = ScannedDocumentsHelper.setExceptionRecordIdToScannedDocuments(
+            exceptionRecord,
+            caseDetails
+        );
 
         //then
-        var updatedScannedDocuments = getScannedDocuments(caseDetails);
+        var updatedScannedDocuments = getScannedDocuments(updatedCaseData);
         assertThat(updatedScannedDocuments).hasSize(3);
         assertThat(updatedScannedDocuments.get(0).controlNumber).isEqualTo("1000");
         assertThat(updatedScannedDocuments.get(0).exceptionReference).isEqualTo("1");
@@ -159,10 +162,13 @@ class ScannedDocumentsHelperTest {
         );
 
         // when
-        ScannedDocumentsHelper.setExceptionRecordIdToScannedDocuments(exceptionRecord, caseDetails);
+        var updatedCaseData = ScannedDocumentsHelper.setExceptionRecordIdToScannedDocuments(
+            exceptionRecord,
+            caseDetails
+        );
 
         //then
-        var updatedScannedDocuments = getScannedDocuments(caseDetails);
+        var updatedScannedDocuments = getScannedDocuments(updatedCaseData);
         assertThat(updatedScannedDocuments).hasSize(3);
         assertThat(updatedScannedDocuments.get(0).controlNumber).isEqualTo("1000");
         assertThat(updatedScannedDocuments.get(0).exceptionReference).isNull();
@@ -193,9 +199,8 @@ class ScannedDocumentsHelperTest {
     }
 
     private List<uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument> getScannedDocuments(
-        CaseUpdateDetails caseDetails
+        Map<String, Object> caseData
     ) {
-        var caseData = (Map<String, Object>) caseDetails.caseData;
         var scannedDocuments = (List<Map<String, Object>>) caseData.get(SCANNED_DOCUMENTS);
         return scannedDocuments.stream().map(o ->
             objectMapper.convertValue(

@@ -57,6 +57,7 @@ class CcdCaseUpdaterTest {
 
     @Mock private CaseUpdateClient caseUpdateClient;
     @Mock private ServiceResponseParser serviceResponseParser;
+    @Mock private EnvelopeReferenceHelper envelopeReferenceHelper;
     @Mock private AuthTokenGenerator authTokenGenerator;
     @Mock private CoreCaseDataApi coreCaseDataApi;
     @Mock private ServiceConfigItem configItem;
@@ -76,7 +77,8 @@ class CcdCaseUpdaterTest {
             authTokenGenerator,
             coreCaseDataApi,
             caseUpdateClient,
-            serviceResponseParser
+            serviceResponseParser,
+            envelopeReferenceHelper
         );
 
         caseUpdateDetails = new CaseUpdateDetails(null, new HashMap<String, String>());

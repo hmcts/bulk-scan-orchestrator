@@ -15,6 +15,7 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SCANNED_DOCUMENTS;
@@ -49,11 +50,11 @@ public class ScannedDocumentsHelper {
     }
 
     @SuppressWarnings("unchecked")
-    public static void setExceptionRecordIdToScannedDocuments(
+    public static Map<String, Object> setExceptionRecordIdToScannedDocuments(
         ExceptionRecord exceptionRecord,
         CaseUpdateDetails caseDetails
     ) {
-        var caseData = (Map<String, Object>) caseDetails.caseData;
+        var caseData = newHashMap((Map<String, Object>)caseDetails.caseData);
         List<ScannedDocument> scannedDocuments = getScannedDocuments(caseData);
 
         List<String> exceptionRecordDcns = exceptionRecord.scannedDocuments
@@ -82,6 +83,7 @@ public class ScannedDocumentsHelper {
             })
             .collect(toList());
         caseData.put(SCANNED_DOCUMENTS, updatedScannedDocuments);
+        return caseData;
     }
 
     @SuppressWarnings("unchecked")
