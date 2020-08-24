@@ -14,7 +14,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import java.util.List;
+import java.util.Map;
+
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getDocuments;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ServiceCaseFields.BULK_SCAN_ENVELOPES;
 
 @Component
 class AttachDocsToSupplementaryEvidence {
@@ -74,12 +78,13 @@ class AttachDocsToSupplementaryEvidence {
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     private CaseDataContent buildCaseDataContent(Envelope envelope, StartEventResponse startEventResponse) {
-        SupplementaryEvidence caseData = mapper.map(
-            getDocuments(startEventResponse.getCaseDetails()),
-            envelope.documents,
-            envelope.deliveryDate
-        );
+        CaseDetails caseDetails = startEventResponse.getCaseDetails();
+        var envelopeReferences = (List<Map<String, Object>>)caseDetails.getData().get(BULK_SCAN_ENVELOPES);
+
+        SupplementaryEvidence caseData = mapper.map(getDocuments(caseDetails), envelopeReferences, envelope);
+
         return CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
             .event(Event.builder()
