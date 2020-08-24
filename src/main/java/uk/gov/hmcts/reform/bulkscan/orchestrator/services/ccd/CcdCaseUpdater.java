@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.respons
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.EnvelopeReference;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -254,15 +256,14 @@ public class CcdCaseUpdater {
         var updatedCaseData = newHashMap(transformedCaseData);
 
         if (envelopeReferenceHelper.serviceSupportsEnvelopeReferences(service)) {
-            var envelopeReferences = envelopeReferenceHelper.parseEnvelopeReferences(
-                (List<Map<String, Object>>) originalCaseData.get(BULK_SCAN_CASE_REFERENCE)
-            );
+            var envelopeReferences =
+                envelopeReferenceHelper
+                    .parseEnvelopeReferences(
+                        (List<Map<String, Object>>) originalCaseData.get(BULK_SCAN_CASE_REFERENCE)
+                    );
 
-            envelopeReferences.addAll(
-                envelopeReferenceHelper.singleEnvelopeReferenceList(
-                    exceptionRecord.envelopeId,
-                    CaseAction.UPDATE
-                )
+            envelopeReferences.add(
+                new CcdCollectionElement<>(new EnvelopeReference(exceptionRecord.envelopeId, CaseAction.UPDATE))
             );
 
             updatedCaseData.put(BULK_SCAN_ENVELOPES, envelopeReferences);
