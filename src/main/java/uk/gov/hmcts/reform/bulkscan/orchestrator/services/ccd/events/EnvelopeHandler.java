@@ -58,7 +58,7 @@ public class EnvelopeHandler {
                     } else {
                         log.info(
                             "Creating exception record as attaching supplementary evidence to a case failed."
-                            + "envelope: {}, case: {}",
+                                + "envelope: {}, case: {}",
                             envelope.id,
                             existingCase.getId()
                         );
