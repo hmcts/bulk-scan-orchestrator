@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.EnvelopeReference;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
@@ -10,7 +9,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigPr
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 
@@ -51,14 +49,5 @@ public class EnvelopeReferenceHelper {
                 .map(CcdCollectionElement::new)
                 .collect(toList());
         }
-    }
-
-    public List<CcdCollectionElement<EnvelopeReference>> singleEnvelopeReferenceList(
-        String envelopeId,
-        CaseAction action
-    ) {
-        return asList(
-            new CcdCollectionElement<>(new EnvelopeReference(envelopeId, action))
-        );
     }
 }
