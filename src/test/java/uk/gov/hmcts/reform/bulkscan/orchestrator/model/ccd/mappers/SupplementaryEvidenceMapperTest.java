@@ -1,7 +1,15 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.EnvelopeReference;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.SupplementaryEvidence;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EnvelopeReferenceHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 
 import java.time.Instant;
@@ -9,17 +17,33 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.time.Instant.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 
 @SuppressWarnings("checkstyle:LineLength")
+@ExtendWith(MockitoExtension.class)
 class SupplementaryEvidenceMapperTest {
 
-    private static final SupplementaryEvidenceMapper mapper = new SupplementaryEvidenceMapper("http://localhost", "files");
+    @Mock
+    private EnvelopeReferenceHelper envelopeReferenceHelper;
+
+    private SupplementaryEvidenceMapper mapper;
     Instant deliveryDate = Instant.now();
+
+    @BeforeEach
+    void setUp() {
+        mapper = new SupplementaryEvidenceMapper("http://localhost", "files", envelopeReferenceHelper);
+    }
 
     @Test
     void maps_all_fields_correctly() {
@@ -37,7 +61,7 @@ class SupplementaryEvidenceMapperTest {
             );
 
         // when
-        SupplementaryEvidence result = mapper.map(existingDocs, envelopeDocs, deliveryDate);
+        SupplementaryEvidence result = mapper.map(existingDocs, emptyList(), envelope(envelopeDocs, now()));
 
         // then
         assertThat(result.evidenceHandled).isEqualTo("No");
@@ -77,7 +101,7 @@ class SupplementaryEvidenceMapperTest {
             ));
 
         // when
-        SupplementaryEvidence result = mapper.map(existingDocs, envelopeDocs, deliveryDate);
+        SupplementaryEvidence result = mapper.map(existingDocs, emptyList(), envelope(envelopeDocs, deliveryDate));
 
         // then
         assertThat(result.evidenceHandled).isEqualTo("No");
@@ -91,6 +115,52 @@ class SupplementaryEvidenceMapperTest {
                 tuple("b.pdf", "http://localhost/files/uuidb"),
                 tuple("b.pdf", "http://localhost/files/uuidxxxxx")
             );
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void should_set_envelope_references_correctly_when_service_supports_them() {
+        // given
+        var parsedExistingEnvelopeReferences =
+            asList(new CcdCollectionElement<>(new EnvelopeReference("id1", CaseAction.CREATE)));
+
+        given(envelopeReferenceHelper.serviceSupportsEnvelopeReferences(any())).willReturn(true);
+        given(envelopeReferenceHelper.parseEnvelopeReferences(any())).willReturn(parsedExistingEnvelopeReferences);
+
+        var rawExistingEnvelopeReferences = mock(List.class);
+        var envelope = envelope(1);
+
+        // when
+        SupplementaryEvidence result = mapper.map(emptyList(), rawExistingEnvelopeReferences, envelope);
+
+        // then
+        List<CcdCollectionElement<EnvelopeReference>> expectedFinalEnvelopeReferences =
+            getExpectedEnvelopeReferencesAfterUpdate(parsedExistingEnvelopeReferences, envelope.id);
+
+        assertThat(result.bulkScanEnvelopes)
+            .usingRecursiveFieldByFieldElementComparator()
+            .isEqualTo(expectedFinalEnvelopeReferences);
+
+        verify(envelopeReferenceHelper).serviceSupportsEnvelopeReferences(envelope.container);
+        verify(envelopeReferenceHelper).parseEnvelopeReferences(rawExistingEnvelopeReferences);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void should_set_envelope_references_to_null_when_service_does_not_support_them() {
+        // given
+        given(envelopeReferenceHelper.serviceSupportsEnvelopeReferences(any())).willReturn(false);
+
+        var envelope = envelope(1);
+
+        // when
+        SupplementaryEvidence result = mapper.map(emptyList(), mock(List.class), envelope);
+
+        // then
+        assertThat(result.bulkScanEnvelopes).isNull();
+
+        verify(envelopeReferenceHelper).serviceSupportsEnvelopeReferences(envelope.container);
+        verify(envelopeReferenceHelper, never()).parseEnvelopeReferences(any());
     }
 
     @Test
@@ -109,7 +179,7 @@ class SupplementaryEvidenceMapperTest {
             );
 
         // when
-        SupplementaryEvidence result = mapper.map(existingDocs, envelopeDocs, deliveryDate);
+        SupplementaryEvidence result = mapper.map(existingDocs, emptyList(), envelope(envelopeDocs, deliveryDate));
 
         // then
         assertThat(result.scannedDocuments).hasSize(3); // only one doc should be added
@@ -129,10 +199,23 @@ class SupplementaryEvidenceMapperTest {
         List<Document> envelopeDocuments = emptyList();
 
         // when
-        SupplementaryEvidence result = mapper.map(existingDocuments, envelopeDocuments, deliveryDate);
+        SupplementaryEvidence result = mapper.map(
+            existingDocuments,
+            emptyList(),
+            envelope(envelopeDocuments, deliveryDate)
+        );
 
         // then
         assertThat(result.scannedDocuments).isEmpty();
+    }
+
+    private List<CcdCollectionElement<EnvelopeReference>> getExpectedEnvelopeReferencesAfterUpdate(
+        List<CcdCollectionElement<EnvelopeReference>> existingEnvelopeReferences,
+        String newEnvelopeId
+    ) {
+        var references = newArrayList(existingEnvelopeReferences);
+        references.add(new CcdCollectionElement<>(new EnvelopeReference(newEnvelopeId, CaseAction.UPDATE)));
+        return references;
     }
 
     private LocalDateTime toLocalDateTime(Instant instant) {

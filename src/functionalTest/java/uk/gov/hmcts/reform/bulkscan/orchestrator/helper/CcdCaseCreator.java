@@ -21,6 +21,7 @@ import java.util.Map;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 
 @Service
 public class CcdCaseCreator {
@@ -77,7 +78,7 @@ public class CcdCaseCreator {
         Map<String, Object> fieldsToOverwrite
     ) {
         SupplementaryEvidence supplementaryEvidence =
-            supplementaryEvidenceMapper.map(emptyList(), documents, deliveryDate);
+            supplementaryEvidenceMapper.map(emptyList(), null, envelope(documents, deliveryDate));
 
         Map<String, Object> eventData = new HashMap<>();
         eventData.put("evidenceHandled", supplementaryEvidence.evidenceHandled);

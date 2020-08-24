@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
+import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -7,6 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.SupplementaryEvidence;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.SupplementaryEvidenceMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
@@ -15,6 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -54,15 +57,24 @@ class AttachDocsToSupplementaryEvidenceTest {
         // given
         given(ccdApi.authenticateJurisdiction(any())).willReturn(AUTH_DETAILS);
 
-        // and
-        String eventToken = "token123";
+        var supplementaryEvidence = mock(SupplementaryEvidence.class);
+        given(mapper.map(any(), any(), any())).willReturn(supplementaryEvidence);
 
+        // and
+        List<Map<String, Object>> existingEnvelopeReferences = mock(List.class);
         StartEventResponse startEventResponse = mock(StartEventResponse.class);
+        given(startEventResponse.getCaseDetails())
+            .willReturn(
+                CaseDetails.builder().data(ImmutableMap.of("bulkScanEnvelopes", existingEnvelopeReferences)).build()
+            );
+
         CaseDetails caseDetails = mock(CaseDetails.class);
         given(caseDetails.getCaseTypeId()).willReturn(SampleData.BULK_SCANNED_CASE_TYPE);
 
         Map<String, Object> ccdData = new HashMap<>();
         ccdData.put("scannedDocuments", emptyList());
+
+        String eventToken = "token123";
 
         given(startEventResponse.getToken()).willReturn(eventToken);
         given(startEventResponse.getCaseDetails()).willReturn(caseDetails);
@@ -95,10 +107,11 @@ class AttachDocsToSupplementaryEvidenceTest {
         assertThat(caseDataContent.getEventToken()).isEqualTo(eventToken);
         assertThat(caseDataContent.getEvent().getId()).isEqualTo(EVENT_TYPE_ID);
         assertThat(caseDataContent.getEvent().getSummary()).isEqualTo("Attach scanned documents");
+        assertThat(caseDataContent.getData()).isSameAs(supplementaryEvidence);
         assertThat(docsAttached).isTrue();
 
         // and
-        verify(mapper).map(emptyList(), envelope.documents, envelope.deliveryDate);
+        verify(mapper).map(emptyList(), null, envelope);
     }
 
     @Test
