@@ -35,7 +35,6 @@ import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.setExceptionRecordIdToScannedDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.logging.FeignExceptionLogger.debugCcdException;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ServiceCaseFields.BULK_SCAN_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ServiceCaseFields.BULK_SCAN_ENVELOPES;
 
 @Service
@@ -139,14 +138,18 @@ public class CcdCaseUpdater {
                 return Optional.of(new ErrorsAndWarnings(emptyList(), updateResponse.warnings));
             } else {
                 var caseDataWithUpdatedScannedDocuments =
-                    setExceptionRecordIdToScannedDocuments(exceptionRecord, updateResponse.caseDetails);
+                    setExceptionRecordIdToScannedDocuments(
+                        exceptionRecord,
+                        updateResponse.caseDetails
+                    );
 
-                Map<String, Object> updatedCaseData = updateEnvelopeReferences(
-                    caseDataWithUpdatedScannedDocuments,
-                    existingCase.getData(),
-                    exceptionRecord,
-                    configItem.getService()
-                );
+                var updatedCaseData =
+                    updateEnvelopeReferences(
+                        caseDataWithUpdatedScannedDocuments,
+                        existingCase.getData(),
+                        exceptionRecord.envelopeId,
+                        configItem.getService()
+                    );
 
                 updateCaseInCcd(
                     ignoreWarnings,
@@ -234,7 +237,7 @@ public class CcdCaseUpdater {
     private Map<String, Object> updateEnvelopeReferences(
         Map<String, Object> transformedCaseData,
         Map<String, Object> originalCaseData,
-        ExceptionRecord exceptionRecord,
+        String envelopeId,
         String service
     ) {
         var updatedCaseData = newHashMap(transformedCaseData);
@@ -247,7 +250,7 @@ public class CcdCaseUpdater {
                     );
 
             envelopeReferences.add(
-                new CcdCollectionElement<>(new EnvelopeReference(exceptionRecord.envelopeId, CaseAction.UPDATE))
+                new CcdCollectionElement<>(new EnvelopeReference(envelopeId, CaseAction.UPDATE))
             );
 
             updatedCaseData.put(BULK_SCAN_ENVELOPES, envelopeReferences);
@@ -356,11 +359,11 @@ public class CcdCaseUpdater {
             .caseReference(exceptionRecord.id)
             .data(caseData)
             .event(Event
-                .builder()
-                .id(startEvent.getEventId())
-                .summary(String.format("Case updated, case Id %s", startEvent.getCaseDetails().getId()))
-                .description(String.format("Case updated based on exception record ref %s", exceptionRecord.id))
-                .build()
+                       .builder()
+                       .id(startEvent.getEventId())
+                       .summary(String.format("Case updated, case Id %s", startEvent.getCaseDetails().getId()))
+                       .description(String.format("Case updated based on exception record ref %s", exceptionRecord.id))
+                       .build()
             )
             .eventToken(startEvent.getToken())
             .build();
