@@ -9,7 +9,6 @@ import org.springframework.web.client.RestClientException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.CaseUpdateClient;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.CaseUpdateDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
@@ -139,8 +138,11 @@ public class CcdCaseUpdater {
                 );
                 return Optional.of(new ErrorsAndWarnings(emptyList(), updateResponse.warnings));
             } else {
-                Map<String, Object> updatedCaseData = setBulkScanSpecificFields(
-                    updateResponse.caseDetails,
+                var caseDataWithUpdatedScannedDocuments =
+                    setExceptionRecordIdToScannedDocuments(exceptionRecord, updateResponse.caseDetails);
+
+                Map<String, Object> updatedCaseData = updateEnvelopeReferences(
+                    caseDataWithUpdatedScannedDocuments,
                     existingCase.getData(),
                     exceptionRecord,
                     configItem.getService()
@@ -229,24 +231,6 @@ public class CcdCaseUpdater {
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String, Object> setBulkScanSpecificFields(
-        CaseUpdateDetails caseUpdateDetails,
-        Map<String, Object> originalCaseData,
-        ExceptionRecord exceptionRecord,
-        String service
-    ) {
-        var caseDataWithUpdatedScannedDocuments =
-            setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails);
-
-        return updateEnvelopeReferences(
-            caseDataWithUpdatedScannedDocuments,
-            originalCaseData,
-            exceptionRecord,
-            service
-        );
-    }
-
-    @SuppressWarnings("unchecked")
     private Map<String, Object> updateEnvelopeReferences(
         Map<String, Object> transformedCaseData,
         Map<String, Object> originalCaseData,
@@ -259,7 +243,7 @@ public class CcdCaseUpdater {
             var envelopeReferences =
                 envelopeReferenceHelper
                     .parseEnvelopeReferences(
-                        (List<Map<String, Object>>) originalCaseData.get(BULK_SCAN_CASE_REFERENCE)
+                        (List<Map<String, Object>>) originalCaseData.get(BULK_SCAN_ENVELOPES)
                     );
 
             envelopeReferences.add(
