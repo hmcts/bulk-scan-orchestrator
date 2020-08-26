@@ -13,11 +13,11 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static java.time.LocalDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.fileContentAsBytes;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.objectMapper;
@@ -106,6 +106,7 @@ class ScannedDocumentsHelperTest {
         // given
         //contains documents with control numbers 1000, 2000, 3000
         var caseDetails = getCaseUpdateDetails("case-data/multiple-scanned-docs.json");
+        var caseData = (Map<String, Object>) caseDetails.caseData;
         var scannedDocuments = asList(
             getScannedDocument("1000"),
             getScannedDocument("2000")
@@ -125,15 +126,15 @@ class ScannedDocumentsHelperTest {
         );
 
         // when
-        ScannedDocumentsHelper.setExceptionRecordIdToScannedDocuments(exceptionRecord, caseDetails);
+        var updatedCaseData = ScannedDocumentsHelper.setExceptionRecordIdToScannedDocuments(exceptionRecord, caseData);
 
         //then
-        var updatedScannedDocuments = getScannedDocuments(caseDetails);
+        var updatedScannedDocuments = getScannedDocuments(updatedCaseData);
         assertThat(updatedScannedDocuments).hasSize(3);
         assertThat(updatedScannedDocuments.get(0).controlNumber).isEqualTo("1000");
-        assertThat(updatedScannedDocuments.get(0).exceptionReference).isEqualTo("1");
+        assertThat(updatedScannedDocuments.get(0).exceptionReference).isEqualTo(exceptionRecord.id);
         assertThat(updatedScannedDocuments.get(1).controlNumber).isEqualTo("2000");
-        assertThat(updatedScannedDocuments.get(1).exceptionReference).isEqualTo("1");
+        assertThat(updatedScannedDocuments.get(1).exceptionReference).isEqualTo(exceptionRecord.id);
         // not present in the exception record and should not be set
         assertThat(updatedScannedDocuments.get(2).controlNumber).isEqualTo("3000");
         assertThat(updatedScannedDocuments.get(2).exceptionReference).isNull();
@@ -144,6 +145,7 @@ class ScannedDocumentsHelperTest {
         // given
         //contains documents with control numbers 1000, 2000, 3000
         var caseDetails = getCaseUpdateDetails("case-data/multiple-scanned-docs.json");
+        var caseData = (Map<String, Object>) caseDetails.caseData;
         var exceptionRecord = new ExceptionRecord(
             EXCEPTION_REFERENCE,
             "caseTypeId",
@@ -159,10 +161,10 @@ class ScannedDocumentsHelperTest {
         );
 
         // when
-        ScannedDocumentsHelper.setExceptionRecordIdToScannedDocuments(exceptionRecord, caseDetails);
+        var updatedCaseData = ScannedDocumentsHelper.setExceptionRecordIdToScannedDocuments(exceptionRecord, caseData);
 
         //then
-        var updatedScannedDocuments = getScannedDocuments(caseDetails);
+        var updatedScannedDocuments = getScannedDocuments(updatedCaseData);
         assertThat(updatedScannedDocuments).hasSize(3);
         assertThat(updatedScannedDocuments.get(0).controlNumber).isEqualTo("1000");
         assertThat(updatedScannedDocuments.get(0).exceptionReference).isNull();
@@ -193,15 +195,14 @@ class ScannedDocumentsHelperTest {
     }
 
     private List<uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument> getScannedDocuments(
-        CaseUpdateDetails caseDetails
+        Map<String, Object> caseData
     ) {
-        var caseData = (Map<String, Object>) caseDetails.caseData;
         var scannedDocuments = (List<Map<String, Object>>) caseData.get(SCANNED_DOCUMENTS);
         return scannedDocuments.stream().map(o ->
             objectMapper.convertValue(
                 o.get("value"),
                 uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument.class
             )
-        ).collect(Collectors.toList());
+        ).collect(toList());
     }
 }

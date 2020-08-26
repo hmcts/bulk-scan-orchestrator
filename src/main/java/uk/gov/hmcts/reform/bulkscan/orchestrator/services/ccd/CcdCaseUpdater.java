@@ -9,7 +9,6 @@ import org.springframework.web.client.RestClientException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.CaseUpdateClient;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.CaseUpdateDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
@@ -22,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.validation.ConstraintViolationException;
 
@@ -53,6 +53,7 @@ public class CcdCaseUpdater {
         this.serviceResponseParser = serviceResponseParser;
     }
 
+    @SuppressWarnings("unchecked")
     public Optional<ErrorsAndWarnings> updateCase(
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,
@@ -129,14 +130,19 @@ public class CcdCaseUpdater {
                 );
                 return Optional.of(new ErrorsAndWarnings(emptyList(), updateResponse.warnings));
             } else {
-                setExceptionRecordIdToScannedDocuments(exceptionRecord, updateResponse.caseDetails);
+                var caseDataAfterClientUpdate = (Map<String, Object>) updateResponse.caseDetails.caseData;
+
+                var finalCaseData = setExceptionRecordIdToScannedDocuments(
+                    exceptionRecord,
+                    caseDataAfterClientUpdate
+                );
 
                 updateCaseInCcd(
                     ignoreWarnings,
                     new CcdRequestCredentials(idamToken, s2sToken, userId),
                     existingCaseId,
                     exceptionRecord,
-                    updateResponse.caseDetails,
+                    finalCaseData,
                     startEvent
                 );
 
@@ -247,12 +253,12 @@ public class CcdCaseUpdater {
         CcdRequestCredentials ccdRequestCredentials,
         String existingCaseId,
         ExceptionRecord exceptionRecord,
-        CaseUpdateDetails caseUpdateDetails,
+        Map<String, Object> caseData,
         StartEventResponse startEvent
     ) {
         CaseDetails existingCase = startEvent.getCaseDetails();
 
-        final CaseDataContent caseDataContent = buildCaseDataContent(exceptionRecord, caseUpdateDetails, startEvent);
+        final CaseDataContent caseDataContent = buildCaseDataContent(exceptionRecord, caseData, startEvent);
         try {
             coreCaseDataApi.submitEventForCaseWorker(
                 ccdRequestCredentials.idamToken,
@@ -301,13 +307,13 @@ public class CcdCaseUpdater {
 
     private CaseDataContent buildCaseDataContent(
         ExceptionRecord exceptionRecord,
-        CaseUpdateDetails caseUpdateDetails,
+        Map<String, Object> caseData,
         StartEventResponse startEvent
     ) {
         return CaseDataContent
             .builder()
             .caseReference(exceptionRecord.id)
-            .data(caseUpdateDetails.caseData)
+            .data(caseData)
             .event(Event
                 .builder()
                 .id(startEvent.getEventId())
