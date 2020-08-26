@@ -53,6 +53,7 @@ class AttachDocsToSupplementaryEvidence {
         );
         if (mapper.getDocsToAdd(getDocuments(existingCase), envelope.documents).isEmpty()) {
             log.warn("Envelope has no new documents. CCD Case not updated. {}", loggingContext);
+            return true;
         } else {
             log.info("Attaching supplementary evidence. {}", loggingContext);
 
@@ -70,12 +71,12 @@ class AttachDocsToSupplementaryEvidence {
                 );
 
                 log.info("Attached documents from envelope to case. {}", loggingContext);
+                return true;
             } catch (UnableToAttachDocumentsException e) {
                 log.error("Failed to attach documents from envelope to case. {}", loggingContext, e);
                 return false;
             }
         }
-        return true;
     }
 
     @SuppressWarnings("unchecked")

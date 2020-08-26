@@ -57,7 +57,8 @@ public class EnvelopeHandler {
                         return new EnvelopeProcessingResult(existingCase.getId(), AUTO_ATTACHED_TO_CASE);
                     } else {
                         log.info(
-                            "Creating exception record as supplementary evidence failed for envelope {} case {}",
+                            "Creating exception record as attaching supplementary evidence to a case failed."
+                                + "envelope: {}, case: {}",
                             envelope.id,
                             existingCase.getId()
                         );
