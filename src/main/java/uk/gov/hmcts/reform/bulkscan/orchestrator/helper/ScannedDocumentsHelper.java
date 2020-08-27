@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang.StringUtils;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.CaseUpdateDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
@@ -15,6 +14,7 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SCANNED_DOCUMENTS;
@@ -48,12 +48,11 @@ public class ScannedDocumentsHelper {
             .collect(toList());
     }
 
-    @SuppressWarnings("unchecked")
-    public static void setExceptionRecordIdToScannedDocuments(
+    public static Map<String, Object> setExceptionRecordIdToScannedDocuments(
         ExceptionRecord exceptionRecord,
-        CaseUpdateDetails caseDetails
+        Map<String, Object> caseData
     ) {
-        var caseData = (Map<String, Object>) caseDetails.caseData;
+        var updatedCaseData = newHashMap(caseData);
         List<ScannedDocument> scannedDocuments = getScannedDocuments(caseData);
 
         List<String> exceptionRecordDcns = exceptionRecord.scannedDocuments
@@ -81,7 +80,10 @@ public class ScannedDocumentsHelper {
                 }
             })
             .collect(toList());
-        caseData.put(SCANNED_DOCUMENTS, updatedScannedDocuments);
+
+        updatedCaseData.put(SCANNED_DOCUMENTS, updatedScannedDocuments);
+
+        return updatedCaseData;
     }
 
     @SuppressWarnings("unchecked")
