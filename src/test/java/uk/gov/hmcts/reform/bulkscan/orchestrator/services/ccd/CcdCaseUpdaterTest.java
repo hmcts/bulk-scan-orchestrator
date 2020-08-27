@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUr
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataUpdater;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -62,6 +63,7 @@ class CcdCaseUpdaterTest {
     @Mock private ServiceConfigItem configItem;
     @Mock private CaseDetails existingCase;
     @Mock private StartEventResponse eventResponse;
+    @Mock private CaseDataUpdater caseDataUpdater;
 
     private ExceptionRecord exceptionRecord;
 
@@ -76,6 +78,7 @@ class CcdCaseUpdaterTest {
             authTokenGenerator,
             coreCaseDataApi,
             caseUpdateClient,
+            caseDataUpdater,
             serviceResponseParser
         );
 

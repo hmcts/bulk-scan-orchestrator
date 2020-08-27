@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.CaseUpdateCli
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataUpdater;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -29,7 +30,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getDocuments;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.setExceptionRecordIdToScannedDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.logging.FeignExceptionLogger.debugCcdException;
 
 @Service
@@ -39,17 +39,20 @@ public class CcdCaseUpdater {
     private final AuthTokenGenerator s2sTokenGenerator;
     private final CoreCaseDataApi coreCaseDataApi;
     private final CaseUpdateClient caseUpdateClient;
+    private final CaseDataUpdater caseDataUpdater;
     private final ServiceResponseParser serviceResponseParser;
 
     public CcdCaseUpdater(
         AuthTokenGenerator s2sTokenGenerator,
         CoreCaseDataApi coreCaseDataApi,
         CaseUpdateClient caseUpdateClient,
+        CaseDataUpdater caseDataUpdater,
         ServiceResponseParser serviceResponseParser
     ) {
         this.s2sTokenGenerator = s2sTokenGenerator;
         this.coreCaseDataApi = coreCaseDataApi;
         this.caseUpdateClient = caseUpdateClient;
+        this.caseDataUpdater = caseDataUpdater;
         this.serviceResponseParser = serviceResponseParser;
     }
 
@@ -132,7 +135,7 @@ public class CcdCaseUpdater {
             } else {
                 var caseDataAfterClientUpdate = (Map<String, Object>) updateResponse.caseDetails.caseData;
 
-                var finalCaseData = setExceptionRecordIdToScannedDocuments(
+                var finalCaseData = caseDataUpdater.setExceptionRecordIdToScannedDocuments(
                     exceptionRecord,
                     caseDataAfterClientUpdate
                 );
