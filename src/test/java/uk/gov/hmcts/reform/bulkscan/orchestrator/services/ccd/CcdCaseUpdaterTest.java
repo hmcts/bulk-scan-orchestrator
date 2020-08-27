@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito.BDDMyOngoingStubbing;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
@@ -68,8 +69,6 @@ class CcdCaseUpdaterTest {
     private SuccessfulUpdateResponse noWarningsUpdateResponse;
     private SuccessfulUpdateResponse warningsUpdateResponse;
 
-    private CaseUpdateDetails caseUpdateDetails;
-
     @BeforeEach
     void setUp() {
         ccdCaseUpdater = new CcdCaseUpdater(
@@ -79,89 +78,14 @@ class CcdCaseUpdaterTest {
             serviceResponseParser
         );
 
-        caseUpdateDetails = new CaseUpdateDetails(null, new HashMap<String, String>());
+        CaseUpdateDetails caseUpdateDetails = new CaseUpdateDetails(null, new HashMap<String, String>());
         exceptionRecord = getExceptionRecord();
 
         noWarningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
-        warningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, asList("warning1"));
+        warningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, singletonList("warning1"));
 
         given(configItem.getService()).willReturn("Service");
         given(authTokenGenerator.generate()).willReturn("token");
-    }
-
-    @Test
-    void updateCase_should_if_no_warnings() {
-        // given
-        given(configItem.getUpdateUrl()).willReturn("url");
-        given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
-            .willReturn(noWarningsUpdateResponse);
-        initResponseMockData();
-        initMockData();
-        prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
-
-        // when
-        Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
-            exceptionRecord,
-            configItem,
-            true,
-            "idamToken",
-            "userId",
-            EXISTING_CASE_ID,
-            EXISTING_CASE_TYPE_ID
-        );
-
-        // then
-        assertThat(res).isEmpty();
-    }
-
-    @Test
-    void updateCase_should_ignore_warnings() {
-        // given
-        given(configItem.getUpdateUrl()).willReturn("url");
-        given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
-            .willReturn(noWarningsUpdateResponse);
-        initResponseMockData();
-        initMockData();
-        prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
-
-        // when
-        Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
-            exceptionRecord,
-            configItem,
-            true,
-            "idamToken",
-            "userId",
-            EXISTING_CASE_ID,
-            EXISTING_CASE_TYPE_ID
-        );
-
-        // then
-        assertThat(res).isEmpty();
-    }
-
-    @Test
-    void updateCase_should_not_ignore_warnings() {
-        // given
-        given(configItem.getUpdateUrl()).willReturn("url");
-        given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
-            .willReturn(warningsUpdateResponse);
-        initMockData();
-
-        // when
-        Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
-            exceptionRecord,
-            configItem,
-            false,
-            "idamToken",
-            "userId",
-            EXISTING_CASE_ID,
-            EXISTING_CASE_TYPE_ID
-        );
-
-        // then
-        assertThat(res).isNotEmpty();
-        assertThat(res.get().getErrors()).isEmpty();
-        assertThat(res.get().getWarnings()).containsOnly("warning1");
     }
 
     @Test
@@ -187,6 +111,56 @@ class CcdCaseUpdaterTest {
 
         // then
         assertThat(res).isEmpty();
+    }
+
+    @Test
+    void updateCase_should_ignore_warnings_if_ignoreWarnings_is_true() {
+        // given
+        given(configItem.getUpdateUrl()).willReturn("url");
+        given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
+            .willReturn(warningsUpdateResponse);
+        initResponseMockData();
+        initMockData();
+        prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
+
+        // when
+        Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
+            exceptionRecord,
+            configItem,
+            true,
+            "idamToken",
+            "userId",
+            EXISTING_CASE_ID,
+            EXISTING_CASE_TYPE_ID
+        );
+
+        // then
+        assertThat(res).isEmpty();
+    }
+
+    @Test
+    void updateCase_should_not_ignore_warnings_if_ignoreWarnings_is_false() {
+        // given
+        given(configItem.getUpdateUrl()).willReturn("url");
+        given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
+            .willReturn(warningsUpdateResponse);
+        initMockData();
+
+        // when
+        Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
+            exceptionRecord,
+            configItem,
+            false,
+            "idamToken",
+            "userId",
+            EXISTING_CASE_ID,
+            EXISTING_CASE_TYPE_ID
+        );
+
+        // then
+        assertThat(res).isNotEmpty();
+        assertThat(res.get().getErrors()).isEmpty();
+        assertThat(res.get().getWarnings()).containsOnly("warning1");
     }
 
     @Test
@@ -368,7 +342,7 @@ class CcdCaseUpdaterTest {
             .willThrow(HttpClientErrorException.create(
                 HttpStatus.BAD_REQUEST,
                 "bad request message",
-                null,
+                HttpHeaders.EMPTY,
                 null,
                 null
             ));
@@ -405,7 +379,7 @@ class CcdCaseUpdaterTest {
             HttpClientErrorException.create(
                 HttpStatus.UNPROCESSABLE_ENTITY,
                 "unprocessable entity message",
-                null,
+                HttpHeaders.EMPTY,
                 null,
                 null
             );
