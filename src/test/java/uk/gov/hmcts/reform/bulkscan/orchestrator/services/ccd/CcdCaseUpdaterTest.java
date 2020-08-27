@@ -305,7 +305,7 @@ class CcdCaseUpdaterTest {
                 exceptionRecord.id
             );
 
-        verifyNoInteractions(caseDataUpdater);
+        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, (Map<String, Object>) caseUpdateDetails.caseData);
     }
 
     @Test

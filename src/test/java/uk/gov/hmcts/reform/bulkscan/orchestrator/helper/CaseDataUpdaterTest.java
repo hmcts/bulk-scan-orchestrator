@@ -21,7 +21,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.objectMapper;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType.FORM;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SCANNED_DOCUMENTS;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "checkstyle:LineLength"})
 class CaseDataUpdaterTest {
 
     @Test
