@@ -29,7 +29,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import javax.validation.ConstraintViolationException;
 
@@ -46,8 +46,11 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
+@SuppressWarnings({"checkstyle:LineLength", "unchecked"})
 @ExtendWith(MockitoExtension.class)
 class CcdCaseUpdaterTest {
 
@@ -82,7 +85,7 @@ class CcdCaseUpdaterTest {
             serviceResponseParser
         );
 
-        caseUpdateDetails = new CaseUpdateDetails(null, new HashMap<String, String>());
+        caseUpdateDetails = new CaseUpdateDetails(null, Map.of("a", "b"));
         exceptionRecord = getExceptionRecord();
 
         noWarningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
@@ -115,6 +118,8 @@ class CcdCaseUpdaterTest {
 
         // then
         assertThat(res).isEmpty();
+
+        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, (Map<String, Object>) caseUpdateDetails.caseData);
     }
 
     @Test
@@ -140,6 +145,8 @@ class CcdCaseUpdaterTest {
 
         // then
         assertThat(res).isEmpty();
+
+        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, (Map<String, Object>) caseUpdateDetails.caseData);
     }
 
     @Test
@@ -165,6 +172,8 @@ class CcdCaseUpdaterTest {
         assertThat(res).isNotEmpty();
         assertThat(res.get().getErrors()).isEmpty();
         assertThat(res.get().getWarnings()).containsOnly("warning1");
+
+        verifyNoInteractions(caseDataUpdater);
     }
 
     @Test
@@ -190,6 +199,8 @@ class CcdCaseUpdaterTest {
 
         // then
         assertThat(res).isEmpty();
+
+        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, (Map<String, Object>) caseUpdateDetails.caseData);
     }
 
     @Test
@@ -218,6 +229,8 @@ class CcdCaseUpdaterTest {
         assertThat(res.get().getErrors()).containsExactlyInAnyOrder("Failed to update case for Service service "
             + "with case Id existing_case_id based on exception record 1 because it has been updated in the meantime");
         assertThat(res.get().getWarnings()).isEmpty();
+
+        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, (Map<String, Object>) caseUpdateDetails.caseData);
     }
 
     @Test
@@ -251,6 +264,8 @@ class CcdCaseUpdaterTest {
             .isEqualTo("Failed to update case for Service service with case Id existing_case_id "
                 + "based on exception record 1");
         assertThat(callbackException.getCause().getMessage()).isEqualTo("Service response: Body");
+
+        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, (Map<String, Object>) caseUpdateDetails.caseData);
     }
 
     @Test
@@ -289,6 +304,8 @@ class CcdCaseUpdaterTest {
                 EXISTING_CASE_ID,
                 exceptionRecord.id
             );
+
+        verifyNoInteractions(caseDataUpdater);
     }
 
     @Test
@@ -324,6 +341,8 @@ class CcdCaseUpdaterTest {
                 EXISTING_CASE_ID,
                 exceptionRecord.id
             );
+
+        verifyNoInteractions(caseDataUpdater);
     }
 
     @Test
@@ -354,6 +373,8 @@ class CcdCaseUpdaterTest {
             .isInstanceOf(CallbackException.class)
             .hasCauseInstanceOf(ConstraintViolationException.class)
             .hasMessageContaining("Invalid case-update response");
+
+        verifyNoInteractions(caseDataUpdater);
     }
 
     @Test
@@ -399,6 +420,8 @@ class CcdCaseUpdaterTest {
         assertThat(((HttpClientErrorException) callbackException.getCause()).getStatusText())
             .isEqualTo("bad request message");
         assertThat(((HttpClientErrorException) callbackException.getCause()).getRawStatusCode()).isEqualTo(400);
+
+        verifyNoInteractions(caseDataUpdater);
     }
 
     @Test
@@ -440,6 +463,8 @@ class CcdCaseUpdaterTest {
         assertThat(res).isNotEmpty();
         assertThat(res.get().getErrors()).containsExactlyInAnyOrder("error1", "error2");
         assertThat(res.get().getWarnings()).isEmpty();
+
+        verifyNoInteractions(caseDataUpdater);
     }
 
     @Test
@@ -475,6 +500,8 @@ class CcdCaseUpdaterTest {
             .isEqualTo("Failed to update case for Service service with case Id existing_case_id "
                 + "based on exception record 1. Service response: Body");
         assertThat(callbackException.getCause().getMessage()).isEqualTo("Msg");
+
+        verifyNoInteractions(caseDataUpdater);
     }
 
     @Test
@@ -507,8 +534,9 @@ class CcdCaseUpdaterTest {
 
         // then
         assertThat(callbackException.getMessage())
-            .isEqualTo("Failed to update case for Service service with case Id existing_case_id "
-                + "based on exception record 1");
+            .isEqualTo("Failed to update case for Service service with case Id existing_case_id based on exception record 1");
+
+        verifyNoInteractions(caseDataUpdater);
     }
 
     @Test
@@ -542,6 +570,8 @@ class CcdCaseUpdaterTest {
         assertThat(res).isNotEmpty();
         assertThat(res.get().getErrors()).containsOnly("No case found for case ID: 1234123412341234");
         assertThat(res.get().getWarnings()).isEmpty();
+
+        verifyNoInteractions(caseDataUpdater);
     }
 
     @Test
@@ -573,6 +603,8 @@ class CcdCaseUpdaterTest {
         assertThat(res).isNotEmpty();
         assertThat(res.get().getErrors()).containsOnly("Invalid case ID: 1234");
         assertThat(res.get().getWarnings()).isEmpty();
+
+        verifyNoInteractions(caseDataUpdater);
     }
 
     private BDDMyOngoingStubbing<CaseDetails> prepareMockForSubmissionEventForCaseWorker() {
