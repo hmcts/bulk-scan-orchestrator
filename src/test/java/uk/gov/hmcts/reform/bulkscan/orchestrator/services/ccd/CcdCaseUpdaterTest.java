@@ -69,6 +69,8 @@ class CcdCaseUpdaterTest {
     private SuccessfulUpdateResponse noWarningsUpdateResponse;
     private SuccessfulUpdateResponse warningsUpdateResponse;
 
+    private CaseUpdateDetails caseUpdateDetails;
+
     @BeforeEach
     void setUp() {
         ccdCaseUpdater = new CcdCaseUpdater(
@@ -78,7 +80,7 @@ class CcdCaseUpdaterTest {
             serviceResponseParser
         );
 
-        CaseUpdateDetails caseUpdateDetails = new CaseUpdateDetails(null, new HashMap<String, String>());
+        caseUpdateDetails = new CaseUpdateDetails(null, new HashMap<String, String>());
         exceptionRecord = getExceptionRecord();
 
         noWarningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
@@ -89,7 +91,7 @@ class CcdCaseUpdaterTest {
     }
 
     @Test
-    void updateCase_should_pass_if_no_warnings() {
+    void updateCase_should_return_no_error_or_warnings_if_no_warnings_from_updateCase() {
         // given
         given(configItem.getUpdateUrl()).willReturn("url");
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
@@ -114,7 +116,7 @@ class CcdCaseUpdaterTest {
     }
 
     @Test
-    void updateCase_should_ignore_warnings_if_ignoreWarnings_is_true() {
+    void updateCase_should_return_no_error_or_warnings_if_warnings_from_updateCase_and_ignoreWarnings_is_true() {
         // given
         given(configItem.getUpdateUrl()).willReturn("url");
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
@@ -139,7 +141,7 @@ class CcdCaseUpdaterTest {
     }
 
     @Test
-    void updateCase_should_not_ignore_warnings_if_ignoreWarnings_is_false() {
+    void updateCase_should_return_warnings_if_warnings_from_updateCase_and_ignoreWarnings_is_false() {
         // given
         given(configItem.getUpdateUrl()).willReturn("url");
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
@@ -449,7 +451,7 @@ class CcdCaseUpdaterTest {
     }
 
     @Test
-    void updateCase_should_handle_exception() {
+    void updateCase_should_handle_generic_exception() {
         // given
         given(coreCaseDataApi.startEventForCaseWorker(
             anyString(),
