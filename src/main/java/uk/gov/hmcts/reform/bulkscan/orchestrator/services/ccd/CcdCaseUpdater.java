@@ -56,7 +56,6 @@ public class CcdCaseUpdater {
         this.serviceResponseParser = serviceResponseParser;
     }
 
-    @SuppressWarnings("unchecked")
     public Optional<ErrorsAndWarnings> updateCase(
         ExceptionRecord exceptionRecord,
         ServiceConfigItem configItem,

@@ -50,7 +50,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
-@SuppressWarnings({"checkstyle:LineLength", "unchecked"})
+@SuppressWarnings({"checkstyle:LineLength"})
 @ExtendWith(MockitoExtension.class)
 class CcdCaseUpdaterTest {
 
