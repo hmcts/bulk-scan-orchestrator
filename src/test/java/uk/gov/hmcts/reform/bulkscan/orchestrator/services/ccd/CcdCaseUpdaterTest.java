@@ -119,7 +119,7 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(res).isEmpty();
 
-        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, (Map<String, Object>) caseUpdateDetails.caseData);
+        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
     }
 
     @Test
@@ -146,7 +146,7 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(res).isEmpty();
 
-        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, (Map<String, Object>) caseUpdateDetails.caseData);
+        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
     }
 
     @Test
@@ -200,7 +200,7 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(res).isEmpty();
 
-        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, (Map<String, Object>) caseUpdateDetails.caseData);
+        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
     }
 
     @Test
@@ -230,7 +230,7 @@ class CcdCaseUpdaterTest {
             + "with case Id existing_case_id based on exception record 1 because it has been updated in the meantime");
         assertThat(res.get().getWarnings()).isEmpty();
 
-        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, (Map<String, Object>) caseUpdateDetails.caseData);
+        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
     }
 
     @Test
@@ -265,7 +265,7 @@ class CcdCaseUpdaterTest {
                 + "based on exception record 1");
         assertThat(callbackException.getCause().getMessage()).isEqualTo("Service response: Body");
 
-        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, (Map<String, Object>) caseUpdateDetails.caseData);
+        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
     }
 
     @Test
@@ -305,7 +305,7 @@ class CcdCaseUpdaterTest {
                 exceptionRecord.id
             );
 
-        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, (Map<String, Object>) caseUpdateDetails.caseData);
+        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
     }
 
     @Test

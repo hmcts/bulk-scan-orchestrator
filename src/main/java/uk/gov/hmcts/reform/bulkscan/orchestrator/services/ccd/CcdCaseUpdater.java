@@ -133,7 +133,7 @@ public class CcdCaseUpdater {
                 );
                 return Optional.of(new ErrorsAndWarnings(emptyList(), updateResponse.warnings));
             } else {
-                var caseDataAfterClientUpdate = (Map<String, Object>) updateResponse.caseDetails.caseData;
+                var caseDataAfterClientUpdate = updateResponse.caseDetails.caseData;
 
                 var finalCaseData = caseDataUpdater.setExceptionRecordIdToScannedDocuments(
                     exceptionRecord,
