@@ -1,10 +1,18 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.CaseUpdateDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.EnvelopeReference;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EnvelopeReferenceHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 
 import java.io.IOException;
@@ -16,20 +24,31 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.fileContentAsBytes;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.objectMapper;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType.FORM;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SCANNED_DOCUMENTS;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ServiceCaseFields.BULK_SCAN_ENVELOPES;
 
 @SuppressWarnings({"unchecked", "checkstyle:LineLength"})
+@ExtendWith(MockitoExtension.class)
 class CaseDataUpdaterTest {
+
+    @Mock EnvelopeReferenceHelper envelopeReferenceHelper;
+
+    CaseDataUpdater caseDataUpdater;
+
+    @BeforeEach
+    void setUp() {
+        this.caseDataUpdater = new CaseDataUpdater(envelopeReferenceHelper);
+    }
 
     @Test
     void sets_exception_record_id_to_scanned_documents() throws Exception {
         // given
-        var caseDataUpdater = new CaseDataUpdater();
-
-        //contains documents with control numbers 1000, 2000, 3000
+        // case contains documents with control numbers 1000, 2000, 3000
         var caseDetails = getCaseUpdateDetails("case-data/multiple-scanned-docs.json");
         var scannedDocuments = asList(
             getScannedDocument("1000"),
@@ -50,7 +69,10 @@ class CaseDataUpdaterTest {
         );
 
         // when
-        var updatedCaseData = caseDataUpdater.setExceptionRecordIdToScannedDocuments(exceptionRecord, caseDetails.caseData);
+        var updatedCaseData = caseDataUpdater.setExceptionRecordIdToScannedDocuments(
+            exceptionRecord,
+            caseDetails.caseData
+        );
 
         //then
         var updatedScannedDocuments = getScannedDocuments(updatedCaseData);
@@ -62,6 +84,31 @@ class CaseDataUpdaterTest {
         // not present in the exception record and should not be set
         assertThat(updatedScannedDocuments.get(2).controlNumber).isEqualTo("3000");
         assertThat(updatedScannedDocuments.get(2).exceptionReference).isNull();
+    }
+
+    @Test
+    void should_update_exception_record_references() throws Exception {
+        //given
+        var caseDetails = getCaseUpdateDetails("case-data/envelope-refs/with-refs.json");
+
+        given(envelopeReferenceHelper.parseEnvelopeReferences(any()))
+            .willReturn(
+                List.of(
+                    new CcdCollectionElement<>(new EnvelopeReference("aaaaa", CaseAction.CREATE))
+                )
+            );
+
+        // when
+        var result = caseDataUpdater.updateUpdateEnvelopeReferences(caseDetails.caseData, "bbbbb");
+
+        // then
+        var refsAfterUpdate = (List<CcdCollectionElement<EnvelopeReference>>) result.get(BULK_SCAN_ENVELOPES);
+        assertThat(refsAfterUpdate.stream().map(ccdElement -> ccdElement.value))
+            .usingFieldByFieldElementComparator()
+            .containsExactlyInAnyOrder(
+                new EnvelopeReference("aaaaa", CaseAction.CREATE),
+                new EnvelopeReference("bbbbb", CaseAction.UPDATE)
+            );
     }
 
     private CaseUpdateDetails getCaseUpdateDetails(String resourceName) throws IOException {
