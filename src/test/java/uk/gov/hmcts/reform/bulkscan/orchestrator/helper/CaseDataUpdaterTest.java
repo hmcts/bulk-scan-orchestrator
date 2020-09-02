@@ -94,21 +94,22 @@ class CaseDataUpdaterTest {
         given(envelopeReferenceHelper.parseEnvelopeReferences(any()))
             .willReturn(
                 List.of(
-                    new CcdCollectionElement<>(new EnvelopeReference("aaaaa", CaseAction.CREATE))
+                    new CcdCollectionElement<>(new EnvelopeReference("OLD-id", CaseAction.CREATE))
                 )
             );
 
         // when
-        var result = caseDataUpdater.updateUpdateEnvelopeReferences(caseDetails.caseData, "bbbbb");
+        var result = caseDataUpdater.updateUpdateEnvelopeReferences(caseDetails.caseData, "NEW-id");
 
         // then
         var refsAfterUpdate = (List<CcdCollectionElement<EnvelopeReference>>) result.get(BULK_SCAN_ENVELOPES);
         assertThat(refsAfterUpdate.stream().map(ccdElement -> ccdElement.value))
             .usingFieldByFieldElementComparator()
             .containsExactlyInAnyOrder(
-                new EnvelopeReference("aaaaa", CaseAction.CREATE),
-                new EnvelopeReference("bbbbb", CaseAction.UPDATE)
+                new EnvelopeReference("OLD-id", CaseAction.CREATE),
+                new EnvelopeReference("NEW-id", CaseAction.UPDATE)
             );
+        // TODO: assert other fields in case have not changed
     }
 
     private CaseUpdateDetails getCaseUpdateDetails(String resourceName) throws IOException {
