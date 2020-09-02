@@ -72,8 +72,8 @@ public class CaseDataUpdater {
         String envelopeId
     ) {
         List<CcdCollectionElement<EnvelopeReference>> existingCaseRefs =
-            envelopeReferenceHelper.
-                parseEnvelopeReferences(
+            envelopeReferenceHelper
+                .parseEnvelopeReferences(
                     (List<Map<String, Object>>) caseData.get(BULK_SCAN_ENVELOPES)
                 );
 

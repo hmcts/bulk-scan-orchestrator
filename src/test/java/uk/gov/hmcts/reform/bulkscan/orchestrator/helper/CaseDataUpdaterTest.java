@@ -109,7 +109,7 @@ class CaseDataUpdaterTest {
                 new EnvelopeReference("OLD-id", CaseAction.CREATE),
                 new EnvelopeReference("NEW-id", CaseAction.UPDATE)
             );
-        // TODO: assert other fields in case have not changed
+        // TODO: assert other fields in case dataCaseDataUpdater have not changed
     }
 
     private CaseUpdateDetails getCaseUpdateDetails(String resourceName) throws IOException {
