@@ -31,7 +31,6 @@ class CaseDataUpdaterTest {
 
         //contains documents with control numbers 1000, 2000, 3000
         var caseDetails = getCaseUpdateDetails("case-data/multiple-scanned-docs.json");
-        var caseData = (Map<String, Object>) caseDetails.caseData;
         var scannedDocuments = asList(
             getScannedDocument("1000"),
             getScannedDocument("2000")
@@ -51,7 +50,7 @@ class CaseDataUpdaterTest {
         );
 
         // when
-        var updatedCaseData = caseDataUpdater.setExceptionRecordIdToScannedDocuments(exceptionRecord, caseData);
+        var updatedCaseData = caseDataUpdater.setExceptionRecordIdToScannedDocuments(exceptionRecord, caseDetails.caseData);
 
         //then
         var updatedScannedDocuments = getScannedDocuments(updatedCaseData);
