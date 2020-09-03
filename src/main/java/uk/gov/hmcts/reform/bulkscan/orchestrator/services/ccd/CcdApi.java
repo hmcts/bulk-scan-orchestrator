@@ -199,7 +199,7 @@ public class CcdApi {
                     .build()
             );
         } catch (FeignException e) {
-            debugCcdException(log, e, "Failed to call 'attachCall' - `submitEventForCaseWorker`");
+            debugCcdException(log, e, "Failed to call 'attachExceptionRecord' - `submitEventForCaseWorker`");
             throw new CcdCallException(
                 format("Internal Error: submitting attach file event failed case: %s Error: %s", caseRef, e.status()),
                 e
@@ -371,7 +371,7 @@ public class CcdApi {
 
             return caseId;
         } catch (FeignException exception) {
-            debugCcdException(log, exception, "Failed to call 'createNewCaseFromCallback'");
+            debugCcdException(log, exception, "Failed to call 'createCase'");
 
             throw exception;
         }
