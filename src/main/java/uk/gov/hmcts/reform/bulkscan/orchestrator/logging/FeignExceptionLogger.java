@@ -13,7 +13,7 @@ public final class FeignExceptionLogger {
         logger.debug(
             "{}. CCD response: {}",
             introMessage,
-            exception.responseBody().map(b -> new String(b.array())).orElseGet(exception::getMessage)
+            exception.responseBody().map(b -> exception.contentUTF8()).orElseGet(exception::getMessage)
         );
     }
 }
