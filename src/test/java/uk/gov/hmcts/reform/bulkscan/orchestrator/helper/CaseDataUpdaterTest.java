@@ -90,6 +90,7 @@ class CaseDataUpdaterTest {
     void should_update_exception_record_references() throws Exception {
         //given
         var caseDetails = getCaseUpdateDetails("case-data/envelope-refs/with-refs.json");
+        var caseDataBeforeUpdate = caseDetails.caseData;
 
         given(envelopeReferenceHelper.parseEnvelopeReferences(any()))
             .willReturn(
@@ -99,17 +100,20 @@ class CaseDataUpdaterTest {
             );
 
         // when
-        var result = caseDataUpdater.updateUpdateEnvelopeReferences(caseDetails.caseData, "NEW-id");
+        var caseDataAfterUpdate = caseDataUpdater.updateUpdateEnvelopeReferences(caseDetails.caseData, "NEW-id");
 
         // then
-        var refsAfterUpdate = (List<CcdCollectionElement<EnvelopeReference>>) result.get(BULK_SCAN_ENVELOPES);
+        var refsAfterUpdate = (List<CcdCollectionElement<EnvelopeReference>>) caseDataAfterUpdate.get(BULK_SCAN_ENVELOPES);
         assertThat(refsAfterUpdate.stream().map(ccdElement -> ccdElement.value))
             .usingFieldByFieldElementComparator()
             .containsExactlyInAnyOrder(
                 new EnvelopeReference("OLD-id", CaseAction.CREATE),
                 new EnvelopeReference("NEW-id", CaseAction.UPDATE)
             );
-        // TODO: assert other fields in case dataCaseDataUpdater have not changed
+
+        assertThat(caseDataAfterUpdate.entrySet().stream().filter(e -> e.getKey().equals(BULK_SCAN_ENVELOPES)).collect(toList()))
+            .as("All other fields should remain unchanged")
+            .isEqualTo(caseDataAfterUpdate.entrySet().stream().filter(e -> e.getKey().equals(BULK_SCAN_ENVELOPES)).collect(toList()));
     }
 
     private CaseUpdateDetails getCaseUpdateDetails(String resourceName) throws IOException {
