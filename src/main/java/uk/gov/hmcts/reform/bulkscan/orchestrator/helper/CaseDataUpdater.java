@@ -21,41 +21,45 @@ public class CaseDataUpdater {
         Map<String, Object> caseData
     ) {
         var updatedCaseData = newHashMap(caseData);
-        List<ScannedDocument> scannedDocuments = getScannedDocuments(caseData);
 
-        List<String> exceptionRecordDcns = exceptionRecord.scannedDocuments
-            .stream()
-            .map(scannedDocument -> scannedDocument.controlNumber)
-            .collect(toList());
+        List<String> exceptionRecordDcns =
+            exceptionRecord
+                .scannedDocuments
+                .stream()
+                .map(doc -> doc.controlNumber)
+                .collect(toList());
 
-        List<ImmutableMap<String, ScannedDocument>> updatedScannedDocuments = scannedDocuments.stream()
-            .map(scannedDocument -> {
-                if (exceptionRecordDcns.contains(scannedDocument.controlNumber)) {
-                    // set exceptionReference if the document received with the exception record
-                    return ImmutableMap.of("value", new ScannedDocument(
-                        scannedDocument.fileName,
-                        scannedDocument.controlNumber,
-                        scannedDocument.type,
-                        scannedDocument.subtype,
-                        scannedDocument.scannedDate,
-                        scannedDocument.url,
-                        scannedDocument.deliveryDate,
-                        exceptionRecord.id
-                    ));
-                } else {
-                    // do not update the document if it was received with some previous exception record
-                    return ImmutableMap.of("value", scannedDocument);
-                }
-            })
-            .collect(toList());
+        List<Map<String, ScannedDocument>> updatedScannedDocuments =
+            getScannedDocuments(caseData)
+                .stream()
+                .map(doc -> {
+                    if (exceptionRecordDcns.contains(doc.controlNumber)) {
+                        // set exceptionReference if the document received with the exception record
+                        return ImmutableMap.of("value", new ScannedDocument(
+                            doc.fileName,
+                            doc.controlNumber,
+                            doc.type,
+                            doc.subtype,
+                            doc.scannedDate,
+                            doc.url,
+                            doc.deliveryDate,
+                            exceptionRecord.id
+                        ));
+                    } else {
+                        // do not update the document if it was received with some previous exception record
+                        return ImmutableMap.of("value", doc);
+                    }
+                })
+                .collect(toList());
 
+        // replace scanned docs list
         updatedCaseData.put(SCANNED_DOCUMENTS, updatedScannedDocuments);
 
         return updatedCaseData;
     }
 
     @SuppressWarnings("unchecked")
-    static List<ScannedDocument> getScannedDocuments(Map<String, Object> caseData) {
+    private List<ScannedDocument> getScannedDocuments(Map<String, Object> caseData) {
         var scannedDocuments = (List<Map<String, Object>>) caseData.get(SCANNED_DOCUMENTS);
 
         return scannedDocuments == null

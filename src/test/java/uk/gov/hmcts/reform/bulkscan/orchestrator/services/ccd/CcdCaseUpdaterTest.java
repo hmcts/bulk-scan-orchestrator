@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito.BDDMyOngoingStubbing;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
@@ -89,18 +90,45 @@ class CcdCaseUpdaterTest {
         exceptionRecord = getExceptionRecord();
 
         noWarningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
-        warningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, asList("warning1"));
+        warningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, singletonList("warning1"));
 
         given(configItem.getService()).willReturn("Service");
         given(authTokenGenerator.generate()).willReturn("token");
     }
 
     @Test
-    void updateCase_should_if_no_warnings() {
+    void updateCase_should_return_no_error_or_warnings_if_no_warnings_from_updateCase() {
         // given
         given(configItem.getUpdateUrl()).willReturn("url");
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
             .willReturn(noWarningsUpdateResponse);
+        initResponseMockData();
+        initMockData();
+        prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
+
+        // when
+        Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
+            exceptionRecord,
+            configItem,
+            false,
+            "idamToken",
+            "userId",
+            EXISTING_CASE_ID,
+            EXISTING_CASE_TYPE_ID
+        );
+
+        // then
+        assertThat(res).isEmpty();
+
+        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
+    }
+
+    @Test
+    void updateCase_should_return_no_error_or_warnings_if_warnings_from_updateCase_and_ignoreWarnings_is_true() {
+        // given
+        given(configItem.getUpdateUrl()).willReturn("url");
+        given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
+            .willReturn(warningsUpdateResponse);
         initResponseMockData();
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
@@ -123,34 +151,7 @@ class CcdCaseUpdaterTest {
     }
 
     @Test
-    void updateCase_should_ignore_warnings() {
-        // given
-        given(configItem.getUpdateUrl()).willReturn("url");
-        given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
-            .willReturn(noWarningsUpdateResponse);
-        initResponseMockData();
-        initMockData();
-        prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
-
-        // when
-        Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
-            exceptionRecord,
-            configItem,
-            true,
-            "idamToken",
-            "userId",
-            EXISTING_CASE_ID,
-            EXISTING_CASE_TYPE_ID
-        );
-
-        // then
-        assertThat(res).isEmpty();
-
-        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
-    }
-
-    @Test
-    void updateCase_should_not_ignore_warnings() {
+    void updateCase_should_return_warnings_if_warnings_from_updateCase_and_ignoreWarnings_is_false() {
         // given
         given(configItem.getUpdateUrl()).willReturn("url");
         given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
@@ -174,33 +175,6 @@ class CcdCaseUpdaterTest {
         assertThat(res.get().getWarnings()).containsOnly("warning1");
 
         verifyNoInteractions(caseDataUpdater);
-    }
-
-    @Test
-    void updateCase_should_pass_if_no_warnings() {
-        // given
-        given(configItem.getUpdateUrl()).willReturn("url");
-        given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
-            .willReturn(noWarningsUpdateResponse);
-        initResponseMockData();
-        initMockData();
-        prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
-
-        // when
-        Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
-            exceptionRecord,
-            configItem,
-            false,
-            "idamToken",
-            "userId",
-            EXISTING_CASE_ID,
-            EXISTING_CASE_TYPE_ID
-        );
-
-        // then
-        assertThat(res).isEmpty();
-
-        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
     }
 
     @Test
@@ -392,7 +366,7 @@ class CcdCaseUpdaterTest {
             .willThrow(HttpClientErrorException.create(
                 HttpStatus.BAD_REQUEST,
                 "bad request message",
-                null,
+                HttpHeaders.EMPTY,
                 null,
                 null
             ));
@@ -431,7 +405,7 @@ class CcdCaseUpdaterTest {
             HttpClientErrorException.create(
                 HttpStatus.UNPROCESSABLE_ENTITY,
                 "unprocessable entity message",
-                null,
+                HttpHeaders.EMPTY,
                 null,
                 null
             );
@@ -505,7 +479,7 @@ class CcdCaseUpdaterTest {
     }
 
     @Test
-    void updateCase_should_handle_exception() {
+    void updateCase_should_handle_generic_exception() {
         // given
         given(coreCaseDataApi.startEventForCaseWorker(
             anyString(),
