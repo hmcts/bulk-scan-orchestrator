@@ -73,7 +73,8 @@ public class CaseDataUpdater {
     @SuppressWarnings("unchecked")
     public Map<String, Object> updateUpdateEnvelopeReferences(
         Map<String, Object> caseData,
-        String envelopeId
+        String envelopeId,
+        CaseAction caseAction
     ) {
         List<CcdCollectionElement<EnvelopeReference>> existingCaseRefs =
             envelopeReferenceHelper
@@ -82,7 +83,7 @@ public class CaseDataUpdater {
                 );
 
         var updatedCaseRefs = newArrayList(existingCaseRefs);
-        updatedCaseRefs.add(new CcdCollectionElement<>(new EnvelopeReference(envelopeId, CaseAction.UPDATE)));
+        updatedCaseRefs.add(new CcdCollectionElement<>(new EnvelopeReference(envelopeId, caseAction)));
 
         var updatedCaseData = newHashMap(caseData);
         updatedCaseData.put(BULK_SCAN_ENVELOPES, updatedCaseRefs);

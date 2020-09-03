@@ -100,7 +100,7 @@ class CaseDataUpdaterTest {
             );
 
         // when
-        var caseDataAfterUpdate = caseDataUpdater.updateUpdateEnvelopeReferences(caseDetails.caseData, "NEW-id");
+        var caseDataAfterUpdate = caseDataUpdater.updateUpdateEnvelopeReferences(caseDetails.caseData, "NEW-id", CaseAction.UPDATE);
 
         // then
         var refsAfterUpdate = (List<CcdCollectionElement<EnvelopeReference>>) caseDataAfterUpdate.get(BULK_SCAN_ENVELOPES);
