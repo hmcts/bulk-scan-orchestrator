@@ -1,0 +1,14 @@
+{
+  "case_data": {
+    "id": "0192",
+    "case_ref": "",
+    "po_box": "BULKSCAN PO BOX",
+    "jurisdiction": "BULKSCAN",
+    "bulkScanEnvelopes": [
+      {
+        "id": "1234",
+        "action": "create"
+      }
+    ]
+  }
+}

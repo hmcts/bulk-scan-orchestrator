@@ -2,19 +2,31 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 
 import com.google.common.collect.ImmutableMap;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.EnvelopeReference;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EnvelopeReferenceHelper;
 
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SCANNED_DOCUMENTS;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ServiceCaseFields.BULK_SCAN_ENVELOPES;
 
 @Component
 public class CaseDataUpdater {
+
+    private final EnvelopeReferenceHelper envelopeReferenceHelper;
+
+    public CaseDataUpdater(EnvelopeReferenceHelper envelopeReferenceHelper) {
+        this.envelopeReferenceHelper = envelopeReferenceHelper;
+    }
 
     public Map<String, Object> setExceptionRecordIdToScannedDocuments(
         ExceptionRecord exceptionRecord,
@@ -54,6 +66,27 @@ public class CaseDataUpdater {
 
         // replace scanned docs list
         updatedCaseData.put(SCANNED_DOCUMENTS, updatedScannedDocuments);
+
+        return updatedCaseData;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> updateUpdateEnvelopeReferences(
+        Map<String, Object> caseData,
+        String envelopeId,
+        CaseAction caseAction
+    ) {
+        List<CcdCollectionElement<EnvelopeReference>> existingCaseRefs =
+            envelopeReferenceHelper
+                .parseEnvelopeReferences(
+                    (List<Map<String, Object>>) caseData.get(BULK_SCAN_ENVELOPES)
+                );
+
+        var updatedCaseRefs = newArrayList(existingCaseRefs);
+        updatedCaseRefs.add(new CcdCollectionElement<>(new EnvelopeReference(envelopeId, caseAction)));
+
+        var updatedCaseData = newHashMap(caseData);
+        updatedCaseData.put(BULK_SCAN_ENVELOPES, updatedCaseRefs);
 
         return updatedCaseData;
     }
