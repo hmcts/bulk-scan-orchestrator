@@ -48,6 +48,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
@@ -126,6 +127,7 @@ class CcdCaseUpdaterTest {
         assertThat(res).isEmpty();
 
         verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
+        verify(caseDataUpdater, never()).updateEnvelopeReferences(any(), any(), any());
     }
 
     @Test
@@ -142,7 +144,7 @@ class CcdCaseUpdaterTest {
         prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
 
         // when
-        Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
+        ccdCaseUpdater.updateCase(
             exceptionRecord,
             configItem,
             false,
@@ -153,8 +155,6 @@ class CcdCaseUpdaterTest {
         );
 
         // then
-        assertThat(res).isEmpty();
-
         verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
         verify(caseDataUpdater).updateEnvelopeReferences(
             caseDataAfterDocExceptionRefUpdate,
