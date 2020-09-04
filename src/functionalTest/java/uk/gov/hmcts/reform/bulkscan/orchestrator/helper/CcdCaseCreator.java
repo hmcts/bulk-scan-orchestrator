@@ -47,10 +47,12 @@ public class CcdCaseCreator {
         this.supplementaryEvidenceMapper = supplementaryEvidenceMapper;
     }
 
+    // only used in tests
     public CaseDetails createCase(List<Document> documents, Instant deliveryDate) {
         return createCase(documents, deliveryDate, emptyMap());
     }
 
+    // only used in tests
     public CaseDetails createCase(
         List<Document> documents,
         Instant deliveryDate,
@@ -103,6 +105,7 @@ public class CcdCaseCreator {
     }
 
     private StartEventResponse startEventForCreateCase(CcdAuthenticator authenticator) {
+        // not including in try catch to fast fail the method
         return coreCaseDataApi.startForCaseworker(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
@@ -117,6 +120,7 @@ public class CcdCaseCreator {
         CcdAuthenticator authenticator,
         CaseDataContent caseDataContent
     ) {
+        // not including in try catch to fast fail the method
         return coreCaseDataApi.submitForCaseworker(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
