@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDoc
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataUpdater;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -47,6 +48,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
@@ -68,6 +70,7 @@ class CcdCaseUpdaterTest {
     @Mock private CaseDetails existingCase;
     @Mock private StartEventResponse eventResponse;
     @Mock private CaseDataUpdater caseDataUpdater;
+    @Mock private EnvelopeReferenceHelper envelopeReferenceHelper;
 
     private ExceptionRecord exceptionRecord;
 
@@ -75,6 +78,7 @@ class CcdCaseUpdaterTest {
     private SuccessfulUpdateResponse warningsUpdateResponse;
 
     private CaseUpdateDetails caseUpdateDetails;
+    private Map<String, Object> caseDataAfterDocExceptionRefUpdate;
 
     @BeforeEach
     void setUp() {
@@ -83,10 +87,12 @@ class CcdCaseUpdaterTest {
             coreCaseDataApi,
             caseUpdateClient,
             caseDataUpdater,
+            envelopeReferenceHelper,
             serviceResponseParser
         );
 
         caseUpdateDetails = new CaseUpdateDetails(null, Map.of("a", "b"));
+        caseDataAfterDocExceptionRefUpdate = Map.of("x", "y");
         exceptionRecord = getExceptionRecord();
 
         noWarningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
@@ -121,6 +127,40 @@ class CcdCaseUpdaterTest {
         assertThat(res).isEmpty();
 
         verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
+        verify(caseDataUpdater, never()).updateEnvelopeReferences(any(), any(), any());
+    }
+
+    @Test
+    void should_update_envelope_reference_if_its_enabled_for_service() {
+        given(envelopeReferenceHelper.serviceSupportsEnvelopeReferences(any())).willReturn(true);
+        given(caseDataUpdater.setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData))
+            .willReturn(caseDataAfterDocExceptionRefUpdate);
+
+        given(configItem.getUpdateUrl()).willReturn("url");
+        given(caseUpdateClient.updateCase("url", existingCase, exceptionRecord, "token"))
+            .willReturn(noWarningsUpdateResponse);
+        initResponseMockData();
+        initMockData();
+        prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
+
+        // when
+        ccdCaseUpdater.updateCase(
+            exceptionRecord,
+            configItem,
+            false,
+            "idamToken",
+            "userId",
+            EXISTING_CASE_ID,
+            EXISTING_CASE_TYPE_ID
+        );
+
+        // then
+        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
+        verify(caseDataUpdater).updateEnvelopeReferences(
+            caseDataAfterDocExceptionRefUpdate,
+            exceptionRecord.envelopeId,
+            CaseAction.UPDATE
+        );
     }
 
     @Test
