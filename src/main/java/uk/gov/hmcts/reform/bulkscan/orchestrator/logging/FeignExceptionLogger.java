@@ -14,7 +14,7 @@ public final class FeignExceptionLogger {
             "{}. CCD response: {}",
             introMessage,
             // exception.contentUTF8() uses response body internally
-            exception.responseBody().map(body -> exception.contentUTF8()).orElseGet(exception::getMessage)
+            exception.responseBody().isPresent() ? exception.contentUTF8() : exception.getMessage()
         );
     }
 }
