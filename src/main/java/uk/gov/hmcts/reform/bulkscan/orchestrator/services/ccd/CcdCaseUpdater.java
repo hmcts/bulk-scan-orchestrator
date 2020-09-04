@@ -181,9 +181,9 @@ public class CcdCaseUpdater {
             return Optional.of(new ErrorsAndWarnings(singletonList(msg), emptyList()));
         } catch (FeignException exception) {
             debugCcdException(log, exception, "Failed to call 'updateCase'");
+            final String errorMessage = getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id);
             log.error(
-                getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id)
-                    + "Service response: {}",
+                errorMessage + ". Service response: {}",
                 configItem.getService(),
                 existingCaseId,
                 exceptionRecord.id,
@@ -192,11 +192,7 @@ public class CcdCaseUpdater {
             );
 
             throw new CallbackException(
-                String.format(
-                    "%s. Service response: %s",
-                    getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id),
-                    exception.contentUTF8()
-                ),
+                String.format("%s. Service response: %s", errorMessage, exception.contentUTF8()),
                 exception
             );
         // exceptions received from case update client
