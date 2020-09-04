@@ -71,7 +71,7 @@ public class CaseDataUpdater {
     }
 
     @SuppressWarnings("unchecked")
-    public Map<String, Object> updateUpdateEnvelopeReferences(
+    public Map<String, Object> updateEnvelopeReferences(
         Map<String, Object> caseData,
         String envelopeId,
         CaseAction caseAction
