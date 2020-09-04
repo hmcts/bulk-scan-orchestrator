@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.respons
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataUpdater;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -40,6 +41,7 @@ public class CcdCaseUpdater {
     private final CoreCaseDataApi coreCaseDataApi;
     private final CaseUpdateClient caseUpdateClient;
     private final CaseDataUpdater caseDataUpdater;
+    private final EnvelopeReferenceHelper envelopeReferenceHelper;
     private final ServiceResponseParser serviceResponseParser;
 
     public CcdCaseUpdater(
@@ -47,12 +49,14 @@ public class CcdCaseUpdater {
         CoreCaseDataApi coreCaseDataApi,
         CaseUpdateClient caseUpdateClient,
         CaseDataUpdater caseDataUpdater,
+        EnvelopeReferenceHelper envelopeReferenceHelper,
         ServiceResponseParser serviceResponseParser
     ) {
         this.s2sTokenGenerator = s2sTokenGenerator;
         this.coreCaseDataApi = coreCaseDataApi;
         this.caseUpdateClient = caseUpdateClient;
         this.caseDataUpdater = caseDataUpdater;
+        this.envelopeReferenceHelper = envelopeReferenceHelper;
         this.serviceResponseParser = serviceResponseParser;
     }
 
@@ -134,10 +138,22 @@ public class CcdCaseUpdater {
             } else {
                 var caseDataAfterClientUpdate = updateResponse.caseDetails.caseData;
 
-                var finalCaseData = caseDataUpdater.setExceptionRecordIdToScannedDocuments(
+                var caseDataAfterDocUpdate = caseDataUpdater.setExceptionRecordIdToScannedDocuments(
                     exceptionRecord,
                     caseDataAfterClientUpdate
                 );
+
+                final Map<String, Object> finalCaseData;
+
+                if (envelopeReferenceHelper.serviceSupportsEnvelopeReferences(configItem.getService())) {
+                    finalCaseData = caseDataUpdater.updateEnvelopeReferences(
+                        caseDataAfterDocUpdate,
+                        exceptionRecord.envelopeId,
+                        CaseAction.UPDATE
+                    );
+                } else {
+                    finalCaseData = caseDataAfterDocUpdate;
+                }
 
                 updateCaseInCcd(
                     ignoreWarnings,
