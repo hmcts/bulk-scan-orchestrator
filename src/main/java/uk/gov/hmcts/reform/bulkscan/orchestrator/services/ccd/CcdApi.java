@@ -19,6 +19,10 @@ import java.util.function.Function;
 import javax.annotation.Nonnull;
 
 import static java.lang.String.format;
+import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
+import static java.net.HttpURLConnection.HTTP_FORBIDDEN;
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
+import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.logging.FeignExceptionLogger.debugCcdException;
@@ -102,9 +106,9 @@ public class CcdApi {
             removeFromIdamCacheIfAuthProblem(e.status(), jurisdiction);
 
             switch (e.status()) {
-                case 404:
+                case HTTP_NOT_FOUND:
                     throw new CaseNotFoundException("Could not find case: " + caseRef, e);
-                case 400:
+                case HTTP_BAD_REQUEST:
                     throw new InvalidCaseIdException("Invalid case ID: " + caseRef, e);
                 default:
                     throw new CcdCallException(
@@ -405,7 +409,7 @@ public class CcdApi {
     }
 
     private void removeFromIdamCacheIfAuthProblem(int status, String jurisdiction) {
-        if (status == 403 || status == 401) {
+        if (status == HTTP_FORBIDDEN || status == HTTP_UNAUTHORIZED) {
             authenticatorFactory.removeFromCache(jurisdiction);
         }
     }
