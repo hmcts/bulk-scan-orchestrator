@@ -200,8 +200,9 @@ class CcdCaseUpdaterTest {
 
         // then
         assertThat(res).isNotEmpty();
-        assertThat(res.get().getErrors()).containsExactlyInAnyOrder("Failed to update case for Service service "
-            + "with case Id existing_case_id based on exception record 1 because it has been updated in the meantime");
+        assertThat(res.get().getErrors()).containsExactlyInAnyOrder(
+            "Failed to update case for Service service with case Id existing_case_id based on exception record 1 because it has been updated in the meantime"
+        );
         assertThat(res.get().getWarnings()).isEmpty();
 
         verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
@@ -216,11 +217,12 @@ class CcdCaseUpdaterTest {
             .willReturn(noWarningsUpdateResponse);
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willThrow(
-                new FeignException.BadRequest("Msg", mock(Request.class), "Body".getBytes())
+            new FeignException.BadRequest("Msg", mock(Request.class), "Body".getBytes())
         );
 
         // when
-        CallbackException callbackException = catchThrowableOfType(() ->
+        CallbackException callbackException = catchThrowableOfType(
+            () ->
                 ccdCaseUpdater.updateCase(
                     exceptionRecord,
                     configItem,
@@ -235,8 +237,8 @@ class CcdCaseUpdaterTest {
 
         // then
         assertThat(callbackException.getMessage())
-            .isEqualTo("Failed to update case for Service service with case Id existing_case_id "
-                + "based on exception record 1");
+            .isEqualTo(
+                "Failed to update case for Service service with case Id existing_case_id based on exception record 1");
         assertThat(callbackException.getCause().getMessage()).isEqualTo("Service response: Body");
 
         verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
@@ -252,11 +254,12 @@ class CcdCaseUpdaterTest {
         initMockData();
         prepareMockForSubmissionEventForCaseWorker()
             .willThrow(
-                    new FeignException.UnprocessableEntity("Msg", mock(Request.class),  "Body".getBytes())
+                new FeignException.UnprocessableEntity("Msg", mock(Request.class), "Body".getBytes())
             );
 
         // when
-        CallbackException exception = catchThrowableOfType(() ->
+        CallbackException exception = catchThrowableOfType(
+            () ->
                 ccdCaseUpdater.updateCase(
                     exceptionRecord,
                     configItem,
@@ -293,7 +296,8 @@ class CcdCaseUpdaterTest {
         initMockData();
 
         // when
-        CallbackException exception = catchThrowableOfType(() ->
+        CallbackException exception = catchThrowableOfType(
+            () ->
                 ccdCaseUpdater.updateCase(
                     exceptionRecord,
                     configItem,
@@ -330,7 +334,8 @@ class CcdCaseUpdaterTest {
         initMockData();
 
         // when
-        Throwable exception = catchThrowable(() ->
+        Throwable exception = catchThrowable(
+            () ->
                 ccdCaseUpdater.updateCase(
                     exceptionRecord,
                     configItem,
@@ -372,7 +377,8 @@ class CcdCaseUpdaterTest {
             ));
 
         // when
-        CallbackException callbackException = catchThrowableOfType(() ->
+        CallbackException callbackException = catchThrowableOfType(
+            () ->
                 ccdCaseUpdater.updateCase(
                     exceptionRecord,
                     configItem,
@@ -387,8 +393,8 @@ class CcdCaseUpdaterTest {
 
         // then
         assertThat(callbackException.getMessage())
-            .isEqualTo("Failed to update case for Service service with case Id existing_case_id "
-                + "based on exception record 1");
+            .isEqualTo(
+                "Failed to update case for Service service with case Id existing_case_id based on exception record 1");
         assertThat(callbackException.getCause().getMessage()).isEqualTo("400 bad request message");
         assertThat(callbackException.getCause() instanceof HttpClientErrorException).isTrue();
         assertThat(((HttpClientErrorException) callbackException.getCause()).getStatusText())
@@ -453,10 +459,11 @@ class CcdCaseUpdaterTest {
             anyString(),
             anyString()
         ))
-            .willThrow(new FeignException.MethodNotAllowed("Msg", mock(Request.class),  "Body".getBytes()));
+            .willThrow(new FeignException.MethodNotAllowed("Msg", mock(Request.class), "Body".getBytes()));
 
         // when
-        CallbackException callbackException = catchThrowableOfType(() ->
+        CallbackException callbackException = catchThrowableOfType(
+            () ->
                 ccdCaseUpdater.updateCase(
                     exceptionRecord,
                     configItem,
@@ -471,8 +478,8 @@ class CcdCaseUpdaterTest {
 
         // then
         assertThat(callbackException.getMessage())
-            .isEqualTo("Failed to update case for Service service with case Id existing_case_id "
-                + "based on exception record 1. Service response: Body");
+            .isEqualTo(
+                "Failed to update case for Service service with case Id existing_case_id based on exception record 1. Service response: Body");
         assertThat(callbackException.getCause().getMessage()).isEqualTo("Msg");
 
         verifyNoInteractions(caseDataUpdater);
@@ -493,7 +500,8 @@ class CcdCaseUpdaterTest {
             .willThrow(new RuntimeException());
 
         // when
-        CallbackException callbackException = catchThrowableOfType(() ->
+        CallbackException callbackException = catchThrowableOfType(
+            () ->
                 ccdCaseUpdater.updateCase(
                     exceptionRecord,
                     configItem,
@@ -508,7 +516,9 @@ class CcdCaseUpdaterTest {
 
         // then
         assertThat(callbackException.getMessage())
-            .isEqualTo("Failed to update case for Service service with case Id existing_case_id based on exception record 1");
+            .isEqualTo(
+                "Failed to update case for Service service with case Id existing_case_id based on exception record 1"
+            );
 
         verifyNoInteractions(caseDataUpdater);
     }
@@ -526,7 +536,7 @@ class CcdCaseUpdaterTest {
             anyString()
         ))
             .willThrow(
-                    new FeignException.NotFound("case not found",  mock(Request.class), "Body".getBytes())
+                new FeignException.NotFound("case not found", mock(Request.class), "Body".getBytes())
             );
 
         // when
@@ -560,7 +570,7 @@ class CcdCaseUpdaterTest {
             anyString(),
             anyString()
         ))
-            .willThrow(new FeignException.BadRequest("invalid", mock(Request.class),  "Body".getBytes()));
+            .willThrow(new FeignException.BadRequest("invalid", mock(Request.class), "Body".getBytes()));
 
         // when
         Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
