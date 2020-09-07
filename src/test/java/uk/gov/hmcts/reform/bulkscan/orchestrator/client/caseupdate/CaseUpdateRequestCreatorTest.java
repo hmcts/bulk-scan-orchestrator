@@ -1,7 +1,6 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.client;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate;
 
 import org.junit.jupiter.api.Test;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.CaseUpdateRequestCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdateDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdateRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;

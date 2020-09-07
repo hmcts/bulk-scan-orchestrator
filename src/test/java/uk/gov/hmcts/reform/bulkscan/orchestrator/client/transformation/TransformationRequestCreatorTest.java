@@ -1,11 +1,10 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.client;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation;
 
 import io.vavr.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.TransformationRequestCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
