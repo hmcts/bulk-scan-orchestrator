@@ -12,11 +12,9 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.util.function.Function;
 
-import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -74,7 +72,7 @@ public class CcdApiCreateCaseTest {
         verify(feignCcdApi).startForCaseworker(
             ccdAuthenticator.getUserToken(),
             ccdAuthenticator.getServiceToken(),
-            ccdAuthenticator.getUserDetails().getId(),
+            ccdAuthenticator.getUserId(),
             jurisdiction,
             caseTypeId,
             eventId
@@ -83,7 +81,7 @@ public class CcdApiCreateCaseTest {
         verify(feignCcdApi).submitForCaseworker(
             ccdAuthenticator.getUserToken(),
             ccdAuthenticator.getServiceToken(),
-            ccdAuthenticator.getUserDetails().getId(),
+            ccdAuthenticator.getUserId(),
             jurisdiction,
             caseTypeId,
             true,
@@ -171,13 +169,7 @@ public class CcdApiCreateCaseTest {
     private CcdAuthenticator sampleCcdAuthenticator() {
         return new CcdAuthenticator(
             () -> "serviceToken1",
-            new UserDetails(
-                "userId1",
-                "email1",
-                "forename1",
-                "surname1",
-                asList("role1", "role2")
-            ),
+            "userId1",
             "userToken1"
         );
     }

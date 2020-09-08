@@ -51,7 +51,7 @@ public class CaseSearcher {
         return coreCaseDataApi.searchForCaseworker(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
+            authenticator.getUserId(),
             jurisdiction,
             caseTypeId,
             searchCriteria

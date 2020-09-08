@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.util.List;
 
@@ -59,7 +58,7 @@ class CaseRetrievalTest {
     private static final CcdAuthenticator CCD_AUTHENTICATOR =
         new CcdAuthenticator(
             () -> "service_token",
-            new UserDetails("12", "forname", "", null, null),
+            "12",
             "ey_token"
         );
 

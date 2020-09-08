@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.env
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Payment;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -27,7 +26,6 @@ import java.util.stream.Stream;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.DatetimeHelper.toIso8601;
 
 public class SampleData {
@@ -46,14 +44,10 @@ public class SampleData {
     public static final long CASE_ID = 23L;
     public static final String EXAMPLE_JSON_FILE = "envelopes/example.json";
     public static final String BULK_SCANNED_CASE_TYPE = "Bulk_Scanned";
-
-    public static final UserDetails USER_DETAILS = new UserDetails(USER_ID,
-        null, null, null, emptyList()
-    );
     public static final Credential USER_CREDS = new Credential(USER_NAME, PASSWORD);
     public static final CcdAuthenticator AUTH_DETAILS = new CcdAuthenticator(
         () -> SERVICE_TOKEN,
-        USER_DETAILS,
+        USER_ID,
         USER_TOKEN
     );
 

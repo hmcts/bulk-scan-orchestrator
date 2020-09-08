@@ -228,7 +228,7 @@ public class CcdApi {
             StartEventResponse eventResponse = feignCcdApi.startForCaseworker(
                 authenticator.getUserToken(),
                 authenticator.getServiceToken(),
-                authenticator.getUserDetails().getId(),
+                authenticator.getUserId(),
                 jurisdiction,
                 caseTypeId,
                 eventTypeId
@@ -241,7 +241,7 @@ public class CcdApi {
             return feignCcdApi.submitForCaseworker(
                 authenticator.getUserToken(),
                 authenticator.getServiceToken(),
-                authenticator.getUserDetails().getId(),
+                authenticator.getUserId(),
                 jurisdiction,
                 caseTypeId,
                 true,
@@ -268,7 +268,7 @@ public class CcdApi {
             StartEventResponse eventResponse = feignCcdApi.startEventForCaseWorker(
                 authenticator.getUserToken(),
                 authenticator.getServiceToken(),
-                authenticator.getUserDetails().getId(),
+                authenticator.getUserId(),
                 jurisdiction,
                 caseTypeId,
                 caseRef,
@@ -282,7 +282,7 @@ public class CcdApi {
             feignCcdApi.submitEventForCaseWorker(
                 authenticator.getUserToken(),
                 authenticator.getServiceToken(),
-                authenticator.getUserDetails().getId(),
+                authenticator.getUserId(),
                 jurisdiction,
                 caseTypeId,
                 caseRef,
@@ -318,7 +318,7 @@ public class CcdApi {
         return createCase(
             ccdAuthenticator.getUserToken(),
             ccdAuthenticator.getServiceToken(),
-            ccdAuthenticator.getUserDetails().getId(),
+            ccdAuthenticator.getUserId(),
             jurisdiction,
             caseTypeId,
             eventId,
