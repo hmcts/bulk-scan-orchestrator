@@ -109,7 +109,7 @@ public class CcdCaseCreator {
         return coreCaseDataApi.startForCaseworker(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
+            authenticator.getUserId(),
             JURISDICTION,
             CASE_TYPE_ID,
             CREATE_CASE_EVENT_TYPE_ID
@@ -124,7 +124,7 @@ public class CcdCaseCreator {
         return coreCaseDataApi.submitForCaseworker(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
+            authenticator.getUserId(),
             JURISDICTION,
             CASE_TYPE_ID,
             true,

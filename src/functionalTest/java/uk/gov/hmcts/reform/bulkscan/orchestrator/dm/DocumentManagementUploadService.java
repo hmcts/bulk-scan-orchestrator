@@ -52,7 +52,7 @@ public class DocumentManagementUploadService {
         UploadResponse uploadResponse = documentUploadClientApi.upload(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
-            authenticator.getUserDetails().getId(),
+            authenticator.getUserId(),
             singletonList(file)
         );
         log.info("{} uploaded to DM store", displayName);

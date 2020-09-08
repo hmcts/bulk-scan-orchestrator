@@ -62,7 +62,7 @@ public class IdamCachedClient {
 
         String tokenWithBearer = BEARER_AUTH_TYPE + tokenResponse.accessToken;
         UserDetails userDetails = idamClient.getUserDetails(tokenWithBearer);
-        return new CachedIdamCredential(tokenWithBearer, userDetails, Long.valueOf(tokenResponse.expiresIn));
+        return new CachedIdamCredential(tokenWithBearer, userDetails.getId(), Long.valueOf(tokenResponse.expiresIn));
     }
 
 }
