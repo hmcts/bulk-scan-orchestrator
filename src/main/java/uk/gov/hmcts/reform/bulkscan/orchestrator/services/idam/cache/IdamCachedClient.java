@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.Credential;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.JurisdictionToUserMapping;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.TokenResponse;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 @Service
 public class IdamCachedClient {
@@ -61,8 +61,8 @@ public class IdamCachedClient {
         );
 
         String tokenWithBearer = BEARER_AUTH_TYPE + tokenResponse.accessToken;
-        UserDetails userDetails = idamClient.getUserDetails(tokenWithBearer);
-        return new CachedIdamCredential(tokenWithBearer, userDetails.getId(), Long.valueOf(tokenResponse.expiresIn));
+        UserInfo userDetails = idamClient.getUserInfo(tokenWithBearer);
+        return new CachedIdamCredential(tokenWithBearer, userDetails.getUid(), Long.valueOf(tokenResponse.expiresIn));
     }
 
 }
