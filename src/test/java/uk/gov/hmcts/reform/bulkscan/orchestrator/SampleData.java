@@ -46,14 +46,10 @@ public class SampleData {
     public static final long CASE_ID = 23L;
     public static final String EXAMPLE_JSON_FILE = "envelopes/example.json";
     public static final String BULK_SCANNED_CASE_TYPE = "Bulk_Scanned";
-
-    public static final UserDetails USER_DETAILS = new UserDetails(USER_ID,
-        null, null, null, emptyList()
-    );
     public static final Credential USER_CREDS = new Credential(USER_NAME, PASSWORD);
     public static final CcdAuthenticator AUTH_DETAILS = new CcdAuthenticator(
         () -> SERVICE_TOKEN,
-        USER_DETAILS,
+        USER_ID,
         USER_TOKEN
     );
 

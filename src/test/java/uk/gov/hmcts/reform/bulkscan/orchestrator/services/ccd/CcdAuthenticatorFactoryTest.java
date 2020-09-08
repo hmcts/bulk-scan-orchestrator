@@ -13,7 +13,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.BDDMockito.given;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.JURSIDICTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.SERVICE_TOKEN;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_DETAILS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_ID;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_TOKEN;
 
@@ -36,7 +35,7 @@ class CcdAuthenticatorFactoryTest {
     void should_sucessfully_return_authInfo() {
         CachedIdamCredential cachedIdamCredential = new CachedIdamCredential(
             USER_TOKEN,
-            USER_DETAILS,
+            USER_ID,
             28800L
         );
 
@@ -47,7 +46,7 @@ class CcdAuthenticatorFactoryTest {
 
         assertThat(authenticator.getServiceToken()).isEqualTo(SERVICE_TOKEN);
         assertThat(authenticator.getUserToken()).isEqualTo(USER_TOKEN);
-        assertThat(authenticator.getUserDetails().getId()).isEqualTo(USER_ID);
+        assertThat(authenticator.getUserId()).isEqualTo(USER_ID);
     }
 
 }

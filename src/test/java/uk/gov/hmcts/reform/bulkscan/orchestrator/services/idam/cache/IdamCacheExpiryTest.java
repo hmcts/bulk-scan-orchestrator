@@ -2,9 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.cache;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,13 +11,7 @@ class IdamCacheExpiryTest {
 
     private IdamCacheExpiry idamCacheExpiry = new IdamCacheExpiry(20);
 
-    private static final UserDetails USER_DETAILS = new UserDetails(
-        "12",
-        "q@a.com",
-        "name_x",
-        "surname_y",
-        Arrays.asList("role1, role2", "role3")
-    );
+    private static final String USER_ID = "12";
 
     @ParameterizedTest
     @CsvSource({
@@ -28,7 +20,7 @@ class IdamCacheExpiryTest {
         "22, 0, 2000000000"
     })
     void expireAfterCreate(long expireIn, long currentTime, long result) {
-        CachedIdamCredential cachedIdamCredential = new CachedIdamCredential("token", USER_DETAILS, expireIn);
+        CachedIdamCredential cachedIdamCredential = new CachedIdamCredential("token", USER_ID, expireIn);
         long remainingTime = idamCacheExpiry.expireAfterCreate(
             "key_9090",
             cachedIdamCredential,
@@ -51,7 +43,7 @@ class IdamCacheExpiryTest {
         long expectedSecondsLeft
     ) {
         // given
-        CachedIdamCredential newCreds = new CachedIdamCredential("token", USER_DETAILS, expireIn);
+        CachedIdamCredential newCreds = new CachedIdamCredential("token", USER_ID, expireIn);
 
         // when
         long remainingTimeNanos = idamCacheExpiry.expireAfterUpdate(
@@ -72,7 +64,7 @@ class IdamCacheExpiryTest {
         "22, 0, 120, 120"
     })
     void expireAfterRead(long expireIn, long currentTime, long currentDuration, long result) {
-        CachedIdamCredential cachedIdamCredential = new CachedIdamCredential("token", USER_DETAILS, expireIn);
+        CachedIdamCredential cachedIdamCredential = new CachedIdamCredential("token", USER_ID, expireIn);
 
         long remainingTime = idamCacheExpiry.expireAfterRead(
             "21321",

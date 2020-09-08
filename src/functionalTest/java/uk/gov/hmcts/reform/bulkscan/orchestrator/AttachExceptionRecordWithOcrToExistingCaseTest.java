@@ -182,7 +182,7 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .header(SyntheticHeaders.SYNTHETIC_TEST_SOURCE, "Bulk Scan Orchestrator Functional test")
             .header(HttpHeaders.AUTHORIZATION, ccdAuthenticator.getUserToken())
-            .header(CcdCallbackController.USER_ID, ccdAuthenticator.getUserDetails().getId())
+            .header(CcdCallbackController.USER_ID, ccdAuthenticator.getUserId())
             .body(request)
             .when()
             .post("/callback/attach_case?ignore-warning=true");

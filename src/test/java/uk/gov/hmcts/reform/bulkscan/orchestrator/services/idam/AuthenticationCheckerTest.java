@@ -26,7 +26,7 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_DETAILS;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_ID;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.USER_TOKEN;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,7 +53,7 @@ class AuthenticationCheckerTest {
 
     private static final CachedIdamCredential CACHED_IDAM_CREDENTIAL = new CachedIdamCredential(
         USER_TOKEN,
-        USER_DETAILS,
+        USER_ID,
         28800L
     );
 

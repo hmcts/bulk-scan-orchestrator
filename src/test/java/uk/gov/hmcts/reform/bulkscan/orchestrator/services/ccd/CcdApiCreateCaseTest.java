@@ -74,7 +74,7 @@ public class CcdApiCreateCaseTest {
         verify(feignCcdApi).startForCaseworker(
             ccdAuthenticator.getUserToken(),
             ccdAuthenticator.getServiceToken(),
-            ccdAuthenticator.getUserDetails().getId(),
+            ccdAuthenticator.getUserId(),
             jurisdiction,
             caseTypeId,
             eventId
@@ -83,7 +83,7 @@ public class CcdApiCreateCaseTest {
         verify(feignCcdApi).submitForCaseworker(
             ccdAuthenticator.getUserToken(),
             ccdAuthenticator.getServiceToken(),
-            ccdAuthenticator.getUserDetails().getId(),
+            ccdAuthenticator.getUserId(),
             jurisdiction,
             caseTypeId,
             true,
@@ -171,13 +171,7 @@ public class CcdApiCreateCaseTest {
     private CcdAuthenticator sampleCcdAuthenticator() {
         return new CcdAuthenticator(
             () -> "serviceToken1",
-            new UserDetails(
-                "userId1",
-                "email1",
-                "forename1",
-                "surname1",
-                asList("role1", "role2")
-            ),
+            "userId1",
             "userToken1"
         );
     }

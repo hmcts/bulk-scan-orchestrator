@@ -1,22 +1,20 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-
 import java.util.function.Supplier;
 
 public class CcdAuthenticator {
 
-    private final UserDetails userDetails;
+    private final String userId;
     private final Supplier<String> serviceTokenSupplier;
     private final String userToken;
 
     public CcdAuthenticator(
         Supplier<String> serviceTokenSupplier,
-        UserDetails userDetails,
+        String userId,
         String userToken
     ) {
         this.serviceTokenSupplier = serviceTokenSupplier;
-        this.userDetails = userDetails;
+        this.userId = userId;
         this.userToken = userToken;
     }
 
@@ -28,7 +26,7 @@ public class CcdAuthenticator {
         return this.serviceTokenSupplier.get();
     }
 
-    public UserDetails getUserDetails() {
-        return this.userDetails;
+    public String getUserId() {
+        return this.userId;
     }
 }

@@ -59,7 +59,7 @@ class CaseRetrievalTest {
     private static final CcdAuthenticator CCD_AUTHENTICATOR =
         new CcdAuthenticator(
             () -> "service_token",
-            new UserDetails("12", "forname", "", null, null),
+            "12",
             "ey_token"
         );
 
