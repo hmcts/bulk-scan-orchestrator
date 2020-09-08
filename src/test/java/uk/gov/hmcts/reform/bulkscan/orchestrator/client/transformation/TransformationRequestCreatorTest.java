@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.client;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation;
 
 import io.vavr.Tuple;
 import org.junit.jupiter.api.BeforeEach;
