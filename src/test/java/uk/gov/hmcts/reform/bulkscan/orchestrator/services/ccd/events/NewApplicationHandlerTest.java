@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.pro
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
@@ -26,6 +27,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.casecreation.CaseCreationResult.caseCreated;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.casecreation.CaseCreationResult.potentiallyRecoverableFailure;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.NewApplicationHandler.MAX_RETRIES_FOR_POTENTIALLY_RECOVERABLE_FAILURES;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.EXCEPTION_RECORD;
 
@@ -51,7 +53,7 @@ class NewApplicationHandlerTest {
         given(autoCaseCreator.createCase(envelope)).willReturn(caseCreated(caseId));
 
         // when
-        EnvelopeProcessingResult result = handler.processNewApplication(envelope, 0);
+        EnvelopeProcessingResult result = handler.handle(envelope, 0);
 
         // then
         assertThat(result.envelopeCcdAction).isEqualTo(EnvelopeCcdAction.CASE_CREATED);
@@ -70,7 +72,7 @@ class NewApplicationHandlerTest {
         given(exceptionRecordCreator.tryCreateFrom(envelope)).willReturn(CASE_ID);
 
         // when
-        var result = handler.processNewApplication(envelope, 0);
+        var result = handler.handle(envelope, 0);
 
         // then
         assertThat(result.envelopeCcdAction).isEqualTo(EXCEPTION_RECORD);
@@ -86,7 +88,7 @@ class NewApplicationHandlerTest {
         Envelope envelope = envelope(NEW_APPLICATION, JURSIDICTION, CASE_REF);
         given(autoCaseCreator.createCase(envelope)).willReturn(potentiallyRecoverableFailure());
 
-        assertThatThrownBy(() -> handler.processNewApplication(envelope, 0))
+        assertThatThrownBy(() -> handler.handle(envelope, 0))
             .isInstanceOf(CaseCreationException.class)
             .hasMessage("Case creation failed due to a potentially recoverable error");
 
@@ -101,7 +103,7 @@ class NewApplicationHandlerTest {
         given(exceptionRecordCreator.tryCreateFrom(envelope)).willReturn(CASE_ID);
 
         // when
-        var result = handler.processNewApplication(envelope, MAX_RETRIES_FOR_POTENTIALLY_RECOVERABLE_FAILURES);
+        var result = handler.handle(envelope, MAX_RETRIES_FOR_POTENTIALLY_RECOVERABLE_FAILURES);
 
         // then
         assertThat(result.envelopeCcdAction).isEqualTo(EXCEPTION_RECORD);
@@ -110,5 +112,17 @@ class NewApplicationHandlerTest {
         verify(autoCaseCreator).createCase(envelope);
         verify(exceptionRecordCreator).tryCreateFrom(envelope);
         verify(paymentsProcessor).createPayments(envelope, CASE_ID, true);
+    }
+
+    @Test
+    void should_throw_an_exception_if_envelope_is_not_a_new_application() {
+        // given
+        Envelope envelope = envelope(EXCEPTION, JURSIDICTION, CASE_REF);
+
+        // when
+        var exc = catchThrowable(() -> handler.handle(envelope, 0));
+
+        // then
+        assertThat(exc).isInstanceOf(IllegalArgumentException.class);
     }
 }

@@ -66,7 +66,7 @@ public class EnvelopeHandler {
             case EXCEPTION:
                 return new EnvelopeProcessingResult(createExceptionRecord(envelope), EXCEPTION_RECORD);
             case NEW_APPLICATION:
-                return newApplicationHandler.processNewApplication(envelope, deliveryCount);
+                return newApplicationHandler.handle(envelope, deliveryCount);
             default:
                 throw new UnknownClassificationException(
                     "Cannot determine CCD action for envelope - unknown classification: " + envelope.classification

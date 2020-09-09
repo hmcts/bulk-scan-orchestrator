@@ -4,15 +4,17 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.PaymentsProcessor;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.casecreation.AutoCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.casecreation.CaseCreationException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeProcessingResult;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.CASE_CREATED;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.EXCEPTION_RECORD;
 
 /**
- * Handles envelops of classification NEW_APPLICATION.
+ * Handles envelopes of classification NEW_APPLICATION.
  */
 @Service
 public class NewApplicationHandler {
@@ -33,7 +35,12 @@ public class NewApplicationHandler {
         this.exceptionRecordCreator = exceptionRecordCreator;
     }
 
-    public EnvelopeProcessingResult processNewApplication(Envelope envelope, long deliveryCount) {
+    public EnvelopeProcessingResult handle(Envelope envelope, long deliveryCount) {
+        checkArgument(
+            envelope.classification == Classification.NEW_APPLICATION,
+            "Exception classification has to be " + Classification.NEW_APPLICATION
+        );
+
         var caseCreationResult = caseCreator.createCase(envelope);
 
         switch (caseCreationResult.resultType) {
