@@ -12,7 +12,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.EXCEPTION_RECORD;
 
 /**
- * Handles envelops of classification NEW_APPLICATION
+ * Handles envelops of classification NEW_APPLICATION.
  */
 @Service
 public class NewApplicationHandler {
