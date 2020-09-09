@@ -21,11 +21,6 @@ import java.util.Map;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseCreationResult.abortedWithoutFailure;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseCreationResult.caseAlreadyExists;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseCreationResult.caseCreated;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseCreationResult.potentiallyRecoverableFailure;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseCreationResult.unrecoverableFailure;
 
 @Service
 public class AutoCaseCreator {
@@ -54,7 +49,7 @@ public class AutoCaseCreator {
             return createCaseIfDoesNotExist(envelope, loggingContext);
         } else {
             log.info("Automatic case creation is disabled for the service - skipping. {}", loggingContext);
-            return abortedWithoutFailure();
+            return CaseCreationResult.abortedWithoutFailure();
         }
     }
 
@@ -66,7 +61,7 @@ public class AutoCaseCreator {
         } else if (caseIds.size() == 1) {
             long caseId = caseIds.get(0);
             log.warn("Case already exists for envelope - skipping creation. Case ID: {}. {}", caseId, loggingContext);
-            return caseAlreadyExists(caseId);
+            return CaseCreationResult.caseAlreadyExists(caseId);
         } else {
             log.error(
                 "Multiple cases exist for envelope. Case Ids: [{}]. {}",
@@ -74,7 +69,7 @@ public class AutoCaseCreator {
                 loggingContext
             );
 
-            return unrecoverableFailure();
+            return CaseCreationResult.unrecoverableFailure();
         }
     }
 
@@ -85,8 +80,8 @@ public class AutoCaseCreator {
             )
             .getOrElseGet(failureType ->
                 failureType == EnvelopeTransformer.TransformationFailureType.UNRECOVERABLE
-                    ? unrecoverableFailure()
-                    : potentiallyRecoverableFailure()
+                    ? CaseCreationResult.unrecoverableFailure()
+                    : CaseCreationResult.potentiallyRecoverableFailure()
             );
     }
 
@@ -100,7 +95,7 @@ public class AutoCaseCreator {
             long caseId = callCcdApiToCreateCase(transformationResponse, envelope, loggingContext);
             log.info("Created a case in CCD from envelope. Case Id: {}. {}", caseId, loggingContext);
 
-            return caseCreated(caseId);
+            return CaseCreationResult.caseCreated(caseId);
         } catch (FeignException.UnprocessableEntity | FeignException.BadRequest ex) {
             log.error(
                 "Received a response with status {} when trying to create a CCD case from an envelope. {}",
@@ -109,7 +104,7 @@ public class AutoCaseCreator {
                 ex
             );
 
-            return unrecoverableFailure();
+            return CaseCreationResult.unrecoverableFailure();
         } catch (Exception ex) {
             log.error(
                 "An error occurred when trying to create a case in CCD from envelope. {}",
@@ -117,7 +112,7 @@ public class AutoCaseCreator {
                 ex
             );
 
-            return potentiallyRecoverableFailure();
+            return CaseCreationResult.potentiallyRecoverableFailure();
         }
     }
 
