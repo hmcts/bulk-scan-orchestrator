@@ -19,10 +19,10 @@ public class CaseUpdateRequestCreatorTest {
         CaseDetails caseDetails = sampleCaseDetails();
 
         // when
-        CaseUpdateRequest request = new CaseUpdateRequestCreator().create(exceptionRecord, caseDetails);
+        CaseUpdateRequest request = new CaseUpdateRequestCreator().create(exceptionRecord, caseDetails, true);
 
         // then
-        assertThat(request.isAutomatedProcess).isFalse();
+        assertThat(request.isAutomatedProcess).isEqualTo(true);
 
         assertThat(request.caseDetails.id).isEqualTo(caseDetails.getId().toString());
         assertThat(request.caseDetails.caseTypeId).isEqualTo(caseDetails.getCaseTypeId());

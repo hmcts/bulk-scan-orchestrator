@@ -50,7 +50,7 @@ public class CaseUpdateClient {
                 .build()
                 .toString();
 
-        var caseUpdateRequest = requestCreator.create(exceptionRecord, existingCase);
+        var caseUpdateRequest = requestCreator.create(exceptionRecord, existingCase, false);
 
         log.info(
             "Requesting service to update case, caseTypeId: {}, case id: {}, exception id: {}",
