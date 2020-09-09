@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -48,7 +49,7 @@ class CaseUpdateClientResponseValidationTest {
             mock(ExistingCaseDetails.class)
         );
 
-        given(requestCreator.create(any(), any())).willReturn(caseUpdateRequest);
+        given(requestCreator.create(any(), any(), anyBoolean())).willReturn(caseUpdateRequest);
         this.client = new CaseUpdateClient(validator, restTemplate, requestCreator);
     }
 

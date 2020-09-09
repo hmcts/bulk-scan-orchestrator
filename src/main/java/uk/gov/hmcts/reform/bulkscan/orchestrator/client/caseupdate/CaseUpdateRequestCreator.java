@@ -12,11 +12,12 @@ public class CaseUpdateRequestCreator {
 
     public CaseUpdateRequest create(
         uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord exceptionRecord,
-        CaseDetails existingCaseDetails
+        CaseDetails existingCaseDetails,
+        boolean isAutomatedProcess
     ) {
         return new CaseUpdateRequest(
             createExceptionRecord(exceptionRecord),
-            false,
+            isAutomatedProcess,
             createCaseUpdateDetails(exceptionRecord),
             createExistingCaseDetails(existingCaseDetails)
         );
