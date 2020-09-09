@@ -1,7 +1,6 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.casecreation;
 
 import org.junit.jupiter.api.Test;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CaseCreationResultType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

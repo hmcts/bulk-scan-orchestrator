@@ -1,12 +1,10 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.casecreation;
 
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CaseCreationResultType;
-
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CaseCreationResultType.ABORTED_WITHOUT_FAILURE;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CaseCreationResultType.CASE_ALREADY_EXISTS;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CaseCreationResultType.CASE_CREATED;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CaseCreationResultType.POTENTIALLY_RECOVERABLE_FAILURE;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CaseCreationResultType.UNRECOVERABLE_FAILURE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.casecreation.CaseCreationResultType.ABORTED_WITHOUT_FAILURE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.casecreation.CaseCreationResultType.CASE_ALREADY_EXISTS;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.casecreation.CaseCreationResultType.CASE_CREATED;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.casecreation.CaseCreationResultType.POTENTIALLY_RECOVERABLE_FAILURE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.casecreation.CaseCreationResultType.UNRECOVERABLE_FAILURE;
 
 public final class CaseCreationResult {
 
