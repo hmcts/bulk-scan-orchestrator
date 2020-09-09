@@ -30,12 +30,14 @@ public class CaseUpdateRequestCreatorTest {
 
         assertCaseUpdateDetailsMappedCorrectly(request.caseUpdateDetails, exceptionRecord);
 
-        assertThat(request.exceptionRecord).isEqualToIgnoringGivenFields(
-            exceptionRecord,
-            "exceptionRecordId",
-            "exceptionRecordCaseTypeId",
-            "isAutomatedProcess"
-        );
+        assertThat(request.exceptionRecord)
+            .usingRecursiveComparison()
+            .ignoringFields(
+                "exceptionRecordId",
+                "exceptionRecordCaseTypeId",
+                "isAutomatedProcess"
+            )
+            .isEqualTo(exceptionRecord);
 
         assertThat(request.exceptionRecord.id).isEqualTo(exceptionRecord.id);
         assertThat(request.exceptionRecord.caseTypeId).isEqualTo(exceptionRecord.caseTypeId);
