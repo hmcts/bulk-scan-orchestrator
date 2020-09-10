@@ -5,43 +5,38 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseFinder;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.PaymentsProcessor;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.casecreation.AutoCaseCreator;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.casecreation.CaseCreationException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeProcessingResult;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.Optional;
 
-import static java.lang.String.format;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.AUTO_ATTACHED_TO_CASE;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.CASE_CREATED;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.EXCEPTION_RECORD;
 
 @Service
 public class EnvelopeHandler {
 
     private static final Logger log = LoggerFactory.getLogger(EnvelopeHandler.class);
-    private static final int MAX_RETRIES_FOR_POTENTIALLY_RECOVERABLE_FAILURES = 2;
 
     private final AttachDocsToSupplementaryEvidence evidenceAttacher;
     private final CreateExceptionRecord exceptionRecordCreator;
     private final CaseFinder caseFinder;
     private final PaymentsProcessor paymentsProcessor;
-    private final AutoCaseCreator caseCreator;
+    private final NewApplicationHandler newApplicationHandler;
 
     public EnvelopeHandler(
         AttachDocsToSupplementaryEvidence evidenceAttacher,
         CreateExceptionRecord exceptionRecordCreator,
         CaseFinder caseFinder,
         PaymentsProcessor paymentsProcessor,
-        AutoCaseCreator caseCreator
+        NewApplicationHandler newApplicationHandler
     ) {
         this.evidenceAttacher = evidenceAttacher;
         this.exceptionRecordCreator = exceptionRecordCreator;
         this.caseFinder = caseFinder;
         this.paymentsProcessor = paymentsProcessor;
-        this.caseCreator = caseCreator;
+        this.newApplicationHandler = newApplicationHandler;
     }
 
     public EnvelopeProcessingResult handleEnvelope(Envelope envelope, long deliveryCount) {
@@ -71,39 +66,10 @@ public class EnvelopeHandler {
             case EXCEPTION:
                 return new EnvelopeProcessingResult(createExceptionRecord(envelope), EXCEPTION_RECORD);
             case NEW_APPLICATION:
-                return processNewApplication(envelope, deliveryCount);
+                return newApplicationHandler.handle(envelope, deliveryCount);
             default:
                 throw new UnknownClassificationException(
                     "Cannot determine CCD action for envelope - unknown classification: " + envelope.classification
-                );
-        }
-    }
-
-    private EnvelopeProcessingResult processNewApplication(Envelope envelope, long deliveryCount) {
-        var caseCreationResult = caseCreator.createCase(envelope);
-
-        switch (caseCreationResult.resultType) {
-            case CASE_CREATED:
-            case CASE_ALREADY_EXISTS:
-                paymentsProcessor.createPayments(envelope, caseCreationResult.caseCcdId, false);
-                return new EnvelopeProcessingResult(caseCreationResult.caseCcdId, CASE_CREATED);
-            case ABORTED_WITHOUT_FAILURE:
-            case UNRECOVERABLE_FAILURE:
-                return new EnvelopeProcessingResult(createExceptionRecord(envelope), EXCEPTION_RECORD);
-            case POTENTIALLY_RECOVERABLE_FAILURE:
-                if (deliveryCount < MAX_RETRIES_FOR_POTENTIALLY_RECOVERABLE_FAILURES) {
-                    // let the application retry later
-                    throw new CaseCreationException("Case creation failed due to a potentially recoverable error");
-                } else {
-                    // too many attempts - fall back to exception record
-                    return new EnvelopeProcessingResult(createExceptionRecord(envelope), EXCEPTION_RECORD);
-                }
-            default:
-                throw new CaseCreationException(
-                    format(
-                        "Failed to process case creation result - unknown result type: '%s'",
-                        caseCreationResult.resultType
-                    )
                 );
         }
     }
