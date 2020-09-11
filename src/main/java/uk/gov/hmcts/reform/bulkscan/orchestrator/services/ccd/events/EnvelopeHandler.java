@@ -12,19 +12,22 @@ public class EnvelopeHandler {
 
     private final CreateExceptionRecord exceptionRecordCreator;
     private final PaymentsProcessor paymentsProcessor;
+    private final SupplementaryEvidenceWithOcrHandler supplementaryEvidenceWithOcrHandler;
     private final NewApplicationHandler newApplicationHandler;
     private final SupplementaryEvidenceHandler supplementaryEvidenceHandler;
 
     public EnvelopeHandler(
         CreateExceptionRecord exceptionRecordCreator,
         PaymentsProcessor paymentsProcessor,
-        SupplementaryEvidenceHandler supplementaryEvidenceHandler,
-        NewApplicationHandler newApplicationHandler
+        SupplementaryEvidenceWithOcrHandler supplementaryEvidenceWithOcrHandler,
+        NewApplicationHandler newApplicationHandler,
+        SupplementaryEvidenceHandler supplementaryEvidenceHandler
     ) {
         this.exceptionRecordCreator = exceptionRecordCreator;
         this.paymentsProcessor = paymentsProcessor;
-        this.supplementaryEvidenceHandler = supplementaryEvidenceHandler;
+        this.supplementaryEvidenceWithOcrHandler = supplementaryEvidenceWithOcrHandler;
         this.newApplicationHandler = newApplicationHandler;
+        this.supplementaryEvidenceHandler = supplementaryEvidenceHandler;
     }
 
     public EnvelopeProcessingResult handleEnvelope(Envelope envelope, long deliveryCount) {
@@ -32,6 +35,7 @@ public class EnvelopeHandler {
             case SUPPLEMENTARY_EVIDENCE:
                 return supplementaryEvidenceHandler.handle(envelope);
             case SUPPLEMENTARY_EVIDENCE_WITH_OCR:
+                return supplementaryEvidenceWithOcrHandler.handle(envelope);
             case EXCEPTION:
                 return new EnvelopeProcessingResult(createExceptionRecord(envelope), EXCEPTION_RECORD);
             case NEW_APPLICATION:
