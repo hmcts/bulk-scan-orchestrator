@@ -38,7 +38,7 @@ public class NewApplicationHandler {
     public EnvelopeProcessingResult handle(Envelope envelope, long deliveryCount) {
         checkArgument(
             envelope.classification == Classification.NEW_APPLICATION,
-            "Exception classification has to be " + Classification.NEW_APPLICATION
+            "Envelope classification has to be " + Classification.NEW_APPLICATION
         );
 
         var caseCreationResult = caseCreator.createCase(envelope);

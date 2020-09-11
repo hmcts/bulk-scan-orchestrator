@@ -13,12 +13,14 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.CASE_ID;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.JURSIDICTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.AUTO_ATTACHED_TO_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.EXCEPTION_RECORD;
@@ -101,5 +103,20 @@ class SupplementaryEvidenceHandlerTest {
         verify(evidenceAttacher).attach(envelope, caseDetails);
         verify(exceptionRecordCreator).tryCreateFrom(envelope);
         verify(paymentsProcessor).createPayments(envelope, CASE_ID, true);
+    }
+
+    @Test
+    void should_throw_an_exception_if_envelope_classification_is_not_correct() {
+        // given
+        Envelope envelope = envelope(EXCEPTION, JURSIDICTION, CASE_REF);
+
+        // when
+        var exc = catchThrowable(() -> handler.handle(envelope));
+
+        // then
+        assertThat(exc)
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Envelope classification")
+            .hasMessageContaining(SUPPLEMENTARY_EVIDENCE.toString());
     }
 }
