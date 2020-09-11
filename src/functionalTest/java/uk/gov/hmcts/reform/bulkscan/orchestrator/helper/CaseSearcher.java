@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events.CreateExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.envelopehandlers.CreateExceptionRecord;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;

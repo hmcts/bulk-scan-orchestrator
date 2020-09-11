@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.envelopehandlers;
 
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
