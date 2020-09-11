@@ -19,12 +19,12 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 @ExtendWith(MockitoExtension.class)
 class EnvelopeHandlerTest {
 
-    @Mock private ExceptionClassificationHandler exceptionClassificationHandler;
-    @Mock private SupplementaryEvidenceWithOcrHandler supplementaryEvidenceWithOcrHandler;
-    @Mock private NewApplicationHandler newApplicationHandler;
-    @Mock private SupplementaryEvidenceHandler supplementaryEvidenceHandler;
+    @Mock ExceptionClassificationHandler exceptionClassificationHandler;
+    @Mock SupplementaryEvidenceWithOcrHandler supplementaryEvidenceWithOcrHandler;
+    @Mock NewApplicationHandler newApplicationHandler;
+    @Mock SupplementaryEvidenceHandler supplementaryEvidenceHandler;
 
-    private EnvelopeHandler envelopeHandler;
+    EnvelopeHandler envelopeHandler;
 
     @BeforeEach
     void setUp() {

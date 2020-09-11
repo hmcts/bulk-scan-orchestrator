@@ -5,12 +5,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseFinder;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.PaymentsProcessor;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeProcessingResult;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.AUTO_ATTACHED_TO_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.EXCEPTION_RECORD;
 
@@ -37,6 +39,11 @@ public class SupplementaryEvidenceHandler {
     }
 
     public EnvelopeProcessingResult handle(Envelope envelope) {
+        checkArgument(
+            envelope.classification == Classification.SUPPLEMENTARY_EVIDENCE,
+            "Envelope classification has to be " + Classification.SUPPLEMENTARY_EVIDENCE
+        );
+
         Optional<CaseDetails> caseDetailsFound = caseFinder.findCase(envelope);
 
         if (caseDetailsFound.isPresent()) {

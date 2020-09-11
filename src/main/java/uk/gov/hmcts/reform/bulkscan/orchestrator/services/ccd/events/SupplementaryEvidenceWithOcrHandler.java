@@ -2,9 +2,11 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
 
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.PaymentsProcessor;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeProcessingResult;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.EXCEPTION_RECORD;
 
 @Service
@@ -22,6 +24,11 @@ public class SupplementaryEvidenceWithOcrHandler {
     }
 
     public EnvelopeProcessingResult handle(Envelope envelope) {
+        checkArgument(
+            envelope.classification == Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR,
+            "Envelope classification has to be " + Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR
+        );
+
         Long ccdId = exceptionRecordCreator.tryCreateFrom(envelope);
         paymentsProcessor.createPayments(envelope, ccdId, true);
 
