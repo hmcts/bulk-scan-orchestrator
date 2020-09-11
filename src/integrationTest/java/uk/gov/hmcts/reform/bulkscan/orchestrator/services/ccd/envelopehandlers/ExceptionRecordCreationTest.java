@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.envelopehandlers;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.microsoft.azure.servicebus.IMessageReceiver;
