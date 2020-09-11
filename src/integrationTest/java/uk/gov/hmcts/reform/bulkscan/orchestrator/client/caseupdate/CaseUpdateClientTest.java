@@ -46,6 +46,7 @@ import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
+@SuppressWarnings("checkstyle:LineLength")
 @AutoConfigureWireMock(port = 0)
 @IntegrationTest
 public class CaseUpdateClientTest {
