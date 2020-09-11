@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation;
 
-import io.vavr.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.shared.DocumentMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
@@ -18,23 +20,21 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.SampleData.sampleExceptionRecord;
 
+@ExtendWith(MockitoExtension.class)
 class TransformationRequestCreatorTest {
 
-    private static final String DOCUMENT_MANAGEMENT_URL = "docManagementUrl1";
-    private static final String DOCUMENT_MANAGEMENT_CONTEXT_PATH = "docManagementContextPath1";
+    @Mock DocumentMapper documentMapper;
 
     private TransformationRequestCreator requestCreator;
 
     @BeforeEach
     void setUp() {
-        this.requestCreator = new TransformationRequestCreator(
-            DOCUMENT_MANAGEMENT_URL,
-            DOCUMENT_MANAGEMENT_CONTEXT_PATH
-        );
+        this.requestCreator = new TransformationRequestCreator(documentMapper);
     }
 
     @Test
@@ -59,7 +59,18 @@ class TransformationRequestCreatorTest {
     @Test
     void should_set_all_fields_in_the_request_correctly_from_envelope() {
         // given
-        var envelope = sampleEnvelope(sampleEnvelopeOcrDataFields());
+        var doc1 = mock(Document.class);
+        var doc2 = mock(Document.class);
+        var envelope = sampleEnvelope(
+            sampleEnvelopeOcrDataFields(),
+            asList(doc1, doc2)
+        );
+
+        var mappedDoc1 = mock(ScannedDocument.class);
+        var mappedDoc2 = mock(ScannedDocument.class);
+
+        given(documentMapper.toScannedDoc(doc1)).willReturn(mappedDoc1);
+        given(documentMapper.toScannedDoc(doc2)).willReturn(mappedDoc2);
 
         // when
         var transformationRequest = requestCreator.create(envelope);
@@ -82,13 +93,15 @@ class TransformationRequestCreatorTest {
             .usingFieldByFieldElementComparator()
             .isEqualTo(envelope.ocrData);
 
-        assertScannedDocumentsMappedCorrectly(transformationRequest.scannedDocuments, envelope.documents);
+        assertThat(transformationRequest.scannedDocuments).hasSize(2);
+        assertThat(transformationRequest.scannedDocuments.get(0)).isEqualTo(mappedDoc1);
+        assertThat(transformationRequest.scannedDocuments.get(1)).isEqualTo(mappedDoc2);
     }
 
     @Test
     void should_map_null_ocr_data_from_envelope_to_empty_list() {
         // given
-        var envelope = sampleEnvelope(null);
+        var envelope = sampleEnvelope(null, sampleEnvelopeDocuments());
 
         // when
         var transformationRequest = requestCreator.create(envelope);
@@ -97,55 +110,7 @@ class TransformationRequestCreatorTest {
         assertThat(transformationRequest.ocrDataFields).isEmpty();
     }
 
-    private void assertScannedDocumentsMappedCorrectly(
-        List<ScannedDocument> scannedDocuments,
-        List<Document> envelopeDocuments
-    ) {
-        assertThat(scannedDocuments)
-            .extracting(document ->
-                Tuple.of(
-                    document.controlNumber,
-                    document.deliveryDate,
-                    document.documentUrl,
-                    document.fileName,
-                    document.scannedDate,
-                    document.subtype,
-                    document.type.toString()
-                )
-            )
-            .usingRecursiveFieldByFieldElementComparator()
-            .isEqualTo(
-                envelopeDocuments
-                    .stream()
-                    .map(document ->
-                        Tuple.of(
-                            document.controlNumber,
-                            toLocalDateTime(document.deliveryDate),
-                            getDocumentUrl(document),
-                            document.fileName,
-                            toLocalDateTime(document.scannedAt),
-                            document.subtype,
-                            document.type
-                        )
-                    )
-                    .collect(toList())
-            );
-    }
-
-    private DocumentUrl getDocumentUrl(Document document) {
-        String url = String.join(
-            "/",
-            DOCUMENT_MANAGEMENT_URL,
-            DOCUMENT_MANAGEMENT_CONTEXT_PATH,
-            document.uuid
-        );
-
-        String binaryUrl = url + "/binary";
-
-        return new DocumentUrl(url, binaryUrl, document.fileName);
-    }
-
-    private Envelope sampleEnvelope(List<OcrDataField> ocrDataFields) {
+    private Envelope sampleEnvelope(List<OcrDataField> ocrDataFields, List<Document> documents) {
         return new Envelope(
             "envelopeId1",
             "caseRef1",
@@ -158,7 +123,7 @@ class TransformationRequestCreatorTest {
             Instant.now(),
             Instant.now().plusSeconds(1),
             Classification.NEW_APPLICATION,
-            sampleEnvelopeDocuments(),
+            documents,
             emptyList(),
             ocrDataFields,
             emptyList()
