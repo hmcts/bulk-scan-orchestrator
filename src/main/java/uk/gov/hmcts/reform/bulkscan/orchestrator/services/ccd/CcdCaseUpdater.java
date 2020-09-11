@@ -8,7 +8,7 @@ import org.springframework.web.client.HttpClientErrorException.UnprocessableEnti
 import org.springframework.web.client.RestClientException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.CaseUpdateClient;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.CaseUpdateDataClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
@@ -39,7 +39,7 @@ public class CcdCaseUpdater {
 
     private final AuthTokenGenerator s2sTokenGenerator;
     private final CoreCaseDataApi coreCaseDataApi;
-    private final CaseUpdateClient caseUpdateClient;
+    private final CaseUpdateDataClient caseUpdateDataClient;
     private final CaseDataUpdater caseDataUpdater;
     private final EnvelopeReferenceHelper envelopeReferenceHelper;
     private final ServiceResponseParser serviceResponseParser;
@@ -47,14 +47,14 @@ public class CcdCaseUpdater {
     public CcdCaseUpdater(
         AuthTokenGenerator s2sTokenGenerator,
         CoreCaseDataApi coreCaseDataApi,
-        CaseUpdateClient caseUpdateClient,
+        CaseUpdateDataClient caseUpdateDataClient,
         CaseDataUpdater caseDataUpdater,
         EnvelopeReferenceHelper envelopeReferenceHelper,
         ServiceResponseParser serviceResponseParser
     ) {
         this.s2sTokenGenerator = s2sTokenGenerator;
         this.coreCaseDataApi = coreCaseDataApi;
-        this.caseUpdateClient = caseUpdateClient;
+        this.caseUpdateDataClient = caseUpdateDataClient;
         this.caseDataUpdater = caseDataUpdater;
         this.envelopeReferenceHelper = envelopeReferenceHelper;
         this.serviceResponseParser = serviceResponseParser;
@@ -111,7 +111,7 @@ public class CcdCaseUpdater {
                 return Optional.empty();
             }
 
-            SuccessfulUpdateResponse updateResponse = caseUpdateClient.getCaseUpdateData(
+            SuccessfulUpdateResponse updateResponse = caseUpdateDataClient.getCaseUpdateData(
                 configItem.getUpdateUrl(),
                 existingCase,
                 exceptionRecord,

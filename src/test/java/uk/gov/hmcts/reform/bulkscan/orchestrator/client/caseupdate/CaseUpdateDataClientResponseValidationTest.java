@@ -31,14 +31,14 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
-class CaseUpdateClientResponseValidationTest {
+class CaseUpdateDataClientResponseValidationTest {
 
     @Mock RestTemplate restTemplate;
     @Mock CaseUpdateRequestCreator requestCreator;
 
     Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
-    CaseUpdateClient client;
+    CaseUpdateDataClient client;
 
     @BeforeEach
     void setUp() {
@@ -50,7 +50,7 @@ class CaseUpdateClientResponseValidationTest {
         );
 
         given(requestCreator.create(any(), any(), anyBoolean())).willReturn(caseUpdateRequest);
-        this.client = new CaseUpdateClient(validator, restTemplate, requestCreator);
+        this.client = new CaseUpdateDataClient(validator, restTemplate, requestCreator);
     }
 
     @Test

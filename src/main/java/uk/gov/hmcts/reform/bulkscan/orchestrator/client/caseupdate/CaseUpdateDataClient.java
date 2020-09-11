@@ -16,16 +16,19 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 
+/**
+ * Retrieves data that should be used to update a case.
+ */
 @Component
-public class CaseUpdateClient {
+public class CaseUpdateDataClient {
 
-    private static final Logger log = LoggerFactory.getLogger(CaseUpdateClient.class);
+    private static final Logger log = LoggerFactory.getLogger(CaseUpdateDataClient.class);
 
     private final Validator validator;
     private final RestTemplate restTemplate;
     private final CaseUpdateRequestCreator requestCreator;
 
-    public CaseUpdateClient(
+    public CaseUpdateDataClient(
         Validator validator,
         RestTemplate restTemplate,
         CaseUpdateRequestCreator requestCreator
