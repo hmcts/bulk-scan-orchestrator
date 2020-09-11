@@ -111,7 +111,7 @@ public class CcdCaseUpdater {
                 return Optional.empty();
             }
 
-            SuccessfulUpdateResponse updateResponse = caseUpdateClient.updateCase(
+            SuccessfulUpdateResponse updateResponse = caseUpdateClient.getCaseUpdateData(
                 configItem.getUpdateUrl(),
                 existingCase,
                 exceptionRecord,

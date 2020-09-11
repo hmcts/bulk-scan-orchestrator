@@ -35,7 +35,7 @@ public class CaseUpdateClient {
         this.requestCreator = requestCreator;
     }
 
-    public SuccessfulUpdateResponse updateCase(
+    public SuccessfulUpdateResponse getCaseUpdateData(
         String updateUrl,
         CaseDetails existingCase,
         ExceptionRecord exceptionRecord,

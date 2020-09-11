@@ -64,7 +64,7 @@ class CaseUpdateClientTest {
         String url = "http://test-url.example.com";
 
         // when
-        caseUpdateClient.updateCase(url, existingCase, exceptionRecord, "token");
+        caseUpdateClient.getCaseUpdateData(url, existingCase, exceptionRecord, "token");
 
         // then
         var requestCaptor = ArgumentCaptor.forClass(HttpEntity.class);
