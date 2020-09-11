@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.SampleData.sampleCaseDetails;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.SampleData.sampleEnvelope;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.SampleData.sampleExceptionRecord;
 
 @ExtendWith(MockitoExtension.class)
@@ -142,26 +143,6 @@ public class CaseUpdateRequestCreatorTest {
         assertThat(caseUpdateDetails.poBox).isEqualTo(exceptionRecord.poBox);
         assertThat(caseUpdateDetails.poBoxJurisdiction).isEqualTo(exceptionRecord.poBoxJurisdiction);
         assertThat(caseUpdateDetails.scannedDocuments).isEqualTo(exceptionRecord.scannedDocuments);
-    }
-
-    private Envelope sampleEnvelope(List<OcrDataField> ocrDataFields, List<Document> documents) {
-        return new Envelope(
-            "envelopeId1",
-            "caseRef1",
-            "legacyCaseRef1",
-            "poBox1",
-            "jurisdiction1",
-            "container1",
-            "zipFileName1",
-            "formType1",
-            Instant.now(),
-            Instant.now().plusSeconds(1),
-            Classification.NEW_APPLICATION,
-            documents,
-            emptyList(),
-            ocrDataFields,
-            emptyList()
-        );
     }
 
     private LocalDateTime toLocalDateTime(Instant instant) {
