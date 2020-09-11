@@ -123,6 +123,9 @@ class NewApplicationHandlerTest {
         var exc = catchThrowable(() -> handler.handle(envelope, 0));
 
         // then
-        assertThat(exc).isInstanceOf(IllegalArgumentException.class);
+        assertThat(exc)
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Envelope classification")
+            .hasMessageContaining(NEW_APPLICATION.toString());
     }
 }
