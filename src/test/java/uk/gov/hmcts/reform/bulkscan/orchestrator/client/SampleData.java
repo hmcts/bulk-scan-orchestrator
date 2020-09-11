@@ -18,6 +18,7 @@ import java.util.List;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 
+@SuppressWarnings("checkstyle:LineLength")
 public class SampleData {
 
     private SampleData() {
