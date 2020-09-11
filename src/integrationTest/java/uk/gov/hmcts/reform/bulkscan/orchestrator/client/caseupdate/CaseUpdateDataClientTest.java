@@ -49,12 +49,12 @@ import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 @SuppressWarnings("checkstyle:LineLength")
 @AutoConfigureWireMock(port = 0)
 @IntegrationTest
-public class CaseUpdateClientTest {
+public class CaseUpdateDataClientTest {
 
     private static final String UPDATE_CASE_URL = "/update-case";
 
     @Autowired
-    private CaseUpdateClient client;
+    private CaseUpdateDataClient client;
 
     @Value("${service-config.services[0].update-url}")
     private String updateUrl;
