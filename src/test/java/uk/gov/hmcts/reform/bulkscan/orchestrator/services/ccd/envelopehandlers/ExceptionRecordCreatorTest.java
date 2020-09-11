@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.envelopehandlers;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

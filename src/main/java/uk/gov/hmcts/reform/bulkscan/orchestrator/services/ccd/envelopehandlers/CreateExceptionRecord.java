@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.envelopehandlers;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
