@@ -28,7 +28,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.SampleData.sample
 
 
 @ExtendWith(MockitoExtension.class)
-class CaseUpdateClientTest {
+class CaseUpdateDataClientTest {
 
     @Mock
     Validator validator;
@@ -39,11 +39,11 @@ class CaseUpdateClientTest {
     @Mock
     CaseUpdateRequestCreator requestCreator;
 
-    private CaseUpdateClient caseUpdateClient;
+    private CaseUpdateDataClient caseUpdateDataClient;
 
     @BeforeEach
     void setUp() {
-        caseUpdateClient = new CaseUpdateClient(validator, restTemplate, requestCreator);
+        caseUpdateDataClient = new CaseUpdateDataClient(validator, restTemplate, requestCreator);
     }
 
     @Test
@@ -64,7 +64,7 @@ class CaseUpdateClientTest {
         String url = "http://test-url.example.com";
 
         // when
-        caseUpdateClient.getCaseUpdateData(url, existingCase, exceptionRecord, "token");
+        caseUpdateDataClient.getCaseUpdateData(url, existingCase, exceptionRecord, "token");
 
         // then
         var requestCaptor = ArgumentCaptor.forClass(HttpEntity.class);
