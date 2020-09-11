@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate;
 
+import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.CaseUpdateClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
@@ -10,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
 
+@Service
 public class AutoCaseUpdater {
 
     private final AuthTokenGenerator s2sTokenGenerator;
