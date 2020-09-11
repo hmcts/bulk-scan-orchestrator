@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.events;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.envelopehandlers;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,26 +17,26 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.JURSIDICTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.EXCEPTION_RECORD;
 
 @ExtendWith(MockitoExtension.class)
-class SupplementaryEvidenceWithOcrHandlerTest {
+class ExceptionClassificationHandlerTest {
 
     @Mock CreateExceptionRecord exceptionRecordCreator;
     @Mock PaymentsProcessor paymentsProcessor;
 
-    SupplementaryEvidenceWithOcrHandler handler;
+    ExceptionClassificationHandler handler;
 
     @BeforeEach
     void setUp() {
-        handler = new SupplementaryEvidenceWithOcrHandler(exceptionRecordCreator, paymentsProcessor);
+        handler = new ExceptionClassificationHandler(exceptionRecordCreator, paymentsProcessor);
     }
 
     @Test
     void should_create_exception_record() {
         // given
-        Envelope envelope = envelope(SUPPLEMENTARY_EVIDENCE_WITH_OCR, JURSIDICTION, CASE_REF);
+        Envelope envelope = envelope(EXCEPTION, JURSIDICTION, CASE_REF);
         given(exceptionRecordCreator.tryCreateFrom(envelope)).willReturn(CASE_ID);
 
         // when
@@ -51,9 +51,9 @@ class SupplementaryEvidenceWithOcrHandlerTest {
     }
 
     @Test
-    void should_throw_an_exception_if_envelope_classification_is_incorrect() {
+    void should_throw_exception_if_envelope_is_not_of_exception_classification() {
         // given
-        Envelope envelope = envelope(EXCEPTION, JURSIDICTION, CASE_REF);
+        Envelope envelope = envelope(NEW_APPLICATION, JURSIDICTION, CASE_REF);
 
         // when
         var exc = catchThrowable(() -> handler.handle(envelope));
@@ -61,7 +61,6 @@ class SupplementaryEvidenceWithOcrHandlerTest {
         // then
         assertThat(exc)
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Envelope classification")
-            .hasMessageContaining(SUPPLEMENTARY_EVIDENCE_WITH_OCR.toString());
+            .hasMessageContaining("Envelope classification");
     }
 }
