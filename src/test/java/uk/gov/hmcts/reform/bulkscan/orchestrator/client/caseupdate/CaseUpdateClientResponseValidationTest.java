@@ -121,7 +121,7 @@ class CaseUpdateClientResponseValidationTest {
     }
 
     void callUpdateCase() {
-        client.updateCase(
+        client.getCaseUpdateData(
             "http://some-url.com/update",
             mock(CaseDetails.class),
             mock(ExceptionRecord.class),

@@ -77,7 +77,7 @@ public class CaseUpdateClientTest {
         );
 
         // when
-        SuccessfulUpdateResponse response = client.updateCase(
+        SuccessfulUpdateResponse response = client.getCaseUpdateData(
             updateUrl,
             existingCase(),
             exceptionRecordRequestData(),
@@ -104,7 +104,7 @@ public class CaseUpdateClientTest {
 
         // when
         UnprocessableEntity exception = catchThrowableOfType(
-            () -> client.updateCase(updateUrl, existingCase(), exceptionRecordRequestData(), s2sToken),
+            () -> client.getCaseUpdateData(updateUrl, existingCase(), exceptionRecordRequestData(), s2sToken),
             UnprocessableEntity.class
         );
 
@@ -126,7 +126,7 @@ public class CaseUpdateClientTest {
 
         // when
         BadRequest exception = catchThrowableOfType(
-            () -> client.updateCase(updateUrl, existingCase(), exceptionRecordRequestData(), s2sToken),
+            () -> client.getCaseUpdateData(updateUrl, existingCase(), exceptionRecordRequestData(), s2sToken),
             BadRequest.class
         );
 
@@ -146,7 +146,7 @@ public class CaseUpdateClientTest {
 
         // when
         BadRequest exception = catchThrowableOfType(
-            () -> client.updateCase(updateUrl, existingCase(), exceptionRecordRequestData(), s2sToken),
+            () -> client.getCaseUpdateData(updateUrl, existingCase(), exceptionRecordRequestData(), s2sToken),
             BadRequest.class
         );
 
@@ -164,7 +164,7 @@ public class CaseUpdateClientTest {
 
         // when
         Forbidden exception = catchThrowableOfType(
-            () -> client.updateCase(updateUrl, existingCase(), exceptionRecordRequestData(), randomUUID().toString()),
+            () -> client.getCaseUpdateData(updateUrl, existingCase(), exceptionRecordRequestData(), randomUUID().toString()),
             Forbidden.class
         );
 
@@ -182,7 +182,7 @@ public class CaseUpdateClientTest {
 
         // when
         Unauthorized exception = catchThrowableOfType(
-            () -> client.updateCase(updateUrl, existingCase(), exceptionRecordRequestData(), randomUUID().toString()),
+            () -> client.getCaseUpdateData(updateUrl, existingCase(), exceptionRecordRequestData(), randomUUID().toString()),
             Unauthorized.class
         );
 
@@ -200,7 +200,7 @@ public class CaseUpdateClientTest {
 
         // when
         InternalServerError exception = catchThrowableOfType(
-            () -> client.updateCase(updateUrl, existingCase(), exceptionRecordRequestData(), randomUUID().toString()),
+            () -> client.getCaseUpdateData(updateUrl, existingCase(), exceptionRecordRequestData(), randomUUID().toString()),
             InternalServerError.class
         );
 
