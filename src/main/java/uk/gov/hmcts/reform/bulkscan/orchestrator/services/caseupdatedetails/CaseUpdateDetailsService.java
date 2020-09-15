@@ -30,6 +30,10 @@ public class CaseUpdateDetailsService {
 
     /**
      * Retrieves data that should be used to update given case based on given exception record.
+     *
+     * @param service         service that should be called to get the data.
+     * @param existingCase    CCD case to update.
+     * @param exceptionRecord exception record that should be used to update the case.
      */
     public SuccessfulUpdateResponse getCaseUpdateData(
         String service,
