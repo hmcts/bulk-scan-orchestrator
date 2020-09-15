@@ -7,6 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdateRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -38,11 +39,21 @@ public class CaseUpdateDataClient {
         this.requestCreator = requestCreator;
     }
 
+    @Deprecated
     public SuccessfulUpdateResponse getCaseUpdateData(
         String updateUrl,
         CaseDetails existingCase,
         ExceptionRecord exceptionRecord,
         String s2sToken
+    ) {
+        var caseUpdateRequest = requestCreator.create(exceptionRecord, existingCase, false);
+        return getCaseUpdateData(updateUrl, s2sToken, caseUpdateRequest);
+    }
+
+    public SuccessfulUpdateResponse getCaseUpdateData(
+        String updateUrl,
+        String s2sToken,
+        CaseUpdateRequest caseUpdateRequest
     ) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("ServiceAuthorization", s2sToken);
@@ -52,8 +63,6 @@ public class CaseUpdateDataClient {
                 .fromHttpUrl(updateUrl)
                 .build()
                 .toString();
-
-        var caseUpdateRequest = requestCreator.create(exceptionRecord, existingCase, false);
 
         log.info(
             "Requesting service to update case, caseTypeId: {}, case id: {}, exception id: {}",
