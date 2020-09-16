@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.caseupdatedetails;
 
+import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.CaseUpdateDataClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.CaseUpdateRequestCreator;
@@ -9,6 +10,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+@Service
 public class CaseUpdateDetailsService {
 
     private final AuthTokenGenerator s2sTokenGenerator;

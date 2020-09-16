@@ -8,13 +8,13 @@ import org.springframework.web.client.HttpClientErrorException.UnprocessableEnti
 import org.springframework.web.client.RestClientException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.CaseUpdateDataClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataUpdater;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.caseupdatedetails.CaseUpdateDetailsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -39,7 +39,7 @@ public class CcdCaseUpdater {
 
     private final AuthTokenGenerator s2sTokenGenerator;
     private final CoreCaseDataApi coreCaseDataApi;
-    private final CaseUpdateDataClient caseUpdateDataClient;
+    private final CaseUpdateDetailsService caseUpdateDataService;
     private final CaseDataUpdater caseDataUpdater;
     private final EnvelopeReferenceHelper envelopeReferenceHelper;
     private final ServiceResponseParser serviceResponseParser;
@@ -47,14 +47,14 @@ public class CcdCaseUpdater {
     public CcdCaseUpdater(
         AuthTokenGenerator s2sTokenGenerator,
         CoreCaseDataApi coreCaseDataApi,
-        CaseUpdateDataClient caseUpdateDataClient,
+        CaseUpdateDetailsService caseUpdateDataService,
         CaseDataUpdater caseDataUpdater,
         EnvelopeReferenceHelper envelopeReferenceHelper,
         ServiceResponseParser serviceResponseParser
     ) {
         this.s2sTokenGenerator = s2sTokenGenerator;
         this.coreCaseDataApi = coreCaseDataApi;
-        this.caseUpdateDataClient = caseUpdateDataClient;
+        this.caseUpdateDataService = caseUpdateDataService;
         this.caseDataUpdater = caseDataUpdater;
         this.envelopeReferenceHelper = envelopeReferenceHelper;
         this.serviceResponseParser = serviceResponseParser;
@@ -62,7 +62,7 @@ public class CcdCaseUpdater {
 
     public Optional<ErrorsAndWarnings> updateCase(
         ExceptionRecord exceptionRecord,
-        ServiceConfigItem configItem,
+        ServiceConfigItem configItem, // todo: change to just service name
         boolean ignoreWarnings,
         String idamToken,
         String userId,
@@ -111,11 +111,10 @@ public class CcdCaseUpdater {
                 return Optional.empty();
             }
 
-            SuccessfulUpdateResponse updateResponse = caseUpdateDataClient.getCaseUpdateData(
-                configItem.getUpdateUrl(),
+            SuccessfulUpdateResponse updateResponse = caseUpdateDataService.getCaseUpdateData(
+                configItem.getService(),
                 existingCase,
-                exceptionRecord,
-                s2sToken
+                exceptionRecord
             );
 
             log.info(
