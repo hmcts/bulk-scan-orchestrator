@@ -427,7 +427,7 @@ public class AttachToCaseCallbackService {
         ServiceConfigItem serviceConfigItem = getServiceConfig(callBackEvent.service);
         return ccdCaseUpdater.updateCase(
             callBackEvent.exceptionRecord,
-            serviceConfigItem,
+            serviceConfigItem.getService(),
             ignoreWarnings,
             callBackEvent.idamToken,
             callBackEvent.userId,
