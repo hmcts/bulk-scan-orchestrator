@@ -14,7 +14,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.CaseUpdateDataClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.CaseUpdateDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
@@ -25,6 +24,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataUpdater;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.caseupdatedetails.CaseUpdateDetailsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -62,7 +62,7 @@ class CcdCaseUpdaterTest {
 
     private CcdCaseUpdater ccdCaseUpdater;
 
-    @Mock private CaseUpdateDataClient caseUpdateDataClient;
+    @Mock private CaseUpdateDetailsService caseUpdateDataService;
     @Mock private ServiceResponseParser serviceResponseParser;
     @Mock private AuthTokenGenerator authTokenGenerator;
     @Mock private CoreCaseDataApi coreCaseDataApi;
@@ -85,7 +85,7 @@ class CcdCaseUpdaterTest {
         ccdCaseUpdater = new CcdCaseUpdater(
             authTokenGenerator,
             coreCaseDataApi,
-            caseUpdateDataClient,
+            caseUpdateDataService,
             caseDataUpdater,
             envelopeReferenceHelper,
             serviceResponseParser
@@ -105,8 +105,7 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_return_no_error_or_warnings_if_no_warnings_from_updateCase() {
         // given
-        given(configItem.getUpdateUrl()).willReturn("url");
-        given(caseUpdateDataClient.getCaseUpdateData("url", existingCase, exceptionRecord, "token"))
+        given(caseUpdateDataService.getCaseUpdateData("Service", existingCase, exceptionRecord))
             .willReturn(noWarningsUpdateResponse);
         initResponseMockData();
         initMockData();
@@ -136,8 +135,7 @@ class CcdCaseUpdaterTest {
         given(caseDataUpdater.setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData))
             .willReturn(caseDataAfterDocExceptionRefUpdate);
 
-        given(configItem.getUpdateUrl()).willReturn("url");
-        given(caseUpdateDataClient.getCaseUpdateData("url", existingCase, exceptionRecord, "token"))
+        given(caseUpdateDataService.getCaseUpdateData("Service", existingCase, exceptionRecord))
             .willReturn(noWarningsUpdateResponse);
         initResponseMockData();
         initMockData();
@@ -166,8 +164,7 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_return_no_error_or_warnings_if_warnings_from_updateCase_and_ignoreWarnings_is_true() {
         // given
-        given(configItem.getUpdateUrl()).willReturn("url");
-        given(caseUpdateDataClient.getCaseUpdateData("url", existingCase, exceptionRecord, "token"))
+        given(caseUpdateDataService.getCaseUpdateData("Service", existingCase, exceptionRecord))
             .willReturn(warningsUpdateResponse);
         initResponseMockData();
         initMockData();
@@ -193,8 +190,7 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_return_warnings_if_warnings_from_updateCase_and_ignoreWarnings_is_false() {
         // given
-        given(configItem.getUpdateUrl()).willReturn("url");
-        given(caseUpdateDataClient.getCaseUpdateData("url", existingCase, exceptionRecord, "token"))
+        given(caseUpdateDataService.getCaseUpdateData("Service", existingCase, exceptionRecord))
             .willReturn(warningsUpdateResponse);
         initMockData();
 
@@ -220,8 +216,7 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_handle_conflict_response_from_ccd_api() {
         initResponseMockData();
-        given(configItem.getUpdateUrl()).willReturn("url");
-        given(caseUpdateDataClient.getCaseUpdateData(anyString(), any(CaseDetails.class), any(ExceptionRecord.class), anyString()))
+        given(caseUpdateDataService.getCaseUpdateData(anyString(), any(CaseDetails.class), any(ExceptionRecord.class)))
             .willReturn(noWarningsUpdateResponse);
         initMockData();
         prepareMockForSubmissionEventForCaseWorker()
@@ -252,8 +247,7 @@ class CcdCaseUpdaterTest {
     void updateCase_should_handle_feign_exception() {
         // given
         initResponseMockData();
-        given(configItem.getUpdateUrl()).willReturn("url");
-        given(caseUpdateDataClient.getCaseUpdateData(anyString(), any(CaseDetails.class), any(ExceptionRecord.class), anyString()))
+        given(caseUpdateDataService.getCaseUpdateData(anyString(), any(CaseDetails.class), any(ExceptionRecord.class)))
             .willReturn(noWarningsUpdateResponse);
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willThrow(
@@ -288,8 +282,7 @@ class CcdCaseUpdaterTest {
     void updateCase_should_handle_feign_unprocessable_entity() {
         // given
         initResponseMockData();
-        given(configItem.getUpdateUrl()).willReturn("url");
-        given(caseUpdateDataClient.getCaseUpdateData(anyString(), any(CaseDetails.class), any(ExceptionRecord.class), anyString()))
+        given(caseUpdateDataService.getCaseUpdateData(anyString(), any(CaseDetails.class), any(ExceptionRecord.class)))
             .willReturn(noWarningsUpdateResponse);
         initMockData();
         prepareMockForSubmissionEventForCaseWorker()
@@ -330,8 +323,7 @@ class CcdCaseUpdaterTest {
         // given
         given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
         given(eventResponse.getEventId()).willReturn(EventIds.ATTACH_SCANNED_DOCS_WITH_OCR);
-        given(configItem.getUpdateUrl()).willReturn("url");
-        given(caseUpdateDataClient.getCaseUpdateData(anyString(), any(CaseDetails.class), any(ExceptionRecord.class), anyString()))
+        given(caseUpdateDataService.getCaseUpdateData(anyString(), any(CaseDetails.class), any(ExceptionRecord.class)))
             .willThrow(new RestClientException("I/O error"));
         initMockData();
 
@@ -368,8 +360,7 @@ class CcdCaseUpdaterTest {
         // given
         given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
         given(eventResponse.getEventId()).willReturn(EventIds.ATTACH_SCANNED_DOCS_WITH_OCR);
-        given(configItem.getUpdateUrl()).willReturn("url");
-        given(caseUpdateDataClient.getCaseUpdateData(anyString(), any(CaseDetails.class), any(ExceptionRecord.class), anyString()))
+        given(caseUpdateDataService.getCaseUpdateData(anyString(), any(CaseDetails.class), any(ExceptionRecord.class)))
             .willThrow(new ConstraintViolationException("validation error message", emptySet()));
         initMockData();
 
