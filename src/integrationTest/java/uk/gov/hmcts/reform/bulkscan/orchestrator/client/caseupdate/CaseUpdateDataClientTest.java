@@ -14,6 +14,7 @@ import org.springframework.web.client.HttpClientErrorException.Unauthorized;
 import org.springframework.web.client.HttpClientErrorException.UnprocessableEntity;
 import org.springframework.web.client.HttpServerErrorException.InternalServerError;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdateRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.CaseUpdateDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
@@ -56,12 +57,14 @@ public class CaseUpdateDataClientTest {
     @Autowired
     private CaseUpdateDataClient client;
 
+    @Autowired
+    private CaseUpdateRequestCreator requestCreator;
+
     @Value("${service-config.services[0].update-url}")
     private String updateUrl;
 
     @Test
     public void should_return_case_details_for_successful_update() throws Exception {
-
         // given
         String s2sToken = randomUUID().toString();
 
@@ -77,12 +80,13 @@ public class CaseUpdateDataClientTest {
                 .willReturn(okJson(successResponse().toString()))
         );
 
+        CaseUpdateRequest request = requestCreator.create(exceptionRecordRequestData(), existingCase(), false);
+
         // when
         SuccessfulUpdateResponse response = client.getCaseUpdateData(
             updateUrl,
-            existingCase(),
-            exceptionRecordRequestData(),
-            s2sToken
+            s2sToken,
+            request
         );
 
         // then
@@ -103,9 +107,11 @@ public class CaseUpdateDataClientTest {
                 .withHeader("ServiceAuthorization", equalTo(s2sToken))
                 .willReturn(aResponse().withBody(errorResponse().toString()).withStatus(422)));
 
+        CaseUpdateRequest request = requestCreator.create(exceptionRecordRequestData(), existingCase(), false);
+
         // when
         UnprocessableEntity exception = catchThrowableOfType(
-            () -> client.getCaseUpdateData(updateUrl, existingCase(), exceptionRecordRequestData(), s2sToken),
+            () -> client.getCaseUpdateData(updateUrl, s2sToken, request),
             UnprocessableEntity.class
         );
 
@@ -125,9 +131,11 @@ public class CaseUpdateDataClientTest {
                 .withHeader("ServiceAuthorization", equalTo(s2sToken))
                 .willReturn(aResponse().withBody(invalidDataResponse().toString()).withStatus(400)));
 
+        CaseUpdateRequest request = requestCreator.create(exceptionRecordRequestData(), existingCase(), false);
+
         // when
         BadRequest exception = catchThrowableOfType(
-            () -> client.getCaseUpdateData(updateUrl, existingCase(), exceptionRecordRequestData(), s2sToken),
+            () -> client.getCaseUpdateData(updateUrl, s2sToken, request),
             BadRequest.class
         );
 
@@ -145,9 +153,11 @@ public class CaseUpdateDataClientTest {
                 .withHeader("ServiceAuthorization", equalTo(s2sToken))
                 .willReturn(aResponse().withBody("bad response".getBytes()).withStatus(400)));
 
+        CaseUpdateRequest request = requestCreator.create(exceptionRecordRequestData(), existingCase(), false);
+
         // when
         BadRequest exception = catchThrowableOfType(
-            () -> client.getCaseUpdateData(updateUrl, existingCase(), exceptionRecordRequestData(), s2sToken),
+            () -> client.getCaseUpdateData(updateUrl, s2sToken, request),
             BadRequest.class
         );
 
@@ -163,9 +173,11 @@ public class CaseUpdateDataClientTest {
             post(urlPathMatching(UPDATE_CASE_URL))
                 .willReturn(forbidden().withBody("Calling service is not authorised")));
 
+        CaseUpdateRequest request = requestCreator.create(exceptionRecordRequestData(), existingCase(), false);
+
         // when
         Forbidden exception = catchThrowableOfType(
-            () -> client.getCaseUpdateData(updateUrl, existingCase(), exceptionRecordRequestData(), randomUUID().toString()),
+            () -> client.getCaseUpdateData(updateUrl, randomUUID().toString(), request),
             Forbidden.class
         );
 
@@ -181,9 +193,11 @@ public class CaseUpdateDataClientTest {
             post(urlPathMatching(UPDATE_CASE_URL))
                 .willReturn(unauthorized().withBody("Invalid S2S token")));
 
+        CaseUpdateRequest request = requestCreator.create(exceptionRecordRequestData(), existingCase(), false);
+
         // when
         Unauthorized exception = catchThrowableOfType(
-            () -> client.getCaseUpdateData(updateUrl, existingCase(), exceptionRecordRequestData(), randomUUID().toString()),
+            () -> client.getCaseUpdateData(updateUrl, randomUUID().toString(), request),
             Unauthorized.class
         );
 
@@ -199,9 +213,11 @@ public class CaseUpdateDataClientTest {
             post(urlPathMatching(UPDATE_CASE_URL))
                 .willReturn(serverError().withBody("Internal Server error")));
 
+        CaseUpdateRequest request = requestCreator.create(exceptionRecordRequestData(), existingCase(), false);
+
         // when
         InternalServerError exception = catchThrowableOfType(
-            () -> client.getCaseUpdateData(updateUrl, existingCase(), exceptionRecordRequestData(), randomUUID().toString()),
+            () -> client.getCaseUpdateData(updateUrl, randomUUID().toString(), request),
             InternalServerError.class
         );
 

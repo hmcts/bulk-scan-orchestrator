@@ -9,13 +9,11 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdateRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
-import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
+import java.util.Set;
 
 /**
  * Retrieves data that should be used to update a case.
@@ -27,27 +25,13 @@ public class CaseUpdateDataClient {
 
     private final Validator validator;
     private final RestTemplate restTemplate;
-    private final CaseUpdateRequestCreator requestCreator;
 
     public CaseUpdateDataClient(
         Validator validator,
-        RestTemplate restTemplate,
-        CaseUpdateRequestCreator requestCreator
+        RestTemplate restTemplate
     ) {
         this.validator = validator;
         this.restTemplate = restTemplate;
-        this.requestCreator = requestCreator;
-    }
-
-    @Deprecated
-    public SuccessfulUpdateResponse getCaseUpdateData(
-        String updateUrl,
-        CaseDetails existingCase,
-        ExceptionRecord exceptionRecord,
-        String s2sToken
-    ) {
-        var caseUpdateRequest = requestCreator.create(exceptionRecord, existingCase, false);
-        return getCaseUpdateData(updateUrl, s2sToken, caseUpdateRequest);
     }
 
     public SuccessfulUpdateResponse getCaseUpdateData(
