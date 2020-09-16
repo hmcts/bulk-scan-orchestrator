@@ -9,11 +9,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdateRequest;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.ExistingCaseDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.CaseUpdateDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validation;
@@ -25,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -34,7 +32,6 @@ import static org.mockito.Mockito.mock;
 class CaseUpdateDataClientResponseValidationTest {
 
     @Mock RestTemplate restTemplate;
-    @Mock CaseUpdateRequestCreator requestCreator;
 
     Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
@@ -42,15 +39,7 @@ class CaseUpdateDataClientResponseValidationTest {
 
     @BeforeEach
     void setUp() {
-        CaseUpdateRequest caseUpdateRequest = new CaseUpdateRequest(
-            mock(uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.ExceptionRecord.class),
-            false,
-            mock(uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdateDetails.class),
-            mock(ExistingCaseDetails.class)
-        );
-
-        given(requestCreator.create(any(), any(), anyBoolean())).willReturn(caseUpdateRequest);
-        this.client = new CaseUpdateDataClient(validator, restTemplate, requestCreator);
+        this.client = new CaseUpdateDataClient(validator, restTemplate);
     }
 
     @Test
@@ -123,9 +112,13 @@ class CaseUpdateDataClientResponseValidationTest {
     void callUpdateCase() {
         client.getCaseUpdateData(
             "http://some-url.com/update",
-            mock(CaseDetails.class),
-            mock(ExceptionRecord.class),
-            "s2s-token"
+            "s2s-token",
+            new CaseUpdateRequest(
+                mock(ExceptionRecord.class),
+                false,
+                mock(uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdateDetails.class),
+                mock(ExistingCaseDetails.class)
+            )
         );
     }
 

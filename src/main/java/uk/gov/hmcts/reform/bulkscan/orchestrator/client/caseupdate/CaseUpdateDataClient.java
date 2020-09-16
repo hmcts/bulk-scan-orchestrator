@@ -9,8 +9,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdateRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.Set;
 import javax.validation.ConstraintViolation;
@@ -27,27 +25,13 @@ public class CaseUpdateDataClient {
 
     private final Validator validator;
     private final RestTemplate restTemplate;
-    private final CaseUpdateRequestCreator requestCreator;
 
     public CaseUpdateDataClient(
         Validator validator,
-        RestTemplate restTemplate,
-        CaseUpdateRequestCreator requestCreator
+        RestTemplate restTemplate
     ) {
         this.validator = validator;
         this.restTemplate = restTemplate;
-        this.requestCreator = requestCreator;
-    }
-
-    @Deprecated
-    public SuccessfulUpdateResponse getCaseUpdateData(
-        String updateUrl,
-        CaseDetails existingCase,
-        ExceptionRecord exceptionRecord,
-        String s2sToken
-    ) {
-        var caseUpdateRequest = requestCreator.create(exceptionRecord, existingCase, false);
-        return getCaseUpdateData(updateUrl, s2sToken, caseUpdateRequest);
     }
 
     public SuccessfulUpdateResponse getCaseUpdateData(
@@ -64,12 +48,7 @@ public class CaseUpdateDataClient {
                 .build()
                 .toString();
 
-        log.info(
-            "Requesting service to update case, caseTypeId: {}, case id: {}, exception id: {}",
-            caseUpdateRequest.caseDetails.caseTypeId,
-            caseUpdateRequest.caseDetails.id,
-            caseUpdateRequest.exceptionRecord.id
-        );
+        log.info("Requesting service to update case. " + requestInfo(caseUpdateRequest));
 
         SuccessfulUpdateResponse response = restTemplate.postForObject(
             url,
@@ -84,5 +63,14 @@ public class CaseUpdateDataClient {
         } else {
             throw new ConstraintViolationException(violations);
         }
+    }
+
+    private String requestInfo(CaseUpdateRequest req) {
+        return String.format(
+            "caseTypeId: %s, case id: %s, exception id: %s",
+            req.caseDetails.caseTypeId,
+            req.caseDetails.id,
+            req.exceptionRecord != null ? req.exceptionRecord.id : "null"
+        );
     }
 }
