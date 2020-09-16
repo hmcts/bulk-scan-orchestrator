@@ -44,7 +44,7 @@ public class CaseUpdateDetailsService {
     ) {
         String s2sToken = s2sTokenGenerator.generate();
         String url = serviceConfigProvider.getConfig(service).getUpdateUrl();
-        CaseUpdateRequest request = requestCreator.create(exceptionRecord, existingCase, false);
+        CaseUpdateRequest request = requestCreator.create(exceptionRecord, existingCase);
 
         return caseUpdateDataClient.getCaseUpdateData(url, s2sToken, request);
     }

@@ -51,7 +51,7 @@ class CaseUpdateDetailsServiceTest {
 
         given(s2sTokenGenerator.generate()).willReturn("some-s2s-token");
         given(serviceConfigProvider.getConfig("some-service")).willReturn(cfg("some-url"));
-        given(requestCreator.create(exceptionRecord, existingCase, false)).willReturn(caseUpdateRequest);
+        given(requestCreator.create(exceptionRecord, existingCase)).willReturn(caseUpdateRequest);
         given(caseUpdateDataClient.getCaseUpdateData("some-url", "some-s2s-token", caseUpdateRequest))
             .willReturn(updateDataResponse);
 
