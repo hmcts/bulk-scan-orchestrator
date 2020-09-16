@@ -10,10 +10,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdateRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 
+import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
-import java.util.Set;
 
 /**
  * Retrieves data that should be used to update a case.
