@@ -48,12 +48,7 @@ public class CaseUpdateDataClient {
                 .build()
                 .toString();
 
-        log.info(
-            "Requesting service to update case, caseTypeId: {}, case id: {}, exception id: {}",
-            caseUpdateRequest.caseDetails.caseTypeId,
-            caseUpdateRequest.caseDetails.id,
-            caseUpdateRequest.exceptionRecord.id
-        );
+        log.info("Requesting service to update case. " + requestInfo(caseUpdateRequest));
 
         SuccessfulUpdateResponse response = restTemplate.postForObject(
             url,
@@ -68,5 +63,14 @@ public class CaseUpdateDataClient {
         } else {
             throw new ConstraintViolationException(violations);
         }
+    }
+
+    private String requestInfo(CaseUpdateRequest req) {
+        return String.format(
+            "caseTypeId: %s, case id: %s, exception id: %s",
+            req.caseDetails.caseTypeId,
+            req.caseDetails.id,
+            req.exceptionRecord != null ? req.exceptionRecord.id : "null"
+        );
     }
 }
