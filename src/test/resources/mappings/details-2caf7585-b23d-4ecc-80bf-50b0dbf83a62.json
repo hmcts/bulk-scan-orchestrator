@@ -7,7 +7,7 @@
   },
   "response" : {
     "status" : 200,
-    "body" : "{\"forename\":\"Bulkscan\",\"surname\":\"Caseworker\",\"roles\":[\"caseworker-bulkscan\",\"caseworker\",\"caseworker-bulkscan-loa1\",\"caseworker-loa1\"],\"uid\":640,\"defaultService\":\"CCD\",\"email\":\"bulkscan+ccd@gmail.com\"}",
+    "body" : "{\"uid\":640,\"sub\":\"bulkscan+ccd@gmail.com\",\"roles\":[\"caseworker-bulkscan\",\"caseworker\",\"caseworker-bulkscan-loa1\",\"caseworker-loa1\"],\"name\":\"Bulkscan\",\"given_name\":\"Bulkscan\",\"family_name\":\"Caseworker\"}",
     "headers" : {
       "X-Application-Context" : "application",
       "Content-Type" : "application/json;charset=UTF-8",
