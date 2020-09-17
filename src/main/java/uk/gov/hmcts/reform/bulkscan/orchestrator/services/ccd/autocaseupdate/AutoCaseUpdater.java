@@ -1,17 +1,22 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.caseupdatedetails.CaseUpdateDetailsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
 
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate.AutoCaseUpdateResult.ABANDONED;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate.AutoCaseUpdateResult.OK;
+
 @Service
 public class AutoCaseUpdater {
+
+    private static final Logger log = LoggerFactory.getLogger(AutoCaseUpdater.class);
 
     private final AuthTokenGenerator s2sTokenGenerator;
     private final CaseUpdateDetailsService caseUpdateDataService;
@@ -27,42 +32,49 @@ public class AutoCaseUpdater {
         this.ccdApi = ccdApi;
     }
 
-    public void updateCase(Envelope envelope) {
+    public AutoCaseUpdateResult updateCase(Envelope envelope) {
         List<Long> matchingCases = ccdApi.getCaseRefsByEnvelopeId(envelope.id, envelope.container);
 
         switch (matchingCases.size()) {
-            case 0:
-                handleNoMatchingCases();
-                break;
             case 1:
-                handleSingleMatchingCase(matchingCases.get(0), envelope);
-                break;
+                return handleSingleMatchingCase(matchingCases.get(0), envelope);
+            case 0:
+                return handleNoMatchingCases(envelope);
             default:
-                handleMultipleMatchingCases();
-                break;
+                return handleMultipleMatchingCases(matchingCases, envelope);
         }
     }
 
-    private void handleSingleMatchingCase(Long caseId, Envelope envelope) {
-        CaseDetails existingCase = ccdApi.getCase(String.valueOf(caseId), envelope.jurisdiction);
+    private AutoCaseUpdateResult handleSingleMatchingCase(Long caseId, Envelope envelope) {
+        var existingCase = ccdApi.getCase(String.valueOf(caseId), envelope.jurisdiction);
 
-        SuccessfulUpdateResponse caseUpdateResult =
-            caseUpdateDataService.getCaseUpdateData("?", existingCase, envelope);
+        var caseUpdateResult = caseUpdateDataService.getCaseUpdateData(envelope.container, existingCase, envelope);
 
-        if (!caseUpdateResult.warnings.isEmpty()) {
-            // stop here
+        if (caseUpdateResult.warnings.isEmpty()) {
+            // TODO: update case
+            return OK;
         } else {
-
+            log.info("Case update details received from service contained errors. Auto case update abandoned");
+            return ABANDONED;
         }
     }
 
-    private void handleNoMatchingCases() {
-
+    private AutoCaseUpdateResult handleNoMatchingCases(Envelope envelope) {
+        log.warn(
+            "No case found for envelope. Auto case update abandoned. Envelope ID: {}, case ref: {}",
+            envelope.id,
+            envelope.caseRef
+        );
+        return ABANDONED;
     }
 
-    private void handleMultipleMatchingCases() {
-
+    private AutoCaseUpdateResult handleMultipleMatchingCases(List<Long> matchingCases, Envelope envelope) {
+        log.warn(
+            "Multiple cases found for envelope. Auto case update abandoned. Envelope ID: {}, target case ref: {}, found cases: {}",
+            envelope.id,
+            envelope.caseRef,
+            matchingCases
+        );
+        return ABANDONED;
     }
-
-
 }
