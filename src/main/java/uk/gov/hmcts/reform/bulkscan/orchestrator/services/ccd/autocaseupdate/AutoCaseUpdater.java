@@ -2,10 +2,9 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate;
 
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.CaseUpdateClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.caseupdatedetails.CaseUpdateDetailsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -15,20 +14,17 @@ import java.util.List;
 public class AutoCaseUpdater {
 
     private final AuthTokenGenerator s2sTokenGenerator;
-    private final CaseUpdateClient caseUpdateClient;
+    private final CaseUpdateDetailsService caseUpdateDataService;
     private final CcdApi ccdApi;
-    private final ServiceConfigProvider serviceConfigProvider;
 
     public AutoCaseUpdater(
         AuthTokenGenerator s2sTokenGenerator,
-        CaseUpdateClient caseUpdateClient,
-        CcdApi ccdApi,
-        ServiceConfigProvider serviceConfigProvider
+        CaseUpdateDetailsService caseUpdateDataService,
+        CcdApi ccdApi
     ) {
         this.s2sTokenGenerator = s2sTokenGenerator;
-        this.caseUpdateClient = caseUpdateClient;
+        this.caseUpdateDataService = caseUpdateDataService;
         this.ccdApi = ccdApi;
-        this.serviceConfigProvider = serviceConfigProvider;
     }
 
     public void updateCase(Envelope envelope) {
@@ -51,13 +47,7 @@ public class AutoCaseUpdater {
         CaseDetails existingCase = ccdApi.getCase(String.valueOf(caseId), envelope.jurisdiction);
 
         SuccessfulUpdateResponse caseUpdateResult =
-            caseUpdateClient
-                .updateCase(
-                    serviceConfigProvider.getConfig(envelope.container).getUpdateUrl(),
-                    existingCase,
-                    null,
-                    s2sTokenGenerator.generate()
-                );
+            caseUpdateDataService.getCaseUpdateData("?", existingCase, envelope);
 
         if (!caseUpdateResult.warnings.isEmpty()) {
             // stop here
