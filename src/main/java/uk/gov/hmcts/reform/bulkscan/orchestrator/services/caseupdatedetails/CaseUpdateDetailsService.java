@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 @Service
@@ -44,7 +45,26 @@ public class CaseUpdateDetailsService {
     ) {
         String s2sToken = s2sTokenGenerator.generate();
         String url = serviceConfigProvider.getConfig(service).getUpdateUrl();
-        CaseUpdateRequest request = requestCreator.create(exceptionRecord, existingCase, false);
+        CaseUpdateRequest request = requestCreator.create(exceptionRecord, existingCase);
+
+        return caseUpdateDataClient.getCaseUpdateData(url, s2sToken, request);
+    }
+
+    /**
+     * Retrieves data that should be used to update given case based on given envelope.
+     *
+     * @param service      service that should be called to get the data.
+     * @param existingCase CCD case to update.
+     * @param envelope     envelope that should be used to update the case.
+     */
+    public SuccessfulUpdateResponse getCaseUpdateData(
+        String service,
+        CaseDetails existingCase,
+        Envelope envelope
+    ) {
+        String s2sToken = s2sTokenGenerator.generate();
+        String url = serviceConfigProvider.getConfig(service).getUpdateUrl();
+        CaseUpdateRequest request = requestCreator.create(envelope, existingCase);
 
         return caseUpdateDataClient.getCaseUpdateData(url, s2sToken, request);
     }

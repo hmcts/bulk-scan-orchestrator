@@ -80,7 +80,7 @@ public class CaseUpdateDataClientTest {
                 .willReturn(okJson(successResponse().toString()))
         );
 
-        CaseUpdateRequest request = requestCreator.create(exceptionRecordRequestData(), existingCase(), false);
+        CaseUpdateRequest request = requestCreator.create(exceptionRecordRequestData(), existingCase());
 
         // when
         SuccessfulUpdateResponse response = client.getCaseUpdateData(
@@ -107,7 +107,7 @@ public class CaseUpdateDataClientTest {
                 .withHeader("ServiceAuthorization", equalTo(s2sToken))
                 .willReturn(aResponse().withBody(errorResponse().toString()).withStatus(422)));
 
-        CaseUpdateRequest request = requestCreator.create(exceptionRecordRequestData(), existingCase(), false);
+        CaseUpdateRequest request = requestCreator.create(exceptionRecordRequestData(), existingCase());
 
         // when
         UnprocessableEntity exception = catchThrowableOfType(
@@ -131,7 +131,7 @@ public class CaseUpdateDataClientTest {
                 .withHeader("ServiceAuthorization", equalTo(s2sToken))
                 .willReturn(aResponse().withBody(invalidDataResponse().toString()).withStatus(400)));
 
-        CaseUpdateRequest request = requestCreator.create(exceptionRecordRequestData(), existingCase(), false);
+        CaseUpdateRequest request = requestCreator.create(exceptionRecordRequestData(), existingCase());
 
         // when
         BadRequest exception = catchThrowableOfType(
@@ -153,7 +153,7 @@ public class CaseUpdateDataClientTest {
                 .withHeader("ServiceAuthorization", equalTo(s2sToken))
                 .willReturn(aResponse().withBody("bad response".getBytes()).withStatus(400)));
 
-        CaseUpdateRequest request = requestCreator.create(exceptionRecordRequestData(), existingCase(), false);
+        CaseUpdateRequest request = requestCreator.create(exceptionRecordRequestData(), existingCase());
 
         // when
         BadRequest exception = catchThrowableOfType(
@@ -173,7 +173,7 @@ public class CaseUpdateDataClientTest {
             post(urlPathMatching(UPDATE_CASE_URL))
                 .willReturn(forbidden().withBody("Calling service is not authorised")));
 
-        CaseUpdateRequest request = requestCreator.create(exceptionRecordRequestData(), existingCase(), false);
+        CaseUpdateRequest request = requestCreator.create(exceptionRecordRequestData(), existingCase());
 
         // when
         Forbidden exception = catchThrowableOfType(
@@ -193,7 +193,7 @@ public class CaseUpdateDataClientTest {
             post(urlPathMatching(UPDATE_CASE_URL))
                 .willReturn(unauthorized().withBody("Invalid S2S token")));
 
-        CaseUpdateRequest request = requestCreator.create(exceptionRecordRequestData(), existingCase(), false);
+        CaseUpdateRequest request = requestCreator.create(exceptionRecordRequestData(), existingCase());
 
         // when
         Unauthorized exception = catchThrowableOfType(
@@ -213,7 +213,7 @@ public class CaseUpdateDataClientTest {
             post(urlPathMatching(UPDATE_CASE_URL))
                 .willReturn(serverError().withBody("Internal Server error")));
 
-        CaseUpdateRequest request = requestCreator.create(exceptionRecordRequestData(), existingCase(), false);
+        CaseUpdateRequest request = requestCreator.create(exceptionRecordRequestData(), existingCase());
 
         // when
         InternalServerError exception = catchThrowableOfType(
