@@ -50,13 +50,8 @@ public class AutoCaseUpdater {
 
         var caseUpdateResult = caseUpdateDataService.getCaseUpdateData(envelope.container, existingCase, envelope);
 
-        if (caseUpdateResult.warnings.isEmpty()) {
-            // TODO: update case
-            return OK;
-        } else {
-            log.info("Case update details received from service contained errors. Auto case update abandoned");
-            return ABANDONED;
-        }
+        // TODO: update case
+        return OK;
     }
 
     private AutoCaseUpdateResult handleNoMatchingCases(Envelope envelope) {
