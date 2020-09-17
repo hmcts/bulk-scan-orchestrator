@@ -56,7 +56,8 @@ public class AutoCaseUpdater {
 
     private AutoCaseUpdateResult handleNoMatchingCases(Envelope envelope) {
         log.warn(
-            "No case found for envelope. Auto case update abandoned. Envelope ID: {}, case ref: {}",
+            "Auto case update abandoned - no case found for envelope. "
+                + "Envelope ID: {}, case ref: {}",
             envelope.id,
             envelope.caseRef
         );
@@ -65,7 +66,8 @@ public class AutoCaseUpdater {
 
     private AutoCaseUpdateResult handleMultipleMatchingCases(List<Long> matchingCases, Envelope envelope) {
         log.warn(
-            "Multiple cases found for envelope. Auto case update abandoned. Envelope ID: {}, target case ref: {}, found cases: {}",
+            "Auto case update abandoned - multiple cases found for envelope. "
+                + "Envelope ID: {}, target case ref: {}, found cases: {}",
             envelope.id,
             envelope.caseRef,
             matchingCases
