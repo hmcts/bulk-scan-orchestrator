@@ -29,12 +29,11 @@ public class CaseUpdateRequestCreator {
 
     public CaseUpdateRequest create(
         uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord exceptionRecord,
-        CaseDetails existingCaseDetails,
-        boolean isAutomatedProcess
+        CaseDetails existingCaseDetails
     ) {
         return new CaseUpdateRequest(
             createExceptionRecord(exceptionRecord),
-            isAutomatedProcess,
+            false, // always false when created from exception record
             createCaseUpdateDetails(exceptionRecord),
             createExistingCaseDetails(existingCaseDetails)
         );
@@ -43,7 +42,7 @@ public class CaseUpdateRequestCreator {
     public CaseUpdateRequest create(Envelope envelope, CaseDetails existingCaseDetails) {
         return new CaseUpdateRequest(
             null,
-            true,
+            true, // always true when created from envelope
             createCaseUpdateDetails(envelope),
             createExistingCaseDetails(existingCaseDetails)
         );
