@@ -2,12 +2,12 @@
   "id" : "2caf7585-b23d-4ecc-80bf-50b0dbf83a62",
   "name" : "details",
   "request" : {
-    "url" : "/details",
+    "url" : "/o/userinfo",
     "method" : "GET"
   },
   "response" : {
     "status" : 200,
-    "body" : "{\"forename\":\"Bulkscan\",\"surname\":\"Caseworker\",\"roles\":[\"caseworker-bulkscan\",\"caseworker\",\"caseworker-bulkscan-loa1\",\"caseworker-loa1\"],\"id\":640,\"defaultService\":\"CCD\",\"email\":\"bulkscan+ccd@gmail.com\"}",
+    "body" : "{\"forename\":\"Bulkscan\",\"surname\":\"Caseworker\",\"roles\":[\"caseworker-bulkscan\",\"caseworker\",\"caseworker-bulkscan-loa1\",\"caseworker-loa1\"],\"uid\":640,\"defaultService\":\"CCD\",\"email\":\"bulkscan+ccd@gmail.com\"}",
     "headers" : {
       "X-Application-Context" : "application",
       "Content-Type" : "application/json;charset=UTF-8",
