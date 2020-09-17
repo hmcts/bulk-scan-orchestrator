@@ -73,6 +73,7 @@ class AttachToCaseCallbackServiceTest {
 
     private static final String BULKSCAN_ENVELOPE_ID = "some-envelope-id";
     private static final String JURISDICTION = "BULKSCAN";
+    private static final String SERVICE_NAME = "bulkscan";
     private static final String CASE_TYPE_EXCEPTION_RECORD = "BULKSCAN_ExceptionRecord";
     private static final String CASE_REF = "1539007368674134";
     private static final String DOCUMENT_FILENAME = "document.pdf";
@@ -126,6 +127,7 @@ class AttachToCaseCallbackServiceTest {
         given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);
         configItem = new ServiceConfigItem();
         configItem.setUpdateUrl("url");
+        configItem.setService(SERVICE_NAME);
         given(serviceConfigProvider.getConfig("bulkscan")).willReturn(configItem);
     }
 
@@ -134,7 +136,7 @@ class AttachToCaseCallbackServiceTest {
         // given
         given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
         given(ccdCaseUpdater.updateCase(
-            exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE
+            exceptionRecord, SERVICE_NAME, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE
         )).willReturn(Optional.empty());
 
         // when
@@ -149,7 +151,7 @@ class AttachToCaseCallbackServiceTest {
         // then
         assertThat(res.isRight()).isTrue();
         verify(ccdCaseUpdater)
-            .updateCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE);
+            .updateCase(exceptionRecord, SERVICE_NAME, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE);
 
         // and
         var paymentsDataCaptor = ArgumentCaptor.forClass(PaymentsHelper.class);
@@ -173,7 +175,7 @@ class AttachToCaseCallbackServiceTest {
         // given
         given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
         given(ccdCaseUpdater.updateCase(
-            exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE
+            exceptionRecord, SERVICE_NAME, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE
         )).willReturn(
             Optional.of(new ErrorsAndWarnings(asList("error1"), asList("warning1")))
         );
@@ -193,7 +195,7 @@ class AttachToCaseCallbackServiceTest {
         assertThat(res.getLeft().getErrors()).isEqualTo(asList("error1"));
 
         verify(ccdCaseUpdater)
-            .updateCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE);
+            .updateCase(exceptionRecord, SERVICE_NAME, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE);
         verifyNoInteractions(paymentsProcessor);
     }
 

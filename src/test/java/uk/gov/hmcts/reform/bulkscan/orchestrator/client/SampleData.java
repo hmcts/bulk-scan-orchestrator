@@ -7,13 +7,18 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.OcrDataFie
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 
+@SuppressWarnings("checkstyle:LineLength")
 public class SampleData {
 
     private SampleData() {
@@ -45,6 +50,29 @@ public class SampleData {
                 new OcrDataField("name1", "value1"),
                 new OcrDataField("name2", "value2")
             )
+        );
+    }
+
+    public static Envelope sampleEnvelope(
+        List<uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.OcrDataField> ocrDataFields,
+        List<Document> documents
+    ) {
+        return new Envelope(
+            "envelopeId1",
+            "caseRef1",
+            "legacyCaseRef1",
+            "poBox1",
+            "jurisdiction1",
+            "container1",
+            "zipFileName1",
+            "formType1",
+            Instant.now(),
+            Instant.now().plusSeconds(1),
+            Classification.NEW_APPLICATION,
+            documents,
+            emptyList(),
+            ocrDataFields,
+            emptyList()
         );
     }
 

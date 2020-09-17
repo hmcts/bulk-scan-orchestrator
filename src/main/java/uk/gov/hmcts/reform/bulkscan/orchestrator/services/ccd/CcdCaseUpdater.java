@@ -8,13 +8,12 @@ import org.springframework.web.client.HttpClientErrorException.UnprocessableEnti
 import org.springframework.web.client.RestClientException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.CaseUpdateClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataUpdater;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.caseupdatedetails.CaseUpdateDetailsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -39,7 +38,7 @@ public class CcdCaseUpdater {
 
     private final AuthTokenGenerator s2sTokenGenerator;
     private final CoreCaseDataApi coreCaseDataApi;
-    private final CaseUpdateClient caseUpdateClient;
+    private final CaseUpdateDetailsService caseUpdateDataService;
     private final CaseDataUpdater caseDataUpdater;
     private final EnvelopeReferenceHelper envelopeReferenceHelper;
     private final ServiceResponseParser serviceResponseParser;
@@ -47,14 +46,14 @@ public class CcdCaseUpdater {
     public CcdCaseUpdater(
         AuthTokenGenerator s2sTokenGenerator,
         CoreCaseDataApi coreCaseDataApi,
-        CaseUpdateClient caseUpdateClient,
+        CaseUpdateDetailsService caseUpdateDataService,
         CaseDataUpdater caseDataUpdater,
         EnvelopeReferenceHelper envelopeReferenceHelper,
         ServiceResponseParser serviceResponseParser
     ) {
         this.s2sTokenGenerator = s2sTokenGenerator;
         this.coreCaseDataApi = coreCaseDataApi;
-        this.caseUpdateClient = caseUpdateClient;
+        this.caseUpdateDataService = caseUpdateDataService;
         this.caseDataUpdater = caseDataUpdater;
         this.envelopeReferenceHelper = envelopeReferenceHelper;
         this.serviceResponseParser = serviceResponseParser;
@@ -62,7 +61,7 @@ public class CcdCaseUpdater {
 
     public Optional<ErrorsAndWarnings> updateCase(
         ExceptionRecord exceptionRecord,
-        ServiceConfigItem configItem,
+        String serviceName,
         boolean ignoreWarnings,
         String idamToken,
         String userId,
@@ -71,7 +70,7 @@ public class CcdCaseUpdater {
     ) {
         log.info(
             "Start updating case for service {} with case Id {} from exception record {}",
-            configItem.getService(),
+            serviceName,
             existingCaseId,
             exceptionRecord.id
         );
@@ -111,17 +110,16 @@ public class CcdCaseUpdater {
                 return Optional.empty();
             }
 
-            SuccessfulUpdateResponse updateResponse = caseUpdateClient.updateCase(
-                configItem.getUpdateUrl(),
+            SuccessfulUpdateResponse updateResponse = caseUpdateDataService.getCaseUpdateData(
+                serviceName,
                 existingCase,
-                exceptionRecord,
-                s2sToken
+                exceptionRecord
             );
 
             log.info(
                 "Successfully called case update endpoint of service {} to update case with case Id {} "
                     + "based on exception record ref {}",
-                configItem.getService(),
+                serviceName,
                 existingCase.getId(),
                 exceptionRecord.id
             );
@@ -130,7 +128,7 @@ public class CcdCaseUpdater {
                 log.info(
                     "Returned warnings after calling case update endpoint of service {} to update case with case Id {} "
                         + "based on exception record ref {}",
-                    configItem.getService(),
+                    serviceName,
                     existingCase.getId(),
                     exceptionRecord.id
                 );
@@ -145,7 +143,7 @@ public class CcdCaseUpdater {
 
                 final Map<String, Object> finalCaseData;
 
-                if (envelopeReferenceHelper.serviceSupportsEnvelopeReferences(configItem.getService())) {
+                if (envelopeReferenceHelper.serviceSupportsEnvelopeReferences(serviceName)) {
                     finalCaseData = caseDataUpdater.updateEnvelopeReferences(
                         caseDataAfterDocUpdate,
                         exceptionRecord.envelopeId,
@@ -166,7 +164,7 @@ public class CcdCaseUpdater {
 
                 log.info(
                     "Successfully updated case for service {} with case Id {} based on exception record ref {}",
-                    configItem.getService(),
+                    serviceName,
                     existingCase.getId(),
                     exceptionRecord.id
                 );
@@ -177,7 +175,7 @@ public class CcdCaseUpdater {
             ClientServiceErrorResponse errorResponse = serviceResponseParser.parseResponseBody(exception);
             return Optional.of(new ErrorsAndWarnings(errorResponse.errors, errorResponse.warnings));
         } catch (FeignException.Conflict exception) {
-            String msg = getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id)
+            String msg = getErrorMessage(serviceName, existingCaseId, exceptionRecord.id)
                 + " because it has been updated in the meantime";
             log.error(msg);
             return Optional.of(new ErrorsAndWarnings(singletonList(msg), emptyList()));
@@ -185,22 +183,22 @@ public class CcdCaseUpdater {
             String msg = "No case found for case ID: " + existingCaseId;
             log.error(
                 "No case found for case ID: {} service: {} exception record id: {}",
-                existingCaseId, configItem.getService(), exceptionRecord.id
+                existingCaseId, serviceName, exceptionRecord.id
             );
             return Optional.of(new ErrorsAndWarnings(singletonList(msg), emptyList()));
         } catch (FeignException.BadRequest exception) {
             String msg = "Invalid case ID: " + existingCaseId;
             log.error(
                 "Invalid case ID: {} service: {} exception record id: {}",
-                existingCaseId, configItem.getService(), exceptionRecord.id, exception
+                existingCaseId, serviceName, exceptionRecord.id, exception
             );
             return Optional.of(new ErrorsAndWarnings(singletonList(msg), emptyList()));
         } catch (FeignException exception) {
             debugCcdException(log, exception, "Failed to call 'updateCase'");
-            final String errorMessage = getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id);
+            final String errorMessage = getErrorMessage(serviceName, existingCaseId, exceptionRecord.id);
             log.error(
                 errorMessage + ". Service response: {}",
-                configItem.getService(),
+                serviceName,
                 existingCaseId,
                 exceptionRecord.id,
                 exception.contentUTF8(),
@@ -213,21 +211,21 @@ public class CcdCaseUpdater {
             );
         // exceptions received from case update client
         } catch (RestClientException exception) {
-            String message = getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id);
+            String message = getErrorMessage(serviceName, existingCaseId, exceptionRecord.id);
 
             log.error(message, exception);
 
             throw new CallbackException(message, exception);
         // rest of exceptions we did not handle appropriately. so far not such case
         } catch (ConstraintViolationException exc) {
-            String errorMessage = getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id);
+            String errorMessage = getErrorMessage(serviceName, existingCaseId, exceptionRecord.id);
             throw new CallbackException(
                 "Invalid case-update response. " + errorMessage,
                 exc
             );
         } catch (Exception exception) {
             throw new CallbackException(
-                getErrorMessage(configItem.getService(), existingCaseId, exceptionRecord.id),
+                getErrorMessage(serviceName, existingCaseId, exceptionRecord.id),
                 exception
             );
         }

@@ -7,39 +7,37 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.CaseUpdateRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 
+/**
+ * Retrieves data that should be used to update a case.
+ */
 @Component
-public class CaseUpdateClient {
+public class CaseUpdateDataClient {
 
-    private static final Logger log = LoggerFactory.getLogger(CaseUpdateClient.class);
+    private static final Logger log = LoggerFactory.getLogger(CaseUpdateDataClient.class);
 
     private final Validator validator;
     private final RestTemplate restTemplate;
-    private final CaseUpdateRequestCreator requestCreator;
 
-    public CaseUpdateClient(
+    public CaseUpdateDataClient(
         Validator validator,
-        RestTemplate restTemplate,
-        CaseUpdateRequestCreator requestCreator
+        RestTemplate restTemplate
     ) {
         this.validator = validator;
         this.restTemplate = restTemplate;
-        this.requestCreator = requestCreator;
     }
 
-    public SuccessfulUpdateResponse updateCase(
+    public SuccessfulUpdateResponse getCaseUpdateData(
         String updateUrl,
-        CaseDetails existingCase,
-        ExceptionRecord exceptionRecord,
-        String s2sToken
+        String s2sToken,
+        CaseUpdateRequest caseUpdateRequest
     ) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("ServiceAuthorization", s2sToken);
@@ -50,14 +48,7 @@ public class CaseUpdateClient {
                 .build()
                 .toString();
 
-        var caseUpdateRequest = requestCreator.create(exceptionRecord, existingCase, false);
-
-        log.info(
-            "Requesting service to update case, caseTypeId: {}, case id: {}, exception id: {}",
-            caseUpdateRequest.caseDetails.caseTypeId,
-            caseUpdateRequest.caseDetails.id,
-            caseUpdateRequest.exceptionRecord.id
-        );
+        log.info("Requesting service to update case. " + requestInfo(caseUpdateRequest));
 
         SuccessfulUpdateResponse response = restTemplate.postForObject(
             url,
@@ -72,5 +63,14 @@ public class CaseUpdateClient {
         } else {
             throw new ConstraintViolationException(violations);
         }
+    }
+
+    private String requestInfo(CaseUpdateRequest req) {
+        return String.format(
+            "caseTypeId: %s, case id: %s, exception id: %s",
+            req.caseDetails.caseTypeId,
+            req.caseDetails.id,
+            req.exceptionRecord != null ? req.exceptionRecord.id : "null"
+        );
     }
 }

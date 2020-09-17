@@ -13,22 +13,17 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request.ExistingCaseDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import javax.validation.Validator;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.SampleData.sampleExceptionRecord;
 
 
 @ExtendWith(MockitoExtension.class)
-class CaseUpdateClientTest {
+class CaseUpdateDataClientTest {
 
     @Mock
     Validator validator;
@@ -36,18 +31,15 @@ class CaseUpdateClientTest {
     @Mock
     RestTemplate restTemplate;
 
-    @Mock
-    CaseUpdateRequestCreator requestCreator;
-
-    private CaseUpdateClient caseUpdateClient;
+    private CaseUpdateDataClient caseUpdateDataClient;
 
     @BeforeEach
     void setUp() {
-        caseUpdateClient = new CaseUpdateClient(validator, restTemplate, requestCreator);
+        caseUpdateDataClient = new CaseUpdateDataClient(validator, restTemplate);
     }
 
     @Test
-    void updateCase_use_request_creator_for_making_request_body() {
+    void updateCase_should_use_provided_parameter_to_send_a_http_request() {
         // given
         var request = new CaseUpdateRequest(
             mock(ExceptionRecord.class),
@@ -56,15 +48,10 @@ class CaseUpdateClientTest {
             mock(ExistingCaseDetails.class)
         );
 
-        given(requestCreator.create(any(), any(), anyBoolean())).willReturn(request);
-
-        var existingCase = CaseDetails.builder().build();
-        var exceptionRecord = sampleExceptionRecord();
-
         String url = "http://test-url.example.com";
 
         // when
-        caseUpdateClient.updateCase(url, existingCase, exceptionRecord, "token");
+        caseUpdateDataClient.getCaseUpdateData(url, "token", request);
 
         // then
         var requestCaptor = ArgumentCaptor.forClass(HttpEntity.class);
