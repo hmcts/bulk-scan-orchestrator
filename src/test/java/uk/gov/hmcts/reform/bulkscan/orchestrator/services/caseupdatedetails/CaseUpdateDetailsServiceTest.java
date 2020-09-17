@@ -13,11 +13,14 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.respons
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.SampleData.sampleCaseDetails;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.SampleData.sampleEnvelope;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.SampleData.sampleExceptionRecord;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,19 +47,38 @@ class CaseUpdateDetailsServiceTest {
     }
 
     @Test
-    void should_call_api_client_with_correct_arguments() {
+    void should_call_api_client_with_correct_arguments_for_exception_record() {
         // given
         CaseDetails existingCase = sampleCaseDetails();
         ExceptionRecord exceptionRecord = sampleExceptionRecord();
 
         given(s2sTokenGenerator.generate()).willReturn("some-s2s-token");
         given(serviceConfigProvider.getConfig("some-service")).willReturn(cfg("some-url"));
-        given(requestCreator.create(exceptionRecord, existingCase, false)).willReturn(caseUpdateRequest);
+        given(requestCreator.create(exceptionRecord, existingCase)).willReturn(caseUpdateRequest);
         given(caseUpdateDataClient.getCaseUpdateData("some-url", "some-s2s-token", caseUpdateRequest))
             .willReturn(updateDataResponse);
 
         // when
         var result = service.getCaseUpdateData("some-service", existingCase, exceptionRecord);
+
+        // then
+        assertThat(result).isEqualTo(updateDataResponse);
+    }
+
+    @Test
+    void should_call_api_client_with_correct_arguments_for_envelope() {
+        // given
+        CaseDetails existingCase = sampleCaseDetails();
+        Envelope envelope = sampleEnvelope(emptyList(), emptyList());
+
+        given(s2sTokenGenerator.generate()).willReturn("some-s2s-token");
+        given(serviceConfigProvider.getConfig("some-service")).willReturn(cfg("some-url"));
+        given(requestCreator.create(envelope, existingCase)).willReturn(caseUpdateRequest);
+        given(caseUpdateDataClient.getCaseUpdateData("some-url", "some-s2s-token", caseUpdateRequest))
+            .willReturn(updateDataResponse);
+
+        // when
+        var result = service.getCaseUpdateData("some-service", existingCase, envelope);
 
         // then
         assertThat(result).isEqualTo(updateDataResponse);

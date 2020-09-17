@@ -41,18 +41,16 @@ public class CaseUpdateRequestCreatorTest {
     }
 
     @Test
-    void create_should_map_all_request_fields_correctly_from_exception_record() {
+    void should_create_request_from_exception_record_correctly() {
         // given
         ExceptionRecord exceptionRecord = sampleExceptionRecord();
         CaseDetails caseDetails = sampleCaseDetails();
 
-
         // when
-        CaseUpdateRequest request = reqCreator.create(exceptionRecord, caseDetails, true);
+        CaseUpdateRequest request = reqCreator.create(exceptionRecord, caseDetails);
 
         // then
-        assertThat(request.isAutomatedProcess).isEqualTo(true);
-
+        assertThat(request.isAutomatedProcess).isEqualTo(false); // always false when creating it from exception record
         assertThat(request.caseDetails.id).isEqualTo(caseDetails.getId().toString());
         assertThat(request.caseDetails.caseTypeId).isEqualTo(caseDetails.getCaseTypeId());
         assertThat(request.caseDetails.data).isEqualTo(caseDetails.getData());
