@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentTy
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataUpdater;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
@@ -59,6 +58,7 @@ class CcdCaseUpdaterTest {
 
     private static final String EXISTING_CASE_ID = "existing_case_id";
     private static final String EXISTING_CASE_TYPE_ID = "existing_case_type";
+    private static final String SERVICE_NAME = "some_service_name";
 
     private CcdCaseUpdater ccdCaseUpdater;
 
@@ -66,7 +66,6 @@ class CcdCaseUpdaterTest {
     @Mock private ServiceResponseParser serviceResponseParser;
     @Mock private AuthTokenGenerator authTokenGenerator;
     @Mock private CoreCaseDataApi coreCaseDataApi;
-    @Mock private ServiceConfigItem configItem;
     @Mock private CaseDetails existingCase;
     @Mock private StartEventResponse eventResponse;
     @Mock private CaseDataUpdater caseDataUpdater;
@@ -98,14 +97,13 @@ class CcdCaseUpdaterTest {
         noWarningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
         warningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, singletonList("warning1"));
 
-        given(configItem.getService()).willReturn("Service");
         given(authTokenGenerator.generate()).willReturn("token");
     }
 
     @Test
     void updateCase_should_return_no_error_or_warnings_if_no_warnings_from_updateCase() {
         // given
-        given(caseUpdateDataService.getCaseUpdateData("Service", existingCase, exceptionRecord))
+        given(caseUpdateDataService.getCaseUpdateData(SERVICE_NAME, existingCase, exceptionRecord))
             .willReturn(noWarningsUpdateResponse);
         initResponseMockData();
         initMockData();
@@ -114,7 +112,7 @@ class CcdCaseUpdaterTest {
         // when
         Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
             exceptionRecord,
-            configItem,
+            SERVICE_NAME,
             false,
             "idamToken",
             "userId",
@@ -135,7 +133,7 @@ class CcdCaseUpdaterTest {
         given(caseDataUpdater.setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData))
             .willReturn(caseDataAfterDocExceptionRefUpdate);
 
-        given(caseUpdateDataService.getCaseUpdateData("Service", existingCase, exceptionRecord))
+        given(caseUpdateDataService.getCaseUpdateData(SERVICE_NAME, existingCase, exceptionRecord))
             .willReturn(noWarningsUpdateResponse);
         initResponseMockData();
         initMockData();
@@ -144,7 +142,7 @@ class CcdCaseUpdaterTest {
         // when
         ccdCaseUpdater.updateCase(
             exceptionRecord,
-            configItem,
+            SERVICE_NAME,
             false,
             "idamToken",
             "userId",
@@ -164,7 +162,7 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_return_no_error_or_warnings_if_warnings_from_updateCase_and_ignoreWarnings_is_true() {
         // given
-        given(caseUpdateDataService.getCaseUpdateData("Service", existingCase, exceptionRecord))
+        given(caseUpdateDataService.getCaseUpdateData(SERVICE_NAME, existingCase, exceptionRecord))
             .willReturn(warningsUpdateResponse);
         initResponseMockData();
         initMockData();
@@ -173,7 +171,7 @@ class CcdCaseUpdaterTest {
         // when
         Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
             exceptionRecord,
-            configItem,
+            SERVICE_NAME,
             true,
             "idamToken",
             "userId",
@@ -190,14 +188,14 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_return_warnings_if_warnings_from_updateCase_and_ignoreWarnings_is_false() {
         // given
-        given(caseUpdateDataService.getCaseUpdateData("Service", existingCase, exceptionRecord))
+        given(caseUpdateDataService.getCaseUpdateData(SERVICE_NAME, existingCase, exceptionRecord))
             .willReturn(warningsUpdateResponse);
         initMockData();
 
         // when
         Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
             exceptionRecord,
-            configItem,
+            SERVICE_NAME,
             false,
             "idamToken",
             "userId",
@@ -225,7 +223,7 @@ class CcdCaseUpdaterTest {
         // when
         Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
             exceptionRecord,
-            configItem,
+            SERVICE_NAME,
             true,
             "idamToken",
             "userId",
@@ -236,7 +234,7 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(res).isNotEmpty();
         assertThat(res.get().getErrors()).containsExactlyInAnyOrder(
-            "Failed to update case for Service service with case Id existing_case_id based on exception record 1 because it has been updated in the meantime"
+            "Failed to update case for " + SERVICE_NAME + " service with case Id " + EXISTING_CASE_ID + " based on exception record " + exceptionRecord.id + " because it has been updated in the meantime"
         );
         assertThat(res.get().getWarnings()).isEmpty();
 
@@ -259,7 +257,7 @@ class CcdCaseUpdaterTest {
             () ->
                 ccdCaseUpdater.updateCase(
                     exceptionRecord,
-                    configItem,
+                    SERVICE_NAME,
                     true,
                     "idamToken",
                     "userId",
@@ -272,7 +270,7 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(callbackException.getMessage())
             .isEqualTo(
-                "Failed to update case for Service service with case Id existing_case_id based on exception record 1");
+                "Failed to update case for " + SERVICE_NAME + " service with case Id " + EXISTING_CASE_ID + " based on exception record " + exceptionRecord.id);
         assertThat(callbackException.getCause().getMessage()).isEqualTo("Service response: Body");
 
         verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
@@ -295,7 +293,7 @@ class CcdCaseUpdaterTest {
             () ->
                 ccdCaseUpdater.updateCase(
                     exceptionRecord,
-                    configItem,
+                    SERVICE_NAME,
                     true,
                     "idamToken",
                     "userId",
@@ -310,7 +308,7 @@ class CcdCaseUpdaterTest {
             .hasCauseInstanceOf(RuntimeException.class)
             .hasMessage(
                 "Failed to update case for %s service with case Id %s based on exception record %s",
-                configItem.getService(),
+                SERVICE_NAME,
                 EXISTING_CASE_ID,
                 exceptionRecord.id
             );
@@ -332,7 +330,7 @@ class CcdCaseUpdaterTest {
             () ->
                 ccdCaseUpdater.updateCase(
                     exceptionRecord,
-                    configItem,
+                    SERVICE_NAME,
                     true,
                     "idamToken",
                     "userId",
@@ -347,7 +345,7 @@ class CcdCaseUpdaterTest {
             .hasCauseInstanceOf(RestClientException.class)
             .hasMessage(
                 "Failed to update case for %s service with case Id %s based on exception record %s",
-                configItem.getService(),
+                SERVICE_NAME,
                 EXISTING_CASE_ID,
                 exceptionRecord.id
             );
@@ -369,7 +367,7 @@ class CcdCaseUpdaterTest {
             () ->
                 ccdCaseUpdater.updateCase(
                     exceptionRecord,
-                    configItem,
+                    SERVICE_NAME,
                     true,
                     "idamToken",
                     "userId",
@@ -412,7 +410,7 @@ class CcdCaseUpdaterTest {
             () ->
                 ccdCaseUpdater.updateCase(
                     exceptionRecord,
-                    configItem,
+                    SERVICE_NAME,
                     true,
                     "idamToken",
                     "userId",
@@ -425,7 +423,7 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(callbackException.getMessage())
             .isEqualTo(
-                "Failed to update case for Service service with case Id existing_case_id based on exception record 1");
+                "Failed to update case for " + SERVICE_NAME + " service with case Id " + EXISTING_CASE_ID + " based on exception record " + exceptionRecord.id);
         assertThat(callbackException.getCause().getMessage()).isEqualTo("400 bad request message");
         assertThat(callbackException.getCause() instanceof HttpClientErrorException).isTrue();
         assertThat(((HttpClientErrorException) callbackException.getCause()).getStatusText())
@@ -462,7 +460,7 @@ class CcdCaseUpdaterTest {
         // when
         Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
             exceptionRecord,
-            configItem,
+            SERVICE_NAME,
             true,
             "idamToken",
             "userId",
@@ -497,7 +495,7 @@ class CcdCaseUpdaterTest {
             () ->
                 ccdCaseUpdater.updateCase(
                     exceptionRecord,
-                    configItem,
+                    SERVICE_NAME,
                     true,
                     "idamToken",
                     "userId",
@@ -510,7 +508,7 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(callbackException.getMessage())
             .isEqualTo(
-                "Failed to update case for Service service with case Id existing_case_id based on exception record 1. Service response: Body");
+                "Failed to update case for " + SERVICE_NAME + " service with case Id " + EXISTING_CASE_ID + " based on exception record " + exceptionRecord.id + ". Service response: Body");
         assertThat(callbackException.getCause().getMessage()).isEqualTo("Msg");
 
         verifyNoInteractions(caseDataUpdater);
@@ -535,7 +533,7 @@ class CcdCaseUpdaterTest {
             () ->
                 ccdCaseUpdater.updateCase(
                     exceptionRecord,
-                    configItem,
+                    SERVICE_NAME,
                     true,
                     "idamToken",
                     "userId",
@@ -548,7 +546,7 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(callbackException.getMessage())
             .isEqualTo(
-                "Failed to update case for Service service with case Id existing_case_id based on exception record 1"
+                "Failed to update case for " + SERVICE_NAME + " service with case Id " + EXISTING_CASE_ID + " based on exception record " + exceptionRecord.id
             );
 
         verifyNoInteractions(caseDataUpdater);
@@ -573,7 +571,7 @@ class CcdCaseUpdaterTest {
         // when
         Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
             exceptionRecord,
-            configItem,
+            SERVICE_NAME,
             true,
             "idamToken",
             "userId",
@@ -606,7 +604,7 @@ class CcdCaseUpdaterTest {
         // when
         Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
             exceptionRecord,
-            configItem,
+            SERVICE_NAME,
             true,
             "idamToken",
             "userId",
