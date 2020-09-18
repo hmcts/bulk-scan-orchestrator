@@ -381,6 +381,63 @@ public class CcdApi {
         }
     }
 
+    public void updateCase(
+        String jurisdiction,
+        String caseTypeId,
+        String eventId,
+        String caseId,
+        Function<StartEventResponse, CaseDataContent> caseDataContentBuilder,
+        String logContext
+    ) {
+        CcdAuthenticator ccdAuthenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
+
+        String userToken = ccdAuthenticator.getUserToken();
+        String serviceToken = ccdAuthenticator.getServiceToken();
+        String userId = ccdAuthenticator.getUserId();
+
+        try {
+            StartEventResponse eventResponse = feignCcdApi.startEventForCaseWorker(
+                userToken,
+                serviceToken,
+                userId,
+                jurisdiction,
+                caseTypeId,
+                caseId,
+                eventId
+            );
+
+            log.info(
+                "Started updating case in CCD. Event ID: {}, case type: {}. {}",
+                eventId,
+                caseTypeId,
+                logContext
+            );
+
+            feignCcdApi.submitEventForCaseWorker(
+                userToken,
+                serviceToken,
+                userId,
+                jurisdiction,
+                caseTypeId,
+                caseId,
+                true,
+                caseDataContentBuilder.apply(eventResponse)
+            );
+
+            log.info(
+                "Submitted case update event in CCD. Event ID: {}, case type: {}, case ID: {}. {}",
+                eventId,
+                caseTypeId,
+                caseId,
+                logContext
+            );
+        } catch (FeignException exception) {
+            debugCcdException(log, exception, "Failed to call 'updateCase'");
+
+            throw exception;
+        }
+    }
+
     private List<Long> searchCases(
         String jurisdiction,
         String caseType,
