@@ -2,8 +2,11 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.logging;
 
 import com.google.common.collect.ImmutableMap;
 import com.microsoft.applicationinsights.TelemetryClient;
-import com.microsoft.azure.servicebus.IMessage;
+import org.apache.qpid.jms.message.JmsMessage;
 import org.springframework.stereotype.Component;
+
+import javax.jms.JMSException;
+import javax.jms.Message;
 
 @Component
 public class AppInsights {
@@ -16,17 +19,18 @@ public class AppInsights {
         this.telemetryClient = telemetryClient;
     }
 
-    public void trackDeadLetteredMessage(IMessage message, String queue, String reason, String description) {
+    public void trackDeadLetteredMessage(Message message, String queue, String reason, String description) throws JMSException {
+        JmsMessage jmsMessage = (JmsMessage) message;
         telemetryClient.trackEvent(
             DEAD_LETTER_EVENT,
             ImmutableMap.of(
                 "reason", reason,
                 "description", description,
-                "messageId", message.getMessageId(),
+                "messageId", message.getJMSMessageID(),
                 "queue", queue
             ),
             ImmutableMap.of(
-                "deliveryCount", (double) (message.getDeliveryCount() + 1) // starts from 0
+                "deliveryCount", (double) (jmsMessage.getFacade().getRedeliveryCount() + 1) // starts from 0
             )
         );
     }

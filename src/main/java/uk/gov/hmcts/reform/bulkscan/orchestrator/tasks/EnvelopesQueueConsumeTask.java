@@ -37,9 +37,6 @@ public class EnvelopesQueueConsumeTask {
             while (queueMayHaveMessages && isReadyForConsumingMessages()) {
                 queueMayHaveMessages = envelopeMessageProcessor.processNextMessage();
             }
-        } catch (InterruptedException exception) {
-            logTaskError(exception);
-            Thread.currentThread().interrupt();
         } catch (Exception exception) {
             logTaskError(exception);
         }

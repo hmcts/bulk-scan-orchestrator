@@ -65,7 +65,7 @@ class EnvelopeMessageProcessorTest {
         processor = new EnvelopeMessageProcessor(
             envelopeHandler,
             processedEnvelopeNotifier,
-            messageReceiver,
+            null,
             10,
             appInsights
         );
@@ -155,7 +155,7 @@ class EnvelopeMessageProcessorTest {
             anyMap()
         );
         verify(appInsights).trackDeadLetteredMessage(
-            eq(message),
+            any(),
             eq("envelopes"),
             eq(DEAD_LETTER_REASON_PROCESSING_ERROR),
             startsWith(JsonParseException.class.getCanonicalName())
@@ -214,7 +214,7 @@ class EnvelopeMessageProcessorTest {
         processor = new EnvelopeMessageProcessor(
             envelopeHandler,
             processedEnvelopeNotifier,
-            messageReceiver,
+            null,
             1,
             appInsights
         );
@@ -236,7 +236,7 @@ class EnvelopeMessageProcessorTest {
             anyMap()
         );
         verify(appInsights).trackDeadLetteredMessage(
-            validMessage,
+            any(),
             "envelopes",
             "Too many deliveries",
             "Reached limit of message delivery count of 1"

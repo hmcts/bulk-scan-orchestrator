@@ -273,6 +273,9 @@ dependencies {
   implementation group: 'com.microsoft.azure', name: 'azure-servicebus', version: '3.4.0',{
     exclude group: 'net.minidev', module: 'json-smart' // most up-to-date libraries use v2.* now. this one brings in 1.3
   }
+  implementation group: 'org.apache.qpid', name: 'qpid-jms-client', version: '0.54.0'
+  //Service Bus supports JMS in 1.1 not 2.0 (2.0 is in preview in Premium pricing plan)
+  implementation group: 'org.apache.geronimo.specs', name: 'geronimo-jms_1.1_spec', version: '1.0'
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.3'
   implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '2.8.1'
 

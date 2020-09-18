@@ -24,7 +24,7 @@ azure:
       access-key: ${ENVELOPES_QUEUE_READ_ACCESS_KEY}
       access-key-name: ${QUEUE_ACCESS_KEY_LISTEN_NAME}
       queue-name: ${ENVELOPES_QUEUE_NAME}
-      max-delivery-count: ${ENVELOPES_QUEUE_MAX_DELIVERY_COUNT}
+      max-delivery-count: ${ENVELOPES_QUEUE_MAX_DELIVERY_COUNT:2}
     processed-envelopes:
       access-key: ${PROCESSED_ENVELOPES_QUEUE_WRITE_ACCESS_KEY}
       access-key-name: ${QUEUE_ACCESS_KEY_SEND_NAME}
@@ -206,3 +206,27 @@ task:
   check-jurisdiction-log-in:
     check-validity-duration: PT5M # only ensure this often that no log-in attempt is rejected by IDAM
 
+---
+
+# XXX could potentially be replaced with local or different profile name
+spring:
+  profiles: nosb
+
+azure:
+  application-insights:
+    instrumentation-key: dummy
+
+service-config:
+  # Services and all their case type IDs, excluding exception records.
+  # These mappings are used by Bulk Scan to determine which case type IDs to search across
+  # when looking for a service case (by its legacy ID, ID of related exception record, etc).
+  # Those CTIDs that are not present here, will not be included in the search.
+  # If case type ID list is empty, no case can be found for the service, except when sought for by CCD ID.
+  services:
+    - service: publiclaw
+      jurisdiction: PUBLICLAW
+      case-type-ids: []
+      auto-case-creation-enabled: false
+      auto-case-update-enabled: false
+      case-definition-has-envelope-ids: true
+      search-cases-by-envelope-id: false

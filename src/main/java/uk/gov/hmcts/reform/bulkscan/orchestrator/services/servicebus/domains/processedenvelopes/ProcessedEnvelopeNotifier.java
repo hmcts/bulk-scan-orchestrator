@@ -4,12 +4,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.Message;
 import com.microsoft.azure.servicebus.QueueClient;
+import org.apache.qpid.jms.JmsMessageProducer;
+import org.apache.qpid.jms.JmsSession;
+import org.apache.qpid.jms.message.JmsTextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+import javax.jms.TextMessage;
 import java.time.Instant;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -42,6 +46,8 @@ public class ProcessedEnvelopeNotifier implements IProcessedEnvelopeNotifier {
             IMessage message = new Message(envelopeId, messageBody, APPLICATION_JSON.toString());
 
             // TODO: change back to `queueClient.send(message)` when BPS-694 is implemented
+            //AMQP supports message annotations but couldn't find how this is exposed via QPID JMS client...
+            //Proton QPID-J which is different library, could support that but it's poorly documented and I would recomme
             queueClient.scheduleMessage(message, Instant.now().plusSeconds(10));
 
             log.info("Sent message to processed envelopes queue. Message Body: {}", messageBody);
