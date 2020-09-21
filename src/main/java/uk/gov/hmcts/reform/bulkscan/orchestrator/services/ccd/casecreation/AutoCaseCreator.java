@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.EnvelopeTransformer;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.EnvelopeReference;
@@ -76,9 +76,8 @@ public class AutoCaseCreator {
 
     private CaseCreationResult transformAndCreateCase(Envelope envelope, String loggingContext) {
         return envelopeTransformer.transformEnvelope(envelope)
-            .map(successfulTransformationResponse ->
-                createCaseInCcd(successfulTransformationResponse, envelope, loggingContext)
-            )
+            .map(resp -> resp.caseCreationDetails)
+            .map(caseCreationDetails -> createCaseInCcd(caseCreationDetails, envelope, loggingContext))
             .getOrElseGet(failureType ->
                 failureType == EnvelopeTransformer.TransformationFailureType.UNRECOVERABLE
                     ? CaseCreationResult.unrecoverableFailure()
@@ -87,13 +86,13 @@ public class AutoCaseCreator {
     }
 
     private CaseCreationResult createCaseInCcd(
-        SuccessfulTransformationResponse transformationResponse,
+        CaseCreationDetails caseCreationDetails,
         Envelope envelope,
         String loggingContext
     ) {
         try {
             log.info("About to create a case in CCD from envelope. {}", loggingContext);
-            long caseId = callCcdApiToCreateCase(transformationResponse, envelope, loggingContext);
+            long caseId = callCcdApiToCreateCase(caseCreationDetails, envelope, loggingContext);
             log.info("Created a case in CCD from envelope. Case Id: {}. {}", caseId, loggingContext);
 
             return CaseCreationResult.caseCreated(caseId);
@@ -118,17 +117,17 @@ public class AutoCaseCreator {
     }
 
     private long callCcdApiToCreateCase(
-        SuccessfulTransformationResponse transformationResponse,
+        CaseCreationDetails caseCreationDetails,
         Envelope envelope,
         String loggingContext
     ) {
         return ccdApi.createCase(
             envelope.jurisdiction,
-            transformationResponse.caseCreationDetails.caseTypeId,
-            transformationResponse.caseCreationDetails.eventId,
+            caseCreationDetails.caseTypeId,
+            caseCreationDetails.eventId,
             startEventResponse ->
                 getCaseDataContent(
-                    transformationResponse.caseCreationDetails.caseData,
+                    caseCreationDetails.caseData,
                     envelope.id,
                     startEventResponse.getEventId(),
                     startEventResponse.getToken()
