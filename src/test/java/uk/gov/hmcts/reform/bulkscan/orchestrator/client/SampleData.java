@@ -53,6 +53,10 @@ public class SampleData {
         );
     }
 
+    public static Envelope sampleEnvelope() {
+        return sampleEnvelope(emptyList(), emptyList());
+    }
+
     public static Envelope sampleEnvelope(
         List<uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.OcrDataField> ocrDataFields,
         List<Document> documents
