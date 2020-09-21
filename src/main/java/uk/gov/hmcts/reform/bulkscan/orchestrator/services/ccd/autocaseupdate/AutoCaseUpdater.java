@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataUpdater;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.caseupdatedetails.CaseUpdateDetailsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIds;
@@ -17,6 +19,9 @@ import static java.lang.String.format;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate.AutoCaseUpdateResult.ABANDONED;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate.AutoCaseUpdateResult.OK;
 
+/**
+ * Updates a case based on data from envelope (without caseworkers intervention).
+ */
 @Service
 public class AutoCaseUpdater {
 
@@ -24,14 +29,19 @@ public class AutoCaseUpdater {
 
     private final CaseUpdateDetailsService caseUpdateDataService;
     private final CcdApi ccdApi;
+    private final CaseDataUpdater caseDataUpdater;
 
+    // region constructor
     public AutoCaseUpdater(
         CaseUpdateDetailsService caseUpdateDataService,
-        CcdApi ccdApi
+        CcdApi ccdApi,
+        CaseDataUpdater caseDataUpdater
     ) {
         this.caseUpdateDataService = caseUpdateDataService;
         this.ccdApi = ccdApi;
+        this.caseDataUpdater = caseDataUpdater;
     }
+    // endregion
 
     public AutoCaseUpdateResult updateCase(Envelope envelope) {
         List<Long> matchingCases = ccdApi.getCaseRefsByEnvelopeId(envelope.id, envelope.container);
@@ -102,11 +112,16 @@ public class AutoCaseUpdater {
         String eventId,
         String eventToken
     ) {
-        // TODO: update casedata with envelope ID
 
         return CaseDataContent
             .builder()
-            .data(caseData)
+            .data(
+                caseDataUpdater
+                    .updateEnvelopeReferences(
+                        caseData,
+                        envelopeId,
+                        CaseAction.UPDATE
+                    ))
             .event(
                 Event
                     .builder()
