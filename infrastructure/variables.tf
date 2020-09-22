@@ -34,4 +34,8 @@ variable "supported_jurisdictions" {
   default = ["SSCS", "BULKSCAN", "PROBATE", "DIVORCE", "FINREM", "CMC"]
 }
 
+variable "common_tags" {
+  type = map(string)
+}
+
 
