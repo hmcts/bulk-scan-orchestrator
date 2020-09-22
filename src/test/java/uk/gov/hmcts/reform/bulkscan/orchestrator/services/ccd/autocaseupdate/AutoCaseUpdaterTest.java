@@ -66,4 +66,18 @@ class AutoCaseUpdaterTest {
         verifyNoMoreInteractions(ccdApi);
         verifyNoMoreInteractions(caseDataUpdater);
     }
+
+    @Test
+    void should_return_error_if_ccd_operation_fails() {
+        // given
+        Envelope envelope = sampleEnvelope();
+        given(ccdApi.getCaseRefsByEnvelopeId(envelope.id, envelope.container))
+            .willThrow(RuntimeException.class);
+
+        // when
+        var result = service.updateCase(envelope);
+
+        // then
+        assertThat(result).isEqualTo(AutoCaseUpdateResult.ERROR);
+    }
 }

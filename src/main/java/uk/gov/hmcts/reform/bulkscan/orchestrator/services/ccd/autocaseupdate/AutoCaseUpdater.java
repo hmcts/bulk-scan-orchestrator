@@ -17,6 +17,7 @@ import java.util.Map;
 
 import static java.lang.String.format;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate.AutoCaseUpdateResult.ABANDONED;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate.AutoCaseUpdateResult.ERROR;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate.AutoCaseUpdateResult.OK;
 
 /**
@@ -44,16 +45,26 @@ public class AutoCaseUpdater {
     // endregion
 
     public AutoCaseUpdateResult updateCase(Envelope envelope) {
-        List<Long> matchingCases = ccdApi.getCaseRefsByEnvelopeId(envelope.id, envelope.container);
+        try {
+            List<Long> matchingCases = ccdApi.getCaseRefsByEnvelopeId(envelope.id, envelope.container);
 
-        switch (matchingCases.size()) {
-            case 1:
-                String caseId = String.valueOf(matchingCases.get(0));
-                return handleSingleMatchingCase(caseId, envelope);
-            case 0:
-                return handleNoMatchingCases(envelope);
-            default:
-                return handleMultipleMatchingCases(matchingCases, envelope);
+            switch (matchingCases.size()) {
+                case 1:
+                    String caseId = String.valueOf(matchingCases.get(0));
+                    return handleSingleMatchingCase(caseId, envelope);
+                case 0:
+                    return handleNoMatchingCases(envelope);
+                default:
+                    return handleMultipleMatchingCases(matchingCases, envelope);
+            }
+        } catch (Exception exc) {
+            log.error(
+                "Error while trying to automatically update a case. {}",
+                getLoggingInfo(envelope),
+                exc
+            );
+
+            return ERROR;
         }
     }
 
@@ -80,7 +91,7 @@ public class AutoCaseUpdater {
                     startEventResponse.getEventId(),
                     startEventResponse.getToken()
                 ),
-            getLoggingContext(envelope)
+            getLoggingInfo(envelope)
         );
 
         return OK;
@@ -134,7 +145,7 @@ public class AutoCaseUpdater {
             .build();
     }
 
-    private String getLoggingContext(Envelope envelope) {
+    private String getLoggingInfo(Envelope envelope) {
         return format(
             "Envelope ID: %s. File name: %s. Service: %s.",
             envelope.id,
