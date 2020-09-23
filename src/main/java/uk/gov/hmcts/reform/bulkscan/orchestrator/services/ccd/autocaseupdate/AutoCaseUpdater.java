@@ -3,17 +3,12 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataUpdater;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.caseupdatedetails.CaseUpdateDetailsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIds;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
-import uk.gov.hmcts.reform.ccd.client.model.Event;
 
 import java.util.List;
-import java.util.Map;
 
 import static java.lang.String.format;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate.AutoCaseUpdateResult.ABANDONED;
@@ -30,18 +25,20 @@ public class AutoCaseUpdater {
 
     private final CaseUpdateDetailsService caseUpdateDataService;
     private final CcdApi ccdApi;
-    private final CaseDataUpdater caseDataUpdater;
+    private final AutoCaseUpdateCaseDataBuilder caseDataBuilder;
 
     // region constructor
+
     public AutoCaseUpdater(
         CaseUpdateDetailsService caseUpdateDataService,
         CcdApi ccdApi,
-        CaseDataUpdater caseDataUpdater
+        AutoCaseUpdateCaseDataBuilder caseDataBuilder
     ) {
         this.caseUpdateDataService = caseUpdateDataService;
         this.ccdApi = ccdApi;
-        this.caseDataUpdater = caseDataUpdater;
+        this.caseDataBuilder = caseDataBuilder;
     }
+
     // endregion
 
     public AutoCaseUpdateResult updateCase(Envelope envelope) {
@@ -80,17 +77,16 @@ public class AutoCaseUpdater {
                 );
 
         ccdApi.updateCase(
-            envelope.container,
+            existingCase.getJurisdiction(),
             existingCase.getCaseTypeId(),
             EventIds.ATTACH_SCANNED_DOCS_WITH_OCR,
             caseId,
-            startEventResponse ->
-                getCaseDataContent(
-                    caseUpdateResult.caseDetails.caseData,
-                    envelope.id,
-                    startEventResponse.getEventId(),
-                    startEventResponse.getToken()
-                ),
+            startEventResponse -> caseDataBuilder.getCaseDataContent(
+                caseUpdateResult.caseDetails.caseData,
+                envelope.id,
+                startEventResponse.getEventId(),
+                startEventResponse.getToken()
+            ),
             getLoggingInfo(envelope)
         );
 
@@ -115,34 +111,6 @@ public class AutoCaseUpdater {
             matchingCases
         );
         return ABANDONED;
-    }
-
-    private CaseDataContent getCaseDataContent(
-        Map<String, Object> caseData,
-        String envelopeId,
-        String eventId,
-        String eventToken
-    ) {
-
-        return CaseDataContent
-            .builder()
-            .data(
-                caseDataUpdater
-                    .updateEnvelopeReferences(
-                        caseData,
-                        envelopeId,
-                        CaseAction.UPDATE
-                    ))
-            .event(
-                Event
-                    .builder()
-                    .id(eventId)
-                    .summary("Case automatically updated with envelope")
-                    .description("Case update with envelope " + envelopeId)
-                    .build()
-            )
-            .eventToken(eventToken)
-            .build();
     }
 
     private String getLoggingInfo(Envelope envelope) {
