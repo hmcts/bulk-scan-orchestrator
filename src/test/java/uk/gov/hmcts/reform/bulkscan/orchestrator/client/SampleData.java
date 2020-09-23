@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client;
 
 import com.google.common.collect.ImmutableMap;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.CaseUpdateDetails;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.OcrDataField;
@@ -14,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -53,6 +56,10 @@ public class SampleData {
         );
     }
 
+    public static Envelope sampleEnvelope() {
+        return sampleEnvelope(emptyList(), emptyList());
+    }
+
     public static Envelope sampleEnvelope(
         List<uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.OcrDataField> ocrDataFields,
         List<Document> documents
@@ -72,6 +79,19 @@ public class SampleData {
             documents,
             emptyList(),
             ocrDataFields,
+            emptyList()
+        );
+    }
+
+    public static SuccessfulUpdateResponse sampleUpdateDataResponse() {
+        return new SuccessfulUpdateResponse(
+            new CaseUpdateDetails(
+                "some-event-id",
+                Map.of(
+                    "a", 1,
+                    "b", 2
+                )
+            ),
             emptyList()
         );
     }
