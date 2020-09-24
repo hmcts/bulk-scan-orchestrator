@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.caseupdatedetails.CaseUpdateDetailsService;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseFinder;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIds;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
@@ -14,10 +15,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
-import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
-import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -32,6 +32,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.SampleData.sample
 class AutoCaseUpdaterTest {
 
     @Mock CaseUpdateDetailsService caseUpdateDataService;
+    @Mock CaseFinder caseFinder;
     @Mock CcdApi ccdApi;
     @Mock CaseDataContentBuilderProvider caseDataBuilder;
 
@@ -41,33 +42,15 @@ class AutoCaseUpdaterTest {
 
     @BeforeEach
     void setUp() {
-        this.service = new AutoCaseUpdater(caseUpdateDataService, ccdApi, caseDataBuilder);
+        this.service = new AutoCaseUpdater(caseUpdateDataService, caseFinder, ccdApi, caseDataBuilder);
     }
 
     @Test
     void should_abandon_update_if_case_is_not_found() {
         // given
         Envelope envelope = sampleEnvelope();
-        given(ccdApi.getCaseRefsByEnvelopeId(envelope.id, envelope.container))
-            .willReturn(emptyList());
-
-        // when
-        var result = service.updateCase(envelope);
-
-        // then
-        assertThat(result).isEqualTo(AutoCaseUpdateResult.ABANDONED);
-
-        verifyNoMoreInteractions(caseUpdateDataService);
-        verifyNoMoreInteractions(ccdApi);
-        verifyNoMoreInteractions(caseDataBuilder);
-    }
-
-    @Test
-    void should_abandon_update_if_more_than_one_case_is_found() {
-        // given
-        Envelope envelope = sampleEnvelope();
-        given(ccdApi.getCaseRefsByEnvelopeId(envelope.id, envelope.container))
-            .willReturn(List.of(1L, 2L));
+        given(caseFinder.findCase(envelope))
+            .willReturn(Optional.empty());
 
         // when
         var result = service.updateCase(envelope);
@@ -84,8 +67,7 @@ class AutoCaseUpdaterTest {
     void should_return_error_if_ccd_operation_fails() {
         // given
         Envelope envelope = sampleEnvelope();
-        given(ccdApi.getCaseRefsByEnvelopeId(envelope.id, envelope.container))
-            .willThrow(RuntimeException.class);
+        given(caseFinder.findCase(envelope)).willThrow(RuntimeException.class);
 
         // when
         var result = service.updateCase(envelope);
@@ -95,18 +77,15 @@ class AutoCaseUpdaterTest {
     }
 
     @Test
-    void should_update_case_if_only_one_case_is_found() {
+    void should_update_case_if_it_is_found() {
         // given
         Long existingCaseRef = 1L;
         CaseDetails existingCaseDetails = sampleCaseDetails();
         Envelope envelope = sampleEnvelope();
         SuccessfulUpdateResponse updateDataResponse = sampleUpdateDataResponse();
 
-        given(ccdApi.getCaseRefsByEnvelopeId(envelope.id, envelope.container))
-            .willReturn(List.of(existingCaseRef));
-
-        given(ccdApi.getCase(existingCaseRef.toString(), envelope.jurisdiction))
-            .willReturn(existingCaseDetails);
+        given(caseFinder.findCase(envelope))
+            .willReturn(Optional.of(existingCaseDetails));
 
         given(caseUpdateDataService.getCaseUpdateData(envelope.container, existingCaseDetails, envelope))
             .willReturn(updateDataResponse);
@@ -130,7 +109,7 @@ class AutoCaseUpdaterTest {
                 eq(existingCaseDetails.getJurisdiction()),
                 eq(existingCaseDetails.getCaseTypeId()),
                 eq(EventIds.ATTACH_SCANNED_DOCS_WITH_OCR),
-                eq(existingCaseRef.toString()),
+                eq(existingCaseDetails.getId().toString()),
                 eq(caseDataContentBuilder),
                 anyString()
             );
