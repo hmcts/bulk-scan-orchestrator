@@ -11,11 +11,11 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Component
-public class AutoCaseUpdateCaseDataBuilder {
+public class CaseDataContentBuilderProvider {
 
     private final CaseDataUpdater caseDataUpdater;
 
-    public AutoCaseUpdateCaseDataBuilder(CaseDataUpdater caseDataUpdater) {
+    public CaseDataContentBuilderProvider(CaseDataUpdater caseDataUpdater) {
         this.caseDataUpdater = caseDataUpdater;
     }
 

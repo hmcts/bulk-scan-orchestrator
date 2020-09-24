@@ -25,18 +25,18 @@ public class AutoCaseUpdater {
 
     private final CaseUpdateDetailsService caseUpdateDataService;
     private final CcdApi ccdApi;
-    private final AutoCaseUpdateCaseDataBuilder caseDataBuilder;
+    private final CaseDataContentBuilderProvider caseDataBuilderProvider;
 
     // region constructor
 
     public AutoCaseUpdater(
         CaseUpdateDetailsService caseUpdateDataService,
         CcdApi ccdApi,
-        AutoCaseUpdateCaseDataBuilder caseDataBuilder
+        CaseDataContentBuilderProvider caseDataBuilderProvider
     ) {
         this.caseUpdateDataService = caseUpdateDataService;
         this.ccdApi = ccdApi;
-        this.caseDataBuilder = caseDataBuilder;
+        this.caseDataBuilderProvider = caseDataBuilderProvider;
     }
 
     // endregion
@@ -81,7 +81,7 @@ public class AutoCaseUpdater {
             existingCase.getCaseTypeId(),
             EventIds.ATTACH_SCANNED_DOCS_WITH_OCR,
             caseId,
-            caseDataBuilder.getBuilder(caseUpdateResult.caseDetails.caseData, envelope.id),
+            caseDataBuilderProvider.getBuilder(caseUpdateResult.caseDetails.caseData, envelope.id),
             getLoggingInfo(envelope)
         );
 

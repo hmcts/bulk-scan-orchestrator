@@ -33,7 +33,7 @@ class AutoCaseUpdaterTest {
 
     @Mock CaseUpdateDetailsService caseUpdateDataService;
     @Mock CcdApi ccdApi;
-    @Mock AutoCaseUpdateCaseDataBuilder caseDataBuilder;
+    @Mock CaseDataContentBuilderProvider caseDataBuilder;
 
     @Mock Function<StartEventResponse, CaseDataContent> caseDataContentBuilder;
 

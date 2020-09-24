@@ -18,18 +18,18 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
-class AutoCaseUpdateCaseDataBuilderTest {
+class CaseDataContentBuilderProviderTest {
 
     @Mock Map<String, Object> inputCaseData;
     @Mock Map<String, Object> caseDataAfterUpdate;
 
     @Mock CaseDataUpdater caseDataUpdater;
 
-    AutoCaseUpdateCaseDataBuilder caseDataBuilder;
+    CaseDataContentBuilderProvider caseDataBuilderProvider;
 
     @BeforeEach
     void setUp() {
-        caseDataBuilder = new AutoCaseUpdateCaseDataBuilder(caseDataUpdater);
+        caseDataBuilderProvider = new CaseDataContentBuilderProvider(caseDataUpdater);
     }
 
     @Test
@@ -46,7 +46,7 @@ class AutoCaseUpdateCaseDataBuilderTest {
             .willReturn(caseDataAfterUpdate);
 
         // when
-        Function<StartEventResponse, CaseDataContent> builder = caseDataBuilder.getBuilder(inputCaseData, envelopeId);
+        Function<StartEventResponse, CaseDataContent> builder = caseDataBuilderProvider.getBuilder(inputCaseData, envelopeId);
         CaseDataContent result = builder.apply(startEventResponse);
 
         // then
