@@ -73,8 +73,7 @@ public class AutoCaseUpdater {
                     log.warn("Auto case update abandoned - case not found for envelope. {}", getLoggingInfo(envelope));
                     return ABANDONED;
                 });
-        } catch (
-            Exception exc) {
+        } catch (Exception exc) {
             log.error(
                 "Error while trying to automatically update a case. {}",
                 getLoggingInfo(envelope),
