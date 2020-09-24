@@ -3,8 +3,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
@@ -24,7 +22,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.SampleData.sampleCaseDetails;
@@ -36,12 +33,9 @@ class AutoCaseUpdaterTest {
 
     @Mock CaseUpdateDetailsService caseUpdateDataService;
     @Mock CcdApi ccdApi;
-    @Mock AutoCaseUpdateCaseDataBuilder caseDataBuilder;
+    @Mock CaseDataContentBuilderProvider caseDataBuilder;
 
-    @Mock CaseDataContent caseDataContent;
-
-    @Captor ArgumentCaptor<Function<StartEventResponse, CaseDataContent>> caseBuilderCaptor;
-
+    @Mock Function<StartEventResponse, CaseDataContent> caseDataContentBuilder;
 
     AutoCaseUpdater service;
 
@@ -117,6 +111,9 @@ class AutoCaseUpdaterTest {
         given(caseUpdateDataService.getCaseUpdateData(envelope.container, existingCaseDetails, envelope))
             .willReturn(updateDataResponse);
 
+        given(caseDataBuilder.getBuilder(updateDataResponse.caseDetails.caseData, envelope.id))
+            .willReturn(caseDataContentBuilder);
+
         // when
         var result = service.updateCase(envelope);
 
@@ -134,29 +131,8 @@ class AutoCaseUpdaterTest {
                 eq(existingCaseDetails.getCaseTypeId()),
                 eq(EventIds.ATTACH_SCANNED_DOCS_WITH_OCR),
                 eq(existingCaseRef.toString()),
-                caseBuilderCaptor.capture(),
+                eq(caseDataContentBuilder),
                 anyString()
             );
-
-        // and
-        Function<StartEventResponse, CaseDataContent> caseBuilder = caseBuilderCaptor.getValue();
-
-        var startEventResponse = mock(StartEventResponse.class);
-        given(startEventResponse.getEventId()).willReturn("event-id");
-        given(startEventResponse.getToken()).willReturn("event-token");
-
-        given(
-            caseDataBuilder
-                .getCaseDataContent(
-                    updateDataResponse.caseDetails.caseData,
-                    envelope.id,
-                    "event-id",
-                    "event-token"
-                )
-        ).willReturn(caseDataContent);
-
-        CaseDataContent caseDataContentSentToCcd = caseBuilder.apply(startEventResponse);
-
-        assertThat(caseDataContentSentToCcd).isEqualTo(caseDataContent);
     }
 }
