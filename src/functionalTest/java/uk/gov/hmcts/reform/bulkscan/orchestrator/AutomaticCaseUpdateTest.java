@@ -32,7 +32,7 @@ public class AutomaticCaseUpdateTest {
 
     @Disabled
     @Test
-    void should_update_a_case() throws Exception{
+    void should_update_a_case() throws Exception {
         //given
         String docUrl = dmUploadService.uploadToDmStore("Certificate.pdf", "documents/supplementary-evidence.pdf");
         CaseDetails existingCase = ccdCaseCreator.createCase(emptyList(), Instant.now());
