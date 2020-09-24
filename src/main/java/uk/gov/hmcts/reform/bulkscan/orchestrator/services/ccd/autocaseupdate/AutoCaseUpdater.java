@@ -81,12 +81,7 @@ public class AutoCaseUpdater {
             existingCase.getCaseTypeId(),
             EventIds.ATTACH_SCANNED_DOCS_WITH_OCR,
             caseId,
-            startEventResponse -> caseDataBuilder.getCaseDataContent(
-                caseUpdateResult.caseDetails.caseData,
-                envelope.id,
-                startEventResponse.getEventId(),
-                startEventResponse.getToken()
-            ),
+            caseDataBuilder.getBuilder(caseUpdateResult.caseDetails.caseData, envelope.id),
             getLoggingInfo(envelope)
         );
 
