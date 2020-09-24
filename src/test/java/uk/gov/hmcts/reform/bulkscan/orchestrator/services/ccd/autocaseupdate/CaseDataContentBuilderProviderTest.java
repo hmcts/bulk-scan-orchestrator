@@ -46,7 +46,9 @@ class CaseDataContentBuilderProviderTest {
             .willReturn(caseDataAfterUpdate);
 
         // when
-        Function<StartEventResponse, CaseDataContent> builder = caseDataBuilderProvider.getBuilder(inputCaseData, envelopeId);
+        Function<StartEventResponse, CaseDataContent> builder =
+            caseDataBuilderProvider.getBuilder(inputCaseData, envelopeId);
+
         CaseDataContent result = builder.apply(startEventResponse);
 
         // then
