@@ -56,7 +56,7 @@ class AutoCaseUpdaterTest {
         var result = service.updateCase(envelope);
 
         // then
-        assertThat(result).isEqualTo(AutoCaseUpdateResult.ABANDONED);
+        assertThat(result.type).isEqualTo(AutoCaseUpdateResultType.ABANDONED);
 
         verifyNoMoreInteractions(caseUpdateDataService);
         verifyNoMoreInteractions(ccdApi);
@@ -73,7 +73,7 @@ class AutoCaseUpdaterTest {
         var result = service.updateCase(envelope);
 
         // then
-        assertThat(result).isEqualTo(AutoCaseUpdateResult.ERROR);
+        assertThat(result.type).isEqualTo(AutoCaseUpdateResultType.ERROR);
     }
 
     @Test
@@ -97,7 +97,8 @@ class AutoCaseUpdaterTest {
         var result = service.updateCase(envelope);
 
         // then
-        assertThat(result).isEqualTo(AutoCaseUpdateResult.OK);
+        assertThat(result.type).isEqualTo(AutoCaseUpdateResultType.OK);
+        assertThat(result.caseId).isEqualTo(existingCaseDetails.getId());
 
         // should request data from appropriate service
         verify(caseUpdateDataService)

@@ -1,7 +1,15 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate;
 
-public enum AutoCaseUpdateResult {
-    OK,        // case was updated successfully
-    ERROR,     // an error occurred when updating a case
-    ABANDONED, // conditions for updating a case were not met, there was no attempt to update a case
+public class AutoCaseUpdateResult {
+
+    public final AutoCaseUpdateResultType type;
+    public final Long caseId;
+
+    public AutoCaseUpdateResult(
+        AutoCaseUpdateResultType type,
+        Long caseId
+    ) {
+        this.type = type;
+        this.caseId = caseId;
+    }
 }
