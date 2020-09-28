@@ -38,13 +38,29 @@ public class SupplementaryEvidenceWithOcrHandler {
         );
 
         if (serviceConfigProvider.getConfig(envelope.container).getAutoCaseUpdateEnabled()) {
-            autoCaseUpdater.updateCase(envelope);
-            paymentsProcessor.createPayments(envelope, ccdId, false);
-            return new EnvelopeProcessingResult(ccdId, EXCEPTION_RECORD);
+            var updateResult = autoCaseUpdater.updateCase(envelope);
+
+            switch (updateResult.type) {
+                case OK:
+                    paymentsProcessor.createPayments(envelope, updateResult.caseId, false);
+                    return new EnvelopeProcessingResult(updateResult.caseId, EXCEPTION_RECORD);
+                case ERROR:
+                    // failed, let's try again later...
+                    // TODO: limit number of attempts and create exception record
+                    throw new CaseUpdateException("Updating case failed due to a potentially recoverable error");
+                case ABANDONED:
+                    // it's not possible to update a case...
+                    return createExceptionRecord(envelope);
+            }
+
         } else {
-            Long ccdId = exceptionRecordCreator.tryCreateFrom(envelope);
-            paymentsProcessor.createPayments(envelope, ccdId, true);
-            return new EnvelopeProcessingResult(ccdId, EXCEPTION_RECORD);
+           return createExceptionRecord(envelope);
         }
+    }
+
+    private EnvelopeProcessingResult createExceptionRecord(Envelope envelope) {
+        Long ccdId = exceptionRecordCreator.tryCreateFrom(envelope);
+        paymentsProcessor.createPayments(envelope, ccdId, true);
+        return new EnvelopeProcessingResult(ccdId, EXCEPTION_RECORD);
     }
 }
