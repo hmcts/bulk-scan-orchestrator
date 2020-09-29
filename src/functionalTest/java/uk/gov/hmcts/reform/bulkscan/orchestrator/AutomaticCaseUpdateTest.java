@@ -30,7 +30,6 @@ public class AutomaticCaseUpdateTest {
     @Autowired DocumentManagementUploadService dmUploadService;
     @Autowired CcdCaseCreator ccdCaseCreator;
 
-    @Disabled
     @Test
     void should_update_a_case() throws Exception {
         //given
