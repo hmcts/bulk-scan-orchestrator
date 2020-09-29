@@ -6,7 +6,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate.Aut
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeProcessingResult;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -57,7 +56,7 @@ public class SupplementaryEvidenceWithOcrHandler {
                     throw new CaseUpdateException("Unsupported result type: " + updateResult.type);
             }
         } else {
-           return createExceptionRecord(envelope);
+            return createExceptionRecord(envelope);
         }
     }
 
