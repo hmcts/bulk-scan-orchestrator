@@ -80,7 +80,7 @@ class SupplementaryEvidenceWithOcrHandlerTest {
         EnvelopeProcessingResult result = handler.handle(envelope);
 
         // then
-        assertThat(result.ccdId).isEqualTo(111000L);
+        assertThat(result.ccdId).isEqualTo(existingCaseId);
         assertThat(result.envelopeCcdAction).isEqualTo(EnvelopeCcdAction.AUTO_UPDATED_CASE);
 
         verify(paymentsProcessor).createPayments(envelope, existingCaseId, false);
