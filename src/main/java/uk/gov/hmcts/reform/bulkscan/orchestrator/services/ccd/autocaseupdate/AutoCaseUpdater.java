@@ -10,9 +10,9 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIds;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 
 import static java.lang.String.format;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate.AutoCaseUpdateResult.ABANDONED;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate.AutoCaseUpdateResult.ERROR;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate.AutoCaseUpdateResult.OK;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate.AutoCaseUpdateResultType.ABANDONED;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate.AutoCaseUpdateResultType.ERROR;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate.AutoCaseUpdateResultType.OK;
 
 /**
  * Updates a case based on data from envelope (without caseworkers intervention).
@@ -66,12 +66,12 @@ public class AutoCaseUpdater {
                             getLoggingInfo(envelope)
                         );
 
-                        return OK;
+                        return new AutoCaseUpdateResult(OK, existingCase.getId());
                     }
                 )
                 .orElseGet(() -> {
                     log.warn("Auto case update abandoned - case not found for envelope. {}", getLoggingInfo(envelope));
-                    return ABANDONED;
+                    return new AutoCaseUpdateResult(ABANDONED, null);
                 });
         } catch (Exception exc) {
             log.error(
@@ -80,7 +80,7 @@ public class AutoCaseUpdater {
                 exc
             );
 
-            return ERROR;
+            return new AutoCaseUpdateResult(ERROR, null);
         }
     }
 
