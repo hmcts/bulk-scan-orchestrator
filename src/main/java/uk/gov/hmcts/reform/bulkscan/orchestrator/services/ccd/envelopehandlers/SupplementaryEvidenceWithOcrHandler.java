@@ -6,9 +6,11 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate.Aut
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeProcessingResult;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.AUTO_UPDATED_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.EXCEPTION_RECORD;
 
 @Service
@@ -43,7 +45,7 @@ public class SupplementaryEvidenceWithOcrHandler {
             switch (updateResult.type) {
                 case OK:
                     paymentsProcessor.createPayments(envelope, updateResult.caseId, false);
-                    return new EnvelopeProcessingResult(updateResult.caseId, EXCEPTION_RECORD);
+                    return new EnvelopeProcessingResult(updateResult.caseId, AUTO_UPDATED_CASE);
                 case ERROR:
                     // failed, let's try again later...
                     // TODO: limit number of attempts and create exception record
@@ -51,8 +53,9 @@ public class SupplementaryEvidenceWithOcrHandler {
                 case ABANDONED:
                     // it's not possible to update a case...
                     return createExceptionRecord(envelope);
+                default:
+                    throw new CaseUpdateException("Unsupported result type: " + updateResult.type);
             }
-
         } else {
            return createExceptionRecord(envelope);
         }
