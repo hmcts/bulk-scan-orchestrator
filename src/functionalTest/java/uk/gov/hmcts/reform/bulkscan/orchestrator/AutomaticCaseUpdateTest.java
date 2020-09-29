@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.Collections.emptyList;
@@ -53,7 +54,10 @@ public class AutomaticCaseUpdateTest {
                     String.valueOf(existingCase.getId()),
                     existingCase.getJurisdiction()
                 );
-                return updatedCaseDetails.getData().get("email").equals("email-from-envelope@test.com");
+                return Objects.equals(
+                    updatedCaseDetails.getData().get("email"),
+                    "email-from-envelope@test.com"
+                );
             });
     }
 }
