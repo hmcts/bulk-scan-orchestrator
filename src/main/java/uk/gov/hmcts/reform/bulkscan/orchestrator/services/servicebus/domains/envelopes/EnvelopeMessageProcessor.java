@@ -190,11 +190,12 @@ public class EnvelopeMessageProcessor {
 
     private void logMessageParsed(IMessage message, Envelope envelope) {
         log.info(
-            "Parsed message. ID: {}, Envelope ID: {}, File name: {}, Jurisdiction: {}, Form type: {}, "
+            "Parsed message. ID: {}, Envelope ID: {}, File name: {}, Container: {}, Jurisdiction: {}, Form type: {}, "
                 + "Classification: {}, {}: {}",
             message.getMessageId(),
             envelope.id,
             envelope.zipFileName,
+            envelope.container,
             envelope.jurisdiction,
             envelope.formType == null ? "" : envelope.formType,
             envelope.classification,
