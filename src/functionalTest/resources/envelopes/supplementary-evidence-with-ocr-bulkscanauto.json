@@ -6,7 +6,7 @@
   "container": "bulkscanauto",
   "formType": "B123",
   "classification": "SUPPLEMENTARY_EVIDENCE_WITH_OCR",
-  "zip_file_name": "zip-file-test-updated.zip",
+  "zip_file_name": "sup-evidence-with-ocr-bulkscan-auto.zip",
   "delivery_date": "1970-01-01T00:00:00.000Z",
   "opening_date": "1970-01-01T00:00:00.000Z",
   "documents": [
