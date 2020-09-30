@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -31,6 +32,7 @@ public class AutomaticCaseUpdateTest {
     @Autowired CcdCaseCreator ccdCaseCreator;
 
     @Test
+    @SuppressWarnings("unchecked")
     void should_update_a_case() throws Exception {
         //given
         String docUrl = dmUploadService.uploadToDmStore("Certificate.pdf", "documents/supplementary-evidence.pdf");
@@ -54,9 +56,10 @@ public class AutomaticCaseUpdateTest {
                     String.valueOf(existingCase.getId()),
                     existingCase.getJurisdiction()
                 );
+                Map<String, String> address = (Map<String, String>) updatedCaseDetails.getData().get("address");
                 return Objects.equals(
-                    updatedCaseDetails.getData().get("email"),
-                    "email-from-envelope@test.com"
+                    address.get("country"),
+                    "country-from-envelope"
                 );
             });
     }

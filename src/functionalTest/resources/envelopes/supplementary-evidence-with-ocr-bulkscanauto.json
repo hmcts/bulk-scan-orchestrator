@@ -34,7 +34,7 @@
     },
     {
       "metadata_field_name": "country",
-      "metadata_field_value": "sample_country"
+      "metadata_field_value": "country-from-envelope"
     }
   ],
   "ocr_data_validation_warnings": [
