@@ -56,11 +56,8 @@ public class AutomaticCaseUpdateTest {
                     String.valueOf(existingCase.getId()),
                     existingCase.getJurisdiction()
                 );
-                Map<String, String> address = (Map<String, String>) updatedCaseDetails.getData().get("address");
-                return Objects.equals(
-                    address.get("country"),
-                    "country-from-envelope"
-                );
+                var address = (Map<String, String>) updatedCaseDetails.getData().get("address");
+                return address != null && Objects.equals(address.get("country"), "country-from-envelope");
             });
     }
 }
