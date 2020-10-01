@@ -30,6 +30,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.EXCEPTION_RECORD;
 
+@SuppressWarnings("checkstyle:LineLength")
 @ExtendWith(MockitoExtension.class)
 class SupplementaryEvidenceWithOcrHandlerTest {
 
