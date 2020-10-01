@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,6 +13,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.Collections.emptyList;
@@ -30,8 +31,8 @@ public class AutomaticCaseUpdateTest {
     @Autowired DocumentManagementUploadService dmUploadService;
     @Autowired CcdCaseCreator ccdCaseCreator;
 
-    @Disabled
     @Test
+    @SuppressWarnings("unchecked")
     void should_update_a_case() throws Exception {
         //given
         String docUrl = dmUploadService.uploadToDmStore("Certificate.pdf", "documents/supplementary-evidence.pdf");
@@ -55,7 +56,8 @@ public class AutomaticCaseUpdateTest {
                     String.valueOf(existingCase.getId()),
                     existingCase.getJurisdiction()
                 );
-                return updatedCaseDetails.getData().get("email").equals("email-from-envelope@test.com");
+                var address = (Map<String, String>) updatedCaseDetails.getData().get("address");
+                return address != null && Objects.equals(address.get("country"), "country-from-envelope");
             });
     }
 }
