@@ -15,6 +15,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 @Service
 public class SupplementaryEvidenceWithOcrHandler {
 
+    public static final int MAX_RETRIES = 2;
+
     private final CreateExceptionRecord exceptionRecordCreator;
     private final PaymentsProcessor paymentsProcessor;
     private final AutoCaseUpdater autoCaseUpdater;
@@ -32,7 +34,7 @@ public class SupplementaryEvidenceWithOcrHandler {
         this.serviceConfigProvider = serviceConfigProvider;
     }
 
-    public EnvelopeProcessingResult handle(Envelope envelope) {
+    public EnvelopeProcessingResult handle(Envelope envelope, long deliveryCount) {
         checkArgument(
             envelope.classification == Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR,
             "Envelope classification has to be " + Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR
@@ -46,9 +48,11 @@ public class SupplementaryEvidenceWithOcrHandler {
                     paymentsProcessor.createPayments(envelope, updateResult.caseId, false);
                     return new EnvelopeProcessingResult(updateResult.caseId, AUTO_UPDATED_CASE);
                 case ERROR:
-                    // failed, let's try again later...
-                    // TODO: limit number of attempts and create exception record
-                    throw new CaseUpdateException("Updating case failed due to a potentially recoverable error");
+                    if (deliveryCount < MAX_RETRIES) {
+                        throw new CaseUpdateException("Updating case failed due to a potentially recoverable error");
+                    } else {
+                        return createExceptionRecord(envelope);
+                    }
                 case ABANDONED:
                     // it's not possible to update a case...
                     return createExceptionRecord(envelope);
