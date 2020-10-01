@@ -68,7 +68,7 @@ class EnvelopeHandlerTest {
                 verify(supplementaryEvidenceHandler).handle(envelope);
                 break;
             case SUPPLEMENTARY_EVIDENCE_WITH_OCR:
-                verify(supplementaryEvidenceWithOcrHandler).handle(envelope);
+                verify(supplementaryEvidenceWithOcrHandler).handle(envelope, deliveryCount);
                 break;
             default:
                 break;

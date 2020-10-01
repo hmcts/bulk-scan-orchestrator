@@ -58,7 +58,7 @@ class SupplementaryEvidenceWithOcrHandlerTest {
         given(exceptionRecordCreator.tryCreateFrom(envelope)).willReturn(CASE_ID);
 
         // when
-        var result = handler.handle(envelope);
+        var result = handler.handle(envelope, 0);
 
         // then
         assertThat(result.envelopeCcdAction).isEqualTo(EXCEPTION_RECORD);
@@ -77,7 +77,7 @@ class SupplementaryEvidenceWithOcrHandlerTest {
         given(autoCaseUpdater.updateCase(envelope)).willReturn(new AutoCaseUpdateResult(OK, existingCaseId));
 
         // when
-        EnvelopeProcessingResult result = handler.handle(envelope);
+        EnvelopeProcessingResult result = handler.handle(envelope, 0);
 
         // then
         assertThat(result.ccdId).isEqualTo(existingCaseId);
@@ -95,7 +95,7 @@ class SupplementaryEvidenceWithOcrHandlerTest {
         given(exceptionRecordCreator.tryCreateFrom(envelope)).willReturn(CASE_ID);
 
         // when
-        var result = handler.handle(envelope);
+        var result = handler.handle(envelope, 0);
 
         // then
         assertThat(result.envelopeCcdAction).isEqualTo(EXCEPTION_RECORD);
@@ -106,18 +106,37 @@ class SupplementaryEvidenceWithOcrHandlerTest {
     }
 
     @Test
-    void should_throw_an_exception_if_an_error_occurred_while_updating_a_case() {
+    void should_throw_an_exception_if_an_error_occurred_while_updating_a_case_and_max_number_of_retries_was_not_reached() {
         // given
         Envelope envelope = envelope(SUPPLEMENTARY_EVIDENCE_WITH_OCR, JURSIDICTION, CASE_REF);
         givenAutoCaseUpdateEnabled(envelope, true);
         given(autoCaseUpdater.updateCase(envelope)).willReturn(new AutoCaseUpdateResult(ERROR, null));
 
         // when
-        var exc = catchThrowable(() -> handler.handle(envelope));
+        var exc = catchThrowable(() -> handler.handle(envelope, 0));
 
         // then
         assertThat(exc).isInstanceOf(CaseUpdateException.class);
         assertThat(exc).hasMessageContaining("Updating case failed due to a potentially recoverable error");
+    }
+
+    @Test
+    void should_create_exception_record_if_an_error_occurred_while_updating_a_case_and_max_number_of_retries_was_reached() {
+        // given
+        Envelope envelope = envelope(SUPPLEMENTARY_EVIDENCE_WITH_OCR, JURSIDICTION, CASE_REF);
+        givenAutoCaseUpdateEnabled(envelope, true);
+        given(autoCaseUpdater.updateCase(envelope)).willReturn(new AutoCaseUpdateResult(ERROR, null));
+        given(exceptionRecordCreator.tryCreateFrom(envelope)).willReturn(CASE_ID);
+
+        // when
+        var result = handler.handle(envelope, SupplementaryEvidenceWithOcrHandler.MAX_RETRIES);
+
+        // then
+        assertThat(result.envelopeCcdAction).isEqualTo(EXCEPTION_RECORD);
+        assertThat(result.ccdId).isEqualTo(CASE_ID);
+
+        verify(exceptionRecordCreator).tryCreateFrom(envelope);
+        verify(paymentsProcessor).createPayments(envelope, CASE_ID, true);
     }
 
     @Test
@@ -126,7 +145,7 @@ class SupplementaryEvidenceWithOcrHandlerTest {
         Envelope envelope = envelope(EXCEPTION, JURSIDICTION, CASE_REF);
 
         // when
-        var exc = catchThrowable(() -> handler.handle(envelope));
+        var exc = catchThrowable(() -> handler.handle(envelope, 0));
 
         // then
         assertThat(exc)

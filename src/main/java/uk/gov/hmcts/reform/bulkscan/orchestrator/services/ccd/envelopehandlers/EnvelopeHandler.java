@@ -29,7 +29,7 @@ public class EnvelopeHandler {
             case SUPPLEMENTARY_EVIDENCE:
                 return supplementaryEvidenceHandler.handle(envelope);
             case SUPPLEMENTARY_EVIDENCE_WITH_OCR:
-                return supplementaryEvidenceWithOcrHandler.handle(envelope);
+                return supplementaryEvidenceWithOcrHandler.handle(envelope, deliveryCount);
             case EXCEPTION:
                 return exceptionClassificationHandler.handle(envelope);
             case NEW_APPLICATION:
