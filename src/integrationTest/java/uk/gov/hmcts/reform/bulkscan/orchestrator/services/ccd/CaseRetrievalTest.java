@@ -281,7 +281,8 @@ class CaseRetrievalTest {
         )
             // then
             .isInstanceOf(CcdCallException.class)
-            .hasMessageContaining("Could not attach documents for case ref: 2 Error: " + status);
+            .hasMessageContaining("Could not attach documents for case ref: 2, Response status: " + status
+                + ", CCD response: ");
 
         // and
         Mockito.verify(authenticatorFactory).removeFromCache(JURISDICTION);
