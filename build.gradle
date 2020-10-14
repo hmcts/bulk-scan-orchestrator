@@ -267,7 +267,7 @@ dependencies {
   implementation group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
   implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '3.1.2'
   implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: 'v1.5.5'
-  implementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: '4.7.3'
+  implementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: 'v4.7.5'
   implementation group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version:'0.1.0'
 
   implementation group: 'com.microsoft.azure', name: 'azure-servicebus', version: '3.4.0',{
