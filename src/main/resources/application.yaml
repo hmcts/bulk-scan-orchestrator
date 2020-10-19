@@ -56,7 +56,10 @@ idam:
     redirect_uri: http://localhost/receiver
     cache:
       refresh-before-expire-in-sec: 300
-
+  users:
+    bulkscan:
+      username: ${IDAM_USERS_BULKSCAN_USERNAME}
+      password: ${IDAM_USERS_BULKSCAN_PASSWORD}
 
 service-config:
   # Services and all their case type IDs, excluding exception records.
