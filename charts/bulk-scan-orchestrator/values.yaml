@@ -23,7 +23,7 @@ java:
     DELETE_ENVELOPES_DLQ_MESSAGES_TTL: "10s"
     QUEUE_ACCESS_KEY_LISTEN_NAME: "ListenSharedAccessKey"
     QUEUE_ACCESS_KEY_SEND_NAME: "SendSharedAccessKey"
-    QUEUE_NAMESPACE: "bulk-scan-servicebus-{{ .Values.global.environment }}"
+    QUEUE_NAMESPACE: "bulk-scan-servicebus-v2-{{ .Values.global.environment }}"
     ENVELOPES_QUEUE_NAME: "envelopes"
     PROCESSED_ENVELOPES_QUEUE_NAME: "processed-envelopes"
     PAYMENTS_QUEUE_NAME: "payments"
@@ -60,7 +60,7 @@ java:
     CAN_SEARCH_CASES_BY_ENVELOPE_ID_CMC: "false"
     CAN_SEARCH_CASES_BY_ENVELOPE_ID_PUBLICLAW: "false"
   keyVaults:
-    bulk-scan:
+    bulk-scan-v2:
       resourceGroup: bulk-scan
       secrets:
         - idam-client-secret

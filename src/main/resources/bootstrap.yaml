@@ -3,6 +3,7 @@ spring:
     propertiesvolume:
       prefixed: false
       paths: /mnt/secrets/bulk-scan
+      name: bulk-scan-v2
       aliases:
         idam-client-secret: IDAM_CLIENT_SECRET
         s2s-secret-bulk-scan-orchestrator: S2S_SECRET

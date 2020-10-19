@@ -8,7 +8,7 @@ java:
   ingressHost: ${SERVICE_FQDN}
   devApplicationInsightsInstrumentKey: "f666440f-43c0-4abb-9c20-2ce175a374f0"
   keyVaults:
-    bulk-scan:
+    bulk-scan-v2:
       resourceGroup: bulk-scan
       secrets:
         - idam-client-secret

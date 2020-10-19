@@ -18,7 +18,7 @@ def nonPrSecrets = [
   's2s-${env}': [
     secret('microservicekey-bulk-scan-orchestrator', 'S2S_SECRET')
   ],
-  'bulk-scan-${env}': [
+  'bulk-scan-v2-${env}': [
     secret('idam-users-bulkscan-username', 'IDAM_USER_NAME'),
     secret('idam-users-bulkscan-password', 'IDAM_USER_PASSWORD'),
     secret('idam-client-secret', 'IDAM_CLIENT_SECRET'),
@@ -31,7 +31,7 @@ def prSecrets = [
   's2s-${env}': [
     secret('microservicekey-bulk-scan-orchestrator', 'S2S_SECRET')
   ],
-  'bulk-scan-${env}': [
+  'bulk-scan-v2-${env}': [
     secret('idam-users-bulkscan-username', 'IDAM_USER_NAME'),
     secret('idam-users-bulkscan-password', 'IDAM_USER_PASSWORD'),
     secret('idam-client-secret', 'IDAM_CLIENT_SECRET')
@@ -56,7 +56,7 @@ withPipeline(type, product, component) {
     env.CORE_CASE_DATA_API_URL = 'http://ccd-data-store-api-aat.service.core-compute-aat.internal'
     env.IDAM_API_URL = 'https://idam-api.aat.platform.hmcts.net'
     env.IDAM_CLIENT_REDIRECT_URI = 'https://bulk-scan-orchestrator-aat.service.core-compute-aat.internal/oauth2/callback'
-    env.QUEUE_NAMESPACE = "bulk-scan-servicebus-aat"
+    env.QUEUE_NAMESPACE = "bulk-scan-servicebus-v2-aat"
     env.QUEUE_ENVELOPES_NAME = "envelopes-staging"
     env.QUEUE_PAYMENTS_NAME = "payments-staging"
     env.QUEUE_READ_ACCESS_KEY_NAME = 'ListenSharedAccessKey'

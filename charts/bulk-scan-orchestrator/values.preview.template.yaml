@@ -23,7 +23,7 @@ java:
     PROCESSED_ENVELOPES_QUEUE_WRITE_ACCESS_KEY: "$(SB_ACCESS_KEY)"
     PAYMENTS_QUEUE_WRITE_ACCESS_KEY: "$(SB_ACCESS_KEY)"
   keyVaults:
-    "bulk-scan":
+    "bulk-scan-v2":
       secrets:
         - idam-client-secret
         - s2s-secret-bulk-scan-orchestrator
