@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getCaseDataForField;
 
+@Disabled
 @SpringBootTest
 @ActiveProfiles("nosb")  // no servicebus queue handler registration
 public class AutomaticCaseCreationTest {

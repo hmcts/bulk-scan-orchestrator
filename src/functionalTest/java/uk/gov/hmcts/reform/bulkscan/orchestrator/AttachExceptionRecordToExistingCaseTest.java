@@ -4,6 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -194,6 +195,7 @@ class AttachExceptionRecordToExistingCaseTest {
     }
 
     @Test
+    @Disabled
     public void should_attach_exception_record_to_case_by_legacy_id() throws Exception {
         verifyExceptionRecordAttachesToCase(EXTERNAL_CASE_REFERENCE);
     }
