@@ -61,7 +61,7 @@ java:
     CAN_SEARCH_CASES_BY_ENVELOPE_ID_PUBLICLAW: "false"
   keyVaults:
     bulk-scan-v2:
-      resourceGroup: bulk-scan
+      resourceGroup: bulk-scan-v2
       secrets:
         - idam-client-secret
         - s2s-secret-bulk-scan-orchestrator

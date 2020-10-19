@@ -9,7 +9,7 @@ java:
   devApplicationInsightsInstrumentKey: "f666440f-43c0-4abb-9c20-2ce175a374f0"
   keyVaults:
     bulk-scan-v2:
-      resourceGroup: bulk-scan
+      resourceGroup: bulk-scan-v2
       secrets:
         - idam-client-secret
         - s2s-secret-bulk-scan-orchestrator
