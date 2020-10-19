@@ -112,7 +112,7 @@ class SupplementaryEvidenceTest {
         String legacyId = (String) caseDetails.getData().get("legacyId");
         assertThat(legacyId).isNotEmpty();
 
-        await("The new case can be found by legacy ID, legacyId: " + legacyId )
+        await("The new case can be found by legacy ID, legacyId: " + legacyId)
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(1))
             .until(() -> !ccdApi.getCaseRefsByLegacyId(legacyId, TEST_SERVICE_NAME).isEmpty());
