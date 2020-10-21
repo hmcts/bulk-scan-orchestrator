@@ -86,6 +86,9 @@ public class CreateCaseCallbackService {
         ServiceConfigItem serviceConfigItem = getServiceConfig(request.getCaseDetails()).get();
 
         CaseDetails exceptionRecordData = request.getCaseDetails();
+        log.info("CaseDetails data:{}", exceptionRecordData.getData());
+        log.info("CaseDetails deliveryDate:{}", exceptionRecordData.getData().get("deliveryDate"));
+        log.info("CaseDetails openingDate:{}:", exceptionRecordData.getData().get("openingDate"));
 
         // Extract exception record ID for logging reasons
         String exceptionRecordId = validator.getCaseId(exceptionRecordData).getOrElse("UNKNOWN");
