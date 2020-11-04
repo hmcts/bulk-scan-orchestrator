@@ -18,12 +18,13 @@
     <cve>CVE-2016-6798</cve>
   </suppress>
 
-  <suppress until="2021-01-25">
-    <notes><![CDATA[No fix is available]]></notes>
-    <gav regex="true">^org\.springframework\.security:spring-security-crypto:5\.3\.4\.RELEASE$</gav>
+  <suppress until="2021-03-25">
+    <notes><![CDATA[
+   file name: spring-security-crypto-5.3.5.RELEASE.jar
+   ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring\-security\-crypto@.*$</packageUrl>
     <cve>CVE-2018-1258</cve>
   </suppress>
-
   <suppress until="2021-03-05">
     <notes><![CDATA[
       used in the integration tests.
