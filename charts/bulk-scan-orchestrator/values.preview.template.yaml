@@ -1,10 +1,10 @@
 java:
   secrets:
     SB_ACCESS_KEY:
-      secretRef: servicebus-secret-namespace-{{ .Release.Name }}
+      secretRef: servicebus-secret-namespace-{{ .Release.Name }}-servicebus
       key: primaryKey
     SB_NAMESPACE:
-      secretRef: servicebus-secret-namespace-{{ .Release.Name }}
+      secretRef: servicebus-secret-namespace-{{ .Release.Name }}-servicebus
       key: namespaceName
   environment:
     S2S_URL: "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
