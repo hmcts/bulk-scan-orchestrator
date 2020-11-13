@@ -400,12 +400,16 @@ public class AttachToCaseCallbackService {
 
             Map<String, Object> newCaseData = buildCaseData(newCaseDocuments, targetCaseDocuments);
 
+            final String eventSummary = createEventSummary(theCase, callBackEvent.exceptionRecordId, newCaseDocuments);
+
+            log.info(eventSummary);
+
             ccdApi.attachExceptionRecord(
                 theCase,
                 callBackEvent.idamToken,
                 callBackEvent.userId,
                 newCaseData,
-                createEventSummary(theCase, callBackEvent.exceptionRecordId, newCaseDocuments),
+                eventSummary,
                 ccdStartEvent
             );
 
