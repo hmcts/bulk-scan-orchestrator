@@ -46,11 +46,11 @@ public class SupplementaryEvidenceMapper {
         List<Map<String, Object>> existingEnvelopeReferences,
         Envelope envelope
     ) {
-        log.info("Mapping documents: container {}, zipFileName {}, caseRef {}",
+        log.info(String.format("Mapping documents: container %s, zipFileName %s, caseRef %s",
             envelope.container,
             envelope.zipFileName,
             envelope.caseRef
-        );
+        ));
         List<CcdCollectionElement<EnvelopeReference>> updatedEnvelopeReferences =
             updateEnvelopeReferences(existingEnvelopeReferences, envelope);
 
@@ -104,7 +104,7 @@ public class SupplementaryEvidenceMapper {
         final String docLogs = docs.stream()
             .map(doc -> "uuid: " + doc.uuid + ", dcn: " + doc.controlNumber + ", fileName: " + doc.fileName)
             .collect(joining("; "));
-        log.info("{}: {}", header, docLogs);
+        log.info(String.format("%s: %s", header, docLogs));
     }
 
     private boolean areDuplicates(Document d1, Document d2) {
