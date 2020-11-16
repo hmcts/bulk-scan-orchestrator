@@ -270,7 +270,7 @@ dependencies {
   implementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: '4.7.5'
   implementation group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version:'0.1.0'
 
-  implementation group: 'com.microsoft.azure', name: 'azure-servicebus', version: '3.4.0',{
+  implementation group: 'com.microsoft.azure', name: 'azure-servicebus', version: '3.5.0',{
     exclude group: 'net.minidev', module: 'json-smart' // most up-to-date libraries use v2.* now. this one brings in 1.3
   }
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.3'
