@@ -1,10 +1,13 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.LoggerTestUtil;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.EnvelopeReference;
@@ -40,9 +43,13 @@ class SupplementaryEvidenceMapperTest {
     private SupplementaryEvidenceMapper mapper;
     Instant deliveryDate = Instant.now();
 
+    private ListAppender<ILoggingEvent> loggingEvents;
+
     @BeforeEach
     void setUp() {
         mapper = new SupplementaryEvidenceMapper("http://localhost", "files", envelopeReferenceHelper);
+
+        loggingEvents = LoggerTestUtil.getListAppenderForClass(SupplementaryEvidenceMapper.class);
     }
 
     @Test
@@ -83,6 +90,14 @@ class SupplementaryEvidenceMapperTest {
                 tuple("x.pdf", "xxx", "type_x", "subtype_x", toLocalDateTime(envelopeDocs.get(0).scannedAt), "http://localhost/files/uuidx", toLocalDateTime(envelopeDocs.get(0).deliveryDate)),
                 tuple("y.pdf", "yyy", "type_y", "subtype_y", toLocalDateTime(envelopeDocs.get(1).scannedAt), "http://localhost/files/uuidy", toLocalDateTime(envelopeDocs.get(1).deliveryDate))
             );
+        assertThat(loggingEvents.list)
+            .extracting(ILoggingEvent::getMessage)
+            .containsExactly(
+                "Mapping documents: container bulkscan, zipFileName zip-file-test.zip, caseRef ABC123",
+                "Existing docs: uuid: uuida, dcn: aaa, fileName: a.pdf; uuid: uuidb, dcn: bbb, fileName: b.pdf",
+                "New docs: uuid: uuidx, dcn: xxx, fileName: x.pdf; uuid: uuidy, dcn: yyy, fileName: y.pdf",
+                "Docs to add: uuid: uuidx, dcn: xxx, fileName: x.pdf; uuid: uuidy, dcn: yyy, fileName: y.pdf"
+            );
     }
 
     @Test
@@ -115,6 +130,14 @@ class SupplementaryEvidenceMapperTest {
                 tuple("b.pdf", "http://localhost/files/uuidb"),
                 tuple("b.pdf", "http://localhost/files/uuidxxxxx")
             );
+        assertThat(loggingEvents.list)
+            .extracting(ILoggingEvent::getMessage)
+            .containsExactly(
+                "Mapping documents: container bulkscan, zipFileName zip-file-test.zip, caseRef ABC123",
+                "Existing docs: uuid: uuida, dcn: aaa, fileName: a.pdf; uuid: uuidb, dcn: bbb, fileName: b.pdf",
+                "New docs: uuid: uuida, dcn: aaa1, fileName: a1.pdf; uuid: uuidxxxxx, dcn: bbb1, fileName: b.pdf",
+                "Docs to add: uuid: uuidxxxxx, dcn: bbb1, fileName: b.pdf"
+            );
     }
 
     @SuppressWarnings("unchecked")
@@ -140,6 +163,14 @@ class SupplementaryEvidenceMapperTest {
         assertThat(result.bulkScanEnvelopes)
             .usingRecursiveFieldByFieldElementComparator()
             .isEqualTo(expectedFinalEnvelopeReferences);
+        assertThat(loggingEvents.list)
+            .extracting(ILoggingEvent::getMessage)
+            .containsExactly(
+                "Mapping documents: container bulkscan, zipFileName zip-file-test.zip, caseRef ABC123",
+                "Existing docs: ",
+                "New docs: uuid: uuid1, dcn: control_number_1, fileName: file_1.pdf",
+                "Docs to add: uuid: uuid1, dcn: control_number_1, fileName: file_1.pdf"
+            );
 
         verify(envelopeReferenceHelper).serviceSupportsEnvelopeReferences(envelope.container);
         verify(envelopeReferenceHelper).parseEnvelopeReferences(rawExistingEnvelopeReferences);
@@ -158,6 +189,14 @@ class SupplementaryEvidenceMapperTest {
 
         // then
         assertThat(result.bulkScanEnvelopes).isNull();
+        assertThat(loggingEvents.list)
+            .extracting(ILoggingEvent::getMessage)
+            .containsExactly(
+                "Mapping documents: container bulkscan, zipFileName zip-file-test.zip, caseRef ABC123",
+                "Existing docs: ",
+                "New docs: uuid: uuid1, dcn: control_number_1, fileName: file_1.pdf",
+                "Docs to add: uuid: uuid1, dcn: control_number_1, fileName: file_1.pdf"
+            );
 
         verify(envelopeReferenceHelper).serviceSupportsEnvelopeReferences(envelope.container);
         verify(envelopeReferenceHelper, never()).parseEnvelopeReferences(any());
@@ -190,6 +229,14 @@ class SupplementaryEvidenceMapperTest {
                 tuple("b.pdf", "BBB"),
                 tuple("d.pdf", "DDD")
             );
+        assertThat(loggingEvents.list)
+            .extracting(ILoggingEvent::getMessage)
+            .containsExactly(
+                "Mapping documents: container bulkscan, zipFileName zip-file-test.zip, caseRef ABC123",
+                "Existing docs: uuid: uuida, dcn: AAA, fileName: a.pdf; uuid: uuidb, dcn: BBB, fileName: b.pdf",
+                "New docs: uuid: uuidc, dcn: AAA, fileName: c.pdf; uuid: uuidd, dcn: DDD, fileName: d.pdf",
+                "Docs to add: uuid: uuidd, dcn: DDD, fileName: d.pdf"
+            );
     }
 
     @Test
@@ -207,6 +254,14 @@ class SupplementaryEvidenceMapperTest {
 
         // then
         assertThat(result.scannedDocuments).isEmpty();
+        assertThat(loggingEvents.list)
+            .extracting(ILoggingEvent::getMessage)
+            .containsExactly(
+                "Mapping documents: container bulkscan, zipFileName zip-file-test.zip, caseRef ABC123",
+                "Existing docs: ",
+                "New docs: ",
+                "Docs to add: "
+            );
     }
 
     private List<CcdCollectionElement<EnvelopeReference>> getExpectedEnvelopeReferencesAfterUpdate(
