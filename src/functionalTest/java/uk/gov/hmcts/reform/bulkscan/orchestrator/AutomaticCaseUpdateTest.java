@@ -64,6 +64,41 @@ public class AutomaticCaseUpdateTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    void should_update_a_case_with_ocr_values_already_set() throws Exception {
+        //given
+        String docUrl = dmUploadService.uploadToDmStore("Certificate.pdf", "documents/supplementary-evidence.pdf");
+
+        Map<String, Object> ocrFields = new HashMap<>();
+        // the values are from envelopes/supplementary-evidence-with-ocr-bulkscanauto.json file
+        ocrFields.put("firstName", "value1");
+        ocrFields.put("lastName", "value2");
+        CaseDetails existingCase = ccdCaseCreator.createCase(emptyList(), Instant.now(), ocrFields);
+
+        // when
+        envelopeMessager.sendMessageFromFile(
+            "envelopes/supplementary-evidence-with-ocr-bulkscanauto.json",
+            String.valueOf(existingCase.getId()),
+            null,
+            randomUUID(),
+            docUrl
+        );
+
+        // then
+        await("Case in CCD was updated with data from envelope")
+            .atMost(60, TimeUnit.SECONDS)
+            .pollInterval(Duration.ofSeconds(2))
+            .until(() -> {
+                CaseDetails updatedCaseDetails = ccdApi.getCase(
+                    String.valueOf(existingCase.getId()),
+                    existingCase.getJurisdiction()
+                );
+                var address = (Map<String, String>) updatedCaseDetails.getData().get("address");
+                return address != null && Objects.equals(address.get("country"), "country-from-envelope");
+            });
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     void should_update_a_case_with_ocr_values_set() throws Exception {
         //given
         String docUrl = dmUploadService.uploadToDmStore("Certificate.pdf", "documents/supplementary-evidence.pdf");
@@ -94,6 +129,28 @@ public class AutomaticCaseUpdateTest {
                 );
                 var address = (Map<String, String>) updatedCaseDetails.getData().get("address");
                 return address != null && Objects.equals(address.get("country"), "country-from-envelope");
+            });
+
+        // when
+        envelopeMessager.sendMessageFromFile(
+            "envelopes/supplementary-evidence-with-updated-ocr-bulkscanauto.json",
+            String.valueOf(existingCase.getId()),
+            null,
+            randomUUID(),
+            docUrl
+        );
+
+        // then
+        await("Case in CCD was updated with data from envelope")
+            .atMost(60, TimeUnit.SECONDS)
+            .pollInterval(Duration.ofSeconds(2))
+            .until(() -> {
+                CaseDetails updatedCaseDetails = ccdApi.getCase(
+                    String.valueOf(existingCase.getId()),
+                    existingCase.getJurisdiction()
+                );
+                var address = (Map<String, String>) updatedCaseDetails.getData().get("address");
+                return address != null && Objects.equals(address.get("country"), "updated-country-from-envelope");
             });
     }
 }
