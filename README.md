@@ -6,6 +6,7 @@
 
 ## Purpose
 
+
 The purpose of this application is to:
 - Process envelopes (with scanned documents) received from bulk-scan-processor and update CCD with them, either by
 updating existing cases or by creating exception records (special type of cases that need to be converted into proper
