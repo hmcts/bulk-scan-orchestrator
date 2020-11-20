@@ -131,6 +131,16 @@ service-config:
       jurisdiction: PROBATE
       transformation-url: ${TRANSFORMATION_URL_PROBATE}
       update-url: ${UPDATE_URL_PROBATE}
+      form-type-to-surname-ocr-field-mappings:
+        - formType:  PA1P
+          ocrFields:
+            - deceasedSurname
+        - formType: PA8A
+          ocrFields:
+            - deceasedSurname
+        - formType: PA1A
+          ocrFields:
+            - deceasedSurname
       case-type-ids:
         - GrantOfRepresentation
         - Caveat
