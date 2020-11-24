@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.logging.appinsights.SyntheticHeaders;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,6 @@ import java.util.concurrent.TimeUnit;
 
 import static java.time.Instant.now;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
@@ -92,7 +92,13 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
     @SuppressWarnings("unchecked")
     void should_attach_ocr_data_and_scanned_documents_to_the_case_with_existing_documents() throws Exception {
         //given
-        CaseDetails existingCase = createCaseWithDocument();
+        Document document = createDocument(
+            "original.pdf",
+            "documents/supplementary-evidence.pdf",
+            "evidence.pdf",
+            "142525627"
+        );
+        CaseDetails existingCase = createCaseWithDocuments(document);
         String caseId = String.valueOf(existingCase.getId());
 
         CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-with-ocr-envelope.json");
@@ -112,6 +118,47 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
             .extracting(doc -> tuple(doc.fileName, doc.controlNumber, doc.exceptionReference))
             .containsExactlyInAnyOrder(
                 tuple("evidence.pdf", "142525627", null),
+                tuple("certificate1.pdf", "1545657689", Long.toString(exceptionRecord.getId()))
+            );
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void should_attach_ocr_data_and_scanned_documents_to_the_case_with_sevaral_existing_documents() throws Exception {
+        //given
+        Document document1 = createDocument(
+            "original1.pdf",
+            "documents/supplementary-evidence.pdf",
+            "evidence1.pdf",
+            "142525627"
+        );
+        Document document2 = createDocument(
+            "original2.pdf",
+            "documents/supplementary-evidence.pdf",
+            "evidence2.pdf",
+            "142525628"
+        );
+        CaseDetails existingCase = createCaseWithDocuments(document1, document2);
+        String caseId = String.valueOf(existingCase.getId());
+
+        CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-with-ocr-envelope.json");
+        String ocrCountry = "sample_country"; // country from OCR data in exception record json loaded above
+
+        // when
+        sendAttachRequest(exceptionRecord, caseId);
+
+        // then
+        CaseDetails updatedCase = ccdApi.getCase(caseId, existingCase.getJurisdiction());
+
+        Map<String, String> address = (Map<String, String>) updatedCase.getData().get("address");
+        assertThat(address.get("country")).isEqualTo(ocrCountry);
+        List<ScannedDocument> scannedDocuments = getScannedDocuments(updatedCase);
+        assertThat(scannedDocuments)
+            .as("Scanned document were updated with documents from Exception Record")
+            .extracting(doc -> tuple(doc.fileName, doc.controlNumber, doc.exceptionReference))
+            .containsExactlyInAnyOrder(
+                tuple("evidence1.pdf", "142525627", null),
+                tuple("evidence2.pdf", "142525628", null),
                 tuple("certificate1.pdf", "1545657689", Long.toString(exceptionRecord.getId()))
             );
     }
@@ -188,15 +235,17 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
             .post("/callback/attach_case?ignore-warning=true");
     }
 
-    private CaseDetails createCaseWithDocument() {
-        String dmUrlOriginal = dmUploadService.uploadToDmStore("original.pdf", "documents/supplementary-evidence.pdf");
+    private Document createDocument(String displayName,
+                                    String filePath,
+                                    String fileName,
+                                    String controlNumber) {
+        String dmUrlOriginal = dmUploadService.uploadToDmStore(displayName, filePath);
         String documentUuid = StringUtils.substringAfterLast(dmUrlOriginal, "/");
 
-        return ccdCaseCreator.createCase(
-            singletonList(
-                new Document("evidence.pdf", "142525627", "other", null, Instant.now(), documentUuid, Instant.now())
-            ),
-            Instant.now()
-        );
+        return new Document(fileName, controlNumber, "other", null, Instant.now(), documentUuid, Instant.now());
+    }
+
+    private CaseDetails createCaseWithDocuments(Document... documents) {
+        return ccdCaseCreator.createCase(Arrays.asList(documents), Instant.now());
     }
 }

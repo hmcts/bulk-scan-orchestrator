@@ -86,7 +86,7 @@ public class SupplementaryEvidenceMapper {
         }
     }
 
-    public List<Document> getDocsToAdd(List<Document> existingDocs, List<Document> newDocs) {
+    private List<Document> getDocsToAdd(List<Document> existingDocs, List<Document> newDocs) {
         logDocuments("Existing docs", existingDocs);
         logDocuments("New docs", newDocs);
 
