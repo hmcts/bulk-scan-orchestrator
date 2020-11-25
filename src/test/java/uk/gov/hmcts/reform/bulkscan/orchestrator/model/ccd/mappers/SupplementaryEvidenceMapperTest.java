@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -265,6 +266,7 @@ class SupplementaryEvidenceMapperTest {
     }
 
     @Test
+    @Disabled
     void maps_exclude_existing_documents_with_null_filename() {
         // given
         List<Document> existingDocs =

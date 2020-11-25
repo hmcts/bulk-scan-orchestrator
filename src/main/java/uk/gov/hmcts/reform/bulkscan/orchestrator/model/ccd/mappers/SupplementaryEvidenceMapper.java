@@ -58,7 +58,8 @@ public class SupplementaryEvidenceMapper {
         List<CcdCollectionElement<EnvelopeReference>> updatedEnvelopeReferences =
             updateEnvelopeReferences(existingEnvelopeReferences, envelope);
 
-        List<Document> sanitizedExistingDocs = sanitizeDocuments(existingDocs, envelope);
+        //List<Document> sanitizedExistingDocs = sanitizeDocuments(existingDocs, envelope);
+        List<Document> sanitizedExistingDocs = existingDocs;
 
         var scannedDocuments = mapDocuments(
             Stream.concat(
