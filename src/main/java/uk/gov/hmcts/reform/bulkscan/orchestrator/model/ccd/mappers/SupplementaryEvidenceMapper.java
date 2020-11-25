@@ -19,7 +19,6 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentMapper.mapDocuments;
 
@@ -74,7 +73,7 @@ public class SupplementaryEvidenceMapper {
         return new SupplementaryEvidence(scannedDocuments, updatedEnvelopeReferences);
     }
 
-    private List<Document> sanitizeDocuments(List<Document> docs, Envelope envelope) {
+    /*private List<Document> sanitizeDocuments(List<Document> docs, Envelope envelope) {
         Map<Boolean, List<Document>> splitDocs = docs.stream()
             .collect(partitioningBy(doc -> doc.fileName == null));
 
@@ -92,7 +91,7 @@ public class SupplementaryEvidenceMapper {
         }
 
         return splitDocs.get(false);
-    }
+    }*/
 
     private List<CcdCollectionElement<EnvelopeReference>> updateEnvelopeReferences(
         List<Map<String, Object>> existingEnvelopeReferences,
