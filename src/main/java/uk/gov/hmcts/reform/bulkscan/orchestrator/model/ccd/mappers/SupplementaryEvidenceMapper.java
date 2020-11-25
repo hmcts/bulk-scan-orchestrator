@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentMapper.mapDocuments;
 
@@ -46,18 +47,23 @@ public class SupplementaryEvidenceMapper {
         List<Map<String, Object>> existingEnvelopeReferences,
         Envelope envelope
     ) {
-        log.info(String.format("Mapping documents: container %s, zipFileName %s, caseRef %s",
-            envelope.container,
-            envelope.zipFileName,
-            envelope.caseRef
-        ));
+        log.info(
+            String.format(
+                "Mapping documents: container %s, zipFileName %s, caseRef %s",
+                envelope.container,
+                envelope.zipFileName,
+                envelope.caseRef
+            )
+        );
         List<CcdCollectionElement<EnvelopeReference>> updatedEnvelopeReferences =
             updateEnvelopeReferences(existingEnvelopeReferences, envelope);
 
+        List<Document> sanitizedExistingDocs = sanitizeDocuments(existingDocs, envelope);
+
         var scannedDocuments = mapDocuments(
             Stream.concat(
-                existingDocs.stream(),
-                getDocsToAdd(existingDocs, envelope.documents).stream()
+                sanitizedExistingDocs.stream(),
+                getDocsToAdd(sanitizedExistingDocs, envelope.documents).stream()
             ).collect(toList()),
             documentManagementUrl,
             contextPath,
@@ -65,6 +71,26 @@ public class SupplementaryEvidenceMapper {
         );
 
         return new SupplementaryEvidence(scannedDocuments, updatedEnvelopeReferences);
+    }
+
+    private List<Document> sanitizeDocuments(List<Document> docs, Envelope envelope) {
+        Map<Boolean, List<Document>> splitDocs = docs.stream()
+            .collect(partitioningBy(doc -> doc.fileName == null));
+
+        if (!splitDocs.get(true).isEmpty()) {
+            log.warn(
+                String.format(
+                    "%s of existing documents have been excluded due to null fileName "
+                        + "when processing container %s, zipFileName %s, caseRef %s",
+                    splitDocs.get(true).size(),
+                    envelope.container,
+                    envelope.zipFileName,
+                    envelope.caseRef
+                )
+            );
+        }
+
+        return splitDocs.get(false);
     }
 
     private List<CcdCollectionElement<EnvelopeReference>> updateEnvelopeReferences(

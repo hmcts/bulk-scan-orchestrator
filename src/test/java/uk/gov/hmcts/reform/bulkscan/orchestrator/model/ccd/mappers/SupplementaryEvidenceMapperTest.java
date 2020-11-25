@@ -264,6 +264,54 @@ class SupplementaryEvidenceMapperTest {
             );
     }
 
+    @Test
+    void maps_exclude_existing_documents_with_null_filename() {
+        // given
+        List<Document> existingDocs =
+            asList(
+                new Document(null, null, null, null, now().plusSeconds(1), "uuida", now().minusSeconds(10)),
+                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "uuidb", now().minusSeconds(10))
+            );
+
+        List<Document> envelopeDocs =
+            asList(
+                new Document("x.pdf", "xxx", "type_x", "subtype_x", now().plusSeconds(3), "uuidx", now().minusSeconds(10)),
+                new Document("y.pdf", "yyy", "type_y", "subtype_y", now().plusSeconds(4), "uuidy", now().minusSeconds(10))
+            );
+
+        // when
+        SupplementaryEvidence result = mapper.map(existingDocs, emptyList(), envelope(envelopeDocs, now()));
+
+        // then
+        assertThat(result.evidenceHandled).isEqualTo("No");
+        assertThat(result.scannedDocuments).hasSize(3);
+        assertThat(result.scannedDocuments)
+            .extracting(ccdDoc ->
+                tuple(
+                    ccdDoc.value.fileName,
+                    ccdDoc.value.controlNumber,
+                    ccdDoc.value.type,
+                    ccdDoc.value.subtype,
+                    ccdDoc.value.scannedDate,
+                    ccdDoc.value.url.documentUrl,
+                    ccdDoc.value.deliveryDate
+                ))
+            .containsExactly(
+                tuple("b.pdf", "bbb", "type_b", "subtype_b", toLocalDateTime(existingDocs.get(1).scannedAt), "http://localhost/files/uuidb", toLocalDateTime(existingDocs.get(1).deliveryDate)),
+                tuple("x.pdf", "xxx", "type_x", "subtype_x", toLocalDateTime(envelopeDocs.get(0).scannedAt), "http://localhost/files/uuidx", toLocalDateTime(envelopeDocs.get(0).deliveryDate)),
+                tuple("y.pdf", "yyy", "type_y", "subtype_y", toLocalDateTime(envelopeDocs.get(1).scannedAt), "http://localhost/files/uuidy", toLocalDateTime(envelopeDocs.get(1).deliveryDate))
+            );
+        assertThat(loggingEvents.list)
+            .extracting(ILoggingEvent::getMessage)
+            .containsExactly(
+                "Mapping documents: container bulkscan, zipFileName zip-file-test.zip, caseRef ABC123",
+                "1 of existing documents have been excluded due to null fileName when processing container bulkscan, zipFileName zip-file-test.zip, caseRef ABC123",
+                "Existing docs: uuid: uuidb, dcn: bbb, fileName: b.pdf",
+                "New docs: uuid: uuidx, dcn: xxx, fileName: x.pdf; uuid: uuidy, dcn: yyy, fileName: y.pdf",
+                "Docs to add: uuid: uuidx, dcn: xxx, fileName: x.pdf; uuid: uuidy, dcn: yyy, fileName: y.pdf"
+            );
+    }
+
     private List<CcdCollectionElement<EnvelopeReference>> getExpectedEnvelopeReferencesAfterUpdate(
         List<CcdCollectionElement<EnvelopeReference>> existingEnvelopeReferences,
         String newEnvelopeId
