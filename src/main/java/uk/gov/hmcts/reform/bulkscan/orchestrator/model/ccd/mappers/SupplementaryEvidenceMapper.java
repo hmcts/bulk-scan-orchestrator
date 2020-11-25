@@ -73,26 +73,6 @@ public class SupplementaryEvidenceMapper {
         return new SupplementaryEvidence(scannedDocuments, updatedEnvelopeReferences);
     }
 
-    /*private List<Document> sanitizeDocuments(List<Document> docs, Envelope envelope) {
-        Map<Boolean, List<Document>> splitDocs = docs.stream()
-            .collect(partitioningBy(doc -> doc.fileName == null));
-
-        if (!splitDocs.get(true).isEmpty()) {
-            log.warn(
-                String.format(
-                    "%s of existing documents have been excluded due to null fileName "
-                        + "when processing container %s, zipFileName %s, caseRef %s",
-                    splitDocs.get(true).size(),
-                    envelope.container,
-                    envelope.zipFileName,
-                    envelope.caseRef
-                )
-            );
-        }
-
-        return splitDocs.get(false);
-    }*/
-
     private List<CcdCollectionElement<EnvelopeReference>> updateEnvelopeReferences(
         List<Map<String, Object>> existingEnvelopeReferences,
         Envelope envelope
