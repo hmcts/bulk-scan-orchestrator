@@ -43,6 +43,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 
 @SpringBootTest
 @ActiveProfiles("nosb")
+@SuppressWarnings("checkstyle:LineLength")
 class AttachExceptionRecordWithOcrToExistingCaseTest {
 
     @Value("${test-url}")
@@ -124,7 +125,7 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    void should_attach_ocr_data_and_scanned_documents_to_the_case_with_sevaral_existing_documents() throws Exception {
+    void should_attach_ocr_data_and_scanned_documents_to_the_case_with_several_existing_documents() throws Exception {
         //given
         Document document1 = createDocument(
             "original1.pdf",
@@ -158,6 +159,46 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
             .extracting(doc -> tuple(doc.fileName, doc.controlNumber, doc.exceptionReference))
             .containsExactlyInAnyOrder(
                 tuple("evidence1.pdf", "142525627", null),
+                tuple("evidence2.pdf", "142525628", null),
+                tuple("certificate1.pdf", "1545657689", Long.toString(exceptionRecord.getId()))
+            );
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void should_filter_out_existing_documents_with_null_file_name_when_attaching_ocr_data_and_scanned_documents_to_the_case() throws Exception {
+        //given
+        Document document1 = createDocument(
+            "original1.pdf",
+            "documents/supplementary-evidence.pdf",
+            null,
+            "142525627"
+        );
+        Document document2 = createDocument(
+            "original2.pdf",
+            "documents/supplementary-evidence.pdf",
+            "evidence2.pdf",
+            "142525628"
+        );
+        CaseDetails existingCase = createCaseWithDocuments(document1, document2);
+        String caseId = String.valueOf(existingCase.getId());
+
+        CaseDetails exceptionRecord = createExceptionRecord("envelopes/supplementary-evidence-with-ocr-envelope.json");
+        String ocrCountry = "sample_country"; // country from OCR data in exception record json loaded above
+
+        // when
+        sendAttachRequest(exceptionRecord, caseId);
+
+        // then
+        CaseDetails updatedCase = ccdApi.getCase(caseId, existingCase.getJurisdiction());
+
+        Map<String, String> address = (Map<String, String>) updatedCase.getData().get("address");
+        assertThat(address.get("country")).isEqualTo(ocrCountry);
+        List<ScannedDocument> scannedDocuments = getScannedDocuments(updatedCase);
+        assertThat(scannedDocuments)
+            .as("Scanned document were updated with documents from Exception Record")
+            .extracting(doc -> tuple(doc.fileName, doc.controlNumber, doc.exceptionReference))
+            .containsExactlyInAnyOrder(
                 tuple("evidence2.pdf", "142525628", null),
                 tuple("certificate1.pdf", "1545657689", Long.toString(exceptionRecord.getId()))
             );
