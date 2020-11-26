@@ -128,7 +128,7 @@ public class AutomaticCaseUpdateTest {
                     existingCase.getJurisdiction()
                 );
                 var address = (Map<String, String>) updatedCaseDetails.getData().get("address");
-                return Objects.equals(updatedCaseDetails.getData().get("firstName"), "value1")
+                return Objects.equals(updatedCaseDetails.getData().get("firstName"), "value3")
                     && Objects.equals(updatedCaseDetails.getData().get("lastName"), "value2")
                     && address != null && Objects.equals(address.get("country"), "country-from-envelope");
             });
