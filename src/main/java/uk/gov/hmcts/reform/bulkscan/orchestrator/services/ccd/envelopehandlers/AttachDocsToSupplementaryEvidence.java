@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.Supplementary
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIds;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -25,7 +26,7 @@ class AttachDocsToSupplementaryEvidence {
 
     private static final Logger log = LoggerFactory.getLogger(AttachDocsToSupplementaryEvidence.class);
 
-    public static final String EVENT_SUMMARY = "Attach scanned documents";
+    private static final String EVENT_SUMMARY = "Attach scanned documents";
 
     private final SupplementaryEvidenceMapper mapper;
     private final CcdApi ccdApi;
@@ -66,7 +67,7 @@ class AttachDocsToSupplementaryEvidence {
                     existingCase.getCaseTypeId(),
                     Long.toString(existingCase.getId()),
                     EventIds.ATTACH_SCANNED_DOCS,
-                    startEventResponse -> buildCaseDataContent(envelope, startEventResponse),
+                    startEventResponse -> buildCaseDataContent(envelope, loggingContext, startEventResponse),
                     loggingContext
                 );
 
@@ -80,11 +81,26 @@ class AttachDocsToSupplementaryEvidence {
     }
 
     @SuppressWarnings("unchecked")
-    private CaseDataContent buildCaseDataContent(Envelope envelope, StartEventResponse startEventResponse) {
+    private CaseDataContent buildCaseDataContent(
+        Envelope envelope,
+        String loggingContext,
+        StartEventResponse startEventResponse
+    ) {
         CaseDetails caseDetails = startEventResponse.getCaseDetails();
         var envelopeReferences = (List<Map<String, Object>>)caseDetails.getData().get(BULK_SCAN_ENVELOPES);
 
-        SupplementaryEvidence caseData = mapper.map(getDocuments(caseDetails), envelopeReferences, envelope);
+        final List<Document> existingDocuments = getDocuments(caseDetails);
+        for (Document document : existingDocuments) {
+            if (document.fileName == null || document.uuid == null) {
+                if (document.fileName == null) {
+                    log.error("null fileName of anexisting document. {}", loggingContext);
+                }
+                if (document.uuid == null) {
+                    log.error("null uuid of an existing document. {}", loggingContext);
+                }
+            }
+        }
+        SupplementaryEvidence caseData = mapper.map(existingDocuments, envelopeReferences, envelope);
 
         return CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
