@@ -178,7 +178,7 @@ class AttachDocsToSupplementaryEvidenceTest {
             caseDataBuilderCaptor.getValue().apply(startEventResponse)
         )
             .isInstanceOf(UnrecoverableErrorException.class)
-            .hasMessageContaining("File name or UUID of an existing document is NULL.");
+            .hasMessageContaining("File name of an existing document is NULL.");
     }
 
     @Test

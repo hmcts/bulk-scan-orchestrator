@@ -92,10 +92,10 @@ class AttachDocsToSupplementaryEvidence {
 
         final List<Document> existingDocuments = getDocuments(caseDetails);
         for (Document document : existingDocuments) {
-            if (document.fileName == null || document.uuid == null) {
+            if (document.fileName == null) {
                 throw new UnrecoverableErrorException(
                     String.format(
-                        "File name or UUID of an existing document is NULL. %s",
+                        "File name of an existing document is NULL. %s",
                         loggingContext
                     )
                 );
