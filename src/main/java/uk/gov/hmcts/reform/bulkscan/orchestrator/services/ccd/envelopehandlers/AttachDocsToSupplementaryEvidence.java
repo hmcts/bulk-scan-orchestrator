@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIds;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.UnrecoverableErrorException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
@@ -92,12 +93,12 @@ class AttachDocsToSupplementaryEvidence {
         final List<Document> existingDocuments = getDocuments(caseDetails);
         for (Document document : existingDocuments) {
             if (document.fileName == null || document.uuid == null) {
-                if (document.fileName == null) {
-                    log.error("null fileName of anexisting document. {}", loggingContext);
-                }
-                if (document.uuid == null) {
-                    log.error("null uuid of an existing document. {}", loggingContext);
-                }
+                throw new UnrecoverableErrorException(
+                    String.format(
+                        "File name or UUID of an existing document is NULL. %s",
+                        loggingContext
+                    )
+                );
             }
         }
         SupplementaryEvidence caseData = mapper.map(existingDocuments, envelopeReferences, envelope);

@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.SupplementaryEvidence
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.SupplementaryEvidenceMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.UnrecoverableErrorException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -27,8 +28,8 @@ import java.util.function.Function;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -126,9 +127,6 @@ class AttachDocsToSupplementaryEvidenceTest {
         // given
         given(ccdApi.authenticateJurisdiction(any())).willReturn(AUTH_DETAILS);
 
-        var supplementaryEvidence = mock(SupplementaryEvidence.class);
-        given(mapper.map(any(), any(), any())).willReturn(supplementaryEvidence);
-
         // and
         List<Map<String, Object>> existingEnvelopeReferences = mock(List.class);
         StartEventResponse startEventResponse = mock(StartEventResponse.class);
@@ -150,9 +148,6 @@ class AttachDocsToSupplementaryEvidenceTest {
         );
         ccdData.put("scannedDocuments", asList(scannedDocuments));
 
-        String eventToken = "token123";
-
-        given(startEventResponse.getToken()).willReturn(eventToken);
         given(startEventResponse.getCaseDetails()).willReturn(caseDetails);
         given(startEventResponse.getCaseDetails().getData()).willReturn(ccdData);
 
@@ -164,7 +159,7 @@ class AttachDocsToSupplementaryEvidenceTest {
         given(mapper.getDocsToAdd(any(), any())).willReturn(envelope.documents);
 
         // when
-        boolean docsAttached = attacher.attach(envelope, caseDetails);
+        attacher.attach(envelope, caseDetails);
 
         // then
         var caseDataBuilderCaptor = ArgumentCaptor.forClass(Function.class);
@@ -179,15 +174,11 @@ class AttachDocsToSupplementaryEvidenceTest {
             anyString()
         );
 
-        var caseDataContent = (CaseDataContent) caseDataBuilderCaptor.getValue().apply(startEventResponse);
-        assertThat(caseDataContent.getEventToken()).isEqualTo(eventToken);
-        assertThat(caseDataContent.getEvent().getId()).isEqualTo(EVENT_TYPE_ID);
-        assertThat(caseDataContent.getEvent().getSummary()).isEqualTo("Attach scanned documents");
-        assertThat(caseDataContent.getData()).isSameAs(supplementaryEvidence);
-        assertThat(docsAttached).isTrue();
-
-        // and
-        verify(mapper).map(anyList(), eq(null), eq(envelope));
+        assertThatThrownBy(() ->
+            caseDataBuilderCaptor.getValue().apply(startEventResponse)
+        )
+            .isInstanceOf(UnrecoverableErrorException.class)
+            .hasMessageContaining("File name or UUID of an existing document is NULL.");
     }
 
     @Test
