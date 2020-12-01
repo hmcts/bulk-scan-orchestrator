@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.pro
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.IProcessedEnvelopeNotifier;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.InvalidMessageException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.MessageProcessingException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.UnrecoverableErrorException;
 
 import java.time.Instant;
 import java.util.Objects;
@@ -94,6 +95,13 @@ public class EnvelopeMessageProcessor {
                 return new MessageProcessingResult(SUCCESS);
             } catch (InvalidMessageException ex) {
                 log.error("Rejected message with ID {}, because it's invalid", message.getMessageId(), ex);
+                return new MessageProcessingResult(UNRECOVERABLE_FAILURE, ex);
+            } catch (UnrecoverableErrorException ex) {
+                log.error(
+                    "Rejected message with ID {}, because unrecoverable error occured",
+                    message.getMessageId(),
+                    ex
+                );
                 return new MessageProcessingResult(UNRECOVERABLE_FAILURE, ex);
             } catch (Exception ex) {
                 logMessageProcessingError(message, envelope, ex);
