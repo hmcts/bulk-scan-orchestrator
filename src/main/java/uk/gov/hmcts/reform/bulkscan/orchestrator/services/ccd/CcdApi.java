@@ -420,7 +420,6 @@ public class CcdApi {
             try {
                 caseDataContentStr = new ObjectMapper().writeValueAsString(caseDataContent);
             } catch (JsonProcessingException ex) {
-                log.error("Error converting to JSON string", ex);
                 caseDataContentStr = "Error";
             }
             log.info(
