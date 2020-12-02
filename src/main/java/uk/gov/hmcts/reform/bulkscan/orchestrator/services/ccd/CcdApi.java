@@ -416,11 +416,11 @@ public class CcdApi {
             );
 
             CaseDataContent caseDataContent = caseDataContentBuilder.apply(eventResponse);
-            String caseDataContentStr;
+            String caseDataContentStr = "Error";
             try {
                 caseDataContentStr = new ObjectMapper().writeValueAsString(caseDataContent);
             } catch (JsonProcessingException ex) {
-                caseDataContentStr = "Error";
+                //
             }
             log.info(
                 "Sending request to CCD. "
