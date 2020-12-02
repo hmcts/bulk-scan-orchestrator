@@ -415,13 +415,6 @@ public class CcdApi {
                 logContext
             );
 
-            CaseDataContent caseDataContent = caseDataContentBuilder.apply(eventResponse);
-            String caseDataContentStr = "Error";
-            try {
-                caseDataContentStr = new ObjectMapper().writeValueAsString(caseDataContent);
-            } catch (JsonProcessingException ex) {
-                //
-            }
             log.info(
                 "Sending request to CCD. "
                     + "User token: {}, "
@@ -430,15 +423,22 @@ public class CcdApi {
                     + "jurisdiction: {} "
                     + "case type Id: {} "
                     + "case ID: {}. "
-                    + "{}",
                 userToken,
                 serviceToken,
                 userId,
                 jurisdiction,
                 caseTypeId,
-                caseId,
-                caseDataContentStr
+                caseId
             );
+
+            CaseDataContent caseDataContent = caseDataContentBuilder.apply(eventResponse);
+            String caseDataContentStr = "Error";
+            try {
+                caseDataContentStr = new ObjectMapper().writeValueAsString(caseDataContent);
+            } catch (JsonProcessingException ex) {
+                //
+            }
+            log.info("Case data content: {}", caseDataContentStr);
 
             feignCcdApi.submitEventForCaseWorker(
                 userToken,
