@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -413,6 +415,32 @@ public class CcdApi {
                 logContext
             );
 
+            CaseDataContent caseDataContent = caseDataContentBuilder.apply(eventResponse);
+            String caseDataContentStr;
+            try {
+                caseDataContentStr = new ObjectMapper().writeValueAsString(caseDataContent);
+            } catch (JsonProcessingException ex) {
+                log.error("Error converting to JSON string", ex);
+                caseDataContentStr = "Error";
+            }
+            log.info(
+                "Sending request to CCD. "
+                    + "User token: {}, "
+                    + "service token: {}, "
+                    + "user Id: {} "
+                    + "jurisdiction: {} "
+                    + "case type Id: {} "
+                    + "case ID: {}. "
+                    + "{}",
+                userToken,
+                serviceToken,
+                userId,
+                jurisdiction,
+                caseTypeId,
+                caseId,
+                caseDataContentStr
+            );
+
             feignCcdApi.submitEventForCaseWorker(
                 userToken,
                 serviceToken,
@@ -421,7 +449,7 @@ public class CcdApi {
                 caseTypeId,
                 caseId,
                 true,
-                caseDataContentBuilder.apply(eventResponse)
+                caseDataContent
             );
 
             log.info(
