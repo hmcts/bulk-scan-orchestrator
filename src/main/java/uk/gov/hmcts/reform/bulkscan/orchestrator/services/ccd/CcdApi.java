@@ -422,7 +422,7 @@ public class CcdApi {
                     + "user Id: {} "
                     + "jurisdiction: {} "
                     + "case type Id: {} "
-                    + "case ID: {}. "
+                    + "case ID: {}. ",
                 userToken,
                 serviceToken,
                 userId,
