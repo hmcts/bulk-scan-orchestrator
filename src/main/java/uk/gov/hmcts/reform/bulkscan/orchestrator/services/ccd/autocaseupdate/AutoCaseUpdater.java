@@ -60,7 +60,7 @@ public class AutoCaseUpdater {
                         ccdApi.updateCase(
                             existingCase.getJurisdiction(),
                             existingCase.getCaseTypeId(),
-                            EventIds.ATTACH_SCANNED_DOCS_WITH_OCR,
+                            EventIds.ATTACH_SCANNED_DOCS,
                             existingCase.getId().toString(),
                             caseDataBuilderProvider.getBuilder(caseUpdateResult.caseDetails.caseData, envelope.id),
                             getLoggingInfo(envelope)

@@ -109,7 +109,7 @@ class AutoCaseUpdaterTest {
             .updateCase(
                 eq(existingCaseDetails.getJurisdiction()),
                 eq(existingCaseDetails.getCaseTypeId()),
-                eq(EventIds.ATTACH_SCANNED_DOCS_WITH_OCR),
+                eq(EventIds.ATTACH_SCANNED_DOCS),
                 eq(existingCaseDetails.getId().toString()),
                 eq(caseDataContentBuilder),
                 anyString()
