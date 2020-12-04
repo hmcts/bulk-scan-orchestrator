@@ -40,7 +40,7 @@ class DocumentMapperTest {
                     doc.type,
                     doc.subtype,
                     toLocalDateTime(doc.scannedAt),
-                    new CcdDocument("https://localhost/files/" + doc.uuid),
+                    new CcdDocument("https://localhost/files/" + doc.uuid, doc.fileName),
                     toLocalDateTime(doc.deliveryDate),
                     null // this should always be null;
                 )

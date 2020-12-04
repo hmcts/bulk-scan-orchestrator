@@ -59,6 +59,50 @@ class ScannedDocumentsHelperTest {
     }
 
     @Test
+    void getDocuments_should_map_document_properties_correctly_if_filename_in_url() throws Exception {
+        CaseDetails caseDetails = getCaseDetails("case-data/single-scanned-doc-filename-in-url.json");
+
+        List<Document> documents = ScannedDocumentsHelper.getDocuments(caseDetails);
+
+        assertThat(documents.size()).isOne();
+        Document document = documents.get(0);
+
+        Document expectedDocument = new Document(
+            "filename2.pdf",
+            "1111001",
+            "Other",
+            null,
+            Instant.parse("2018-12-01T12:34:56.123Z"),
+            "863c495e-d05b-4376-9951-ea489360db6f",
+            Instant.parse("2018-12-02T12:30:56.123Z")
+        );
+
+        assertThat(document).isEqualToComparingFieldByField(expectedDocument);
+    }
+
+    @Test
+    void getDocuments_should_map_document_properties_correctly_if_filename_null() throws Exception {
+        CaseDetails caseDetails = getCaseDetails("case-data/single-scanned-doc-null-filename.json");
+
+        List<Document> documents = ScannedDocumentsHelper.getDocuments(caseDetails);
+
+        assertThat(documents.size()).isOne();
+        Document document = documents.get(0);
+
+        Document expectedDocument = new Document(
+            "filename2.pdf",
+            "1111001",
+            "Other",
+            null,
+            Instant.parse("2018-12-01T12:34:56.123Z"),
+            "863c495e-d05b-4376-9951-ea489360db6f",
+            Instant.parse("2018-12-02T12:30:56.123Z")
+        );
+
+        assertThat(document).isEqualToComparingFieldByField(expectedDocument);
+    }
+
+    @Test
     void should_handle_null_fields_in_document() throws Exception {
         // given
         CaseDetails caseDetails = getCaseDetails("case-data/null-fields-in-doc.json");

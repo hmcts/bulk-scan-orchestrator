@@ -54,7 +54,7 @@ public class ScannedDocumentsHelper {
             return null;
         } else {
             return new Document(
-                doc.fileName,
+                getFileName(doc),
                 doc.controlNumber,
                 doc.type,
                 doc.subtype,
@@ -62,6 +62,18 @@ public class ScannedDocumentsHelper {
                 doc.url == null ? null : StringUtils.substringAfterLast(doc.url.documentUrl, "/"),
                 doc.deliveryDate == null ? null : doc.deliveryDate.atZone(ZoneId.systemDefault()).toInstant()
             );
+        }
+    }
+
+    private static String getFileName(ScannedDocument doc) {
+        if (doc.fileName == null) {
+            if (doc.url == null) {
+                return null;
+            } else {
+                return doc.url.documentFilename;
+            }
+        } else {
+            return doc.fileName;
         }
     }
 }
