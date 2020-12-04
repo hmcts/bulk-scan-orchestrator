@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 
 import com.google.common.collect.ImmutableMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
@@ -21,6 +23,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 
 @Component
 public class CaseDataUpdater {
+
+    private static final Logger log = LoggerFactory.getLogger(CaseDataUpdater.class);
 
     private final EnvelopeReferenceHelper envelopeReferenceHelper;
 
@@ -82,8 +86,26 @@ public class CaseDataUpdater {
                     (List<Map<String, Object>>) caseData.get(BULK_SCAN_ENVELOPES)
                 );
 
+
+        log.info(
+            "Existing bulkscanenvelope ref {}",
+            existingCaseRefs
+                .stream()
+                .map(r -> "(" + r.value.id + " - " + r.value.action + ")")
+                .reduce("", (r1, r2) -> r1 + " " + r2),
+            envelopeId
+        );
+
         var updatedCaseRefs = newArrayList(existingCaseRefs);
         updatedCaseRefs.add(new CcdCollectionElement<>(new EnvelopeReference(envelopeId, caseAction)));
+        log.info(
+            "Updated  bulkscanenvelope ref {}",
+            updatedCaseRefs
+                .stream()
+                .map(r -> "(" + r.value.id + " - " + r.value.action + ")")
+                .reduce("", (r1, r2) -> r1 + " " + r2),
+            envelopeId
+        );
 
         var updatedCaseData = newHashMap(caseData);
         updatedCaseData.put(BULK_SCAN_ENVELOPES, updatedCaseRefs);

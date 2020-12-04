@@ -31,6 +31,7 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.logging.FeignExceptionLogger.debugCcdException;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ServiceCaseFields.BULK_SCAN_CASE_REFERENCE;
 
 @Service
 public class CcdCaseUpdater {
@@ -118,10 +119,11 @@ public class CcdCaseUpdater {
 
             log.info(
                 "Successfully called case update endpoint of service {} to update case with case Id {} "
-                    + "based on exception record ref {}",
+                    + "based on exception record ref {}, BULK_SCAN_CASE_REFERENCE: {}",
                 serviceName,
                 existingCase.getId(),
-                exceptionRecord.id
+                exceptionRecord.id,
+                updateResponse.caseDetails.caseData.get(BULK_SCAN_CASE_REFERENCE)
             );
 
             if (!ignoreWarnings && !updateResponse.warnings.isEmpty()) {
@@ -144,6 +146,13 @@ public class CcdCaseUpdater {
                 final Map<String, Object> finalCaseData;
 
                 if (envelopeReferenceHelper.serviceSupportsEnvelopeReferences(serviceName)) {
+
+                    log.info(
+                        "Service Supports Envelope References, service {}  case Id {}  exception record  {}",
+                        serviceName,
+                        existingCase.getId(),
+                        exceptionRecord.id
+                    );
                     finalCaseData = caseDataUpdater.updateEnvelopeReferences(
                         caseDataAfterDocUpdate,
                         exceptionRecord.envelopeId,
