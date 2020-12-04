@@ -14,11 +14,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.logging.AppInsights;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.envelopehandlers.EnvelopeHandler;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeMessageProcessor;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeProcessingResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.NotificationSendingException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.ProcessedEnvelopeNotifier;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.UnrecoverableErrorException;
 
 import java.nio.charset.Charset;
 import java.util.UUID;
@@ -41,7 +39,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelopeJson;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.EXCEPTION_RECORD;
 
 @ExtendWith(MockitoExtension.class)
@@ -162,41 +159,6 @@ class EnvelopeMessageProcessorTest {
             eq("envelopes"),
             eq(DEAD_LETTER_REASON_PROCESSING_ERROR),
             startsWith(JsonParseException.class.getCanonicalName())
-        );
-
-        verifyNoMoreInteractions(messageReceiver);
-    }
-
-    @Test
-    public void should_dead_letter_the_message_when_unrecoverable_error_exception() throws Exception {
-        // given
-        String envelopeId = UUID.randomUUID().toString();
-        IMessage message = mock(IMessage.class);
-        given(message.getMessageBody()).willReturn(
-            MessageBody.fromBinaryData(ImmutableList.of(envelopeJson(SUPPLEMENTARY_EVIDENCE, "caseRef123", envelopeId)))
-        );
-        given(message.getLockToken()).willReturn(UUID.randomUUID());
-        given(messageReceiver.receive()).willReturn(message);
-        given(envelopeHandler.handleEnvelope(any(Envelope.class), anyLong()))
-            .willThrow(new UnrecoverableErrorException("msg"));
-
-        // when
-        processor.processNextMessage();
-
-        // then
-        verify(messageReceiver).receive();
-
-        verify(messageReceiver).deadLetter(
-            eq(message.getLockToken()),
-            eq(DEAD_LETTER_REASON_PROCESSING_ERROR),
-            eq("msg"),
-            anyMap()
-        );
-        verify(appInsights).trackDeadLetteredMessage(
-            eq(message),
-            eq("envelopes"),
-            eq(DEAD_LETTER_REASON_PROCESSING_ERROR),
-            eq("msg")
         );
 
         verifyNoMoreInteractions(messageReceiver);

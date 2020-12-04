@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIds;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.UnrecoverableErrorException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
@@ -68,7 +67,7 @@ class AttachDocsToSupplementaryEvidence {
                     existingCase.getCaseTypeId(),
                     Long.toString(existingCase.getId()),
                     EventIds.ATTACH_SCANNED_DOCS,
-                    startEventResponse -> buildCaseDataContent(envelope, loggingContext, startEventResponse),
+                    startEventResponse -> buildCaseDataContent(envelope, startEventResponse),
                     loggingContext
                 );
 
@@ -84,7 +83,6 @@ class AttachDocsToSupplementaryEvidence {
     @SuppressWarnings("unchecked")
     private CaseDataContent buildCaseDataContent(
         Envelope envelope,
-        String loggingContext,
         StartEventResponse startEventResponse
     ) {
         CaseDetails caseDetails = startEventResponse.getCaseDetails();
@@ -93,12 +91,7 @@ class AttachDocsToSupplementaryEvidence {
         final List<Document> existingDocuments = getDocuments(caseDetails);
         for (Document document : existingDocuments) {
             if (document.fileName == null) {
-                throw new UnrecoverableErrorException(
-                    String.format(
-                        "File name of an existing document is NULL. %s",
-                        loggingContext
-                    )
-                );
+                log.error("null fileName of existing document");
             }
         }
         SupplementaryEvidence caseData = mapper.map(existingDocuments, envelopeReferences, envelope);
