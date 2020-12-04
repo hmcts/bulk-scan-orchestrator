@@ -8,13 +8,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseFinder;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.PaymentsProcessor;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.UnrecoverableErrorException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -120,20 +118,5 @@ class SupplementaryEvidenceHandlerTest {
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Envelope classification")
             .hasMessageContaining(SUPPLEMENTARY_EVIDENCE.toString());
-    }
-
-    @Test
-    void should_rethrow_unrecoverable_error_exception() {
-        // given
-        Envelope envelope = envelope(SUPPLEMENTARY_EVIDENCE, JURSIDICTION, CASE_REF);
-        given(caseFinder.findCase(envelope)).willReturn(Optional.of(caseDetails));
-        given(evidenceAttacher.attach(envelope, caseDetails)).willThrow(new UnrecoverableErrorException("msg"));
-
-        // when
-        assertThatThrownBy(() ->
-            handler.handle(envelope)
-        )
-            .isInstanceOf(UnrecoverableErrorException.class)
-            .hasMessage("msg");
     }
 }
