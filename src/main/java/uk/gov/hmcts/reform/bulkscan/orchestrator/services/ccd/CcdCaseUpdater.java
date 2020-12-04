@@ -32,6 +32,7 @@ import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ScannedDocumentsHelper.getDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.logging.FeignExceptionLogger.debugCcdException;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ServiceCaseFields.BULK_SCAN_CASE_REFERENCE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ServiceCaseFields.BULK_SCAN_ENVELOPES;
 
 @Service
 public class CcdCaseUpdater {
@@ -153,6 +154,7 @@ public class CcdCaseUpdater {
                         existingCase.getId(),
                         exceptionRecord.id
                     );
+                    caseDataAfterDocUpdate.put(BULK_SCAN_ENVELOPES, existingCase.getData().get(BULK_SCAN_ENVELOPES));
                     finalCaseData = caseDataUpdater.updateEnvelopeReferences(
                         caseDataAfterDocUpdate,
                         exceptionRecord.envelopeId,
