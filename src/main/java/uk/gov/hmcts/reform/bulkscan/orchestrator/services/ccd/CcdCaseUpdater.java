@@ -138,6 +138,7 @@ public class CcdCaseUpdater {
                 return Optional.of(new ErrorsAndWarnings(emptyList(), updateResponse.warnings));
             } else {
                 var caseDataAfterClientUpdate = updateResponse.caseDetails.caseData;
+                caseDataAfterClientUpdate.put(BULK_SCAN_ENVELOPES, existingCase.getData().get(BULK_SCAN_ENVELOPES));
 
                 var caseDataAfterDocUpdate = caseDataUpdater.setExceptionRecordIdToScannedDocuments(
                     exceptionRecord,
@@ -154,7 +155,6 @@ public class CcdCaseUpdater {
                         existingCase.getId(),
                         exceptionRecord.id
                     );
-                    caseDataAfterDocUpdate.put(BULK_SCAN_ENVELOPES, existingCase.getData().get(BULK_SCAN_ENVELOPES));
                     finalCaseData = caseDataUpdater.updateEnvelopeReferences(
                         caseDataAfterDocUpdate,
                         exceptionRecord.envelopeId,
