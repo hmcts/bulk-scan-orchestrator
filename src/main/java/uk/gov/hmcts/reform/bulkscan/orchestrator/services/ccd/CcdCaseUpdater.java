@@ -138,7 +138,6 @@ public class CcdCaseUpdater {
                 return Optional.of(new ErrorsAndWarnings(emptyList(), updateResponse.warnings));
             } else {
                 var caseDataAfterClientUpdate = updateResponse.caseDetails.caseData;
-                caseDataAfterClientUpdate.put(BULK_SCAN_ENVELOPES, existingCase.getData().get(BULK_SCAN_ENVELOPES));
 
                 var caseDataAfterDocUpdate = caseDataUpdater.setExceptionRecordIdToScannedDocuments(
                     exceptionRecord,
@@ -148,6 +147,22 @@ public class CcdCaseUpdater {
                 final Map<String, Object> finalCaseData;
 
                 if (envelopeReferenceHelper.serviceSupportsEnvelopeReferences(serviceName)) {
+
+                    if (existingCase.getData() != null
+                        && existingCase.getData().get(BULK_SCAN_ENVELOPES) != null) {
+
+
+                        log.info(
+                            "ExistingCase.getData().get(BULK_SCAN_ENVELOPES)   {} to update case with case Id {} "
+                                + "based on exception record ref {}",
+                            existingCase.getData().get(BULK_SCAN_ENVELOPES),
+                            existingCase.getId(),
+                            exceptionRecord.id
+                        );
+
+                        caseDataAfterDocUpdate.put(BULK_SCAN_ENVELOPES,
+                            existingCase.getData().get(BULK_SCAN_ENVELOPES));
+                    }
 
                     log.info(
                         "Service Supports Envelope References, service {}  case Id {}  exception record  {}",
