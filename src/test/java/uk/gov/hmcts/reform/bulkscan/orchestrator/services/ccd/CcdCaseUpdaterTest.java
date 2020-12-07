@@ -22,6 +22,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDoc
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataUpdater;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.EnvelopeReference;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.caseupdatedetails.CaseUpdateDetailsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
@@ -46,10 +48,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ServiceCaseFields.BULK_SCAN_ENVELOPES;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
 @SuppressWarnings({"checkstyle:LineLength"})
@@ -130,8 +134,26 @@ class CcdCaseUpdaterTest {
     @Test
     void should_update_envelope_reference_if_its_enabled_for_service() {
         given(envelopeReferenceHelper.serviceSupportsEnvelopeReferences(any())).willReturn(true);
-        given(caseDataUpdater.setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData))
-            .willReturn(caseDataAfterDocExceptionRefUpdate);
+
+        caseUpdateDetails = new CaseUpdateDetails(
+            null,
+            Map.of(
+                "a", "b",
+                BULK_SCAN_ENVELOPES, asList(new CcdCollectionElement<>(
+                    new EnvelopeReference("31231231321", CaseAction.UPDATE))
+                )
+            )
+        );
+        noWarningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
+
+        given(existingCase.getData()).willReturn(Map.of(
+            "a", "b",
+            BULK_SCAN_ENVELOPES, asList(new CcdCollectionElement<>(
+                new EnvelopeReference("31231231321", CaseAction.UPDATE))
+            )
+        ));
+
+        doReturn(caseDataAfterDocExceptionRefUpdate).when(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
 
         given(caseUpdateDataService.getCaseUpdateData(SERVICE_NAME, existingCase, exceptionRecord))
             .willReturn(noWarningsUpdateResponse);
@@ -152,11 +174,7 @@ class CcdCaseUpdaterTest {
 
         // then
         verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
-        verify(caseDataUpdater).updateEnvelopeReferences(
-            caseDataAfterDocExceptionRefUpdate,
-            exceptionRecord.envelopeId,
-            CaseAction.UPDATE
-        );
+
     }
 
     @Test

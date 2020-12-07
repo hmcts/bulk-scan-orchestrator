@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -151,7 +152,6 @@ public class CcdCaseUpdater {
                     if (existingCase.getData() != null
                         && existingCase.getData().get(BULK_SCAN_ENVELOPES) != null) {
 
-
                         log.info(
                             "ExistingCase.getData().get(BULK_SCAN_ENVELOPES)   {} to update case with case Id {} "
                                 + "based on exception record ref {}",
@@ -160,6 +160,7 @@ public class CcdCaseUpdater {
                             exceptionRecord.id
                         );
 
+                        caseDataAfterDocUpdate = new HashMap<>(caseDataAfterDocUpdate);
                         caseDataAfterDocUpdate.put(BULK_SCAN_ENVELOPES,
                             existingCase.getData().get(BULK_SCAN_ENVELOPES));
                     }
