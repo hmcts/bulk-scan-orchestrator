@@ -9,10 +9,13 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIds;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 
+import java.util.HashMap;
+
 import static java.lang.String.format;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate.AutoCaseUpdateResultType.ABANDONED;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate.AutoCaseUpdateResultType.ERROR;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate.AutoCaseUpdateResultType.OK;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ServiceCaseFields.BULK_SCAN_ENVELOPES;
 
 /**
  * Updates a case based on data from envelope (without caseworkers intervention).
@@ -56,13 +59,19 @@ public class AutoCaseUpdater {
                                     existingCase,
                                     envelope
                                 );
+                        var caseDataAfterUpdate = new HashMap<>(
+                            caseUpdateResult.caseDetails.caseData);
+                        if (existingCase.getData().get(BULK_SCAN_ENVELOPES) != null) {
+                            caseDataAfterUpdate.put(BULK_SCAN_ENVELOPES,
+                                existingCase.getData().get(BULK_SCAN_ENVELOPES));
+                        }
 
                         ccdApi.updateCase(
                             existingCase.getJurisdiction(),
                             existingCase.getCaseTypeId(),
                             EventIds.ATTACH_SCANNED_DOCS_WITH_OCR,
                             existingCase.getId().toString(),
-                            caseDataBuilderProvider.getBuilder(caseUpdateResult.caseDetails.caseData, envelope.id),
+                            caseDataBuilderProvider.getBuilder(caseDataAfterUpdate, envelope.id),
                             getLoggingInfo(envelope)
                         );
 
