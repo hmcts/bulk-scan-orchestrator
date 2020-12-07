@@ -20,4 +20,12 @@ public class EnvelopeReference {
         this.id = id;
         this.action = action;
     }
+
+    @Override
+    public String toString() {
+        return "EnvelopeReference{"
+            + "id='" + id + '\''
+            + ", action=" + action
+            + '}';
+    }
 }

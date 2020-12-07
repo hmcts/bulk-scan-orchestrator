@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.EnvelopeReference;
@@ -14,6 +16,7 @@ import static java.util.stream.Collectors.toList;
 
 @Service
 public class EnvelopeReferenceHelper {
+    private static final Logger log = LoggerFactory.getLogger(EnvelopeReferenceHelper.class);
 
     private final ObjectMapper objectMapper;
     private final ServiceConfigProvider serviceConfigProvider;
@@ -41,11 +44,13 @@ public class EnvelopeReferenceHelper {
         List<Map<String, Object>> rawEnvelopeReferences
     ) {
         if (rawEnvelopeReferences == null) {
+            log.info("envelope references NULL");
             return emptyList();
         } else {
             return rawEnvelopeReferences
                 .stream()
                 .map(ref -> objectMapper.convertValue(ref.get("value"), EnvelopeReference.class))
+                .peek(ref -> log.info("existing refs " + ref.id, ref.action))
                 .map(CcdCollectionElement::new)
                 .collect(toList());
         }

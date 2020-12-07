@@ -86,7 +86,7 @@ public class CaseDataUpdater {
                     (List<Map<String, Object>>) caseData.get(BULK_SCAN_ENVELOPES)
                 );
 
-
+        log.info("existingCaseRefs {}", existingCaseRefs);
         log.info(
             "Existing bulkscanenvelope ref {}",
             existingCaseRefs
