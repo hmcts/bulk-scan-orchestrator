@@ -239,16 +239,20 @@ dependencyManagement {
       entry 'bcprov-jdk15on'
     }
     // align with jupiter version
-    dependencySet(group: 'org.mockito', version: '3.6.0') {
+    dependencySet(group: 'org.mockito', version: '3.6.28') {
       entry 'mockito-core'
     }
     // force junit5 deps to use groovy v3 which fixes reflective call errors for java 11
     // rest assured 4.2 -> 4.3 jumps to groovy v3. junit v5.6 still on v2.5
-    dependencySet(group: 'org.codehaus.groovy', version: '3.0.6') {
+    dependencySet(group: 'org.codehaus.groovy', version: '3.0.7') {
       entry 'groovy'
       entry 'groovy-json'
       entry 'groovy-xml'
     }
+    //avoid   CVE-2020-17527
+    dependency group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '9.0.40'
+    //avoid   CVE-2020-17527
+    dependency group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: '9.0.40'
   }
 }
 
@@ -270,7 +274,7 @@ dependencies {
   implementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: '4.7.5'
   implementation group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version:'0.1.0'
 
-  implementation group: 'com.microsoft.azure', name: 'azure-servicebus', version: '3.4.0',{
+  implementation group: 'com.microsoft.azure', name: 'azure-servicebus', version: '3.5.1',{
     exclude group: 'net.minidev', module: 'json-smart' // most up-to-date libraries use v2.* now. this one brings in 1.3
   }
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.3'
