@@ -97,7 +97,10 @@ withPipeline(type, product, component) {
   disableLegacyDeployment()
   enableSlackNotifications(channel)
   enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
-
+  
+  def branchesToSync = ['demo', 'perftest']
+  syncBranchesWithMaster(branchesToSync)
+  
   onPR() {
     loadVaultSecrets(prSecrets)
   }

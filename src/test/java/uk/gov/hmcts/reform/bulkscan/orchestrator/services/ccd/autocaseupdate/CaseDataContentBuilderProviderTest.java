@@ -5,8 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataUpdater;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
@@ -21,15 +19,12 @@ import static org.mockito.Mockito.mock;
 class CaseDataContentBuilderProviderTest {
 
     @Mock Map<String, Object> inputCaseData;
-    @Mock Map<String, Object> caseDataAfterUpdate;
-
-    @Mock CaseDataUpdater caseDataUpdater;
 
     CaseDataContentBuilderProvider caseDataBuilderProvider;
 
     @BeforeEach
     void setUp() {
-        caseDataBuilderProvider = new CaseDataContentBuilderProvider(caseDataUpdater);
+        caseDataBuilderProvider = new CaseDataContentBuilderProvider();
     }
 
     @Test
@@ -42,9 +37,6 @@ class CaseDataContentBuilderProviderTest {
         given(startEventResponse.getEventId()).willReturn(eventId);
         given(startEventResponse.getToken()).willReturn(eventToken);
 
-        given(caseDataUpdater.updateEnvelopeReferences(inputCaseData, envelopeId, CaseAction.UPDATE))
-            .willReturn(caseDataAfterUpdate);
-
         // when
         Function<StartEventResponse, CaseDataContent> builder =
             caseDataBuilderProvider.getBuilder(inputCaseData, envelopeId);
@@ -52,7 +44,7 @@ class CaseDataContentBuilderProviderTest {
         CaseDataContent result = builder.apply(startEventResponse);
 
         // then
-        assertThat(result.getData()).isEqualTo(caseDataAfterUpdate);
+        assertThat(result.getData()).isEqualTo(inputCaseData);
         assertThat(result.getEventToken()).isEqualTo(eventToken);
         assertThat(result.getEvent().getId()).isEqualTo(eventId);
     }

@@ -72,20 +72,21 @@ public class CaseDataUpdater {
 
     @SuppressWarnings("unchecked")
     public Map<String, Object> updateEnvelopeReferences(
-        Map<String, Object> caseData,
+        Map<String, Object> transformedCaseData,
         String envelopeId,
-        CaseAction caseAction
+        CaseAction caseAction,
+        Map<String, Object> existingCaseData
     ) {
         List<CcdCollectionElement<EnvelopeReference>> existingCaseRefs =
             envelopeReferenceHelper
                 .parseEnvelopeReferences(
-                    (List<Map<String, Object>>) caseData.get(BULK_SCAN_ENVELOPES)
+                    (List<Map<String, Object>>) existingCaseData.get(BULK_SCAN_ENVELOPES)
                 );
 
         var updatedCaseRefs = newArrayList(existingCaseRefs);
         updatedCaseRefs.add(new CcdCollectionElement<>(new EnvelopeReference(envelopeId, caseAction)));
 
-        var updatedCaseData = newHashMap(caseData);
+        var updatedCaseData = newHashMap(transformedCaseData);
         updatedCaseData.put(BULK_SCAN_ENVELOPES, updatedCaseRefs);
 
         return updatedCaseData;

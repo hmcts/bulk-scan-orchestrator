@@ -124,7 +124,7 @@ class CcdCaseUpdaterTest {
         assertThat(res).isEmpty();
 
         verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
-        verify(caseDataUpdater, never()).updateEnvelopeReferences(any(), any(), any());
+        verify(caseDataUpdater, never()).updateEnvelopeReferences(any(), any(), any(),  any());
     }
 
     @Test
@@ -138,6 +138,9 @@ class CcdCaseUpdaterTest {
         initResponseMockData();
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
+
+        Map<String, Object>  existingCaseData = Map.of();
+        given(existingCase.getData()).willReturn(existingCaseData);
 
         // when
         ccdCaseUpdater.updateCase(
@@ -155,7 +158,8 @@ class CcdCaseUpdaterTest {
         verify(caseDataUpdater).updateEnvelopeReferences(
             caseDataAfterDocExceptionRefUpdate,
             exceptionRecord.envelopeId,
-            CaseAction.UPDATE
+            CaseAction.UPDATE,
+            existingCaseData
         );
     }
 
