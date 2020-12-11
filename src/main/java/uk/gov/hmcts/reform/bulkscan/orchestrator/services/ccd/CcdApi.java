@@ -301,7 +301,13 @@ public class CcdApi {
             removeFromIdamCacheIfAuthProblem(e.status(), jurisdiction);
 
             throw new CcdCallException(
-                String.format("Could not attach documents for case ref: %s Error: %s", caseRef, e.status()), e
+                String.format(
+                    "Could not attach documents for case ref: %s Error: %s, CCD response: %s",
+                    caseRef,
+                    e.status(),
+                    e.contentUTF8()
+                ),
+                e
             );
         }
     }
