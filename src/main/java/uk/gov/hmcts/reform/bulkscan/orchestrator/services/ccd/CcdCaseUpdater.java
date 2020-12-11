@@ -147,7 +147,8 @@ public class CcdCaseUpdater {
                     finalCaseData = caseDataUpdater.updateEnvelopeReferences(
                         caseDataAfterDocUpdate,
                         exceptionRecord.envelopeId,
-                        CaseAction.UPDATE
+                        CaseAction.UPDATE,
+                        existingCase.getData()
                     );
                 } else {
                     finalCaseData = caseDataAfterDocUpdate;

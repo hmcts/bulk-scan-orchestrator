@@ -89,9 +89,10 @@ class CaseDataUpdaterTest {
     @Test
     void should_update_exception_record_references() throws Exception {
         //given
-        var caseDetails = getCaseUpdateDetails("case-data/envelope-refs/with-refs.json");
-        var caseDataBeforeUpdate = caseDetails.caseData;
+        var existingCase = getCaseUpdateDetails("case-data/envelope-refs/with-refs.json");
+        var caseDataBeforeUpdate = existingCase.caseData;
 
+        Map<String, Object> transformedCaseData = Map.of("K_1", "value_x");
         given(envelopeReferenceHelper.parseEnvelopeReferences(any()))
             .willReturn(
                 List.of(
@@ -100,7 +101,8 @@ class CaseDataUpdaterTest {
             );
 
         // when
-        var caseDataAfterUpdate = caseDataUpdater.updateEnvelopeReferences(caseDetails.caseData, "NEW-id", CaseAction.UPDATE);
+        var caseDataAfterUpdate =
+            caseDataUpdater.updateEnvelopeReferences(transformedCaseData, "NEW-id", CaseAction.UPDATE, caseDataBeforeUpdate);
 
         // then
         var refsAfterUpdate = (List<CcdCollectionElement<EnvelopeReference>>) caseDataAfterUpdate.get(BULK_SCAN_ENVELOPES);

@@ -6,6 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataUpdater;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.caseupdatedetails.CaseUpdateDetailsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseFinder;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
@@ -37,12 +39,13 @@ class AutoCaseUpdaterTest {
     @Mock CaseDataContentBuilderProvider caseDataBuilder;
 
     @Mock Function<StartEventResponse, CaseDataContent> caseDataContentBuilder;
+    @Mock CaseDataUpdater caseDataUpdater;
 
     AutoCaseUpdater service;
 
     @BeforeEach
     void setUp() {
-        this.service = new AutoCaseUpdater(caseUpdateDataService, caseFinder, ccdApi, caseDataBuilder);
+        this.service = new AutoCaseUpdater(caseUpdateDataService, caseFinder, ccdApi, caseDataBuilder, caseDataUpdater);
     }
 
     @Test
@@ -89,6 +92,14 @@ class AutoCaseUpdaterTest {
 
         given(caseUpdateDataService.getCaseUpdateData(envelope.container, existingCaseDetails, envelope))
             .willReturn(updateDataResponse);
+
+        given(
+            caseDataUpdater.updateEnvelopeReferences(
+                updateDataResponse.caseDetails.caseData,
+                envelope.id,
+                CaseAction.UPDATE,
+                existingCaseDetails.getData())
+        ).willReturn(updateDataResponse.caseDetails.caseData);
 
         given(caseDataBuilder.getBuilder(updateDataResponse.caseDetails.caseData, envelope.id))
             .willReturn(caseDataContentBuilder);

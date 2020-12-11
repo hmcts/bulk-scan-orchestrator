@@ -3,11 +3,15 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataUpdater;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.caseupdatedetails.CaseUpdateDetailsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseFinder;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIds;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
+
+import java.util.Map;
 
 import static java.lang.String.format;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate.AutoCaseUpdateResultType.ABANDONED;
@@ -27,18 +31,21 @@ public class AutoCaseUpdater {
     private final CcdApi ccdApi;
     private final CaseDataContentBuilderProvider caseDataBuilderProvider;
 
+    private final CaseDataUpdater caseDataUpdater;
     // region constructor
 
     public AutoCaseUpdater(
         CaseUpdateDetailsService caseUpdateDataService,
         CaseFinder caseFinder,
         CcdApi ccdApi,
-        CaseDataContentBuilderProvider caseDataBuilderProvider
+        CaseDataContentBuilderProvider caseDataBuilderProvider,
+        CaseDataUpdater caseDataUpdater
     ) {
         this.caseUpdateDataService = caseUpdateDataService;
         this.caseFinder = caseFinder;
         this.ccdApi = ccdApi;
         this.caseDataBuilderProvider = caseDataBuilderProvider;
+        this.caseDataUpdater = caseDataUpdater;
     }
 
     // endregion
@@ -57,12 +64,20 @@ public class AutoCaseUpdater {
                                     envelope
                                 );
 
+                        Map<String, Object>  updatedCaseData = caseDataUpdater
+                            .updateEnvelopeReferences(
+                                caseUpdateResult.caseDetails.caseData,
+                                envelope.id,
+                                CaseAction.UPDATE,
+                                existingCase.getData()
+                            );
+
                         ccdApi.updateCase(
                             existingCase.getJurisdiction(),
                             existingCase.getCaseTypeId(),
                             EventIds.ATTACH_SCANNED_DOCS_WITH_OCR,
                             existingCase.getId().toString(),
-                            caseDataBuilderProvider.getBuilder(caseUpdateResult.caseDetails.caseData, envelope.id),
+                            caseDataBuilderProvider.getBuilder(updatedCaseData, envelope.id),
                             getLoggingInfo(envelope)
                         );
 
