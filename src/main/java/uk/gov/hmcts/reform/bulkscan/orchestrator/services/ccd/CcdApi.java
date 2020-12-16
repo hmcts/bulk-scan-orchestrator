@@ -302,9 +302,10 @@ public class CcdApi {
 
             throw new CcdCallException(
                 String.format(
-                    "Could not attach documents for case ref: %s Error: %s",
+                    "Could not attach documents for case ref: %s Error: %s, CCD response: %s",
                     caseRef,
-                    e.status()
+                    e.status(),
+                    e.contentUTF8()
                 ),
                 e
             );
