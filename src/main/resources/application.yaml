@@ -221,8 +221,4 @@ logging:
     uk:
       gov:
         hmcts:
-          reform:
-            bulkscan:
-              orchestrator:
-                services:
-                  ccd: ${CCD_API_LOG_LEVEL:DEBUG}
+          reform: ${REFORM_LOG_LEVEL:INFO}
