@@ -234,7 +234,7 @@ public class CcdApi {
                 eventTypeId
             );
 
-            log.debug("---Test Started event in CCD. Event: {}, case type: {}. {}", eventTypeId, caseTypeId, logContext);
+            log.debug("Test Started event in CCD. Event: {}, case type: {}. {}", eventTypeId, caseTypeId, logContext);
             log.info("Started event in CCD. Event: {}, case type: {}. {}", eventTypeId, caseTypeId, logContext);
 
             CaseDataContent caseData = caseDataContentBuilder.apply(eventResponse);
@@ -276,7 +276,7 @@ public class CcdApi {
                 eventTypeId
             );
 
-            log.debug("---Test Started event in CCD. Event: {}, case type: {}. {}", eventTypeId, caseTypeId, logContext);
+            log.debug("Test Started event in CCD. Event: {}, case type: {}. {}", eventTypeId, caseTypeId, logContext);
             log.info("Started event in CCD. Event: {}, case type: {}. {}", eventTypeId, caseTypeId, logContext);
 
             CaseDataContent caseData = caseDataContentBuilder.apply(eventResponse);
