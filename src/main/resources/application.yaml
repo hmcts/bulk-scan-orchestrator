@@ -225,4 +225,4 @@ logging:
             bulkscan:
               orchestrator:
                 services:
-                  ccd: ${CCD_API_LOG_LEVEL:INFO}
+                  ccd: ${CCD_API_LOG_LEVEL:DEBUG}
