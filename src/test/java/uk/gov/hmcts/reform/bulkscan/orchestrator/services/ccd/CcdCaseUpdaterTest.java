@@ -94,8 +94,10 @@ class CcdCaseUpdaterTest {
         caseDataAfterDocExceptionRefUpdate = Map.of("x", "y");
         exceptionRecord = getExceptionRecord();
 
-        noWarningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
-        warningsUpdateResponse = new SuccessfulUpdateResponse(caseUpdateDetails, singletonList("warning1"));
+        noWarningsUpdateResponse =
+            new SuccessfulUpdateResponse(caseUpdateDetails, emptyList());
+        warningsUpdateResponse =
+            new SuccessfulUpdateResponse(caseUpdateDetails, singletonList("warning1"));
 
         given(authTokenGenerator.generate()).willReturn("token");
     }
@@ -103,11 +105,15 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_return_no_error_or_warnings_if_no_warnings_from_updateCase() {
         // given
-        given(caseUpdateDataService.getCaseUpdateData(SERVICE_NAME, existingCase, exceptionRecord))
+        given(caseUpdateDataService.getCaseUpdateData(
+            SERVICE_NAME,
+            existingCase, exceptionRecord
+        ))
             .willReturn(noWarningsUpdateResponse);
         initResponseMockData();
         initMockData();
-        prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
+        prepareMockForSubmissionEventForCaseWorker()
+            .willReturn(CaseDetails.builder().id(1L).build());
 
         // when
         Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
@@ -123,21 +129,36 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(res).isEmpty();
 
-        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
-        verify(caseDataUpdater, never()).updateEnvelopeReferences(any(), any(), any(),  any());
+        verify(caseDataUpdater)
+            .setExceptionRecordIdToScannedDocuments(
+                exceptionRecord,
+                caseUpdateDetails.caseData
+            );
+        verify(caseDataUpdater, never())
+            .updateEnvelopeReferences(any(), any(), any(),  any());
     }
 
     @Test
     void should_update_envelope_reference_if_its_enabled_for_service() {
-        given(envelopeReferenceHelper.serviceSupportsEnvelopeReferences(any())).willReturn(true);
-        given(caseDataUpdater.setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData))
+        given(envelopeReferenceHelper
+            .serviceSupportsEnvelopeReferences(any())).willReturn(true);
+        given(caseDataUpdater
+            .setExceptionRecordIdToScannedDocuments(
+                exceptionRecord,
+                caseUpdateDetails.caseData
+            ))
             .willReturn(caseDataAfterDocExceptionRefUpdate);
 
-        given(caseUpdateDataService.getCaseUpdateData(SERVICE_NAME, existingCase, exceptionRecord))
+        given(caseUpdateDataService.getCaseUpdateData(
+            SERVICE_NAME,
+            existingCase,
+            exceptionRecord
+        ))
             .willReturn(noWarningsUpdateResponse);
         initResponseMockData();
         initMockData();
-        prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
+        prepareMockForSubmissionEventForCaseWorker()
+            .willReturn(CaseDetails.builder().id(1L).build());
 
         Map<String, Object>  existingCaseData = Map.of();
         given(existingCase.getData()).willReturn(existingCaseData);
@@ -154,7 +175,11 @@ class CcdCaseUpdaterTest {
         );
 
         // then
-        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
+        verify(caseDataUpdater).
+            setExceptionRecordIdToScannedDocuments(
+                exceptionRecord,
+                caseUpdateDetails.caseData
+            );
         verify(caseDataUpdater).updateEnvelopeReferences(
             caseDataAfterDocExceptionRefUpdate,
             exceptionRecord.envelopeId,
@@ -166,11 +191,16 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_return_no_error_or_warnings_if_warnings_from_updateCase_and_ignoreWarnings_is_true() {
         // given
-        given(caseUpdateDataService.getCaseUpdateData(SERVICE_NAME, existingCase, exceptionRecord))
+        given(caseUpdateDataService.getCaseUpdateData(
+            SERVICE_NAME,
+            existingCase,
+            exceptionRecord
+        ))
             .willReturn(warningsUpdateResponse);
         initResponseMockData();
         initMockData();
-        prepareMockForSubmissionEventForCaseWorker().willReturn(CaseDetails.builder().id(1L).build());
+        prepareMockForSubmissionEventForCaseWorker()
+            .willReturn(CaseDetails.builder().id(1L).build());
 
         // when
         Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
@@ -186,13 +216,21 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(res).isEmpty();
 
-        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
+        verify(caseDataUpdater)
+            .setExceptionRecordIdToScannedDocuments(
+                exceptionRecord,
+                caseUpdateDetails.caseData
+            );
     }
 
     @Test
     void updateCase_should_return_warnings_if_warnings_from_updateCase_and_ignoreWarnings_is_false() {
         // given
-        given(caseUpdateDataService.getCaseUpdateData(SERVICE_NAME, existingCase, exceptionRecord))
+        given(caseUpdateDataService.getCaseUpdateData(
+            SERVICE_NAME,
+            existingCase,
+            exceptionRecord
+        ))
             .willReturn(warningsUpdateResponse);
         initMockData();
 
@@ -218,11 +256,19 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_handle_conflict_response_from_ccd_api() {
         initResponseMockData();
-        given(caseUpdateDataService.getCaseUpdateData(anyString(), any(CaseDetails.class), any(ExceptionRecord.class)))
+        given(caseUpdateDataService.getCaseUpdateData(
+            anyString(),
+            any(CaseDetails.class),
+            any(ExceptionRecord.class)
+        ))
             .willReturn(noWarningsUpdateResponse);
         initMockData();
         prepareMockForSubmissionEventForCaseWorker()
-            .willThrow(new FeignException.Conflict("Msg", mock(Request.class), "Body".getBytes()));
+            .willThrow(new FeignException.Conflict(
+                "Msg",
+                mock(Request.class),
+                "Body".getBytes()
+            ));
 
         // when
         Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
@@ -238,22 +284,35 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(res).isNotEmpty();
         assertThat(res.get().getErrors()).containsExactlyInAnyOrder(
-            "Failed to update case for " + SERVICE_NAME + " service with case Id " + EXISTING_CASE_ID + " based on exception record " + exceptionRecord.id + " because it has been updated in the meantime"
+            "Failed to update case for " + SERVICE_NAME + " service with case Id "
+                + EXISTING_CASE_ID + " based on exception record "
+                + exceptionRecord.id + " because it has been updated in the meantime"
         );
         assertThat(res.get().getWarnings()).isEmpty();
 
-        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
+        verify(caseDataUpdater)
+            .setExceptionRecordIdToScannedDocuments(
+                exceptionRecord,
+                caseUpdateDetails.caseData
+            );
     }
 
     @Test
     void updateCase_should_handle_feign_exception() {
         // given
         initResponseMockData();
-        given(caseUpdateDataService.getCaseUpdateData(anyString(), any(CaseDetails.class), any(ExceptionRecord.class)))
+        given(caseUpdateDataService.getCaseUpdateData(
+            anyString(),
+            any(CaseDetails.class),
+            any(ExceptionRecord.class)
+        ))
             .willReturn(noWarningsUpdateResponse);
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willThrow(
-            new FeignException.BadRequest("Msg", mock(Request.class), "Body".getBytes())
+            new FeignException.BadRequest(
+                "Msg",
+                mock(Request.class),
+                "Body".getBytes())
         );
 
         // when
@@ -274,22 +333,35 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(callbackException.getMessage())
             .isEqualTo(
-                "Failed to update case for " + SERVICE_NAME + " service with case Id " + EXISTING_CASE_ID + " based on exception record " + exceptionRecord.id);
+                "Failed to update case for " + SERVICE_NAME + " service with case Id "
+                    + EXISTING_CASE_ID + " based on exception record " + exceptionRecord.id);
         assertThat(callbackException.getCause().getMessage()).isEqualTo("Service response: Body");
 
-        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
+        verify(caseDataUpdater)
+            .setExceptionRecordIdToScannedDocuments(
+                exceptionRecord,
+                caseUpdateDetails.caseData
+            );
     }
 
     @Test
     void updateCase_should_handle_feign_unprocessable_entity() {
         // given
         initResponseMockData();
-        given(caseUpdateDataService.getCaseUpdateData(anyString(), any(CaseDetails.class), any(ExceptionRecord.class)))
+        given(caseUpdateDataService.getCaseUpdateData(
+            anyString(),
+            any(CaseDetails.class),
+            any(ExceptionRecord.class)
+        ))
             .willReturn(noWarningsUpdateResponse);
         initMockData();
         prepareMockForSubmissionEventForCaseWorker()
             .willThrow(
-                new FeignException.UnprocessableEntity("Msg", mock(Request.class), "Body".getBytes())
+                new FeignException.UnprocessableEntity(
+                    "Msg",
+                    mock(Request.class),
+                    "Body".getBytes()
+                )
             );
 
         // when
@@ -317,15 +389,24 @@ class CcdCaseUpdaterTest {
                 exceptionRecord.id
             );
 
-        verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
+        verify(caseDataUpdater)
+            .setExceptionRecordIdToScannedDocuments(
+                exceptionRecord,
+                caseUpdateDetails.caseData
+            );
     }
 
     @Test
     void updateCase_should_handle_rest_template_client_exception_for_i_o_exceptions() {
         // given
         given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
-        given(eventResponse.getEventId()).willReturn(EventIds.ATTACH_SCANNED_DOCS_WITH_OCR);
-        given(caseUpdateDataService.getCaseUpdateData(anyString(), any(CaseDetails.class), any(ExceptionRecord.class)))
+        given(eventResponse.getEventId())
+            .willReturn(EventIds.ATTACH_SCANNED_DOCS_WITH_OCR);
+        given(caseUpdateDataService.getCaseUpdateData(
+            anyString(),
+            any(CaseDetails.class),
+            any(ExceptionRecord.class)
+        ))
             .willThrow(new RestClientException("I/O error"));
         initMockData();
 
@@ -361,8 +442,13 @@ class CcdCaseUpdaterTest {
     void updateCase_should_handle_response_validation_exception() {
         // given
         given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
-        given(eventResponse.getEventId()).willReturn(EventIds.ATTACH_SCANNED_DOCS_WITH_OCR);
-        given(caseUpdateDataService.getCaseUpdateData(anyString(), any(CaseDetails.class), any(ExceptionRecord.class)))
+        given(eventResponse.getEventId())
+            .willReturn(EventIds.ATTACH_SCANNED_DOCS_WITH_OCR);
+        given(caseUpdateDataService.getCaseUpdateData(
+            anyString(),
+            any(CaseDetails.class),
+            any(ExceptionRecord.class)
+        ))
             .willThrow(new ConstraintViolationException("validation error message", emptySet()));
         initMockData();
 
@@ -427,12 +513,17 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(callbackException.getMessage())
             .isEqualTo(
-                "Failed to update case for " + SERVICE_NAME + " service with case Id " + EXISTING_CASE_ID + " based on exception record " + exceptionRecord.id);
-        assertThat(callbackException.getCause().getMessage()).isEqualTo("400 bad request message");
-        assertThat(callbackException.getCause() instanceof HttpClientErrorException).isTrue();
+                "Failed to update case for " + SERVICE_NAME + " service with case Id "
+                    + EXISTING_CASE_ID + " based on exception record " + exceptionRecord.id
+            );
+        assertThat(callbackException.getCause().getMessage())
+            .isEqualTo("400 bad request message");
+        assertThat(callbackException.getCause() instanceof HttpClientErrorException)
+            .isTrue();
         assertThat(((HttpClientErrorException) callbackException.getCause()).getStatusText())
             .isEqualTo("bad request message");
-        assertThat(((HttpClientErrorException) callbackException.getCause()).getRawStatusCode()).isEqualTo(400);
+        assertThat(((HttpClientErrorException) callbackException.getCause()).getRawStatusCode())
+            .isEqualTo(400);
 
         verifyNoInteractions(caseDataUpdater);
     }
@@ -459,7 +550,10 @@ class CcdCaseUpdaterTest {
         ))
             .willThrow(unprocessableEntity);
         given(serviceResponseParser.parseResponseBody(unprocessableEntity))
-            .willReturn(new ClientServiceErrorResponse(asList("error1", "error2"), emptyList()));
+            .willReturn(new ClientServiceErrorResponse(
+                asList("error1", "error2"),
+                emptyList()
+            ));
 
         // when
         Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
@@ -492,7 +586,11 @@ class CcdCaseUpdaterTest {
             anyString(),
             anyString()
         ))
-            .willThrow(new FeignException.MethodNotAllowed("Msg", mock(Request.class), "Body".getBytes()));
+            .willThrow(new FeignException.MethodNotAllowed(
+                "Msg",
+                mock(Request.class),
+                "Body".getBytes()
+            ));
 
         // when
         CallbackException callbackException = catchThrowableOfType(
@@ -512,7 +610,10 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(callbackException.getMessage())
             .isEqualTo(
-                "Failed to update case for " + SERVICE_NAME + " service with case Id " + EXISTING_CASE_ID + " based on exception record " + exceptionRecord.id + ". Service response: Body");
+                "Failed to update case for " + SERVICE_NAME + " service with case Id "
+                    + EXISTING_CASE_ID + " based on exception record "
+                    + exceptionRecord.id + ". Service response: Body"
+            );
         assertThat(callbackException.getCause().getMessage()).isEqualTo("Msg");
 
         verifyNoInteractions(caseDataUpdater);
@@ -550,7 +651,9 @@ class CcdCaseUpdaterTest {
         // then
         assertThat(callbackException.getMessage())
             .isEqualTo(
-                "Failed to update case for " + SERVICE_NAME + " service with case Id " + EXISTING_CASE_ID + " based on exception record " + exceptionRecord.id
+                "Failed to update case for " + SERVICE_NAME + " service with case Id "
+                    + EXISTING_CASE_ID + " based on exception record "
+                    + exceptionRecord.id
             );
 
         verifyNoInteractions(caseDataUpdater);
@@ -568,9 +671,11 @@ class CcdCaseUpdaterTest {
             anyString(),
             anyString()
         ))
-            .willThrow(
-                new FeignException.NotFound("case not found", mock(Request.class), "Body".getBytes())
-            );
+            .willThrow(new FeignException.NotFound(
+                "case not found",
+                mock(Request.class),
+                "Body".getBytes()
+            ));
 
         // when
         Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
@@ -585,7 +690,8 @@ class CcdCaseUpdaterTest {
 
         // then
         assertThat(res).isNotEmpty();
-        assertThat(res.get().getErrors()).containsOnly("No case found for case ID: 1234123412341234");
+        assertThat(res.get().getErrors())
+            .containsOnly("No case found for case ID: 1234123412341234");
         assertThat(res.get().getWarnings()).isEmpty();
 
         verifyNoInteractions(caseDataUpdater);
@@ -603,7 +709,11 @@ class CcdCaseUpdaterTest {
             anyString(),
             anyString()
         ))
-            .willThrow(new FeignException.BadRequest("invalid", mock(Request.class), "Body".getBytes()));
+            .willThrow(new FeignException.BadRequest(
+                "invalid",
+                mock(Request.class),
+                "Body".getBytes()
+            ));
 
         // when
         Optional<ErrorsAndWarnings> res = ccdCaseUpdater.updateCase(
@@ -653,7 +763,8 @@ class CcdCaseUpdaterTest {
 
     private void initResponseMockData() {
         given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
-        given(eventResponse.getEventId()).willReturn(EventIds.ATTACH_SCANNED_DOCS_WITH_OCR);
+        given(eventResponse.getEventId())
+            .willReturn(EventIds.ATTACH_SCANNED_DOCS_WITH_OCR);
         given(eventResponse.getToken()).willReturn("token");
     }
 
