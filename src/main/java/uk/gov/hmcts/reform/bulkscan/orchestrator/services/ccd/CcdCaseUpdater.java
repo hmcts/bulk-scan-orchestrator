@@ -15,10 +15,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.caseupdatedetails.CaseUpdateDetailsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.List;
@@ -37,7 +34,7 @@ public class CcdCaseUpdater {
     private static final Logger log = LoggerFactory.getLogger(CcdCaseUpdater.class);
 
     private final AuthTokenGenerator s2sTokenGenerator;
-    private final CoreCaseDataApi coreCaseDataApi;
+    private final CcdApi ccdApi;
     private final CaseUpdateDetailsService caseUpdateDataService;
     private final CaseDataUpdater caseDataUpdater;
     private final EnvelopeReferenceHelper envelopeReferenceHelper;
@@ -45,14 +42,14 @@ public class CcdCaseUpdater {
 
     public CcdCaseUpdater(
         AuthTokenGenerator s2sTokenGenerator,
-        CoreCaseDataApi coreCaseDataApi,
+        CcdApi ccdApi,
         CaseUpdateDetailsService caseUpdateDataService,
         CaseDataUpdater caseDataUpdater,
         EnvelopeReferenceHelper envelopeReferenceHelper,
         ServiceResponseParser serviceResponseParser
     ) {
         this.s2sTokenGenerator = s2sTokenGenerator;
-        this.coreCaseDataApi = coreCaseDataApi;
+        this.ccdApi = ccdApi;
         this.caseUpdateDataService = caseUpdateDataService;
         this.caseDataUpdater = caseDataUpdater;
         this.envelopeReferenceHelper = envelopeReferenceHelper;
@@ -78,14 +75,13 @@ public class CcdCaseUpdater {
         try {
             String s2sToken = s2sTokenGenerator.generate();
 
-            StartEventResponse startEvent = coreCaseDataApi.startEventForCaseWorker(
+            StartEventResponse startEvent = ccdApi.startAttachScannedDocsWithOcr(
                 idamToken,
                 s2sToken,
                 userId,
-                exceptionRecord.poBoxJurisdiction,
-                existingCaseTypeId,
                 existingCaseId,
-                EventIds.ATTACH_SCANNED_DOCS_WITH_OCR
+                exceptionRecord.poBoxJurisdiction,
+                existingCaseTypeId
             );
 
             log.info(
@@ -154,7 +150,7 @@ public class CcdCaseUpdater {
                     finalCaseData = caseDataAfterDocUpdate;
                 }
 
-                updateCaseInCcd(
+                ccdApi.updateCaseInCcd(
                     ignoreWarnings,
                     new CcdRequestCredentials(idamToken, s2sToken, userId),
                     existingCaseId,
@@ -256,85 +252,5 @@ public class CcdCaseUpdater {
             existingCaseId,
             exceptionRecordId
         );
-    }
-
-    /**
-     * Submits event to update the case.
-     */
-    private void updateCaseInCcd(
-        boolean ignoreWarnings,
-        CcdRequestCredentials ccdRequestCredentials,
-        String existingCaseId,
-        ExceptionRecord exceptionRecord,
-        Map<String, Object> caseData,
-        StartEventResponse startEvent
-    ) {
-        CaseDetails existingCase = startEvent.getCaseDetails();
-
-        final CaseDataContent caseDataContent = buildCaseDataContent(exceptionRecord, caseData, startEvent);
-        try {
-            coreCaseDataApi.submitEventForCaseWorker(
-                ccdRequestCredentials.idamToken,
-                ccdRequestCredentials.s2sToken,
-                ccdRequestCredentials.userId,
-                exceptionRecord.poBoxJurisdiction,
-                startEvent.getCaseDetails().getCaseTypeId(),
-                existingCaseId,
-                ignoreWarnings,
-                caseDataContent
-            );
-        } catch (FeignException.UnprocessableEntity exception) {
-            String msg = String.format(
-                "CCD returned 422 Unprocessable Entity response "
-                    + "when trying to update case for %s jurisdiction "
-                    + "with case Id %s "
-                    + "based on exception record with Id %s. "
-                    + "CCD response: %s",
-                exceptionRecord.poBoxJurisdiction,
-                existingCase.getId(),
-                exceptionRecord.id,
-                exception.contentUTF8()
-            );
-            throw new CcdCallException(msg, exception);
-        } catch (FeignException.Conflict exception) {
-            throw exception;
-        } catch (FeignException exception) {
-            debugCcdException(log, exception, "Failed to call 'updateCaseInCcd'");
-            // should service response be removed?
-            String msg = String.format("Service response: %s", exception.contentUTF8());
-            log.error(
-                "Failed to update case for {} jurisdiction "
-                    + "with case Id {} "
-                    + "based on exception record with Id {}. "
-                    + "{}",
-                exceptionRecord.poBoxJurisdiction,
-                existingCase.getId(),
-                exceptionRecord.id,
-                msg,
-                exception
-            );
-
-            throw new RuntimeException(msg);
-        }
-    }
-
-    private CaseDataContent buildCaseDataContent(
-        ExceptionRecord exceptionRecord,
-        Map<String, Object> caseData,
-        StartEventResponse startEvent
-    ) {
-        return CaseDataContent
-            .builder()
-            .caseReference(exceptionRecord.id)
-            .data(caseData)
-            .event(Event
-                .builder()
-                .id(startEvent.getEventId())
-                .summary(String.format("Case updated, case Id %s", startEvent.getCaseDetails().getId()))
-                .description(String.format("Case updated based on exception record ref %s", exceptionRecord.id))
-                .build()
-            )
-            .eventToken(startEvent.getToken())
-            .build();
     }
 }

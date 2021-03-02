@@ -25,8 +25,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.caseupdatedetails.CaseUpdateDetailsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
@@ -44,6 +42,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -65,7 +64,7 @@ class CcdCaseUpdaterTest {
     @Mock private CaseUpdateDetailsService caseUpdateDataService;
     @Mock private ServiceResponseParser serviceResponseParser;
     @Mock private AuthTokenGenerator authTokenGenerator;
-    @Mock private CoreCaseDataApi coreCaseDataApi;
+    @Mock private CcdApi ccdApi;
     @Mock private CaseDetails existingCase;
     @Mock private StartEventResponse eventResponse;
     @Mock private CaseDataUpdater caseDataUpdater;
@@ -83,7 +82,7 @@ class CcdCaseUpdaterTest {
     void setUp() {
         ccdCaseUpdater = new CcdCaseUpdater(
             authTokenGenerator,
-            coreCaseDataApi,
+            ccdApi,
             caseUpdateDataService,
             caseDataUpdater,
             envelopeReferenceHelper,
@@ -253,7 +252,7 @@ class CcdCaseUpdaterTest {
             .willReturn(noWarningsUpdateResponse);
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willThrow(
-            new FeignException.BadRequest("Msg", mock(Request.class), "Body".getBytes())
+            new RuntimeException("Service response: Msg")
         );
 
         // when
@@ -275,7 +274,7 @@ class CcdCaseUpdaterTest {
         assertThat(callbackException.getMessage())
             .isEqualTo(
                 "Failed to update case for " + SERVICE_NAME + " service with case Id " + EXISTING_CASE_ID + " based on exception record " + exceptionRecord.id);
-        assertThat(callbackException.getCause().getMessage()).isEqualTo("Service response: Body");
+        assertThat(callbackException.getCause().getMessage()).isEqualTo("Service response: Msg");
 
         verify(caseDataUpdater).setExceptionRecordIdToScannedDocuments(exceptionRecord, caseUpdateDetails.caseData);
     }
@@ -289,7 +288,8 @@ class CcdCaseUpdaterTest {
         initMockData();
         prepareMockForSubmissionEventForCaseWorker()
             .willThrow(
-                new FeignException.UnprocessableEntity("Msg", mock(Request.class), "Body".getBytes())
+                new CcdCallException("Msg",
+                    new FeignException.UnprocessableEntity("Msg", mock(Request.class), "Body".getBytes()))
             );
 
         // when
@@ -392,8 +392,7 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_handle_bad_request_from_start_event() {
         // given
-        given(coreCaseDataApi.startEventForCaseWorker(
-            anyString(),
+        given(ccdApi.startAttachScannedDocsWithOcr(
             anyString(),
             anyString(),
             anyString(),
@@ -448,8 +447,7 @@ class CcdCaseUpdaterTest {
                 null,
                 null
             );
-        given(coreCaseDataApi.startEventForCaseWorker(
-            anyString(),
+        given(ccdApi.startAttachScannedDocsWithOcr(
             anyString(),
             anyString(),
             anyString(),
@@ -483,8 +481,7 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_handle_feign_exception_from_start_event() {
         // given
-        given(coreCaseDataApi.startEventForCaseWorker(
-            anyString(),
+        given(ccdApi.startAttachScannedDocsWithOcr(
             anyString(),
             anyString(),
             anyString(),
@@ -521,8 +518,7 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_handle_generic_exception() {
         // given
-        given(coreCaseDataApi.startEventForCaseWorker(
-            anyString(),
+        given(ccdApi.startAttachScannedDocsWithOcr(
             anyString(),
             anyString(),
             anyString(),
@@ -559,8 +555,7 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_handle_exception_when_start_event_returns_not_found_response() {
         // given
-        given(coreCaseDataApi.startEventForCaseWorker(
-            anyString(),
+        given(ccdApi.startAttachScannedDocsWithOcr(
             anyString(),
             anyString(),
             anyString(),
@@ -594,8 +589,7 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_handle_exception_when_start_event_returns_invalid_case_id_response() {
         // given
-        given(coreCaseDataApi.startEventForCaseWorker(
-            anyString(),
+        given(ccdApi.startAttachScannedDocsWithOcr(
             anyString(),
             anyString(),
             anyString(),
@@ -625,22 +619,19 @@ class CcdCaseUpdaterTest {
     }
 
     private BDDMyOngoingStubbing<CaseDetails> prepareMockForSubmissionEventForCaseWorker() {
-        return given(coreCaseDataApi.submitEventForCaseWorker(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
+        return given(ccdApi.updateCaseInCcd(
             anyBoolean(),
-            any(CaseDataContent.class)
+            any(CcdRequestCredentials.class),
+            anyString(),
+            any(ExceptionRecord.class),
+            anyMap(),
+            any(StartEventResponse.class)
         ));
     }
 
     private void initMockData() {
         given(eventResponse.getCaseDetails()).willReturn(existingCase);
-        given(coreCaseDataApi.startEventForCaseWorker(
-            anyString(),
+        given(ccdApi.startAttachScannedDocsWithOcr(
             anyString(),
             anyString(),
             anyString(),
@@ -654,7 +645,6 @@ class CcdCaseUpdaterTest {
     private void initResponseMockData() {
         given(existingCase.getCaseTypeId()).willReturn("caseTypeId");
         given(eventResponse.getEventId()).willReturn(EventIds.ATTACH_SCANNED_DOCS_WITH_OCR);
-        given(eventResponse.getToken()).willReturn("token");
     }
 
     private ExceptionRecord getExceptionRecord() {
