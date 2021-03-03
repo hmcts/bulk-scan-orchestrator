@@ -37,6 +37,7 @@ public class CcdCaseUpdater {
     private static final Logger log = LoggerFactory.getLogger(CcdCaseUpdater.class);
 
     private final AuthTokenGenerator s2sTokenGenerator;
+    private final CcdApi ccdApi;
     private final CoreCaseDataApi coreCaseDataApi;
     private final CaseUpdateDetailsService caseUpdateDataService;
     private final CaseDataUpdater caseDataUpdater;
@@ -45,6 +46,7 @@ public class CcdCaseUpdater {
 
     public CcdCaseUpdater(
         AuthTokenGenerator s2sTokenGenerator,
+        CcdApi ccdApi,
         CoreCaseDataApi coreCaseDataApi,
         CaseUpdateDetailsService caseUpdateDataService,
         CaseDataUpdater caseDataUpdater,
@@ -52,6 +54,7 @@ public class CcdCaseUpdater {
         ServiceResponseParser serviceResponseParser
     ) {
         this.s2sTokenGenerator = s2sTokenGenerator;
+        this.ccdApi = ccdApi;
         this.coreCaseDataApi = coreCaseDataApi;
         this.caseUpdateDataService = caseUpdateDataService;
         this.caseDataUpdater = caseDataUpdater;
@@ -78,7 +81,7 @@ public class CcdCaseUpdater {
         try {
             String s2sToken = s2sTokenGenerator.generate();
 
-            StartEventResponse startEvent = coreCaseDataApi.startEventForCaseWorker(
+            StartEventResponse startEvent = ccdApi.startEventForCaseWorker(
                 idamToken,
                 s2sToken,
                 userId,

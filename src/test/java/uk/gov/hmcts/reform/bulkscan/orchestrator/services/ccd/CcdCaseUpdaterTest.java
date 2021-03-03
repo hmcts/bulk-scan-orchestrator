@@ -65,6 +65,7 @@ class CcdCaseUpdaterTest {
     @Mock private CaseUpdateDetailsService caseUpdateDataService;
     @Mock private ServiceResponseParser serviceResponseParser;
     @Mock private AuthTokenGenerator authTokenGenerator;
+    @Mock private CcdApi ccdApi;
     @Mock private CoreCaseDataApi coreCaseDataApi;
     @Mock private CaseDetails existingCase;
     @Mock private StartEventResponse eventResponse;
@@ -83,6 +84,7 @@ class CcdCaseUpdaterTest {
     void setUp() {
         ccdCaseUpdater = new CcdCaseUpdater(
             authTokenGenerator,
+            ccdApi,
             coreCaseDataApi,
             caseUpdateDataService,
             caseDataUpdater,
@@ -478,7 +480,7 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_handle_bad_request_from_start_event() {
         // given
-        given(coreCaseDataApi.startEventForCaseWorker(
+        given(ccdApi.startEventForCaseWorker(
             anyString(),
             anyString(),
             anyString(),
@@ -539,7 +541,7 @@ class CcdCaseUpdaterTest {
                 null,
                 null
             );
-        given(coreCaseDataApi.startEventForCaseWorker(
+        given(ccdApi.startEventForCaseWorker(
             anyString(),
             anyString(),
             anyString(),
@@ -577,7 +579,7 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_handle_feign_exception_from_start_event() {
         // given
-        given(coreCaseDataApi.startEventForCaseWorker(
+        given(ccdApi.startEventForCaseWorker(
             anyString(),
             anyString(),
             anyString(),
@@ -622,7 +624,7 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_handle_generic_exception() {
         // given
-        given(coreCaseDataApi.startEventForCaseWorker(
+        given(ccdApi.startEventForCaseWorker(
             anyString(),
             anyString(),
             anyString(),
@@ -662,7 +664,7 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_handle_exception_when_start_event_returns_not_found_response() {
         // given
-        given(coreCaseDataApi.startEventForCaseWorker(
+        given(ccdApi.startEventForCaseWorker(
             anyString(),
             anyString(),
             anyString(),
@@ -700,7 +702,7 @@ class CcdCaseUpdaterTest {
     @Test
     void updateCase_should_handle_exception_when_start_event_returns_invalid_case_id_response() {
         // given
-        given(coreCaseDataApi.startEventForCaseWorker(
+        given(ccdApi.startEventForCaseWorker(
             anyString(),
             anyString(),
             anyString(),
@@ -749,7 +751,7 @@ class CcdCaseUpdaterTest {
 
     private void initMockData() {
         given(eventResponse.getCaseDetails()).willReturn(existingCase);
-        given(coreCaseDataApi.startEventForCaseWorker(
+        given(ccdApi.startEventForCaseWorker(
             anyString(),
             anyString(),
             anyString(),
