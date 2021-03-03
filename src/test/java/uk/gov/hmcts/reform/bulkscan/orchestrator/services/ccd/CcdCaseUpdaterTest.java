@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.caseupdatedetails.CaseUpdateDetailsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -66,7 +65,6 @@ class CcdCaseUpdaterTest {
     @Mock private ServiceResponseParser serviceResponseParser;
     @Mock private AuthTokenGenerator authTokenGenerator;
     @Mock private CcdApi ccdApi;
-    @Mock private CoreCaseDataApi coreCaseDataApi;
     @Mock private CaseDetails existingCase;
     @Mock private StartEventResponse eventResponse;
     @Mock private CaseDataUpdater caseDataUpdater;
@@ -85,7 +83,6 @@ class CcdCaseUpdaterTest {
         ccdCaseUpdater = new CcdCaseUpdater(
             authTokenGenerator,
             ccdApi,
-            coreCaseDataApi,
             caseUpdateDataService,
             caseDataUpdater,
             envelopeReferenceHelper,
@@ -311,10 +308,7 @@ class CcdCaseUpdaterTest {
             .willReturn(noWarningsUpdateResponse);
         initMockData();
         prepareMockForSubmissionEventForCaseWorker().willThrow(
-            new FeignException.BadRequest(
-                "Msg",
-                mock(Request.class),
-                "Body".getBytes())
+            new RuntimeException("Service response: Body")
         );
 
         // when
@@ -359,10 +353,13 @@ class CcdCaseUpdaterTest {
         initMockData();
         prepareMockForSubmissionEventForCaseWorker()
             .willThrow(
-                new FeignException.UnprocessableEntity(
-                    "Msg",
-                    mock(Request.class),
-                    "Body".getBytes()
+                new CcdCallException(
+                    "ErrMsg",
+                    new FeignException.UnprocessableEntity(
+                        "Msg",
+                        mock(Request.class),
+                        "Body".getBytes()
+                    )
                 )
             );
 
@@ -737,14 +734,13 @@ class CcdCaseUpdaterTest {
     }
 
     private BDDMyOngoingStubbing<CaseDetails> prepareMockForSubmissionEventForCaseWorker() {
-        return given(coreCaseDataApi.submitEventForCaseWorker(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
+        return given(ccdApi.updateCaseInCcd(
             anyBoolean(),
+            anyString(),
+            anyString(),
+            anyString(),
+            any(ExceptionRecord.class),
+            any(CaseDetails.class),
             any(CaseDataContent.class)
         ));
     }
