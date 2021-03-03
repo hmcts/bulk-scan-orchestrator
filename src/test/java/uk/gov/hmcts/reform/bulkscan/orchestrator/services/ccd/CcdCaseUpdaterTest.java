@@ -175,8 +175,8 @@ class CcdCaseUpdaterTest {
         );
 
         // then
-        verify(caseDataUpdater).
-            setExceptionRecordIdToScannedDocuments(
+        verify(caseDataUpdater)
+            .setExceptionRecordIdToScannedDocuments(
                 exceptionRecord,
                 caseUpdateDetails.caseData
             );
