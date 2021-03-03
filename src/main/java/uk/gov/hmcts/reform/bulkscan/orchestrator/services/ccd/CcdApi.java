@@ -473,6 +473,26 @@ public class CcdApi {
         }
     }
 
+    public StartEventResponse startEventForCaseWorker(
+        String idamToken,
+        String serviceToken,
+        String userId,
+        String jurisdiction,
+        String caseTypeId,
+        String caseId,
+        String eventId
+    ) {
+        return feignCcdApi.startEventForCaseWorker(
+            idamToken,
+            serviceToken,
+            userId,
+            jurisdiction,
+            caseTypeId,
+            caseId,
+            eventId
+        );
+    }
+
     private List<Long> searchCases(
         String jurisdiction,
         String caseType,
