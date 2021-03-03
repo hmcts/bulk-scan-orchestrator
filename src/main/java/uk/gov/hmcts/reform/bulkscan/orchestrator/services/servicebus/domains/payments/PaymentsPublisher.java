@@ -25,17 +25,19 @@ public class PaymentsPublisher implements IPaymentsPublisher {
 
     private final QueueClient queueClient;
     private final ObjectMapper objectMapper;
-
     private final int retryCount;
+    private final int retryWait;
 
     public PaymentsPublisher(
         @Qualifier("payments") QueueClient queueClient,
         ObjectMapper objectMapper,
-        @Value("${azure.servicebus.payments.manual-retry-count}") int retryCount
+        @Value("${azure.servicebus.payments.manual-retry-count}") int retryCount,
+        @Value("${azure.servicebus.payments.manual-retry-wait-in-ms}") int retryWait
     ) {
         this.queueClient = queueClient;
         this.objectMapper = objectMapper;
         this.retryCount = retryCount;
+        this.retryWait = retryWait;
     }
 
     @Override
@@ -84,6 +86,7 @@ public class PaymentsPublisher implements IPaymentsPublisher {
                         retryCount,
                         ex
                 );
+                Thread.sleep(retryWait);
                 doSend(message, --retryCount);
             } else {
                 throw ex;
