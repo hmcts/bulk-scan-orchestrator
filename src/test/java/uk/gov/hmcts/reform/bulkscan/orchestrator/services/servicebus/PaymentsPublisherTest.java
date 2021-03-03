@@ -51,7 +51,7 @@ class PaymentsPublisherTest {
 
     @BeforeEach
     void setUp() {
-        paymentsPublisher = new PaymentsPublisher(queueClient, new ObjectMapper(), 2);
+        paymentsPublisher = new PaymentsPublisher(queueClient, new ObjectMapper(), 2, 1000);
     }
 
     @ParameterizedTest
