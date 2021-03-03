@@ -84,6 +84,7 @@ public class PaymentsPublisher implements IPaymentsPublisher {
                         retryCount,
                         ex
                 );
+                Thread.sleep(2000);
                 doSend(message, --retryCount);
             } else {
                 throw ex;

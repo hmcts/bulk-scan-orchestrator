@@ -33,7 +33,7 @@ azure:
       access-key: ${PAYMENTS_QUEUE_WRITE_ACCESS_KEY}
       access-key-name: ${QUEUE_ACCESS_KEY_SEND_NAME}
       queue-name: ${PAYMENTS_QUEUE_NAME}
-      manual-retry-count: 2
+      manual-retry-count: 3
 
 core_case_data:
   api:
