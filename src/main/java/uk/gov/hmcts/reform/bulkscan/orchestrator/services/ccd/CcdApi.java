@@ -61,11 +61,16 @@ public class CcdApi {
     }
 
     @Nonnull
-    StartEventResponse startAttachScannedDocs(CaseDetails theCase, String idamToken, String userId) {
+    StartEventResponse startAttachScannedDocs(
+        CaseDetails theCase,
+        String idamToken,
+        String userId
+    ) {
         String caseRef = String.valueOf(theCase.getId());
         try {
             //TODO We don't need to login here as we just need the service token
-            CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(theCase.getJurisdiction());
+            CcdAuthenticator authenticator =
+                authenticatorFactory.createForJurisdiction(theCase.getJurisdiction());
             StartEventResponse response = feignCcdApi.startEventForCaseWorker(
                 idamToken,
                 authenticator.getServiceToken(),
@@ -90,17 +95,27 @@ public class CcdApi {
         } catch (FeignException e) {
             debugCcdException(log, e, "Failed to call 'startAttachScannedDocs'");
             throw new CcdCallException(
-                format("Internal Error: start event call failed case: %s Error: %s", caseRef, e.status()), e
+                format(
+                    "Internal Error: start event call failed case: %s Error: %s",
+                    caseRef,
+                    e.status()
+                ),
+                e
             );
         }
     }
 
     @Nonnull
     public CaseDetails getCase(String caseRef, String jurisdiction) {
-        CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
+        CcdAuthenticator authenticator =
+            authenticatorFactory.createForJurisdiction(jurisdiction);
 
         try {
-            return feignCcdApi.getCase(authenticator.getUserToken(), authenticator.getServiceToken(), caseRef);
+            return feignCcdApi.getCase(
+                authenticator.getUserToken(),
+                authenticator.getServiceToken(),
+                caseRef
+            );
         } catch (FeignException e) {
             debugCcdException(log, e, "Failed to call 'getCase'");
             removeFromIdamCacheIfAuthProblem(e.status(), jurisdiction);
@@ -139,7 +154,10 @@ public class CcdApi {
         }
     }
 
-    public List<Long> getExceptionRecordRefsByEnvelopeId(String envelopeId, String service) {
+    public List<Long> getExceptionRecordRefsByEnvelopeId(
+        String envelopeId,
+        String service
+    ) {
         return searchCases(
             serviceConfigProvider.getConfig(service).getJurisdiction(),
             format("%s_ExceptionRecord", service.toUpperCase()),
@@ -187,7 +205,8 @@ public class CcdApi {
         String caseTypeId = theCase.getCaseTypeId();
         try {
             //TODO We don't need to login here as we just need the service token
-            CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
+            CcdAuthenticator authenticator =
+                authenticatorFactory.createForJurisdiction(jurisdiction);
             feignCcdApi.submitEventForCaseWorker(
                 idamToken,
                 authenticator.getServiceToken(),
@@ -205,7 +224,11 @@ public class CcdApi {
         } catch (FeignException e) {
             debugCcdException(log, e, "Failed to call 'attachExceptionRecord' - `submitEventForCaseWorker`");
             throw new CcdCallException(
-                format("Internal Error: submitting attach file event failed case: %s Error: %s", caseRef, e.status()),
+                format(
+                    "Internal Error: submitting attach file event failed case: %s Error: %s",
+                    caseRef,
+                    e.status()
+                ),
                 e
             );
         }
@@ -234,7 +257,12 @@ public class CcdApi {
                 eventTypeId
             );
 
-            log.info("Started event in CCD. Event: {}, case type: {}. {}", eventTypeId, caseTypeId, logContext);
+            log.info(
+                "Started event in CCD. Event: {}, case type: {}. {}",
+                eventTypeId,
+                caseTypeId,
+                logContext
+            );
 
             CaseDataContent caseData = caseDataContentBuilder.apply(eventResponse);
 
@@ -318,7 +346,8 @@ public class CcdApi {
         Function<StartEventResponse, CaseDataContent> caseDataContentBuilder,
         String logContext
     ) {
-        CcdAuthenticator ccdAuthenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
+        CcdAuthenticator ccdAuthenticator =
+            authenticatorFactory.createForJurisdiction(jurisdiction);
 
         return createCase(
             ccdAuthenticator.getUserToken(),
@@ -394,7 +423,8 @@ public class CcdApi {
         Function<StartEventResponse, CaseDataContent> caseDataContentBuilder,
         String logContext
     ) {
-        CcdAuthenticator ccdAuthenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
+        CcdAuthenticator ccdAuthenticator =
+            authenticatorFactory.createForJurisdiction(jurisdiction);
 
         String userToken = ccdAuthenticator.getUserToken();
         String serviceToken = ccdAuthenticator.getServiceToken();
@@ -448,7 +478,8 @@ public class CcdApi {
         String caseType,
         String searchString
     ) {
-        CcdAuthenticator authenticator = authenticatorFactory.createForJurisdiction(jurisdiction);
+        CcdAuthenticator authenticator =
+            authenticatorFactory.createForJurisdiction(jurisdiction);
         try {
             var searchResult = feignCcdApi.searchCases(
                 authenticator.getUserToken(),
