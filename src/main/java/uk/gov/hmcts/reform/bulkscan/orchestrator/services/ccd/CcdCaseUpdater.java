@@ -160,7 +160,7 @@ public class CcdCaseUpdater {
                 }
 
                 final CaseDataContent caseDataContent =
-                    buildCaseDataContent(exceptionRecord, finalCaseData, startEvent);
+                    buildCaseDataContent(exceptionRecord.id, finalCaseData, startEvent);
                 ccdApi.updateCaseInCcd(
                     ignoreWarnings,
                     idamToken,
@@ -289,19 +289,19 @@ public class CcdCaseUpdater {
     }
 
     private CaseDataContent buildCaseDataContent(
-        ExceptionRecord exceptionRecord,
+        String exceptionRecordId,
         Map<String, Object> caseData,
         StartEventResponse startEvent
     ) {
         return CaseDataContent
             .builder()
-            .caseReference(exceptionRecord.id)
+            .caseReference(exceptionRecordId)
             .data(caseData)
             .event(Event
                 .builder()
                 .id(startEvent.getEventId())
                 .summary(String.format("Case updated, case Id %s", startEvent.getCaseDetails().getId()))
-                .description(String.format("Case updated based on exception record ref %s", exceptionRecord.id))
+                .description(String.format("Case updated based on exception record ref %s", exceptionRecordId))
                 .build()
             )
             .eventToken(startEvent.getToken())

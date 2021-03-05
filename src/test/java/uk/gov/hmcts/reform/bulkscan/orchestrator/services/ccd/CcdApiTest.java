@@ -186,6 +186,77 @@ class CcdApiTest {
     }
 
     @Test
+    void updateCaseInCcd_should_return_result_from_ccd() {
+        // given
+        final CaseDetails updatedCaseDetails = mock(CaseDetails.class);
+        given(feignCcdApi.submitEventForCaseWorker(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyBoolean(),
+            any(CaseDataContent.class)
+        )).willReturn(updatedCaseDetails);
+        given(caseDetails.getId()).willReturn(1L);
+        given(caseDetails.getCaseTypeId()).willReturn(EXISTING_CASE_TYPE_ID);
+
+        // when
+        CaseDetails res = ccdApi.updateCaseInCcd(
+                true,
+                "idamToken",
+                "serviceToken",
+                "userId",
+                getExceptionRecord(),
+                caseDetails,
+                CaseDataContent.builder().build()
+            );
+
+        // then
+        assertThat(res).isSameAs(updatedCaseDetails);
+    }
+
+    @Test
+    void updateCaseInCcd_should_rethrow_feign_conflict() {
+        // given
+        final FeignException.Conflict conflict = new FeignException.Conflict(
+            "Msg",
+            mock(Request.class),
+            "Body".getBytes()
+        );
+        given(feignCcdApi.submitEventForCaseWorker(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyBoolean(),
+            any(CaseDataContent.class)
+        )).willThrow(conflict);
+        given(caseDetails.getId()).willReturn(1L);
+        given(caseDetails.getCaseTypeId()).willReturn(EXISTING_CASE_TYPE_ID);
+
+        // when
+        FeignException.Conflict exception = catchThrowableOfType(
+            () -> ccdApi.updateCaseInCcd(
+                true,
+                "idamToken",
+                "serviceToken",
+                "userId",
+                getExceptionRecord(),
+                caseDetails,
+                CaseDataContent.builder().build()
+            ),
+            FeignException.Conflict.class
+        );
+
+        // then
+        assertThat(exception).isSameAs(conflict);
+    }
+
+    @Test
     void updateCaseInCcd_should_handle_feign_unprocessable_entity() {
         // given
         given(feignCcdApi.submitEventForCaseWorker(
