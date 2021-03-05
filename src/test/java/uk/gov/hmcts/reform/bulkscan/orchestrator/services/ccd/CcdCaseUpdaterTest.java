@@ -307,9 +307,11 @@ class CcdCaseUpdaterTest {
         ))
             .willReturn(noWarningsUpdateResponse);
         initMockData();
-        prepareMockForSubmissionEventForCaseWorker().willThrow(
-            new RuntimeException("Service response: Body")
-        );
+
+        var ccdException = mock(FeignException.BadRequest.class);
+        final CcdCallException ex =
+            new CcdCallException("Service response: Body", ccdException);
+        prepareMockForSubmissionEventForCaseWorker().willThrow(ex);
 
         // when
         CallbackException callbackException = catchThrowableOfType(
@@ -331,7 +333,7 @@ class CcdCaseUpdaterTest {
             .isEqualTo(
                 "Failed to update case for " + SERVICE_NAME + " service with case Id "
                     + EXISTING_CASE_ID + " based on exception record " + exceptionRecord.id);
-        assertThat(callbackException.getCause().getMessage()).isEqualTo("Service response: Body");
+        assertThat(callbackException.getCause()).isSameAs(ex);
 
         verify(caseDataUpdater)
             .setExceptionRecordIdToScannedDocuments(

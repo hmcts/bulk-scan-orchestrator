@@ -148,6 +148,11 @@ class CcdApiTest {
     @Test
     void updateCaseInCcd_should_handle_feign_exception() {
         // given
+        final FeignException.BadRequest ex = new FeignException.BadRequest(
+            "Msg",
+            mock(Request.class),
+            "Body".getBytes()
+        );
         given(feignCcdApi.submitEventForCaseWorker(
             anyString(),
             anyString(),
@@ -157,18 +162,12 @@ class CcdApiTest {
             anyString(),
             anyBoolean(),
             any(CaseDataContent.class)
-        )).willThrow(
-            new FeignException.BadRequest(
-                "Msg",
-                mock(Request.class),
-                "Body".getBytes()
-            )
-        );
+        )).willThrow(ex);
         given(caseDetails.getId()).willReturn(1L);
         given(caseDetails.getCaseTypeId()).willReturn(EXISTING_CASE_TYPE_ID);
 
         // when
-        RuntimeException exception = catchThrowableOfType(
+        CcdCallException exception = catchThrowableOfType(
             () -> ccdApi.updateCaseInCcd(
                 true,
                 "idamToken",
@@ -178,10 +177,11 @@ class CcdApiTest {
                 caseDetails,
                 CaseDataContent.builder().build()
             ),
-            RuntimeException.class
+            CcdCallException.class
         );
 
         // then
+        assertThat(exception.getCause()).isSameAs(ex);
         assertThat(exception.getMessage()).isEqualTo("Service response: Body");
     }
 

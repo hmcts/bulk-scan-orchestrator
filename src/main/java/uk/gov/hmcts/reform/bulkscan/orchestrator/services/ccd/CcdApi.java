@@ -545,7 +545,7 @@ public class CcdApi {
                 exception
             );
 
-            throw new RuntimeException(msg);
+            throw new CcdCallException(msg, exception);
         }
     }
 
