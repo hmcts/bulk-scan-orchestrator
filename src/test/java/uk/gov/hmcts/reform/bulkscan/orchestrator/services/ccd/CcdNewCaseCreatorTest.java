@@ -103,7 +103,7 @@ class CcdNewCaseCreatorTest {
             .willReturn(expectedTransformationResponse);
 
         given(ccdApi.createCase(
-            anyString(), anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString()
+            any(CcdRequestCredentials.class), anyString(), anyString(), anyString(), any(), anyString()
         )).willReturn(CASE_ID);
 
         ServiceConfigItem configItem = getConfigItem();
@@ -124,16 +124,18 @@ class CcdNewCaseCreatorTest {
             exceptionRecord.formType
         );
 
+        var ccdRequestCredentials = ArgumentCaptor.forClass(CcdRequestCredentials.class);
         verify(ccdApi).createCase(
-            eq(IDAM_TOKEN),
-            eq(s2sToken),
-            eq(USER_ID),
+            ccdRequestCredentials.capture(),
             eq(exceptionRecord.poBoxJurisdiction),
             eq(expectedTransformationResponse.caseCreationDetails.caseTypeId),
             eq(expectedTransformationResponse.caseCreationDetails.eventId),
             any(), // there's a separate test for this argument (case data content builder)
             eq(expectedLogContext)
         );
+        assertThat(ccdRequestCredentials.getValue().idamToken).isEqualTo(IDAM_TOKEN);
+        assertThat(ccdRequestCredentials.getValue().s2sToken).isEqualTo(s2sToken);
+        assertThat(ccdRequestCredentials.getValue().userId).isEqualTo(USER_ID);
     }
 
     @SuppressWarnings("unchecked")
@@ -155,7 +157,14 @@ class CcdNewCaseCreatorTest {
         ccdNewCaseCreator.createNewCase(exceptionRecord, getConfigItem(), true, IDAM_TOKEN, USER_ID);
 
         var caseDetailsBuilderCaptor = ArgumentCaptor.forClass(Function.class);
-        verify(ccdApi).createCase(any(), any(), any(), any(), any(), any(), caseDetailsBuilderCaptor.capture(), any());
+        verify(ccdApi).createCase(
+            any(CcdRequestCredentials.class),
+            any(),
+            any(),
+            any(),
+            caseDetailsBuilderCaptor.capture(),
+            any()
+        );
 
         // then
         assertCaseDataContentBuilderCreatesCorrectResult(

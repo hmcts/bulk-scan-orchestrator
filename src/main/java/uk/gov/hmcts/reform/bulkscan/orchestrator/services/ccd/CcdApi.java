@@ -351,9 +351,11 @@ public class CcdApi {
             authenticatorFactory.createForJurisdiction(jurisdiction);
 
         return createCase(
-            ccdAuthenticator.getUserToken(),
-            ccdAuthenticator.getServiceToken(),
-            ccdAuthenticator.getUserId(),
+            new CcdRequestCredentials(
+                ccdAuthenticator.getUserToken(),
+                ccdAuthenticator.getServiceToken(),
+                ccdAuthenticator.getUserId()
+            ),
             jurisdiction,
             caseTypeId,
             eventId,
@@ -363,9 +365,7 @@ public class CcdApi {
     }
 
     long createCase(
-        String idamToken,
-        String s2sToken,
-        String userId,
+        CcdRequestCredentials ccdRequestCredentials,
         String jurisdiction,
         String caseTypeId,
         String eventId,
@@ -374,9 +374,9 @@ public class CcdApi {
     ) {
         try {
             StartEventResponse eventResponse = feignCcdApi.startForCaseworker(
-                idamToken,
-                s2sToken,
-                userId,
+                ccdRequestCredentials.idamToken,
+                ccdRequestCredentials.s2sToken,
+                ccdRequestCredentials.userId,
                 jurisdiction,
                 caseTypeId,
                 eventId
@@ -390,9 +390,9 @@ public class CcdApi {
             );
 
             long caseId = feignCcdApi.submitForCaseworker(
-                idamToken,
-                s2sToken,
-                userId,
+                ccdRequestCredentials.idamToken,
+                ccdRequestCredentials.s2sToken,
+                ccdRequestCredentials.userId,
                 jurisdiction,
                 caseTypeId,
                 true,
@@ -475,18 +475,16 @@ public class CcdApi {
     }
 
     StartEventResponse startEventForCaseWorker(
-        String idamToken,
-        String serviceToken,
-        String userId,
+        CcdRequestCredentials ccdRequestCredentials,
         String jurisdiction,
         String caseTypeId,
         String caseId,
         String eventId
     ) {
         return feignCcdApi.startEventForCaseWorker(
-            idamToken,
-            serviceToken,
-            userId,
+            ccdRequestCredentials.idamToken,
+            ccdRequestCredentials.s2sToken,
+            ccdRequestCredentials.userId,
             jurisdiction,
             caseTypeId,
             caseId,

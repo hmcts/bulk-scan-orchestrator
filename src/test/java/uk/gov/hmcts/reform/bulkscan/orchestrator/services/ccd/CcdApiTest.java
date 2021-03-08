@@ -83,9 +83,7 @@ class CcdApiTest {
 
         // when
         ccdApi.startEventForCaseWorker(
-            userToken,
-            serviceToken,
-            userId,
+            new CcdRequestCredentials(userToken, serviceToken, userId),
             jurisdiction,
             caseTypeId,
             caseId,
@@ -131,9 +129,7 @@ class CcdApiTest {
         // when
         Throwable exc = catchThrowable(
             () -> ccdApi.startEventForCaseWorker(
-                userToken,
-                serviceToken,
-                userId,
+                new CcdRequestCredentials(userToken, serviceToken, userId),
                 jurisdiction,
                 caseTypeId,
                 caseId,

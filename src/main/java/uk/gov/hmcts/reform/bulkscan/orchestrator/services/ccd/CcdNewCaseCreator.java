@@ -173,9 +173,7 @@ public class CcdNewCaseCreator {
         );
 
         return ccdApi.createCase(
-            ccdRequestCredentials.idamToken,
-            ccdRequestCredentials.s2sToken,
-            ccdRequestCredentials.userId,
+            ccdRequestCredentials,
             exceptionRecord.poBoxJurisdiction,
             caseCreationDetails.caseTypeId,
             // when onboarding remind services to not configure about to submit callback for this event
