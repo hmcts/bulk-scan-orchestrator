@@ -8,36 +8,4 @@
     <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring\-security\-crypto@.*$</packageUrl>
     <cve>CVE-2018-1258</cve>
   </suppress>
-  <suppress until="2021-03-05">
-    <notes><![CDATA[
-      used in the integration tests.
-    ]]></notes>
-    <cpe regex="true">^a:apache:groovy:2\.5\.7$</cpe>
-    <cve>CVE-2016-6497</cve>
-  </suppress>
-
-  <suppress until="2021-02-05">
-    <notes><![CDATA[No fix is available]]></notes>
-    <gav regex="true">^com\.sun\.jersey\.contribs:jersey-apache-client4:1\.19\.1$</gav>
-    <cve>CVE-2006-0550</cve>
-  </suppress>
-
-  <suppress until="2021-02-05">
-    <notes><![CDATA[No fix is available. Used only in functional tests]]></notes>
-    <cpe regex="true">^a:netty:netty:0\.4\.9$</cpe>
-    <cve>CVE-2014-3488</cve>
-    <cve>CVE-2015-2156</cve>
-    <cve>CVE-2019-16869</cve>
-  </suppress>
-
-  <suppress until="2021-03-01">
-    <notes><![CDATA[
-   file name: lang-tag-1.4.4.jar
-   ]]></notes>
-    <packageUrl regex="true">^pkg:maven/com\.nimbusds/lang\-tag@.*$</packageUrl>
-    <cve>CVE-2020-29242</cve>
-    <cve>CVE-2020-29243</cve>
-    <cve>CVE-2020-29244</cve>
-    <cve>CVE-2020-29245</cve>
-  </suppress>
 </suppressions>
