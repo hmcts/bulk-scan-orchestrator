@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.envelopehandlers.UnableToAttachDocumentsException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -491,6 +492,59 @@ public class CcdApi {
             caseId,
             eventId
         );
+    }
+
+    public CaseDetails updateCaseInCcd(
+        boolean ignoreWarnings,
+        CcdRequestCredentials ccdRequestCredentials,
+        ExceptionRecord exceptionRecord,
+        CaseDetails existingCase,
+        CaseDataContent caseDataContent
+    ) {
+        try {
+            return feignCcdApi.submitEventForCaseWorker(
+                ccdRequestCredentials.idamToken,
+                ccdRequestCredentials.s2sToken,
+                ccdRequestCredentials.userId,
+                exceptionRecord.poBoxJurisdiction,
+                existingCase.getCaseTypeId(),
+                String.valueOf(existingCase.getId()),
+                ignoreWarnings,
+                caseDataContent
+            );
+        } catch (FeignException.UnprocessableEntity exception) {
+            String msg = String.format(
+                "CCD returned 422 Unprocessable Entity response "
+                    + "when trying to update case for %s jurisdiction "
+                    + "with case Id %s "
+                    + "based on exception record with Id %s. "
+                    + "CCD response: %s",
+                exceptionRecord.poBoxJurisdiction,
+                existingCase.getId(),
+                exceptionRecord.id,
+                exception.contentUTF8()
+            );
+            throw new CcdCallException(msg, exception);
+        } catch (FeignException.Conflict exception) {
+            throw exception;
+        } catch (FeignException exception) {
+            debugCcdException(log, exception, "Failed to call 'updateCaseInCcd'");
+            // should service response be removed?
+            String msg = String.format("Service response: %s", exception.contentUTF8());
+            log.error(
+                "Failed to update case for {} jurisdiction "
+                    + "with case Id {} "
+                    + "based on exception record with Id {}. "
+                    + "{}",
+                exceptionRecord.poBoxJurisdiction,
+                existingCase.getId(),
+                exceptionRecord.id,
+                msg,
+                exception
+            );
+
+            throw new CcdCallException(msg, exception);
+        }
     }
 
     private List<Long> searchCases(

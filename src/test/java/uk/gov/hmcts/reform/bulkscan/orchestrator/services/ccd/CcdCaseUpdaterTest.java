@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.caseupdatedetails.CaseUpdateDetailsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -66,7 +65,6 @@ class CcdCaseUpdaterTest {
     @Mock private ServiceResponseParser serviceResponseParser;
     @Mock private AuthTokenGenerator authTokenGenerator;
     @Mock private CcdApi ccdApi;
-    @Mock private CoreCaseDataApi coreCaseDataApi;
     @Mock private CaseDetails existingCase;
     @Mock private StartEventResponse eventResponse;
     @Mock private CaseDataUpdater caseDataUpdater;
@@ -85,7 +83,6 @@ class CcdCaseUpdaterTest {
         ccdCaseUpdater = new CcdCaseUpdater(
             authTokenGenerator,
             ccdApi,
-            coreCaseDataApi,
             caseUpdateDataService,
             caseDataUpdater,
             envelopeReferenceHelper,
@@ -310,12 +307,11 @@ class CcdCaseUpdaterTest {
         ))
             .willReturn(noWarningsUpdateResponse);
         initMockData();
-        prepareMockForSubmissionEventForCaseWorker().willThrow(
-            new FeignException.BadRequest(
-                "Msg",
-                mock(Request.class),
-                "Body".getBytes())
-        );
+
+        var ccdException = mock(FeignException.BadRequest.class);
+        final CcdCallException ex =
+            new CcdCallException("Service response: Body", ccdException);
+        prepareMockForSubmissionEventForCaseWorker().willThrow(ex);
 
         // when
         CallbackException callbackException = catchThrowableOfType(
@@ -337,7 +333,7 @@ class CcdCaseUpdaterTest {
             .isEqualTo(
                 "Failed to update case for " + SERVICE_NAME + " service with case Id "
                     + EXISTING_CASE_ID + " based on exception record " + exceptionRecord.id);
-        assertThat(callbackException.getCause().getMessage()).isEqualTo("Service response: Body");
+        assertThat(callbackException.getCause()).isSameAs(ex);
 
         verify(caseDataUpdater)
             .setExceptionRecordIdToScannedDocuments(
@@ -359,10 +355,13 @@ class CcdCaseUpdaterTest {
         initMockData();
         prepareMockForSubmissionEventForCaseWorker()
             .willThrow(
-                new FeignException.UnprocessableEntity(
-                    "Msg",
-                    mock(Request.class),
-                    "Body".getBytes()
+                new CcdCallException(
+                    "ErrMsg",
+                    new FeignException.UnprocessableEntity(
+                        "Msg",
+                        mock(Request.class),
+                        "Body".getBytes()
+                    )
                 )
             );
 
@@ -737,14 +736,11 @@ class CcdCaseUpdaterTest {
     }
 
     private BDDMyOngoingStubbing<CaseDetails> prepareMockForSubmissionEventForCaseWorker() {
-        return given(coreCaseDataApi.submitEventForCaseWorker(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
+        return given(ccdApi.updateCaseInCcd(
             anyBoolean(),
+            any(CcdRequestCredentials.class),
+            any(ExceptionRecord.class),
+            any(CaseDetails.class),
             any(CaseDataContent.class)
         ));
     }
