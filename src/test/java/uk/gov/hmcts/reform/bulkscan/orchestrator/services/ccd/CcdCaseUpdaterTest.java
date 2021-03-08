@@ -738,9 +738,7 @@ class CcdCaseUpdaterTest {
     private BDDMyOngoingStubbing<CaseDetails> prepareMockForSubmissionEventForCaseWorker() {
         return given(ccdApi.updateCaseInCcd(
             anyBoolean(),
-            anyString(),
-            anyString(),
-            anyString(),
+            any(CcdRequestCredentials.class),
             any(ExceptionRecord.class),
             any(CaseDetails.class),
             any(CaseDataContent.class)

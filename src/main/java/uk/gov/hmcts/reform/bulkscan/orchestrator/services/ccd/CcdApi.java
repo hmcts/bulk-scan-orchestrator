@@ -496,18 +496,16 @@ public class CcdApi {
 
     public CaseDetails updateCaseInCcd(
         boolean ignoreWarnings,
-        String idamToken,
-        String serviceToken,
-        String userId,
+        CcdRequestCredentials ccdRequestCredentials,
         ExceptionRecord exceptionRecord,
         CaseDetails existingCase,
         CaseDataContent caseDataContent
     ) {
         try {
             return feignCcdApi.submitEventForCaseWorker(
-                idamToken,
-                serviceToken,
-                userId,
+                ccdRequestCredentials.idamToken,
+                ccdRequestCredentials.s2sToken,
+                ccdRequestCredentials.userId,
                 exceptionRecord.poBoxJurisdiction,
                 existingCase.getCaseTypeId(),
                 String.valueOf(existingCase.getId()),

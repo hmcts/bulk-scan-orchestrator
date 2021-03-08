@@ -170,9 +170,7 @@ class CcdApiTest {
         CcdCallException exception = catchThrowableOfType(
             () -> ccdApi.updateCaseInCcd(
                 true,
-                "idamToken",
-                "serviceToken",
-                "userId",
+                new CcdRequestCredentials("idamToken","serviceToken","userId"),
                 getExceptionRecord(),
                 caseDetails,
                 CaseDataContent.builder().build()
@@ -205,9 +203,7 @@ class CcdApiTest {
         // when
         CaseDetails res = ccdApi.updateCaseInCcd(
                 true,
-                "idamToken",
-                "serviceToken",
-                "userId",
+                new CcdRequestCredentials("idamToken","serviceToken","userId"),
                 getExceptionRecord(),
                 caseDetails,
                 CaseDataContent.builder().build()
@@ -242,9 +238,7 @@ class CcdApiTest {
         FeignException.Conflict exception = catchThrowableOfType(
             () -> ccdApi.updateCaseInCcd(
                 true,
-                "idamToken",
-                "serviceToken",
-                "userId",
+                new CcdRequestCredentials("idamToken","serviceToken","userId"),
                 getExceptionRecord(),
                 caseDetails,
                 CaseDataContent.builder().build()
@@ -284,9 +278,7 @@ class CcdApiTest {
         CcdCallException exception = catchThrowableOfType(
             () -> ccdApi.updateCaseInCcd(
                 true,
-                "idamToken",
-                "serviceToken",
-                "userId",
+                new CcdRequestCredentials("idamToken","serviceToken","userId"),
                 exceptionRecord,
                 caseDetails,
                 CaseDataContent.builder().build()

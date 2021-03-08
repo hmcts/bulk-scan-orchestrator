@@ -163,9 +163,7 @@ public class CcdCaseUpdater {
                     buildCaseDataContent(exceptionRecord.id, finalCaseData, startEvent);
                 ccdApi.updateCaseInCcd(
                     ignoreWarnings,
-                    idamToken,
-                    s2sToken,
-                    userId,
+                    new CcdRequestCredentials(idamToken, s2sToken, userId),
                     exceptionRecord,
                     startEvent.getCaseDetails(),
                     caseDataContent
