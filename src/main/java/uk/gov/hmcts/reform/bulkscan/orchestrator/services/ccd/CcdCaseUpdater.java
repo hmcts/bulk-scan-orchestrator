@@ -78,9 +78,7 @@ public class CcdCaseUpdater {
             String s2sToken = s2sTokenGenerator.generate();
 
             StartEventResponse startEvent = ccdApi.startEventForCaseWorker(
-                idamToken,
-                s2sToken,
-                userId,
+                new CcdRequestCredentials(idamToken, s2sToken, userId),
                 exceptionRecord.poBoxJurisdiction,
                 existingCaseTypeId,
                 existingCaseId,

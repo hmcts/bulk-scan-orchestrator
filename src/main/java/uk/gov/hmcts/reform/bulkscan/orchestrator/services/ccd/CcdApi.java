@@ -38,13 +38,13 @@ public class CcdApi {
 
     public static final Logger log = LoggerFactory.getLogger(CcdApi.class);
 
-    public static final String SEARCH_BY_LEGACY_ID_QUERY_FORMAT =
+    private static final String SEARCH_BY_LEGACY_ID_QUERY_FORMAT =
         "{\"query\": { \"match_phrase\" : { \"alias.previousServiceCaseReference\" : \"%s\" }}}";
 
-    public static final String SEARCH_BY_ENVELOPE_ID_QUERY_FORMAT =
+    private static final String SEARCH_BY_ENVELOPE_ID_QUERY_FORMAT =
         "{\"query\": { \"match_phrase\" : { \"data.envelopeId\" : \"%s\" }}}";
 
-    public static final String SEARCH_BY_BULK_SCAN_CASE_REFERENCE_QUERY_FORMAT =
+    private static final String SEARCH_BY_BULK_SCAN_CASE_REFERENCE_QUERY_FORMAT =
         "{\"query\": { \"match_phrase\" : { \"data.bulkScanCaseReference\" : \"%s\" }}}";
 
     private final CoreCaseDataApi feignCcdApi;
@@ -193,7 +193,7 @@ public class CcdApi {
         );
     }
 
-    public void attachExceptionRecord(
+    void attachExceptionRecord(
         CaseDetails theCase,
         String idamToken,
         String userId,
@@ -351,9 +351,11 @@ public class CcdApi {
             authenticatorFactory.createForJurisdiction(jurisdiction);
 
         return createCase(
-            ccdAuthenticator.getUserToken(),
-            ccdAuthenticator.getServiceToken(),
-            ccdAuthenticator.getUserId(),
+            new CcdRequestCredentials(
+                ccdAuthenticator.getUserToken(),
+                ccdAuthenticator.getServiceToken(),
+                ccdAuthenticator.getUserId()
+            ),
             jurisdiction,
             caseTypeId,
             eventId,
@@ -362,10 +364,8 @@ public class CcdApi {
         );
     }
 
-    public long createCase(
-        String idamToken,
-        String s2sToken,
-        String userId,
+    long createCase(
+        CcdRequestCredentials ccdRequestCredentials,
         String jurisdiction,
         String caseTypeId,
         String eventId,
@@ -374,9 +374,9 @@ public class CcdApi {
     ) {
         try {
             StartEventResponse eventResponse = feignCcdApi.startForCaseworker(
-                idamToken,
-                s2sToken,
-                userId,
+                ccdRequestCredentials.idamToken,
+                ccdRequestCredentials.s2sToken,
+                ccdRequestCredentials.userId,
                 jurisdiction,
                 caseTypeId,
                 eventId
@@ -390,9 +390,9 @@ public class CcdApi {
             );
 
             long caseId = feignCcdApi.submitForCaseworker(
-                idamToken,
-                s2sToken,
-                userId,
+                ccdRequestCredentials.idamToken,
+                ccdRequestCredentials.s2sToken,
+                ccdRequestCredentials.userId,
                 jurisdiction,
                 caseTypeId,
                 true,
@@ -474,19 +474,17 @@ public class CcdApi {
         }
     }
 
-    public StartEventResponse startEventForCaseWorker(
-        String idamToken,
-        String serviceToken,
-        String userId,
+    StartEventResponse startEventForCaseWorker(
+        CcdRequestCredentials ccdRequestCredentials,
         String jurisdiction,
         String caseTypeId,
         String caseId,
         String eventId
     ) {
         return feignCcdApi.startEventForCaseWorker(
-            idamToken,
-            serviceToken,
-            userId,
+            ccdRequestCredentials.idamToken,
+            ccdRequestCredentials.s2sToken,
+            ccdRequestCredentials.userId,
             jurisdiction,
             caseTypeId,
             caseId,
@@ -494,7 +492,7 @@ public class CcdApi {
         );
     }
 
-    public CaseDetails updateCaseInCcd(
+    CaseDetails updateCaseInCcd(
         boolean ignoreWarnings,
         CcdRequestCredentials ccdRequestCredentials,
         ExceptionRecord exceptionRecord,

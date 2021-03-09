@@ -480,9 +480,7 @@ class CcdCaseUpdaterTest {
     void updateCase_should_handle_bad_request_from_start_event() {
         // given
         given(ccdApi.startEventForCaseWorker(
-            anyString(),
-            anyString(),
-            anyString(),
+            any(CcdRequestCredentials.class),
             anyString(),
             anyString(),
             anyString(),
@@ -541,9 +539,7 @@ class CcdCaseUpdaterTest {
                 null
             );
         given(ccdApi.startEventForCaseWorker(
-            anyString(),
-            anyString(),
-            anyString(),
+            any(CcdRequestCredentials.class),
             anyString(),
             anyString(),
             anyString(),
@@ -579,9 +575,7 @@ class CcdCaseUpdaterTest {
     void updateCase_should_handle_feign_exception_from_start_event() {
         // given
         given(ccdApi.startEventForCaseWorker(
-            anyString(),
-            anyString(),
-            anyString(),
+            any(CcdRequestCredentials.class),
             anyString(),
             anyString(),
             anyString(),
@@ -624,9 +618,7 @@ class CcdCaseUpdaterTest {
     void updateCase_should_handle_generic_exception() {
         // given
         given(ccdApi.startEventForCaseWorker(
-            anyString(),
-            anyString(),
-            anyString(),
+            any(CcdRequestCredentials.class),
             anyString(),
             anyString(),
             anyString(),
@@ -664,9 +656,7 @@ class CcdCaseUpdaterTest {
     void updateCase_should_handle_exception_when_start_event_returns_not_found_response() {
         // given
         given(ccdApi.startEventForCaseWorker(
-            anyString(),
-            anyString(),
-            anyString(),
+            any(CcdRequestCredentials.class),
             anyString(),
             anyString(),
             anyString(),
@@ -702,9 +692,7 @@ class CcdCaseUpdaterTest {
     void updateCase_should_handle_exception_when_start_event_returns_invalid_case_id_response() {
         // given
         given(ccdApi.startEventForCaseWorker(
-            anyString(),
-            anyString(),
-            anyString(),
+            any(CcdRequestCredentials.class),
             anyString(),
             anyString(),
             anyString(),
@@ -748,9 +736,7 @@ class CcdCaseUpdaterTest {
     private void initMockData() {
         given(eventResponse.getCaseDetails()).willReturn(existingCase);
         given(ccdApi.startEventForCaseWorker(
-            anyString(),
-            anyString(),
-            anyString(),
+            any(CcdRequestCredentials.class),
             anyString(),
             anyString(),
             anyString(),
