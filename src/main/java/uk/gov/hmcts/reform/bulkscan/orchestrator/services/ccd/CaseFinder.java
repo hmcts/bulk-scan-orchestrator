@@ -34,7 +34,7 @@ public class CaseFinder {
             serviceConfig.getService()
         );
 
-        if ((ids == null || ids.size() == 0) && serviceConfig.getSearchCasesByEnvelopeId()) {
+        if ((ids == null || ids.isEmpty()) && serviceConfig.getSearchCasesByEnvelopeId()) {
             log.info(
                 "Searching for existing service cases (by envelope id) for exception record {}",
                 exceptionRecord.id
