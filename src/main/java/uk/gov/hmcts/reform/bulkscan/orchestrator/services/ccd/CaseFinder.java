@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.base.Strings;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -44,9 +45,9 @@ public class CaseFinder {
     }
 
     public Optional<CaseDetails> findCase(Envelope envelope) {
-        Optional<CaseDetails> caseDetails = Strings.isNullOrEmpty(envelope.caseRef)
-            ? Optional.empty()
-            : getCaseByCcdId(envelope.caseRef, envelope.jurisdiction);
+        Optional<CaseDetails> caseDetails = isValidCaseRef(envelope.caseRef)
+            ? getCaseByCcdId(envelope.caseRef, envelope.jurisdiction)
+            : Optional.empty();
 
         if (caseDetails.isPresent()) {
             return caseDetails;
@@ -55,6 +56,11 @@ public class CaseFinder {
         } else {
             return Optional.empty();
         }
+    }
+
+    // if case ref is not valid we do not need to search
+    private boolean isValidCaseRef(String caseRef) {
+        return StringUtils.isNotEmpty(caseRef) && StringUtils.isNumeric(caseRef);
     }
 
     private Optional<CaseDetails> getCaseByLegacyId(Envelope envelope) {
