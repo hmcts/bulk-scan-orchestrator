@@ -44,7 +44,7 @@ public class AutoCaseCreator {
 
     public CaseCreationResult createCase(Envelope envelope) {
         String loggingContext = getLoggingContext(envelope);
-        log.info("Started attempt to create a new case from envelope. {}", loggingContext);
+        log.info("Started attempt to auto create a new case from envelope. {}", loggingContext);
 
         if (serviceConfigProvider.getConfig(envelope.container).getAutoCaseCreationEnabled()) {
             return createCaseIfDoesNotExist(envelope, loggingContext);
@@ -78,10 +78,12 @@ public class AutoCaseCreator {
         return envelopeTransformer.transformEnvelope(envelope)
             .map(resp -> resp.caseCreationDetails)
             .map(caseCreationDetails -> createCaseInCcd(caseCreationDetails, envelope, loggingContext))
-            .getOrElseGet(failureType ->
-                failureType == EnvelopeTransformer.TransformationFailureType.UNRECOVERABLE
-                    ? CaseCreationResult.unrecoverableFailure()
-                    : CaseCreationResult.potentiallyRecoverableFailure()
+            .getOrElseGet(failureType -> {
+                    log.error("Failed to auto create case, failure type {}, {}", failureType, loggingContext);
+                    return failureType == EnvelopeTransformer.TransformationFailureType.UNRECOVERABLE
+                        ? CaseCreationResult.unrecoverableFailure()
+                        : CaseCreationResult.potentiallyRecoverableFailure();
+                    }
             );
     }
 
@@ -91,14 +93,14 @@ public class AutoCaseCreator {
         String loggingContext
     ) {
         try {
-            log.info("About to create a case in CCD from envelope. {}", loggingContext);
+            log.info("About to auto create a case in CCD from envelope. {}", loggingContext);
             long caseId = callCcdApiToCreateCase(caseCreationDetails, envelope, loggingContext);
-            log.info("Created a case in CCD from envelope. Case Id: {}. {}", caseId, loggingContext);
+            log.info("Auto created a case in CCD from envelope. Case Id: {}. {}", caseId, loggingContext);
 
             return CaseCreationResult.caseCreated(caseId);
         } catch (FeignException.UnprocessableEntity | FeignException.BadRequest ex) {
             log.error(
-                "Received a response with status {} when trying to create a CCD case from an envelope. {}",
+                "Received a response with status {} when trying to auto create a CCD case from an envelope. {}",
                 ex.status(),
                 loggingContext,
                 ex
@@ -107,7 +109,7 @@ public class AutoCaseCreator {
             return CaseCreationResult.unrecoverableFailure();
         } catch (Exception ex) {
             log.error(
-                "An error occurred when trying to create a case in CCD from envelope. {}",
+                "An error occurred when trying to auto create a case in CCD from envelope. {}",
                 loggingContext,
                 ex
             );
