@@ -16,14 +16,17 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -77,6 +80,36 @@ public class CaseFinderTest {
         if (searchCasesByEnvelopeId) {
             verify(ccdApi).getCaseRefsByEnvelopeId("envelope-id", "some-service-name");
         }
+    }
+
+    @Test
+    void should_not_call_search_by_envelope_if_case_found_by_bulk_scan_ref() {
+        // given
+        var serviceCfg = mock(ServiceConfigItem.class);
+        given(serviceCfg.getService()).willReturn("some-service-name");
+
+        var exceptionRecord = new ExceptionRecord(
+            "er-id",
+            null,
+            "envelope-id",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            emptyList(),
+            emptyList()
+        );
+
+        given(ccdApi.getCaseRefsByBulkScanCaseReference(any(), any())).willReturn(List.of(193623L));
+        // when
+        caseFinder.findCases(exceptionRecord, serviceCfg);
+
+        // then
+        verify(ccdApi).getCaseRefsByBulkScanCaseReference("er-id", "some-service-name");
+        verify(serviceCfg, never()).getSearchCasesByEnvelopeId();
+        verify(ccdApi, never()).getCaseRefsByEnvelopeId(anyString(), anyString());
     }
 
     @Test
