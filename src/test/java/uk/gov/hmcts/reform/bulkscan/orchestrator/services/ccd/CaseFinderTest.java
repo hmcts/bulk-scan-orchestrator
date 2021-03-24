@@ -70,10 +70,10 @@ public class CaseFinderTest {
         caseFinder.findCases(exceptionRecord, serviceCfg);
 
         // then
+        verify(ccdApi).getCaseRefsByBulkScanCaseReference("er-id", "some-service-name");
+
         if (searchCasesByEnvelopeId) {
             verify(ccdApi).getCaseRefsByEnvelopeId("envelope-id", "some-service-name");
-        } else {
-            verify(ccdApi).getCaseRefsByBulkScanCaseReference("er-id", "some-service-name");
         }
     }
 
