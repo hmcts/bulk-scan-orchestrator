@@ -231,7 +231,7 @@ ext["rest-assured.version"] = '4.3.0'
 dependencyManagement {
   dependencies {
     // CVE-2018-10237 - Unbounded memory allocation
-    dependencySet(group: 'com.google.guava', version: '30.1-jre') {
+    dependencySet(group: 'com.google.guava', version: '30.1.1-jre') {
       entry 'guava'
     }
     // solves: CVE-2017-13098, CVE-2018-1000180, CVE-2018-1000613
@@ -274,7 +274,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
-  implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap', version: '3.0.1'
+  implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap', version: '3.0.2'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.2.7.RELEASE'
 
   implementation group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
@@ -313,9 +313,8 @@ dependencies {
 
   integrationTestImplementation sourceSets.main.runtimeClasspath
   integrationTestImplementation sourceSets.test.runtimeClasspath
-  integrationTestImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '3.0.1', {
-    exclude group: 'com.github.tomakehurst', module: 'wiremock-jre8-standalone'
-  }
+  integrationTestImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '3.0.2'
+  
   integrationTestImplementation group: 'com.github.tomakehurst', name: 'wiremock-jre8', version: '2.26.3'
 
   functionalTestImplementation sourceSets.main.runtimeClasspath

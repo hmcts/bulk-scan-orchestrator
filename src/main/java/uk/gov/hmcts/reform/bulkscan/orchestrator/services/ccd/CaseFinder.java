@@ -60,7 +60,7 @@ public class CaseFinder {
 
     // if case ref is not valid we do not need to search
     private boolean isValidCaseRef(String caseRef) {
-        return StringUtils.isNotEmpty(caseRef) || StringUtils.isNumeric(caseRef);
+        return StringUtils.isNotEmpty(caseRef) && StringUtils.isNumeric(caseRef);
     }
 
     private Optional<CaseDetails> getCaseByLegacyId(Envelope envelope) {
