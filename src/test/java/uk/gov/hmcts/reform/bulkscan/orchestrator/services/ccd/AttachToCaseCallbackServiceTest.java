@@ -28,6 +28,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidationsTest.JOURNEY_CLASSIFICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.CONTAINS_PAYMENTS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.ENVELOPE_ID;
@@ -40,6 +41,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 @ExtendWith(MockitoExtension.class)
 class AttachToCaseCallbackServiceTest {
 
+    public static final String WRONG_CASE_TYPE_ID = "BULKSCAN_Exception";
     private AttachToCaseCallbackService attachToCaseCallbackService;
 
     @Mock
@@ -66,25 +68,13 @@ class AttachToCaseCallbackServiceTest {
     private static final String IDAM_TOKEN = "IDAM_TOKEN";
     private static final String USER_ID = "USER_ID";
     private static final String EXISTING_CASE_ID = "12345";
-    private static final String EXISTING_CASE_TYPE = "Bulk_Scanned";
+
+    private static final String PREREQUISITES_ERROR = "prerequisites_error";
+    private static final String ERROR_1 = "error1";
+    private static final String WARNING_1 = "warning1";
 
     private ExceptionRecord exceptionRecord;
     private ServiceConfigItem configItem;
-
-    private static final CaseDetails CASE_DETAILS = CaseDetails.builder()
-        .jurisdiction(JURISDICTION)
-        .caseTypeId(CASE_TYPE_EXCEPTION_RECORD)
-        .id(Long.parseLong(CASE_REF))
-        .data(ImmutableMap.<String, Object>builder()
-            .put(JOURNEY_CLASSIFICATION, SUPPLEMENTARY_EVIDENCE_WITH_OCR.name())
-            .put(SEARCH_CASE_REFERENCE, EXISTING_CASE_ID)
-            .put(OCR_DATA, singletonList(ImmutableMap.of("firstName", "John")))
-            .put(SCANNED_DOCUMENTS, ImmutableList.of(EXISTING_DOC))
-            .put(CONTAINS_PAYMENTS, YES)
-            .put(ENVELOPE_ID, BULKSCAN_ENVELOPE_ID)
-            .build()
-        )
-        .build();
 
     @BeforeEach
     void setUp() {
@@ -96,17 +86,16 @@ class AttachToCaseCallbackServiceTest {
         );
 
         exceptionRecord = getExceptionRecord();
-        given(exceptionRecordValidator.getValidation(CASE_DETAILS)).willReturn(Validation.valid(exceptionRecord));
-        //given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);
         configItem = new ServiceConfigItem();
         configItem.setUpdateUrl("url");
         configItem.setService(SERVICE_NAME);
-        given(serviceConfigProvider.getConfig("bulkscan")).willReturn(configItem);
     }
 
     @Test
     void process_should_process_supplementary_evidence_with_ocr() {
         // given
+        CaseDetails caseDetails = getValidCaseDetails();
+        given(exceptionRecordValidator.getValidation(caseDetails)).willReturn(Validation.valid(exceptionRecord));
         given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
         given(exceptionRecordAttacher.tryAttachToCase(
             any(AttachToCaseEventData.class),
@@ -114,10 +103,11 @@ class AttachToCaseCallbackServiceTest {
             anyBoolean()
         ))
             .willReturn(Either.right(EXISTING_CASE_ID));
+        given(serviceConfigProvider.getConfig(SERVICE_NAME)).willReturn(configItem);
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
-            CASE_DETAILS,
+            caseDetails,
             IDAM_TOKEN,
             USER_ID,
             EventIds.ATTACH_TO_CASE,
@@ -129,26 +119,22 @@ class AttachToCaseCallbackServiceTest {
 
         // and exception record should be finalized
         verify(exceptionRecordFinalizer).finalizeExceptionRecord(
-            CASE_DETAILS.getData(),
+            caseDetails.getData(),
             EXISTING_CASE_ID,
             CcdCallbackType.ATTACHING_SUPPLEMENTARY_EVIDENCE
         );
     }
 
     @Test
-    void process_should_not_update_case_if_error_occurs() {
+    void process_should_not_update_case_if_mandatory_prerequisites_invalid() {
         // given
-        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
-        given(exceptionRecordAttacher.tryAttachToCase(
-            any(AttachToCaseEventData.class),
-            any(CaseDetails.class),
-            anyBoolean())
-        )
-            .willReturn(Either.left(new ErrorsAndWarnings(singletonList("error1"), singletonList("warning1"))));
+        CaseDetails caseDetails = getValidCaseDetails();
+        given(exceptionRecordValidator.mandatoryPrerequisites(any()))
+            .willReturn(Validation.invalid(PREREQUISITES_ERROR));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
-            CASE_DETAILS,
+            caseDetails,
             IDAM_TOKEN,
             USER_ID,
             EventIds.ATTACH_TO_CASE,
@@ -157,8 +143,118 @@ class AttachToCaseCallbackServiceTest {
 
         // then
         assertThat(res.isLeft()).isTrue();
-        assertThat(res.getLeft().getWarnings()).isEqualTo(singletonList("warning1"));
-        assertThat(res.getLeft().getErrors()).isEqualTo(singletonList("error1"));
+        assertThat(res.getLeft().getErrors()).isEqualTo(singletonList(PREREQUISITES_ERROR));
+        verifyNoInteractions(exceptionRecordAttacher);
+    }
+
+    @Test
+    void process_should_not_update_case_if_error_occurs() {
+        // given
+        CaseDetails caseDetails = getValidCaseDetails();
+        given(exceptionRecordValidator.getValidation(caseDetails)).willReturn(Validation.valid(exceptionRecord));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+        given(exceptionRecordAttacher.tryAttachToCase(
+            any(AttachToCaseEventData.class),
+            any(CaseDetails.class),
+            anyBoolean())
+        )
+            .willReturn(Either.left(new ErrorsAndWarnings(singletonList(ERROR_1), singletonList(WARNING_1))));
+        given(serviceConfigProvider.getConfig(SERVICE_NAME)).willReturn(configItem);
+
+        // when
+        Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
+            caseDetails,
+            IDAM_TOKEN,
+            USER_ID,
+            EventIds.ATTACH_TO_CASE,
+            true
+        );
+
+        // then
+        assertThat(res.isLeft()).isTrue();
+        assertThat(res.getLeft().getWarnings()).isEqualTo(singletonList(WARNING_1));
+        assertThat(res.getLeft().getErrors()).isEqualTo(singletonList(ERROR_1));
+    }
+
+    @Test
+    void process_should_not_update_case_if_null_jurisdiction() {
+        // given
+        CaseDetails caseDetails = getCaseDetails(
+            null,
+            CASE_TYPE_EXCEPTION_RECORD
+        );
+        given(exceptionRecordValidator.getValidation(caseDetails)).willReturn(Validation.valid(exceptionRecord));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+
+        // when
+        Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
+            caseDetails,
+            IDAM_TOKEN,
+            USER_ID,
+            EventIds.ATTACH_TO_CASE,
+            true
+        );
+
+        // then
+        assertThat(res.isLeft()).isTrue();
+        assertThat(res.getLeft().getWarnings().isEmpty()).isTrue();
+        assertThat(res.getLeft().getErrors())
+            .isEqualTo(singletonList("Internal Error: invalid jurisdiction supplied: null"));
+        verifyNoInteractions(exceptionRecordAttacher);
+    }
+
+    @Test
+    void process_should_not_update_case_if_wrong_case_type_id() {
+        // given
+        CaseDetails caseDetails = getCaseDetails(
+            JURISDICTION,
+            WRONG_CASE_TYPE_ID
+        );
+        given(exceptionRecordValidator.getValidation(caseDetails)).willReturn(Validation.valid(exceptionRecord));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+
+        // when
+        Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
+            caseDetails,
+            IDAM_TOKEN,
+            USER_ID,
+            EventIds.ATTACH_TO_CASE,
+            true
+        );
+
+        // then
+        assertThat(res.isLeft()).isTrue();
+        assertThat(res.getLeft().getWarnings().isEmpty()).isTrue();
+        assertThat(res.getLeft().getErrors())
+            .isEqualTo(singletonList("Case type ID (" + WRONG_CASE_TYPE_ID + ") has invalid format"));
+        verifyNoInteractions(exceptionRecordAttacher);
+    }
+
+    @Test
+    void process_should_not_update_case_if_null_case_type_id() {
+        // given
+        CaseDetails caseDetails = getCaseDetails(
+            JURISDICTION,
+            null
+        );
+        given(exceptionRecordValidator.getValidation(caseDetails)).willReturn(Validation.valid(exceptionRecord));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+
+        // when
+        Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
+            caseDetails,
+            IDAM_TOKEN,
+            USER_ID,
+            EventIds.ATTACH_TO_CASE,
+            true
+        );
+
+        // then
+        assertThat(res.isLeft()).isTrue();
+        assertThat(res.getLeft().getWarnings().isEmpty()).isTrue();
+        assertThat(res.getLeft().getErrors())
+            .isEqualTo(singletonList("No case type ID supplied"));
+        verifyNoInteractions(exceptionRecordAttacher);
     }
 
     private static Map<String, Object> document(String filename, String documentNumber) {
@@ -197,5 +293,32 @@ class AttachToCaseCallbackServiceTest {
             )),
             emptyList()
         );
+    }
+
+    private CaseDetails getValidCaseDetails() {
+        return getCaseDetails(
+            JURISDICTION,
+            CASE_TYPE_EXCEPTION_RECORD
+        );
+    }
+
+    private CaseDetails getCaseDetails(
+        String jurisdiction,
+        String caseTypeId
+    ) {
+        return CaseDetails.builder()
+            .jurisdiction(jurisdiction)
+            .caseTypeId(caseTypeId)
+            .id(Long.parseLong(CASE_REF))
+            .data(ImmutableMap.<String, Object>builder()
+                .put(JOURNEY_CLASSIFICATION, SUPPLEMENTARY_EVIDENCE_WITH_OCR.name())
+                .put(SEARCH_CASE_REFERENCE, EXISTING_CASE_ID)
+                .put(OCR_DATA, singletonList(ImmutableMap.of("firstName", "John")))
+                .put(SCANNED_DOCUMENTS, ImmutableList.of(EXISTING_DOC))
+                .put(CONTAINS_PAYMENTS, YES)
+                .put(ENVELOPE_ID, BULKSCAN_ENVELOPE_ID)
+                .build()
+            )
+            .build();
     }
 }

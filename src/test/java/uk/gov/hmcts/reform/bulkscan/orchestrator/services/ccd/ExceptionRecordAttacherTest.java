@@ -117,18 +117,7 @@ class ExceptionRecordAttacherTest {
         given(ccdCaseUpdater.updateCase(
             exceptionRecord, SERVICE_NAME, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE
         )).willReturn(Optional.empty());
-        AttachToCaseEventData callBackEvent = new AttachToCaseEventData(
-            JURISDICTION,
-            SERVICE_NAME,
-            EXISTING_CASE_TYPE,
-            EXISTING_CASE_ID,
-            Long.parseLong(CASE_REF),
-            emptyList(),
-            IDAM_TOKEN,
-            USER_ID,
-            SUPPLEMENTARY_EVIDENCE_WITH_OCR,
-            exceptionRecord
-        );
+        AttachToCaseEventData callBackEvent = getCallbackEvent();
 
         // when
         Either<ErrorsAndWarnings, String> res = exceptionRecordAttacher.tryAttachToCase(
@@ -159,18 +148,7 @@ class ExceptionRecordAttacherTest {
         given(ccdCaseUpdater.updateCase(
             exceptionRecord, SERVICE_NAME, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE
         )).willReturn(Optional.empty());
-        AttachToCaseEventData callBackEvent = new AttachToCaseEventData(
-            JURISDICTION,
-            SERVICE_NAME,
-            EXISTING_CASE_TYPE,
-            EXISTING_CASE_ID,
-            Long.parseLong(CASE_REF),
-            emptyList(),
-            IDAM_TOKEN,
-            USER_ID,
-            SUPPLEMENTARY_EVIDENCE_WITH_OCR,
-            exceptionRecord
-        );
+        AttachToCaseEventData callBackEvent = getCallbackEvent();
 
         // when
         Either<ErrorsAndWarnings, String> res = exceptionRecordAttacher.tryAttachToCase(
@@ -192,6 +170,21 @@ class ExceptionRecordAttacherTest {
             assertThat(data.containsPayments).isEqualTo(CASE_DETAILS.getData().get(CONTAINS_PAYMENTS).equals(YES));
             assertThat(data.envelopeId).isEqualTo(BULKSCAN_ENVELOPE_ID);
         });
+    }
+
+    private AttachToCaseEventData getCallbackEvent() {
+        return new AttachToCaseEventData(
+            JURISDICTION,
+            SERVICE_NAME,
+            EXISTING_CASE_TYPE,
+            EXISTING_CASE_ID,
+            Long.parseLong(CASE_REF),
+            emptyList(),
+            IDAM_TOKEN,
+            USER_ID,
+            SUPPLEMENTARY_EVIDENCE_WITH_OCR,
+            exceptionRecord
+        );
     }
 
     private static Map<String, Object> document(String filename, String documentNumber) {
