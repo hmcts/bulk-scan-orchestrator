@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -66,6 +67,7 @@ public class CaseFinderTest {
             emptyList()
         );
 
+        given(ccdApi.getCaseRefsByBulkScanCaseReference(any(), any())).willReturn(null);
         // when
         caseFinder.findCases(exceptionRecord, serviceCfg);
 
