@@ -11,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.AttachScannedDocumentsValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -43,6 +42,9 @@ class ExceptionRecordAttacherTest {
     private ServiceConfigProvider serviceConfigProvider;
 
     @Mock
+    private SupplementaryEvidenceUpdater supplementaryEvidenceUpdater;
+
+    @Mock
     private PaymentsProcessor paymentsProcessor;
 
     @Mock
@@ -50,9 +52,6 @@ class ExceptionRecordAttacherTest {
 
     @Mock
     private CcdCaseUpdater ccdCaseUpdater;
-
-    @Mock
-    private AttachScannedDocumentsValidator scannedDocumentsValidator;
 
     private ExceptionRecordAttacher exceptionRecordAttacher;
 
@@ -98,10 +97,10 @@ class ExceptionRecordAttacherTest {
     void setUp() {
         exceptionRecordAttacher = new ExceptionRecordAttacher(
             serviceConfigProvider,
+            supplementaryEvidenceUpdater,
             paymentsProcessor,
             ccdApi,
-            ccdCaseUpdater,
-            scannedDocumentsValidator
+            ccdCaseUpdater
         );
 
         ServiceConfigItem configItem = new ServiceConfigItem();
