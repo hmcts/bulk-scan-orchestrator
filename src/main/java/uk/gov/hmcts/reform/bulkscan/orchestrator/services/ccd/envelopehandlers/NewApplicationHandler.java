@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.pro
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.CASE_CREATED;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.AUTO_CREATED_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeCcdAction.EXCEPTION_RECORD;
 
 /**
@@ -47,7 +47,7 @@ public class NewApplicationHandler {
             case CASE_CREATED:
             case CASE_ALREADY_EXISTS:
                 paymentsProcessor.createPayments(envelope, caseCreationResult.caseCcdId, false);
-                return new EnvelopeProcessingResult(caseCreationResult.caseCcdId, CASE_CREATED);
+                return new EnvelopeProcessingResult(caseCreationResult.caseCcdId, AUTO_CREATED_CASE);
             case ABORTED_WITHOUT_FAILURE:
             case UNRECOVERABLE_FAILURE:
                 // we can't create a case - create exception record instead.
