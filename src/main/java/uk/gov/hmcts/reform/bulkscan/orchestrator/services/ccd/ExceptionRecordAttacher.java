@@ -96,7 +96,6 @@ public class ExceptionRecordAttacher {
                 exc
             );
             return Either.left(ErrorsAndWarnings.withErrors(singletonList(exc.getMessage())));
-
         } catch (PaymentsPublishingException exception) {
             log.error(
                 "Failed to send update to payment processor for {} exception record {}",

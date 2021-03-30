@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.Map;
@@ -23,6 +24,8 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -164,6 +167,58 @@ class ExceptionRecordAttacherTest {
         assertThat(res.isLeft()).isTrue();
         assertThat(res.getLeft().getErrors()).hasSize(1);
         assertThat(res.getLeft().getErrors().get(0)).isEqualTo("msg");
+    }
+
+    @Test
+    void should_not_attach_supplementary_evidence_if_exception_thrown() {
+        // given
+        given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);
+        AttachToCaseEventData callBackEvent = getCallbackEvent(SUPPLEMENTARY_EVIDENCE);
+        doThrow(new IllegalArgumentException("msg"))
+            .when(supplementaryEvidenceUpdater).updateSupplementaryEvidence(callBackEvent, EXISTING_CASE_ID);
+
+        // when
+        // then
+        assertThatCode(() -> exceptionRecordAttacher.tryAttachToCase(
+            callBackEvent,
+            CASE_DETAILS,
+            true
+        ))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("msg");
+
+    }
+
+    @Test
+    void should_not_attach_supplementary_evidence_if_payments_publishing_fails() {
+        // given
+        given(serviceConfigProvider.getConfig("bulkscan")).willReturn(configItem);
+        given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);
+        given(ccdCaseUpdater.updateCase(
+            exceptionRecord, SERVICE_NAME, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE
+        )).willReturn(Optional.empty());
+        AttachToCaseEventData callBackEvent = getCallbackEvent(SUPPLEMENTARY_EVIDENCE_WITH_OCR);
+        Throwable cause = new Exception("cause");
+        doThrow(new PaymentsPublishingException("msg", cause))
+            .when(paymentsProcessor).updatePayments(
+                any(PaymentsHelper.class),
+                eq(CASE_REF),
+                eq(JURISDICTION),
+                eq(EXISTING_CASE_ID)
+            );
+
+        // when
+        Either<ErrorsAndWarnings, String> res = exceptionRecordAttacher.tryAttachToCase(
+            callBackEvent,
+            CASE_DETAILS,
+            true
+        );
+
+        // then
+        assertThat(res.isLeft()).isTrue();
+        assertThat(res.getLeft().getErrors()).hasSize(1);
+        assertThat(res.getLeft().getErrors().get(0))
+            .isEqualTo("Payment references cannot be processed. Please try again later");
     }
 
     private AttachToCaseEventData getCallbackEvent(Classification classification) {
