@@ -88,4 +88,22 @@ public class TransformationRequest {
         this.scannedDocuments = scannedDocuments;
         this.ocrDataFields = ocrDataFields;
     }
+
+    @Override
+    public String toString() {
+        return "TransformationRequest{"
+            + "id='" + id + '\''
+            + ", exceptionRecordId='" + exceptionRecordId + '\''
+            + ", caseTypeId='" + caseTypeId + '\''
+            + ", exceptionRecordCaseTypeId='" + exceptionRecordCaseTypeId + '\''
+            + ", envelopeId='" + envelopeId + '\''
+            + ", isAutomatedProcess=" + isAutomatedProcess
+            + ", poBox='" + poBox + '\''
+            + ", poBoxJurisdiction='" + poBoxJurisdiction + '\''
+            + ", journeyClassification=" + journeyClassification
+            + ", formType='" + formType + '\''
+            + ", deliveryDate=" + deliveryDate + '\''
+            + ", openingDate=" + openingDate + '\''
+            + '}';
+    }
 }
