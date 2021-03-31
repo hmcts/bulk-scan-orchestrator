@@ -186,7 +186,6 @@ class ExceptionRecordAttacherTest {
         ))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("msg");
-
     }
 
     @Test
