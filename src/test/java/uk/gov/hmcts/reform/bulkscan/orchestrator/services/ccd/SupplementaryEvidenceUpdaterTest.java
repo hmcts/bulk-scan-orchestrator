@@ -209,7 +209,7 @@ class SupplementaryEvidenceUpdaterTest {
             exceptionRecord
         );
     }
-    
+
     private ExceptionRecord getExceptionRecord() {
         return new ExceptionRecord(
             "1",
