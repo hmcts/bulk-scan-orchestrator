@@ -36,11 +36,12 @@ public class ExceptionRecordAttacher {
     private final CcdApi ccdApi;
     private final CcdCaseUpdater ccdCaseUpdater;
 
-    public ExceptionRecordAttacher(ServiceConfigProvider serviceConfigProvider,
-                                   SupplementaryEvidenceUpdater supplementaryEvidenceUpdater,
-                                   PaymentsProcessor paymentsProcessor,
-                                   CcdApi ccdApi,
-                                   CcdCaseUpdater ccdCaseUpdater
+    public ExceptionRecordAttacher(
+        ServiceConfigProvider serviceConfigProvider,
+        SupplementaryEvidenceUpdater supplementaryEvidenceUpdater,
+        PaymentsProcessor paymentsProcessor,
+        CcdApi ccdApi,
+        CcdCaseUpdater ccdCaseUpdater
     ) {
         this.serviceConfigProvider = serviceConfigProvider;
         this.supplementaryEvidenceUpdater = supplementaryEvidenceUpdater;
