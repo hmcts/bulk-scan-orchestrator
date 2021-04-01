@@ -56,7 +56,7 @@ class NewApplicationHandlerTest {
         EnvelopeProcessingResult result = handler.handle(envelope, 0);
 
         // then
-        assertThat(result.envelopeCcdAction).isEqualTo(EnvelopeCcdAction.CASE_CREATED);
+        assertThat(result.envelopeCcdAction).isEqualTo(EnvelopeCcdAction.AUTO_CREATED_CASE);
         assertThat(result.ccdId).isEqualTo(caseId);
 
         verify(autoCaseCreator).createCase(envelope);
