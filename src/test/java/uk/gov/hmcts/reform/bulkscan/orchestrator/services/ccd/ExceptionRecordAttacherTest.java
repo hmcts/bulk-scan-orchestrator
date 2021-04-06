@@ -11,9 +11,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.AttachScannedDocumentsValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.Map;
@@ -23,9 +24,12 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidationsTest.JOURNEY_CLASSIFICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.CONTAINS_PAYMENTS;
@@ -34,6 +38,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SCANNED_DOCUMENTS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SEARCH_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues.YES;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +46,9 @@ class ExceptionRecordAttacherTest {
 
     @Mock
     private ServiceConfigProvider serviceConfigProvider;
+
+    @Mock
+    private SupplementaryEvidenceUpdater supplementaryEvidenceUpdater;
 
     @Mock
     private PaymentsProcessor paymentsProcessor;
@@ -51,12 +59,11 @@ class ExceptionRecordAttacherTest {
     @Mock
     private CcdCaseUpdater ccdCaseUpdater;
 
-    @Mock
-    private AttachScannedDocumentsValidator scannedDocumentsValidator;
-
     private ExceptionRecordAttacher exceptionRecordAttacher;
 
     private ExceptionRecord exceptionRecord;
+
+    private ServiceConfigItem configItem;
 
     private static final String JURISDICTION = "BULKSCAN";
     private static final String SERVICE_NAME = "bulkscan";
@@ -98,26 +105,26 @@ class ExceptionRecordAttacherTest {
     void setUp() {
         exceptionRecordAttacher = new ExceptionRecordAttacher(
             serviceConfigProvider,
+            supplementaryEvidenceUpdater,
             paymentsProcessor,
             ccdApi,
-            ccdCaseUpdater,
-            scannedDocumentsValidator
+            ccdCaseUpdater
         );
 
-        ServiceConfigItem configItem = new ServiceConfigItem();
+        configItem = new ServiceConfigItem();
         configItem.setUpdateUrl("url");
         configItem.setService(SERVICE_NAME);
-        given(serviceConfigProvider.getConfig("bulkscan")).willReturn(configItem);
     }
 
     @Test
     void should_attach_exception_record_to_case() {
         // given
+        given(serviceConfigProvider.getConfig("bulkscan")).willReturn(configItem);
         given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);
         given(ccdCaseUpdater.updateCase(
             exceptionRecord, SERVICE_NAME, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE
         )).willReturn(Optional.empty());
-        AttachToCaseEventData callBackEvent = getCallbackEvent();
+        AttachToCaseEventData callBackEvent = getCallbackEvent(SUPPLEMENTARY_EVIDENCE_WITH_OCR);
 
         // when
         Either<ErrorsAndWarnings, String> res = exceptionRecordAttacher.tryAttachToCase(
@@ -142,13 +149,12 @@ class ExceptionRecordAttacherTest {
     }
 
     @Test
-    void should_not_attach_exception_record_if_error_occurs() {
+    void should_not_attach_supplementary_evidence_if_case_does_not_exist() {
         // given
         given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);
-        given(ccdCaseUpdater.updateCase(
-            exceptionRecord, SERVICE_NAME, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE
-        )).willReturn(Optional.empty());
-        AttachToCaseEventData callBackEvent = getCallbackEvent();
+        AttachToCaseEventData callBackEvent = getCallbackEvent(SUPPLEMENTARY_EVIDENCE);
+        doThrow(new CaseNotFoundException("msg"))
+            .when(supplementaryEvidenceUpdater).updateSupplementaryEvidence(callBackEvent, EXISTING_CASE_ID);
 
         // when
         Either<ErrorsAndWarnings, String> res = exceptionRecordAttacher.tryAttachToCase(
@@ -158,21 +164,63 @@ class ExceptionRecordAttacherTest {
         );
 
         // then
-        assertThat(res.isRight()).isTrue();
-        verify(ccdCaseUpdater)
-            .updateCase(exceptionRecord, SERVICE_NAME, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE);
-
-        // and
-        var paymentsDataCaptor = ArgumentCaptor.forClass(PaymentsHelper.class);
-        verify(paymentsProcessor)
-            .updatePayments(paymentsDataCaptor.capture(), eq(CASE_REF), eq(JURISDICTION), eq(EXISTING_CASE_ID));
-        assertThat(paymentsDataCaptor.getValue()).satisfies(data -> {
-            assertThat(data.containsPayments).isEqualTo(CASE_DETAILS.getData().get(CONTAINS_PAYMENTS).equals(YES));
-            assertThat(data.envelopeId).isEqualTo(BULKSCAN_ENVELOPE_ID);
-        });
+        assertThat(res.isLeft()).isTrue();
+        assertThat(res.getLeft().getErrors()).hasSize(1);
+        assertThat(res.getLeft().getErrors().get(0)).isEqualTo("msg");
     }
 
-    private AttachToCaseEventData getCallbackEvent() {
+    @Test
+    void should_not_attach_supplementary_evidence_if_exception_thrown() {
+        // given
+        given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);
+        AttachToCaseEventData callBackEvent = getCallbackEvent(SUPPLEMENTARY_EVIDENCE);
+        doThrow(new IllegalArgumentException("msg"))
+            .when(supplementaryEvidenceUpdater).updateSupplementaryEvidence(callBackEvent, EXISTING_CASE_ID);
+
+        // when
+        // then
+        assertThatCode(() -> exceptionRecordAttacher.tryAttachToCase(
+            callBackEvent,
+            CASE_DETAILS,
+            true
+        ))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("msg");
+    }
+
+    @Test
+    void should_not_attach_supplementary_evidence_if_payments_publishing_fails() {
+        // given
+        given(serviceConfigProvider.getConfig("bulkscan")).willReturn(configItem);
+        given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);
+        given(ccdCaseUpdater.updateCase(
+            exceptionRecord, SERVICE_NAME, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE
+        )).willReturn(Optional.empty());
+        AttachToCaseEventData callBackEvent = getCallbackEvent(SUPPLEMENTARY_EVIDENCE_WITH_OCR);
+        Throwable cause = new Exception("cause");
+        doThrow(new PaymentsPublishingException("msg", cause))
+            .when(paymentsProcessor).updatePayments(
+                any(PaymentsHelper.class),
+                eq(CASE_REF),
+                eq(JURISDICTION),
+                eq(EXISTING_CASE_ID)
+            );
+
+        // when
+        Either<ErrorsAndWarnings, String> res = exceptionRecordAttacher.tryAttachToCase(
+            callBackEvent,
+            CASE_DETAILS,
+            true
+        );
+
+        // then
+        assertThat(res.isLeft()).isTrue();
+        assertThat(res.getLeft().getErrors()).hasSize(1);
+        assertThat(res.getLeft().getErrors().get(0))
+            .isEqualTo("Payment references cannot be processed. Please try again later");
+    }
+
+    private AttachToCaseEventData getCallbackEvent(Classification classification) {
         return new AttachToCaseEventData(
             JURISDICTION,
             SERVICE_NAME,
@@ -182,7 +230,7 @@ class ExceptionRecordAttacherTest {
             emptyList(),
             IDAM_TOKEN,
             USER_ID,
-            SUPPLEMENTARY_EVIDENCE_WITH_OCR,
+            classification,
             exceptionRecord
         );
     }
