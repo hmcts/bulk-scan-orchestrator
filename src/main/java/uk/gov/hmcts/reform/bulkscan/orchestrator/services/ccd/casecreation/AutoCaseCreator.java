@@ -79,7 +79,7 @@ public class AutoCaseCreator {
             .map(resp -> resp.caseCreationDetails)
             .map(caseCreationDetails -> createCaseInCcd(caseCreationDetails, envelope, loggingContext))
             .getOrElseGet(failureType -> {
-                    log.error("Failed to auto create case, failure type {}, {}", failureType, loggingContext);
+                    log.warn("Failed to auto create case, failure type {}, {}", failureType, loggingContext);
                     return failureType == EnvelopeTransformer.TransformationFailureType.UNRECOVERABLE
                         ? CaseCreationResult.unrecoverableFailure()
                         : CaseCreationResult.potentiallyRecoverableFailure();
