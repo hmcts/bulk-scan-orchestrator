@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 import org.apache.commons.lang.StringUtils;
@@ -9,28 +8,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.AttachScannedDocumentsValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.DuplicateDocsException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.EXTERNAL_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.ATTACH_TO_CASE_REFERENCE;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.EVIDENCE_HANDLED;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SCANNED_DOCUMENTS;
 
 @Component
 public class ExceptionRecordAttacher {
@@ -40,22 +31,23 @@ public class ExceptionRecordAttacher {
     private static final Logger log = LoggerFactory.getLogger(ExceptionRecordAttacher.class);
 
     private final ServiceConfigProvider serviceConfigProvider;
+    private final SupplementaryEvidenceUpdater supplementaryEvidenceUpdater;
     private final PaymentsProcessor paymentsProcessor;
     private final CcdApi ccdApi;
     private final CcdCaseUpdater ccdCaseUpdater;
-    private final AttachScannedDocumentsValidator scannedDocumentsValidator;
 
-    public ExceptionRecordAttacher(ServiceConfigProvider serviceConfigProvider,
-                                   PaymentsProcessor paymentsProcessor,
-                                   CcdApi ccdApi,
-                                   CcdCaseUpdater ccdCaseUpdater,
-                                   AttachScannedDocumentsValidator scannedDocumentsValidator
+    public ExceptionRecordAttacher(
+        ServiceConfigProvider serviceConfigProvider,
+        SupplementaryEvidenceUpdater supplementaryEvidenceUpdater,
+        PaymentsProcessor paymentsProcessor,
+        CcdApi ccdApi,
+        CcdCaseUpdater ccdCaseUpdater
     ) {
         this.serviceConfigProvider = serviceConfigProvider;
+        this.supplementaryEvidenceUpdater = supplementaryEvidenceUpdater;
         this.paymentsProcessor = paymentsProcessor;
         this.ccdApi = ccdApi;
         this.ccdCaseUpdater = ccdCaseUpdater;
-        this.scannedDocumentsValidator = scannedDocumentsValidator;
     }
 
     //The code below need to be rewritten to reuse the EventPublisher class
@@ -105,7 +97,6 @@ public class ExceptionRecordAttacher {
                 exc
             );
             return Either.left(ErrorsAndWarnings.withErrors(singletonList(exc.getMessage())));
-
         } catch (PaymentsPublishingException exception) {
             log.error(
                 "Failed to send update to payment processor for {} exception record {}",
@@ -209,7 +200,7 @@ public class ExceptionRecordAttacher {
         switch (callBackEvent.classification) {
             case EXCEPTION:
             case SUPPLEMENTARY_EVIDENCE:
-                updateSupplementaryEvidence(
+                supplementaryEvidenceUpdater.updateSupplementaryEvidence(
                     callBackEvent,
                     targetCaseCcdRef
                 );
@@ -224,58 +215,6 @@ public class ExceptionRecordAttacher {
 
             default:
                 throw new CallbackException("Invalid Journey Classification: " + callBackEvent.classification);
-        }
-    }
-
-    private void updateSupplementaryEvidence(
-        AttachToCaseEventData callBackEvent,
-        String targetCaseCcdRef
-    ) {
-        CaseDetails theCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
-        List<Map<String, Object>> targetCaseDocuments = Documents.getScannedDocuments(theCase);
-
-        scannedDocumentsValidator.verifyExceptionRecordAddsNoDuplicates(
-            targetCaseDocuments,
-            callBackEvent.exceptionRecordDocuments,
-            Long.toString(callBackEvent.exceptionRecordId),
-            targetCaseCcdRef
-        );
-
-        List<Map<String, Object>> documentsToAttach = Documents.removeAlreadyAttachedDocuments(
-            callBackEvent.exceptionRecordDocuments,
-            targetCaseDocuments,
-            Long.toString(callBackEvent.exceptionRecordId)
-        );
-
-        if (!documentsToAttach.isEmpty()) {
-            List<Map<String, Object>> newCaseDocuments = attachExceptionRecordReference(
-                documentsToAttach,
-                callBackEvent.exceptionRecordId
-            );
-
-            StartEventResponse ccdStartEvent =
-                ccdApi.startAttachScannedDocs(theCase, callBackEvent.idamToken, callBackEvent.userId);
-
-            Map<String, Object> newCaseData = buildCaseData(newCaseDocuments, targetCaseDocuments);
-
-            final String eventSummary = createEventSummary(theCase, callBackEvent.exceptionRecordId, newCaseDocuments);
-
-            log.info(eventSummary);
-
-            ccdApi.attachExceptionRecord(
-                theCase,
-                callBackEvent.idamToken,
-                callBackEvent.userId,
-                newCaseData,
-                eventSummary,
-                ccdStartEvent
-            );
-
-            log.info(
-                "Attached Exception Record to a case in CCD. ER ID: {}. Case ID: {}",
-                callBackEvent.exceptionRecordId,
-                theCase.getId()
-            );
         }
     }
 
@@ -295,58 +234,6 @@ public class ExceptionRecordAttacher {
             callBackEvent.userId,
             targetCaseCcdRef,
             targetCase.getCaseTypeId()
-        );
-    }
-
-    private Map<String, Object> buildCaseData(
-        List<Map<String, Object>> exceptionDocuments,
-        List<Map<String, Object>> existingDocuments
-    ) {
-        List<Object> documents = Documents.concatDocuments(exceptionDocuments, existingDocuments);
-        return ImmutableMap.of(SCANNED_DOCUMENTS, documents, EVIDENCE_HANDLED, YesNoFieldValues.NO);
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<Map<String, Object>> attachExceptionRecordReference(
-        List<Map<String, Object>> exceptionDocuments,
-        Long exceptionRecordReference
-    ) {
-        List<String> exceptionDocumentsDcns = exceptionDocuments
-            .stream()
-            .map(Documents::getDocumentId)
-            .collect(toList());
-        log.info(
-            "Attaching documents of {} exception record with following DCNs: {}",
-            exceptionRecordReference,
-            exceptionDocumentsDcns
-        );
-
-        return exceptionDocuments
-            .stream()
-            .map(document -> {
-                HashMap<String, Object> copiedDocumentContent =
-                    new HashMap<>((Map<String, Object>) document.get("value"));
-
-                copiedDocumentContent.put(
-                    "exceptionRecordReference",
-                    String.valueOf(exceptionRecordReference)
-                );
-
-                return ImmutableMap.<String, Object>of("value", copiedDocumentContent);
-            })
-            .collect(toList());
-    }
-
-    private String createEventSummary(
-        CaseDetails theCase,
-        Long exceptionRecordId,
-        List<Map<String, Object>> exceptionDocuments
-    ) {
-        return String.format(
-            "Attaching exception record(%d) document numbers:%s to case:%d",
-            exceptionRecordId,
-            Documents.getDocumentNumbers(exceptionDocuments),
-            theCase.getId()
         );
     }
 
