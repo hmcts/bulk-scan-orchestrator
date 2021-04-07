@@ -2,8 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.base.Strings;
 import io.vavr.control.Try;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
@@ -14,8 +12,6 @@ import java.util.Optional;
 
 @Component
 public class SupplementaryEvidenceWithOcrUpdater {
-    private static final Logger log = LoggerFactory.getLogger(SupplementaryEvidenceWithOcrUpdater.class);
-
     private final ServiceConfigProvider serviceConfigProvider;
     private final CcdApi ccdApi;
     private final CcdCaseUpdater ccdCaseUpdater;
