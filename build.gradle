@@ -249,22 +249,6 @@ dependencyManagement {
       entry 'groovy-json'
       entry 'groovy-xml'
     }
-    //avoid CVE-2021-21290
-    dependencySet(group: 'io.netty', version: '4.1.60.Final') {
-      entry 'netty-buffer'
-      entry 'netty-codec'
-      entry 'netty-codec-http'
-      entry 'netty-codec-http2'
-      entry 'netty-codec-socks'
-      entry 'netty-common'
-      entry 'netty-handler'
-      entry 'netty-handler-proxy'
-      entry 'netty-resolver'
-      entry 'netty-transport'
-      entry 'netty-transport-native-epoll'
-      entry 'netty-transport-native-kqueue'
-      entry 'netty-transport-native-unix-common'
-    }
   }
 }
 
