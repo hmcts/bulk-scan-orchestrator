@@ -9,7 +9,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
@@ -51,6 +50,9 @@ class ExceptionRecordAttacherTest {
     private SupplementaryEvidenceUpdater supplementaryEvidenceUpdater;
 
     @Mock
+    private SupplementaryEvidenceWithOcrUpdater supplementaryEvidenceWithOcrUpdater;
+
+    @Mock
     private PaymentsProcessor paymentsProcessor;
 
     @Mock
@@ -62,8 +64,6 @@ class ExceptionRecordAttacherTest {
     private ExceptionRecordAttacher exceptionRecordAttacher;
 
     private ExceptionRecord exceptionRecord;
-
-    private ServiceConfigItem configItem;
 
     private static final String JURISDICTION = "BULKSCAN";
     private static final String SERVICE_NAME = "bulkscan";
@@ -104,27 +104,21 @@ class ExceptionRecordAttacherTest {
     @BeforeEach
     void setUp() {
         exceptionRecordAttacher = new ExceptionRecordAttacher(
-            serviceConfigProvider,
             supplementaryEvidenceUpdater,
+            supplementaryEvidenceWithOcrUpdater,
             paymentsProcessor,
-            ccdApi,
-            ccdCaseUpdater
+            ccdApi
         );
-
-        configItem = new ServiceConfigItem();
-        configItem.setUpdateUrl("url");
-        configItem.setService(SERVICE_NAME);
     }
 
     @Test
     void should_attach_exception_record_to_case() {
         // given
-        given(serviceConfigProvider.getConfig("bulkscan")).willReturn(configItem);
         given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);
-        given(ccdCaseUpdater.updateCase(
-            exceptionRecord, SERVICE_NAME, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE
-        )).willReturn(Optional.empty());
         AttachToCaseEventData callBackEvent = getCallbackEvent(SUPPLEMENTARY_EVIDENCE_WITH_OCR);
+        given(supplementaryEvidenceWithOcrUpdater.updateSupplementaryEvidenceWithOcr(
+            callBackEvent, EXISTING_CASE_ID, true
+        )).willReturn(Optional.empty());
 
         // when
         Either<ErrorsAndWarnings, String> res = exceptionRecordAttacher.tryAttachToCase(
@@ -135,8 +129,6 @@ class ExceptionRecordAttacherTest {
 
         // then
         assertThat(res.isRight()).isTrue();
-        verify(ccdCaseUpdater)
-            .updateCase(exceptionRecord, SERVICE_NAME, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE);
 
         // and
         var paymentsDataCaptor = ArgumentCaptor.forClass(PaymentsHelper.class);
@@ -191,11 +183,7 @@ class ExceptionRecordAttacherTest {
     @Test
     void should_not_attach_supplementary_evidence_if_payments_publishing_fails() {
         // given
-        given(serviceConfigProvider.getConfig("bulkscan")).willReturn(configItem);
         given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);
-        given(ccdCaseUpdater.updateCase(
-            exceptionRecord, SERVICE_NAME, true, IDAM_TOKEN, USER_ID, EXISTING_CASE_ID, EXISTING_CASE_TYPE
-        )).willReturn(Optional.empty());
         AttachToCaseEventData callBackEvent = getCallbackEvent(SUPPLEMENTARY_EVIDENCE_WITH_OCR);
         Throwable cause = new Exception("cause");
         doThrow(new PaymentsPublishingException("msg", cause))

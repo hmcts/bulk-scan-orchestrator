@@ -1,17 +1,13 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
-import com.google.common.base.Strings;
 import io.vavr.control.Either;
-import io.vavr.control.Try;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.DuplicateDocsException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -30,24 +26,21 @@ public class ExceptionRecordAttacher {
 
     private static final Logger log = LoggerFactory.getLogger(ExceptionRecordAttacher.class);
 
-    private final ServiceConfigProvider serviceConfigProvider;
     private final SupplementaryEvidenceUpdater supplementaryEvidenceUpdater;
+    private final SupplementaryEvidenceWithOcrUpdater supplementaryEvidenceWithOcrUpdater;
     private final PaymentsProcessor paymentsProcessor;
     private final CcdApi ccdApi;
-    private final CcdCaseUpdater ccdCaseUpdater;
 
     public ExceptionRecordAttacher(
-        ServiceConfigProvider serviceConfigProvider,
         SupplementaryEvidenceUpdater supplementaryEvidenceUpdater,
+        SupplementaryEvidenceWithOcrUpdater supplementaryEvidenceWithOcrUpdater,
         PaymentsProcessor paymentsProcessor,
-        CcdApi ccdApi,
-        CcdCaseUpdater ccdCaseUpdater
+        CcdApi ccdApi
     ) {
-        this.serviceConfigProvider = serviceConfigProvider;
         this.supplementaryEvidenceUpdater = supplementaryEvidenceUpdater;
+        this.supplementaryEvidenceWithOcrUpdater = supplementaryEvidenceWithOcrUpdater;
         this.paymentsProcessor = paymentsProcessor;
         this.ccdApi = ccdApi;
-        this.ccdCaseUpdater = ccdCaseUpdater;
     }
 
     //The code below need to be rewritten to reuse the EventPublisher class
@@ -207,7 +200,7 @@ public class ExceptionRecordAttacher {
                 return Optional.empty();
 
             case SUPPLEMENTARY_EVIDENCE_WITH_OCR:
-                return updateSupplementaryEvidenceWithOcr(
+                return supplementaryEvidenceWithOcrUpdater.updateSupplementaryEvidenceWithOcr(
                     callBackEvent,
                     targetCaseCcdRef,
                     ignoreWarnings
@@ -216,30 +209,5 @@ public class ExceptionRecordAttacher {
             default:
                 throw new CallbackException("Invalid Journey Classification: " + callBackEvent.classification);
         }
-    }
-
-    private Optional<ErrorsAndWarnings> updateSupplementaryEvidenceWithOcr(
-        AttachToCaseEventData callBackEvent,
-        String targetCaseCcdRef,
-        boolean ignoreWarnings
-    ) {
-        CaseDetails targetCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
-
-        ServiceConfigItem serviceConfigItem = getServiceConfig(callBackEvent.service);
-        return ccdCaseUpdater.updateCase(
-            callBackEvent.exceptionRecord,
-            serviceConfigItem.getService(),
-            ignoreWarnings,
-            callBackEvent.idamToken,
-            callBackEvent.userId,
-            targetCaseCcdRef,
-            targetCase.getCaseTypeId()
-        );
-    }
-
-    private ServiceConfigItem getServiceConfig(String service) {
-        return Try.of(() -> serviceConfigProvider.getConfig(service))
-            .filter(item -> !Strings.isNullOrEmpty(item.getUpdateUrl()))
-            .getOrElseThrow(() -> new CallbackException("Update URL is not configured"));
     }
 }
