@@ -34,10 +34,10 @@ public class SupplementaryEvidenceUpdater {
 
     public void updateSupplementaryEvidence(
         AttachToCaseEventData callBackEvent,
+        CaseDetails targetCase,
         String targetCaseCcdRef
     ) {
-        CaseDetails theCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
-        List<Map<String, Object>> targetCaseDocuments = Documents.getScannedDocuments(theCase);
+        List<Map<String, Object>> targetCaseDocuments = Documents.getScannedDocuments(targetCase);
 
         scannedDocumentsValidator.verifyExceptionRecordAddsNoDuplicates(
             targetCaseDocuments,
@@ -59,16 +59,20 @@ public class SupplementaryEvidenceUpdater {
             );
 
             StartEventResponse ccdStartEvent =
-                ccdApi.startAttachScannedDocs(theCase, callBackEvent.idamToken, callBackEvent.userId);
+                ccdApi.startAttachScannedDocs(targetCase, callBackEvent.idamToken, callBackEvent.userId);
 
             Map<String, Object> newCaseData = buildCaseData(newCaseDocuments, targetCaseDocuments);
 
-            final String eventSummary = createEventSummary(theCase, callBackEvent.exceptionRecordId, newCaseDocuments);
+            final String eventSummary = createEventSummary(
+                targetCase,
+                callBackEvent.exceptionRecordId,
+                newCaseDocuments
+            );
 
             log.info(eventSummary);
 
             ccdApi.attachExceptionRecord(
-                theCase,
+                targetCase,
                 callBackEvent.idamToken,
                 callBackEvent.userId,
                 newCaseData,
@@ -79,7 +83,7 @@ public class SupplementaryEvidenceUpdater {
             log.info(
                 "Attached Exception Record to a case in CCD. ER ID: {}. Case ID: {}",
                 callBackEvent.exceptionRecordId,
-                theCase.getId()
+                targetCase.getId()
             );
         }
     }

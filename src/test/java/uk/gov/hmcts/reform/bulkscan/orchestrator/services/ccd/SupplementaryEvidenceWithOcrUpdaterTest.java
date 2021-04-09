@@ -23,7 +23,6 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
@@ -32,9 +31,6 @@ class SupplementaryEvidenceWithOcrUpdaterTest {
 
     @Mock
     private ServiceConfigProvider serviceConfigProvider;
-
-    @Mock
-    private CcdApi ccdApi;
 
     @Mock
     private CcdCaseUpdater ccdCaseUpdater;
@@ -65,7 +61,6 @@ class SupplementaryEvidenceWithOcrUpdaterTest {
     void setUp() {
         supplementaryEvidenceWithOcrUpdater = new SupplementaryEvidenceWithOcrUpdater(
             serviceConfigProvider,
-            ccdApi,
             ccdCaseUpdater
         );
 
@@ -78,7 +73,6 @@ class SupplementaryEvidenceWithOcrUpdaterTest {
         // given
         ServiceConfigItem configItem = getConfigItem("url");
         given(serviceConfigProvider.getConfig(SERVICE_NAME)).willReturn(configItem);
-        given(ccdApi.getCase(EXISTING_CASE_ID, JURISDICTION)).willReturn(EXISTING_CASE_DETAILS);
         Optional<ErrorsAndWarnings> errorsAndWarnings = Optional.of(new ErrorsAndWarnings(emptyList(), emptyList()));
         given(ccdCaseUpdater.updateCase(
             exceptionRecord,
@@ -93,6 +87,7 @@ class SupplementaryEvidenceWithOcrUpdaterTest {
         // when
         Optional<ErrorsAndWarnings> res = supplementaryEvidenceWithOcrUpdater.updateSupplementaryEvidenceWithOcr(
             callBackEvent,
+            EXISTING_CASE_DETAILS,
             EXISTING_CASE_ID,
             true);
 
@@ -110,13 +105,12 @@ class SupplementaryEvidenceWithOcrUpdaterTest {
         assertThatCode(() ->
             supplementaryEvidenceWithOcrUpdater.updateSupplementaryEvidenceWithOcr(
                 callBackEvent,
+                EXISTING_CASE_DETAILS,
                 EXISTING_CASE_ID,
                 true
             ))
             .isInstanceOf(CallbackException.class)
             .hasMessage("Update URL is not configured");
-
-        verifyNoInteractions(ccdApi, ccdCaseUpdater);
     }
 
     @Test
@@ -131,13 +125,12 @@ class SupplementaryEvidenceWithOcrUpdaterTest {
         assertThatCode(() ->
             supplementaryEvidenceWithOcrUpdater.updateSupplementaryEvidenceWithOcr(
                 callBackEvent,
+                EXISTING_CASE_DETAILS,
                 EXISTING_CASE_ID,
                 true
             ))
             .isInstanceOf(CallbackException.class)
             .hasMessage("Update URL is not configured");
-
-        verifyNoInteractions(ccdApi, ccdCaseUpdater);
     }
 
     @Test
@@ -152,13 +145,12 @@ class SupplementaryEvidenceWithOcrUpdaterTest {
         assertThatCode(() ->
             supplementaryEvidenceWithOcrUpdater.updateSupplementaryEvidenceWithOcr(
                 callBackEvent,
+                EXISTING_CASE_DETAILS,
                 EXISTING_CASE_ID,
                 true
             ))
             .isInstanceOf(CallbackException.class)
             .hasMessage("Update URL is not configured");
-
-        verifyNoInteractions(ccdApi, ccdCaseUpdater);
     }
 
     private AttachToCaseEventData getCallbackEvent() {

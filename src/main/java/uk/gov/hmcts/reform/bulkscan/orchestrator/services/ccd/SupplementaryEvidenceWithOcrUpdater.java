@@ -13,27 +13,23 @@ import java.util.Optional;
 @Component
 public class SupplementaryEvidenceWithOcrUpdater {
     private final ServiceConfigProvider serviceConfigProvider;
-    private final CcdApi ccdApi;
     private final CcdCaseUpdater ccdCaseUpdater;
 
     public SupplementaryEvidenceWithOcrUpdater(
         ServiceConfigProvider serviceConfigProvider,
-        CcdApi ccdApi,
         CcdCaseUpdater ccdCaseUpdater
     ) {
         this.serviceConfigProvider = serviceConfigProvider;
-        this.ccdApi = ccdApi;
         this.ccdCaseUpdater = ccdCaseUpdater;
     }
 
     public Optional<ErrorsAndWarnings> updateSupplementaryEvidenceWithOcr(
         AttachToCaseEventData callBackEvent,
+        CaseDetails targetCase,
         String targetCaseCcdRef,
         boolean ignoreWarnings
     ) {
         ServiceConfigItem serviceConfigItem = getServiceConfig(callBackEvent.service);
-
-        CaseDetails targetCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
 
         return ccdCaseUpdater.updateCase(
             callBackEvent.exceptionRecord,

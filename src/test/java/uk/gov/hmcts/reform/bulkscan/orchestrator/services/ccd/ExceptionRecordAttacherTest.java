@@ -117,7 +117,7 @@ class ExceptionRecordAttacherTest {
         given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);
         AttachToCaseEventData callBackEvent = getCallbackEvent(SUPPLEMENTARY_EVIDENCE_WITH_OCR);
         given(supplementaryEvidenceWithOcrUpdater.updateSupplementaryEvidenceWithOcr(
-            callBackEvent, EXISTING_CASE_ID, true
+            callBackEvent, EXISTING_CASE_DETAILS, EXISTING_CASE_ID, true
         )).willReturn(Optional.empty());
 
         // when
@@ -146,7 +146,11 @@ class ExceptionRecordAttacherTest {
         given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);
         AttachToCaseEventData callBackEvent = getCallbackEvent(SUPPLEMENTARY_EVIDENCE);
         doThrow(new CaseNotFoundException("msg"))
-            .when(supplementaryEvidenceUpdater).updateSupplementaryEvidence(callBackEvent, EXISTING_CASE_ID);
+            .when(supplementaryEvidenceUpdater).updateSupplementaryEvidence(
+                callBackEvent,
+                EXISTING_CASE_DETAILS,
+                EXISTING_CASE_ID
+            );
 
         // when
         Either<ErrorsAndWarnings, String> res = exceptionRecordAttacher.tryAttachToCase(
@@ -167,7 +171,11 @@ class ExceptionRecordAttacherTest {
         given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);
         AttachToCaseEventData callBackEvent = getCallbackEvent(SUPPLEMENTARY_EVIDENCE);
         doThrow(new IllegalArgumentException("msg"))
-            .when(supplementaryEvidenceUpdater).updateSupplementaryEvidence(callBackEvent, EXISTING_CASE_ID);
+            .when(supplementaryEvidenceUpdater).updateSupplementaryEvidence(
+                callBackEvent,
+                EXISTING_CASE_DETAILS,
+                EXISTING_CASE_ID
+            );
 
         // when
         // then

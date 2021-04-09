@@ -89,7 +89,6 @@ class SupplementaryEvidenceUpdaterTest {
             .id(Long.parseLong(EXISTING_CASE_ID))
             .data(existingData)
             .build();
-        given(ccdApi.getCase(EXISTING_CASE_ID, JURISDICTION)).willReturn(existingCaseDetails);
         StartEventResponse startEventResponse = mock(StartEventResponse.class);
         given(ccdApi.startAttachScannedDocs(existingCaseDetails, IDAM_TOKEN, USER_ID))
             .willReturn(startEventResponse);
@@ -102,10 +101,13 @@ class SupplementaryEvidenceUpdaterTest {
         AttachToCaseEventData callBackEvent = getCallbackEvent(exceptionRecordDocuments);
 
         // when
-        supplementaryEvidenceUpdater.updateSupplementaryEvidence(callBackEvent, EXISTING_CASE_ID);
+        supplementaryEvidenceUpdater.updateSupplementaryEvidence(
+            callBackEvent,
+            existingCaseDetails,
+            EXISTING_CASE_ID
+        );
 
         // then
-        verify(ccdApi).getCase(EXISTING_CASE_ID, JURISDICTION);
         verify(scannedDocumentsValidator)
             .verifyExceptionRecordAddsNoDuplicates(anyList(), anyList(), eq(CASE_REF), eq(EXISTING_CASE_ID));
         verify(ccdApi).startAttachScannedDocs(any(CaseDetails.class), eq(IDAM_TOKEN), eq(USER_ID));
@@ -132,7 +134,6 @@ class SupplementaryEvidenceUpdaterTest {
             .id(Long.parseLong(EXISTING_CASE_ID))
             .data(existingData)
             .build();
-        given(ccdApi.getCase(EXISTING_CASE_ID, JURISDICTION)).willReturn(existingCaseDetails);
 
         doThrow(new DuplicateDocsException("msg"))
             .when(scannedDocumentsValidator)
@@ -145,12 +146,15 @@ class SupplementaryEvidenceUpdaterTest {
         // when
         // then
         assertThatCode(() ->
-            supplementaryEvidenceUpdater.updateSupplementaryEvidence(callBackEvent, EXISTING_CASE_ID))
+            supplementaryEvidenceUpdater.updateSupplementaryEvidence(
+                callBackEvent,
+                existingCaseDetails,
+                EXISTING_CASE_ID
+            ))
             .isInstanceOf(DuplicateDocsException.class)
             .hasMessage("msg");
 
         // then
-        verify(ccdApi).getCase(EXISTING_CASE_ID, JURISDICTION);
         verify(scannedDocumentsValidator)
             .verifyExceptionRecordAddsNoDuplicates(anyList(), anyList(), eq(CASE_REF), eq(EXISTING_CASE_ID));
         verifyNoMoreInteractions(ccdApi);
@@ -169,17 +173,19 @@ class SupplementaryEvidenceUpdaterTest {
             .id(Long.parseLong(EXISTING_CASE_ID))
             .data(existingData)
             .build();
-        given(ccdApi.getCase(EXISTING_CASE_ID, JURISDICTION)).willReturn(existingCaseDetails);
 
         List<Map<String, Object>> exceptionRecordDocuments = emptyList();
 
         AttachToCaseEventData callBackEvent = getCallbackEvent(exceptionRecordDocuments);
 
         // when
-        supplementaryEvidenceUpdater.updateSupplementaryEvidence(callBackEvent, EXISTING_CASE_ID);
+        supplementaryEvidenceUpdater.updateSupplementaryEvidence(
+            callBackEvent,
+            existingCaseDetails,
+            EXISTING_CASE_ID
+        );
 
         // then
-        verify(ccdApi).getCase(EXISTING_CASE_ID, JURISDICTION);
         verify(scannedDocumentsValidator)
             .verifyExceptionRecordAddsNoDuplicates(anyList(), anyList(), eq(CASE_REF), eq(EXISTING_CASE_ID));
         verifyNoMoreInteractions(ccdApi);

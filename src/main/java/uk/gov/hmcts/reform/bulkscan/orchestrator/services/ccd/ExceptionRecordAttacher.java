@@ -190,11 +190,14 @@ public class ExceptionRecordAttacher {
             targetCaseCcdRef
         );
 
+        CaseDetails targetCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
+
         switch (callBackEvent.classification) {
             case EXCEPTION:
             case SUPPLEMENTARY_EVIDENCE:
                 supplementaryEvidenceUpdater.updateSupplementaryEvidence(
                     callBackEvent,
+                    targetCase,
                     targetCaseCcdRef
                 );
                 return Optional.empty();
@@ -202,6 +205,7 @@ public class ExceptionRecordAttacher {
             case SUPPLEMENTARY_EVIDENCE_WITH_OCR:
                 return supplementaryEvidenceWithOcrUpdater.updateSupplementaryEvidenceWithOcr(
                     callBackEvent,
+                    targetCase,
                     targetCaseCcdRef,
                     ignoreWarnings
                 );
