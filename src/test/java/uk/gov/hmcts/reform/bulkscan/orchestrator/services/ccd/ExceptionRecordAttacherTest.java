@@ -9,9 +9,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -19,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.time.LocalDateTime.now;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
@@ -44,9 +47,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 class ExceptionRecordAttacherTest {
 
     @Mock
-    private ServiceConfigProvider serviceConfigProvider;
-
-    @Mock
     private SupplementaryEvidenceUpdater supplementaryEvidenceUpdater;
 
     @Mock
@@ -57,9 +57,6 @@ class ExceptionRecordAttacherTest {
 
     @Mock
     private CcdApi ccdApi;
-
-    @Mock
-    private CcdCaseUpdater ccdCaseUpdater;
 
     private ExceptionRecordAttacher exceptionRecordAttacher;
 
@@ -109,6 +106,8 @@ class ExceptionRecordAttacherTest {
             paymentsProcessor,
             ccdApi
         );
+
+        exceptionRecord = getExceptionRecord();
     }
 
     @Test
@@ -238,6 +237,34 @@ class ExceptionRecordAttacherTest {
                 "controlNumber", documentNumber,
                 "someNumber", 3
             )
+        );
+    }
+
+    private ExceptionRecord getExceptionRecord() {
+        return new ExceptionRecord(
+            "1",
+            "caseTypeId",
+            "envelopeId123",
+            "12345",
+            "some jurisdiction",
+            SUPPLEMENTARY_EVIDENCE_WITH_OCR,
+            "Form1",
+            now(),
+            now(),
+            singletonList(new ScannedDocument(
+                DocumentType.FORM,
+                "D8",
+                new DocumentUrl(
+                    "http://locahost",
+                    "http://locahost/binary",
+                    "file1.pdf"
+                ),
+                "1234",
+                "file1.pdf",
+                now(),
+                now()
+            )),
+            emptyList()
         );
     }
 }
