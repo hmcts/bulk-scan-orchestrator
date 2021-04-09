@@ -34,8 +34,7 @@ public class SupplementaryEvidenceUpdater {
 
     public void updateSupplementaryEvidence(
         AttachToCaseEventData callBackEvent,
-        CaseDetails targetCase,
-        String targetCaseCcdRef
+        CaseDetails targetCase
     ) {
         List<Map<String, Object>> targetCaseDocuments = Documents.getScannedDocuments(targetCase);
 
@@ -43,7 +42,7 @@ public class SupplementaryEvidenceUpdater {
             targetCaseDocuments,
             callBackEvent.exceptionRecordDocuments,
             Long.toString(callBackEvent.exceptionRecordId),
-            targetCaseCcdRef
+            Long.toString(targetCase.getId())
         );
 
         List<Map<String, Object>> documentsToAttach = Documents.removeAlreadyAttachedDocuments(

@@ -197,8 +197,7 @@ public class ExceptionRecordAttacher {
             case SUPPLEMENTARY_EVIDENCE:
                 supplementaryEvidenceUpdater.updateSupplementaryEvidence(
                     callBackEvent,
-                    targetCase,
-                    targetCaseCcdRef
+                    targetCase
                 );
                 return Optional.empty();
 
@@ -206,7 +205,6 @@ public class ExceptionRecordAttacher {
                 return supplementaryEvidenceWithOcrUpdater.updateSupplementaryEvidenceWithOcr(
                     callBackEvent,
                     targetCase,
-                    targetCaseCcdRef,
                     ignoreWarnings
                 );
 

@@ -103,8 +103,7 @@ class SupplementaryEvidenceUpdaterTest {
         // when
         supplementaryEvidenceUpdater.updateSupplementaryEvidence(
             callBackEvent,
-            existingCaseDetails,
-            EXISTING_CASE_ID
+            existingCaseDetails
         );
 
         // then
@@ -148,8 +147,7 @@ class SupplementaryEvidenceUpdaterTest {
         assertThatCode(() ->
             supplementaryEvidenceUpdater.updateSupplementaryEvidence(
                 callBackEvent,
-                existingCaseDetails,
-                EXISTING_CASE_ID
+                existingCaseDetails
             ))
             .isInstanceOf(DuplicateDocsException.class)
             .hasMessage("msg");
@@ -181,8 +179,7 @@ class SupplementaryEvidenceUpdaterTest {
         // when
         supplementaryEvidenceUpdater.updateSupplementaryEvidence(
             callBackEvent,
-            existingCaseDetails,
-            EXISTING_CASE_ID
+            existingCaseDetails
         );
 
         // then

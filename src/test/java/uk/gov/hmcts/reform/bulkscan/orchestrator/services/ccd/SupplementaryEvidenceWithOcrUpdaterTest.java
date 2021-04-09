@@ -88,7 +88,6 @@ class SupplementaryEvidenceWithOcrUpdaterTest {
         Optional<ErrorsAndWarnings> res = supplementaryEvidenceWithOcrUpdater.updateSupplementaryEvidenceWithOcr(
             callBackEvent,
             EXISTING_CASE_DETAILS,
-            EXISTING_CASE_ID,
             true);
 
         // then
@@ -106,7 +105,6 @@ class SupplementaryEvidenceWithOcrUpdaterTest {
             supplementaryEvidenceWithOcrUpdater.updateSupplementaryEvidenceWithOcr(
                 callBackEvent,
                 EXISTING_CASE_DETAILS,
-                EXISTING_CASE_ID,
                 true
             ))
             .isInstanceOf(CallbackException.class)
@@ -126,7 +124,6 @@ class SupplementaryEvidenceWithOcrUpdaterTest {
             supplementaryEvidenceWithOcrUpdater.updateSupplementaryEvidenceWithOcr(
                 callBackEvent,
                 EXISTING_CASE_DETAILS,
-                EXISTING_CASE_ID,
                 true
             ))
             .isInstanceOf(CallbackException.class)
@@ -146,7 +143,6 @@ class SupplementaryEvidenceWithOcrUpdaterTest {
             supplementaryEvidenceWithOcrUpdater.updateSupplementaryEvidenceWithOcr(
                 callBackEvent,
                 EXISTING_CASE_DETAILS,
-                EXISTING_CASE_ID,
                 true
             ))
             .isInstanceOf(CallbackException.class)

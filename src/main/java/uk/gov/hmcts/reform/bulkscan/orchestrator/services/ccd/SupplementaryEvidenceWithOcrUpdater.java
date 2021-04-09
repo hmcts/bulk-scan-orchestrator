@@ -26,7 +26,6 @@ public class SupplementaryEvidenceWithOcrUpdater {
     public Optional<ErrorsAndWarnings> updateSupplementaryEvidenceWithOcr(
         AttachToCaseEventData callBackEvent,
         CaseDetails targetCase,
-        String targetCaseCcdRef,
         boolean ignoreWarnings
     ) {
         ServiceConfigItem serviceConfigItem = getServiceConfig(callBackEvent.service);
@@ -37,7 +36,7 @@ public class SupplementaryEvidenceWithOcrUpdater {
             ignoreWarnings,
             callBackEvent.idamToken,
             callBackEvent.userId,
-            targetCaseCcdRef,
+            Long.toString(targetCase.getId()),
             targetCase.getCaseTypeId()
         );
     }
