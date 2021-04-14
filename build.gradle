@@ -269,7 +269,6 @@ dependencies {
   implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '4.0.0'
   implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '2.0.0'
   implementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: '4.7.6'
-  implementation group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version:'0.1.0'
 
   implementation group: 'com.microsoft.azure', name: 'azure-servicebus', version: '3.6.2',{
     exclude group: 'net.minidev', module: 'json-smart' // most up-to-date libraries use v2.* now. this one brings in 1.3
@@ -298,7 +297,7 @@ dependencies {
   integrationTestImplementation sourceSets.main.runtimeClasspath
   integrationTestImplementation sourceSets.test.runtimeClasspath
   integrationTestImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '3.0.2'
-  
+
   integrationTestImplementation group: 'com.github.tomakehurst', name: 'wiremock-jre8', version: '2.26.3'
 
   functionalTestImplementation sourceSets.main.runtimeClasspath

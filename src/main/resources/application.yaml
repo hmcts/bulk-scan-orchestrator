@@ -16,7 +16,8 @@ management:
 spring:
   application:
     name: Bulk Scan Orchestrator
-
+  config:
+    import: "optional:configtree:/mnt/secrets/bulk-scan/"
 azure:
   servicebus:
     namespace: ${QUEUE_NAMESPACE}
