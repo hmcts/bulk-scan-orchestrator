@@ -9,24 +9,42 @@ java:
   devApplicationInsightsInstrumentKey: "f666440f-43c0-4abb-9c20-2ce175a374f0"
   keyVaults:
     bulk-scan:
-      resourceGroup: bulk-scan
       secrets:
-        - idam-client-secret
-        - s2s-secret-bulk-scan-orchestrator
-        - idam-users-bulkscan-username
-        - idam-users-bulkscan-password
-        - idam-users-cmc-username
-        - idam-users-cmc-password
-        - idam-users-div-username
-        - idam-users-div-password
-        - idam-users-probate-username
-        - idam-users-probate-password
-        - idam-users-publiclaw-username
-        - idam-users-publiclaw-password
-        - idam-users-sscs-username
-        - idam-users-sscs-password
-        - envelopes-staging-queue-listen-shared-access-key
-        - payments-staging-queue-send-shared-access-key
-        - processed-envelopes-staging-queue-send-shared-access-key
-        - envelopes-queue-max-delivery-count
-        - app-insights-instrumentation-key
+        - name: idam-client-secret
+          alias: IDAM_CLIENT_SECRET
+        - name: s2s-secret-bulk-scan-orchestrator
+          alias: S2S_SECRET
+        - name: idam-users-bulkscan-username
+          alias: idam.users.bulkscan.username
+        - name: idam-users-bulkscan-password
+          alias: idam.users.bulkscan.password
+        - name: idam-users-cmc-username
+          alias: idam.users.cmc.username
+        - name: idam-users-cmc-password
+          alias: idam.users.cmc.password
+        - name: idam-users-div-username
+          alias: idam.users.divorce.username
+        - name: idam-users-div-password
+          alias: idam.users.divorce.password
+        - name: idam-users-probate-username
+          alias: idam.users.probate.username
+        - name: idam-users-probate-password
+          alias: idam.users.probate.password
+        - name: idam-users-publiclaw-username
+          alias: idam.users.publiclaw.username
+        - name: idam-users-publiclaw-password
+          alias: idam.users.publiclaw.password
+        - name: idam-users-sscs-username
+          alias: idam.users.sscs.username
+        - name: idam-users-sscs-password
+          alias: idam.users.sscs.password
+        - name: envelopes-staging-queue-listen-shared-access-key
+          alias: ENVELOPES_QUEUE_READ_ACCESS_KEY
+        - name: payments-staging-queue-send-shared-access-key
+          alias: PAYMENTS_QUEUE_WRITE_ACCESS_KEY
+        - name: processed-envelopes-staging-queue-send-shared-access-key
+          alias: PROCESSED_ENVELOPES_QUEUE_WRITE_ACCESS_KEY
+        - name: envelopes-queue-max-delivery-count
+          alias: ENVELOPES_QUEUE_MAX_DELIVERY_COUNT
+        - name: app-insights-instrumentation-key
+          alias: azure.application-insights.instrumentation-key
