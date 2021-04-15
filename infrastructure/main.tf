@@ -38,7 +38,7 @@ module "bulk-scan-db" {
   location           = var.location_db
   env                = var.env
   database_name      = "bulk_scan_orchestrator"
-  postgresql_user    = "bulk_scanner_orch"
+  postgresql_user    = "bulk_scan_orchestrator"
   postgresql_version = "11"
   sku_name           = "GP_Gen5_2"
   sku_tier           = "GeneralPurpose"
@@ -55,7 +55,7 @@ module "bulk-scan-staging-db" {
   location           = var.location_db
   env                = var.env
   database_name      = "bulk_scan_orchestrator"
-  postgresql_user    = "bulk_scanner_orch"
+  postgresql_user    = "bulk_scan_orchestrator"
   postgresql_version = "11"
   sku_name           = "GP_Gen5_2"
   sku_tier           = "GeneralPurpose"
