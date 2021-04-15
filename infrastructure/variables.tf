@@ -13,6 +13,11 @@ variable "location_app" {
   default = "UK South"
 }
 
+variable "location_db" {
+  type    = "string"
+  default = "UK South"
+}
+
 variable "env" {
   type = "string"
 }
