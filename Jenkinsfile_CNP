@@ -93,14 +93,15 @@ withPipeline(type, product, component) {
     builder.gradle('integration')
   }
 
+  enableDbMigration('bulk-scan')
   enableAksStagingDeployment()
   disableLegacyDeployment()
   enableSlackNotifications(channel)
   enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
-  
+
   def branchesToSync = ['demo', 'perftest']
   syncBranchesWithMaster(branchesToSync)
-  
+
   onPR() {
     loadVaultSecrets(prSecrets)
   }

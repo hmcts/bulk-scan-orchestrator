@@ -10,6 +10,7 @@ plugins {
   id 'org.sonarqube' version '3.1.1'
   id 'info.solidsoft.pitest' version '1.6.0'
   id 'au.com.dius.pact' version '4.2.3'
+  id 'org.flywaydb.flyway' version '7.7.2'
 }
 
 group = 'uk.gov.hmcts.reform'
@@ -253,6 +254,9 @@ dependencyManagement {
 }
 
 dependencies {
+  implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.19'
+  implementation group: 'org.flywaydb', name: 'flyway-core', version: '7.7.2'
+
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
@@ -322,5 +326,14 @@ bootJar {
 
   manifest {
     attributes('Implementation-Version': project.version.toString())
+  }
+}
+
+import org.flywaydb.gradle.task.FlywayMigrateTask
+
+task migratePostgresDatabase(type: FlywayMigrateTask) {
+  baselineOnMigrate = true
+  if (project.hasProperty("dburl")) { // set by jenkins
+    url = "jdbc:postgresql://${dburl}"
   }
 }
