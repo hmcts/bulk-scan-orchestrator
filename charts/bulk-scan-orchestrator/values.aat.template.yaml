@@ -3,6 +3,7 @@ java:
     ENVELOPES_QUEUE_NAME: "envelopes-staging"
     PROCESSED_ENVELOPES_QUEUE_NAME: "processed-envelopes-staging"
     PAYMENTS_QUEUE_NAME: "payments-staging"
+    FLYWAY_SKIP_MIGRATIONS: "false"
   # Don't modify below here
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
