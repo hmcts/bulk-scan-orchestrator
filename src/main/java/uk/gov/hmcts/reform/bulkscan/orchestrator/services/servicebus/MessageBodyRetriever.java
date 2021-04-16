@@ -9,7 +9,6 @@ public final class MessageBodyRetriever {
 
     public static byte[] getBinaryData(MessageBody messageBody) {
         List<byte[]> binaryData = messageBody.getBinaryData();
-
         return CollectionUtils.isEmpty(binaryData) ? null : binaryData.get(0);
     }
 
