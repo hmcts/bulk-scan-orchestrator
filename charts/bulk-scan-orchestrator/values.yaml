@@ -61,7 +61,7 @@ java:
     CAN_SEARCH_CASES_BY_ENVELOPE_ID_PUBLICLAW: "false"
     FLYWAY_URL: jdbc:postgresql://bulk-scan-processor-{{ .Values.global.environment }}.postgres.database.azure.com:5432/bulk_scan?sslmode=require
     FLYWAY_USER: bulk_scanner@bulk-scan-processor-{{ .Values.global.environment }}
-    FLYWAY_SKIP_MIGRATIONS: "false"
+    FLYWAY_SKIP_MIGRATIONS: "true"
   keyVaults:
     bulk-scan:
       secrets:
