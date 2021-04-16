@@ -25,7 +25,7 @@ java:
     FLYWAY_URL: "jdbc:postgresql://{{ .Release.Name }}-postgresql:5432/{{ .Values.postgresql.postgresqlDatabase}}"
     FLYWAY_USER: "{{ .Values.postgresql.postgresqlUsername}}"
     FLYWAY_PASSWORD: "{{ .Values.postgresql.postgresqlPassword}}"
-    FLYWAY_SKIP_MIGRATIONS: "true"
+    FLYWAY_SKIP_MIGRATIONS: "false"
   keyVaults:
     "bulk-scan":
       secrets:
