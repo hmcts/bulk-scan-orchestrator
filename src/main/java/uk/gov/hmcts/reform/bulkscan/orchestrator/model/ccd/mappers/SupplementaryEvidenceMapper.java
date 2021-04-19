@@ -76,6 +76,22 @@ public class SupplementaryEvidenceMapper {
                 envelopeReferenceHelper.parseEnvelopeReferences(existingEnvelopeReferences)
             );
 
+            updatedEnvelopeReferences
+                .stream()
+                .map(e -> e.value)
+                .forEach(
+                    e -> log.info(
+                        "Update case: {}, zip file: {}, envelope id: {}, "
+                        +"existing case has bulkscan envelope id: {}, action: {}",
+                        envelope.caseRef,
+                        envelope.zipFileName,
+                        envelope.id,
+                        e.id,
+                        e.action
+                    )
+                );
+
+
             updatedEnvelopeReferences.add(
                 new CcdCollectionElement<>(new EnvelopeReference(envelope.id, CaseAction.UPDATE))
             );
