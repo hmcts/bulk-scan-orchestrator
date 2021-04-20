@@ -82,7 +82,7 @@ public class SupplementaryEvidenceMapper {
                 .forEach(
                     e -> log.info(
                         "Update case: {}, zip file: {}, envelope id: {}, "
-                        +"existing case has bulkscan envelope id: {}, action: {}",
+                            + "existing case has bulkscan envelope id: {}, action: {}",
                         envelope.caseRef,
                         envelope.zipFileName,
                         envelope.id,
