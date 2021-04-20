@@ -81,13 +81,15 @@ public class SupplementaryEvidenceMapper {
                 .map(e -> e.value)
                 .forEach(
                     e -> log.info(
-                        "Update case: {}, zip file: {}, envelope id: {}, "
-                            + "existing case has bulkscan envelope id: {}, action: {}",
-                        envelope.caseRef,
-                        envelope.zipFileName,
-                        envelope.id,
-                        e.id,
-                        e.action
+                        String.format(
+                            "Update case: %s, zip file: %s, envelope id: %s, "
+                                + "existing case has bulkscan envelope id: %s, action: %s",
+                            envelope.caseRef,
+                            envelope.zipFileName,
+                            envelope.id,
+                            e.id,
+                            e.action
+                        )
                     )
                 );
 

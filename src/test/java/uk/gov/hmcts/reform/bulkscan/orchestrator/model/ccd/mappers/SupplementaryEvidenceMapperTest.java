@@ -167,6 +167,8 @@ class SupplementaryEvidenceMapperTest {
             .extracting(ILoggingEvent::getMessage)
             .containsExactly(
                 "Mapping documents: container bulkscan, zipFileName zip-file-test.zip, caseRef ABC123",
+                "Update case: ABC123, zip file: zip-file-test.zip, envelope id: eb9c3598-35fc-424e-b05a-902ee9f11d56,"
+                    + " existing case has bulkscan envelope id: id1, action: CREATE",
                 "Existing docs: ",
                 "New docs: uuid: uuid1, dcn: control_number_1, fileName: file_1.pdf",
                 "Docs to add: uuid: uuid1, dcn: control_number_1, fileName: file_1.pdf"
