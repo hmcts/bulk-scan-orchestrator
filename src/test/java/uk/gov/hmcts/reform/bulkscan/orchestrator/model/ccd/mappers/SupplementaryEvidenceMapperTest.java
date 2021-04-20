@@ -145,7 +145,10 @@ class SupplementaryEvidenceMapperTest {
     void should_set_envelope_references_correctly_when_service_supports_them() {
         // given
         var parsedExistingEnvelopeReferences =
-            asList(new CcdCollectionElement<>(new EnvelopeReference("id1", CaseAction.CREATE)));
+            asList(
+                new CcdCollectionElement<>(new EnvelopeReference("id1", CaseAction.CREATE)),
+                new CcdCollectionElement<>(new EnvelopeReference("id2", CaseAction.UPDATE))
+                );
 
         given(envelopeReferenceHelper.serviceSupportsEnvelopeReferences(any())).willReturn(true);
         given(envelopeReferenceHelper.parseEnvelopeReferences(any())).willReturn(parsedExistingEnvelopeReferences);
@@ -167,8 +170,8 @@ class SupplementaryEvidenceMapperTest {
             .extracting(ILoggingEvent::getMessage)
             .containsExactly(
                 "Mapping documents: container bulkscan, zipFileName zip-file-test.zip, caseRef ABC123",
-                "Update case: ABC123, zip file: zip-file-test.zip, envelope id: eb9c3598-35fc-424e-b05a-902ee9f11d56,"
-                    + " existing case has bulkscan envelope id: id1, action: CREATE",
+                "Update case: ABC123, zip file: zip-file-test.zip, envelope id: eb9c3598-35fc-424e-b05a-902ee9f11d56, "
+                    + "existing case has bulkscan refs: id:id1-action:CREATE,id:id2-action:UPDATE",
                 "Existing docs: ",
                 "New docs: uuid: uuid1, dcn: control_number_1, fileName: file_1.pdf",
                 "Docs to add: uuid: uuid1, dcn: control_number_1, fileName: file_1.pdf"
