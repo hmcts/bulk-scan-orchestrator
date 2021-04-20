@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.env
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -76,6 +77,21 @@ public class SupplementaryEvidenceMapper {
                 envelopeReferenceHelper.parseEnvelopeReferences(existingEnvelopeReferences)
             );
 
+            String existingReferences = updatedEnvelopeReferences
+                .stream()
+                .map(e -> "id:" + e.value.id + "-action:" + e.value.action)
+                .collect(Collectors.joining(","));
+
+            log.info(
+                String.format(
+                    "Update case: %s, zip file: %s, envelope id: %s, "
+                        + "existing case has bulkscan refs: %s",
+                    envelope.caseRef,
+                    envelope.zipFileName,
+                    envelope.id,
+                    existingReferences
+                )
+            );
             updatedEnvelopeReferences.add(
                 new CcdCollectionElement<>(new EnvelopeReference(envelope.id, CaseAction.UPDATE))
             );
