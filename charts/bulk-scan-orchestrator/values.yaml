@@ -59,8 +59,6 @@ java:
     CAN_SEARCH_CASES_BY_ENVELOPE_ID_FINREM: "false"
     CAN_SEARCH_CASES_BY_ENVELOPE_ID_CMC: "false"
     CAN_SEARCH_CASES_BY_ENVELOPE_ID_PUBLICLAW: "false"
-    FLYWAY_URL: jdbc:postgresql://bulk-scan-processor-{{ .Values.global.environment }}.postgres.database.azure.com:5432/bulk_scan?sslmode=require
-    FLYWAY_USER: bulk_scanner@bulk-scan-processor-{{ .Values.global.environment }}
     FLYWAY_SKIP_MIGRATIONS: "true"
   keyVaults:
     bulk-scan:
@@ -103,6 +101,16 @@ java:
           alias: ENVELOPES_QUEUE_MAX_DELIVERY_COUNT
         - name: app-insights-instrumentation-key
           alias: azure.application-insights.instrumentation-key
+        - name: bulk-scan-orchestrator-POSTGRES-PASS
+          alias: DB_PASSWORD
+        - name: bulk-scan-orchestrator-POSTGRES-USER
+          alias: DB_USER
+        - name: bulk-scan-orchestrator-POSTGRES-HOST
+          alias: DB_HOST
+        - name: bulk-scan-orchestrator-POSTGRES-PORT
+          alias: DB_PORT
+        - name: bulk-scan-orchestrator-POSTGRES-DATABASE
+          alias: DB_NAME
   image: hmctspublic.azurecr.io/bulk-scan/orchestrator:latest
 
 servicebus:
