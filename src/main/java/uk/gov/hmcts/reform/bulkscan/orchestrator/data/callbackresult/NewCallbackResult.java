@@ -10,11 +10,11 @@ public class NewCallbackResult {
 
     public static NewCallbackResult createCaseRequest(String exceptionRecordId, String caseId) {
         return new NewCallbackResult(CREATE_CASE, exceptionRecordId, caseId);
-    };
+    }
 
     public static NewCallbackResult attachToCaseCaseRequest(String exceptionRecordId, String caseId) {
         return new NewCallbackResult(ATTACH_TO_CASE, exceptionRecordId, caseId);
-    };
+    }
 
     private NewCallbackResult(
         RequestType requestType,

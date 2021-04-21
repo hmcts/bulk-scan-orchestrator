@@ -21,7 +21,7 @@ public class CallbackResultRepository {
                 + "VALUES (:id, :requestType, :exceptionRecordId, :caseId, CURRENT_TIMESTAMP)",
             new MapSqlParameterSource()
                 .addValue("id", id)
-                .addValue("requestType", callbackResult.requestType)
+                .addValue("requestType", callbackResult.requestType.name())
                 .addValue("exceptionRecordId", callbackResult.exceptionRecordId)
                 .addValue("caseId", callbackResult.caseId)
         );
