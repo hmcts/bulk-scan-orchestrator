@@ -49,13 +49,13 @@ java:
           alias: ENVELOPES_QUEUE_MAX_DELIVERY_COUNT
         - name: app-insights-instrumentation-key
           alias: azure.application-insights.instrumentation-key
-        - name: bulk-scan-orchestrator-POSTGRES-PASS
+        - name: orchestrator-staging-postgres-pass
           alias: DB_PASSWORD
-        - name: bulk-scan-orchestrator-POSTGRES-USER
+        - name: orchestrator-staging-postgres-user
           alias: DB_USER
-        - name: bulk-scan-orchestrator-POSTGRES-HOST
+        - name: orchestrator-staging-postgres-host
           alias: DB_HOST
-        - name: bulk-scan-orchestrator-POSTGRES-PORT
+        - name: orchestrator-staging-postgres-port
           alias: DB_PORT
-        - name: bulk-scan-orchestrator-POSTGRES-DATABASE
+        - name: orchestrator-staging-postgres-database
           alias: DB_NAME
