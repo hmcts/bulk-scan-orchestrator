@@ -341,6 +341,14 @@ bootJar {
 
 import org.flywaydb.gradle.task.FlywayMigrateTask
 
+flyway {
+  user = System.getenv('DB_USER')
+  password = System.getenv('DB_PASSWORD')
+
+  baselineOnMigrate = true
+  baselineVersion = '000'
+}
+
 task migratePostgresDatabase(type: FlywayMigrateTask) {
   baselineOnMigrate = true
   if (project.hasProperty("dburl")) { // set by jenkins
