@@ -19,8 +19,9 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.Requ
 @IntegrationTest
 public class CallbackResultRepositoryTest {
 
-    public static final String ER_ID_1 = "ER_ID_1";
-    public static final String CASE_ID_1 = "CASE_ID_1";
+    private static final String ER_ID_1 = "ER_ID_1";
+    private static final String CASE_ID_1 = "CASE_ID_1";
+
     @Autowired private CallbackResultRepository repo;
     @Autowired private DbHelper dbHelper;
 
