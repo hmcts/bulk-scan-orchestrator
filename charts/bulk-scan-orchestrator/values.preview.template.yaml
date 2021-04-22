@@ -26,6 +26,12 @@ java:
     FLYWAY_USER: "{{ .Values.postgresql.postgresqlUsername}}"
     FLYWAY_PASSWORD: "{{ .Values.postgresql.postgresqlPassword}}"
     FLYWAY_SKIP_MIGRATIONS: "false"
+    DB_HOST: "{{ .Release.Name }}-postgresql"
+    DB_NAME: "{{ .Values.postgresql.postgresqlDatabase}}"
+    DB_USER: "{{ .Values.postgresql.postgresqlUsername}}"
+    DB_PASSWORD: "{{ .Values.postgresql.postgresqlPassword}}"
+    DB_PORT: '5432'
+    DB_CONN_OPTIONS: ""
   keyVaults:
     "bulk-scan":
       secrets:
