@@ -93,7 +93,7 @@ withPipeline(type, product, component) {
     builder.gradle('integration')
   }
 
-  enableDbMigration('bs_orchestrator')
+  enableDbMigration('bulk-scan')
   enableAksStagingDeployment()
   disableLegacyDeployment()
   enableSlackNotifications(channel)
