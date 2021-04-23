@@ -318,6 +318,11 @@ dependencies {
   functionalTestImplementation sourceSets.test.runtimeClasspath
   functionalTestImplementation group: 'uk.gov.hmcts.reform', name: 'document-management-client', version: '7.0.0'
 
+  functionalTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.15.2', {
+    exclude group: 'junit', module: 'junit'
+  }
+  functionalTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.15.2'
+
   smokeTestImplementation sourceSets.main.runtimeClasspath
   smokeTestImplementation sourceSets.test.runtimeClasspath
 

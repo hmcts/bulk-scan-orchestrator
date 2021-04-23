@@ -10,11 +10,11 @@ spring:
   application:
     name: Bulk Scan Orchestrator Functional Tests
   datasource:
-    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_CONN_OPTIONS}
-    username: ${DB_USER}
-    password: ${DB_PASSWORD}
-    properties:
-      charSet: UTF-8
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    url: jdbc:tc:postgresql:11.0://localhost/bs_orchestrator
+
+flyway:
+  skip-migrations: false
 
 queue:
   namespace: ${QUEUE_NAMESPACE}
