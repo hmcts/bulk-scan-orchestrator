@@ -10,7 +10,7 @@ spring:
   application:
     name: Bulk Scan Orchestrator Functional Tests
   datasource:
-    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    driver-class-name: org.postgresql.Driver
     url: jdbc:tc:postgresql:11.0://localhost/bs_orchestrator
 
 queue:
