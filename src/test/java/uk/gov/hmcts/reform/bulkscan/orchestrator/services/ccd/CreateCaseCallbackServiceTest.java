@@ -5,9 +5,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.CallbackResultRepository;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.NewCallbackResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
@@ -21,10 +24,12 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceNotConfi
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
@@ -38,7 +43,9 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.RequestType.CREATE_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdCallbackType.CASE_CREATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
@@ -62,6 +69,8 @@ class CreateCaseCallbackServiceTest {
     @Mock CcdNewCaseCreator ccdNewCaseCreator;
     @Mock ExceptionRecordFinalizer exceptionRecordFinalizer;
     @Mock PaymentsProcessor paymentsProcessor;
+    @Mock private CallbackResultRepository callbackResultRepository;
+
 
     private CreateCaseCallbackService service;
 
@@ -73,7 +82,8 @@ class CreateCaseCallbackServiceTest {
             caseFinder,
             ccdNewCaseCreator,
             exceptionRecordFinalizer,
-            paymentsProcessor
+            paymentsProcessor,
+            callbackResultRepository
         );
     }
 
@@ -91,6 +101,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException.getCause()).isNull();
         assertThat(callbackException).hasMessage("The some event event is not supported. Please contact service team");
 
+        verifyNoInteractions(callbackResultRepository);
         verify(serviceConfigProvider, never()).getConfig(anyString());
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
@@ -113,6 +124,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException.getCause()).isNull();
         assertThat(callbackException).hasMessage("No case type ID supplied");
 
+        verifyNoInteractions(callbackResultRepository);
         verify(serviceConfigProvider, never()).getConfig(anyString());
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
@@ -136,6 +148,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException.getCause()).isNull();
         assertThat(callbackException).hasMessage("Case type ID () has invalid format");
 
+        verifyNoInteractions(callbackResultRepository);
         verify(serviceConfigProvider, never()).getConfig(anyString());
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
@@ -160,6 +173,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException.getCause()).isNull();
         assertThat(callbackException).hasMessage("oh no");
 
+        verifyNoInteractions(callbackResultRepository);
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
 
@@ -183,6 +197,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException.getCause()).isNull();
         assertThat(callbackException).hasMessage("Transformation URL is not configured");
 
+        verifyNoInteractions(callbackResultRepository);
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
 
@@ -208,6 +223,7 @@ class CreateCaseCallbackServiceTest {
         );
 
         // then
+        verifyNoInteractions(callbackResultRepository);
         assertThat(callbackException.getCause()).isNull();
         assertThat(callbackException).hasMessage("Callback has no Idam token received in the header");
     }
@@ -234,6 +250,7 @@ class CreateCaseCallbackServiceTest {
         );
 
         // then
+        verifyNoInteractions(callbackResultRepository);
         assertThat(callbackException.getCause()).isNull();
         assertThat(callbackException).hasMessage("Callback has no user id received in the header");
     }
@@ -269,6 +286,7 @@ class CreateCaseCallbackServiceTest {
             )
         );
 
+        verifyNoInteractions(callbackResultRepository);
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
 
@@ -297,16 +315,17 @@ class CreateCaseCallbackServiceTest {
             )
         );
 
+        verifyNoInteractions(callbackResultRepository);
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
 
     @Test
-    void should_return_existing_case_if_it_exists_in_ccd_for_a_given_exception_record() throws Exception {
+    void should_return_existing_case_if_it_exists_in_ccd_for_a_given_exception_record() {
         // given
         setUpServiceConfig();
 
         when(caseFinder.findCases(any(), any()))
-            .thenReturn(asList(345L));
+            .thenReturn(singletonList(345L));
         Map<String, Object> caseData = basicCaseData();
         Map<String, Object> finalizedCaseData = new HashMap<>();
         when(exceptionRecordFinalizer.finalizeExceptionRecord(caseData, "345", CASE_CREATION))
@@ -324,11 +343,12 @@ class CreateCaseCallbackServiceTest {
         assertThat(result.getWarnings()).isEmpty();
         assertThat(result.getErrors()).isEmpty();
 
+        verifyNoInteractions(callbackResultRepository);
         verify(exceptionRecordFinalizer).finalizeExceptionRecord(caseData, "345", CASE_CREATION);
     }
 
     @Test
-    void should_return_error_if_multiple_cases_exist_in_ccd_for_a_given_exception_record() throws Exception {
+    void should_return_error_if_multiple_cases_exist_in_ccd_for_a_given_exception_record() {
         setUpServiceConfig();
 
         when(caseFinder.findCases(any(), any()))
@@ -344,6 +364,7 @@ class CreateCaseCallbackServiceTest {
             .isInstanceOf(MultipleCasesFoundException.class)
             .hasMessage("Multiple cases (345, 456) found for the given bulk scan case reference: 123");
 
+        verifyNoInteractions(callbackResultRepository);
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
 
@@ -375,16 +396,28 @@ class CreateCaseCallbackServiceTest {
 
         // then
         if (isAllowedToProceed) {
+            if (ignoresWarnings) {
+                var callbackResultCaptor = ArgumentCaptor.forClass(NewCallbackResult.class);
+                verify(callbackResultRepository).insert(callbackResultCaptor.capture());
+                assertThat(callbackResultCaptor.getValue()).satisfies(res -> {
+                    assertThat(res.requestType).isEqualTo(CREATE_CASE);
+                    assertThat(res.exceptionRecordId).isEqualTo(CASE_ID);
+                    assertThat(res.caseId).isEqualTo("EXISTING_CASE_ID");
+                });
+            } else {
+                verifyNoInteractions(callbackResultRepository);
+            }
             assertThat(result.getErrors()).isEmpty();
             assertThat(result.getWarnings()).containsExactly(CreateCaseCallbackService.AWAITING_PAYMENTS_MESSAGE);
         } else {
+            verifyNoInteractions(callbackResultRepository);
             assertThat(result.getErrors()).containsExactly(CreateCaseCallbackService.AWAITING_PAYMENTS_MESSAGE);
             assertThat(result.getWarnings()).isEmpty();
         }
     }
 
     @Test
-    void should_allow_creating_case_when_payments_are_not_present_but_user_is_allowed_to_proceed_and_ignores_warnings() throws Exception {
+    void should_allow_creating_case_when_payments_are_not_present_but_user_is_allowed_to_proceed_and_ignores_warnings() {
         // given
         setUpServiceConfig("https://localhost", true); // allowed to create case despite pending payments
 
@@ -410,6 +443,13 @@ class CreateCaseCallbackServiceTest {
                 );
 
         // then
+        var callbackResultCaptor = ArgumentCaptor.forClass(NewCallbackResult.class);
+        verify(callbackResultRepository).insert(callbackResultCaptor.capture());
+        assertThat(callbackResultCaptor.getValue()).satisfies(res -> {
+            assertThat(res.requestType).isEqualTo(CREATE_CASE);
+            assertThat(res.exceptionRecordId).isEqualTo(CASE_ID);
+            assertThat(res.caseId).isEqualTo(Long.toString(newCaseId));
+        });
         assertThat(result.getErrors()).isEmpty();
         assertThat(result.getWarnings()).isEmpty();
         verify(paymentsProcessor).updatePayments(any(), anyString(), anyString(), eq(Long.toString(newCaseId)));
@@ -445,6 +485,13 @@ class CreateCaseCallbackServiceTest {
                 );
 
         // then
+        var callbackResultCaptor = ArgumentCaptor.forClass(NewCallbackResult.class);
+        verify(callbackResultRepository).insert(callbackResultCaptor.capture());
+        assertThat(callbackResultCaptor.getValue()).satisfies(res -> {
+            assertThat(res.requestType).isEqualTo(CREATE_CASE);
+            assertThat(res.exceptionRecordId).isEqualTo(CASE_ID);
+            assertThat(res.caseId).isEqualTo(Long.toString(newCaseId));
+        });
         assertThat(result.getErrors()).containsOnly("Payment references cannot be processed. Please try again later");
         assertThat(result.getWarnings()).isEmpty();
     }

@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.CallbackResultRepository;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.NewCallbackResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
@@ -26,6 +28,7 @@ import java.util.Optional;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.NewCallbackResult.createCaseRequest;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasIdamToken;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasUserId;
@@ -46,6 +49,7 @@ public class CreateCaseCallbackService {
     private final CcdNewCaseCreator ccdNewCaseCreator;
     private final ExceptionRecordFinalizer exceptionRecordFinalizer;
     private final PaymentsProcessor paymentsProcessor;
+    private final CallbackResultRepository callbackResultRepository;
 
     public CreateCaseCallbackService(
         ExceptionRecordValidator validator,
@@ -53,7 +57,8 @@ public class CreateCaseCallbackService {
         CaseFinder caseFinder,
         CcdNewCaseCreator ccdNewCaseCreator,
         ExceptionRecordFinalizer exceptionRecordFinalizer,
-        PaymentsProcessor paymentsProcessor
+        PaymentsProcessor paymentsProcessor,
+        CallbackResultRepository callbackResultRepository
     ) {
         this.validator = validator;
         this.serviceConfigProvider = serviceConfigProvider;
@@ -61,6 +66,7 @@ public class CreateCaseCallbackService {
         this.ccdNewCaseCreator = ccdNewCaseCreator;
         this.exceptionRecordFinalizer = exceptionRecordFinalizer;
         this.paymentsProcessor = paymentsProcessor;
+        this.callbackResultRepository = callbackResultRepository;
     }
 
     /**
@@ -178,6 +184,12 @@ public class CreateCaseCallbackService {
                     idamToken,
                     userId
                 );
+                if (result.caseId != null) {
+                    callbackResultRepository.insert(createCaseRequest(
+                        exceptionRecord.id,
+                        Long.toString(result.caseId)
+                    ));
+                }
             } else if (ids.size() == 1) {
                 result = new CreateCaseResult(ids.get(0));
             } else {

@@ -5,6 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.CallbackResultRepository;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.DuplicateDocsException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
@@ -16,6 +17,7 @@ import java.util.Optional;
 
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.NewCallbackResult.attachToCaseCaseRequest;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.EXTERNAL_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.ATTACH_TO_CASE_REFERENCE;
 
@@ -29,17 +31,20 @@ public class ExceptionRecordAttacher {
     private final SupplementaryEvidenceUpdater supplementaryEvidenceUpdater;
     private final SupplementaryEvidenceWithOcrUpdater supplementaryEvidenceWithOcrUpdater;
     private final PaymentsProcessor paymentsProcessor;
+    private final CallbackResultRepository callbackResultRepository;
     private final CcdApi ccdApi;
 
     public ExceptionRecordAttacher(
         SupplementaryEvidenceUpdater supplementaryEvidenceUpdater,
         SupplementaryEvidenceWithOcrUpdater supplementaryEvidenceWithOcrUpdater,
         PaymentsProcessor paymentsProcessor,
+        CallbackResultRepository callbackResultRepository,
         CcdApi ccdApi
     ) {
         this.supplementaryEvidenceUpdater = supplementaryEvidenceUpdater;
         this.supplementaryEvidenceWithOcrUpdater = supplementaryEvidenceWithOcrUpdater;
         this.paymentsProcessor = paymentsProcessor;
+        this.callbackResultRepository = callbackResultRepository;
         this.ccdApi = ccdApi;
     }
 
@@ -200,15 +205,24 @@ public class ExceptionRecordAttacher {
                     targetCase,
                     targetCaseCcdRef
                 );
+                callbackResultRepository.insert(
+                    attachToCaseCaseRequest(Long.toString(callBackEvent.exceptionRecordId), targetCaseCcdRef)
+                );
                 return Optional.empty();
 
             case SUPPLEMENTARY_EVIDENCE_WITH_OCR:
-                return supplementaryEvidenceWithOcrUpdater.updateSupplementaryEvidenceWithOcr(
+                var errorsAndWarnings = supplementaryEvidenceWithOcrUpdater.updateSupplementaryEvidenceWithOcr(
                     callBackEvent,
                     targetCase,
                     targetCaseCcdRef,
                     ignoreWarnings
                 );
+                if (errorsAndWarnings.isEmpty()) {
+                    callbackResultRepository.insert(
+                        attachToCaseCaseRequest(Long.toString(callBackEvent.exceptionRecordId), targetCaseCcdRef)
+                    );
+                }
+                return errorsAndWarnings;
 
             default:
                 throw new CallbackException("Invalid Journey Classification: " + callBackEvent.classification);

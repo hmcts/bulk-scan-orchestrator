@@ -12,6 +12,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.CallbackResultRepository;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.NewCallbackResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
@@ -33,6 +35,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.RequestType.ATTACH_TO_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidationsTest.JOURNEY_CLASSIFICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.CONTAINS_PAYMENTS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.ENVELOPE_ID;
@@ -54,6 +58,9 @@ class ExceptionRecordAttacherTest {
 
     @Mock
     private PaymentsProcessor paymentsProcessor;
+
+    @Mock
+    private CallbackResultRepository callbackResultRepository;
 
     @Mock
     private CcdApi ccdApi;
@@ -104,6 +111,7 @@ class ExceptionRecordAttacherTest {
             supplementaryEvidenceUpdater,
             supplementaryEvidenceWithOcrUpdater,
             paymentsProcessor,
+            callbackResultRepository,
             ccdApi
         );
 
@@ -130,6 +138,13 @@ class ExceptionRecordAttacherTest {
         assertThat(res.isRight()).isTrue();
 
         // and
+        var callbackResultCaptor = ArgumentCaptor.forClass(NewCallbackResult.class);
+        verify(callbackResultRepository).insert(callbackResultCaptor.capture());
+        assertThat(callbackResultCaptor.getValue()).satisfies(data -> {
+            assertThat(data.requestType).isEqualTo(ATTACH_TO_CASE);
+            assertThat(data.exceptionRecordId).isEqualTo(CASE_REF);
+            assertThat(data.caseId).isEqualTo(EXISTING_CASE_ID);
+        });
         var paymentsDataCaptor = ArgumentCaptor.forClass(PaymentsHelper.class);
         verify(paymentsProcessor)
             .updatePayments(paymentsDataCaptor.capture(), eq(CASE_REF), eq(JURISDICTION), eq(EXISTING_CASE_ID));
@@ -159,6 +174,7 @@ class ExceptionRecordAttacherTest {
         );
 
         // then
+        verifyNoInteractions(callbackResultRepository);
         assertThat(res.isLeft()).isTrue();
         assertThat(res.getLeft().getErrors()).hasSize(1);
         assertThat(res.getLeft().getErrors().get(0)).isEqualTo("msg");
@@ -178,6 +194,7 @@ class ExceptionRecordAttacherTest {
 
         // when
         // then
+        verifyNoInteractions(callbackResultRepository);
         assertThatCode(() -> exceptionRecordAttacher.tryAttachToCase(
             callBackEvent,
             CASE_DETAILS,
@@ -188,7 +205,7 @@ class ExceptionRecordAttacherTest {
     }
 
     @Test
-    void should_not_attach_supplementary_evidence_if_payments_publishing_fails() {
+    void should_attach_supplementary_evidence_if_payments_publishing_fails() {
         // given
         given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);
         AttachToCaseEventData callBackEvent = getCallbackEvent(SUPPLEMENTARY_EVIDENCE_WITH_OCR);
@@ -209,6 +226,13 @@ class ExceptionRecordAttacherTest {
         );
 
         // then
+        var callbackResultCaptor = ArgumentCaptor.forClass(NewCallbackResult.class);
+        verify(callbackResultRepository).insert(callbackResultCaptor.capture());
+        assertThat(callbackResultCaptor.getValue()).satisfies(data -> {
+            assertThat(data.requestType).isEqualTo(ATTACH_TO_CASE);
+            assertThat(data.exceptionRecordId).isEqualTo(CASE_REF);
+            assertThat(data.caseId).isEqualTo(EXISTING_CASE_ID);
+        });
         assertThat(res.isLeft()).isTrue();
         assertThat(res.getLeft().getErrors()).hasSize(1);
         assertThat(res.getLeft().getErrors().get(0))
