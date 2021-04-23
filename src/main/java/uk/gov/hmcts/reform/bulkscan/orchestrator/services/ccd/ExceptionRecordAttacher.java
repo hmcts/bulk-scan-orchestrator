@@ -205,9 +205,7 @@ public class ExceptionRecordAttacher {
                     targetCase,
                     targetCaseCcdRef
                 );
-                callbackResultRepository.insert(
-                    attachToCaseCaseRequest(Long.toString(callBackEvent.exceptionRecordId), targetCaseCcdRef)
-                );
+                storeCallbackResult(callBackEvent, targetCaseCcdRef);
                 return Optional.empty();
 
             case SUPPLEMENTARY_EVIDENCE_WITH_OCR:
@@ -218,14 +216,27 @@ public class ExceptionRecordAttacher {
                     ignoreWarnings
                 );
                 if (errorsAndWarnings.isEmpty()) {
-                    callbackResultRepository.insert(
-                        attachToCaseCaseRequest(Long.toString(callBackEvent.exceptionRecordId), targetCaseCcdRef)
-                    );
+                    storeCallbackResult(callBackEvent, targetCaseCcdRef);
                 }
                 return errorsAndWarnings;
 
             default:
                 throw new CallbackException("Invalid Journey Classification: " + callBackEvent.classification);
+        }
+    }
+
+    private void storeCallbackResult(AttachToCaseEventData callBackEvent, String targetCaseCcdRef) {
+        try {
+            callbackResultRepository.insert(
+                attachToCaseCaseRequest(Long.toString(callBackEvent.exceptionRecordId), targetCaseCcdRef)
+            );
+        } catch (Exception ex) {
+            log.error(
+                "Failed to store callback exception record attachment data to db, "
+                    + "exception record Id {}, case Id {}",
+                callBackEvent.exceptionRecordId,
+                targetCaseCcdRef
+            );
         }
     }
 }

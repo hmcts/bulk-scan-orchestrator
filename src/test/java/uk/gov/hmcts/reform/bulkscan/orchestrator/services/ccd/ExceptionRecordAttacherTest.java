@@ -155,6 +155,43 @@ class ExceptionRecordAttacherTest {
     }
 
     @Test
+    void should_ignore_exception_from_repository_call() {
+        // given
+        given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);
+        AttachToCaseEventData callBackEvent = getCallbackEvent(SUPPLEMENTARY_EVIDENCE_WITH_OCR);
+        given(supplementaryEvidenceWithOcrUpdater.updateSupplementaryEvidenceWithOcr(
+            callBackEvent, EXISTING_CASE_DETAILS, EXISTING_CASE_ID, true
+        )).willReturn(Optional.empty());
+        given(callbackResultRepository.insert(any(NewCallbackResult.class))).willThrow(new RuntimeException());
+
+        // when
+        Either<ErrorsAndWarnings, String> res = exceptionRecordAttacher.tryAttachToCase(
+            callBackEvent,
+            CASE_DETAILS,
+            true
+        );
+
+        // then
+        assertThat(res.isRight()).isTrue();
+
+        // and
+        var callbackResultCaptor = ArgumentCaptor.forClass(NewCallbackResult.class);
+        verify(callbackResultRepository).insert(callbackResultCaptor.capture());
+        assertThat(callbackResultCaptor.getValue()).satisfies(data -> {
+            assertThat(data.requestType).isEqualTo(ATTACH_TO_CASE);
+            assertThat(data.exceptionRecordId).isEqualTo(CASE_REF);
+            assertThat(data.caseId).isEqualTo(EXISTING_CASE_ID);
+        });
+        var paymentsDataCaptor = ArgumentCaptor.forClass(PaymentsHelper.class);
+        verify(paymentsProcessor)
+            .updatePayments(paymentsDataCaptor.capture(), eq(CASE_REF), eq(JURISDICTION), eq(EXISTING_CASE_ID));
+        assertThat(paymentsDataCaptor.getValue()).satisfies(data -> {
+            assertThat(data.containsPayments).isEqualTo(CASE_DETAILS.getData().get(CONTAINS_PAYMENTS).equals(YES));
+            assertThat(data.envelopeId).isEqualTo(BULKSCAN_ENVELOPE_ID);
+        });
+    }
+
+    @Test
     void should_not_attach_supplementary_evidence_if_case_does_not_exist() {
         // given
         given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);

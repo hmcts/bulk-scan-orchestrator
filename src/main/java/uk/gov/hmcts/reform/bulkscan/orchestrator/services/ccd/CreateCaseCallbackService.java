@@ -184,10 +184,18 @@ public class CreateCaseCallbackService {
                     userId
                 );
                 if (result.caseId != null) {
-                    callbackResultRepository.insert(createCaseRequest(
-                        exceptionRecord.id,
-                        Long.toString(result.caseId)
-                    ));
+                    try {
+                        callbackResultRepository.insert(createCaseRequest(
+                            exceptionRecord.id,
+                            Long.toString(result.caseId)
+                        ));
+                    } catch (Exception ex) {
+                        log.error(
+                            "Failed to store callback case creation data to db, exception record Id {}, case Id {}",
+                            exceptionRecord.id,
+                            result.caseId
+                        );
+                    }
                 }
             } else if (ids.size() == 1) {
                 result = new CreateCaseResult(ids.get(0));

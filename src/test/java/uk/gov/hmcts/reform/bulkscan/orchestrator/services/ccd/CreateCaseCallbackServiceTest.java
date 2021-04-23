@@ -455,6 +455,46 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
+    void should_ignore_exception_from_repository_call() {
+        // given
+        setUpServiceConfig("https://localhost", true); // allowed to create case despite pending payments
+
+        Map<String, Object> data = basicCaseData();
+        data.put(ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING, YesNoFieldValues.YES);
+
+        long newCaseId = 1;
+        given(ccdNewCaseCreator.createNewCase(
+            any(ExceptionRecord.class),
+            any(ServiceConfigItem.class),
+            anyBoolean(),
+            anyString(),
+            anyString()
+        )).willReturn(new CreateCaseResult(newCaseId));
+        given(callbackResultRepository.insert(any(NewCallbackResult.class))).willThrow(new RuntimeException());
+
+        // when
+        ProcessResult result =
+            service
+                .process(
+                    new CcdCallbackRequest(EventIds.CREATE_NEW_CASE, caseDetails(data), true), // ignore warnings
+                    IDAM_TOKEN,
+                    USER_ID
+                );
+
+        // then
+        var callbackResultCaptor = ArgumentCaptor.forClass(NewCallbackResult.class);
+        verify(callbackResultRepository).insert(callbackResultCaptor.capture());
+        assertThat(callbackResultCaptor.getValue()).satisfies(res -> {
+            assertThat(res.requestType).isEqualTo(CREATE_CASE);
+            assertThat(res.exceptionRecordId).isEqualTo(CASE_ID);
+            assertThat(res.caseId).isEqualTo(Long.toString(newCaseId));
+        });
+        assertThat(result.getErrors()).isEmpty();
+        assertThat(result.getWarnings()).isEmpty();
+        verify(paymentsProcessor).updatePayments(any(), anyString(), anyString(), eq(Long.toString(newCaseId)));
+    }
+
+    @Test
     void should_create_case_but_respond_failure_when_payments_processor_throws_an_error() {
         // given
         setUpServiceConfig("https://localhost", true); // allowed to create case despite pending payments
