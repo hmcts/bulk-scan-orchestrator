@@ -265,6 +265,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-jdbc'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap', version: '3.0.2'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.2.8.RELEASE'
@@ -308,9 +309,19 @@ dependencies {
 
   integrationTestImplementation group: 'com.github.tomakehurst', name: 'wiremock-jre8', version: '2.26.3'
 
+  integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.15.2', {
+    exclude group: 'junit', module: 'junit'
+  }
+  integrationTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.15.2'
+
   functionalTestImplementation sourceSets.main.runtimeClasspath
   functionalTestImplementation sourceSets.test.runtimeClasspath
   functionalTestImplementation group: 'uk.gov.hmcts.reform', name: 'document-management-client', version: '7.0.0'
+
+  functionalTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.15.2', {
+    exclude group: 'junit', module: 'junit'
+  }
+  functionalTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.15.2'
 
   smokeTestImplementation sourceSets.main.runtimeClasspath
   smokeTestImplementation sourceSets.test.runtimeClasspath
@@ -334,6 +345,14 @@ bootJar {
 }
 
 import org.flywaydb.gradle.task.FlywayMigrateTask
+
+flyway {
+  user = System.getenv('DB_USER')
+  password = System.getenv('DB_PASSWORD')
+
+  baselineOnMigrate = true
+  baselineVersion = '000'
+}
 
 task migratePostgresDatabase(type: FlywayMigrateTask) {
   baselineOnMigrate = true
