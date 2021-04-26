@@ -79,3 +79,7 @@ service-config:
       jurisdiction: BULKSCAN
       case-type-ids:
         - Bulk_Scanned
+
+callback:
+  store:
+    retry-count: 3
