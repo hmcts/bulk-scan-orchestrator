@@ -12,7 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.CallbackResultRepository;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.NewCallbackResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
@@ -60,7 +59,7 @@ class ExceptionRecordAttacherTest {
     private PaymentsProcessor paymentsProcessor;
 
     @Mock
-    private CallbackResultRepository callbackResultRepository;
+    private CallbackResultRepositoryProxy callbackResultRepositoryProxy;
 
     @Mock
     private CcdApi ccdApi;
@@ -111,7 +110,7 @@ class ExceptionRecordAttacherTest {
             supplementaryEvidenceUpdater,
             supplementaryEvidenceWithOcrUpdater,
             paymentsProcessor,
-            callbackResultRepository,
+            callbackResultRepositoryProxy,
             ccdApi
         );
 
@@ -139,44 +138,7 @@ class ExceptionRecordAttacherTest {
 
         // and
         var callbackResultCaptor = ArgumentCaptor.forClass(NewCallbackResult.class);
-        verify(callbackResultRepository).insert(callbackResultCaptor.capture());
-        assertThat(callbackResultCaptor.getValue()).satisfies(data -> {
-            assertThat(data.requestType).isEqualTo(ATTACH_TO_CASE);
-            assertThat(data.exceptionRecordId).isEqualTo(CASE_REF);
-            assertThat(data.caseId).isEqualTo(EXISTING_CASE_ID);
-        });
-        var paymentsDataCaptor = ArgumentCaptor.forClass(PaymentsHelper.class);
-        verify(paymentsProcessor)
-            .updatePayments(paymentsDataCaptor.capture(), eq(CASE_REF), eq(JURISDICTION), eq(EXISTING_CASE_ID));
-        assertThat(paymentsDataCaptor.getValue()).satisfies(data -> {
-            assertThat(data.containsPayments).isEqualTo(CASE_DETAILS.getData().get(CONTAINS_PAYMENTS).equals(YES));
-            assertThat(data.envelopeId).isEqualTo(BULKSCAN_ENVELOPE_ID);
-        });
-    }
-
-    @Test
-    void should_ignore_exception_from_repository_call() {
-        // given
-        given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);
-        AttachToCaseEventData callBackEvent = getCallbackEvent(SUPPLEMENTARY_EVIDENCE_WITH_OCR);
-        given(supplementaryEvidenceWithOcrUpdater.updateSupplementaryEvidenceWithOcr(
-            callBackEvent, EXISTING_CASE_DETAILS, EXISTING_CASE_ID, true
-        )).willReturn(Optional.empty());
-        given(callbackResultRepository.insert(any(NewCallbackResult.class))).willThrow(new RuntimeException());
-
-        // when
-        Either<ErrorsAndWarnings, String> res = exceptionRecordAttacher.tryAttachToCase(
-            callBackEvent,
-            CASE_DETAILS,
-            true
-        );
-
-        // then
-        assertThat(res.isRight()).isTrue();
-
-        // and
-        var callbackResultCaptor = ArgumentCaptor.forClass(NewCallbackResult.class);
-        verify(callbackResultRepository).insert(callbackResultCaptor.capture());
+        verify(callbackResultRepositoryProxy).storeCallbackResult(callbackResultCaptor.capture());
         assertThat(callbackResultCaptor.getValue()).satisfies(data -> {
             assertThat(data.requestType).isEqualTo(ATTACH_TO_CASE);
             assertThat(data.exceptionRecordId).isEqualTo(CASE_REF);
@@ -211,7 +173,7 @@ class ExceptionRecordAttacherTest {
         );
 
         // then
-        verifyNoInteractions(callbackResultRepository);
+        verifyNoInteractions(callbackResultRepositoryProxy);
         assertThat(res.isLeft()).isTrue();
         assertThat(res.getLeft().getErrors()).hasSize(1);
         assertThat(res.getLeft().getErrors().get(0)).isEqualTo("msg");
@@ -231,7 +193,7 @@ class ExceptionRecordAttacherTest {
 
         // when
         // then
-        verifyNoInteractions(callbackResultRepository);
+        verifyNoInteractions(callbackResultRepositoryProxy);
         assertThatCode(() -> exceptionRecordAttacher.tryAttachToCase(
             callBackEvent,
             CASE_DETAILS,
@@ -264,7 +226,7 @@ class ExceptionRecordAttacherTest {
 
         // then
         var callbackResultCaptor = ArgumentCaptor.forClass(NewCallbackResult.class);
-        verify(callbackResultRepository).insert(callbackResultCaptor.capture());
+        verify(callbackResultRepositoryProxy).storeCallbackResult(callbackResultCaptor.capture());
         assertThat(callbackResultCaptor.getValue()).satisfies(data -> {
             assertThat(data.requestType).isEqualTo(ATTACH_TO_CASE);
             assertThat(data.exceptionRecordId).isEqualTo(CASE_REF);

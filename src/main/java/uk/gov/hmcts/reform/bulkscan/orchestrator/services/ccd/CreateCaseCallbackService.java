@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.CallbackResultRepository;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
@@ -48,7 +47,7 @@ public class CreateCaseCallbackService {
     private final CcdNewCaseCreator ccdNewCaseCreator;
     private final ExceptionRecordFinalizer exceptionRecordFinalizer;
     private final PaymentsProcessor paymentsProcessor;
-    private final CallbackResultRepository callbackResultRepository;
+    private final CallbackResultRepositoryProxy callbackResultRepositoryProxy;
 
     public CreateCaseCallbackService(
         ExceptionRecordValidator validator,
@@ -57,7 +56,7 @@ public class CreateCaseCallbackService {
         CcdNewCaseCreator ccdNewCaseCreator,
         ExceptionRecordFinalizer exceptionRecordFinalizer,
         PaymentsProcessor paymentsProcessor,
-        CallbackResultRepository callbackResultRepository
+        CallbackResultRepositoryProxy callbackResultRepositoryProxy
     ) {
         this.validator = validator;
         this.serviceConfigProvider = serviceConfigProvider;
@@ -65,7 +64,7 @@ public class CreateCaseCallbackService {
         this.ccdNewCaseCreator = ccdNewCaseCreator;
         this.exceptionRecordFinalizer = exceptionRecordFinalizer;
         this.paymentsProcessor = paymentsProcessor;
-        this.callbackResultRepository = callbackResultRepository;
+        this.callbackResultRepositoryProxy = callbackResultRepositoryProxy;
     }
 
     /**
@@ -185,7 +184,7 @@ public class CreateCaseCallbackService {
                 );
                 if (result.caseId != null) {
                     try {
-                        callbackResultRepository.insert(createCaseRequest(
+                        callbackResultRepositoryProxy.storeCallbackResult(createCaseRequest(
                             exceptionRecord.id,
                             Long.toString(result.caseId)
                         ));

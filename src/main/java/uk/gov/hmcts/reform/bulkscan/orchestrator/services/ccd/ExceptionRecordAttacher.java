@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.CallbackResultRepository;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.NewCallbackResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.DuplicateDocsException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
@@ -31,20 +31,20 @@ public class ExceptionRecordAttacher {
     private final SupplementaryEvidenceUpdater supplementaryEvidenceUpdater;
     private final SupplementaryEvidenceWithOcrUpdater supplementaryEvidenceWithOcrUpdater;
     private final PaymentsProcessor paymentsProcessor;
-    private final CallbackResultRepository callbackResultRepository;
+    private final CallbackResultRepositoryProxy callbackResultRepositoryProxy;
     private final CcdApi ccdApi;
 
     public ExceptionRecordAttacher(
         SupplementaryEvidenceUpdater supplementaryEvidenceUpdater,
         SupplementaryEvidenceWithOcrUpdater supplementaryEvidenceWithOcrUpdater,
         PaymentsProcessor paymentsProcessor,
-        CallbackResultRepository callbackResultRepository,
+        CallbackResultRepositoryProxy callbackResultRepositoryProxy,
         CcdApi ccdApi
     ) {
         this.supplementaryEvidenceUpdater = supplementaryEvidenceUpdater;
         this.supplementaryEvidenceWithOcrUpdater = supplementaryEvidenceWithOcrUpdater;
         this.paymentsProcessor = paymentsProcessor;
-        this.callbackResultRepository = callbackResultRepository;
+        this.callbackResultRepositoryProxy = callbackResultRepositoryProxy;
         this.ccdApi = ccdApi;
     }
 
@@ -226,17 +226,10 @@ public class ExceptionRecordAttacher {
     }
 
     private void storeCallbackResult(AttachToCaseEventData callBackEvent, String targetCaseCcdRef) {
-        try {
-            callbackResultRepository.insert(
-                attachToCaseCaseRequest(Long.toString(callBackEvent.exceptionRecordId), targetCaseCcdRef)
-            );
-        } catch (Exception ex) {
-            log.error(
-                "Failed to store callback exception record attachment data to db, "
-                    + "exception record Id {}, case Id {}",
-                callBackEvent.exceptionRecordId,
-                targetCaseCcdRef
-            );
-        }
+        NewCallbackResult callbackResult = attachToCaseCaseRequest(
+            Long.toString(callBackEvent.exceptionRecordId),
+            targetCaseCcdRef
+        );
+        callbackResultRepositoryProxy.storeCallbackResult(callbackResult);
     }
 }

@@ -9,7 +9,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.CallbackResultRepository;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.NewCallbackResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
@@ -68,7 +67,7 @@ class CreateCaseCallbackServiceTest {
     @Mock CcdNewCaseCreator ccdNewCaseCreator;
     @Mock ExceptionRecordFinalizer exceptionRecordFinalizer;
     @Mock PaymentsProcessor paymentsProcessor;
-    @Mock private CallbackResultRepository callbackResultRepository;
+    @Mock private CallbackResultRepositoryProxy callbackResultRepositoryProxy;
 
 
     private CreateCaseCallbackService service;
@@ -82,7 +81,7 @@ class CreateCaseCallbackServiceTest {
             ccdNewCaseCreator,
             exceptionRecordFinalizer,
             paymentsProcessor,
-            callbackResultRepository
+            callbackResultRepositoryProxy
         );
     }
 
@@ -100,7 +99,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException.getCause()).isNull();
         assertThat(callbackException).hasMessage("The some event event is not supported. Please contact service team");
 
-        verifyNoInteractions(callbackResultRepository);
+        verifyNoInteractions(callbackResultRepositoryProxy);
         verify(serviceConfigProvider, never()).getConfig(anyString());
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
@@ -123,7 +122,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException.getCause()).isNull();
         assertThat(callbackException).hasMessage("No case type ID supplied");
 
-        verifyNoInteractions(callbackResultRepository);
+        verifyNoInteractions(callbackResultRepositoryProxy);
         verify(serviceConfigProvider, never()).getConfig(anyString());
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
@@ -147,7 +146,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException.getCause()).isNull();
         assertThat(callbackException).hasMessage("Case type ID () has invalid format");
 
-        verifyNoInteractions(callbackResultRepository);
+        verifyNoInteractions(callbackResultRepositoryProxy);
         verify(serviceConfigProvider, never()).getConfig(anyString());
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
@@ -172,7 +171,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException.getCause()).isNull();
         assertThat(callbackException).hasMessage("oh no");
 
-        verifyNoInteractions(callbackResultRepository);
+        verifyNoInteractions(callbackResultRepositoryProxy);
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
 
@@ -196,7 +195,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(callbackException.getCause()).isNull();
         assertThat(callbackException).hasMessage("Transformation URL is not configured");
 
-        verifyNoInteractions(callbackResultRepository);
+        verifyNoInteractions(callbackResultRepositoryProxy);
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
 
@@ -222,7 +221,7 @@ class CreateCaseCallbackServiceTest {
         );
 
         // then
-        verifyNoInteractions(callbackResultRepository);
+        verifyNoInteractions(callbackResultRepositoryProxy);
         assertThat(callbackException.getCause()).isNull();
         assertThat(callbackException).hasMessage("Callback has no Idam token received in the header");
     }
@@ -249,7 +248,7 @@ class CreateCaseCallbackServiceTest {
         );
 
         // then
-        verifyNoInteractions(callbackResultRepository);
+        verifyNoInteractions(callbackResultRepositoryProxy);
         assertThat(callbackException.getCause()).isNull();
         assertThat(callbackException).hasMessage("Callback has no user id received in the header");
     }
@@ -285,7 +284,7 @@ class CreateCaseCallbackServiceTest {
             )
         );
 
-        verifyNoInteractions(callbackResultRepository);
+        verifyNoInteractions(callbackResultRepositoryProxy);
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
 
@@ -314,7 +313,7 @@ class CreateCaseCallbackServiceTest {
             )
         );
 
-        verifyNoInteractions(callbackResultRepository);
+        verifyNoInteractions(callbackResultRepositoryProxy);
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
 
@@ -342,7 +341,7 @@ class CreateCaseCallbackServiceTest {
         assertThat(result.getWarnings()).isEmpty();
         assertThat(result.getErrors()).isEmpty();
 
-        verifyNoInteractions(callbackResultRepository);
+        verifyNoInteractions(callbackResultRepositoryProxy);
         verify(exceptionRecordFinalizer).finalizeExceptionRecord(caseData, "345", CASE_CREATION);
     }
 
@@ -363,7 +362,7 @@ class CreateCaseCallbackServiceTest {
             .isInstanceOf(MultipleCasesFoundException.class)
             .hasMessage("Multiple cases (345, 456) found for the given bulk scan case reference: 123");
 
-        verifyNoInteractions(callbackResultRepository);
+        verifyNoInteractions(callbackResultRepositoryProxy);
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
 
@@ -397,19 +396,19 @@ class CreateCaseCallbackServiceTest {
         if (isAllowedToProceed) {
             if (ignoresWarnings) {
                 var callbackResultCaptor = ArgumentCaptor.forClass(NewCallbackResult.class);
-                verify(callbackResultRepository).insert(callbackResultCaptor.capture());
+                verify(callbackResultRepositoryProxy).storeCallbackResult(callbackResultCaptor.capture());
                 assertThat(callbackResultCaptor.getValue()).satisfies(res -> {
                     assertThat(res.requestType).isEqualTo(CREATE_CASE);
                     assertThat(res.exceptionRecordId).isEqualTo(CASE_ID);
                     assertThat(res.caseId).isEqualTo("EXISTING_CASE_ID");
                 });
             } else {
-                verifyNoInteractions(callbackResultRepository);
+                verifyNoInteractions(callbackResultRepositoryProxy);
             }
             assertThat(result.getErrors()).isEmpty();
             assertThat(result.getWarnings()).containsExactly(CreateCaseCallbackService.AWAITING_PAYMENTS_MESSAGE);
         } else {
-            verifyNoInteractions(callbackResultRepository);
+            verifyNoInteractions(callbackResultRepositoryProxy);
             assertThat(result.getErrors()).containsExactly(CreateCaseCallbackService.AWAITING_PAYMENTS_MESSAGE);
             assertThat(result.getWarnings()).isEmpty();
         }
@@ -443,47 +442,7 @@ class CreateCaseCallbackServiceTest {
 
         // then
         var callbackResultCaptor = ArgumentCaptor.forClass(NewCallbackResult.class);
-        verify(callbackResultRepository).insert(callbackResultCaptor.capture());
-        assertThat(callbackResultCaptor.getValue()).satisfies(res -> {
-            assertThat(res.requestType).isEqualTo(CREATE_CASE);
-            assertThat(res.exceptionRecordId).isEqualTo(CASE_ID);
-            assertThat(res.caseId).isEqualTo(Long.toString(newCaseId));
-        });
-        assertThat(result.getErrors()).isEmpty();
-        assertThat(result.getWarnings()).isEmpty();
-        verify(paymentsProcessor).updatePayments(any(), anyString(), anyString(), eq(Long.toString(newCaseId)));
-    }
-
-    @Test
-    void should_ignore_exception_from_repository_call() {
-        // given
-        setUpServiceConfig("https://localhost", true); // allowed to create case despite pending payments
-
-        Map<String, Object> data = basicCaseData();
-        data.put(ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING, YesNoFieldValues.YES);
-
-        long newCaseId = 1;
-        given(ccdNewCaseCreator.createNewCase(
-            any(ExceptionRecord.class),
-            any(ServiceConfigItem.class),
-            anyBoolean(),
-            anyString(),
-            anyString()
-        )).willReturn(new CreateCaseResult(newCaseId));
-        given(callbackResultRepository.insert(any(NewCallbackResult.class))).willThrow(new RuntimeException());
-
-        // when
-        ProcessResult result =
-            service
-                .process(
-                    new CcdCallbackRequest(EventIds.CREATE_NEW_CASE, caseDetails(data), true), // ignore warnings
-                    IDAM_TOKEN,
-                    USER_ID
-                );
-
-        // then
-        var callbackResultCaptor = ArgumentCaptor.forClass(NewCallbackResult.class);
-        verify(callbackResultRepository).insert(callbackResultCaptor.capture());
+        verify(callbackResultRepositoryProxy).storeCallbackResult(callbackResultCaptor.capture());
         assertThat(callbackResultCaptor.getValue()).satisfies(res -> {
             assertThat(res.requestType).isEqualTo(CREATE_CASE);
             assertThat(res.exceptionRecordId).isEqualTo(CASE_ID);
@@ -525,7 +484,7 @@ class CreateCaseCallbackServiceTest {
 
         // then
         var callbackResultCaptor = ArgumentCaptor.forClass(NewCallbackResult.class);
-        verify(callbackResultRepository).insert(callbackResultCaptor.capture());
+        verify(callbackResultRepositoryProxy).storeCallbackResult(callbackResultCaptor.capture());
         assertThat(callbackResultCaptor.getValue()).satisfies(res -> {
             assertThat(res.requestType).isEqualTo(CREATE_CASE);
             assertThat(res.exceptionRecordId).isEqualTo(CASE_ID);
