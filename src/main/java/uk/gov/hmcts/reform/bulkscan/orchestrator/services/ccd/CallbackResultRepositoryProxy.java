@@ -40,7 +40,7 @@ public class CallbackResultRepositoryProxy {
             } catch (Exception ex) {
                 log.error(
                     "Failed to store callback result {}, "
-                        + "exception record Id {}, case Id {}, retry {}",
+                        + "exception record Id {}, case Id {}, try {}",
                     callbackResult.requestType,
                     callbackResult.exceptionRecordId,
                     callbackResult.caseId,
@@ -50,12 +50,12 @@ public class CallbackResultRepositoryProxy {
             }
         }
         log.error(
-            "Failed to store callback result {}, "
-                + "exception record Id {}, case Id {} after {} retries",
+            "Store callback result failed after {} tries, request type {}, "
+                + "exception record Id {}, case Id {}",
+            retryCount,
             callbackResult.requestType,
             callbackResult.exceptionRecordId,
-            callbackResult.caseId,
-            retryCount
+            callbackResult.caseId
         );
     }
 }
