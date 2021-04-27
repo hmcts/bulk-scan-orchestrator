@@ -38,7 +38,7 @@ public class CallbackResultRepositoryProxy {
 
                 return;
             } catch (Exception ex) {
-//
+                //
             }
         }
         log.error(
