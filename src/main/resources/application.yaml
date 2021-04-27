@@ -241,3 +241,7 @@ logging:
       gov:
         hmcts:
           reform: ${REFORM_LOG_LEVEL:INFO}
+
+callback:
+  store:
+    retry-count: 3

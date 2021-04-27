@@ -26,6 +26,7 @@ import java.util.Optional;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.NewCallbackResult.createCaseRequest;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasIdamToken;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasUserId;
@@ -46,6 +47,7 @@ public class CreateCaseCallbackService {
     private final CcdNewCaseCreator ccdNewCaseCreator;
     private final ExceptionRecordFinalizer exceptionRecordFinalizer;
     private final PaymentsProcessor paymentsProcessor;
+    private final CallbackResultRepositoryProxy callbackResultRepositoryProxy;
 
     public CreateCaseCallbackService(
         ExceptionRecordValidator validator,
@@ -53,7 +55,8 @@ public class CreateCaseCallbackService {
         CaseFinder caseFinder,
         CcdNewCaseCreator ccdNewCaseCreator,
         ExceptionRecordFinalizer exceptionRecordFinalizer,
-        PaymentsProcessor paymentsProcessor
+        PaymentsProcessor paymentsProcessor,
+        CallbackResultRepositoryProxy callbackResultRepositoryProxy
     ) {
         this.validator = validator;
         this.serviceConfigProvider = serviceConfigProvider;
@@ -61,6 +64,7 @@ public class CreateCaseCallbackService {
         this.ccdNewCaseCreator = ccdNewCaseCreator;
         this.exceptionRecordFinalizer = exceptionRecordFinalizer;
         this.paymentsProcessor = paymentsProcessor;
+        this.callbackResultRepositoryProxy = callbackResultRepositoryProxy;
     }
 
     /**
@@ -178,6 +182,20 @@ public class CreateCaseCallbackService {
                     idamToken,
                     userId
                 );
+                if (result.caseId != null) {
+                    try {
+                        callbackResultRepositoryProxy.storeCallbackResult(createCaseRequest(
+                            exceptionRecord.id,
+                            Long.toString(result.caseId)
+                        ));
+                    } catch (Exception ex) {
+                        log.error(
+                            "Failed to store callback case creation data to db, exception record Id {}, case Id {}",
+                            exceptionRecord.id,
+                            result.caseId
+                        );
+                    }
+                }
             } else if (ids.size() == 1) {
                 result = new CreateCaseResult(ids.get(0));
             } else {
