@@ -38,7 +38,15 @@ public class CallbackResultRepositoryProxy {
 
                 return;
             } catch (Exception ex) {
-                //
+                log.warn(
+                    "Failed to store callback result {}, "
+                        + "exception record Id {}, case Id {}, retry {}",
+                    callbackResult.requestType,
+                    callbackResult.exceptionRecordId,
+                    callbackResult.caseId,
+                    i,
+                    ex
+                );
             }
         }
         log.error(
