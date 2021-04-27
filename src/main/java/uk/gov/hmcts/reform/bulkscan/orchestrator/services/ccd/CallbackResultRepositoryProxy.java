@@ -27,7 +27,7 @@ public class CallbackResultRepositoryProxy {
             try {
                 callbackResultRepository.insert(callbackResult);
 
-                log.error(
+                log.info(
                     "Successfully stored callback result {}, "
                         + "exception record Id {}, case Id {}, retry {}",
                     callbackResult.requestType,
@@ -41,7 +41,7 @@ public class CallbackResultRepositoryProxy {
 //
             }
         }
-        log.warn(
+        log.error(
             "Failed to store callback result {}, "
                 + "exception record Id {}, case Id {} after {} retries",
             callbackResult.requestType,
