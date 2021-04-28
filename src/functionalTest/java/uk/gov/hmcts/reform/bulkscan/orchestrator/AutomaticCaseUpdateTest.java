@@ -23,7 +23,7 @@ import static java.util.UUID.randomUUID;
 import static org.awaitility.Awaitility.await;
 
 @SpringBootTest
-@ActiveProfiles("nosb")
+@ActiveProfiles({"nosb", "func"})
 public class AutomaticCaseUpdateTest {
 
     @Autowired CcdApi ccdApi;

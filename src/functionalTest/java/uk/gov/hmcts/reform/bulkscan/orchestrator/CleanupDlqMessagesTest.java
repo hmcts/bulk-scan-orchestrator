@@ -22,7 +22,7 @@ import static org.awaitility.Awaitility.await;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
-@ActiveProfiles("nosb")  // no servicebus queue handler registration
+@ActiveProfiles({"nosb", "func"})   // no servicebus queue handler registration
 @Import(FunctionalQueueConfig.class)
 public class CleanupDlqMessagesTest {
     private static final Logger LOG = LoggerFactory.getLogger(CleanupDlqMessagesTest.class);

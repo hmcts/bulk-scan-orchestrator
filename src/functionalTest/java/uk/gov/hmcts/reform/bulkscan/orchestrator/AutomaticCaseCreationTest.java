@@ -29,7 +29,7 @@ import static org.awaitility.Awaitility.await;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getCaseDataForField;
 
 @SpringBootTest
-@ActiveProfiles("nosb")  // no servicebus queue handler registration
+@ActiveProfiles({"nosb", "func"})  // no servicebus queue handler registration
 public class AutomaticCaseCreationTest {
 
     private static final String SERVICE_CASE_JURISDICTION = "BULKSCAN";

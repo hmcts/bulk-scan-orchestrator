@@ -30,7 +30,7 @@ import static org.awaitility.Awaitility.await;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getScannedDocuments;
 
 @SpringBootTest
-@ActiveProfiles("nosb") // no servicebus queue handler registration
+@ActiveProfiles({"nosb", "func"})  // no servicebus queue handler registration
 class SupplementaryEvidenceTest {
 
     private static final String TEST_SERVICE_NAME = "bulkscan";
