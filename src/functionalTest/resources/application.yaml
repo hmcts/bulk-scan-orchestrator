@@ -13,6 +13,7 @@ spring:
     exclude: \
       org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration, \
       org.springframework.boot.autoconfigure.jdbc.JdbcTemplateConfiguration, \
+      org.springframework.boot.actuate.autoconfigure.jdbc.DataSourceHealthContributorAutoConfiguration, \
       org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
   flyway:
     enabled: false
