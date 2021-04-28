@@ -10,11 +10,21 @@ spring:
   application:
     name: Bulk Scan Orchestrator Functional Tests
   datasource:
-    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
-    url: jdbc:tc:postgresql:11.0://localhost/bs_orchestrator
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_CONN_OPTIONS}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    properties:
+      charSet: UTF-8
+    hikari:
+      minimumIdle: 2
+      maximumPoolSize: 10
+      idleTimeout: 10000
+      poolName: OrchestratorHikariCP
+      maxLifetime: 7200000
+      connectionTimeout: 30000
 
 flyway:
-  skip-migrations: false
+  skip-migrations: true
 
 queue:
   namespace: ${QUEUE_NAMESPACE}

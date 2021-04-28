@@ -22,6 +22,11 @@ def nonPrSecrets = [
     secret('idam-users-bulkscan-username', 'IDAM_USER_NAME'),
     secret('idam-users-bulkscan-password', 'IDAM_USER_PASSWORD'),
     secret('idam-client-secret', 'IDAM_CLIENT_SECRET'),
+    secret('orchestrator-staging-postgres-pass', 'DB_PASSWORD'),
+    secret('orchestrator-staging-postgres-user', 'DB_USER'),
+    secret('orchestrator-staging-postgres-host', 'DB_HOST'),
+    secret('orchestrator-staging-postgres-port', 'DB_PORT'),
+    secret('orchestrator-staging-postgres-database', 'DB_NAME'),
     secret('envelopes-staging-queue-send-shared-access-key', 'ENVELOPES_QUEUE_WRITE_ACCESS_KEY'),
     secret('envelopes-staging-queue-listen-shared-access-key', 'ENVELOPES_QUEUE_READ_ACCESS_KEY'),
     secret('payments-staging-queue-send-shared-access-key', 'PAYMENTS_QUEUE_WRITE_ACCESS_KEY')
@@ -61,6 +66,7 @@ withPipeline(type, product, component) {
     env.QUEUE_PAYMENTS_NAME = "payments-staging"
     env.QUEUE_READ_ACCESS_KEY_NAME = 'ListenSharedAccessKey'
     env.QUEUE_WRITE_ACCESS_KEY_NAME = 'SendSharedAccessKey'
+    env.DB_CONN_OPTIONS= '?sslmode=require'
   }
 
   before('smoketest:preview') {
