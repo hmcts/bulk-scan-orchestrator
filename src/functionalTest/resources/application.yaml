@@ -11,6 +11,7 @@ spring:
     name: Bulk Scan Orchestrator Functional Tests
   autoconfigure:
     exclude: \
+      org.springframework.boot.autoconfigure.jdbc.DataSourceConfiguration, \
       org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration, \
       org.springframework.boot.autoconfigure.jdbc.JdbcTemplateConfiguration, \
       org.springframework.boot.actuate.autoconfigure.jdbc.DataSourceHealthContributorAutoConfiguration, \
