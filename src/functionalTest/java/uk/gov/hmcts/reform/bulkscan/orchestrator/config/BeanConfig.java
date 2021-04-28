@@ -13,8 +13,7 @@ public class BeanConfig {
 
     @Bean
     @Primary
-    public CallbackResultRepository getCallbackResultRepository(
-    ) {
+    public CallbackResultRepository getCallbackResultRepository() {
         return new CallbackResultRepository(mock(NamedParameterJdbcTemplate.class));
     }
 }
