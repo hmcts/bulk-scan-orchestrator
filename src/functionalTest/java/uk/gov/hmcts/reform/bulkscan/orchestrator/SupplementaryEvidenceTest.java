@@ -6,7 +6,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.BeanConfig;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseSearcher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
@@ -31,6 +33,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor
 
 @SpringBootTest
 @ActiveProfiles("nosb") // no servicebus queue handler registration
+@Import(BeanConfig.class)
 class SupplementaryEvidenceTest {
 
     private static final String TEST_SERVICE_NAME = "bulkscan";

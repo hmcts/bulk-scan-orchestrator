@@ -3,7 +3,9 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.BeanConfig;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseSearcher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
@@ -24,6 +26,7 @@ import static org.awaitility.Awaitility.await;
 
 @SpringBootTest
 @ActiveProfiles("nosb")
+@Import(BeanConfig.class)
 public class AutomaticCaseUpdateTest {
 
     @Autowired CcdApi ccdApi;

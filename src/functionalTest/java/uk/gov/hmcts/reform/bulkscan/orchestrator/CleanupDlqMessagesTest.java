@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.BeanConfig;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 
 import java.util.concurrent.TimeUnit;
@@ -23,7 +24,7 @@ import static org.awaitility.Awaitility.await;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @ActiveProfiles("nosb")  // no servicebus queue handler registration
-@Import(FunctionalQueueConfig.class)
+@Import({FunctionalQueueConfig.class, BeanConfig.class})
 public class CleanupDlqMessagesTest {
     private static final Logger LOG = LoggerFactory.getLogger(CleanupDlqMessagesTest.class);
 

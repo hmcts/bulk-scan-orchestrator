@@ -8,9 +8,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.BeanConfig;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.CcdCallbackController;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
@@ -44,6 +46,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 
 @SpringBootTest
 @ActiveProfiles("nosb") // no servicebus queue handler registration
+@Import(BeanConfig.class)
 class AttachExceptionRecordToExistingCaseTest {
 
     @Value("${test-url}") String testUrl;

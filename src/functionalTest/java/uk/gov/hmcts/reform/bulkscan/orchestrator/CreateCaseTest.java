@@ -10,9 +10,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.BeanConfig;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.controllers.CcdCallbackController;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ExceptionRecordCreator;
@@ -36,6 +38,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.BULK_SCANNED_
 
 @SpringBootTest
 @ActiveProfiles("nosb") // no servicebus queue handler registration
+@Import(BeanConfig.class)
 class CreateCaseTest {
 
     private static final String DISPLAY_WARNINGS_FIELD = "displayWarnings";
