@@ -26,7 +26,7 @@ import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@ActiveProfiles({"nosb", "func"})  // no servicebus queue handler registration
+@ActiveProfiles("nosb") // no servicebus queue handler registration
 public class ReclassifyCallbackTest {
 
     private static final String JOURNEY_CLASSIFICATION_FIELD_NAME = "journeyClassification";

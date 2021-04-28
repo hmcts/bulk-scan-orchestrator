@@ -42,7 +42,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SEARCH_CASE_REFERENCE;
 
 @SpringBootTest
-@ActiveProfiles({"nosb", "func"})
+@ActiveProfiles("nosb")
 class AttachExceptionRecordWithOcrToExistingCaseTest {
 
     @Value("${test-url}")

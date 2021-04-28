@@ -35,7 +35,7 @@ import static org.awaitility.Awaitility.await;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.BULK_SCANNED_CASE_TYPE;
 
 @SpringBootTest
-@ActiveProfiles({"nosb", "func"})  // no servicebus queue handler registration
+@ActiveProfiles("nosb") // no servicebus queue handler registration
 class CreateCaseTest {
 
     private static final String DISPLAY_WARNINGS_FIELD = "displayWarnings";

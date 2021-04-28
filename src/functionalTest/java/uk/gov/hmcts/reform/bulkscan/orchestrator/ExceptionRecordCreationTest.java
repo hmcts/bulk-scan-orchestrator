@@ -27,7 +27,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getOcrDataValidationWarnings;
 
 @SpringBootTest
-@ActiveProfiles({"nosb", "func"})  // no servicebus queue handler registration
+@ActiveProfiles("nosb")  // no servicebus queue handler registration
 class ExceptionRecordCreationTest {
 
     @Autowired
