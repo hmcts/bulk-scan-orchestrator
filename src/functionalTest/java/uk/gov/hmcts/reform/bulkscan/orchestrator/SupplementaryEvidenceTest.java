@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
@@ -34,6 +35,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor
 @SpringBootTest
 @ActiveProfiles({"nosb", "functest"}) // no servicebus queue handler registration
 @Import(BeanConfig.class)
+@AutoConfigureTestDatabase
 class SupplementaryEvidenceTest {
 
     private static final String TEST_SERVICE_NAME = "bulkscan";

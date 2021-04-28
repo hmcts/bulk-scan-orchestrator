@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
@@ -25,6 +26,7 @@ import static org.awaitility.Awaitility.await;
 @SpringBootTest
 @ActiveProfiles({"nosb", "functest"}) // no servicebus queue handler registration
 @Import({FunctionalQueueConfig.class, BeanConfig.class})
+@AutoConfigureTestDatabase
 public class CleanupDlqMessagesTest {
     private static final Logger LOG = LoggerFactory.getLogger(CleanupDlqMessagesTest.class);
 

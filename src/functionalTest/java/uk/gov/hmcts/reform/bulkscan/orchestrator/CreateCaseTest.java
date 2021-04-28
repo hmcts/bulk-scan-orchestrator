@@ -9,6 +9,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
@@ -39,6 +40,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.BULK_SCANNED_
 @SpringBootTest
 @ActiveProfiles({"nosb", "functest"})// no servicebus queue handler registration
 @Import(BeanConfig.class)
+@AutoConfigureTestDatabase
 class CreateCaseTest {
 
     private static final String DISPLAY_WARNINGS_FIELD = "displayWarnings";

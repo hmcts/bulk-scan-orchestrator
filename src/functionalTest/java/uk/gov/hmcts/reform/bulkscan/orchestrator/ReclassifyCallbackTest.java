@@ -7,6 +7,7 @@ import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
@@ -30,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @ActiveProfiles({"nosb", "functest"}) // no servicebus queue handler registration
 @Import(BeanConfig.class)
+@AutoConfigureTestDatabase
 public class ReclassifyCallbackTest {
 
     private static final String JOURNEY_CLASSIFICATION_FIELD_NAME = "journeyClassification";

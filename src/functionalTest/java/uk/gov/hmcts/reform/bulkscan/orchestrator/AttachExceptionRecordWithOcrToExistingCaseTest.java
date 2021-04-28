@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
@@ -46,6 +47,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 @SpringBootTest
 @ActiveProfiles({"nosb", "functest"})
 @Import(BeanConfig.class)
+@AutoConfigureTestDatabase
 class AttachExceptionRecordWithOcrToExistingCaseTest {
 
     @Value("${test-url}")

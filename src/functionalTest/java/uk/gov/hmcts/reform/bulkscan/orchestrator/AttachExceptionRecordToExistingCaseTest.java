@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
@@ -47,6 +48,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 @SpringBootTest
 @ActiveProfiles({"nosb", "functest"}) // no servicebus queue handler registration
 @Import(BeanConfig.class)
+@AutoConfigureTestDatabase
 class AttachExceptionRecordToExistingCaseTest {
 
     @Value("${test-url}") String testUrl;
