@@ -92,6 +92,12 @@ withPipeline(type, product, component) {
       env.QUEUE_PAYMENTS_NAME = "payments"
       env.QUEUE_READ_ACCESS_KEY_NAME = 'RootManageSharedAccessKey'
       env.QUEUE_WRITE_ACCESS_KEY_NAME = 'RootManageSharedAccessKey'
+      env.DB_HOST = ${product}-${component}-${env.BRANCH_NAME}"-postgresql"
+      env.DB_CONN_OPTIONS = ''
+      env.DB_NAME = 'db'
+      env.DB_PASSWORD = 'db_pass'
+      env.DB_PORT = '5432'
+      env.DB_USER = 'db_user'
     }
   }
 
