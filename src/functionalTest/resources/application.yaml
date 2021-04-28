@@ -9,9 +9,11 @@ scheduling:
 spring:
   application:
     name: Bulk Scan Orchestrator Functional Tests
+  flyway:
+    enabled: false
 
 flyway:
-  skip-migrations: false
+  skip-migrations: true
 
 queue:
   namespace: ${QUEUE_NAMESPACE}
