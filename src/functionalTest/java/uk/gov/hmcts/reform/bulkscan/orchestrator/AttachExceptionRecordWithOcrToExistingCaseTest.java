@@ -44,7 +44,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SEARCH_CASE_REFERENCE;
 
 @SpringBootTest
-@ActiveProfiles("nosb")
+@ActiveProfiles({"nosb", "functest"})
 @Import(BeanConfig.class)
 class AttachExceptionRecordWithOcrToExistingCaseTest {
 

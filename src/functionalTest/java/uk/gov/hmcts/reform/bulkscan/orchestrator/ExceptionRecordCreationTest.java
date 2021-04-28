@@ -29,7 +29,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getOcrDataValidationWarnings;
 
 @SpringBootTest
-@ActiveProfiles("nosb")  // no servicebus queue handler registration
+@ActiveProfiles({"nosb", "functest"}) // no servicebus queue handler registration
 @Import(BeanConfig.class)
 class ExceptionRecordCreationTest {
 

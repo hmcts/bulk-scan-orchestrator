@@ -25,7 +25,7 @@ import static java.util.UUID.randomUUID;
 import static org.awaitility.Awaitility.await;
 
 @SpringBootTest
-@ActiveProfiles("nosb")
+@ActiveProfiles({"nosb", "functest"})
 @Import(BeanConfig.class)
 public class AutomaticCaseUpdateTest {
 

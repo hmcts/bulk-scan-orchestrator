@@ -45,7 +45,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.EXTERNAL_CASE_REFERENCE;
 
 @SpringBootTest
-@ActiveProfiles("nosb") // no servicebus queue handler registration
+@ActiveProfiles({"nosb", "functest"}) // no servicebus queue handler registration
 @Import(BeanConfig.class)
 class AttachExceptionRecordToExistingCaseTest {
 

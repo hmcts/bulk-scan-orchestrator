@@ -31,7 +31,7 @@ import static org.awaitility.Awaitility.await;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getCaseDataForField;
 
 @SpringBootTest
-@ActiveProfiles("nosb")  // no servicebus queue handler registration
+@ActiveProfiles({"nosb", "functest"}) // no servicebus queue handler registration
 @Import(BeanConfig.class)
 public class AutomaticCaseCreationTest {
 
