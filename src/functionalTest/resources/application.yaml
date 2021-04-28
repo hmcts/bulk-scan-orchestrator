@@ -17,10 +17,13 @@ spring:
       org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
   flyway:
     enabled: false
-
+management:
+  health:
+    db:
+      enabled: false
 flyway:
   skip-migrations: true
-
+  DataSourceHealthContributorAutoConfiguration
 queue:
   namespace: ${QUEUE_NAMESPACE}
   read-access-key-name: ${QUEUE_READ_ACCESS_KEY_NAME}
