@@ -11,7 +11,7 @@ import static org.mockito.Mockito.mock;
 @TestConfiguration
 public class BeanConfig {
 
-    @Bean
+    @Bean("callbackResultRepository")
     @Primary
     public CallbackResultRepository getCallbackResultRepository() {
         return new CallbackResultRepository(mock(NamedParameterJdbcTemplate.class));
