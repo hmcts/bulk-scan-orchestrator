@@ -10,10 +10,10 @@ spring:
   application:
     name: Bulk Scan Orchestrator Functional Tests
   autoconfigure:
-  exclude: \
-    org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration, \
-    org.springframework.boot.autoconfigure.jdbc.JdbcTemplateConfiguration, \
-    org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
+    exclude: \
+      org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration, \
+      org.springframework.boot.autoconfigure.jdbc.JdbcTemplateConfiguration, \
+      org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
   flyway:
     enabled: false
 
