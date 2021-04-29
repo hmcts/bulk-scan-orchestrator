@@ -82,13 +82,13 @@ public class CallbackResultRepositoryTest {
         dbHelper.insertCallbackResultWithCreatedAt(NEW_CALLBACK_RESULT_2, createdAt2);
 
         // when
-        var caseResultOpt = repo.findByCaseId(CASE_ID_1);
+        var caseResults = repo.findByCaseId(CASE_ID_1);
 
         // then
-        assertThat(caseResultOpt.isEmpty()).isFalse();
-        assertThat(caseResultOpt.get())
+        assertThat(caseResults.isEmpty()).isFalse();
+        assertThat(caseResults)
             .extracting(res -> tuple(res.id, res.createdAt, res.requestType, res.exceptionRecordId, res.caseId))
-            .isEqualTo(tuple(id1, createdAt1, ATTACH_TO_CASE, ER_ID_1, CASE_ID_1));
+            .containsExactly(tuple(id1, createdAt1, ATTACH_TO_CASE, ER_ID_1, CASE_ID_1));
     }
 
     @Test
@@ -103,10 +103,9 @@ public class CallbackResultRepositoryTest {
         var caseResultOpt = repo.findByExceptionRecordId(ER_ID_1);
 
         // then
-        assertThat(caseResultOpt.isEmpty()).isFalse();
-        assertThat(caseResultOpt.get())
+        assertThat(caseResultOpt)
             .extracting(res -> tuple(res.id, res.createdAt, res.requestType, res.exceptionRecordId, res.caseId))
-            .isEqualTo(tuple(id1, createdAt1, ATTACH_TO_CASE, ER_ID_1, CASE_ID_1));
+            .containsExactly(tuple(id1, createdAt1, ATTACH_TO_CASE, ER_ID_1, CASE_ID_1));
     }
 
     @Test
@@ -118,10 +117,10 @@ public class CallbackResultRepositoryTest {
         dbHelper.insertCallbackResultWithCreatedAt(NEW_CALLBACK_RESULT_2, createdAt2);
 
         // when
-        var caseResultOpt = repo.findByCaseId("WRONG_CASE_ID");
+        var caseResults = repo.findByCaseId("WRONG_CASE_ID");
 
         // then
-        assertThat(caseResultOpt.isEmpty()).isTrue();
+        assertThat(caseResults.isEmpty()).isTrue();
     }
 
     @Test
@@ -133,9 +132,9 @@ public class CallbackResultRepositoryTest {
         dbHelper.insertCallbackResultWithCreatedAt(NEW_CALLBACK_RESULT_2, createdAt2);
 
         // when
-        var caseResultOpt = repo.findByExceptionRecordId("WRONG_ER_ID");
+        var caseResults = repo.findByExceptionRecordId("WRONG_ER_ID");
 
         // then
-        assertThat(caseResultOpt.isEmpty()).isTrue();
+        assertThat(caseResults.isEmpty()).isTrue();
     }
 }
