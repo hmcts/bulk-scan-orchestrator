@@ -10,8 +10,10 @@ spring:
   application:
     name: Bulk Scan Orchestrator Functional Tests
   datasource:
-    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
-    url: jdbc:tc:postgresql:11.0://localhost/bs_orchestrator
+    driver-class-name: ${DB_DRIVER:org.testcontainers.jdbc.ContainerDatabaseDriver}
+    url: ${DB_URI:jdbc:tc:postgresql:11.0}://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:bs_orchestrator}${DB_CONN_OPTIONS:}
+    username: ${DB_USER:}
+    password: ${DB_PASSWORD:}
 
 flyway:
   skip-migrations: false
