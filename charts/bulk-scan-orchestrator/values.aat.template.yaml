@@ -4,7 +4,6 @@ java:
     PROCESSED_ENVELOPES_QUEUE_NAME: "processed-envelopes-staging"
     PAYMENTS_QUEUE_NAME: "payments-staging"
     FLYWAY_SKIP_MIGRATIONS: "false"
-    DB_CONN_OPTIONS: ?sslmode=require
   # Don't modify below here
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
