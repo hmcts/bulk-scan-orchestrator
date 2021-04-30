@@ -34,7 +34,7 @@ class CallbackResultServiceTest {
         singletonList(
             new CallbackResult(UUID.randomUUID(), Instant.now(), CREATE_CASE, EXCEPTION_RECORD_ID, CASE_ID)
         );
-    private static final RuntimeException runtimeException = new RuntimeException("msg");
+    private static final NullPointerException exception = new NullPointerException("msg");
 
     @BeforeEach
     void setUp() {
@@ -57,13 +57,13 @@ class CallbackResultServiceTest {
     @Test
     void should_rethrow_when_find_by_exception_record_id_throws() {
         // given
-        given(callbackResultRepository.findByExceptionRecordId(EXCEPTION_RECORD_ID)).willThrow(runtimeException);
+        given(callbackResultRepository.findByExceptionRecordId(EXCEPTION_RECORD_ID)).willThrow(exception);
 
         // when
         Throwable throwable = catchThrowable(() -> callbackResultService.findByExceptionRecordId(EXCEPTION_RECORD_ID));
 
         // then
-        assertThat(throwable).isSameAs(runtimeException);
+        assertThat(throwable).isSameAs(exception);
         verify(callbackResultRepository).findByExceptionRecordId(EXCEPTION_RECORD_ID);
     }
 
@@ -83,13 +83,13 @@ class CallbackResultServiceTest {
     @Test
     void should_rethrow_when_find_by_case_id_throws() {
         // given
-        given(callbackResultRepository.findByCaseId(CASE_ID)).willThrow(runtimeException);
+        given(callbackResultRepository.findByCaseId(CASE_ID)).willThrow(exception);
 
         // when
         Throwable throwable = catchThrowable(() -> callbackResultService.findByCaseId(CASE_ID));
 
         // then
-        assertThat(throwable).isSameAs(runtimeException);
+        assertThat(throwable).isSameAs(exception);
         verify(callbackResultRepository).findByCaseId(CASE_ID);
     }
 }
