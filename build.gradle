@@ -307,7 +307,7 @@ dependencies {
   integrationTestImplementation sourceSets.test.runtimeClasspath
   integrationTestImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '3.0.2'
 
-  integrationTestImplementation group: 'com.github.tomakehurst', name: 'wiremock-jre8', version: '2.26.3'
+  integrationTestImplementation group: 'com.github.tomakehurst', name: 'wiremock-jre8', version: '2.27.2'
 
   integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.15.2', {
     exclude group: 'junit', module: 'junit'
