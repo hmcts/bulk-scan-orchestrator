@@ -7,6 +7,9 @@ import java.util.List;
 
 public class CallbackResultListResponse {
 
+    @JsonProperty("count")
+    public final int count;
+
     @JsonProperty("callback-results")
     public final List<CallbackResultResponse> callbackResults;
 
@@ -14,6 +17,7 @@ public class CallbackResultListResponse {
     public CallbackResultListResponse(
         @JsonProperty("callback-results") List<CallbackResultResponse> callbackResults
     ) {
+        this.count = callbackResults.size();
         this.callbackResults = callbackResults;
     }
 }

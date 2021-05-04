@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,7 +35,7 @@ public class CallbackResultController {
         notes = "Returns an empty list when no callback results were found"
     )
     @ApiResponse(code = 200, message = "Success", response = CallbackResultListResponse.class)
-    public ResponseEntity<CallbackResultListResponse> getCallbackResults(@RequestParam Map<String, String> filters) {
+    public CallbackResultListResponse getCallbackResults(@RequestParam Map<String, String> filters) {
         if (filters.size() == 1) {
             if (filters.containsKey(CASE_ID) && !filters.get(CASE_ID).isEmpty()) {
                 List<CallbackResult> callbackResults = callbackResultService.findByCaseId(filters.get(CASE_ID));
@@ -54,11 +53,11 @@ public class CallbackResultController {
             + CASE_ID + "' or '" + EXCEPTION_RECORD_ID + "'");
     }
 
-    private ResponseEntity<CallbackResultListResponse> getResponse(List<CallbackResult> callbackResults) {
+    private CallbackResultListResponse getResponse(List<CallbackResult> callbackResults) {
         List<CallbackResultResponse> callbackResultResponses = callbackResults
             .stream()
             .map(CallbackResultResponse::new)
             .collect(Collectors.toList());
-        return ResponseEntity.ok(new CallbackResultListResponse(callbackResultResponses));
+        return new CallbackResultListResponse(callbackResultResponses);
     }
 }
