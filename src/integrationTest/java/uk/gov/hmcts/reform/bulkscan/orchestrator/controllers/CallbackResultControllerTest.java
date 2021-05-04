@@ -11,7 +11,9 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.CallbackRes
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackResultService;
 
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Calendar;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import static java.util.Arrays.asList;
@@ -40,7 +42,8 @@ public class CallbackResultControllerTest {
     private static final Instant TIMESTAMP2;
 
     static {
-        Calendar cal = Calendar.getInstance();
+        TimeZone timeZone = TimeZone.getTimeZone(ZoneId.of("Europe/London"));
+        Calendar cal = Calendar.getInstance(timeZone);
         cal.set(Calendar.YEAR, 2021);
         cal.set(Calendar.MONTH, 4);
         cal.set(Calendar.DAY_OF_MONTH, 4);
