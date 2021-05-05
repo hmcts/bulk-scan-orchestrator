@@ -9,11 +9,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.CallbackResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackResultService;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.util.DateFormatter;
 
 import java.time.Instant;
-import java.time.ZoneId;
-import java.util.Calendar;
-import java.util.TimeZone;
 import java.util.UUID;
 
 import static java.util.Arrays.asList;
@@ -36,24 +34,14 @@ public class CallbackResultControllerTest {
     private static final String CASE_ID2 = "CASE_ID2";
     private static final String EXCEPTION_RECORD_ID1 = "ER_ID1";
     private static final String EXCEPTION_RECORD_ID2 = "ER_ID2";
-    private static final String CREATED_AT2 = "2021-05-05T01:36:22.727Z";
     private static final String CREATED_AT1 = "2021-05-05T01:35:22.727Z";
+    private static final String CREATED_AT2 = "2021-05-05T01:36:22.727Z";
     private static final Instant TIMESTAMP1;
     private static final Instant TIMESTAMP2;
 
     static {
-        TimeZone timeZone = TimeZone.getTimeZone(ZoneId.of("Europe/London"));
-        Calendar cal = Calendar.getInstance(timeZone);
-        cal.set(Calendar.YEAR, 2021);
-        cal.set(Calendar.MONTH, 4);
-        cal.set(Calendar.DAY_OF_MONTH, 4);
-        cal.set(Calendar.HOUR, 14);
-        cal.set(Calendar.MINUTE, 35);
-        cal.set(Calendar.SECOND, 22);
-        cal.set(Calendar.MILLISECOND, 727);
-        TIMESTAMP1 = Instant.ofEpochMilli(cal.getTimeInMillis());
-        cal.set(Calendar.MINUTE, 36);
-        TIMESTAMP2 = Instant.ofEpochMilli(cal.getTimeInMillis());
+        TIMESTAMP1 = DateFormatter.getInstant(CREATED_AT1);
+        TIMESTAMP2 = DateFormatter.getInstant(CREATED_AT2);
     }
 
     @Autowired
