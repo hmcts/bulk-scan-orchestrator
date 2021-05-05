@@ -36,13 +36,8 @@ public class CallbackResultControllerTest {
     private static final String EXCEPTION_RECORD_ID2 = "ER_ID2";
     private static final String CREATED_AT1 = "2021-05-05T01:35:22.727Z";
     private static final String CREATED_AT2 = "2021-05-05T01:36:22.727Z";
-    private static final Instant TIMESTAMP1;
-    private static final Instant TIMESTAMP2;
-
-    static {
-        TIMESTAMP1 = DateFormatter.getInstant(CREATED_AT1);
-        TIMESTAMP2 = DateFormatter.getInstant(CREATED_AT2);
-    }
+    private static final Instant TIMESTAMP1 = DateFormatter.getInstant(CREATED_AT1);
+    private static final Instant TIMESTAMP2 = DateFormatter.getInstant(CREATED_AT2);
 
     @Autowired
     private MockMvc mockMvc;
