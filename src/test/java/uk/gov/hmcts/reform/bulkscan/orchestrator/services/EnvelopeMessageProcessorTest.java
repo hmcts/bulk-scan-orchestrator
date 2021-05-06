@@ -61,7 +61,7 @@ class EnvelopeMessageProcessorTest {
     private EnvelopeMessageProcessor processor;
 
     @BeforeEach
-    void before() throws Exception {
+    void before() {
         processor = new EnvelopeMessageProcessor(
             envelopeHandler,
             processedEnvelopeNotifier,
