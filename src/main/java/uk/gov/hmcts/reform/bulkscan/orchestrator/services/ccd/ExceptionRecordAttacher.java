@@ -200,12 +200,14 @@ public class ExceptionRecordAttacher {
         switch (callBackEvent.classification) {
             case EXCEPTION:
             case SUPPLEMENTARY_EVIDENCE:
-                supplementaryEvidenceUpdater.updateSupplementaryEvidence(
+                boolean attached = supplementaryEvidenceUpdater.updateSupplementaryEvidence(
                     callBackEvent,
                     targetCase,
                     targetCaseCcdRef
                 );
-                storeCallbackResult(callBackEvent, targetCaseCcdRef);
+                if (attached) {
+                    storeCallbackResult(callBackEvent, targetCaseCcdRef);
+                }
                 return Optional.empty();
 
             case SUPPLEMENTARY_EVIDENCE_WITH_OCR:
