@@ -33,11 +33,12 @@ public class SupplementaryEvidenceUpdater {
         this.scannedDocumentsValidator = scannedDocumentsValidator;
     }
 
-    public void updateSupplementaryEvidence(
+    public boolean updateSupplementaryEvidence(
         AttachToCaseEventData callBackEvent,
         CaseDetails targetCase,
         String targetCaseCcdRef
     ) {
+        boolean attached = false;
         List<Map<String, Object>> targetCaseDocuments = Documents.getScannedDocuments(targetCase);
 
         scannedDocumentsValidator.verifyExceptionRecordAddsNoDuplicates(
@@ -80,13 +81,14 @@ public class SupplementaryEvidenceUpdater {
                 eventSummary,
                 ccdStartEvent
             );
-
+            attached = true;
             log.info(
                 "Attached Exception Record to a case in CCD. ER ID: {}. Case ID: {}",
                 callBackEvent.exceptionRecordId,
                 targetCase.getId()
             );
         }
+        return attached;
     }
 
     private Map<String, Object> buildCaseData(

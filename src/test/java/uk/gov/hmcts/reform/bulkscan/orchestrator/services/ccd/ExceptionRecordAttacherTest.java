@@ -204,6 +204,28 @@ class ExceptionRecordAttacherTest {
     }
 
     @Test
+    void should_not_store_call_back_result_when_not_attach_supplementary_evidence() {
+        // given
+        given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);
+        AttachToCaseEventData callBackEvent = getCallbackEvent(SUPPLEMENTARY_EVIDENCE);
+
+        given(supplementaryEvidenceUpdater
+            .updateSupplementaryEvidence(
+                callBackEvent,
+                EXISTING_CASE_DETAILS,
+                EXISTING_CASE_ID)
+        ).willReturn(false);
+
+        // when
+        exceptionRecordAttacher.tryAttachToCase(
+            callBackEvent,
+            CASE_DETAILS,
+            true
+        );
+        verifyNoInteractions(callbackResultRepositoryProxy);
+    }
+
+    @Test
     void should_attach_supplementary_evidence_if_payments_publishing_fails() {
         // given
         given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);
