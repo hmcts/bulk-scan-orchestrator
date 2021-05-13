@@ -27,7 +27,7 @@ public class EnvelopesQueueConsumeTask {
         this.processingReadinessChecker = processingReadinessChecker;
     }
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelayString = "${scheduling.task.consume-envelopes-queue.fixedDelay}")
     public void consumeMessages() {
         log.info("Started {} job", TASK_NAME);
 
