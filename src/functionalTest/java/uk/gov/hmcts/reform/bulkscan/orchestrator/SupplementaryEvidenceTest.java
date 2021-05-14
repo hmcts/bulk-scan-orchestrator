@@ -127,7 +127,7 @@ class SupplementaryEvidenceTest {
         );
 
         // then
-        await("Supplementary evidence is attached to the case in ccd")
+        await("Supplementary evidence is attached to the case in ccd. LegacyId = " +legacyId)
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(2))
             .until(() -> hasCaseBeenUpdatedWithSupplementaryEvidence(caseDetails, 1));
