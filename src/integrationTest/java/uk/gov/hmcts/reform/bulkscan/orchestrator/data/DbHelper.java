@@ -1,15 +1,15 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.data;
 
 import org.springframework.context.annotation.Profile;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.CallbackResult;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.CallbackResultRowMapper;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.NewCallbackResult;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.RequestType;
 
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,12 +20,9 @@ public class DbHelper {
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final CallbackResultRowMapper callbackResultRowMapper;
 
-    public DbHelper(
-        NamedParameterJdbcTemplate jdbcTemplate,
-        CallbackResultRowMapper callbackResultRowMapper
-    ) {
+    public DbHelper(NamedParameterJdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.callbackResultRowMapper = callbackResultRowMapper;
+        this.callbackResultRowMapper = new CallbackResultRowMapper();
     }
 
     public void deleteAll() {
@@ -39,18 +36,17 @@ public class DbHelper {
         );
     }
 
-    public UUID insertCallbackResultWithCreatedAt(NewCallbackResult callbackResult, Instant createdAt) {
-        UUID id = UUID.randomUUID();
-        jdbcTemplate.update(
-            "INSERT INTO callback_result (id, created_at, request_type, exception_record_id, case_id) "
-                + "VALUES (:id, :createdAt, :requestType, :exceptionRecordId, :caseId)",
-            new MapSqlParameterSource()
-                .addValue("id", id)
-                .addValue("createdAt", Timestamp.from(createdAt))
-                .addValue("requestType", callbackResult.requestType.name())
-                .addValue("exceptionRecordId", callbackResult.exceptionRecordId)
-                .addValue("caseId", callbackResult.caseId)
-        );
-        return id;
+    static class CallbackResultRowMapper implements RowMapper<CallbackResult> {
+
+        @Override
+        public CallbackResult mapRow(ResultSet rs, int rowNum) throws SQLException {
+            return new CallbackResult(
+                UUID.fromString(rs.getString("id")),
+                rs.getTimestamp("created_at").toInstant(),
+                RequestType.valueOf(rs.getString("request_type")),
+                rs.getString("exception_record_id"),
+                rs.getString("case_id")
+            );
+        }
     }
 }
