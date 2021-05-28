@@ -175,49 +175,69 @@ public class CreateCaseCallbackService {
             CreateCaseResult result;
 
             if (ids.isEmpty()) {
-                result = ccdNewCaseCreator.createNewCase(
-                    exceptionRecord,
-                    configItem,
-                    ignoreWarnings,
-                    idamToken,
-                    userId
-                );
-                if (result.caseId != null) {
-                    try {
-                        callbackResultRepositoryProxy.storeCallbackResult(createCaseRequest(
-                            exceptionRecord.id,
-                            Long.toString(result.caseId)
-                        ));
-                    } catch (Exception ex) {
-                        log.error(
-                            "Failed to store callback case creation data to db, exception record Id {}, case Id {}",
-                            exceptionRecord.id,
-                            result.caseId
-                        );
-                    }
-                }
+                result = createNewCase(exceptionRecord, configItem, ignoreWarnings, idamToken, userId);
             } else if (ids.size() == 1) {
                 result = new CreateCaseResult(ids.get(0));
             } else {
                 String msg = String.format(
-                    "Multiple cases (%s) found for the given bulk scan case reference: %s",
-                    ids.stream().map(String::valueOf).collect(joining(", ")),
-                    exceptionRecord.id
+                        "Multiple cases (%s) found for the given bulk scan case reference: %s",
+                        ids.stream().map(String::valueOf).collect(joining(", ")),
+                        exceptionRecord.id
                 );
                 log.error(msg);
                 throw new MultipleCasesFoundException(msg);
             }
 
-            if (result.caseId == null) {
-                return new ProcessResult(result.warnings, result.errors);
-            } else {
-                return tryPublishPaymentMessageAndFinalise(
-                    configItem.getService(),
+            return handleCaseCreationResult(configItem, exceptionRecordData, result);
+        }
+    }
+
+    private ProcessResult handleCaseCreationResult(
+            ServiceConfigItem configItem,
+            CaseDetails exceptionRecordData,
+            CreateCaseResult result
+    ) {
+        if (result.caseId == null) {
+            return new ProcessResult(result.warnings, result.errors);
+        } else {
+            return tryPublishPaymentMessageAndFinalise(
+                configItem.getService(),
                     exceptionRecordData,
+                Long.toString(result.caseId)
+            );
+        }
+    }
+
+    private CreateCaseResult createNewCase(
+            ExceptionRecord exceptionRecord,
+            ServiceConfigItem configItem,
+            boolean ignoreWarnings,
+            String idamToken,
+            String userId
+    ) {
+        CreateCaseResult result;
+        result = ccdNewCaseCreator.createNewCase(
+                exceptionRecord,
+                configItem,
+                ignoreWarnings,
+                idamToken,
+                userId
+        );
+        if (result.caseId != null) {
+            try {
+                callbackResultRepositoryProxy.storeCallbackResult(createCaseRequest(
+                    exceptionRecord.id,
                     Long.toString(result.caseId)
+                ));
+            } catch (Exception ex) {
+                log.error(
+                    "Failed to store callback case creation data to db, exception record Id {}, case Id {}",
+                    exceptionRecord.id,
+                    result.caseId
                 );
             }
         }
+        return result;
     }
 
     private ProcessResult tryPublishPaymentMessageAndFinalise(
