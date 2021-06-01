@@ -38,6 +38,9 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 @Component
 public class ExceptionRecordValidator {
 
+    private static final String VALUE = "value";
+    private static final String KEY = "key";
+
     public ExceptionRecordValidator() {
         // empty constructor
     }
@@ -133,7 +136,7 @@ public class ExceptionRecordValidator {
                 .map(Documents::getScannedDocuments)
                 .orElse(emptyList())
                 .stream()
-                .map(items -> items.get("value"))
+                .map(items -> items.get(VALUE))
                 .filter(item -> item instanceof Map)
                 .map(item -> (Map<String, Object>) item)
                 .map(this::mapScannedDocument)
@@ -159,12 +162,12 @@ public class ExceptionRecordValidator {
             .map(ocrDataList ->
                 Try.of(() -> ocrDataList
                     .stream()
-                    .map(items -> items.get("value"))
+                    .map(items -> items.get(VALUE))
                     .filter(item -> item instanceof Map)
                     .map(item -> (Map<String, String>) item)
                     .map(ocrData -> new OcrDataField(
-                        ocrData.get("key"),
-                        ocrData.get("value")
+                        ocrData.get(KEY),
+                        ocrData.get(VALUE)
                     ))
                     .collect(toList())
                 ).toValidation().mapError(throwable -> "Invalid OCR data format. Error: " + throwable.getMessage())
