@@ -106,6 +106,7 @@ public class CcdNewCaseCreator {
             );
 
             return new CreateCaseResult(newCaseId);
+            // exceptions received from transformation client
         } catch (BadRequest exception) {
             throw new CallbackException(
                 format("Failed to transform exception record with Id %s", exceptionRecord.id),
@@ -114,7 +115,6 @@ public class CcdNewCaseCreator {
         } catch (UnprocessableEntity exception) {
             ClientServiceErrorResponse errorResponse = serviceResponseParser.parseResponseBody(exception);
             return new CreateCaseResult(errorResponse.warnings, errorResponse.errors);
-            // exceptions received from transformation client
         } catch (ConstraintViolationException exception) {
             String message = format(
                 "Invalid response received from transformation endpoint. "
