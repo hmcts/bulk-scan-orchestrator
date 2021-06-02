@@ -31,12 +31,12 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
-import javax.validation.ConstraintViolationException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import javax.validation.ConstraintViolationException;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
@@ -340,7 +340,7 @@ class CcdNewCaseCreatorTest {
                         eq(expectedTransformationResponse.caseCreationDetails.eventId),
                         any(),
                         anyString()
-                );
+            );
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -393,7 +393,7 @@ class CcdNewCaseCreatorTest {
                         eq(expectedTransformationResponse.caseCreationDetails.eventId),
                         any(),
                         anyString()
-                );
+            );
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
