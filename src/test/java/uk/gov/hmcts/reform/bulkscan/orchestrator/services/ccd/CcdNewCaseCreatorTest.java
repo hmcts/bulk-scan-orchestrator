@@ -41,7 +41,6 @@ import javax.validation.ConstraintViolationException;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
 import static java.time.LocalDateTime.now;
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
