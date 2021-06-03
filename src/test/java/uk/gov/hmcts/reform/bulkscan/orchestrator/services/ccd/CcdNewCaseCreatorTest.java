@@ -100,7 +100,6 @@ class CcdNewCaseCreatorTest {
         );
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void should_return_new_case_id_when_successfully_executed_all_the_steps() {
         // given
@@ -119,7 +118,12 @@ class CcdNewCaseCreatorTest {
             .willReturn(expectedTransformationResponse);
 
         given(ccdApi.createCase(
-            any(CcdRequestCredentials.class), anyString(), anyString(), anyString(), any(), anyString()
+                any(CcdRequestCredentials.class),
+                eq(exceptionRecord.poBoxJurisdiction),
+                eq(expectedTransformationResponse.caseCreationDetails.caseTypeId),
+                eq(expectedTransformationResponse.caseCreationDetails.eventId),
+                any(),
+                anyString()
         )).willReturn(CASE_ID);
 
         // when
@@ -151,6 +155,87 @@ class CcdNewCaseCreatorTest {
         assertThat(ccdRequestCredentials.getValue().userId).isEqualTo(USER_ID);
     }
 
+    @Test
+    void should_return_new_case_id_if_transformation_returns_warnings_and_ignore_warnings_true() {
+        // given
+        ServiceConfigItem configItem = getConfigItem();
+        ExceptionRecord exceptionRecord = getExceptionRecord();
+
+        var s2sToken = "s2s-token1";
+
+        var expectedTransformationResponse = new SuccessfulTransformationResponse(
+            new CaseCreationDetails("some_case_type", "some_event_id", basicCaseData()),
+            singletonList("warning1")
+        );
+
+        given(s2sTokenGenerator.generate()).willReturn(s2sToken);
+        given(exceptionRecordTransformer.transformExceptionRecord(configItem.getTransformationUrl(), exceptionRecord))
+            .willReturn(expectedTransformationResponse);
+
+        given(ccdApi.createCase(
+                any(CcdRequestCredentials.class),
+                eq(exceptionRecord.poBoxJurisdiction),
+                eq(expectedTransformationResponse.caseCreationDetails.caseTypeId),
+                eq(expectedTransformationResponse.caseCreationDetails.eventId),
+                any(),
+                anyString()
+        )).willReturn(CASE_ID);
+
+        // when
+        CreateCaseResult result =
+            ccdNewCaseCreator.createNewCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID);
+
+        // then
+        assertThat(result.caseId).isEqualTo(CASE_ID);
+
+        // and
+        var expectedLogContext = format(
+            "Exception ID: %s, jurisdiction: %s, form type: %s",
+            exceptionRecord.id,
+            exceptionRecord.poBoxJurisdiction,
+            exceptionRecord.formType
+        );
+
+        var ccdRequestCredentials = ArgumentCaptor.forClass(CcdRequestCredentials.class);
+        verify(ccdApi).createCase(
+            ccdRequestCredentials.capture(),
+            eq(exceptionRecord.poBoxJurisdiction),
+            eq(expectedTransformationResponse.caseCreationDetails.caseTypeId),
+            eq(expectedTransformationResponse.caseCreationDetails.eventId),
+            any(), // there's a separate test for this argument (case data content builder)
+            eq(expectedLogContext)
+        );
+        assertThat(ccdRequestCredentials.getValue().idamToken).isEqualTo(IDAM_TOKEN);
+        assertThat(ccdRequestCredentials.getValue().s2sToken).isEqualTo(s2sToken);
+        assertThat(ccdRequestCredentials.getValue().userId).isEqualTo(USER_ID);
+    }
+
+    @Test
+    void should_return_warnings_if_transformation_returns_warnings_and_ignore_warnings_false() {
+        // given
+        ServiceConfigItem configItem = getConfigItem();
+        ExceptionRecord exceptionRecord = getExceptionRecord();
+
+        var expectedTransformationResponse = new SuccessfulTransformationResponse(
+            new CaseCreationDetails("some_case_type", "some_event_id", basicCaseData()),
+            singletonList("warning1")
+        );
+
+        given(exceptionRecordTransformer.transformExceptionRecord(configItem.getTransformationUrl(), exceptionRecord))
+            .willReturn(expectedTransformationResponse);
+
+        // when
+        CreateCaseResult result =
+            ccdNewCaseCreator.createNewCase(exceptionRecord, configItem, false, IDAM_TOKEN, USER_ID);
+
+        // then
+        assertThat(result.caseId).isNull();
+        assertThat(result.warnings).containsExactly("warning1");
+        assertThat(result.errors).isEmpty();
+
+        verifyNoInteractions(ccdApi);
+    }
+
     @SuppressWarnings("unchecked")
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
@@ -161,36 +246,40 @@ class CcdNewCaseCreatorTest {
             emptyList()
         );
 
-        given(s2sTokenGenerator.generate()).willReturn("s2s-token1");
-        given(exceptionRecordTransformer.transformExceptionRecord(any(), any())).willReturn(transformationResponse);
-
+        ServiceConfigItem configItem = getConfigItem();
         ExceptionRecord exceptionRecord = getExceptionRecord();
 
+        given(s2sTokenGenerator.generate()).willReturn("s2s-token1");
+        given(exceptionRecordTransformer.transformExceptionRecord(configItem.getTransformationUrl(), exceptionRecord))
+                .willReturn(transformationResponse);
+
+        // when
         // trigger case creation to capture data content builder which was passed to CCD client
-        ccdNewCaseCreator.createNewCase(exceptionRecord, getConfigItem(), true, IDAM_TOKEN, USER_ID);
+        ccdNewCaseCreator.createNewCase(exceptionRecord, configItem, true, IDAM_TOKEN, USER_ID);
 
         var caseDetailsBuilderCaptor = ArgumentCaptor.forClass(Function.class);
         verify(ccdApi).createCase(
-            any(CcdRequestCredentials.class),
-            any(),
-            any(),
-            any(),
-            caseDetailsBuilderCaptor.capture(),
-            any()
+                any(CcdRequestCredentials.class),
+                eq(exceptionRecord.poBoxJurisdiction),
+                eq(transformationResponse.caseCreationDetails.caseTypeId),
+                eq(transformationResponse.caseCreationDetails.eventId),
+                caseDetailsBuilderCaptor.capture(),
+                anyString()
         );
 
         // then
         assertCaseDataContentBuilderCreatesCorrectResult(
-            caseDetailsBuilderCaptor.getValue(),
-            exceptionRecord.id,
-            exceptionRecord.envelopeId,
-            transformationResponse,
-            isServiceEnabledForAutoCaseCreation
+                caseDetailsBuilderCaptor.getValue(),
+                configItem.getService(),
+                exceptionRecord.id,
+                exceptionRecord.envelopeId,
+                transformationResponse,
+                isServiceEnabledForAutoCaseCreation
         );
     }
 
     @Test
-    void should_return_errors_and_warnings_when_transformation_client_returns_422() {
+    void should_return_errors_and_warnings_when_transformation_client_returns_unprocessable_entity() {
         // given
         ServiceConfigItem configItem = getConfigItem();
         ExceptionRecord exceptionRecord = getExceptionRecord();
@@ -214,6 +303,8 @@ class CcdNewCaseCreatorTest {
         // then
         assertThat(result.warnings).containsOnly("warning");
         assertThat(result.errors).containsOnly("error");
+
+        verifyNoInteractions(ccdApi);
     }
 
     @Test
@@ -447,17 +538,18 @@ class CcdNewCaseCreatorTest {
     }
 
     private void assertCaseDataContentBuilderCreatesCorrectResult(
-        Function<StartEventResponse, CaseDataContent> caseDetailsBuilder,
-        String exceptionRecordId,
-        String envelopeId,
-        SuccessfulTransformationResponse transformationResponse,
-        boolean isServiceEnabledForAutoCaseCreation
+            Function<StartEventResponse, CaseDataContent> caseDetailsBuilder,
+            String service,
+            String exceptionRecordId,
+            String envelopeId,
+            SuccessfulTransformationResponse transformationResponse,
+            boolean isServiceEnabledForAutoCaseCreation
     ) {
         // given
         var envelopeReferences =
-            asList(new CcdCollectionElement<>(new EnvelopeReference(envelopeId, CaseAction.CREATE)));
+                singletonList(new CcdCollectionElement<>(new EnvelopeReference(envelopeId, CaseAction.CREATE)));
 
-        given(envelopeReferenceHelper.serviceSupportsEnvelopeReferences(any()))
+        given(envelopeReferenceHelper.serviceSupportsEnvelopeReferences(service))
             .willReturn(isServiceEnabledForAutoCaseCreation);
 
         var expectedCaseData = getExpectedCaseDataToPassToCcd(

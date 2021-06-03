@@ -29,8 +29,8 @@ import java.util.Map;
 import javax.validation.ConstraintViolationException;
 
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ServiceCaseFields.BULK_SCAN_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ServiceCaseFields.BULK_SCAN_ENVELOPES;
 
@@ -229,7 +229,7 @@ public class CcdNewCaseCreator {
         if (envelopeReferenceHelper.serviceSupportsEnvelopeReferences(service)) {
             updatedCaseData.put(
                 BULK_SCAN_ENVELOPES,
-                asList(new CcdCollectionElement<>(new EnvelopeReference(envelopeId, CaseAction.CREATE)))
+                    singletonList(new CcdCollectionElement<>(new EnvelopeReference(envelopeId, CaseAction.CREATE)))
             );
 
             log.info(
