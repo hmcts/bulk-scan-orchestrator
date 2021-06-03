@@ -29,8 +29,8 @@ import java.util.Map;
 import javax.validation.ConstraintViolationException;
 
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ServiceCaseFields.BULK_SCAN_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ServiceCaseFields.BULK_SCAN_ENVELOPES;
 
@@ -106,6 +106,7 @@ public class CcdNewCaseCreator {
             );
 
             return new CreateCaseResult(newCaseId);
+            // exceptions received from transformation client
         } catch (BadRequest exception) {
             throw new CallbackException(
                 format("Failed to transform exception record with Id %s", exceptionRecord.id),
@@ -114,7 +115,6 @@ public class CcdNewCaseCreator {
         } catch (UnprocessableEntity exception) {
             ClientServiceErrorResponse errorResponse = serviceResponseParser.parseResponseBody(exception);
             return new CreateCaseResult(errorResponse.warnings, errorResponse.errors);
-            // exceptions received from transformation client
         } catch (ConstraintViolationException exception) {
             String message = format(
                 "Invalid response received from transformation endpoint. "
@@ -229,7 +229,7 @@ public class CcdNewCaseCreator {
         if (envelopeReferenceHelper.serviceSupportsEnvelopeReferences(service)) {
             updatedCaseData.put(
                 BULK_SCAN_ENVELOPES,
-                asList(new CcdCollectionElement<>(new EnvelopeReference(envelopeId, CaseAction.CREATE)))
+                    singletonList(new CcdCollectionElement<>(new EnvelopeReference(envelopeId, CaseAction.CREATE)))
             );
 
             log.info(
