@@ -238,21 +238,9 @@ dependencyManagement {
     dependencySet(group: 'commons-io', version: '2.8.0') {
       entry 'commons-io'
     }
-    // CVE-2021-22118
-    dependencySet(group: 'org.springframework', version: '5.3.7') {
-      entry 'spring-aop'
-      entry 'spring-aspects'
-      entry 'spring-beans'
-      entry 'spring-context'
-      entry 'spring-context-support'
-      entry 'spring-core'
-      entry 'spring-expression'
-      entry 'spring-jcl'
-      entry 'spring-jdbc'
-      entry 'spring-orm'
-      entry 'spring-tx'
-      entry 'spring-web'
-      entry 'spring-webmvc'
+    // avoid CVE-2020-10693
+    dependencySet(group: 'org.hibernate', version: '7.0.1.Final'){
+      entry 'hibernate-validator'
     }
   }
 }
