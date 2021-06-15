@@ -67,7 +67,7 @@ withPipeline(type, product, component) {
     withAksClient('nonprod', product){
       // Envelopes queue connection string is needed by the functional tests client.
       // The following code (as ugly as it looks!) gets it from the k8s cluster
-      def dockerImage = new DockerImage(product, component, null, env.BRANCH_NAME, env.GIT_COMMIT)
+      def dockerImage = new DockerImage(product, component, null, env.BRANCH_NAME, env.GIT_COMMIT, env.LAST_COMMIT_TIMESTAMP)
       def subscription = env.SUBSCRIPTION_NAME
       def aksServiceName = dockerImage.getAksServiceName().toLowerCase()
       def sbNamespaceSecret = "servicebus-secret-namespace-${aksServiceName}-servicebus"
