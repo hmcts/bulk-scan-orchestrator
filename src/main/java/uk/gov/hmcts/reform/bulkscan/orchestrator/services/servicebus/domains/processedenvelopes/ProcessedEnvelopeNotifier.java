@@ -1,16 +1,13 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes;
 
+import com.azure.messaging.servicebus.ServiceBusMessage;
+import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microsoft.azure.servicebus.IMessage;
-import com.microsoft.azure.servicebus.Message;
-import com.microsoft.azure.servicebus.QueueClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-
-import java.time.Instant;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
@@ -23,11 +20,11 @@ public class ProcessedEnvelopeNotifier implements IProcessedEnvelopeNotifier {
 
     private final Logger log = LoggerFactory.getLogger(ProcessedEnvelopeNotifier.class);
 
-    private final QueueClient queueClient;
+    private final ServiceBusSenderClient queueClient;
     private final ObjectMapper objectMapper;
 
     public ProcessedEnvelopeNotifier(
-        @Qualifier("processed-envelopes") QueueClient queueClient,
+        @Qualifier("processed-envelopes") ServiceBusSenderClient queueClient,
         ObjectMapper objectMapper
     ) {
         this.queueClient = queueClient;
@@ -39,10 +36,11 @@ public class ProcessedEnvelopeNotifier implements IProcessedEnvelopeNotifier {
             String messageBody =
                 objectMapper.writeValueAsString(new ProcessedEnvelope(envelopeId, ccdId, envelopeCcdAction));
 
-            IMessage message = new Message(envelopeId, messageBody, APPLICATION_JSON.toString());
+            ServiceBusMessage message = new ServiceBusMessage(messageBody);
+            message.setContentType(APPLICATION_JSON.toString());
+            message.setMessageId(envelopeId);
 
-            // TODO: change back to `queueClient.send(message)` when BPS-694 is implemented
-            queueClient.scheduleMessage(message, Instant.now().plusSeconds(10));
+            queueClient.sendMessage(message);
 
             log.info("Sent message to processed envelopes queue. Message Body: {}", messageBody);
         } catch (Exception ex) {
