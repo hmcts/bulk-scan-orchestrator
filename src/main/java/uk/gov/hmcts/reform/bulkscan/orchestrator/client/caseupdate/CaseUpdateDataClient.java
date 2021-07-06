@@ -15,6 +15,8 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+
 /**
  * Retrieves data that should be used to update a case.
  */
@@ -41,6 +43,7 @@ public class CaseUpdateDataClient {
     ) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("ServiceAuthorization", s2sToken);
+        headers.add("Content-Type", APPLICATION_JSON.toString());
 
         String url =
             UriComponentsBuilder

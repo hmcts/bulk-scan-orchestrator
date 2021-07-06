@@ -14,6 +14,8 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+
 @Service
 public class TransformationClient {
 
@@ -37,6 +39,7 @@ public class TransformationClient {
     ) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("ServiceAuthorization", s2sTokenGenerator.generate());
+        headers.add("Content-Type", APPLICATION_JSON.toString());
 
         SuccessfulTransformationResponse response = restTemplate.postForObject(
             getUrl(baseUrl),
