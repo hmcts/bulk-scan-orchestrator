@@ -37,6 +37,13 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class PaymentsPublisherTest {
 
+    private static Object[][] getIsExceptionRecord() {
+        return new Object[][] {
+            {true},
+            {false}
+        };
+    }
+
     private PaymentsPublisher paymentsPublisher;
 
     @Mock
