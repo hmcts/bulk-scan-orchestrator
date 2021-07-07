@@ -30,7 +30,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.NewC
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasIdamToken;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasUserId;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isCreateNewCaseEvent;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING;
 
 @Service
@@ -48,15 +47,17 @@ public class CreateCaseCallbackService {
     private final ExceptionRecordFinalizer exceptionRecordFinalizer;
     private final PaymentsProcessor paymentsProcessor;
     private final CallbackResultRepositoryProxy callbackResultRepositoryProxy;
+    private final EventIdValidator eventIdValidator;
 
     public CreateCaseCallbackService(
-        ExceptionRecordValidator validator,
-        ServiceConfigProvider serviceConfigProvider,
-        CaseFinder caseFinder,
-        CcdNewCaseCreator ccdNewCaseCreator,
-        ExceptionRecordFinalizer exceptionRecordFinalizer,
-        PaymentsProcessor paymentsProcessor,
-        CallbackResultRepositoryProxy callbackResultRepositoryProxy
+            ExceptionRecordValidator validator,
+            ServiceConfigProvider serviceConfigProvider,
+            CaseFinder caseFinder,
+            CcdNewCaseCreator ccdNewCaseCreator,
+            ExceptionRecordFinalizer exceptionRecordFinalizer,
+            PaymentsProcessor paymentsProcessor,
+            CallbackResultRepositoryProxy callbackResultRepositoryProxy,
+            EventIdValidator eventIdValidator
     ) {
         this.validator = validator;
         this.serviceConfigProvider = serviceConfigProvider;
@@ -65,6 +66,7 @@ public class CreateCaseCallbackService {
         this.exceptionRecordFinalizer = exceptionRecordFinalizer;
         this.paymentsProcessor = paymentsProcessor;
         this.callbackResultRepositoryProxy = callbackResultRepositoryProxy;
+        this.eventIdValidator = eventIdValidator;
     }
 
     /**
@@ -136,7 +138,7 @@ public class CreateCaseCallbackService {
         String userId
     ) {
         return validator.mandatoryPrerequisites(
-            () -> isCreateNewCaseEvent(eventId),
+            () -> eventIdValidator.isCreateNewCaseEvent(eventId),
             () -> getServiceConfig(caseDetails).map(item -> null),
             () -> hasIdamToken(idamToken).map(item -> null),
             () -> hasUserId(userId).map(item -> null)

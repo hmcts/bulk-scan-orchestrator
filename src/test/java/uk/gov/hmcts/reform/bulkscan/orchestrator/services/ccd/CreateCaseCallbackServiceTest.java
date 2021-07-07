@@ -26,6 +26,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import java.util.HashMap;
 import java.util.Map;
 
+import static io.vavr.control.Validation.invalid;
+import static io.vavr.control.Validation.valid;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,7 +70,7 @@ class CreateCaseCallbackServiceTest {
     @Mock ExceptionRecordFinalizer exceptionRecordFinalizer;
     @Mock PaymentsProcessor paymentsProcessor;
     @Mock private CallbackResultRepositoryProxy callbackResultRepositoryProxy;
-
+    @Mock private EventIdValidator eventIdValidator;
 
     private CreateCaseCallbackService service;
 
@@ -81,12 +83,15 @@ class CreateCaseCallbackServiceTest {
             ccdNewCaseCreator,
             exceptionRecordFinalizer,
             paymentsProcessor,
-            callbackResultRepositoryProxy
+            callbackResultRepositoryProxy,
+            eventIdValidator
         );
     }
 
     @Test
     void should_not_allow_to_process_callback_in_case_wrong_event_id_is_received() {
+        given(eventIdValidator.isCreateNewCaseEvent(anyString())).willReturn(invalid("Error msg"));
+
         CallbackException callbackException = catchThrowableOfType(() ->
             service.process(new CcdCallbackRequest(
                 "some event",
@@ -97,7 +102,7 @@ class CreateCaseCallbackServiceTest {
         );
 
         assertThat(callbackException.getCause()).isNull();
-        assertThat(callbackException).hasMessage("The some event event is not supported. Please contact service team");
+        assertThat(callbackException).hasMessage("Error msg");
 
         verifyNoInteractions(callbackResultRepositoryProxy);
         verify(serviceConfigProvider, never()).getConfig(anyString());
@@ -108,6 +113,8 @@ class CreateCaseCallbackServiceTest {
     void should_not_allow_to_process_callback_when_case_type_id_is_missing() {
         // given
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.id(1L));
+
+        given(eventIdValidator.isCreateNewCaseEvent(anyString())).willReturn(valid(null));
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -131,6 +138,7 @@ class CreateCaseCallbackServiceTest {
     void should_not_allow_to_process_callback_when_case_type_id_is_empty() {
         // given
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(""));
+        given(eventIdValidator.isCreateNewCaseEvent(anyString())).willReturn(valid(null));
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -157,6 +165,8 @@ class CreateCaseCallbackServiceTest {
         doThrow(new ServiceNotConfiguredException("oh no")).when(serviceConfigProvider).getConfig(SERVICE);
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(CASE_TYPE_ID));
 
+        given(eventIdValidator.isCreateNewCaseEvent(anyString())).willReturn(valid(null));
+
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
             service.process(new CcdCallbackRequest(
@@ -180,6 +190,8 @@ class CreateCaseCallbackServiceTest {
         // given
         when(serviceConfigProvider.getConfig(SERVICE)).thenReturn(new ServiceConfigItem());
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(CASE_TYPE_ID));
+
+        given(eventIdValidator.isCreateNewCaseEvent(anyString())).willReturn(valid(null));
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -210,6 +222,8 @@ class CreateCaseCallbackServiceTest {
             .jurisdiction("some jurisdiction")
         );
 
+        given(eventIdValidator.isCreateNewCaseEvent(anyString())).willReturn(valid(null));
+
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
             service.process(new CcdCallbackRequest(
@@ -236,6 +250,8 @@ class CreateCaseCallbackServiceTest {
             .caseTypeId(CASE_TYPE_ID)
             .jurisdiction("some jurisdiction")
         );
+
+        given(eventIdValidator.isCreateNewCaseEvent(anyString())).willReturn(valid(null));
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -267,6 +283,8 @@ class CreateCaseCallbackServiceTest {
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
 
+        given(eventIdValidator.isCreateNewCaseEvent(anyString())).willReturn(valid(null));
+
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
             EventIds.CREATE_NEW_CASE,
@@ -295,6 +313,8 @@ class CreateCaseCallbackServiceTest {
 
         Map<String, Object> data = basicCaseData();
         data.put("journeyClassification", SUPPLEMENTARY_EVIDENCE.name());
+
+        given(eventIdValidator.isCreateNewCaseEvent(anyString())).willReturn(valid(null));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -329,6 +349,8 @@ class CreateCaseCallbackServiceTest {
         when(exceptionRecordFinalizer.finalizeExceptionRecord(caseData, "345", CASE_CREATION))
             .thenReturn(finalizedCaseData);
 
+        given(eventIdValidator.isCreateNewCaseEvent(anyString())).willReturn(valid(null));
+
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
             EventIds.CREATE_NEW_CASE,
@@ -351,6 +373,8 @@ class CreateCaseCallbackServiceTest {
 
         when(caseFinder.findCases(any(), any()))
             .thenReturn(asList(345L, 456L));
+
+        given(eventIdValidator.isCreateNewCaseEvent(anyString())).willReturn(valid(null));
 
         assertThatThrownBy(
             () -> service.process(new CcdCallbackRequest(
@@ -382,6 +406,8 @@ class CreateCaseCallbackServiceTest {
 
         Map<String, Object> data = basicCaseData();
         data.put(ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING, YesNoFieldValues.YES);
+
+        given(eventIdValidator.isCreateNewCaseEvent(anyString())).willReturn(valid(null));
 
         // when
         ProcessResult result =
@@ -431,6 +457,8 @@ class CreateCaseCallbackServiceTest {
             anyString()
         )).willReturn(new CreateCaseResult(newCaseId));
 
+        given(eventIdValidator.isCreateNewCaseEvent(anyString())).willReturn(valid(null));
+
         // when
         ProcessResult result =
             service
@@ -472,6 +500,8 @@ class CreateCaseCallbackServiceTest {
 
         willThrow(PaymentsPublishingException.class).given(paymentsProcessor)
             .updatePayments(any(), anyString(), anyString(), eq(Long.toString(newCaseId)));
+
+        given(eventIdValidator.isCreateNewCaseEvent(anyString())).willReturn(valid(null));
 
         // when
         ProcessResult result =

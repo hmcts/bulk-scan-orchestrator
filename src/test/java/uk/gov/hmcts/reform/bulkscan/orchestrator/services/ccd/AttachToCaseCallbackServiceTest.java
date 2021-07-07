@@ -58,6 +58,9 @@ class AttachToCaseCallbackServiceTest {
     @Mock
     private ExceptionRecordAttacher exceptionRecordAttacher;
 
+    @Mock
+    private EventIdValidator callbackValidator;
+
     private static final String BULKSCAN_ENVELOPE_ID = "some-envelope-id";
     private static final String JURISDICTION = "BULKSCAN";
     private static final String SERVICE_NAME = "bulkscan";
@@ -84,7 +87,8 @@ class AttachToCaseCallbackServiceTest {
             serviceConfigProvider,
             exceptionRecordValidator,
             exceptionRecordFinalizer,
-            exceptionRecordAttacher
+            exceptionRecordAttacher,
+            callbackValidator
         );
 
         exceptionRecord = getExceptionRecord();

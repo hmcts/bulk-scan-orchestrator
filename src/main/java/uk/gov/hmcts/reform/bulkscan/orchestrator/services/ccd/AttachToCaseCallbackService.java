@@ -31,7 +31,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasTargetCaseReference;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasUserId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.validatePayments;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isAttachToCaseEvent;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.CCD_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SEARCH_CASE_REFERENCE_TYPE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
@@ -45,17 +44,20 @@ public class AttachToCaseCallbackService {
     private final ExceptionRecordValidator exceptionRecordValidator;
     private final ExceptionRecordFinalizer exceptionRecordFinalizer;
     private final ExceptionRecordAttacher exceptionRecordAttacher;
+    private final EventIdValidator eventIdValidator;
 
     public AttachToCaseCallbackService(
-        ServiceConfigProvider serviceConfigProvider,
-        ExceptionRecordValidator exceptionRecordValidator,
-        ExceptionRecordFinalizer exceptionRecordFinalizer,
-        ExceptionRecordAttacher exceptionRecordAttacher
+            ServiceConfigProvider serviceConfigProvider,
+            ExceptionRecordValidator exceptionRecordValidator,
+            ExceptionRecordFinalizer exceptionRecordFinalizer,
+            ExceptionRecordAttacher exceptionRecordAttacher,
+            EventIdValidator eventIdValidator
     ) {
         this.serviceConfigProvider = serviceConfigProvider;
         this.exceptionRecordValidator = exceptionRecordValidator;
         this.exceptionRecordFinalizer = exceptionRecordFinalizer;
         this.exceptionRecordAttacher = exceptionRecordAttacher;
+        this.eventIdValidator = eventIdValidator;
     }
 
     /**
@@ -72,7 +74,7 @@ public class AttachToCaseCallbackService {
         Boolean ignoreWarnings
     ) {
         Validation<String, Void> canAccess = exceptionRecordValidator.mandatoryPrerequisites(
-            () -> isAttachToCaseEvent(eventId),
+            () -> eventIdValidator.isAttachToCaseEvent(eventId),
             () -> canBeAttachedToCase(exceptionRecordDetails),
             () -> hasIdamToken(requesterIdamToken).map(item -> null),
             () -> hasUserId(requesterUserId).map(item -> null)

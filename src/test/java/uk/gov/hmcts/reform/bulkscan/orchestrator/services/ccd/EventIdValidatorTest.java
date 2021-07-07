@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import io.vavr.control.Validation;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -18,10 +19,17 @@ class EventIdValidatorTest {
         };
     }
 
+    private EventIdValidator eventIdValidator;
+
+    @BeforeEach
+    void setUp() {
+        eventIdValidator = new EventIdValidator();
+    }
+
     @ParameterizedTest(name = "{0}: valid:{2}")
     @MethodSource("attachToCaseEventIdTestParams")
     void attachToCaseEventIdTest(String caseDescription, String eventId, boolean expectedIsValid) {
-        Validation<String, Void> validation = EventIdValidator.isAttachToCaseEvent(eventId);
+        Validation<String, Void> validation = eventIdValidator.isAttachToCaseEvent(eventId);
 
         assertThat(validation.isValid()).isEqualTo(expectedIsValid);
         assertErrorMessage(validation, eventId);
@@ -38,7 +46,7 @@ class EventIdValidatorTest {
     @ParameterizedTest(name = "{0}: valid:{2}")
     @MethodSource("createCaseEventIdTestParams")
     void createCaseEventIdTest(String caseDescription, String eventId, boolean expectedIsValid) {
-        Validation<String, Void> validation = EventIdValidator.isCreateNewCaseEvent(eventId);
+        Validation<String, Void> validation = eventIdValidator.isCreateNewCaseEvent(eventId);
 
         assertThat(validation.isValid()).isEqualTo(expectedIsValid);
         assertErrorMessage(validation, eventId);
