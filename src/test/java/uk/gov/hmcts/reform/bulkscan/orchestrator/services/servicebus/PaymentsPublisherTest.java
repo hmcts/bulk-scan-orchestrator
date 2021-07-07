@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus;
 
+import com.azure.messaging.servicebus.ServiceBusErrorSource;
+import com.azure.messaging.servicebus.ServiceBusException;
+import com.azure.messaging.servicebus.ServiceBusMessage;
+import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microsoft.azure.servicebus.IMessage;
-import com.microsoft.azure.servicebus.Message;
-import com.microsoft.azure.servicebus.QueueClient;
-import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,7 +47,7 @@ class PaymentsPublisherTest {
     private PaymentsPublisher paymentsPublisher;
 
     @Mock
-    private QueueClient queueClient;
+    private ServiceBusSenderClient queueClient;
 
     @BeforeEach
     void setUp() {
@@ -65,15 +65,15 @@ class PaymentsPublisherTest {
         paymentsPublisher.send(cmd);
 
         // then
-        ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
-        verify(queueClient).send(messageCaptor.capture());
+        ArgumentCaptor<ServiceBusMessage> messageCaptor = ArgumentCaptor.forClass(ServiceBusMessage.class);
+        verify(queueClient).sendMessage(messageCaptor.capture());
 
-        Message message = messageCaptor.getValue();
+        ServiceBusMessage message = messageCaptor.getValue();
 
         assertThat(message.getContentType()).isEqualTo("application/json");
-        assertThat(message.getLabel()).isEqualTo(Labels.CREATE);
+        assertThat(message.getSubject()).isEqualTo(Labels.CREATE);
 
-        String messageBodyJson = new String(MessageBodyRetriever.getBinaryData(message.getMessageBody()));
+        String messageBodyJson = message.getBody().toString();
         String expectedMessageBodyJson = String.format(
             "{\"envelope_id\":\"%s\", \"ccd_reference\":\"%s\", \"jurisdiction\":\"%s\", \"service\":\"%s\", "
                 + "\"po_box\":\"%s\", " + "\"is_exception_record\":%s, "
@@ -91,18 +91,19 @@ class PaymentsPublisherTest {
 
     @ParameterizedTest
     @MethodSource("getIsExceptionRecord")
-    void sending_create_command_should_throw_exception_when_queue_client_fails(boolean isExceptionRecord) throws Exception {
+    void sending_create_command_should_throw_exception_when_queue_client_fails(boolean isExceptionRecord) {
         CreatePaymentsCommand cmd = getCreatePaymentsCommand(isExceptionRecord);
 
-        ServiceBusException exceptionToThrow = new ServiceBusException(true, "test exception");
-        willThrow(exceptionToThrow).given(queueClient).send(any());
+        ServiceBusException exceptionToThrow
+            = new ServiceBusException(new IllegalAccessException("test"), ServiceBusErrorSource.UNKNOWN);
+        willThrow(exceptionToThrow).given(queueClient).sendMessage(any());
 
         assertThatThrownBy(() -> paymentsPublisher.send(cmd))
             .isInstanceOf(PaymentsPublishingException.class)
             .hasMessageContaining("An error occurred when trying to publish message to payments queue.")
             .hasCause(exceptionToThrow);
 
-        verify(queueClient, times(3)).send(any());
+        verify(queueClient, times(3)).sendMessage(any());
 
     }
 
@@ -121,12 +122,12 @@ class PaymentsPublisherTest {
         paymentsPublisher.send(cmd);
 
         // then
-        ArgumentCaptor<IMessage> messageCaptor = ArgumentCaptor.forClass(IMessage.class);
-        verify(queueClient).send(messageCaptor.capture());
+        ArgumentCaptor<ServiceBusMessage> messageCaptor = ArgumentCaptor.forClass(ServiceBusMessage.class);
+        verify(queueClient).sendMessage(messageCaptor.capture());
 
-        IMessage msg = messageCaptor.getValue();
+        ServiceBusMessage msg = messageCaptor.getValue();
 
-        assertThat(msg.getLabel()).isEqualTo(Labels.UPDATE);
+        assertThat(msg.getSubject()).isEqualTo(Labels.UPDATE);
 
         JSONAssert.assertEquals(
             (
@@ -137,27 +138,28 @@ class PaymentsPublisherTest {
                     + "'jurisdiction': 'jurisdiction'"
                     + "}"
             ).replace("'", "\""),
-            new String(MessageBodyRetriever.getBinaryData(msg.getMessageBody())),
+            msg.getBody().toString(),
             JSONCompareMode.LENIENT
         );
     }
 
     @Test
-    void sending_create_command_should_retry_for_transient_exception_and_should_recover() throws Exception {
+    void sending_create_command_should_retry_for_transient_exception_and_should_recover() {
         CreatePaymentsCommand cmd = getCreatePaymentsCommand(true);
 
-        ServiceBusException exceptionToThrow = new ServiceBusException(true, "test exception");
-        willThrow(exceptionToThrow).willDoNothing().given(queueClient).send(any());
+        ServiceBusException exceptionToThrow =
+            new ServiceBusException(new IllegalStateException("test exception"), ServiceBusErrorSource.UNKNOWN);
+        willThrow(exceptionToThrow).willDoNothing().given(queueClient).sendMessage(any());
 
         paymentsPublisher.send(cmd);
 
-        ArgumentCaptor<IMessage> messageCaptor = ArgumentCaptor.forClass(IMessage.class);
-        verify(queueClient, times(2)).send(messageCaptor.capture());
+        ArgumentCaptor<ServiceBusMessage> messageCaptor = ArgumentCaptor.forClass(ServiceBusMessage.class);
+        verify(queueClient, times(2)).sendMessage(messageCaptor.capture());
 
-        List<IMessage> capturedMessage = messageCaptor.getAllValues();
+        List<ServiceBusMessage> capturedMessage = messageCaptor.getAllValues();
 
-        IMessage msg1 = capturedMessage.get(0);
-        IMessage msg2 = capturedMessage.get(1);
+        ServiceBusMessage msg1 = capturedMessage.get(0);
+        ServiceBusMessage msg2 = capturedMessage.get(1);
 
         assertThat(msg1).isSameAs(msg2);
 

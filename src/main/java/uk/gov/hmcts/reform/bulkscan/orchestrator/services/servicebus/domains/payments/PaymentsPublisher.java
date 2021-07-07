@@ -1,10 +1,8 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments;
 
+import com.azure.messaging.servicebus.ServiceBusMessage;
+import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microsoft.azure.servicebus.IMessage;
-import com.microsoft.azure.servicebus.Message;
-import com.microsoft.azure.servicebus.QueueClient;
-import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,13 +21,13 @@ public class PaymentsPublisher implements IPaymentsPublisher {
 
     private static final Logger LOG = LoggerFactory.getLogger(PaymentsPublisher.class);
 
-    private final QueueClient queueClient;
+    private final ServiceBusSenderClient queueClient;
     private final ObjectMapper objectMapper;
     private final int retryCount;
     private final int retryWait;
 
     public PaymentsPublisher(
-        @Qualifier("payments") QueueClient queueClient,
+        @Qualifier("payments") ServiceBusSenderClient queueClient,
         ObjectMapper objectMapper,
         @Value("${azure.servicebus.payments.manual-retry-count}") int retryCount,
         @Value("${azure.servicebus.payments.manual-retry-wait-in-ms}") int retryWait
@@ -45,16 +43,15 @@ public class PaymentsPublisher implements IPaymentsPublisher {
         try {
             final String messageContent = objectMapper.writeValueAsString(cmd);
 
-            IMessage message = new Message(
-                UUID.randomUUID().toString(),
-                messageContent,
-                APPLICATION_JSON.toString()
-            );
-            message.setLabel(cmd.getLabel());
+            ServiceBusMessage message = new ServiceBusMessage(messageContent);
+            message.setContentType(APPLICATION_JSON.toString());
+            message.setMessageId(UUID.randomUUID().toString());
+
+            message.setSubject(cmd.getLabel());
 
             LOG.info("About to send message to payments queue. ID: {}, Label: {}, Content: {}",
                     message.getMessageId(),
-                    message.getLabel(),
+                    message.getSubject(),
                     messageContent
             );
 
@@ -63,7 +60,7 @@ public class PaymentsPublisher implements IPaymentsPublisher {
             LOG.info(
                 "Sent message to payments queue. ID: {}, Label: {}, Content: {}",
                 message.getMessageId(),
-                message.getLabel(),
+                message.getSubject(),
                 messageContent
             );
         } catch (Exception ex) {
@@ -74,9 +71,9 @@ public class PaymentsPublisher implements IPaymentsPublisher {
         }
     }
 
-    private void doSend(IMessage message, int retryCount) throws ServiceBusException, InterruptedException {
+    private void doSend(ServiceBusMessage message, int retryCount) throws InterruptedException {
         try {
-            queueClient.send(message);
+            queueClient.sendMessage(message);
         } catch (Exception ex) {
             if (retryCount > 0) {
                 LOG.error(
