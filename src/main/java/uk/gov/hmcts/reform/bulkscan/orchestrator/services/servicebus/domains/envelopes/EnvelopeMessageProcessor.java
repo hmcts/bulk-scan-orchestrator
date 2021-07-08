@@ -4,6 +4,7 @@ import com.azure.messaging.servicebus.ServiceBusErrorContext;
 import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
 import com.azure.messaging.servicebus.ServiceBusReceivedMessageContext;
 import com.azure.messaging.servicebus.models.DeadLetterOptions;
+import com.google.common.collect.ImmutableMap;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.pro
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.InvalidMessageException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.MessageProcessingException;
 
+import java.time.Instant;
 import java.util.Objects;
 
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeParser.parse;
@@ -166,6 +168,7 @@ public class EnvelopeMessageProcessor {
             new DeadLetterOptions()
                 .setDeadLetterReason(reason)
                 .setDeadLetterErrorDescription(description)
+                .setPropertiesToModify(ImmutableMap.of("deadLetteredAt", Instant.now().toString()))
         );
         var message = context.getMessage();
         log.info("Message with ID {} has been dead-lettered", message.getMessageId());
