@@ -124,12 +124,14 @@ public class CleanupEnvelopesDlqTask {
 
             log.info(
                 "Checking if DLQ message can be completed. "
-                    + "MessageId: {}, dead lettered time: {}, ttl: {}, current time: {}",
+                    + "MessageId: {}, dead lettered time: {}, ttl: {}, current time: {}, cutoff:{}",
                 message.getMessageId(),
                 deadLetteredAt,
                 this.ttl,
-                Instant.now()
+                Instant.now(),
+                cutoff
             );
+            log.info("deadLetteredAt.isBefore(cutoff); {}", deadLetteredAt.isBefore(cutoff));
             return deadLetteredAt.isBefore(cutoff);
         }
         return false;
