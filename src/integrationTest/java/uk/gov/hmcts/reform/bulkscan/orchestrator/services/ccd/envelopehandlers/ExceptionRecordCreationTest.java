@@ -1,13 +1,14 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.envelopehandlers;
 
+import com.azure.core.util.BinaryData;
+import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
+import com.azure.messaging.servicebus.ServiceBusReceivedMessageContext;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.microsoft.azure.servicebus.IMessageReceiver;
-import com.microsoft.azure.servicebus.Message;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment;
@@ -25,6 +26,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.fileContentAsString;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_SEARCH_URL;
@@ -44,8 +46,11 @@ class ExceptionRecordCreationTest {
 
     private static final String ELASTICSEARCH_EMPTY_RESPONSE = "{\"total\": 0,\"cases\": []}";
 
-    @SpyBean
-    private IMessageReceiver messageReceiver;
+    @Mock
+    private ServiceBusReceivedMessageContext messageContext;
+
+    @Mock
+    private ServiceBusReceivedMessage message = mock(ServiceBusReceivedMessage.class);
 
     @Autowired
     private EnvelopeMessageProcessor envelopeMessageProcessor;
@@ -69,10 +74,14 @@ class ExceptionRecordCreationTest {
 
     @DisplayName("Should create exception record for supplementary evidence when case record is not found")
     @Test
-    void should_create_exception_record_for_supplementary_evidence_when_case_record_is_not_found() throws Exception {
-        given(messageReceiver.receive()).willReturn(messageFromFile("supplementary-evidence-example.json"));
+    void should_create_exception_record_for_supplementary_evidence_when_case_record_is_not_found() {
+        given(messageContext.getMessage()).willReturn(message);
+        given(message.getBody())
+            .willReturn(
+                BinaryData.fromString(fileContentAsString("servicebus/message/supplementary-evidence-example.json"))
+            );
 
-        envelopeMessageProcessor.processNextMessage();
+        envelopeMessageProcessor.processMessage(messageContext);
 
         await()
             .atMost(30, TimeUnit.SECONDS)
@@ -86,14 +95,13 @@ class ExceptionRecordCreationTest {
 
     @DisplayName("Should create exception record for supplementary evidence when case ref is not provided")
     @Test
-    void should_create_exception_record_for_supplementary_evidence_when_case_ref_is_not_provided() throws Exception {
-        Message incompleteSupplementaryMessage = new Message(fileContentAsString(
+    void should_create_exception_record_for_supplementary_evidence_when_case_ref_is_not_provided() {
+        given(messageContext.getMessage()).willReturn(message);
+        given(message.getBody()).willReturn(BinaryData.fromString(fileContentAsString(
             "servicebus/message/supplementary-evidence-example.json"
-        ).replace(CASE_REF, ""));
+        ).replace(CASE_REF, "")));
 
-        given(messageReceiver.receive()).willReturn(incompleteSupplementaryMessage);
-
-        envelopeMessageProcessor.processNextMessage();
+        envelopeMessageProcessor.processMessage(messageContext);
 
         await()
             .atMost(30, TimeUnit.SECONDS)
@@ -107,10 +115,14 @@ class ExceptionRecordCreationTest {
 
     @DisplayName("Should create exception record for new exception case type")
     @Test
-    void should_create_exception_record_for_new_exception_case_type() throws Exception {
-        given(messageReceiver.receive()).willReturn(messageFromFile("exception-example.json"));
+    void should_create_exception_record_for_new_exception_case_type() {
+        given(messageContext.getMessage()).willReturn(message);
+        given(message.getBody()).willReturn(BinaryData.fromString(fileContentAsString(
+            "servicebus/message/exception-example.json"
+        )));
 
-        envelopeMessageProcessor.processNextMessage();
+
+        envelopeMessageProcessor.processMessage(messageContext);
 
         await()
             .atMost(30, TimeUnit.SECONDS)
@@ -124,10 +136,13 @@ class ExceptionRecordCreationTest {
 
     @DisplayName("Should create exception record for new application case type")
     @Test
-    void should_create_exception_record_for_new_application_case_type() throws Exception {
-        given(messageReceiver.receive()).willReturn(messageFromFile("new-application-example.json"));
+    void should_create_exception_record_for_new_application_case_type() {
+        given(messageContext.getMessage()).willReturn(message);
+        given(message.getBody()).willReturn(BinaryData.fromString(fileContentAsString(
+            "servicebus/message/new-application-example.json"
+        )));
 
-        envelopeMessageProcessor.processNextMessage();
+        envelopeMessageProcessor.processMessage(messageContext);
 
         await()
             .atMost(30, TimeUnit.SECONDS)
@@ -141,10 +156,13 @@ class ExceptionRecordCreationTest {
 
     @DisplayName("Should create exception record for supplementary evidence with ocr case type")
     @Test
-    void should_create_exception_record_for_supplementary_evidence_with_ocr() throws Exception {
-        given(messageReceiver.receive()).willReturn(messageFromFile("supplementary-evidence-with-ocr-example.json"));
+    void should_create_exception_record_for_supplementary_evidence_with_ocr() {
+        given(messageContext.getMessage()).willReturn(message);
+        given(message.getBody()).willReturn(BinaryData.fromString(fileContentAsString(
+            "servicebus/message/supplementary-evidence-with-ocr-example.json"
+        )));
 
-        envelopeMessageProcessor.processNextMessage();
+        envelopeMessageProcessor.processMessage(messageContext);
 
         await()
             .atMost(30, TimeUnit.SECONDS)
@@ -156,7 +174,4 @@ class ExceptionRecordCreationTest {
             });
     }
 
-    private Message messageFromFile(String fileName) {
-        return new Message(fileContentAsString("servicebus/message/" + fileName));
-    }
 }
