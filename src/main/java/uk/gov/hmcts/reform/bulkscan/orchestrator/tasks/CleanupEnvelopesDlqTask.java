@@ -112,6 +112,8 @@ public class CleanupEnvelopesDlqTask {
         Instant cutoff = Instant.now().minus(this.ttl);
         Map<String, Object> messageProperties = message.getProperties();
 
+        log.info("XXXXXX messageProperties ===> {}", messageProperties);
+
         String deadLetteredAtStr =
             messageProperties == null
                 ? null
