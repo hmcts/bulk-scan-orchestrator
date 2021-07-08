@@ -121,7 +121,6 @@ class ExceptionRecordCreationTest {
             "servicebus/message/exception-example.json"
         )));
 
-
         envelopeMessageProcessor.processMessage(messageContext);
 
         await()

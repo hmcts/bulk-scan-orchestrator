@@ -112,8 +112,6 @@ public class CleanupEnvelopesDlqTask {
         Instant cutoff = Instant.now().minus(this.ttl);
         Map<String, Object> messageProperties = message.getProperties();
 
-        log.info("XXXXXX messageProperties ===> {}", messageProperties);
-
         String deadLetteredAtStr =
             messageProperties == null
                 ? null
@@ -124,14 +122,12 @@ public class CleanupEnvelopesDlqTask {
 
             log.info(
                 "Checking if DLQ message can be completed. "
-                    + "MessageId: {}, dead lettered time: {}, ttl: {}, current time: {}, cutoff:{}",
+                    + "MessageId: {}, dead lettered time: {}, ttl: {}, current time: {}",
                 message.getMessageId(),
                 deadLetteredAt,
                 this.ttl,
-                Instant.now(),
-                cutoff
+                Instant.now()
             );
-            log.info("deadLetteredAt.isBefore(cutoff); {}", deadLetteredAt.isBefore(cutoff));
             return deadLetteredAt.isBefore(cutoff);
         }
         return false;

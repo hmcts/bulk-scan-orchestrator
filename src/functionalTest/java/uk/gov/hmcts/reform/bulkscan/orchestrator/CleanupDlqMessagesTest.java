@@ -51,7 +51,7 @@ public class CleanupDlqMessagesTest {
 
         // then
         await("Dead lettered messages are completed from envelopes dlq.")
-            .atMost(5, TimeUnit.MINUTES)
+            .atMost(4, TimeUnit.MINUTES)
             .pollDelay(120, TimeUnit.SECONDS)
             .pollInterval(15, TimeUnit.SECONDS)
             .until(() -> verifyDlqIsEmpty());
