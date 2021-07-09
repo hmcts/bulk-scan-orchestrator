@@ -1,14 +1,15 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.envelopehandlers;
 
+import com.azure.core.util.BinaryData;
+import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
+import com.azure.messaging.servicebus.ServiceBusReceivedMessageContext;
 import com.github.tomakehurst.wiremock.client.MappingBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.microsoft.azure.servicebus.IMessageReceiver;
-import com.microsoft.azure.servicebus.Message;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment;
@@ -27,6 +28,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.fileContentAsString;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_SEARCH_URL;
@@ -40,13 +42,16 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.GET_C
 @IntegrationTest
 class SupplementaryEvidenceCreatorTest {
 
-    private static final Message MOCK_MESSAGE = new Message(fileContentAsString(
+    private static final String MOCK_MESSAGE = fileContentAsString(
         "servicebus/message/supplementary-evidence-example.json"
-    ));
+    );
     private static final String MOCK_RESPONSE = fileContentAsString("ccd/response/sample-case.json");
 
-    @SpyBean
-    private IMessageReceiver messageReceiver;
+    @Mock
+    private ServiceBusReceivedMessageContext messageContext;
+
+    @Mock
+    private ServiceBusReceivedMessage message = mock(ServiceBusReceivedMessage.class);
 
     @Autowired
     private EnvelopeMessageProcessor envelopeMessageProcessor;
@@ -67,17 +72,19 @@ class SupplementaryEvidenceCreatorTest {
     private static final String ELASTICSEARCH_EMPTY_RESPONSE = "{\"total\": 0,\"cases\": []}";
 
     @BeforeEach
-    void before() throws Exception {
+    void before() {
         WireMock.reset();
         givenThat(get(GET_CASE_URL).willReturn(aResponse().withBody(MOCK_RESPONSE)));
-        given(messageReceiver.receive()).willReturn(MOCK_MESSAGE).willReturn(null);
+        given(messageContext.getMessage()).willReturn(message);
+        given(message.getBody()).willReturn(BinaryData.fromString(MOCK_MESSAGE));
+
     }
 
     @DisplayName("Should call ccd to attach supplementary evidence for caseworker")
     @Test
     void should_call_ccd_to_attach_supplementary_evidence_for_caseworker() throws Exception {
         // when
-        envelopeMessageProcessor.processNextMessage();
+        envelopeMessageProcessor.processMessage(messageContext);
 
         // then
         await()
@@ -99,7 +106,7 @@ class SupplementaryEvidenceCreatorTest {
         stubCreateExceptionCcdEvents();
 
         // when
-        envelopeMessageProcessor.processNextMessage();
+        envelopeMessageProcessor.processMessage(messageContext);
 
         // then
         await()
@@ -113,13 +120,13 @@ class SupplementaryEvidenceCreatorTest {
 
     @DisplayName("Should create Exception record when attachScannedDocs ccd event authorisation is missing")
     @Test
-    void should_create_exception_record_when_attachScannedDocs_submit_event_fails() throws Exception {
+    void should_create_exception_record_when_attachScannedDocs_submit_event_fails() {
         // given
         givenThat(attachScannedDocsCcdSubmitEvent().willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())));
         stubCreateExceptionCcdEvents();
 
         // when
-        envelopeMessageProcessor.processNextMessage();
+        envelopeMessageProcessor.processMessage(messageContext);
 
         // then
         await()

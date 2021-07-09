@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
 
-import com.microsoft.azure.servicebus.IMessageReceiver;
+import com.azure.messaging.servicebus.ServiceBusProcessorClient;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -33,7 +33,7 @@ class IntegrationTestInitializer implements ApplicationContextInitializer<Config
     }
 
     @Bean
-    public IMessageReceiver envelopesMessageReceiver() {
-        return mock(IMessageReceiver.class);
+    public ServiceBusProcessorClient envelopesMessageReceiver() {
+        return mock(ServiceBusProcessorClient.class);
     }
 }
