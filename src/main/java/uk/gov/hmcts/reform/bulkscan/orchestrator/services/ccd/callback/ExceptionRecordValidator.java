@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUr
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -26,7 +27,6 @@ import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.FORMATTER;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.getOcrData;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAnId;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasDateField;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasFormType;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJourneyClassification;
@@ -41,8 +41,10 @@ public class ExceptionRecordValidator {
     private static final String VALUE = "value";
     private static final String KEY = "key";
 
-    public ExceptionRecordValidator() {
-        // empty constructor
+    private final CallbackValidator callbackValidator;
+
+    public ExceptionRecordValidator(CallbackValidator callbackValidator) {
+        this.callbackValidator = callbackValidator;
     }
 
     /**
@@ -73,7 +75,7 @@ public class ExceptionRecordValidator {
 
     public Validation<Seq<String>, ExceptionRecord> getValidation(CaseDetails caseDetails) {
         Validation<String, String> exceptionRecordIdValidation = getCaseId(caseDetails);
-        Validation<String, String> caseTypeIdValidation = hasCaseTypeId(caseDetails);
+        Validation<String, String> caseTypeIdValidation = callbackValidator.hasCaseTypeId(caseDetails);
         Validation<String, String> poBoxValidation = hasPoBox(caseDetails);
         Validation<String, String> jurisdictionValidation = hasJurisdiction(caseDetails);
         Validation<String, Classification> journeyClassificationValidation = hasJourneyClassification(caseDetails);

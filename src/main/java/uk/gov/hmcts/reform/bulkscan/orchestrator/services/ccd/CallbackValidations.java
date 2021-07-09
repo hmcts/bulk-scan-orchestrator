@@ -71,14 +71,6 @@ public final class CallbackValidations {
     }
 
     @Nonnull
-    public static Validation<String, String> hasCaseTypeId(CaseDetails theCase) {
-        return Optional.ofNullable(theCase)
-            .map(CaseDetails::getCaseTypeId)
-            .map(Validation::<String, String>valid)
-            .orElse(invalid("Missing caseType"));
-    }
-
-    @Nonnull
     public static Validation<String, String> hasFormType(CaseDetails theCase) {
         return Optional.ofNullable(theCase)
             .map(CaseDetails::getData)
