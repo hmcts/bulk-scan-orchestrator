@@ -44,6 +44,14 @@ public class QueueClientsConfig {
             .buildProcessorClient();
     }
 
+    @Bean("envelopes-dead-letter-send")
+    public ServiceBusSenderClient envelopesDeadLetterSend(
+        @Qualifier("envelopes-queue-config")QueueConfigurationProperties queueProperties
+    ) {
+        queueProperties.setQueueName(queueProperties.getQueueName() + "/$deadletterqueue");
+        return createSendClient(queueProperties);
+    }
+
     @Bean("processed-envelopes-queue-config")
     @ConfigurationProperties(prefix = "azure.servicebus.processed-envelopes")
     protected QueueConfigurationProperties processedEnvelopesQueueConfig() {
