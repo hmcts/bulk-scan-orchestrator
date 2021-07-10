@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
 
 import com.azure.messaging.servicebus.ServiceBusProcessorClient;
+import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -35,5 +36,10 @@ class IntegrationTestInitializer implements ApplicationContextInitializer<Config
     @Bean
     public ServiceBusProcessorClient envelopesMessageReceiver() {
         return mock(ServiceBusProcessorClient.class);
+    }
+
+    @Bean("envelopes-dead-letter-send")
+    public ServiceBusSenderClient envelopesDeadLetterSend() {
+        return mock(ServiceBusSenderClient.class);
     }
 }
