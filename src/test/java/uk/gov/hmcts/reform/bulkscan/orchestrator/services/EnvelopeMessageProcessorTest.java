@@ -1,14 +1,16 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
 
+import com.azure.core.util.BinaryData;
+import com.azure.messaging.servicebus.ServiceBusErrorSource;
+import com.azure.messaging.servicebus.ServiceBusException;
+import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
+import com.azure.messaging.servicebus.ServiceBusReceivedMessageContext;
+import com.azure.messaging.servicebus.models.DeadLetterOptions;
 import com.fasterxml.jackson.core.JsonParseException;
-import com.google.common.collect.ImmutableList;
-import com.microsoft.azure.servicebus.IMessage;
-import com.microsoft.azure.servicebus.IMessageReceiver;
-import com.microsoft.azure.servicebus.MessageBody;
-import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.logging.AppInsights;
@@ -18,7 +20,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.pro
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.NotificationSendingException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.ProcessedEnvelopeNotifier;
 
-import java.nio.charset.Charset;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,14 +27,12 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -45,9 +44,11 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 class EnvelopeMessageProcessorTest {
 
     private static final String DEAD_LETTER_REASON_PROCESSING_ERROR = "Message processing error";
+    @Mock
+    private ServiceBusReceivedMessageContext messageContext;
 
     @Mock
-    private IMessageReceiver messageReceiver;
+    private ServiceBusReceivedMessage message = mock(ServiceBusReceivedMessage.class);
 
     @Mock
     private AppInsights appInsights;
@@ -65,95 +66,74 @@ class EnvelopeMessageProcessorTest {
         processor = new EnvelopeMessageProcessor(
             envelopeHandler,
             processedEnvelopeNotifier,
-            messageReceiver,
             10,
             appInsights
         );
     }
 
     @Test
-    public void should_return_true_when_there_is_a_message_to_process() throws Exception {
-        // given
-        willReturn(getValidMessage()).given(messageReceiver).receive();
+    public void should_not_throw_exception_when_queue_message_is_invalid() {
 
-        // when
-        boolean processedMessage = processor.processNextMessage();
+        given(messageContext.getMessage()).willReturn(message);
+        given(message.getBody()).willReturn(BinaryData.fromString("invalid body"));
 
-        // then
-        assertThat(processedMessage).isTrue();
+        assertThatCode(() -> processor.processMessage(messageContext)).doesNotThrowAnyException();
+
     }
 
     @Test
-    public void should_return_false_when_there_is_no_message_to_process() throws Exception {
+    public void should_not_throw_exception_when_updating_ccd_fails() {
         // given
-        given(messageReceiver.receive()).willReturn(null);
-
-        // when
-        boolean processedMessage = processor.processNextMessage();
-
-        // then
-        assertThat(processedMessage).isFalse();
-    }
-
-    @Test
-    public void should_not_throw_exception_when_queue_message_is_invalid() throws Exception {
-        IMessage invalidMessage = mock(IMessage.class);
-        given(invalidMessage.getMessageBody())
-            .willReturn(MessageBody.fromBinaryData(ImmutableList.of("foo".getBytes())));
-        given(messageReceiver.receive()).willReturn(invalidMessage);
-
-        assertThat(processor.processNextMessage()).isTrue();
-    }
-
-    @Test
-    public void should_not_throw_exception_when_updating_ccd_fails() throws Exception {
-        // given
-        willReturn(getValidMessage()).given(messageReceiver).receive();
+        given(messageContext.getMessage()).willReturn(message);
+        given(message.getBody()).willReturn(BinaryData.fromBytes(envelopeJson()));
 
         // and
         willThrow(new RuntimeException()).given(envelopeHandler).handleEnvelope(any(), anyLong());
 
-        assertThatCode(() -> processor.processNextMessage()).doesNotThrowAnyException();
+        assertThatCode(() -> processor.processMessage(messageContext)).doesNotThrowAnyException();
     }
 
     @Test
-    public void should_complete_the_message_when_processing_is_successful() throws Exception {
+    public void should_complete_the_message_when_processing_is_successful() {
         // given
-        IMessage validMessage = getValidMessage();
-        given(messageReceiver.receive()).willReturn(validMessage);
+        given(messageContext.getMessage()).willReturn(message);
+        given(message.getBody()).willReturn(BinaryData.fromBytes(envelopeJson()));
+
         given(envelopeHandler.handleEnvelope(any(), anyLong()))
             .willReturn(new EnvelopeProcessingResult(3221L, EXCEPTION_RECORD));
         // when
-        processor.processNextMessage();
+        processor.processMessage(messageContext);
 
         // then
-        verify(messageReceiver).receive();
-        verify(messageReceiver).complete(validMessage.getLockToken());
-        verifyNoMoreInteractions(appInsights, messageReceiver);
+        verify(messageContext, times(3)).getMessage();
+        verify(messageContext).complete();
+        verifyNoMoreInteractions(appInsights, messageContext);
     }
 
     @Test
-    public void should_dead_letter_the_message_when_unrecoverable_failure() throws Exception {
+    public void should_dead_letter_the_message_when_unrecoverable_failure() {
         // given
-        IMessage message = mock(IMessage.class);
-        given(message.getMessageBody()).willReturn(
-            MessageBody.fromBinaryData(ImmutableList.of("invalid body".getBytes(Charset.defaultCharset())))
-        );
-        given(message.getLockToken()).willReturn(UUID.randomUUID());
-        given(messageReceiver.receive()).willReturn(message);
+        given(messageContext.getMessage()).willReturn(message);
+        given(message.getBody()).willReturn(BinaryData.fromString("invalid body"));
 
         // when
-        processor.processNextMessage();
+        processor.processMessage(messageContext);
 
         // then
-        verify(messageReceiver).receive();
+        verify(messageContext, times(4)).getMessage();
 
-        verify(messageReceiver).deadLetter(
-            eq(message.getLockToken()),
-            eq(DEAD_LETTER_REASON_PROCESSING_ERROR),
-            contains(JsonParseException.class.getSimpleName()),
-            anyMap()
+        ArgumentCaptor<DeadLetterOptions> deadLetterOptionsArgumentCaptor
+            = ArgumentCaptor.forClass(DeadLetterOptions.class);
+
+        verify(messageContext).deadLetter(
+            deadLetterOptionsArgumentCaptor.capture()
         );
+        var deadLetterOptions = deadLetterOptionsArgumentCaptor.getValue();
+        assertThat(deadLetterOptions.getDeadLetterReason())
+            .isEqualTo(DEAD_LETTER_REASON_PROCESSING_ERROR);
+        assertThat(deadLetterOptions.getDeadLetterErrorDescription())
+            .contains(JsonParseException.class.getSimpleName());
+
         verify(appInsights).trackDeadLetteredMessage(
             eq(message),
             eq("envelopes"),
@@ -161,34 +141,36 @@ class EnvelopeMessageProcessorTest {
             startsWith(JsonParseException.class.getCanonicalName())
         );
 
-        verifyNoMoreInteractions(messageReceiver);
+        verifyNoMoreInteractions(messageContext);
     }
 
+
     @Test
-    public void should_not_complete_the_message_when_notification_sending_fails() throws Exception {
+    public void should_not_complete_the_message_when_notification_sending_fails() {
         // given
         String exceptionMessage = "test exception";
         willThrow(new NotificationSendingException(exceptionMessage, null))
             .given(processedEnvelopeNotifier)
             .notify(any(), any(), any());
 
-        IMessage validMessage = getValidMessage();
-        given(messageReceiver.receive()).willReturn(validMessage);
         given(envelopeHandler.handleEnvelope(any(), anyLong()))
             .willReturn(new EnvelopeProcessingResult(3211321L, EXCEPTION_RECORD));
 
+        given(messageContext.getMessage()).willReturn(message);
+        given(message.getBody()).willReturn(BinaryData.fromBytes(envelopeJson()));
 
         // when
-        processor.processNextMessage();
+        processor.processMessage(messageContext);
 
         // then
-        verify(messageReceiver).receive();
-        verifyNoMoreInteractions(messageReceiver);
+        verify(messageContext, times(3)).getMessage();
+        verifyNoMoreInteractions(messageContext);
     }
 
     @Test
-    public void should_not_finalize_the_message_when_recoverable_failure() throws Exception {
-        willReturn(getValidMessage()).given(messageReceiver).receive();
+    public void should_not_finalize_the_message_when_recoverable_failure() {
+        given(messageContext.getMessage()).willReturn(message);
+        given(message.getBody()).willReturn(BinaryData.fromBytes(envelopeJson()));
 
         Exception processingFailureCause = new RuntimeException(
             "exception of type treated as recoverable"
@@ -198,23 +180,22 @@ class EnvelopeMessageProcessorTest {
         willThrow(processingFailureCause).given(envelopeHandler).handleEnvelope(any(), anyLong());
 
         // when
-        processor.processNextMessage();
+        processor.processMessage(messageContext);
 
         // then the message is not finalised (completed/dead-lettered)
-        verify(messageReceiver).receive();
-        verifyNoMoreInteractions(appInsights, messageReceiver);
+        verify(messageContext, times(3)).getMessage();
+        verifyNoMoreInteractions(appInsights, messageContext);
     }
 
     @Test
-    public void should_finalize_the_message_when_recoverable_failure_but_delivery_maxed() throws Exception {
+    public void should_finalize_the_message_when_recoverable_failure_but_delivery_maxed() {
         // given
-        IMessage validMessage = getValidMessage();
-        given(messageReceiver.receive()).willReturn(validMessage);
+        given(messageContext.getMessage()).willReturn(message);
+        given(message.getBody()).willReturn(BinaryData.fromBytes(envelopeJson()));
 
         processor = new EnvelopeMessageProcessor(
             envelopeHandler,
             processedEnvelopeNotifier,
-            messageReceiver,
             1,
             appInsights
         );
@@ -226,17 +207,23 @@ class EnvelopeMessageProcessorTest {
         willThrow(processingFailureCause).given(envelopeHandler).handleEnvelope(any(), anyLong());
 
         // when
-        processor.processNextMessage();
+        processor.processMessage(messageContext);
 
         // then the message is dead-lettered
-        verify(messageReceiver).deadLetter(
-            eq(validMessage.getLockToken()),
-            eq("Too many deliveries"),
-            eq("Reached limit of message delivery count of 1"),
-            anyMap()
+        ArgumentCaptor<DeadLetterOptions> deadLetterOptionsArgumentCaptor
+            = ArgumentCaptor.forClass(DeadLetterOptions.class);
+
+        verify(messageContext).deadLetter(
+            deadLetterOptionsArgumentCaptor.capture()
         );
+        var deadLetterOptions = deadLetterOptionsArgumentCaptor.getValue();
+        assertThat(deadLetterOptions.getDeadLetterReason())
+            .isEqualTo("Too many deliveries");
+        assertThat(deadLetterOptions.getDeadLetterErrorDescription())
+            .isEqualTo("Reached limit of message delivery count of 1");
+
         verify(appInsights).trackDeadLetteredMessage(
-            validMessage,
+            message,
             "envelopes",
             "Too many deliveries",
             "Reached limit of message delivery count of 1"
@@ -244,60 +231,60 @@ class EnvelopeMessageProcessorTest {
     }
 
     @Test
-    public void should_send_message_with_envelope_id_when_processing_successful() throws Exception {
+    public void should_send_message_with_envelope_id_when_processing_successful() {
         // given
         String envelopeId = UUID.randomUUID().toString();
-        IMessage message = mock(IMessage.class);
-        given(message.getMessageBody()).willReturn(
-            MessageBody.fromBinaryData(ImmutableList.of(envelopeJson(NEW_APPLICATION, "caseRef123", envelopeId)))
-        );
-        given(message.getLockToken()).willReturn(UUID.randomUUID());
-        given(messageReceiver.receive()).willReturn(message);
+        given(messageContext.getMessage()).willReturn(message);
+        given(message.getBody())
+            .willReturn(BinaryData.fromBytes(envelopeJson(NEW_APPLICATION, "caseRef123", envelopeId)));
+
+
+        given(messageContext.getMessage()).willReturn(message);
         given(envelopeHandler.handleEnvelope(any(), anyLong()))
             .willReturn(new EnvelopeProcessingResult(3211321L, EXCEPTION_RECORD));
 
         // when
-        processor.processNextMessage();
+        processor.processMessage(messageContext);
 
         // then
         verify(processedEnvelopeNotifier).notify(envelopeId, 3211321L, EXCEPTION_RECORD);
     }
 
     @Test
-    public void should_not_send_processed_envelope_notification_when_processing_fails() throws Exception {
+    public void should_not_send_processed_envelope_notification_when_processing_fails() {
         // given
-        willReturn(getValidMessage()).given(messageReceiver).receive();
+        given(messageContext.getMessage()).willReturn(message);
+        given(message.getBody()).willReturn(BinaryData.fromBytes(envelopeJson()));
 
         // and
         Exception processingFailureCause = new RuntimeException("test exception");
         willThrow(processingFailureCause).given(envelopeHandler).handleEnvelope(any(), anyLong());
 
         // when
-        processor.processNextMessage();
+        processor.processMessage(messageContext);
 
         // then no notification is sent
         verifyNoMoreInteractions(processedEnvelopeNotifier);
     }
 
     @Test
-    public void should_throw_exception_when_message_receiver_fails() throws Exception {
-        ServiceBusException receiverException = new ServiceBusException(true);
-        willThrow(receiverException).given(messageReceiver).receive();
+    public void should_throw_exception_when_message_receiver_fails() {
+        ServiceBusException receiverException =
+            new ServiceBusException(new IllegalAccessException("test exception"), ServiceBusErrorSource.MANAGEMENT);
+        willThrow(receiverException).given(messageContext).getMessage();
 
-        assertThatThrownBy(() -> processor.processNextMessage())
+        assertThatThrownBy(() -> processor.processMessage(messageContext))
             .isSameAs(receiverException);
     }
 
     @Test
-    public void should_not_treat_heartbeat_messages_as_envelopes() throws Exception {
+    public void should_not_treat_heartbeat_messages_as_envelopes() {
         // given
-        IMessage message = mock(IMessage.class);
-        given(message.getLabel()).willReturn(EnvelopeMessageProcessor.HEARTBEAT_LABEL);
-
-        given(messageReceiver.receive()).willReturn(message);
+        given(messageContext.getMessage()).willReturn(message);
+        given(message.getSubject()).willReturn(EnvelopeMessageProcessor.HEARTBEAT_LABEL);
 
         // when
-        processor.processNextMessage();
+        processor.processMessage(messageContext);
 
         // then
         verifyNoInteractions(
@@ -306,10 +293,4 @@ class EnvelopeMessageProcessorTest {
         );
     }
 
-    private IMessage getValidMessage() {
-        IMessage message = mock(IMessage.class);
-        given(message.getMessageBody())
-            .willReturn(MessageBody.fromBinaryData(ImmutableList.of(envelopeJson())));
-        return message;
-    }
 }

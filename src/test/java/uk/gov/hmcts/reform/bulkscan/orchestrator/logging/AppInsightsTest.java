@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.logging;
 
+import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
 import com.google.common.collect.ImmutableMap;
 import com.microsoft.applicationinsights.TelemetryClient;
-import com.microsoft.azure.servicebus.IMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +16,7 @@ import static org.mockito.Mockito.when;
 class AppInsightsTest {
 
     @Mock
-    private IMessage message;
+    private ServiceBusReceivedMessage message;
 
     @Mock
     private TelemetryClient telemetryClient;

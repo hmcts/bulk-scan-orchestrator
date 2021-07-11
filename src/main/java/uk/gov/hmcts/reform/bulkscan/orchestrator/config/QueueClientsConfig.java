@@ -1,18 +1,17 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
 
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
+import com.azure.messaging.servicebus.ServiceBusProcessorClient;
 import com.azure.messaging.servicebus.ServiceBusSenderClient;
-import com.microsoft.azure.servicebus.ClientFactory;
-import com.microsoft.azure.servicebus.IMessageReceiver;
-import com.microsoft.azure.servicebus.ReceiveMode;
+import com.azure.messaging.servicebus.models.ServiceBusReceiveMode;
 import com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder;
-import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeMessageProcessor;
 
 @Configuration
 @Profile("!nosb") // do not register handler for the nosb (test) profile
@@ -30,13 +29,19 @@ public class QueueClientsConfig {
     }
 
     @Bean("envelopes")
-    public IMessageReceiver envelopesMessageReceiver(
-        @Qualifier("envelopes-queue-config") QueueConfigurationProperties queueProperties
-    ) throws InterruptedException, ServiceBusException {
-        return ClientFactory.createMessageReceiverFromConnectionString(
-            getConnectionStringBuilder(queueProperties).toString(),
-            ReceiveMode.PEEKLOCK
-        );
+    public ServiceBusProcessorClient envelopesMessageReceiver(
+        @Qualifier("envelopes-queue-config")QueueConfigurationProperties queueProperties,
+        EnvelopeMessageProcessor messageHandler
+    ) {
+        return new ServiceBusClientBuilder()
+            .connectionString(createConnectionString(queueProperties))
+            .processor()
+            .queueName(queueProperties.getQueueName())
+            .receiveMode(ServiceBusReceiveMode.PEEK_LOCK)
+            .disableAutoComplete()
+            .processMessage(messageHandler::processMessage)
+            .processError(messageHandler::processException)
+            .buildProcessorClient();
     }
 
     @Bean("processed-envelopes-queue-config")

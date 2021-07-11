@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.logging;
 
+import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
 import com.google.common.collect.ImmutableMap;
 import com.microsoft.applicationinsights.TelemetryClient;
-import com.microsoft.azure.servicebus.IMessage;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,7 +16,12 @@ public class AppInsights {
         this.telemetryClient = telemetryClient;
     }
 
-    public void trackDeadLetteredMessage(IMessage message, String queue, String reason, String description) {
+    public void trackDeadLetteredMessage(
+        ServiceBusReceivedMessage message,
+        String queue,
+        String reason,
+        String description
+    ) {
         telemetryClient.trackEvent(
             DEAD_LETTER_EVENT,
             ImmutableMap.of(

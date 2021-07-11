@@ -1,8 +1,10 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes;
 
+import com.azure.messaging.servicebus.ServiceBusErrorContext;
+import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
+import com.azure.messaging.servicebus.ServiceBusReceivedMessageContext;
+import com.azure.messaging.servicebus.models.DeadLetterOptions;
 import com.google.common.collect.ImmutableMap;
-import com.microsoft.azure.servicebus.IMessage;
-import com.microsoft.azure.servicebus.IMessageReceiver;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.logging.AppInsights;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.envelopehandlers.EnvelopeHandler;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.MessageBodyRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.handler.MessageProcessingResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.handler.MessageProcessingResultType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
@@ -36,20 +37,17 @@ public class EnvelopeMessageProcessor {
 
     private final EnvelopeHandler envelopeHandler;
     private final IProcessedEnvelopeNotifier processedEnvelopeNotifier;
-    private final IMessageReceiver messageReceiver;
     private final int maxDeliveryCount;
     private final AppInsights appInsights;
 
     public EnvelopeMessageProcessor(
         EnvelopeHandler envelopeHandler,
         IProcessedEnvelopeNotifier processedEnvelopeNotifier,
-        IMessageReceiver messageReceiver,
         @Value("${azure.servicebus.envelopes.max-delivery-count}") int maxDeliveryCount,
         AppInsights appInsights
     ) {
         this.envelopeHandler = envelopeHandler;
         this.processedEnvelopeNotifier = processedEnvelopeNotifier;
-        this.messageReceiver = messageReceiver;
         this.maxDeliveryCount = maxDeliveryCount;
         this.appInsights = appInsights;
     }
@@ -59,29 +57,28 @@ public class EnvelopeMessageProcessor {
      *
      * @return false if there was no message to process. Otherwise true.
      */
-    public boolean processNextMessage() throws ServiceBusException, InterruptedException {
-        IMessage message = messageReceiver.receive();
+    public void processMessage(ServiceBusReceivedMessageContext context) {
+        ServiceBusReceivedMessage message = context.getMessage();
 
         if (message != null) {
             log.info("Started processing message with ID {}", message.getMessageId());
             MessageProcessingResult result = process(message);
-            tryFinaliseProcessedMessage(message, result);
+            tryFinaliseProcessedMessage(context, result);
         } else {
             log.info("No envelope messages left to process");
         }
 
-        return message != null;
     }
 
-    private MessageProcessingResult process(IMessage message) {
-        if (Objects.equals(message.getLabel(), HEARTBEAT_LABEL)) {
+    private MessageProcessingResult process(ServiceBusReceivedMessage message) {
+        if (Objects.equals(message.getSubject(), HEARTBEAT_LABEL)) {
             log.info("Heartbeat message received");
             return new MessageProcessingResult(SUCCESS);
         } else {
             Envelope envelope = null;
 
             try {
-                envelope = parse(MessageBodyRetriever.getBinaryData(message.getMessageBody()));
+                envelope = parse(message.getBody().toBytes());
                 logMessageParsed(message, envelope);
                 EnvelopeProcessingResult envelopeProcessingResult =
                     envelopeHandler.handleEnvelope(envelope, message.getDeliveryCount());
@@ -102,9 +99,13 @@ public class EnvelopeMessageProcessor {
         }
     }
 
-    private void tryFinaliseProcessedMessage(IMessage message, MessageProcessingResult processingResult) {
+    private void tryFinaliseProcessedMessage(
+        ServiceBusReceivedMessageContext context,
+        MessageProcessingResult processingResult
+    ) {
+        var message = context.getMessage();
         try {
-            finaliseProcessedMessage(message, processingResult);
+            finaliseProcessedMessage(context, processingResult);
         } catch (InterruptedException ex) {
             logMessageFinaliseError(message, processingResult.resultType, ex);
             Thread.currentThread().interrupt();
@@ -114,18 +115,18 @@ public class EnvelopeMessageProcessor {
     }
 
     private void finaliseProcessedMessage(
-        IMessage message,
+        ServiceBusReceivedMessageContext context,
         MessageProcessingResult processingResult
     ) throws InterruptedException, ServiceBusException {
-
+        var message = context.getMessage();
         switch (processingResult.resultType) {
             case SUCCESS:
-                messageReceiver.complete(message.getLockToken());
+                context.complete();;
                 log.info("Message with ID {} has been completed", message.getMessageId());
                 break;
             case UNRECOVERABLE_FAILURE:
                 deadLetterTheMessage(
-                    message,
+                    context,
                     "Message processing error",
                     processingResult.exception.getMessage()
                 );
@@ -144,7 +145,7 @@ public class EnvelopeMessageProcessor {
                     );
                 } else {
                     deadLetterTheMessage(
-                        message,
+                        context,
                         "Too many deliveries",
                         "Reached limit of message delivery count of " + deliveryCount
                     );
@@ -159,24 +160,24 @@ public class EnvelopeMessageProcessor {
     }
 
     private void deadLetterTheMessage(
-        IMessage message,
+        ServiceBusReceivedMessageContext context,
         String reason,
         String description
-    ) throws InterruptedException, ServiceBusException {
-        messageReceiver.deadLetter(
-            message.getLockToken(),
-            reason,
-            description,
-            ImmutableMap.of("deadLetteredAt", Instant.now().toString())
+    ) {
+        context.deadLetter(
+            new DeadLetterOptions()
+                .setDeadLetterReason(reason)
+                .setDeadLetterErrorDescription(description)
+                .setPropertiesToModify(ImmutableMap.of("deadLetteredAt", Instant.now().toString()))
         );
-
+        var message = context.getMessage();
         log.info("Message with ID {} has been dead-lettered", message.getMessageId());
         // track used for alert
         appInsights.trackDeadLetteredMessage(message, "envelopes", reason, description);
     }
 
     private void logMessageFinaliseError(
-        IMessage message,
+        ServiceBusReceivedMessage message,
         MessageProcessingResultType processingResultType,
         Exception ex
     ) {
@@ -188,7 +189,7 @@ public class EnvelopeMessageProcessor {
         );
     }
 
-    private void logMessageParsed(IMessage message, Envelope envelope) {
+    private void logMessageParsed(ServiceBusReceivedMessage message, Envelope envelope) {
         log.info(
             "Parsed message. ID: {}, Envelope ID: {}, File name: {}, Container: {}, Jurisdiction: {}, Form type: {}, "
                 + "Classification: {}, {}: {}",
@@ -204,7 +205,7 @@ public class EnvelopeMessageProcessor {
         );
     }
 
-    private void logMessageProcessingError(IMessage message, Envelope envelope, Exception exception) {
+    private void logMessageProcessingError(ServiceBusReceivedMessage message, Envelope envelope, Exception exception) {
         String baseMessage = String.format("Failed to process message with ID %s.", message.getMessageId());
 
         String fullMessage = envelope != null
@@ -212,5 +213,9 @@ public class EnvelopeMessageProcessor {
             : baseMessage;
 
         log.error(fullMessage, exception);
+    }
+
+    public void processException(ServiceBusErrorContext context) {
+        log.error("Processed envelope queue handle error {}", context.getErrorSource(), context.getException());
     }
 }
