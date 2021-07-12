@@ -4,8 +4,9 @@ scheduling:
     delete-envelopes-dlq-messages:
       enabled: false
       ttl: 10s
+    consume-envelopes-queue:
+      enabled: false
 
-spring:
   application:
     name: Bulk Scan Orchestrator Functional Tests
   datasource:
