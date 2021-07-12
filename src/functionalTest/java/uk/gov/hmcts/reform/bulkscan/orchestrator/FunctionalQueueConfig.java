@@ -50,6 +50,7 @@ public class FunctionalQueueConfig {
             new ServiceBusClientBuilder()
                 .connectionString(getEnvelopQueueConnectionString())
                 .receiver()
+                .queueName(queueName)
                 .receiveMode(ServiceBusReceiveMode.PEEK_LOCK)
                 .subQueue(SubQueue.DEAD_LETTER_QUEUE)
                 .buildClient();
