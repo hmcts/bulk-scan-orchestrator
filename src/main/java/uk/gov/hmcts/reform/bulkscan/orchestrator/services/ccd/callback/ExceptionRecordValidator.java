@@ -28,7 +28,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.getOcrData;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAnId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasDateField;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasFormType;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJourneyClassification;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJurisdiction;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasPoBox;
@@ -80,7 +79,7 @@ public class ExceptionRecordValidator {
         Validation<String, String> jurisdictionValidation = hasJurisdiction(caseDetails);
         Validation<String, Classification> journeyClassificationValidation = hasJourneyClassification(caseDetails);
 
-        Validation<String, String> formTypeValidation = hasFormType(caseDetails);
+        Validation<String, String> formTypeValidation = callbackValidator.hasFormType(caseDetails);
         // Exception journey classification may not have form type so skipping validation for it
         if (journeyClassificationValidation.isValid() && journeyClassificationValidation.get().equals(EXCEPTION)) {
             formTypeValidation = Validation.valid(formTypeValidation.getOrNull());
