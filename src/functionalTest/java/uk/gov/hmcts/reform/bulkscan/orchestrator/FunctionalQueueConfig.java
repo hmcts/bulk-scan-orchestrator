@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
+import com.azure.messaging.servicebus.ServiceBusProcessorClient;
 import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import com.microsoft.azure.servicebus.ClientFactory;
 import com.microsoft.azure.servicebus.IMessageReceiver;
@@ -95,5 +96,12 @@ public class FunctionalQueueConfig {
     @Bean("envelopes-dead-letter-send")
     public ServiceBusSenderClient envelopesDeadLetterSend() {
         return mock(ServiceBusSenderClient.class);
+    }
+
+    @Bean("envelopes")
+    @Profile("nosb") // apply only when Service Bus should not be used
+    public ServiceBusProcessorClient envelopesMessageReceiver(
+    ) {
+        return mock(ServiceBusProcessorClient.class);
     }
 }
