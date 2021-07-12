@@ -38,7 +38,7 @@ public class FunctionalQueueConfig {
     @Bean
     public ServiceBusSenderClient testWriteClient() {
         return new ServiceBusClientBuilder()
-            .connectionString(getEnvelopQueueConnectionString(queueWriteAccessKeyName, queueWriteAccessKeyName))
+            .connectionString(getEnvelopQueueConnectionString(queueWriteAccessKeyName, queueWriteAccessKey))
             .sender()
             .queueName(queueName)
             .buildClient();
