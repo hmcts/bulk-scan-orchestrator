@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.config.QueueConfigurationProperties;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.IPaymentsPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.IProcessedEnvelopeNotifier;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.ConnectionException;
@@ -43,9 +42,7 @@ public class FunctionalQueueConfig {
     private String queueNamespace;
 
     @Bean
-    public ServiceBusSenderClient testWriteClient(
-        QueueConfigurationProperties queueProperties
-    ) {
+    public ServiceBusSenderClient testWriteClient() {
         return new ServiceBusClientBuilder()
             .connectionString(
                 String.format(
@@ -56,9 +53,8 @@ public class FunctionalQueueConfig {
                 )
             )
             .sender()
-            .queueName(queueProperties.getQueueName())
+            .queueName(queueName)
             .buildClient();
-
     }
 
 
