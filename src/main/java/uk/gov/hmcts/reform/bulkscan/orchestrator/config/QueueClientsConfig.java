@@ -4,7 +4,6 @@ import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import com.azure.messaging.servicebus.ServiceBusProcessorClient;
 import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import com.azure.messaging.servicebus.models.ServiceBusReceiveMode;
-import com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -76,15 +75,6 @@ public class QueueClientsConfig {
         @Qualifier("payments-queue-config") QueueConfigurationProperties queueProperties
     ) {
         return createSendClient(queueProperties);
-    }
-
-    private ConnectionStringBuilder getConnectionStringBuilder(QueueConfigurationProperties queueProperties) {
-        return new ConnectionStringBuilder(
-            namespace,
-            queueProperties.getQueueName(),
-            queueProperties.getAccessKeyName(),
-            queueProperties.getAccessKey()
-        );
     }
 
     private ServiceBusSenderClient createSendClient(

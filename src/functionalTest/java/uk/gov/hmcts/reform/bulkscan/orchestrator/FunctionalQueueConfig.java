@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import com.azure.messaging.servicebus.ServiceBusProcessorClient;
+import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import com.microsoft.azure.servicebus.ClientFactory;
 import com.microsoft.azure.servicebus.IMessageReceiver;
-import com.microsoft.azure.servicebus.QueueClient;
 import com.microsoft.azure.servicebus.ReceiveMode;
 import com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
@@ -21,6 +21,8 @@ import java.util.function.Supplier;
 import static org.mockito.Mockito.mock;
 
 public class FunctionalQueueConfig {
+    public static final String CONNECTION_STR_FORMAT =
+        "Endpoint=sb://%s.servicebus.windows.net;SharedAccessKeyName=%s;SharedAccessKey=%s;";
 
     @Value("${queue.envelopes.name}")
     private String queueName;
@@ -41,12 +43,21 @@ public class FunctionalQueueConfig {
     private String queueNamespace;
 
     @Bean
-    public QueueClient testWriteClient() throws ServiceBusException, InterruptedException {
-        return new QueueClient(
-            new ConnectionStringBuilder(queueNamespace, queueName, queueWriteAccessKeyName, queueWriteAccessKey),
-            ReceiveMode.PEEKLOCK
-        );
+    public ServiceBusSenderClient testWriteClient() {
+        return new ServiceBusClientBuilder()
+            .connectionString(
+                String.format(
+                    CONNECTION_STR_FORMAT,
+                    queueNamespace,
+                    queueWriteAccessKeyName,
+                    queueWriteAccessKey
+                )
+            )
+            .sender()
+            .queueName(queueName)
+            .buildClient();
     }
+
 
     @Bean(name = "dlqReceiver")
     public Supplier<IMessageReceiver> dlqReceiverProvider() {

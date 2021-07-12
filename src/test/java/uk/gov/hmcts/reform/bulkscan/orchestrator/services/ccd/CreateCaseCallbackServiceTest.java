@@ -272,6 +272,7 @@ class CreateCaseCallbackServiceTest {
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
 
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -303,6 +304,7 @@ class CreateCaseCallbackServiceTest {
         data.put("journeyClassification", SUPPLEMENTARY_EVIDENCE.name());
 
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -338,6 +340,7 @@ class CreateCaseCallbackServiceTest {
             .thenReturn(finalizedCaseData);
 
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -363,6 +366,7 @@ class CreateCaseCallbackServiceTest {
             .thenReturn(asList(345L, 456L));
 
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
 
         assertThatThrownBy(
             () -> service.process(new CcdCallbackRequest(
@@ -396,6 +400,7 @@ class CreateCaseCallbackServiceTest {
         data.put(ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING, YesNoFieldValues.YES);
 
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
 
         // when
         ProcessResult result =
@@ -446,6 +451,7 @@ class CreateCaseCallbackServiceTest {
         )).willReturn(new CreateCaseResult(newCaseId));
 
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
 
         // when
         ProcessResult result =
@@ -490,6 +496,7 @@ class CreateCaseCallbackServiceTest {
             .updatePayments(any(), anyString(), anyString(), eq(Long.toString(newCaseId)));
 
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
 
         // when
         ProcessResult result =
