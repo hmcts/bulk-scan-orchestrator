@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import com.azure.messaging.servicebus.ServiceBusReceiverClient;
 import com.azure.messaging.servicebus.ServiceBusSenderClient;
-import com.azure.messaging.servicebus.models.ServiceBusReceiveMode;
 import com.azure.messaging.servicebus.models.SubQueue;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -51,7 +50,6 @@ public class FunctionalQueueConfig {
                 .connectionString(getEnvelopQueueConnectionString(queueReadAccessKeyName, queueReadAccessKey))
                 .receiver()
                 .queueName(queueName)
-                .receiveMode(ServiceBusReceiveMode.PEEK_LOCK)
                 .subQueue(SubQueue.DEAD_LETTER_QUEUE)
                 .buildClient();
     }
