@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import com.azure.messaging.servicebus.ServiceBusException;
-import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
 import com.azure.messaging.servicebus.ServiceBusReceiverClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,25 +58,8 @@ public class CleanupDlqMessagesTest {
 
     private boolean verifyDlqIsEmpty() throws ServiceBusException {
         LOG.info("Reading messages from envelopes Dead letter queue.");
-
-        ServiceBusReceiverClient messageReceiver = null;
-        ServiceBusReceivedMessage message = null;
-
-        try {
-            messageReceiver = dlqReceiverProvider.get();
-            message = messageReceiver.peekMessage();
-            return message == null;
-        } finally {
-            if (messageReceiver != null) {
-                try {
-                    if (message != null) {
-                        messageReceiver.abandon(message);
-                    }
-                    messageReceiver.close();
-                } catch (ServiceBusException e) {
-                    LOG.error("Error closing dlq connection", e);
-                }
-            }
+        try (ServiceBusReceiverClient messageReceiver = dlqReceiverProvider.get()) {
+            return messageReceiver.peekMessage() == null;
         }
     }
 }
