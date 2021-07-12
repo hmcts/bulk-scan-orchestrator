@@ -242,6 +242,9 @@ dependencyManagement {
     dependencySet(group: 'com.nimbusds', version: '9.11') {
       entry 'nimbus-jose-jwt'
     }
+    dependencySet(group: 'net.minidev', version: '2.4.7') {
+      entry 'json-smart'
+    }
   }
 }
 
