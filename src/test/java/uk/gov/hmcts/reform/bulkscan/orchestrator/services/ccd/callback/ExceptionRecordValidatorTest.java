@@ -62,6 +62,7 @@ class ExceptionRecordValidatorTest {
         var validExceptionRecord = createValidExceptionRecordCase();
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid("BULKSCAN_ExceptionRecord"));
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid("personal"));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid("BULKSCAN"));
 
         // when
         var validation = exceptionRecordValidator.getValidation(validExceptionRecord);
@@ -79,6 +80,7 @@ class ExceptionRecordValidatorTest {
         );
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
 
         // when
         var validation = exceptionRecordValidator.getValidation(caseDetails);
@@ -124,13 +126,15 @@ class ExceptionRecordValidatorTest {
     @Test
     void should_return_error_when_case_details_contain_invalid_ocr_data() {
         // given
+        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
+
         var invalidOcrData = ImmutableList.of(
             ImmutableMap.of("value", ImmutableMap.of(
                 "key", "first_name",
                 "value", 1
             )));
-        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
-        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
 
         String errorPattern = "Invalid OCR data format. Error: (class )?java.lang.Integer "
             + "cannot be cast to (class )?java.lang.String.*";
@@ -162,6 +166,7 @@ class ExceptionRecordValidatorTest {
         // given
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.invalid(error));
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
 
         // when
         var validation = exceptionRecordValidator.getValidation(input);
@@ -194,6 +199,7 @@ class ExceptionRecordValidatorTest {
         // given
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
 
         checkValidationErrorMatches(
             input,
@@ -206,8 +212,9 @@ class ExceptionRecordValidatorTest {
     void should_throw_exception_when_envelopeId_is_missing() {
         // given
         var caseDetails = caseWithData("envelopeId", null);
-        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
-        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid("BULKSCAN_ExceptionRecord"));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid("personal"));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid("BULKSCAN"));
 
         // then
         assertThatCode(() -> exceptionRecordValidator.getValidation(caseDetails))

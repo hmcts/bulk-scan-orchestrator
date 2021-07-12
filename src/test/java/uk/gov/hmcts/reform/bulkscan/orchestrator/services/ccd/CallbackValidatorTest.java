@@ -88,4 +88,35 @@ class CallbackValidatorTest {
         assertThat(res.isValid()).isFalse();
         assertThat(res.getError()).isEqualTo("Missing Form Type");
     }
+
+    @Test
+    void hasJurisdiction_returns_valid() {
+        // given
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+                .id(Long.valueOf(CASE_ID))
+                .jurisdiction("some jurisdiction")
+        );
+
+        // when
+        Validation<String, String> res = callbackValidator.hasJurisdiction(caseDetails);
+
+        // then
+        assertThat(res.isValid()).isTrue();
+        assertThat(res.get()).isEqualTo("some jurisdiction");
+    }
+
+    @Test
+    void hasJurisdiction_returns_invalid() {
+        // given
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+                .id(Long.valueOf(CASE_ID))
+        );
+
+        // when
+        Validation<String, String> res = callbackValidator.hasJurisdiction(caseDetails);
+
+        // then
+        assertThat(res.isValid()).isFalse();
+        assertThat(res.getError()).isEqualTo("Internal Error: invalid jurisdiction supplied: null");
+    }
 }
