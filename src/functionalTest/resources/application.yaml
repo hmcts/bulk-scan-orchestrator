@@ -7,6 +7,7 @@ scheduling:
     consume-envelopes-queue:
       enabled: false
 
+spring:
   application:
     name: Bulk Scan Orchestrator Functional Tests
   datasource:

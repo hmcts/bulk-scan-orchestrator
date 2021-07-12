@@ -99,7 +99,6 @@ public class FunctionalQueueConfig {
     }
 
     @Bean("envelopes")
-    @Profile("nosb") // apply only when Service Bus should not be used
     public ServiceBusProcessorClient envelopesMessageReceiver() {
         return mock(ServiceBusProcessorClient.class);
     }
