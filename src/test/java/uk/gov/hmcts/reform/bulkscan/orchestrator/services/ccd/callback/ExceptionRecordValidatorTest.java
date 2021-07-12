@@ -61,6 +61,7 @@ class ExceptionRecordValidatorTest {
         // given
         var validExceptionRecord = createValidExceptionRecordCase();
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid("BULKSCAN_ExceptionRecord"));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid("personal"));
 
         // when
         var validation = exceptionRecordValidator.getValidation(validExceptionRecord);
@@ -77,6 +78,7 @@ class ExceptionRecordValidatorTest {
             EXCEPTION.name()
         );
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
 
         // when
         var validation = exceptionRecordValidator.getValidation(caseDetails);
@@ -128,6 +130,7 @@ class ExceptionRecordValidatorTest {
                 "value", 1
             )));
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
 
         String errorPattern = "Invalid OCR data format. Error: (class )?java.lang.Integer "
             + "cannot be cast to (class )?java.lang.String.*";
@@ -158,6 +161,7 @@ class ExceptionRecordValidatorTest {
     void should_return_errors_for_invalid_case_data(String caseReason, CaseDetails input, String error) {
         // given
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.invalid(error));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
 
         // when
         var validation = exceptionRecordValidator.getValidation(input);
@@ -189,6 +193,7 @@ class ExceptionRecordValidatorTest {
     void should_return_errors_for_invalid_case_documents(String caseReason, CaseDetails input, String error) {
         // given
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
 
         checkValidationErrorMatches(
             input,
@@ -202,6 +207,7 @@ class ExceptionRecordValidatorTest {
         // given
         var caseDetails = caseWithData("envelopeId", null);
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
 
         // then
         assertThatCode(() -> exceptionRecordValidator.getValidation(caseDetails))
