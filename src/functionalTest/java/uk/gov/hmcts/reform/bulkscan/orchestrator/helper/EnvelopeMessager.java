@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 
-import com.microsoft.azure.servicebus.Message;
-import com.microsoft.azure.servicebus.QueueClient;
+import com.azure.messaging.servicebus.ServiceBusMessage;
+import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -28,7 +28,7 @@ public class EnvelopeMessager {
     private static final String ENVELOPE_ID_PLACEHOLDER = "{ENVELOPE_ID}";
 
     @Autowired
-    private QueueClient client;
+    private ServiceBusSenderClient client;
 
     /**
      * Sends a message, with content from the given file, to the queue.
@@ -64,7 +64,7 @@ public class EnvelopeMessager {
         UUID poBox,
         String documentUrl,
         String envelopeId
-    ) throws JSONException, InterruptedException, ServiceBusException {
+    ) throws JSONException {
         String messageContent =
             SampleData.fileContentAsString(jsonFileName)
                 .replace(ENVELOPE_ID_PLACEHOLDER, envelopeId);
@@ -83,12 +83,10 @@ public class EnvelopeMessager {
         document.put("url", documentUrl);
         document.put("uuid", StringUtils.substringAfterLast(documentUrl, "/")); //extract uuid from document url
 
-        Message message = new Message(
-            envelopeId,
-            updateCaseData.toString(),
-            MediaType.APPLICATION_JSON_VALUE
-        );
-        client.send(message);
+        ServiceBusMessage message = new ServiceBusMessage(updateCaseData.toString());
+        message.setMessageId(envelopeId);
+        message.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        client.sendMessage(message);
 
         logger.info(
             "Sent message to queue for the Case ID {} for updating the case. MessageId: {} Current time: {}",
