@@ -38,7 +38,7 @@ public class FunctionalQueueConfig {
     @Bean
     public ServiceBusSenderClient testWriteClient() {
         return new ServiceBusClientBuilder()
-            .connectionString(getEnvelopQueueConnectionString())
+            .connectionString(getEnvelopQueueConnectionString(queueWriteAccessKeyName, queueWriteAccessKeyName))
             .sender()
             .queueName(queueName)
             .buildClient();
@@ -48,7 +48,7 @@ public class FunctionalQueueConfig {
     public Supplier<ServiceBusReceiverClient> dlqReceiverProvider() {
         return () ->
             new ServiceBusClientBuilder()
-                .connectionString(getEnvelopQueueConnectionString())
+                .connectionString(getEnvelopQueueConnectionString(queueReadAccessKeyName, queueReadAccessKey))
                 .receiver()
                 .queueName(queueName)
                 .receiveMode(ServiceBusReceiveMode.PEEK_LOCK)
@@ -72,12 +72,12 @@ public class FunctionalQueueConfig {
         };
     }
 
-    private String getEnvelopQueueConnectionString() {
+    private String getEnvelopQueueConnectionString(String accessKeyName, String accessKey) {
         return String.format(
             CONNECTION_STR_FORMAT,
             queueNamespace,
-            queueWriteAccessKeyName,
-            queueWriteAccessKey
+            accessKeyName,
+            accessKey
         );
     }
 
