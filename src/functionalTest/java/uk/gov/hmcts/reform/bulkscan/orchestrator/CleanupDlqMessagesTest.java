@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
-import com.microsoft.azure.servicebus.IMessage;
-import com.microsoft.azure.servicebus.IMessageReceiver;
-import com.microsoft.azure.servicebus.primitives.ServiceBusException;
+import com.azure.messaging.servicebus.ServiceBusException;
+import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
+import com.azure.messaging.servicebus.ServiceBusReceiverClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
@@ -29,7 +29,7 @@ public class CleanupDlqMessagesTest {
 
     @Autowired
     @Qualifier("dlqReceiver")
-    private Supplier<IMessageReceiver> dlqReceiverProvider;
+    private Supplier<ServiceBusReceiverClient> dlqReceiverProvider;
 
     @Autowired
     private EnvelopeMessager envelopeMessager;
@@ -57,21 +57,21 @@ public class CleanupDlqMessagesTest {
             .until(() -> verifyDlqIsEmpty());
     }
 
-    private boolean verifyDlqIsEmpty() throws ServiceBusException, InterruptedException {
+    private boolean verifyDlqIsEmpty() throws ServiceBusException {
         LOG.info("Reading messages from envelopes Dead letter queue.");
 
-        IMessageReceiver messageReceiver = null;
-        IMessage message = null;
+        ServiceBusReceiverClient messageReceiver = null;
+        ServiceBusReceivedMessage message = null;
 
         try {
             messageReceiver = dlqReceiverProvider.get();
-            message = messageReceiver.receive();
+            message = messageReceiver.peekMessage();
             return message == null;
         } finally {
             if (messageReceiver != null) {
                 try {
                     if (message != null) {
-                        messageReceiver.abandon(message.getLockToken());
+                        messageReceiver.abandon(message);
                     }
                     messageReceiver.close();
                 } catch (ServiceBusException e) {
