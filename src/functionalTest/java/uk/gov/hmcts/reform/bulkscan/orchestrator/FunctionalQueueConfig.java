@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.pro
 
 import java.util.function.Supplier;
 
+import static org.mockito.Mockito.mock;
+
 public class FunctionalQueueConfig {
     public static final String CONNECTION_STR_FORMAT =
         "Endpoint=sb://%s.servicebus.windows.net;SharedAccessKeyName=%s;SharedAccessKey=%s;";
