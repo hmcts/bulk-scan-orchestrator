@@ -37,7 +37,7 @@ public class FunctionalQueueConfig {
     @Value("${queue.namespace}")
     private String queueNamespace;
 
-    @Bean
+    @Bean("testWriteClient")
     public ServiceBusSenderClient testWriteClient() {
         return new ServiceBusClientBuilder()
             .connectionString(getEnvelopQueueConnectionString(queueWriteAccessKeyName, queueWriteAccessKey))
