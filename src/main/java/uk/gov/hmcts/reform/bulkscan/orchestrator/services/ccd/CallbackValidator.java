@@ -10,6 +10,8 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 
 import static io.vavr.control.Validation.invalid;
+import static io.vavr.control.Validation.valid;
+import static java.lang.String.format;
 
 @Component
 public class CallbackValidator {
@@ -30,5 +32,27 @@ public class CallbackValidator {
                 .map(data -> (String) data.get("formType"))
                 .map(Validation::<String, String>valid)
                 .orElse(invalid("Missing Form Type"));
+    }
+
+    @Nonnull
+    public Validation<String, String> hasJurisdiction(CaseDetails theCase) {
+        String jurisdiction = null;
+        return theCase != null
+                && (jurisdiction = theCase.getJurisdiction()) != null
+                ? valid(jurisdiction)
+                : internalError("invalid jurisdiction supplied: %s", jurisdiction);
+    }
+
+    /*
+     * These errors created here are for errors not related to the user input. Hence putting internal in
+     * front of the error so the user knows that they are not responsible and will not spend ages trying
+     * to get it to work. I would suggest passing this via customer support people to verify that the strings
+     * are good enough for the users and contain the right information to triage issues.
+     */
+    @Nonnull
+    private static <T> Validation<String, T> internalError(String error, T arg1) {
+        log.error("{}:{}", error, arg1);
+        String formatString = "Internal Error: " + error;
+        return invalid(format(formatString, arg1));
     }
 }

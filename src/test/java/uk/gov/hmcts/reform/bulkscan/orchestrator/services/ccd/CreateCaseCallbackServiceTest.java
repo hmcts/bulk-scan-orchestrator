@@ -273,6 +273,7 @@ class CreateCaseCallbackServiceTest {
 
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -305,6 +306,7 @@ class CreateCaseCallbackServiceTest {
 
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -341,6 +343,7 @@ class CreateCaseCallbackServiceTest {
 
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -367,6 +370,7 @@ class CreateCaseCallbackServiceTest {
 
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
 
         assertThatThrownBy(
             () -> service.process(new CcdCallbackRequest(
@@ -401,6 +405,7 @@ class CreateCaseCallbackServiceTest {
 
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
 
         // when
         ProcessResult result =
@@ -452,6 +457,7 @@ class CreateCaseCallbackServiceTest {
 
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
 
         // when
         ProcessResult result =
@@ -497,6 +503,7 @@ class CreateCaseCallbackServiceTest {
 
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
 
         // when
         ProcessResult result =

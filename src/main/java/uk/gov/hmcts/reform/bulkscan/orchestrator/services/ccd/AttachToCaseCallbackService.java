@@ -24,7 +24,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAnId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasIdamToken;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJourneyClassificationForAttachToCase;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJurisdiction;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasSearchCaseReference;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasSearchCaseReferenceType;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
@@ -45,17 +44,20 @@ public class AttachToCaseCallbackService {
     private final ExceptionRecordValidator exceptionRecordValidator;
     private final ExceptionRecordFinalizer exceptionRecordFinalizer;
     private final ExceptionRecordAttacher exceptionRecordAttacher;
+    private final CallbackValidator callbackValidator;
 
     public AttachToCaseCallbackService(
-        ServiceConfigProvider serviceConfigProvider,
-        ExceptionRecordValidator exceptionRecordValidator,
-        ExceptionRecordFinalizer exceptionRecordFinalizer,
-        ExceptionRecordAttacher exceptionRecordAttacher
+            ServiceConfigProvider serviceConfigProvider,
+            ExceptionRecordValidator exceptionRecordValidator,
+            ExceptionRecordFinalizer exceptionRecordFinalizer,
+            ExceptionRecordAttacher exceptionRecordAttacher,
+            CallbackValidator callbackValidator
     ) {
         this.serviceConfigProvider = serviceConfigProvider;
         this.exceptionRecordValidator = exceptionRecordValidator;
         this.exceptionRecordFinalizer = exceptionRecordFinalizer;
         this.exceptionRecordAttacher = exceptionRecordAttacher;
+        this.callbackValidator = callbackValidator;
     }
 
     /**
@@ -117,7 +119,7 @@ public class AttachToCaseCallbackService {
             ? hasSearchCaseReference(exceptionRecord)
             : hasTargetCaseReference(exceptionRecord);
 
-        Validation<String, String> jurisdictionValidation = hasJurisdiction(exceptionRecord);
+        Validation<String, String> jurisdictionValidation = callbackValidator.hasJurisdiction(exceptionRecord);
         Validation<String, String> serviceNameInCaseTypeIdValidation = hasServiceNameInCaseTypeId(exceptionRecord);
         Validation<String, Long> idValidation = hasAnId(exceptionRecord);
         Validation<String, List<Map<String, Object>>> scannedRecordValidation = hasAScannedRecord(exceptionRecord);
