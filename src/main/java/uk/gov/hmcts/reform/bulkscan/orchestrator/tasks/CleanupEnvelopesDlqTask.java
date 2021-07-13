@@ -1,15 +1,15 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.tasks;
 
-import com.microsoft.azure.servicebus.IMessage;
-import com.microsoft.azure.servicebus.IMessageReceiver;
-import com.microsoft.azure.servicebus.primitives.ServiceBusException;
+import com.azure.core.util.IterableStream;
+import com.azure.messaging.servicebus.ServiceBusException;
+import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
+import com.azure.messaging.servicebus.ServiceBusReceiverClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.MessageBodyRetriever;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeParser;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.ConnectionException;
@@ -30,11 +30,11 @@ public class CleanupEnvelopesDlqTask {
     private static final Logger log = LoggerFactory.getLogger(CleanupEnvelopesDlqTask.class);
     private static final String TASK_NAME = "delete-envelopes-dlq-messages";
 
-    Supplier<IMessageReceiver> dlqReceiverProvider;
+    Supplier<ServiceBusReceiverClient> dlqReceiverProvider;
     private final Duration ttl;
 
     public CleanupEnvelopesDlqTask(
-        Supplier<IMessageReceiver> receiverProvider,
+        Supplier<ServiceBusReceiverClient> receiverProvider,
         @Value("${scheduling.task.delete-envelopes-dlq-messages.ttl}") Duration ttl
     ) {
         this.dlqReceiverProvider = receiverProvider;
@@ -44,29 +44,38 @@ public class CleanupEnvelopesDlqTask {
     @Scheduled(cron = "${scheduling.task.delete-envelopes-dlq-messages.cron}")
     public void deleteMessagesInEnvelopesDlq() throws ServiceBusException, InterruptedException {
         log.info("Started {} job", TASK_NAME);
-        IMessageReceiver messageReceiver = null;
+        ServiceBusReceiverClient messageReceiver = null;
 
         try {
             messageReceiver = dlqReceiverProvider.get();
-
+            ServiceBusReceivedMessage message = null;
             int completedCount = 0;
-            IMessage message = messageReceiver.receive();
-            while (message != null) {
-                if (canBeCompleted(message)) {
-                    logMessage(message);
-                    messageReceiver.complete(message.getLockToken());
-                    completedCount++;
-                    log.info(
-                        "Completed message from envelopes dlq. messageId: {} Current time: {}",
-                        message.getMessageId(),
-                        Instant.now()
-                    );
-                } else {
-                    // just continue, lock on the current msg will expire automatically
-                    log.info("Leaving message on dlq, ttl has not passed yet. Message id: {}", message.getMessageId());
+            do {
+                message = null;
+                IterableStream<ServiceBusReceivedMessage> messages =
+                    messageReceiver.receiveMessages(1, Duration.ofSeconds(1));
+                var opt = messages.stream().findFirst();
+                if (opt.isPresent()) {
+                    message = opt.get();
+                    messageReceiver.renewMessageLock(message);
+                    if (canBeCompleted(message)) {
+                        logMessage(message);
+                        messageReceiver.complete(message);
+                        completedCount++;
+                        log.info(
+                            "Completed message from envelopes dlq. messageId: {} Current time: {}",
+                            message.getMessageId(),
+                            Instant.now()
+                        );
+                    } else {
+                        // just continue, lock on the current msg will expire automatically
+                        log.info(
+                            "Leaving message on dlq, ttl has not passed yet. Message id: {}",
+                            message.getMessageId()
+                        );
+                    }
                 }
-                message = messageReceiver.receive();
-            }
+            } while (message != null);
 
             log.info("Finished processing messages in envelopes dlq. Completed {} messages", completedCount);
         } catch (ConnectionException e) {
@@ -83,11 +92,9 @@ public class CleanupEnvelopesDlqTask {
         log.info("Finished {} job", TASK_NAME);
     }
 
-    private void logMessage(IMessage msg) {
+    private void logMessage(ServiceBusReceivedMessage msg) {
         try {
-            Envelope envelope = EnvelopeParser.parse(
-                MessageBodyRetriever.getBinaryData(msg.getMessageBody())
-            );
+            Envelope envelope = EnvelopeParser.parse(msg.getBody().toBytes());
 
             log.info(
                 "Completing dlq message. messageId: {}, Envelope ID: {}, File name: {}, Jurisdiction: {},"
@@ -108,9 +115,9 @@ public class CleanupEnvelopesDlqTask {
         }
     }
 
-    private boolean canBeCompleted(IMessage message) {
+    private boolean canBeCompleted(ServiceBusReceivedMessage message) {
         Instant cutoff = Instant.now().minus(this.ttl);
-        Map<String, Object> messageProperties = message.getProperties();
+        Map<String, Object> messageProperties = message.getApplicationProperties();
 
         String deadLetteredAtStr =
             messageProperties == null
