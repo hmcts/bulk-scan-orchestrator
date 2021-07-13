@@ -24,10 +24,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAnId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasIdamToken;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJourneyClassificationForAttachToCase;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasSearchCaseReference;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasSearchCaseReferenceType;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasTargetCaseReference;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasUserId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.validatePayments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isAttachToCaseEvent;
@@ -112,12 +109,12 @@ public class AttachToCaseCallbackService {
             && exceptionRecord.getData().get(SEARCH_CASE_REFERENCE_TYPE) != null;
 
         Validation<String, String> caseReferenceTypeValidation = useSearchCaseReference
-            ? hasSearchCaseReferenceType(exceptionRecord)
+            ? callbackValidator.hasSearchCaseReferenceType(exceptionRecord)
             : valid(CCD_CASE_REFERENCE);
 
         Validation<String, String> caseReferenceValidation = useSearchCaseReference
-            ? hasSearchCaseReference(exceptionRecord)
-            : hasTargetCaseReference(exceptionRecord);
+            ? callbackValidator.hasSearchCaseReference(exceptionRecord)
+            : callbackValidator.hasTargetCaseReference(exceptionRecord);
 
         Validation<String, String> jurisdictionValidation = callbackValidator.hasJurisdiction(exceptionRecord);
         Validation<String, String> serviceNameInCaseTypeIdValidation = hasServiceNameInCaseTypeId(exceptionRecord);

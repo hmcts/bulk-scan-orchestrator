@@ -54,21 +54,6 @@ public final class CallbackValidations {
     }
 
     @Nonnull
-    static Validation<String, String> hasSearchCaseReferenceType(CaseDetails theCase) {
-        return caseRefValidator.validateCaseReferenceType(theCase);
-    }
-
-    @Nonnull
-    static Validation<String, String> hasSearchCaseReference(CaseDetails theCase) {
-        return caseRefValidator.validateSearchCaseReferenceWithSearchType(theCase);
-    }
-
-    @Nonnull
-    static Validation<String, String> hasTargetCaseReference(CaseDetails theCase) {
-        return caseRefValidator.validateTargetCaseReference(theCase);
-    }
-
-    @Nonnull
     public static Validation<String, Long> hasAnId(CaseDetails theCase) {
         return theCase != null
             && theCase.getId() != null
