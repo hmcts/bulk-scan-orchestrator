@@ -1,8 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
-import com.microsoft.azure.servicebus.IMessage;
-import com.microsoft.azure.servicebus.IMessageReceiver;
-import com.microsoft.azure.servicebus.primitives.ServiceBusException;
+import com.azure.messaging.servicebus.ServiceBusException;
+import com.azure.messaging.servicebus.ServiceBusReceiverClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
@@ -29,7 +28,7 @@ public class CleanupDlqMessagesTest {
 
     @Autowired
     @Qualifier("dlqReceiver")
-    private Supplier<IMessageReceiver> dlqReceiverProvider;
+    private Supplier<ServiceBusReceiverClient> dlqReceiverProvider;
 
     @Autowired
     private EnvelopeMessager envelopeMessager;
@@ -51,33 +50,16 @@ public class CleanupDlqMessagesTest {
 
         // then
         await("Dead lettered messages are completed from envelopes dlq.")
-            .atMost(4, TimeUnit.MINUTES)
+            .atMost(6, TimeUnit.MINUTES)
             .pollDelay(120, TimeUnit.SECONDS)
             .pollInterval(15, TimeUnit.SECONDS)
             .until(() -> verifyDlqIsEmpty());
     }
 
-    private boolean verifyDlqIsEmpty() throws ServiceBusException, InterruptedException {
+    private boolean verifyDlqIsEmpty() throws ServiceBusException {
         LOG.info("Reading messages from envelopes Dead letter queue.");
-
-        IMessageReceiver messageReceiver = null;
-        IMessage message = null;
-
-        try {
-            messageReceiver = dlqReceiverProvider.get();
-            message = messageReceiver.receive();
-            return message == null;
-        } finally {
-            if (messageReceiver != null) {
-                try {
-                    if (message != null) {
-                        messageReceiver.abandon(message.getLockToken());
-                    }
-                    messageReceiver.close();
-                } catch (ServiceBusException e) {
-                    LOG.error("Error closing dlq connection", e);
-                }
-            }
+        try (ServiceBusReceiverClient messageReceiver = dlqReceiverProvider.get()) {
+            return messageReceiver.peekMessage() == null;
         }
     }
 }
