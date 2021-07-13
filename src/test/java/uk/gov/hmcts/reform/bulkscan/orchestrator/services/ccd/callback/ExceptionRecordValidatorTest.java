@@ -5,14 +5,18 @@ import com.google.common.collect.ImmutableMap;
 import io.vavr.collection.List;
 import io.vavr.collection.Seq;
 import io.vavr.control.Validation;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.time.LocalDateTime;
@@ -21,6 +25,8 @@ import java.util.function.Function;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.JURSIDICTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.PO_BOX;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.TestExceptionRecordCaseBuilder.caseWithData;
@@ -34,19 +40,32 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 
+@ExtendWith(MockitoExtension.class)
 @SuppressWarnings("checkstyle:LineLength")
 class ExceptionRecordValidatorTest {
 
     private static final String CASE_TYPE_EXCEPTION_RECORD = "BULKSCAN_ExceptionRecord";
-    private static final ExceptionRecordValidator VALIDATOR = new ExceptionRecordValidator();
+
+    @Mock
+    private CallbackValidator callbackValidator;
+
+    private ExceptionRecordValidator exceptionRecordValidator;
+
+    @BeforeEach
+    void setUp() {
+        exceptionRecordValidator = new ExceptionRecordValidator(callbackValidator);
+    }
 
     @Test
     void should_map_to_exception_record_when_case_details_are_valid() {
         // given
         var validExceptionRecord = createValidExceptionRecordCase();
+        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid("BULKSCAN_ExceptionRecord"));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid("personal"));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid("BULKSCAN"));
 
         // when
-        var validation = VALIDATOR.getValidation(validExceptionRecord);
+        var validation = exceptionRecordValidator.getValidation(validExceptionRecord);
 
         // then
         assertExceptionRecordMappings(validation);
@@ -59,9 +78,12 @@ class ExceptionRecordValidatorTest {
             null,
             EXCEPTION.name()
         );
+        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
 
         // when
-        var validation = VALIDATOR.getValidation(caseDetails);
+        var validation = exceptionRecordValidator.getValidation(caseDetails);
 
         // then
         assertThat(validation.isValid()).isTrue();
@@ -74,9 +96,9 @@ class ExceptionRecordValidatorTest {
         var caseDetails = caseWithId(null);
 
         // when
-        var validation = VALIDATOR.mandatoryPrerequisites(
-            () -> VALIDATOR.getCaseId(caseDetails).map(item -> null),
-            () -> CallbackValidations.hasCaseTypeId(caseDetails).map(item -> null)
+        var validation = exceptionRecordValidator.mandatoryPrerequisites(
+            () -> exceptionRecordValidator.getCaseId(caseDetails).map(item -> null),
+            () -> callbackValidator.hasCaseTypeId(caseDetails).map(item -> null)
         );
 
         // then
@@ -88,11 +110,12 @@ class ExceptionRecordValidatorTest {
     void should_not_return_errors_when_validations_are_success() {
         // given
         var caseDetails = createValidExceptionRecordCase();
+        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
 
         // when
-        var validation = VALIDATOR.mandatoryPrerequisites(
-            () -> VALIDATOR.getCaseId(caseDetails).map(item -> null),
-            () -> CallbackValidations.hasCaseTypeId(caseDetails).map(item -> null)
+        var validation = exceptionRecordValidator.mandatoryPrerequisites(
+            () -> exceptionRecordValidator.getCaseId(caseDetails).map(item -> null),
+            () -> callbackValidator.hasCaseTypeId(caseDetails).map(item -> null)
         );
 
         // then
@@ -103,6 +126,10 @@ class ExceptionRecordValidatorTest {
     @Test
     void should_return_error_when_case_details_contain_invalid_ocr_data() {
         // given
+        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
+
         var invalidOcrData = ImmutableList.of(
             ImmutableMap.of("value", ImmutableMap.of(
                 "key", "first_name",
@@ -115,7 +142,7 @@ class ExceptionRecordValidatorTest {
         // then
         checkValidationErrorMatches(
             caseWithData("scanOCRData", invalidOcrData),
-            VALIDATOR::getValidation,
+            exceptionRecordValidator::getValidation,
             errorPattern
         );
     }
@@ -136,8 +163,13 @@ class ExceptionRecordValidatorTest {
     @ParameterizedTest(name = "{0}: input:{1} error:{2}")
     @MethodSource("invalidCaseDataTestParams")
     void should_return_errors_for_invalid_case_data(String caseReason, CaseDetails input, String error) {
+        // given
+        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.invalid(error));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
+
         // when
-        var validation = VALIDATOR.getValidation(input);
+        var validation = exceptionRecordValidator.getValidation(input);
 
         // then
         assertSoftly(softly -> {
@@ -164,9 +196,14 @@ class ExceptionRecordValidatorTest {
     @ParameterizedTest(name = "{0}: input:{1} error:{2}")
     @MethodSource("invalidDocumentTestParams")
     void should_return_errors_for_invalid_case_documents(String caseReason, CaseDetails input, String error) {
+        // given
+        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
+
         checkValidationErrorMatches(
             input,
-            VALIDATOR::getValidation,
+            exceptionRecordValidator::getValidation,
             error
         );
     }
@@ -175,9 +212,12 @@ class ExceptionRecordValidatorTest {
     void should_throw_exception_when_envelopeId_is_missing() {
         // given
         var caseDetails = caseWithData("envelopeId", null);
+        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid("BULKSCAN_ExceptionRecord"));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid("personal"));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid("BULKSCAN"));
 
         // then
-        assertThatCode(() -> VALIDATOR.getValidation(caseDetails))
+        assertThatCode(() -> exceptionRecordValidator.getValidation(caseDetails))
             .isInstanceOf(UnprocessableCaseDataException.class)
             .hasMessage("Exception record is lacking envelopeId field");
     }

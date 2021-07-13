@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
+import io.vavr.control.Validation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,14 +60,16 @@ class CreateCaseCallbackServiceTest {
     private static final String CASE_ID = "123";
     private static final String CASE_TYPE_ID = SERVICE + "_ExceptionRecord";
 
-    // TODO: mock this!
-    private static final ExceptionRecordValidator VALIDATOR = new ExceptionRecordValidator();
+    @Mock
+    private CallbackValidator callbackValidator;
 
-    @Mock ServiceConfigProvider serviceConfigProvider;
-    @Mock CaseFinder caseFinder;
-    @Mock CcdNewCaseCreator ccdNewCaseCreator;
-    @Mock ExceptionRecordFinalizer exceptionRecordFinalizer;
-    @Mock PaymentsProcessor paymentsProcessor;
+    // TODO: mock this!
+    private ExceptionRecordValidator exceptionRecordValidator;
+    @Mock private ServiceConfigProvider serviceConfigProvider;
+    @Mock private CaseFinder caseFinder;
+    @Mock private CcdNewCaseCreator ccdNewCaseCreator;
+    @Mock private ExceptionRecordFinalizer exceptionRecordFinalizer;
+    @Mock private PaymentsProcessor paymentsProcessor;
     @Mock private CallbackResultRepositoryProxy callbackResultRepositoryProxy;
 
 
@@ -74,8 +77,9 @@ class CreateCaseCallbackServiceTest {
 
     @BeforeEach
     void setUp() {
+        exceptionRecordValidator = new ExceptionRecordValidator(callbackValidator);
         service = new CreateCaseCallbackService(
-            VALIDATOR,
+            exceptionRecordValidator,
             serviceConfigProvider,
             caseFinder,
             ccdNewCaseCreator,
@@ -267,6 +271,10 @@ class CreateCaseCallbackServiceTest {
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
 
+        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
+
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
             EventIds.CREATE_NEW_CASE,
@@ -295,6 +303,10 @@ class CreateCaseCallbackServiceTest {
 
         Map<String, Object> data = basicCaseData();
         data.put("journeyClassification", SUPPLEMENTARY_EVIDENCE.name());
+
+        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -329,6 +341,10 @@ class CreateCaseCallbackServiceTest {
         when(exceptionRecordFinalizer.finalizeExceptionRecord(caseData, "345", CASE_CREATION))
             .thenReturn(finalizedCaseData);
 
+        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
+
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
             EventIds.CREATE_NEW_CASE,
@@ -351,6 +367,10 @@ class CreateCaseCallbackServiceTest {
 
         when(caseFinder.findCases(any(), any()))
             .thenReturn(asList(345L, 456L));
+
+        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
 
         assertThatThrownBy(
             () -> service.process(new CcdCallbackRequest(
@@ -382,6 +402,10 @@ class CreateCaseCallbackServiceTest {
 
         Map<String, Object> data = basicCaseData();
         data.put(ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING, YesNoFieldValues.YES);
+
+        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
 
         // when
         ProcessResult result =
@@ -431,6 +455,10 @@ class CreateCaseCallbackServiceTest {
             anyString()
         )).willReturn(new CreateCaseResult(newCaseId));
 
+        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
+
         // when
         ProcessResult result =
             service
@@ -472,6 +500,10 @@ class CreateCaseCallbackServiceTest {
 
         willThrow(PaymentsPublishingException.class).given(paymentsProcessor)
             .updatePayments(any(), anyString(), anyString(), eq(Long.toString(newCaseId)));
+
+        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
 
         // when
         ProcessResult result =

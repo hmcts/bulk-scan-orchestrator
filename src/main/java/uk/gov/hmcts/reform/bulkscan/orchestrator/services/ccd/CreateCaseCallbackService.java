@@ -41,7 +41,7 @@ public class CreateCaseCallbackService {
     public static final String AWAITING_PAYMENTS_MESSAGE =
         "Payments for this Exception Record have not been processed yet";
 
-    private final ExceptionRecordValidator validator;
+    private final ExceptionRecordValidator exceptionRecordValidator;
     private final ServiceConfigProvider serviceConfigProvider;
     private final CaseFinder caseFinder;
     private final CcdNewCaseCreator ccdNewCaseCreator;
@@ -50,7 +50,7 @@ public class CreateCaseCallbackService {
     private final CallbackResultRepositoryProxy callbackResultRepositoryProxy;
 
     public CreateCaseCallbackService(
-        ExceptionRecordValidator validator,
+        ExceptionRecordValidator exceptionRecordValidator,
         ServiceConfigProvider serviceConfigProvider,
         CaseFinder caseFinder,
         CcdNewCaseCreator ccdNewCaseCreator,
@@ -58,7 +58,7 @@ public class CreateCaseCallbackService {
         PaymentsProcessor paymentsProcessor,
         CallbackResultRepositoryProxy callbackResultRepositoryProxy
     ) {
-        this.validator = validator;
+        this.exceptionRecordValidator = exceptionRecordValidator;
         this.serviceConfigProvider = serviceConfigProvider;
         this.caseFinder = caseFinder;
         this.ccdNewCaseCreator = ccdNewCaseCreator;
@@ -92,9 +92,9 @@ public class CreateCaseCallbackService {
         CaseDetails exceptionRecordData = request.getCaseDetails();
 
         // Extract exception record ID for logging reasons
-        String exceptionRecordId = validator.getCaseId(exceptionRecordData).getOrElse("UNKNOWN");
+        String exceptionRecordId = exceptionRecordValidator.getCaseId(exceptionRecordData).getOrElse("UNKNOWN");
 
-        ProcessResult result = validator
+        ProcessResult result = exceptionRecordValidator
             .getValidation(exceptionRecordData)
             .map(exceptionRecord -> tryCreateNewCase(
                 exceptionRecord,
@@ -135,7 +135,7 @@ public class CreateCaseCallbackService {
         String idamToken,
         String userId
     ) {
-        return validator.mandatoryPrerequisites(
+        return exceptionRecordValidator.mandatoryPrerequisites(
             () -> isCreateNewCaseEvent(eventId),
             () -> getServiceConfig(caseDetails).map(item -> null),
             () -> hasIdamToken(idamToken).map(item -> null),

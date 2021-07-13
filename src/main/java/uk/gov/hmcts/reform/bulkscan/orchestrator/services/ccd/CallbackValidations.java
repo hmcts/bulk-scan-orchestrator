@@ -2,8 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
@@ -40,8 +38,6 @@ public final class CallbackValidations {
     private static final List<Classification> VALID_CLASSIFICATIONS_FOR_ATTACH_TO_CASE =
         asList(EXCEPTION, SUPPLEMENTARY_EVIDENCE, SUPPLEMENTARY_EVIDENCE_WITH_OCR);
 
-    private static final Logger log = LoggerFactory.getLogger(CallbackValidations.class);
-
     // todo review usage
     public static final DateTimeFormatter FORMATTER = new DateTimeFormatterBuilder()
         // date/time
@@ -55,45 +51,6 @@ public final class CallbackValidations {
     private static final ScannedDocumentValidator scannedDocumentValidator = new ScannedDocumentValidator();
 
     private CallbackValidations() {
-    }
-
-    /*
-     * These errors created here are for errors not related to the user input. Hence putting internal in
-     * front of the error so the user knows that they are not responsible and will not spend ages trying
-     * to get it to work. I would suggest passing this via customer support people to verify that the strings
-     * are good enough for the users and contain the right information to triage issues.
-     */
-    @Nonnull
-    private static <T> Validation<String, T> internalError(String error, T arg1) {
-        log.error("{}:{}", error, arg1);
-        String formatString = "Internal Error: " + error;
-        return invalid(format(formatString, arg1));
-    }
-
-    @Nonnull
-    public static Validation<String, String> hasCaseTypeId(CaseDetails theCase) {
-        return Optional.ofNullable(theCase)
-            .map(CaseDetails::getCaseTypeId)
-            .map(Validation::<String, String>valid)
-            .orElse(invalid("Missing caseType"));
-    }
-
-    @Nonnull
-    public static Validation<String, String> hasFormType(CaseDetails theCase) {
-        return Optional.ofNullable(theCase)
-            .map(CaseDetails::getData)
-            .map(data -> (String) data.get("formType"))
-            .map(Validation::<String, String>valid)
-            .orElse(invalid("Missing Form Type"));
-    }
-
-    @Nonnull
-    public static Validation<String, String> hasJurisdiction(CaseDetails theCase) {
-        String jurisdiction = null;
-        return theCase != null
-            && (jurisdiction = theCase.getJurisdiction()) != null
-            ? valid(jurisdiction)
-            : internalError("invalid jurisdiction supplied: %s", jurisdiction);
     }
 
     @Nonnull

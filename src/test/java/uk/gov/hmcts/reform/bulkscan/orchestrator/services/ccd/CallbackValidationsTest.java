@@ -243,28 +243,6 @@ class CallbackValidationsTest {
     }
 
     @Test
-    void invalidJurisdictionTest() {
-        checkValidation(
-            createCaseWith(b -> b.jurisdiction(null)),
-            false,
-            null,
-            CallbackValidations::hasJurisdiction,
-            "Internal Error: invalid jurisdiction supplied: null"
-        );
-    }
-
-    @Test
-    void noFormTypeTest() {
-        checkValidation(
-            createCaseWith(b -> b.data(null)),
-            false,
-            null,
-            CallbackValidations::hasFormType,
-            "Missing Form Type"
-        );
-    }
-
-    @Test
     void noCaseIdTest() {
         checkValidation(
             createCaseWith(b -> b.id(null)),
