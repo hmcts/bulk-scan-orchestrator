@@ -111,6 +111,7 @@ class AttachToCaseCallbackServiceTest {
             .willReturn(Either.right(EXISTING_CASE_ID));
         given(serviceConfigProvider.getConfig(SERVICE_NAME)).willReturn(configItem);
         given(callbackValidator.hasJurisdiction(any(CaseDetails.class))).willReturn(Validation.valid(JURISDICTION));
+        given(callbackValidator.hasTargetCaseReference(any(CaseDetails.class))).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -168,6 +169,7 @@ class AttachToCaseCallbackServiceTest {
             .willReturn(Either.left(new ErrorsAndWarnings(singletonList(ERROR_1), singletonList(WARNING_1))));
         given(serviceConfigProvider.getConfig(SERVICE_NAME)).willReturn(configItem);
         given(callbackValidator.hasJurisdiction(any(CaseDetails.class))).willReturn(Validation.valid(JURISDICTION));
+        given(callbackValidator.hasTargetCaseReference(any(CaseDetails.class))).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -197,6 +199,7 @@ class AttachToCaseCallbackServiceTest {
         given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any(CaseDetails.class)))
                 .willReturn(Validation.invalid("Internal Error: invalid jurisdiction supplied: null"));
+        given(callbackValidator.hasTargetCaseReference(any(CaseDetails.class))).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -227,6 +230,7 @@ class AttachToCaseCallbackServiceTest {
         given(exceptionRecordValidator.getValidation(caseDetails)).willReturn(Validation.valid(exceptionRecord));
         given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any(CaseDetails.class))).willReturn(Validation.valid(JURISDICTION));
+        given(callbackValidator.hasTargetCaseReference(any(CaseDetails.class))).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -257,6 +261,7 @@ class AttachToCaseCallbackServiceTest {
         given(exceptionRecordValidator.getValidation(caseDetails)).willReturn(Validation.valid(exceptionRecord));
         given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any(CaseDetails.class))).willReturn(Validation.valid(JURISDICTION));
+        given(callbackValidator.hasTargetCaseReference(any(CaseDetails.class))).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -287,6 +292,7 @@ class AttachToCaseCallbackServiceTest {
         given(exceptionRecordValidator.getValidation(caseDetails)).willReturn(Validation.valid(exceptionRecord));
         given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any(CaseDetails.class))).willReturn(Validation.valid(JURISDICTION));
+        given(callbackValidator.hasTargetCaseReference(any(CaseDetails.class))).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -317,6 +323,7 @@ class AttachToCaseCallbackServiceTest {
         given(exceptionRecordValidator.getValidation(caseDetails)).willReturn(Validation.valid(exceptionRecord));
         given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any(CaseDetails.class))).willReturn(Validation.valid(JURISDICTION));
+        given(callbackValidator.hasTargetCaseReference(any(CaseDetails.class))).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -347,6 +354,7 @@ class AttachToCaseCallbackServiceTest {
         given(exceptionRecordValidator.getValidation(caseDetails)).willReturn(Validation.valid(exceptionRecord));
         given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any(CaseDetails.class))).willReturn(Validation.valid(JURISDICTION));
+        given(callbackValidator.hasTargetCaseReference(any(CaseDetails.class))).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -376,6 +384,7 @@ class AttachToCaseCallbackServiceTest {
         );
         given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any(CaseDetails.class))).willReturn(Validation.valid(JURISDICTION));
+        given(callbackValidator.hasTargetCaseReference(any(CaseDetails.class))).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -405,6 +414,7 @@ class AttachToCaseCallbackServiceTest {
         );
         given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any(CaseDetails.class))).willReturn(Validation.valid(JURISDICTION));
+        given(callbackValidator.hasTargetCaseReference(any(CaseDetails.class))).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
