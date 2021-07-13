@@ -3,6 +3,7 @@ scheduling:
   task:
     delete-envelopes-dlq-messages:
       enabled: false
+      ttl: 10s
     consume-envelopes-queue:
       enabled: false
 
