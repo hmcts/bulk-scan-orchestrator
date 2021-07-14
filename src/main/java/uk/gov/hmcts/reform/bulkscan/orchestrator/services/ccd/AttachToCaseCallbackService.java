@@ -23,7 +23,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAScannedRecord;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasIdamToken;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJourneyClassificationForAttachToCase;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasUserId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.validatePayments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isAttachToCaseEvent;
@@ -116,7 +115,8 @@ public class AttachToCaseCallbackService {
             : callbackValidator.hasTargetCaseReference(exceptionRecord);
 
         Validation<String, String> jurisdictionValidation = callbackValidator.hasJurisdiction(exceptionRecord);
-        Validation<String, String> serviceNameInCaseTypeIdValidation = hasServiceNameInCaseTypeId(exceptionRecord);
+        Validation<String, String> serviceNameInCaseTypeIdValidation =
+                callbackValidator.hasServiceNameInCaseTypeId(exceptionRecord);
         Validation<String, Long> idValidation = callbackValidator.hasAnId(exceptionRecord);
         Validation<String, List<Map<String, Object>>> scannedRecordValidation = hasAScannedRecord(exceptionRecord);
         Validation<String, String> idamTokenValidation = hasIdamToken(requesterIdamToken);

@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessRe
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceNotConfiguredException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -39,7 +38,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -71,7 +69,6 @@ class CreateCaseCallbackServiceTest {
     @Mock private ExceptionRecordFinalizer exceptionRecordFinalizer;
     @Mock private PaymentsProcessor paymentsProcessor;
     @Mock private CallbackResultRepositoryProxy callbackResultRepositoryProxy;
-
 
     private CreateCaseCallbackService service;
 
@@ -112,6 +109,8 @@ class CreateCaseCallbackServiceTest {
     void should_not_allow_to_process_callback_when_case_type_id_is_missing() {
         // given
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.id(1L));
+        given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
+                .willReturn(Validation.invalid("No case type ID supplied"));
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -135,6 +134,8 @@ class CreateCaseCallbackServiceTest {
     void should_not_allow_to_process_callback_when_case_type_id_is_empty() {
         // given
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(""));
+        given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
+                .willReturn(Validation.invalid("Case type ID () has invalid format"));
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -158,8 +159,9 @@ class CreateCaseCallbackServiceTest {
     @Test
     void should_not_allow_to_process_callback_in_case_service_not_configured() {
         // given
-        doThrow(new ServiceNotConfiguredException("oh no")).when(serviceConfigProvider).getConfig(SERVICE);
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(CASE_TYPE_ID));
+        given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
+                .willReturn(Validation.invalid("oh no"));
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -182,8 +184,9 @@ class CreateCaseCallbackServiceTest {
     @Test
     void should_not_allow_to_process_callback_in_case_transformation_url_not_configured() {
         // given
-        when(serviceConfigProvider.getConfig(SERVICE)).thenReturn(new ServiceConfigItem());
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(CASE_TYPE_ID));
+        given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
+                .willReturn(Validation.invalid("Transformation URL is not configured"));
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -206,13 +209,13 @@ class CreateCaseCallbackServiceTest {
     @Test
     void should_not_allow_to_process_callback_when_idam_token_is_missing() {
         // given
-        setUpServiceConfig();
-
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
             .id(Long.valueOf(CASE_ID))
             .caseTypeId(CASE_TYPE_ID)
             .jurisdiction("some jurisdiction")
         );
+        given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
+                .willReturn(Validation.invalid("Callback has no Idam token received in the header"));
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -240,6 +243,8 @@ class CreateCaseCallbackServiceTest {
             .caseTypeId(CASE_TYPE_ID)
             .jurisdiction("some jurisdiction")
         );
+        given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
+                .willReturn(Validation.valid(SERVICE));
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -275,6 +280,7 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(Long.valueOf(CASE_ID)));
+        given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -309,6 +315,7 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(Long.valueOf(CASE_ID)));
+        given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -347,6 +354,7 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(Long.valueOf(CASE_ID)));
+        given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -375,6 +383,7 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(Long.valueOf(CASE_ID)));
+        given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
 
         assertThatThrownBy(
             () -> service.process(new CcdCallbackRequest(
@@ -411,6 +420,7 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(Long.valueOf(CASE_ID)));
+        given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
 
         // when
         ProcessResult result =
@@ -464,6 +474,7 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(Long.valueOf(CASE_ID)));
+        given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
 
         // when
         ProcessResult result =
@@ -511,6 +522,7 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(Long.valueOf(CASE_ID)));
+        given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
 
         // when
         ProcessResult result =

@@ -12,7 +12,6 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nonnull;
@@ -28,8 +27,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
 public final class CallbackValidations {
-
-    private static final String CASE_TYPE_ID_SUFFIX = "_ExceptionRecord";
 
     private static final String CLASSIFICATION_SUPPLEMENTARY_EVIDENCE = "SUPPLEMENTARY_EVIDENCE";
     private static final String CLASSIFICATION_SUPPLEMENTARY_EVIDENCE_WITH_OCR = "SUPPLEMENTARY_EVIDENCE_WITH_OCR";
@@ -53,30 +50,6 @@ public final class CallbackValidations {
     private CallbackValidations() {
     }
 
-    @Nonnull
-    static Validation<String, String> hasServiceNameInCaseTypeId(CaseDetails theCase) {
-        return Optional
-            .ofNullable(theCase)
-            .map(CaseDetails::getCaseTypeId)
-            .filter(caseTypeId -> caseTypeId != null)
-            .map(caseTypeId -> {
-                if (caseTypeId.endsWith(CASE_TYPE_ID_SUFFIX)) {
-                    String serviceName =
-                        caseTypeId
-                            .replace(CASE_TYPE_ID_SUFFIX, "")
-                            .toLowerCase(Locale.getDefault());
-
-                    if (!serviceName.isEmpty()) {
-                        return Validation.<String, String>valid(serviceName);
-                    }
-                }
-
-                return Validation.<String, String>invalid(
-                    format("Case type ID (%s) has invalid format", caseTypeId)
-                );
-            })
-            .orElseGet(() -> invalid("No case type ID supplied"));
-    }
 
     @Nonnull
     static Validation<String, List<Map<String, Object>>> hasAScannedRecord(CaseDetails theCase) {
