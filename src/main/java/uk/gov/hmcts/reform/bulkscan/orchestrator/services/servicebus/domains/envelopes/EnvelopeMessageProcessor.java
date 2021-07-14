@@ -5,7 +5,6 @@ import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
 import com.azure.messaging.servicebus.ServiceBusReceivedMessageContext;
 import com.azure.messaging.servicebus.models.DeadLetterOptions;
 import com.google.common.collect.ImmutableMap;
-import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -117,7 +116,7 @@ public class EnvelopeMessageProcessor {
     private void finaliseProcessedMessage(
         ServiceBusReceivedMessageContext context,
         MessageProcessingResult processingResult
-    ) throws InterruptedException, ServiceBusException {
+    ) throws InterruptedException {
         var message = context.getMessage();
         switch (processingResult.resultType) {
             case SUCCESS:

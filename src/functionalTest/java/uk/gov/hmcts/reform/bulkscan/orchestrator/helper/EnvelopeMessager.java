@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 
 import com.azure.messaging.servicebus.ServiceBusMessage;
 import com.azure.messaging.servicebus.ServiceBusSenderClient;
-import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,7 +40,7 @@ public class EnvelopeMessager {
         String legacyCaseRef,
         UUID poBox,
         String documentUrl
-    ) throws JSONException, InterruptedException, ServiceBusException {
+    ) throws JSONException {
         return sendMessageFromFile(
             jsonFileName,
             caseRef,
