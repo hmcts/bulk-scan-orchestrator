@@ -147,16 +147,6 @@ class CaseReferenceValidatorTest {
         softAssertions(valid, realValue, errorString, validation);
     }
 
-    private <T> void checkValidation(String input,
-                                     boolean valid,
-                                     T realValue,
-                                     Function<String, Validation<String, ?>> validationMethod,
-                                     String errorString) {
-        Validation<String, ?> validation = validationMethod.apply(input);
-
-        softAssertions(valid, realValue, errorString, validation);
-    }
-
     private <T> void softAssertions(boolean valid, T realValue, String errorString, Validation<String, ?> validation) {
         if (valid) {
             assertSoftly(softly -> {

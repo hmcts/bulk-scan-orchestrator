@@ -54,14 +54,6 @@ public final class CallbackValidations {
     }
 
     @Nonnull
-    public static Validation<String, Long> hasAnId(CaseDetails theCase) {
-        return theCase != null
-            && theCase.getId() != null
-            ? valid(theCase.getId())
-            : invalid("Exception case has no Id");
-    }
-
-    @Nonnull
     static Validation<String, String> hasServiceNameInCaseTypeId(CaseDetails theCase) {
         return Optional
             .ofNullable(theCase)
