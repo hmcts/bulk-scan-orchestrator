@@ -1,15 +1,14 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.tasks;
 
-import com.google.common.collect.ImmutableList;
+import com.azure.core.util.BinaryData;
+import com.azure.core.util.IterableStream;
+import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
+import com.azure.messaging.servicebus.ServiceBusReceiverClient;
 import com.google.common.collect.ImmutableMap;
-import com.microsoft.azure.servicebus.IMessage;
-import com.microsoft.azure.servicebus.IMessageReceiver;
-import com.microsoft.azure.servicebus.MessageBody;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
@@ -20,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static java.time.ZoneOffset.UTC;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,13 +38,16 @@ class CleanupEnvelopesDlqTaskTest {
     private CleanupEnvelopesDlqTask cleanupDlqTask;
 
     @Mock
-    private IMessageReceiver messageReceiver;
+    private ServiceBusReceiverClient messageReceiver;
 
     @Mock
-    private IMessage message;
+    private ServiceBusReceivedMessage message;
 
     @Mock
-    private Supplier<IMessageReceiver> receiverProvider;
+    private IterableStream<ServiceBusReceivedMessage> iterableStream;
+
+    @Mock
+    private Supplier<ServiceBusReceiverClient> receiverProvider;
 
     private final Duration ttl = Duration.ofSeconds(10);
 
@@ -62,29 +65,31 @@ class CleanupEnvelopesDlqTaskTest {
     void should_delete_messages_from_dlq() throws Exception {
         //given
         UUID uuid = UUID.randomUUID();
-        given(message.getLockToken()).willReturn(uuid);
-        given(message.getMessageBody())
-            .willReturn(MessageBody.fromBinaryData(ImmutableList.of(SampleData.envelopeJson())));
-        given(message.getProperties())
+        given(message.getBody())
+            .willReturn(BinaryData.fromBytes(SampleData.envelopeJson()));
+        given(message.getApplicationProperties())
             .willReturn(
                 ImmutableMap.of(
                     "deadLetteredAt",
                     LocalDateTime.now().minus(ttl.plusSeconds(10)).toInstant(UTC).toString()
                 )
             );
-        given(messageReceiver.receive()).willReturn(message).willReturn(null);
 
-        ArgumentCaptor<UUID> uuidArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
+
+        given(messageReceiver.receiveMessages(1, Duration.ofSeconds(1)))
+            .willReturn(iterableStream);
+
+        given(iterableStream.stream()).willReturn(Stream.of(message)).willReturn(Stream.empty());
 
         //when
         cleanupDlqTask.deleteMessagesInEnvelopesDlq();
 
         //then
-        verify(messageReceiver).complete(uuidArgumentCaptor.capture());
-        assertThat(uuidArgumentCaptor.getValue()).isEqualTo(uuid);
+        verify(messageReceiver).renewMessageLock(message);
+        verify(messageReceiver).complete(message);
 
         verify(messageReceiver, times(1)).complete(any());
-        verify(messageReceiver, times(2)).receive();
+        verify(messageReceiver, times(2)).receiveMessages(1, Duration.ofSeconds(1));
         verify(messageReceiver, times(1)).close();
         verifyNoMoreInteractions(messageReceiver);
     }
@@ -93,14 +98,16 @@ class CleanupEnvelopesDlqTaskTest {
     void should_not_delete_messages_from_dlq_when_deadLetteredTime_is_not_set()
         throws Exception {
         //given
-        given(message.getProperties().get("deadLetteredAt")).willReturn(null);
-        given(messageReceiver.receive()).willReturn(message).willReturn(null);
+        given(messageReceiver.receiveMessages(1, Duration.ofSeconds(1)))
+            .willReturn(iterableStream);
+        given(iterableStream.stream()).willReturn(Stream.of(message)).willReturn(Stream.empty());
 
         //when
         cleanupDlqTask.deleteMessagesInEnvelopesDlq();
 
         //then
-        verify(messageReceiver, times(2)).receive();
+        verify(messageReceiver).renewMessageLock(message);
+        verify(messageReceiver, times(2)).receiveMessages(1, Duration.ofSeconds(1));
         verify(messageReceiver, never()).complete(any());
         verify(messageReceiver, times(1)).close();
         verifyNoMoreInteractions(messageReceiver);
@@ -109,20 +116,24 @@ class CleanupEnvelopesDlqTaskTest {
     @Test
     void should_leave_message_on_dlq_when_the_ttl_is_less_than_duration() throws Exception {
         //given
-        given(message.getProperties())
+        given(message.getApplicationProperties())
             .willReturn(
                 ImmutableMap.of(
                     "deadLetteredAt",
                     LocalDateTime.now().minus(ttl.minusSeconds(5)).toInstant(UTC).toString()
                 )
             );
-        given(messageReceiver.receive()).willReturn(message).willReturn(null);
+        given(messageReceiver.receiveMessages(1, Duration.ofSeconds(1)))
+            .willReturn(iterableStream);
+
+        given(iterableStream.stream()).willReturn(Stream.of(message)).willReturn(Stream.empty());
 
         //when
         cleanupDlqTask.deleteMessagesInEnvelopesDlq();
 
         //then
-        verify(messageReceiver, times(2)).receive();
+        verify(messageReceiver).renewMessageLock(message);
+        verify(messageReceiver, times(2)).receiveMessages(1, Duration.ofSeconds(1));
         verify(messageReceiver, never()).complete(any());
         verify(messageReceiver, times(1)).close();
         verifyNoMoreInteractions(messageReceiver);
@@ -131,13 +142,17 @@ class CleanupEnvelopesDlqTaskTest {
     @Test
     void should_not_complete_when_no_message_exists_in_dlq() throws Exception {
         //given
-        given(messageReceiver.receive()).willReturn(null);
+        given(messageReceiver.receiveMessages(1, Duration.ofSeconds(1)))
+            .willReturn(iterableStream);
+
+        given(iterableStream.stream()).willReturn(Stream.empty());
 
         //when
         cleanupDlqTask.deleteMessagesInEnvelopesDlq();
 
         //then
-        verify(messageReceiver, times(1)).receive();
+        verify(messageReceiver,never()).renewMessageLock(any());
+        verify(messageReceiver, times(1)).receiveMessages(1, Duration.ofSeconds(1));
         verify(messageReceiver, never()).complete(any());
         verify(messageReceiver, never()).abandon(any());
         verify(messageReceiver, times(1)).close();

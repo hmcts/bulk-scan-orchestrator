@@ -1,27 +1,22 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes;
 
-import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.QueueConfigurationProperties;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.ConnectionException;
 
 class DlqReceiverProviderTest {
 
-    private static final String NAMESPACE = "==namespace==";
+    private static final String NAMESPACE = "r.com";
 
     @Test
     void should_fail_to_connect_to_dlq() {
         // given
         var queueProperties = getQueueProperties();
         var provider = new DlqReceiverProvider(NAMESPACE, queueProperties);
-
         // when
-        Assertions.assertThatCode(provider::get)
-            // then
-            .isInstanceOf(ConnectionException.class)
-            .hasMessage("Unable to connect to the dlq")
-            .hasCauseInstanceOf(ServiceBusException.class);
+        Assertions
+            .assertThat(provider.get())
+            .isNotNull();
     }
 
     private QueueConfigurationProperties getQueueProperties() {

@@ -267,9 +267,6 @@ dependencies {
   implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '2.0.0'
   implementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: '4.7.6'
 
-  implementation group: 'com.microsoft.azure', name: 'azure-servicebus', version: '3.6.3',{
-    exclude group: 'net.minidev', module: 'json-smart' // most up-to-date libraries use v2.* now. this one brings in 1.3
-  }
   implementation group: 'com.azure', name: 'azure-messaging-servicebus', version: '7.2.3'
 
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.3'
