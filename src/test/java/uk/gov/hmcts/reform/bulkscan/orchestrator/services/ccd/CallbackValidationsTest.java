@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 import com.google.common.collect.ImmutableMap;
 import io.vavr.control.Validation;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
@@ -127,39 +126,6 @@ class CallbackValidationsTest {
             expectedValueOrError,
             CallbackValidations::canBeAttachedToCase,
             expectedValueOrError
-        );
-    }
-
-    @Test
-    void noCaseIdTest() {
-        checkValidation(
-            createCaseWith(b -> b.id(null)),
-            false,
-            null,
-            CallbackValidations::hasAnId,
-            "Exception case has no Id"
-        );
-    }
-
-    @Test
-    void valid_case_id_should_pass() {
-        checkValidation(
-            createCaseWith(b -> b.id(1L)),
-            true,
-            1L,
-            CallbackValidations::hasAnId,
-            null
-        );
-    }
-
-    @Test
-    void no_case_details_should_fail() {
-        checkValidation(
-            null,
-            false,
-            1L,
-            CallbackValidations::hasAnId,
-            "Exception case has no Id"
         );
     }
 

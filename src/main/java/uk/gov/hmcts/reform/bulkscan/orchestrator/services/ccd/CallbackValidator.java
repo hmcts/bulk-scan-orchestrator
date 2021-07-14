@@ -65,6 +65,14 @@ public class CallbackValidator {
         return caseReferenceValidator.validateTargetCaseReference(theCase);
     }
 
+    @Nonnull
+    public Validation<String, Long> hasAnId(CaseDetails theCase) {
+        return theCase != null
+                && theCase.getId() != null
+                ? valid(theCase.getId())
+                : invalid("Exception case has no Id");
+    }
+
     /*
      * These errors created here are for errors not related to the user input. Hence putting internal in
      * front of the error so the user knows that they are not responsible and will not spend ages trying

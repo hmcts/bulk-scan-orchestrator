@@ -21,7 +21,6 @@ import static io.vavr.control.Validation.valid;
 import static java.util.Collections.singletonList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.canBeAttachedToCase;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAScannedRecord;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasAnId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasIdamToken;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJourneyClassificationForAttachToCase;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
@@ -118,7 +117,7 @@ public class AttachToCaseCallbackService {
 
         Validation<String, String> jurisdictionValidation = callbackValidator.hasJurisdiction(exceptionRecord);
         Validation<String, String> serviceNameInCaseTypeIdValidation = hasServiceNameInCaseTypeId(exceptionRecord);
-        Validation<String, Long> idValidation = hasAnId(exceptionRecord);
+        Validation<String, Long> idValidation = callbackValidator.hasAnId(exceptionRecord);
         Validation<String, List<Map<String, Object>>> scannedRecordValidation = hasAScannedRecord(exceptionRecord);
         Validation<String, String> idamTokenValidation = hasIdamToken(requesterIdamToken);
         Validation<String, String> userIdValidation = hasUserId(requesterUserId);

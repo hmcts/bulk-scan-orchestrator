@@ -9,12 +9,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.Map;
+import java.util.function.Function;
 
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.createCaseWith;
 
 @ExtendWith(MockitoExtension.class)
 class CallbackValidatorTest {
@@ -171,5 +174,62 @@ class CallbackValidatorTest {
 
         // then
         assertThat(res).isSameAs(validationRes);
+    }
+
+    @Test
+    void noCaseIdTest() {
+        checkValidation(
+                createCaseWith(b -> b.id(null)),
+                false,
+                null,
+                callbackValidator::hasAnId,
+                "Exception case has no Id"
+        );
+    }
+
+    @Test
+    void valid_case_id_should_pass() {
+        checkValidation(
+                createCaseWith(b -> b.id(1L)),
+                true,
+                1L,
+                callbackValidator::hasAnId,
+                null
+        );
+    }
+
+    @Test
+    void no_case_details_should_fail() {
+        checkValidation(
+                null,
+                false,
+                1L,
+                callbackValidator::hasAnId,
+                "Exception case has no Id"
+        );
+    }
+
+    private <T> void checkValidation(CaseDetails input,
+                                     boolean valid,
+                                     T realValue,
+                                     Function<CaseDetails, Validation<String, ?>> validationMethod,
+                                     String errorString) {
+        Validation<String, ?> validation = validationMethod.apply(input);
+
+        softAssertions(valid, realValue, errorString, validation);
+    }
+
+    private <T> void softAssertions(boolean valid, T realValue, String errorString, Validation<String, ?> validation) {
+        if (valid) {
+            assertSoftly(softly -> {
+                softly.assertThat(validation.isValid()).isTrue();
+                softly.assertThat(validation.get()).isEqualTo(realValue);
+            });
+        } else {
+            assertSoftly(softly -> {
+                softly.assertThat(validation.isValid()).isFalse();
+                softly.assertThat(validation.getError()).isEqualTo(errorString);
+            });
+        }
     }
 }

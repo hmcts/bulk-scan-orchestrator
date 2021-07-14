@@ -63,6 +63,7 @@ class ExceptionRecordValidatorTest {
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid("BULKSCAN_ExceptionRecord"));
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid("personal"));
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid("BULKSCAN"));
+        given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(1234L));
 
         // when
         var validation = exceptionRecordValidator.getValidation(validExceptionRecord);
@@ -81,6 +82,7 @@ class ExceptionRecordValidatorTest {
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(1234L));
 
         // when
         var validation = exceptionRecordValidator.getValidation(caseDetails);
@@ -94,6 +96,8 @@ class ExceptionRecordValidatorTest {
     void should_return_errors_when_validations_fail() {
         // given
         var caseDetails = caseWithId(null);
+
+        given(callbackValidator.hasAnId(any())).willReturn(Validation.invalid("Exception case has no Id"));
 
         // when
         var validation = exceptionRecordValidator.mandatoryPrerequisites(
@@ -111,6 +115,7 @@ class ExceptionRecordValidatorTest {
         // given
         var caseDetails = createValidExceptionRecordCase();
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(1234L));
 
         // when
         var validation = exceptionRecordValidator.mandatoryPrerequisites(
@@ -129,6 +134,7 @@ class ExceptionRecordValidatorTest {
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(123L));
 
         var invalidOcrData = ImmutableList.of(
             ImmutableMap.of("value", ImmutableMap.of(
@@ -167,6 +173,7 @@ class ExceptionRecordValidatorTest {
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.invalid(error));
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(1234L));
 
         // when
         var validation = exceptionRecordValidator.getValidation(input);
@@ -200,6 +207,7 @@ class ExceptionRecordValidatorTest {
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(1234L));
 
         checkValidationErrorMatches(
             input,
@@ -215,6 +223,7 @@ class ExceptionRecordValidatorTest {
         given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid("BULKSCAN_ExceptionRecord"));
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid("personal"));
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid("BULKSCAN"));
+        given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(1234L));
 
         // then
         assertThatCode(() -> exceptionRecordValidator.getValidation(caseDetails))
