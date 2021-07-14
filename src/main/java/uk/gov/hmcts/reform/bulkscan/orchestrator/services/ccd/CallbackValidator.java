@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.util.Locale;
 import java.util.Optional;
 import javax.annotation.Nonnull;
 
@@ -16,6 +17,8 @@ import static java.lang.String.format;
 @Component
 public class CallbackValidator {
     private static final Logger log = LoggerFactory.getLogger(CallbackValidator.class);
+
+    private static final String CASE_TYPE_ID_SUFFIX = "_ExceptionRecord";
 
     private final CaseReferenceValidator caseReferenceValidator;
 
@@ -71,6 +74,31 @@ public class CallbackValidator {
                 && theCase.getId() != null
                 ? valid(theCase.getId())
                 : invalid("Exception case has no Id");
+    }
+
+    @Nonnull
+    public Validation<String, String> hasServiceNameInCaseTypeId(CaseDetails theCase) {
+        return Optional
+                .ofNullable(theCase)
+                .map(CaseDetails::getCaseTypeId)
+                .filter(caseTypeId -> caseTypeId != null)
+                .map(caseTypeId -> {
+                    if (caseTypeId.endsWith(CASE_TYPE_ID_SUFFIX)) {
+                        String serviceName =
+                                caseTypeId
+                                        .replace(CASE_TYPE_ID_SUFFIX, "")
+                                        .toLowerCase(Locale.getDefault());
+
+                        if (!serviceName.isEmpty()) {
+                            return Validation.<String, String>valid(serviceName);
+                        }
+                    }
+
+                    return Validation.<String, String>invalid(
+                            format("Case type ID (%s) has invalid format", caseTypeId)
+                    );
+                })
+                .orElseGet(() -> invalid("No case type ID supplied"));
     }
 
     /*

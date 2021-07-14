@@ -28,7 +28,6 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.NewCallbackResult.createCaseRequest;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasIdamToken;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasServiceNameInCaseTypeId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasUserId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isCreateNewCaseEvent;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING;
@@ -144,7 +143,7 @@ public class CreateCaseCallbackService {
     }
 
     private Validation<String, ServiceConfigItem> getServiceConfig(CaseDetails caseDetails) {
-        return hasServiceNameInCaseTypeId(caseDetails).flatMap(service -> Try
+        return exceptionRecordValidator.hasServiceNameInCaseTypeId(caseDetails).flatMap(service -> Try
             .of(() -> serviceConfigProvider.getConfig(service))
             .toValidation()
             .mapError(Throwable::getMessage)

@@ -30,7 +30,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 @SuppressWarnings("checkstyle:LineLength")
 class CallbackValidationsTest {
 
-    public static final String NO_CASE_TYPE_ID_SUPPLIED_ERROR = "No case type ID supplied";
     public static final String NO_IDAM_TOKEN_RECEIVED_ERROR = "Callback has no Idam token received in the header";
     public static final String NO_USER_ID_RECEIVED_ERROR = "Callback has no user id received in the header";
     public static final String JOURNEY_CLASSIFICATION = "journeyClassification";
@@ -59,35 +58,6 @@ class CallbackValidationsTest {
                            List<Map<String, Object>> realValue,
                            String errorString) {
         checkValidation(input, valid, realValue, CallbackValidations::hasAScannedRecord, errorString);
-    }
-
-    private static Object[][] caseTypeIdTestParams() {
-        return new Object[][]{
-            {"null case details", null, false, NO_CASE_TYPE_ID_SUPPLIED_ERROR},
-            {"null case type ID", createCaseWith(b -> b.data(null)), false, NO_CASE_TYPE_ID_SUPPLIED_ERROR},
-            {"case type ID with wrong suffix", createCaseWith(b -> b.caseTypeId("service_exceptionrecord")), false, "Case type ID (service_exceptionrecord) has invalid format"},
-            {"case type ID being just sufifx", createCaseWith(b -> b.caseTypeId("_ExceptionRecord")), false, "Case type ID (_ExceptionRecord) has invalid format"},
-            {"valid case type ID", createCaseWith(b -> b.caseTypeId("SERVICE_ExceptionRecord")), true, "service"},
-            {"case type ID with underscores", createCaseWith(b -> b.caseTypeId("LONG_SERVICE_NAME_ExceptionRecord")), true, "long_service_name"},
-        };
-    }
-
-    @ParameterizedTest(name = "{0}: valid:{2} error/value:{3}")
-    @MethodSource("caseTypeIdTestParams")
-    @DisplayName("Should accept valid case type ID")
-    void serviceNameInCaseTypeIdTest(
-        String caseDescription,
-        CaseDetails inputCase,
-        boolean valid,
-        String expectedValueOrError
-    ) {
-        checkValidation(
-            inputCase,
-            valid,
-            expectedValueOrError,
-            CallbackValidations::hasServiceNameInCaseTypeId,
-            expectedValueOrError
-        );
     }
 
     private static Object[][] classificationTestParams() {

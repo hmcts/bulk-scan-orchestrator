@@ -2,8 +2,11 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import io.vavr.control.Validation;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -19,11 +22,13 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.createCaseWith;
 
+@SuppressWarnings("checkstyle:LineLength")
 @ExtendWith(MockitoExtension.class)
 class CallbackValidatorTest {
     private static final String SERVICE = "service";
     private static final String CASE_ID = "123";
     private static final String CASE_TYPE_ID = SERVICE + "_ExceptionRecord";
+    private static final String NO_CASE_TYPE_ID_SUPPLIED_ERROR = "No case type ID supplied";
 
     @Mock
     private CaseReferenceValidator caseReferenceValidator;
@@ -206,6 +211,35 @@ class CallbackValidatorTest {
                 1L,
                 callbackValidator::hasAnId,
                 "Exception case has no Id"
+        );
+    }
+
+    private static Object[][] caseTypeIdTestParams() {
+        return new Object[][] {
+                {"null case details", null, false, NO_CASE_TYPE_ID_SUPPLIED_ERROR},
+                {"null case type ID", createCaseWith(b -> b.data(null)), false, NO_CASE_TYPE_ID_SUPPLIED_ERROR},
+                {"case type ID with wrong suffix", createCaseWith(b -> b.caseTypeId("service_exceptionrecord")), false, "Case type ID (service_exceptionrecord) has invalid format"},
+                {"case type ID being just sufifx", createCaseWith(b -> b.caseTypeId("_ExceptionRecord")), false, "Case type ID (_ExceptionRecord) has invalid format"},
+                {"valid case type ID", createCaseWith(b -> b.caseTypeId("SERVICE_ExceptionRecord")), true, "service"},
+                {"case type ID with underscores", createCaseWith(b -> b.caseTypeId("LONG_SERVICE_NAME_ExceptionRecord")), true, "long_service_name"},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}: valid:{2} error/value:{3}")
+    @MethodSource("caseTypeIdTestParams")
+    @DisplayName("Should accept valid case type ID")
+    void serviceNameInCaseTypeIdTest(
+            String caseDescription,
+            CaseDetails inputCase,
+            boolean valid,
+            String expectedValueOrError
+    ) {
+        checkValidation(
+                inputCase,
+                valid,
+                expectedValueOrError,
+                callbackValidator::hasServiceNameInCaseTypeId,
+                expectedValueOrError
         );
     }
 

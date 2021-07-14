@@ -122,6 +122,10 @@ public class ExceptionRecordValidator {
         return Validation.invalid(errors);
     }
 
+    public Validation<String, String> hasServiceNameInCaseTypeId(CaseDetails theCase) {
+        return callbackValidator.hasServiceNameInCaseTypeId(theCase);
+    }
+
     private Seq<String> getValidationErrors(Seq<Validation<String, ?>> validations) {
         return validations
             .filter(Validation::isInvalid)
