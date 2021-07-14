@@ -44,6 +44,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 class AttachToCaseCallbackServiceTest {
 
     public static final String WRONG_CASE_TYPE_ID = "BULKSCAN_Exception";
+
     private AttachToCaseCallbackService attachToCaseCallbackService;
 
     @Mock
@@ -115,6 +116,7 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasAnId(any(CaseDetails.class))).willReturn(Validation.valid(null));
         given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SERVICE_NAME));
+        given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -176,6 +178,7 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasAnId(any(CaseDetails.class))).willReturn(Validation.valid(null));
         given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SERVICE_NAME));
+        given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -209,6 +212,7 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasAnId(any(CaseDetails.class))).willReturn(Validation.valid(null));
         given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SERVICE_NAME));
+        given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -243,6 +247,7 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasAnId(any(CaseDetails.class))).willReturn(Validation.valid(null));
         given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.invalid("Case type ID (BULKSCAN_Exception) has invalid format"));
+        given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -277,6 +282,7 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasAnId(any(CaseDetails.class))).willReturn(Validation.valid(null));
         given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.invalid("No case type ID supplied"));
+        given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -312,6 +318,7 @@ class AttachToCaseCallbackServiceTest {
                 .willReturn(Validation.invalid("Exception case has no Id"));
         given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SERVICE_NAME));
+        given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -346,6 +353,7 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasAnId(any(CaseDetails.class))).willReturn(Validation.valid(null));
         given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SERVICE_NAME));
+        given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -380,6 +388,7 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasAnId(any(CaseDetails.class))).willReturn(Validation.valid(null));
         given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SERVICE_NAME));
+        given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -413,6 +422,7 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasAnId(any(CaseDetails.class))).willReturn(Validation.valid(null));
         given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SERVICE_NAME));
+        given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -446,6 +456,7 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasAnId(any(CaseDetails.class))).willReturn(Validation.valid(null));
         given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SERVICE_NAME));
+        given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(

@@ -6,7 +6,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nonnull;
 
@@ -21,9 +23,14 @@ public class CallbackValidator {
     private static final String CASE_TYPE_ID_SUFFIX = "_ExceptionRecord";
 
     private final CaseReferenceValidator caseReferenceValidator;
+    private final ScannedDocumentValidator scannedDocumentValidator;
 
-    public CallbackValidator(CaseReferenceValidator caseReferenceValidator) {
+    public CallbackValidator(
+            CaseReferenceValidator caseReferenceValidator,
+            ScannedDocumentValidator scannedDocumentValidator
+    ) {
         this.caseReferenceValidator = caseReferenceValidator;
+        this.scannedDocumentValidator = scannedDocumentValidator;
     }
 
     @Nonnull
@@ -99,6 +106,11 @@ public class CallbackValidator {
                     );
                 })
                 .orElseGet(() -> invalid("No case type ID supplied"));
+    }
+
+    @Nonnull
+    public Validation<String, List<Map<String, Object>>> hasAScannedRecord(CaseDetails theCase) {
+        return scannedDocumentValidator.validate(theCase);
     }
 
     /*
