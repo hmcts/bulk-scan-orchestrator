@@ -17,6 +17,12 @@ import static java.lang.String.format;
 public class CallbackValidator {
     private static final Logger log = LoggerFactory.getLogger(CallbackValidator.class);
 
+    private final CaseReferenceValidator caseReferenceValidator;
+
+    public CallbackValidator(CaseReferenceValidator caseReferenceValidator) {
+        this.caseReferenceValidator = caseReferenceValidator;
+    }
+
     @Nonnull
     public Validation<String, String> hasCaseTypeId(CaseDetails theCase) {
         return Optional.ofNullable(theCase)
@@ -41,6 +47,30 @@ public class CallbackValidator {
                 && (jurisdiction = theCase.getJurisdiction()) != null
                 ? valid(jurisdiction)
                 : internalError("invalid jurisdiction supplied: %s", jurisdiction);
+    }
+
+
+    @Nonnull
+    public Validation<String, String> hasSearchCaseReferenceType(CaseDetails theCase) {
+        return caseReferenceValidator.validateCaseReferenceType(theCase);
+    }
+
+    @Nonnull
+    public Validation<String, String> hasSearchCaseReference(CaseDetails theCase) {
+        return caseReferenceValidator.validateSearchCaseReferenceWithSearchType(theCase);
+    }
+
+    @Nonnull
+    public Validation<String, String> hasTargetCaseReference(CaseDetails theCase) {
+        return caseReferenceValidator.validateTargetCaseReference(theCase);
+    }
+
+    @Nonnull
+    public Validation<String, Long> hasAnId(CaseDetails theCase) {
+        return theCase != null
+                && theCase.getId() != null
+                ? valid(theCase.getId())
+                : invalid("Exception case has no Id");
     }
 
     /*
