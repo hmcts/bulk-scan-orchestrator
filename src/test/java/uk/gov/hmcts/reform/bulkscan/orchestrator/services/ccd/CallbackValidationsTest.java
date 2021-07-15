@@ -33,18 +33,6 @@ class CallbackValidationsTest {
     public static final String CLASSIFICATION_EXCEPTION = "EXCEPTION";
 
 
-    private static Object[][] classificationTestParams() {
-        return new Object[][]{
-            {"Invalid journey classification", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, "invalid_classification"))), false, "Invalid journey classification invalid_classification"},
-            {"Valid journey classification(supplementary evidence)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, SUPPLEMENTARY_EVIDENCE.name()))), true, null},
-            {"Valid journey classification(supplementary evidence with ocr)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, SUPPLEMENTARY_EVIDENCE_WITH_OCR.name(), OCR_DATA, asList(ImmutableMap.of("f1", "v1"))))), true, null},
-            {"Valid journey classification(supplementary evidence with ocr ocr empty)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, SUPPLEMENTARY_EVIDENCE_WITH_OCR.name(), OCR_DATA, emptyList()))), false, "The 'attach to case' event is not supported for supplementary evidence with OCR but not containing OCR data"},
-            {"Valid journey classification(exception without ocr)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, CLASSIFICATION_EXCEPTION))), true, null},
-            {"Valid journey classification(exception with empty ocr list)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, CLASSIFICATION_EXCEPTION, OCR_DATA, emptyList()))), true, null},
-            {"Invalid action-Valid journey classification(exception with ocr)", createCaseWith(b -> b.data(caseDataWithOcr())), false, "The 'attach to case' event is not supported for exception records with OCR"}
-        };
-    }
-
     private static Object[][] classificationForAttachToCaseTestParams() {
         return new Object[][]{
             {"Invalid journey classification", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, "invalid_classification"))), false, null, "Journey Classification invalid_classification is not allowed when attaching exception record to a case"},
@@ -53,23 +41,6 @@ class CallbackValidationsTest {
             {"Valid journey classification(supplementary evidence with ocr)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, SUPPLEMENTARY_EVIDENCE_WITH_OCR.name(), OCR_DATA, asList(ImmutableMap.of("f1", "v1"))))), true, SUPPLEMENTARY_EVIDENCE_WITH_OCR, null},
             {"Valid journey classification(exception)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, CLASSIFICATION_EXCEPTION))), true, EXCEPTION, null}
         };
-    }
-
-    @ParameterizedTest(name = "{0}: valid:{2} error/value:{3}")
-    @MethodSource("classificationTestParams")
-    void canBeAttachedToCaseTest(
-        String caseDescription,
-        CaseDetails inputCase,
-        boolean valid,
-        String expectedValueOrError
-    ) {
-        checkValidation(
-            inputCase,
-            valid,
-            expectedValueOrError,
-            CallbackValidations::canBeAttachedToCase,
-            expectedValueOrError
-        );
     }
 
     @ParameterizedTest(name = "{0}: valid:{2} value:{3} error:{4}")
@@ -138,15 +109,6 @@ class CallbackValidationsTest {
             expectedValueOrError,
             CallbackValidations::hasUserId,
             expectedValueOrError
-        );
-    }
-
-    private static ImmutableMap<String, Object> caseDataWithOcr() {
-        return ImmutableMap.of(
-            JOURNEY_CLASSIFICATION, CLASSIFICATION_EXCEPTION,
-            OCR_DATA, singletonList(
-                ImmutableMap.of("first_name", "John")
-            )
         );
     }
 
