@@ -44,16 +44,7 @@ public final class CallbackValidations {
         .toFormatter()
         .withZone(ZoneOffset.UTC);
 
-    private static final CaseReferenceValidator caseRefValidator = new CaseReferenceValidator();
-    private static final ScannedDocumentValidator scannedDocumentValidator = new ScannedDocumentValidator();
-
     private CallbackValidations() {
-    }
-
-
-    @Nonnull
-    static Validation<String, List<Map<String, Object>>> hasAScannedRecord(CaseDetails theCase) {
-        return scannedDocumentValidator.validate(theCase);
     }
 
     @Nonnull

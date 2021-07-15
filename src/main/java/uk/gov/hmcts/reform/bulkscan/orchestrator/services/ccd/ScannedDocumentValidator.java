@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import io.vavr.control.Validation;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Optional;
 
 import static io.vavr.control.Validation.invalid;
 
+@Component
 class ScannedDocumentValidator {
     private static final String SCANNED_DOCUMENTS = "scannedDocuments";
 

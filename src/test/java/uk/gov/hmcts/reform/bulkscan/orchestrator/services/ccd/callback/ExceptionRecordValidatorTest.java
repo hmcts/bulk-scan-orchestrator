@@ -27,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.JURSIDICTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.PO_BOX;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.TestExceptionRecordCaseBuilder.caseWithData;
@@ -229,6 +230,20 @@ class ExceptionRecordValidatorTest {
         assertThatCode(() -> exceptionRecordValidator.getValidation(caseDetails))
             .isInstanceOf(UnprocessableCaseDataException.class)
             .hasMessage("Exception record is lacking envelopeId field");
+    }
+
+    @Test
+    void hasServiceNameInCaseTypeId_calls_callbackValidator() {
+        // given
+        CaseDetails caseDetails = mock(CaseDetails.class);
+        Validation<String, String> validationRes = Validation.valid("bulkscan");
+        given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class))).willReturn(validationRes);
+
+        // when
+        Validation<String,String> res = exceptionRecordValidator.hasServiceNameInCaseTypeId(caseDetails);
+
+        // then
+        assertThat(res).isSameAs(validationRes);
     }
 
     private void checkValidationErrorMatches(

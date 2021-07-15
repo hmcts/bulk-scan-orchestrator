@@ -11,9 +11,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
@@ -33,11 +35,14 @@ class CallbackValidatorTest {
     @Mock
     private CaseReferenceValidator caseReferenceValidator;
 
+    @Mock
+    private ScannedDocumentValidator scannedDocumentValidator;
+
     private CallbackValidator callbackValidator;
 
     @BeforeEach
     void setUp() {
-        callbackValidator = new CallbackValidator(caseReferenceValidator);
+        callbackValidator = new CallbackValidator(caseReferenceValidator, scannedDocumentValidator);
     }
 
     @Test
@@ -146,7 +151,7 @@ class CallbackValidatorTest {
         given(caseReferenceValidator.validateTargetCaseReference(any(CaseDetails.class))).willReturn(validationRes);
 
         // when
-        Validation<String,String> res = callbackValidator.hasTargetCaseReference(caseDetails);
+        Validation<String, String> res = callbackValidator.hasTargetCaseReference(caseDetails);
 
         // then
         assertThat(res).isSameAs(validationRes);
@@ -161,7 +166,7 @@ class CallbackValidatorTest {
                 .willReturn(validationRes);
 
         // when
-        Validation<String,String> res = callbackValidator.hasSearchCaseReference(caseDetails);
+        Validation<String, String> res = callbackValidator.hasSearchCaseReference(caseDetails);
 
         // then
         assertThat(res).isSameAs(validationRes);
@@ -175,7 +180,7 @@ class CallbackValidatorTest {
         given(caseReferenceValidator.validateCaseReferenceType(any(CaseDetails.class))).willReturn(validationRes);
 
         // when
-        Validation<String,String> res = callbackValidator.hasSearchCaseReferenceType(caseDetails);
+        Validation<String, String> res = callbackValidator.hasSearchCaseReferenceType(caseDetails);
 
         // then
         assertThat(res).isSameAs(validationRes);
@@ -212,6 +217,21 @@ class CallbackValidatorTest {
                 callbackValidator::hasAnId,
                 "Exception case has no Id"
         );
+    }
+
+
+    @Test
+    void hasAScannedRecord_calls_scannedDocumentValidatorr() {
+        // given
+        CaseDetails caseDetails = mock(CaseDetails.class);
+        Validation<String, List<Map<String,Object>>> validationRes = Validation.valid(emptyList());
+        given(scannedDocumentValidator.validate(any(CaseDetails.class))).willReturn(validationRes);
+
+        // when
+        Validation<?, ?> res = callbackValidator.hasAScannedRecord(caseDetails);
+
+        // then
+        assertThat(res).isSameAs(validationRes);
     }
 
     private static Object[][] caseTypeIdTestParams() {
