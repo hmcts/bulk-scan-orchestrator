@@ -126,6 +126,14 @@ public class ExceptionRecordValidator {
         return callbackValidator.hasServiceNameInCaseTypeId(theCase);
     }
 
+    public Validation<String, String> hasIdamToken(String idamToken) {
+        return callbackValidator.hasIdamToken(idamToken);
+    }
+
+    public Validation<String, String> hasUserId(String userId) {
+        return callbackValidator.hasUserId(userId);
+    }
+
     private Seq<String> getValidationErrors(Seq<Validation<String, ?>> validations) {
         return validations
             .filter(Validation::isInvalid)
