@@ -4,6 +4,7 @@ import io.vavr.control.Validation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
@@ -21,6 +22,9 @@ public class CallbackValidator {
     private static final Logger log = LoggerFactory.getLogger(CallbackValidator.class);
 
     private static final String CASE_TYPE_ID_SUFFIX = "_ExceptionRecord";
+    private static final String CLASSIFICATION_SUPPLEMENTARY_EVIDENCE = "SUPPLEMENTARY_EVIDENCE";
+    private static final String CLASSIFICATION_SUPPLEMENTARY_EVIDENCE_WITH_OCR = "SUPPLEMENTARY_EVIDENCE_WITH_OCR";
+    private static final String CLASSIFICATION_EXCEPTION = "EXCEPTION";
 
     private final CaseReferenceValidator caseReferenceValidator;
     private final ScannedDocumentValidator scannedDocumentValidator;
@@ -113,6 +117,49 @@ public class CallbackValidator {
         return scannedDocumentValidator.validate(theCase);
     }
 
+    @Nonnull
+    public Validation<String, Void> canBeAttachedToCase(CaseDetails theCase) {
+        return getJourneyClassification(theCase)
+                .map(
+                    classification -> {
+                        switch (classification) {
+                            case CLASSIFICATION_SUPPLEMENTARY_EVIDENCE:
+                                return Validation.<String, Void>valid(null);
+                            case CLASSIFICATION_SUPPLEMENTARY_EVIDENCE_WITH_OCR:
+                                return hasOcr(theCase)
+                                        ? Validation.<String, Void>valid(null)
+                                        : Validation.<String, Void>invalid(
+                                        "The 'attach to case' event is not supported for supplementary evidence "
+                                                + "with OCR but not containing OCR data"
+                                );
+                            case CLASSIFICATION_EXCEPTION:
+                                return !hasOcr(theCase)
+                                        ? Validation.<String, Void>valid(null)
+                                        : Validation.<String, Void>invalid(
+                                        "The 'attach to case' event is not supported for exception records with OCR"
+                                );
+                            default:
+                                return Validation.<String, Void>invalid(
+                                        format("Invalid journey classification %s", classification)
+                                );
+                        }
+                    }
+                ).orElseGet(() -> invalid("No journey classification supplied"));
+    }
+
+    private boolean hasOcr(CaseDetails theCase) {
+        return getOcrData(theCase)
+                .map(list -> !CollectionUtils.isEmpty(list))
+                .orElse(false);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Optional<List<Map<String, Object>>> getOcrData(CaseDetails theCase) {
+        return Optional.ofNullable(theCase)
+                .map(CaseDetails::getData)
+                .map(data -> (List<Map<String, Object>>) data.get("scanOCRData"));
+    }
+
     /*
      * These errors created here are for errors not related to the user input. Hence putting internal in
      * front of the error so the user knows that they are not responsible and will not spend ages trying
@@ -120,9 +167,16 @@ public class CallbackValidator {
      * are good enough for the users and contain the right information to triage issues.
      */
     @Nonnull
-    private static <T> Validation<String, T> internalError(String error, T arg1) {
+    private <T> Validation<String, T> internalError(String error, T arg1) {
         log.error("{}:{}", error, arg1);
         String formatString = "Internal Error: " + error;
         return invalid(format(formatString, arg1));
+    }
+
+    private Optional<String> getJourneyClassification(CaseDetails theCase) {
+        return Optional.ofNullable(theCase)
+                .map(CaseDetails::getData)
+                .map(data -> data.get("journeyClassification"))
+                .map(c -> (String) c);
     }
 }

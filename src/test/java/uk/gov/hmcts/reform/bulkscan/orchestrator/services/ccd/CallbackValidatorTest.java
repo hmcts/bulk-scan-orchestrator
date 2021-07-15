@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
+import com.google.common.collect.ImmutableMap;
 import io.vavr.control.Validation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,14 +16,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.createCaseWith;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.OCR_DATA;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
 @SuppressWarnings("checkstyle:LineLength")
 @ExtendWith(MockitoExtension.class)
@@ -31,6 +37,9 @@ class CallbackValidatorTest {
     private static final String CASE_ID = "123";
     private static final String CASE_TYPE_ID = SERVICE + "_ExceptionRecord";
     private static final String NO_CASE_TYPE_ID_SUPPLIED_ERROR = "No case type ID supplied";
+
+    private static final String JOURNEY_CLASSIFICATION = "journeyClassification";
+    private static final String CLASSIFICATION_EXCEPTION = "EXCEPTION";
 
     @Mock
     private CaseReferenceValidator caseReferenceValidator;
@@ -260,6 +269,44 @@ class CallbackValidatorTest {
                 expectedValueOrError,
                 callbackValidator::hasServiceNameInCaseTypeId,
                 expectedValueOrError
+        );
+    }
+
+    private static Object[][] classificationTestParams() {
+        return new Object[][]{
+                {"Invalid journey classification", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, "invalid_classification"))), false, "Invalid journey classification invalid_classification"},
+                {"Valid journey classification(supplementary evidence)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, SUPPLEMENTARY_EVIDENCE.name()))), true, null},
+                {"Valid journey classification(supplementary evidence with ocr)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, SUPPLEMENTARY_EVIDENCE_WITH_OCR.name(), OCR_DATA, asList(ImmutableMap.of("f1", "v1"))))), true, null},
+                {"Valid journey classification(supplementary evidence with ocr ocr empty)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, SUPPLEMENTARY_EVIDENCE_WITH_OCR.name(), OCR_DATA, emptyList()))), false, "The 'attach to case' event is not supported for supplementary evidence with OCR but not containing OCR data"},
+                {"Valid journey classification(exception without ocr)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, CLASSIFICATION_EXCEPTION))), true, null},
+                {"Valid journey classification(exception with empty ocr list)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, CLASSIFICATION_EXCEPTION, OCR_DATA, emptyList()))), true, null},
+                {"Invalid action-Valid journey classification(exception with ocr)", createCaseWith(b -> b.data(caseDataWithOcr())), false, "The 'attach to case' event is not supported for exception records with OCR"}
+        };
+    }
+
+    @ParameterizedTest(name = "{0}: valid:{2} error/value:{3}")
+    @MethodSource("classificationTestParams")
+    void canBeAttachedToCaseTest(
+            String caseDescription,
+            CaseDetails inputCase,
+            boolean valid,
+            String expectedValueOrError
+    ) {
+        checkValidation(
+                inputCase,
+                valid,
+                expectedValueOrError,
+                callbackValidator::canBeAttachedToCase,
+                expectedValueOrError
+        );
+    }
+
+    private static ImmutableMap<String, Object> caseDataWithOcr() {
+        return ImmutableMap.of(
+                JOURNEY_CLASSIFICATION, CLASSIFICATION_EXCEPTION,
+                OCR_DATA, singletonList(
+                        ImmutableMap.of("first_name", "John")
+                )
         );
     }
 

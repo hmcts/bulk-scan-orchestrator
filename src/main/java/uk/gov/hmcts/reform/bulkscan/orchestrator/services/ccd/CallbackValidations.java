@@ -28,10 +28,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 
 public final class CallbackValidations {
 
-    private static final String CLASSIFICATION_SUPPLEMENTARY_EVIDENCE = "SUPPLEMENTARY_EVIDENCE";
-    private static final String CLASSIFICATION_SUPPLEMENTARY_EVIDENCE_WITH_OCR = "SUPPLEMENTARY_EVIDENCE_WITH_OCR";
-    private static final String CLASSIFICATION_EXCEPTION = "EXCEPTION";
-
     private static final List<Classification> VALID_CLASSIFICATIONS_FOR_ATTACH_TO_CASE =
         asList(EXCEPTION, SUPPLEMENTARY_EVIDENCE, SUPPLEMENTARY_EVIDENCE_WITH_OCR);
 
@@ -45,36 +41,6 @@ public final class CallbackValidations {
         .withZone(ZoneOffset.UTC);
 
     private CallbackValidations() {
-    }
-
-    @Nonnull
-    static Validation<String, Void> canBeAttachedToCase(CaseDetails theCase) {
-        return getJourneyClassification(theCase)
-            .map(
-                classification -> {
-                    switch (classification) {
-                        case CLASSIFICATION_SUPPLEMENTARY_EVIDENCE:
-                            return Validation.<String, Void>valid(null);
-                        case CLASSIFICATION_SUPPLEMENTARY_EVIDENCE_WITH_OCR:
-                            return hasOcr(theCase)
-                                ? Validation.<String, Void>valid(null)
-                                : Validation.<String, Void>invalid(
-                                "The 'attach to case' event is not supported for supplementary evidence with OCR "
-                                    + "but not containing OCR data"
-                            );
-                        case CLASSIFICATION_EXCEPTION:
-                            return !hasOcr(theCase)
-                                ? Validation.<String, Void>valid(null)
-                                : Validation.<String, Void>invalid(
-                                "The 'attach to case' event is not supported for exception records with OCR"
-                            );
-                        default:
-                            return Validation.<String, Void>invalid(
-                                format("Invalid journey classification %s", classification)
-                            );
-                    }
-                }
-            ).orElseGet(() -> invalid("No journey classification supplied"));
     }
 
     @Nonnull
