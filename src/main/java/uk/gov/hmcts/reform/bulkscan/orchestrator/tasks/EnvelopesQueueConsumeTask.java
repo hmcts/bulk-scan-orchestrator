@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 
 @Service
-@ConditionalOnProperty(value = "scheduling.task.consume-envelopes-queue.enabled", matchIfMissing = true)
+@ConditionalOnProperty(value = "scheduling.task.check-envelopes-queue.enabled", matchIfMissing = true)
 public class EnvelopesQueueConsumeTask {
 
     private static final Logger log = LoggerFactory.getLogger(EnvelopesQueueConsumeTask.class);
@@ -28,7 +28,7 @@ public class EnvelopesQueueConsumeTask {
         serviceBusProcessorClient.start();
     }
 
-    @Scheduled(fixedDelayString = "${scheduling.task.consume-envelopes-queue.fixedDelay}")
+    @Scheduled(fixedDelayString = "${scheduling.task.check-envelopes-queue.fixedDelay}")
     public void checkServiceBusProcessorClient() {
         if (!serviceBusProcessorClient.isRunning()) {
             log.error("Envelopes queue consume listener is NOT running!!!");

@@ -222,8 +222,8 @@ scheduling:
       enabled: ${DELETE_ENVELOPES_DLQ_MESSAGES_ENABLED:false}
       cron: ${DELETE_ENVELOPES_DLQ_MESSAGES_CRON}
       ttl: ${DELETE_ENVELOPES_DLQ_MESSAGES_TTL}
-    consume-envelopes-queue:
-      fixedDelay:  ${ENVELOPE_QUEUE_CONSUME_POLL_INTERVAL_MS}
+    check-envelopes-queue:
+      fixedDelay:  ${ENVELOPE_QUEUE_CHECK_POLL_INTERVAL}
 
 hystrix:
   command:
