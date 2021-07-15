@@ -19,7 +19,6 @@ import java.util.Map;
 
 import static io.vavr.control.Validation.valid;
 import static java.util.Collections.singletonList;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.canBeAttachedToCase;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasIdamToken;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJourneyClassificationForAttachToCase;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasUserId;
@@ -69,7 +68,7 @@ public class AttachToCaseCallbackService {
     ) {
         Validation<String, Void> canAccess = exceptionRecordValidator.mandatoryPrerequisites(
             () -> isAttachToCaseEvent(eventId),
-            () -> canBeAttachedToCase(exceptionRecordDetails),
+            () -> callbackValidator.canBeAttachedToCase(exceptionRecordDetails),
             () -> hasIdamToken(requesterIdamToken).map(item -> null),
             () -> hasUserId(requesterUserId).map(item -> null)
         );
