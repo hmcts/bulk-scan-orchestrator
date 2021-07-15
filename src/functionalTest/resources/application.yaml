@@ -3,7 +3,7 @@ scheduling:
   task:
     delete-envelopes-dlq-messages:
       enabled: false
-    consume-envelopes-queue:
+    check-envelopes-queue:
       enabled: false
 
 spring:
