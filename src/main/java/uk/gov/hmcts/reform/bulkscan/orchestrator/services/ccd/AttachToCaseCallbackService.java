@@ -19,9 +19,7 @@ import java.util.Map;
 
 import static io.vavr.control.Validation.valid;
 import static java.util.Collections.singletonList;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasIdamToken;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJourneyClassificationForAttachToCase;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasUserId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.validatePayments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isAttachToCaseEvent;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.CCD_CASE_REFERENCE;
@@ -69,8 +67,8 @@ public class AttachToCaseCallbackService {
         Validation<String, Void> canAccess = exceptionRecordValidator.mandatoryPrerequisites(
             () -> isAttachToCaseEvent(eventId),
             () -> callbackValidator.canBeAttachedToCase(exceptionRecordDetails),
-            () -> hasIdamToken(requesterIdamToken).map(item -> null),
-            () -> hasUserId(requesterUserId).map(item -> null)
+            () -> callbackValidator.hasIdamToken(requesterIdamToken).map(item -> null),
+            () -> callbackValidator.hasUserId(requesterUserId).map(item -> null)
         );
 
         if (canAccess.isInvalid()) {
@@ -118,8 +116,8 @@ public class AttachToCaseCallbackService {
         Validation<String, Long> idValidation = callbackValidator.hasAnId(exceptionRecord);
         Validation<String, List<Map<String, Object>>> scannedRecordValidation =
                 callbackValidator.hasAScannedRecord(exceptionRecord);
-        Validation<String, String> idamTokenValidation = hasIdamToken(requesterIdamToken);
-        Validation<String, String> userIdValidation = hasUserId(requesterUserId);
+        Validation<String, String> idamTokenValidation = callbackValidator.hasIdamToken(requesterIdamToken);
+        Validation<String, String> userIdValidation = callbackValidator.hasUserId(requesterUserId);
         Validation<String, Classification> classificationValidation =
             hasJourneyClassificationForAttachToCase(exceptionRecord);
 
