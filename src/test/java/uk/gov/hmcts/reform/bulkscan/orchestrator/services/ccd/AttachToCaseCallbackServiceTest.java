@@ -27,6 +27,7 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -117,6 +118,8 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SERVICE_NAME));
         given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
+        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -179,6 +182,8 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SERVICE_NAME));
         given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
+        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -213,6 +218,8 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SERVICE_NAME));
         given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
+        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -248,6 +255,8 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.invalid("Case type ID (BULKSCAN_Exception) has invalid format"));
         given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
+        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -283,6 +292,8 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.invalid("No case type ID supplied"));
         given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
+        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -319,6 +330,8 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SERVICE_NAME));
         given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
+        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -354,6 +367,9 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SERVICE_NAME));
         given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
+        given(callbackValidator.hasIdamToken(any()))
+                .willReturn(Validation.invalid("Callback has no Idam token received in the header"));
+        given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -389,6 +405,9 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SERVICE_NAME));
         given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
+        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasUserId(any()))
+                .willReturn(Validation.invalid("Callback has no user id received in the header"));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -423,6 +442,8 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SERVICE_NAME));
         given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
+        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -457,6 +478,8 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SERVICE_NAME));
         given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
+        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(

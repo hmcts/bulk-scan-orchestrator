@@ -147,6 +147,21 @@ public class CallbackValidator {
                 ).orElseGet(() -> invalid("No journey classification supplied"));
     }
 
+
+    @Nonnull
+    public Validation<String, String> hasIdamToken(String idamToken) {
+        return idamToken != null
+                ? valid(idamToken)
+                : invalid("Callback has no Idam token received in the header");
+    }
+
+    @Nonnull
+    public Validation<String, String> hasUserId(String userId) {
+        return userId != null
+                ? valid(userId)
+                : invalid("Callback has no user id received in the header");
+    }
+
     private boolean hasOcr(CaseDetails theCase) {
         return getOcrData(theCase)
                 .map(list -> !CollectionUtils.isEmpty(list))

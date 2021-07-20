@@ -245,6 +245,9 @@ class CreateCaseCallbackServiceTest {
         );
         given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SERVICE));
+        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasUserId(any()))
+                .willReturn(Validation.invalid("Callback has no user id received in the header"));
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -281,6 +284,8 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(Long.valueOf(CASE_ID)));
         given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
+        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
+        given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -316,6 +321,8 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(Long.valueOf(CASE_ID)));
         given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
+        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
+        given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -355,6 +362,8 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(Long.valueOf(CASE_ID)));
         given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
+        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
+        given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -384,6 +393,8 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(Long.valueOf(CASE_ID)));
         given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
+        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
+        given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
 
         assertThatThrownBy(
             () -> service.process(new CcdCallbackRequest(
@@ -421,6 +432,8 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(Long.valueOf(CASE_ID)));
         given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
+        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
+        given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
 
         // when
         ProcessResult result =
@@ -475,6 +488,8 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(Long.valueOf(CASE_ID)));
         given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
+        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
+        given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
 
         // when
         ProcessResult result =
@@ -523,6 +538,8 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(Long.valueOf(CASE_ID)));
         given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
+        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
+        given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
 
         // when
         ProcessResult result =
