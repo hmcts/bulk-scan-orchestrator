@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
 import org.springframework.util.CollectionUtils;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -19,7 +18,6 @@ import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues.YES;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
@@ -49,35 +47,11 @@ public final class CallbackValidations {
             .map(c -> (String) c);
     }
 
-    private static Optional<String> getAwaitingPaymentDcnProcessing(CaseDetails theCase) {
-        return Optional.ofNullable(theCase)
-            .map(CaseDetails::getData)
-            .map(data -> data.get("awaitingPaymentDCNProcessing"))
-            .map(c -> (String) c);
-    }
 
     static boolean hasOcr(CaseDetails theCase) {
         return getOcrData(theCase)
             .map(list -> !CollectionUtils.isEmpty(list))
             .orElse(false);
-    }
-
-    static Validation<String, Void> validatePayments(
-        CaseDetails theCase,
-        Classification classification,
-        ServiceConfigItem config
-    ) {
-        Optional<String> awaitingPaymentsOptional = getAwaitingPaymentDcnProcessing(theCase);
-
-        if (awaitingPaymentsOptional.isPresent()
-            && awaitingPaymentsOptional.get().equals(YES) // payments processing pending
-            && !config.getAllowAttachingToCaseBeforePaymentsAreProcessedForClassifications() // check if config allows
-            .contains(classification)
-        ) {
-            return invalid("Cannot attach this exception record to a case because it has pending payments");
-        } else {
-            return valid(null);
-        }
     }
 
     public static Validation<String, String> hasPoBox(CaseDetails theCase) {

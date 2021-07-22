@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ExceptionRecordValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.HashMap;
@@ -28,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -120,6 +122,13 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
         given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(null));
         given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(null));
+        given(callbackValidator
+                .validatePayments(
+                        any(CaseDetails.class),
+                        any(Classification.class),
+                        any(ServiceConfigItem.class)
+                )
+        ).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -184,6 +193,13 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
         given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(null));
         given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(null));
+        given(callbackValidator
+                .validatePayments(
+                        any(CaseDetails.class),
+                        any(Classification.class),
+                        any(ServiceConfigItem.class)
+                )
+        ).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -220,6 +236,13 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
         given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(null));
         given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(null));
+        given(callbackValidator
+                .validatePayments(
+                        any(CaseDetails.class),
+                        any(Classification.class),
+                        eq(null)
+                )
+        ).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -332,6 +355,13 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
         given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(null));
         given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(null));
+        given(callbackValidator
+                .validatePayments(
+                        any(CaseDetails.class),
+                        any(Classification.class),
+                        eq(null)
+                )
+        ).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -370,6 +400,13 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasIdamToken(any()))
                 .willReturn(Validation.invalid("Callback has no Idam token received in the header"));
         given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(null));
+        given(callbackValidator
+                .validatePayments(
+                        any(CaseDetails.class),
+                        any(Classification.class),
+                        eq(null)
+                )
+        ).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -408,6 +445,13 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(null));
         given(callbackValidator.hasUserId(any()))
                 .willReturn(Validation.invalid("Callback has no user id received in the header"));
+        given(callbackValidator
+                .validatePayments(
+                        any(CaseDetails.class),
+                        any(Classification.class),
+                        eq(null)
+                )
+        ).willReturn(Validation.valid(null));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(

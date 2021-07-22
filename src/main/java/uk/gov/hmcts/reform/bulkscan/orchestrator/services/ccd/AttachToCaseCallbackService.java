@@ -20,7 +20,6 @@ import java.util.Map;
 import static io.vavr.control.Validation.valid;
 import static java.util.Collections.singletonList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJourneyClassificationForAttachToCase;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.validatePayments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isAttachToCaseEvent;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.CCD_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SEARCH_CASE_REFERENCE_TYPE;
@@ -126,7 +125,8 @@ public class AttachToCaseCallbackService {
             ServiceConfigItem serviceConfig = serviceConfigProvider.getConfig(
                 serviceNameInCaseTypeIdValidation.get()
             );
-            paymentsValidation = validatePayments(exceptionRecord, classificationValidation.get(), serviceConfig);
+            paymentsValidation =
+                    callbackValidator.validatePayments(exceptionRecord, classificationValidation.get(), serviceConfig);
         } else {
             paymentsValidation = Validation.valid(null);
         }

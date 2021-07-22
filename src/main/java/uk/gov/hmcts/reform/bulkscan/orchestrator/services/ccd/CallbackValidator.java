@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
@@ -16,6 +18,7 @@ import javax.annotation.Nonnull;
 import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
 import static java.lang.String.format;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues.YES;
 
 @Component
 public class CallbackValidator {
@@ -162,6 +165,25 @@ public class CallbackValidator {
                 : invalid("Callback has no user id received in the header");
     }
 
+    public Validation<String, Void> validatePayments(
+            CaseDetails theCase,
+            Classification classification,
+            ServiceConfigItem config
+    ) {
+        Optional<String> awaitingPaymentsOptional = getAwaitingPaymentDcnProcessing(theCase);
+
+        if (awaitingPaymentsOptional.isPresent()
+                && awaitingPaymentsOptional.get().equals(YES) // payments processing pending
+                // check if config allows
+                && !config.getAllowAttachingToCaseBeforePaymentsAreProcessedForClassifications()
+                .contains(classification)
+        ) {
+            return invalid("Cannot attach this exception record to a case because it has pending payments");
+        } else {
+            return valid(null);
+        }
+    }
+
     private boolean hasOcr(CaseDetails theCase) {
         return getOcrData(theCase)
                 .map(list -> !CollectionUtils.isEmpty(list))
@@ -192,6 +214,13 @@ public class CallbackValidator {
         return Optional.ofNullable(theCase)
                 .map(CaseDetails::getData)
                 .map(data -> data.get("journeyClassification"))
+                .map(c -> (String) c);
+    }
+
+    private static Optional<String> getAwaitingPaymentDcnProcessing(CaseDetails theCase) {
+        return Optional.ofNullable(theCase)
+                .map(CaseDetails::getData)
+                .map(data -> data.get("awaitingPaymentDCNProcessing"))
                 .map(c -> (String) c);
     }
 }
