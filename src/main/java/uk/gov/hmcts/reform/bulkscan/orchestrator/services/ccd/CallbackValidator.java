@@ -184,6 +184,14 @@ public class CallbackValidator {
         }
     }
 
+    public Validation<String, String> hasPoBox(CaseDetails theCase) {
+        return Optional.ofNullable(theCase)
+                .map(CaseDetails::getData)
+                .map(data -> data.get("poBox"))
+                .map(o -> Validation.<String, String>valid((String) o))
+                .orElse(invalid("Missing poBox"));
+    }
+
     private boolean hasOcr(CaseDetails theCase) {
         return getOcrData(theCase)
                 .map(list -> !CollectionUtils.isEmpty(list))

@@ -388,6 +388,39 @@ class CallbackValidatorTest {
         );
     }
 
+    @Test
+    void hasPoBox_validates_po_box() {
+        // given
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+                .id(Long.valueOf(CASE_ID))
+                .data(Map.of("poBox", "pobox"))
+                .jurisdiction("some jurisdiction")
+        );
+
+        // when
+        Validation<String, String> res = callbackValidator.hasPoBox(caseDetails);
+
+        // then
+        assertThat(res.isValid()).isTrue();
+        assertThat(res.get()).isEqualTo("pobox");
+    }
+
+    @Test
+    void hasPoBox_returns_invalid_if_no_po_box() {
+        // given
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+                .id(Long.valueOf(CASE_ID))
+                .jurisdiction("some jurisdiction")
+        );
+
+        // when
+        Validation<String, String> res = callbackValidator.hasPoBox(caseDetails);
+
+        // then
+        assertThat(res.isInvalid()).isTrue();
+        assertThat(res.getError()).isEqualTo("Missing poBox");
+    }
+
     private static ImmutableMap<String, Object> caseDataWithOcr() {
         return ImmutableMap.of(
                 JOURNEY_CLASSIFICATION, CLASSIFICATION_EXCEPTION,
