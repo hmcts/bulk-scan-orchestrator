@@ -65,6 +65,7 @@ class ExceptionRecordValidatorTest {
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid("personal"));
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid("BULKSCAN"));
         given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(1234L));
+        given(callbackValidator.hasPoBox(any())).willReturn(Validation.valid(PO_BOX));
 
         // when
         var validation = exceptionRecordValidator.getValidation(validExceptionRecord);
@@ -84,6 +85,7 @@ class ExceptionRecordValidatorTest {
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(1234L));
+        given(callbackValidator.hasPoBox(any())).willReturn(Validation.valid(PO_BOX));
 
         // when
         var validation = exceptionRecordValidator.getValidation(caseDetails);
@@ -136,6 +138,7 @@ class ExceptionRecordValidatorTest {
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(123L));
+        given(callbackValidator.hasPoBox(any())).willReturn(Validation.valid(PO_BOX));
 
         var invalidOcrData = ImmutableList.of(
             ImmutableMap.of("value", ImmutableMap.of(
@@ -175,6 +178,7 @@ class ExceptionRecordValidatorTest {
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(1234L));
+        given(callbackValidator.hasPoBox(any())).willReturn(Validation.valid(PO_BOX));
 
         // when
         var validation = exceptionRecordValidator.getValidation(input);
@@ -209,6 +213,7 @@ class ExceptionRecordValidatorTest {
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(1234L));
+        given(callbackValidator.hasPoBox(any())).willReturn(Validation.valid(PO_BOX));
 
         checkValidationErrorMatches(
             input,
@@ -225,6 +230,7 @@ class ExceptionRecordValidatorTest {
         given(callbackValidator.hasFormType(any())).willReturn(Validation.valid("personal"));
         given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid("BULKSCAN"));
         given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(1234L));
+        given(callbackValidator.hasPoBox(any())).willReturn(Validation.valid(PO_BOX));
 
         // then
         assertThatCode(() -> exceptionRecordValidator.getValidation(caseDetails))

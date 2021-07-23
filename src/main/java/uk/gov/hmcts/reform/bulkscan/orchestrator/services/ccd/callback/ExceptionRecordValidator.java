@@ -28,7 +28,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackVal
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.getOcrData;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasDateField;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJourneyClassification;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasPoBox;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.ENVELOPE_ID;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 
@@ -73,7 +72,7 @@ public class ExceptionRecordValidator {
     public Validation<Seq<String>, ExceptionRecord> getValidation(CaseDetails caseDetails) {
         Validation<String, String> exceptionRecordIdValidation = getCaseId(caseDetails);
         Validation<String, String> caseTypeIdValidation = callbackValidator.hasCaseTypeId(caseDetails);
-        Validation<String, String> poBoxValidation = hasPoBox(caseDetails);
+        Validation<String, String> poBoxValidation = callbackValidator.hasPoBox(caseDetails);
         Validation<String, String> jurisdictionValidation = callbackValidator.hasJurisdiction(caseDetails);
         Validation<String, Classification> journeyClassificationValidation = hasJourneyClassification(caseDetails);
 

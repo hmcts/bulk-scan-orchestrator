@@ -57,6 +57,7 @@ class CreateCaseCallbackServiceTest {
     private static final String SERVICE = "service";
     private static final String CASE_ID = "123";
     private static final String CASE_TYPE_ID = SERVICE + "_ExceptionRecord";
+    private static final String PO_BOX = "pobox";
 
     @Mock
     private CallbackValidator callbackValidator;
@@ -286,6 +287,7 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
         given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
         given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
+        given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -323,6 +325,7 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
         given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
         given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
+        given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -364,6 +367,7 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
         given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
         given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
+        given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -395,6 +399,7 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
         given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
         given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
+        given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
 
         assertThatThrownBy(
             () -> service.process(new CcdCallbackRequest(
@@ -434,6 +439,7 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
         given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
         given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
+        given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
 
         // when
         ProcessResult result =
@@ -490,6 +496,7 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
         given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
         given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
+        given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
 
         // when
         ProcessResult result =
@@ -540,6 +547,7 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
         given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
         given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
+        given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
 
         // when
         ProcessResult result =

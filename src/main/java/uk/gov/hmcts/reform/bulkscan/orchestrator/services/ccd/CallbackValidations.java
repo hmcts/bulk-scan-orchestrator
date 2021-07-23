@@ -54,14 +54,6 @@ public final class CallbackValidations {
             .orElse(false);
     }
 
-    public static Validation<String, String> hasPoBox(CaseDetails theCase) {
-        return Optional.ofNullable(theCase)
-            .map(CaseDetails::getData)
-            .map(data -> data.get("poBox"))
-            .map(o -> Validation.<String, String>valid((String) o))
-            .orElse(invalid("Missing poBox"));
-    }
-
     /**
      * Used in createCase callback only.
      * @param theCase from CCD
