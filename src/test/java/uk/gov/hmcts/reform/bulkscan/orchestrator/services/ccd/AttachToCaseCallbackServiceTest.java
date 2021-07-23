@@ -129,6 +129,8 @@ class AttachToCaseCallbackServiceTest {
                         any(ServiceConfigItem.class)
                 )
         ).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJourneyClassificationForAttachToCase(any(CaseDetails.class)))
+                .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -200,6 +202,8 @@ class AttachToCaseCallbackServiceTest {
                         any(ServiceConfigItem.class)
                 )
         ).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJourneyClassificationForAttachToCase(any(CaseDetails.class)))
+                .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -243,6 +247,8 @@ class AttachToCaseCallbackServiceTest {
                         eq(null)
                 )
         ).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJourneyClassificationForAttachToCase(any(CaseDetails.class)))
+                .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -280,6 +286,8 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
         given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(null));
         given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJourneyClassificationForAttachToCase(any(CaseDetails.class)))
+                .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -317,6 +325,8 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
         given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(null));
         given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJourneyClassificationForAttachToCase(any(CaseDetails.class)))
+                .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -362,6 +372,8 @@ class AttachToCaseCallbackServiceTest {
                         eq(null)
                 )
         ).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJourneyClassificationForAttachToCase(any(CaseDetails.class)))
+                .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -407,6 +419,8 @@ class AttachToCaseCallbackServiceTest {
                         eq(null)
                 )
         ).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJourneyClassificationForAttachToCase(any(CaseDetails.class)))
+                .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -452,6 +466,8 @@ class AttachToCaseCallbackServiceTest {
                         eq(null)
                 )
         ).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJourneyClassificationForAttachToCase(any(CaseDetails.class)))
+                .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -488,6 +504,8 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
         given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(null));
         given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJourneyClassificationForAttachToCase(any(CaseDetails.class)))
+                .willReturn(Validation.invalid("Missing journeyClassification"));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
@@ -524,6 +542,9 @@ class AttachToCaseCallbackServiceTest {
         given(callbackValidator.hasAScannedRecord(any(CaseDetails.class))).willReturn(Validation.valid(null));
         given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(null));
         given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(null));
+        given(callbackValidator.hasJourneyClassificationForAttachToCase(any(CaseDetails.class)))
+                .willReturn(Validation.invalid("The current Journey Classification NEW_APPLICATION "
+                        + "is not allowed for attaching to case"));
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(

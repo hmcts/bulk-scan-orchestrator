@@ -19,7 +19,6 @@ import java.util.Map;
 
 import static io.vavr.control.Validation.valid;
 import static java.util.Collections.singletonList;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJourneyClassificationForAttachToCase;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isAttachToCaseEvent;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.CCD_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SEARCH_CASE_REFERENCE_TYPE;
@@ -118,7 +117,7 @@ public class AttachToCaseCallbackService {
         Validation<String, String> idamTokenValidation = callbackValidator.hasIdamToken(requesterIdamToken);
         Validation<String, String> userIdValidation = callbackValidator.hasUserId(requesterUserId);
         Validation<String, Classification> classificationValidation =
-            hasJourneyClassificationForAttachToCase(exceptionRecord);
+            callbackValidator.hasJourneyClassificationForAttachToCase(exceptionRecord);
 
         final Validation<String, Void> paymentsValidation;
         if (classificationValidation.isValid() && serviceNameInCaseTypeIdValidation.isValid()) {
