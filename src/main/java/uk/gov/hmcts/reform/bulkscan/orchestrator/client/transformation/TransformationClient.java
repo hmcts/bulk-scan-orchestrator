@@ -49,7 +49,7 @@ public class TransformationClient {
         try {
             log.info("transformationRequest", new ObjectMapper().writeValueAsString(transformationRequest));
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            log.error("Error transformationRequest writeValueAsString ", e);
         }
         SuccessfulTransformationResponse response = restTemplate.postForObject(
             getUrl(baseUrl),
