@@ -46,23 +46,28 @@ public class TransformationClient {
         headers.add("ServiceAuthorization", s2sTokenGenerator.generate());
         headers.add("Content-Type", APPLICATION_JSON.toString());
 
-        try {
-            log.info("transformationRequest", new ObjectMapper().writeValueAsString(transformationRequest));
-        } catch (JsonProcessingException e) {
-            log.error("Error transformationRequest writeValueAsString ", e);
-        }
+
         SuccessfulTransformationResponse response = restTemplate.postForObject(
             getUrl(baseUrl),
             new HttpEntity<>(transformationRequest, headers),
             SuccessfulTransformationResponse.class
         );
+        Set<ConstraintViolation<SuccessfulTransformationResponse>> violations;
+        try {
+            violations = validator.validate(response);
 
-        Set<ConstraintViolation<SuccessfulTransformationResponse>> violations = validator.validate(response);
+            if (violations.isEmpty()) {
+                return response;
+            }
 
-        if (violations.isEmpty()) {
-            return response;
+        } catch (ConstraintViolationException ex) {
+            try {
+                log.info("TransformationRequest ===> {}" , new ObjectMapper().writeValueAsString(transformationRequest));
+            } catch (JsonProcessingException e) {
+                log.error("Error transformationRequest writeValueAsString ", e);
+            }
+            throw ex;
         }
-
         throw new ConstraintViolationException(violations);
     }
 
