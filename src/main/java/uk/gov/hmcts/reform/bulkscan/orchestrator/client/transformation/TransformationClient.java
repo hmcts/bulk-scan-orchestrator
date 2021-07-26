@@ -62,7 +62,7 @@ public class TransformationClient {
 
         } catch (ConstraintViolationException ex) {
             try {
-                log.info("TransformationRequest ===> {}" , new ObjectMapper().writeValueAsString(transformationRequest));
+                log.info("TransformationRequest ===> {}", new ObjectMapper().writeValueAsString(transformationRequest));
             } catch (JsonProcessingException e) {
                 log.error("Error transformationRequest writeValueAsString ", e);
             }
