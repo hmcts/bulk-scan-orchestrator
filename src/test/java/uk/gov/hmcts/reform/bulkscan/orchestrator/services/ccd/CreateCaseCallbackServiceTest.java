@@ -47,6 +47,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdCallback
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("checkstyle:LineLength")
@@ -288,6 +289,9 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
         given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
         given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
+        given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
+                .willReturn(Validation.invalid("Event createNewCase not allowed "
+                        + "for the current journey classification NEW_APPLICATION without OCR"));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -326,6 +330,9 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
         given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
         given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
+        given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
+                .willReturn(Validation.invalid("Event createNewCase not allowed "
+                        + "for the current journey classification SUPPLEMENTARY_EVIDENCE"));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -368,6 +375,8 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
         given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
         given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
+        given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
+                .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -400,6 +409,8 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
         given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
         given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
+        given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
+                .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
 
         assertThatThrownBy(
             () -> service.process(new CcdCallbackRequest(
@@ -440,6 +451,8 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
         given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
         given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
+        given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
+                .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
 
         // when
         ProcessResult result =
@@ -497,6 +510,8 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
         given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
         given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
+        given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
+                .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
 
         // when
         ProcessResult result =
@@ -548,6 +563,8 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
         given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
         given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
+        given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
+                .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
 
         // when
         ProcessResult result =
