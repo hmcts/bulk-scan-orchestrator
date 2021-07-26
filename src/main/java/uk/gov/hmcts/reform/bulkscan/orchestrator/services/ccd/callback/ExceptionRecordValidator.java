@@ -27,8 +27,6 @@ import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.FORMATTER;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.getOcrData;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasDateField;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasJourneyClassification;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasPoBox;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.ENVELOPE_ID;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 
@@ -73,9 +71,10 @@ public class ExceptionRecordValidator {
     public Validation<Seq<String>, ExceptionRecord> getValidation(CaseDetails caseDetails) {
         Validation<String, String> exceptionRecordIdValidation = getCaseId(caseDetails);
         Validation<String, String> caseTypeIdValidation = callbackValidator.hasCaseTypeId(caseDetails);
-        Validation<String, String> poBoxValidation = hasPoBox(caseDetails);
+        Validation<String, String> poBoxValidation = callbackValidator.hasPoBox(caseDetails);
         Validation<String, String> jurisdictionValidation = callbackValidator.hasJurisdiction(caseDetails);
-        Validation<String, Classification> journeyClassificationValidation = hasJourneyClassification(caseDetails);
+        Validation<String, Classification> journeyClassificationValidation =
+                callbackValidator.hasJourneyClassification(caseDetails);
 
         Validation<String, String> formTypeValidation = callbackValidator.hasFormType(caseDetails);
         // Exception journey classification may not have form type so skipping validation for it
@@ -124,6 +123,14 @@ public class ExceptionRecordValidator {
 
     public Validation<String, String> hasServiceNameInCaseTypeId(CaseDetails theCase) {
         return callbackValidator.hasServiceNameInCaseTypeId(theCase);
+    }
+
+    public Validation<String, String> hasIdamToken(String idamToken) {
+        return callbackValidator.hasIdamToken(idamToken);
+    }
+
+    public Validation<String, String> hasUserId(String userId) {
+        return callbackValidator.hasUserId(userId);
     }
 
     private Seq<String> getValidationErrors(Seq<Validation<String, ?>> validations) {

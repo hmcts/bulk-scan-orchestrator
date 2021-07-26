@@ -27,8 +27,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.NewCallbackResult.createCaseRequest;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasIdamToken;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.hasUserId;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isCreateNewCaseEvent;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING;
 
@@ -137,8 +135,8 @@ public class CreateCaseCallbackService {
         return exceptionRecordValidator.mandatoryPrerequisites(
             () -> isCreateNewCaseEvent(eventId),
             () -> getServiceConfig(caseDetails).map(item -> null),
-            () -> hasIdamToken(idamToken).map(item -> null),
-            () -> hasUserId(userId).map(item -> null)
+            () -> exceptionRecordValidator.hasIdamToken(idamToken).map(item -> null),
+            () -> exceptionRecordValidator.hasUserId(userId).map(item -> null)
         );
     }
 

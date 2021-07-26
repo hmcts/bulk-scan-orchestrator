@@ -10,6 +10,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
@@ -25,8 +27,11 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithAwaitingPaymentsAndClassification;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.createCaseWith;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.OCR_DATA;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
@@ -40,6 +45,8 @@ class CallbackValidatorTest {
 
     private static final String JOURNEY_CLASSIFICATION = "journeyClassification";
     private static final String CLASSIFICATION_EXCEPTION = "EXCEPTION";
+    private static final String NO_IDAM_TOKEN_RECEIVED_ERROR = "Callback has no Idam token received in the header";
+    private static final String NO_USER_ID_RECEIVED_ERROR = "Callback has no user id received in the header";
 
     @Mock
     private CaseReferenceValidator caseReferenceValidator;
@@ -301,6 +308,149 @@ class CallbackValidatorTest {
         );
     }
 
+    private static Object[][] idamTokenTestParams() {
+        return new Object[][]{
+                {"null idam token", null, false, NO_IDAM_TOKEN_RECEIVED_ERROR},
+                {"valid idam token", "valid token", true, "valid token"}
+        };
+    }
+
+    @ParameterizedTest(name = "{0}: valid:{2} error/value:{3}")
+    @MethodSource("idamTokenTestParams")
+    @DisplayName("Should have idam token in the request")
+    void idamTokenInTheRequestTest(
+            String caseDescription,
+            String input,
+            boolean valid,
+            String expectedValueOrError
+    ) {
+        checkValidation(
+                input,
+                valid,
+                expectedValueOrError,
+                callbackValidator::hasIdamToken,
+                expectedValueOrError
+        );
+    }
+
+    private static Object[][] userIdTestParams() {
+        return new Object[][]{
+                {"null user id", null, false, NO_USER_ID_RECEIVED_ERROR},
+                {"valid user id", "valid user id", true, "valid user id"}
+        };
+    }
+
+    @ParameterizedTest(name = "{0}: valid:{2} error/value:{3}")
+    @MethodSource("userIdTestParams")
+    @DisplayName("Should have user id in the request")
+    void userIdInTheRequestTest(
+            String caseDescription,
+            String input,
+            boolean valid,
+            String expectedValueOrError
+    ) {
+        checkValidation(
+                input,
+                valid,
+                expectedValueOrError,
+                callbackValidator::hasUserId,
+                expectedValueOrError
+        );
+    }
+
+    private static Object[][] attachToCaseWithPaymentsTestParams() {
+        String pendingPaymentsProcessing = "Cannot attach this exception record to a case because it has pending payments";
+        return new Object[][]{
+                {"Valid supplementary evidence with no pending payments", caseWithAwaitingPaymentsAndClassification("No", SUPPLEMENTARY_EVIDENCE.toString()), SUPPLEMENTARY_EVIDENCE, singletonList(SUPPLEMENTARY_EVIDENCE), true, null},
+                {"Valid allow supplementary evidence with pending payments", caseWithAwaitingPaymentsAndClassification("Yes", SUPPLEMENTARY_EVIDENCE.toString()), SUPPLEMENTARY_EVIDENCE, singletonList(SUPPLEMENTARY_EVIDENCE), true, null},
+                {"Invalid supplementary evidence with pending payments", caseWithAwaitingPaymentsAndClassification("Yes", SUPPLEMENTARY_EVIDENCE.toString()), SUPPLEMENTARY_EVIDENCE, emptyList(), false, pendingPaymentsProcessing},
+                {"Valid supplementary evidence with ocr no pending payments", caseWithAwaitingPaymentsAndClassification("No", SUPPLEMENTARY_EVIDENCE_WITH_OCR.toString()), SUPPLEMENTARY_EVIDENCE_WITH_OCR, asList(SUPPLEMENTARY_EVIDENCE, SUPPLEMENTARY_EVIDENCE_WITH_OCR), true, null},
+                {"Valid allow supplementary evidence with ocr with pending payments", caseWithAwaitingPaymentsAndClassification("Yes", SUPPLEMENTARY_EVIDENCE_WITH_OCR.toString()), SUPPLEMENTARY_EVIDENCE_WITH_OCR, singletonList(SUPPLEMENTARY_EVIDENCE_WITH_OCR), true, null},
+                {"Invalid supplementary evidence with ocr with pending payments", caseWithAwaitingPaymentsAndClassification("Yes", SUPPLEMENTARY_EVIDENCE_WITH_OCR.toString()), SUPPLEMENTARY_EVIDENCE_WITH_OCR, emptyList(), false, pendingPaymentsProcessing},
+                {"Invalid awaiting payments dcn processing yes", caseWithAwaitingPaymentsAndClassification("Yes", EXCEPTION.toString()), EXCEPTION, singletonList(SUPPLEMENTARY_EVIDENCE), false, pendingPaymentsProcessing},
+                {"Valid awaiting payments dcn processing No", caseWithAwaitingPaymentsAndClassification("No", EXCEPTION.toString()), EXCEPTION, singletonList(EXCEPTION), true, null},
+                {"Valid awaiting payments dcn processing Yes", caseWithAwaitingPaymentsAndClassification("Yes", EXCEPTION.toString()), EXCEPTION, singletonList(EXCEPTION), true, null},
+                {"Valid awaiting payments dcn processing null", caseWithAwaitingPaymentsAndClassification(null, EXCEPTION.toString()), EXCEPTION, emptyList(), true, null}
+        };
+    }
+
+    @ParameterizedTest(name = "{0}: valid:{4} error:{5}")
+    @MethodSource("attachToCaseWithPaymentsTestParams")
+    @DisplayName("Should attach to case when allowed with pending payments")
+    void attachToCaseWithPaymentsTest(String caseReason, CaseDetails input, Classification classification, List<Classification> classifications, boolean valid, String expectedValueOrError) {
+        ServiceConfigItem configItem = new ServiceConfigItem();
+        configItem.setAllowAttachingToCaseBeforePaymentsAreProcessedForClassifications(classifications);
+        checkValidation(
+                input,
+                valid,
+                expectedValueOrError,
+                (caseDetails -> callbackValidator.validatePayments(caseDetails, classification, configItem)),
+                expectedValueOrError
+        );
+    }
+
+    @Test
+    void hasPoBox_validates_po_box() {
+        // given
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+                .id(Long.valueOf(CASE_ID))
+                .data(Map.of("poBox", "pobox"))
+                .jurisdiction("some jurisdiction")
+        );
+
+        // when
+        Validation<String, String> res = callbackValidator.hasPoBox(caseDetails);
+
+        // then
+        assertThat(res.isValid()).isTrue();
+        assertThat(res.get()).isEqualTo("pobox");
+    }
+
+    @Test
+    void hasPoBox_returns_invalid_if_no_po_box() {
+        // given
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+                .id(Long.valueOf(CASE_ID))
+                .jurisdiction("some jurisdiction")
+        );
+
+        // when
+        Validation<String, String> res = callbackValidator.hasPoBox(caseDetails);
+
+        // then
+        assertThat(res.isInvalid()).isTrue();
+        assertThat(res.getError()).isEqualTo("Missing poBox");
+    }
+
+    private static Object[][] classificationForAttachToCaseTestParams() {
+        return new Object[][]{
+                {"Invalid journey classification", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, "invalid_classification"))), false, null, "Journey Classification invalid_classification is not allowed when attaching exception record to a case"},
+                {"Invalid journey classification", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, NEW_APPLICATION.name()))), false, null, "The current Journey Classification NEW_APPLICATION is not allowed for attaching to case"},
+                {"Valid journey classification(supplementary evidence)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, SUPPLEMENTARY_EVIDENCE.name()))), true, SUPPLEMENTARY_EVIDENCE, null},
+                {"Valid journey classification(supplementary evidence with ocr)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, SUPPLEMENTARY_EVIDENCE_WITH_OCR.name(), OCR_DATA, asList(ImmutableMap.of("f1", "v1"))))), true, SUPPLEMENTARY_EVIDENCE_WITH_OCR, null},
+                {"Valid journey classification(exception)", createCaseWith(b -> b.data(ImmutableMap.of(JOURNEY_CLASSIFICATION, CLASSIFICATION_EXCEPTION))), true, EXCEPTION, null}
+        };
+    }
+
+    @ParameterizedTest(name = "{0}: valid:{2} value:{3} error:{4}")
+    @MethodSource("classificationForAttachToCaseTestParams")
+    @DisplayName("Should accept valid journey classification")
+    void canJourneyClassificationBeAttachedToCaseTest(
+            String caseDescription,
+            CaseDetails inputCase,
+            boolean valid,
+            Classification expectedValue,
+            String error
+    ) {
+        checkValidation(
+                inputCase,
+                valid,
+                expectedValue,
+                callbackValidator::hasJourneyClassificationForAttachToCase,
+                error
+        );
+    }
+
     private static ImmutableMap<String, Object> caseDataWithOcr() {
         return ImmutableMap.of(
                 JOURNEY_CLASSIFICATION, CLASSIFICATION_EXCEPTION,
@@ -310,11 +460,25 @@ class CallbackValidatorTest {
         );
     }
 
-    private <T> void checkValidation(CaseDetails input,
-                                     boolean valid,
-                                     T realValue,
-                                     Function<CaseDetails, Validation<String, ?>> validationMethod,
-                                     String errorString) {
+    private <T> void checkValidation(
+            CaseDetails input,
+            boolean valid,
+            T realValue,
+            Function<CaseDetails, Validation<String, ?>> validationMethod,
+            String errorString
+    ) {
+        Validation<String, ?> validation = validationMethod.apply(input);
+
+        softAssertions(valid, realValue, errorString, validation);
+    }
+
+    private <T> void checkValidation(
+            String input,
+            boolean valid,
+            T realValue,
+            Function<String, Validation<String, ?>> validationMethod,
+            String errorString
+    ) {
         Validation<String, ?> validation = validationMethod.apply(input);
 
         softAssertions(valid, realValue, errorString, validation);
