@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -27,6 +28,7 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidator.FORMATTER;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.caseWithAwaitingPaymentsAndClassification;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.TestCaseBuilder.createCaseWith;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.OCR_DATA;
@@ -38,12 +40,13 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 @SuppressWarnings("checkstyle:LineLength")
 @ExtendWith(MockitoExtension.class)
 class CallbackValidatorTest {
+    public static final String JOURNEY_CLASSIFICATION = "journeyClassification";
+
     private static final String SERVICE = "service";
     private static final String CASE_ID = "123";
     private static final String CASE_TYPE_ID = SERVICE + "_ExceptionRecord";
     private static final String NO_CASE_TYPE_ID_SUPPLIED_ERROR = "No case type ID supplied";
 
-    private static final String JOURNEY_CLASSIFICATION = "journeyClassification";
     private static final String CLASSIFICATION_EXCEPTION = "EXCEPTION";
     private static final String NO_IDAM_TOKEN_RECEIVED_ERROR = "Callback has no Idam token received in the header";
     private static final String NO_USER_ID_RECEIVED_ERROR = "Callback has no user id received in the header";
@@ -449,6 +452,39 @@ class CallbackValidatorTest {
                 callbackValidator::hasJourneyClassificationForAttachToCase,
                 error
         );
+    }
+
+    @Test
+    void hasDateField_should_return_date_if_field_exists() {
+        // given
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+                .id(Long.valueOf(CASE_ID))
+                .data(Map.of("deliveryDate", "2020-04-01T12:34:56.00Z"))
+                .jurisdiction("some jurisdiction")
+        );
+
+        // when
+        Validation<String, LocalDateTime> res = callbackValidator.hasDateField(caseDetails, "deliveryDate");
+
+        // then
+        assertThat(res.isValid()).isTrue();
+        assertThat(res.get()).isEqualTo(LocalDateTime.parse("2020-04-01T12:34:56.00Z", FORMATTER));
+    }
+
+    @Test
+    void hasDateField_should_return_error_if_field_does_not_exist() {
+        // given
+        CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
+                .id(Long.valueOf(CASE_ID))
+                .jurisdiction("some jurisdiction")
+        );
+
+        // when
+        Validation<String, LocalDateTime> res = callbackValidator.hasDateField(caseDetails, "deliveryDate");
+
+        // then
+        assertThat(res.isInvalid()).isTrue();
+        assertThat(res.getError()).isEqualTo("Missing deliveryDate");
     }
 
     private static ImmutableMap<String, Object> caseDataWithOcr() {

@@ -10,6 +10,10 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -29,6 +33,15 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 @Component
 public class CallbackValidator {
     private static final Logger log = LoggerFactory.getLogger(CallbackValidator.class);
+
+    // todo review usage
+    public static final DateTimeFormatter FORMATTER = new DateTimeFormatterBuilder()
+            // date/time
+            .append(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+            // optional offset
+            .optionalStart().appendOffsetId()
+            .toFormatter()
+            .withZone(ZoneOffset.UTC);
 
     private static final String CASE_TYPE_ID_SUFFIX = "_ExceptionRecord";
     private static final String CLASSIFICATION_SUPPLEMENTARY_EVIDENCE = "SUPPLEMENTARY_EVIDENCE";
@@ -236,6 +249,14 @@ public class CallbackValidator {
                         .flatMap(classification -> validateClassificationForAttachToCase(classification, theCase))
                 )
                 .orElse(invalid("Missing journeyClassification"));
+    }
+
+    public Validation<String, LocalDateTime> hasDateField(CaseDetails theCase, String dateField) {
+        return Optional.ofNullable(theCase)
+                .map(CaseDetails::getData)
+                .map(data -> data.get(dateField))
+                .map(o -> Validation.<String, LocalDateTime>valid(LocalDateTime.parse((String) o, FORMATTER)))
+                .orElse(invalid("Missing " + dateField));
     }
 
     @SuppressWarnings("unchecked")
