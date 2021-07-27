@@ -40,19 +40,6 @@ public class TransformationClient {
         HttpHeaders headers = new HttpHeaders();
         headers.add("ServiceAuthorization", s2sTokenGenerator.generate());
         headers.add("Content-Type", APPLICATION_JSON.toString());
-        try {
-            if (transformationRequest != null) {
-                log.info(
-                    "Exception id={}, TransformationRequest ===>{}",
-                    transformationRequest.exceptionRecordCaseTypeId,
-                    new ObjectMapper().writeValueAsString(transformationRequest)
-                );
-            } else {
-                log.info("TransformationRequest ===> null");
-            }
-        } catch (JsonProcessingException e) {
-            log.error("Error transformationRequest writeValueAsString ", e);
-        }
 
         SuccessfulTransformationResponse response = restTemplate.postForObject(
             getUrl(baseUrl),
