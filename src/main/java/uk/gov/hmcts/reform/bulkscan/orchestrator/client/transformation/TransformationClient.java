@@ -28,6 +28,7 @@ public class TransformationClient {
     private final RestTemplate restTemplate;
     private final Validator validator;
     private final AuthTokenGenerator s2sTokenGenerator;
+    private final ObjectMapper objectMapper;
 
     public TransformationClient(
         RestTemplate restTemplate,
@@ -37,6 +38,7 @@ public class TransformationClient {
         this.restTemplate = restTemplate;
         this.validator = validator;
         this.s2sTokenGenerator = s2sTokenGenerator;
+        objectMapper = new ObjectMapper().registerModule(new JSR310Module());
     }
 
     public SuccessfulTransformationResponse transformCaseData(
@@ -51,7 +53,7 @@ public class TransformationClient {
                 log.info(
                     "Exception id={}, TransformationRequest ===>{}",
                     transformationRequest.exceptionRecordCaseTypeId,
-                    new ObjectMapper().registerModule(new JSR310Module()).writeValueAsString(transformationRequest)
+                    objectMapper.writeValueAsString(transformationRequest)
                 );
             } else {
                 log.info("TransformationRequest ===> null");
