@@ -1,5 +1,9 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -18,6 +22,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Service
 public class TransformationClient {
+    private static final Logger log = LoggerFactory.getLogger(TransformationClient.class);
 
     private final RestTemplate restTemplate;
     private final Validator validator;
@@ -40,6 +45,15 @@ public class TransformationClient {
         HttpHeaders headers = new HttpHeaders();
         headers.add("ServiceAuthorization", s2sTokenGenerator.generate());
         headers.add("Content-Type", APPLICATION_JSON.toString());
+        try {
+            log.info(
+                "Exception id={}, TransformationRequest ===>{}",
+                transformationRequest.exceptionRecordCaseTypeId,
+                new ObjectMapper().writeValueAsString(transformationRequest)
+            );
+        } catch (JsonProcessingException e) {
+            log.error("Error transformationRequest writeValueAsString ", e);
+        }
 
         SuccessfulTransformationResponse response = restTemplate.postForObject(
             getUrl(baseUrl),
