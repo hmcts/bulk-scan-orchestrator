@@ -46,11 +46,15 @@ public class TransformationClient {
         headers.add("ServiceAuthorization", s2sTokenGenerator.generate());
         headers.add("Content-Type", APPLICATION_JSON.toString());
         try {
-            log.info(
-                "Exception id={}, TransformationRequest ===>{}",
-                transformationRequest.exceptionRecordCaseTypeId,
-                new ObjectMapper().writeValueAsString(transformationRequest)
-            );
+            if (transformationRequest != null) {
+                log.info(
+                    "Exception id={}, TransformationRequest ===>{}",
+                    transformationRequest.exceptionRecordCaseTypeId,
+                    new ObjectMapper().writeValueAsString(transformationRequest)
+                );
+            } else {
+                log.info("TransformationRequest ===> null");
+            }
         } catch (JsonProcessingException e) {
             log.error("Error transformationRequest writeValueAsString ", e);
         }
