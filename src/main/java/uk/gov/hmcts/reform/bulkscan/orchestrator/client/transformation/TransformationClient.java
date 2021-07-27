@@ -23,7 +23,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Service
 public class TransformationClient {
-    private static final Logger log = LoggerFactory.getLogger(TransformationClient.class);
 
     private final RestTemplate restTemplate;
     private final Validator validator;
