@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -50,7 +51,7 @@ public class TransformationClient {
                 log.info(
                     "Exception id={}, TransformationRequest ===>{}",
                     transformationRequest.exceptionRecordCaseTypeId,
-                    new ObjectMapper().writeValueAsString(transformationRequest)
+                    new ObjectMapper().registerModule(new JSR310Module()).writeValueAsString(transformationRequest)
                 );
             } else {
                 log.info("TransformationRequest ===> null");
