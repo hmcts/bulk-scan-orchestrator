@@ -50,10 +50,11 @@ public class TransformationClient {
         headers.add("Content-Type", APPLICATION_JSON.toString());
         try {
             if (transformationRequest != null) {
+                var req = objectMapper.writeValueAsString(transformationRequest);
                 log.info(
                     "Exception id={}, TransformationRequest ===>{}",
                     transformationRequest.exceptionRecordCaseTypeId,
-                    objectMapper.writeValueAsString(transformationRequest)
+                    req
                 );
             } else {
                 log.info("TransformationRequest ===> null");
