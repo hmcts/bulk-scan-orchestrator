@@ -1,10 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -23,12 +18,10 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Service
 public class TransformationClient {
-    private static final Logger log = LoggerFactory.getLogger(TransformationClient.class);
 
     private final RestTemplate restTemplate;
     private final Validator validator;
     private final AuthTokenGenerator s2sTokenGenerator;
-    private final ObjectMapper objectMapper;
 
     public TransformationClient(
         RestTemplate restTemplate,
@@ -38,7 +31,6 @@ public class TransformationClient {
         this.restTemplate = restTemplate;
         this.validator = validator;
         this.s2sTokenGenerator = s2sTokenGenerator;
-        objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     }
 
     public SuccessfulTransformationResponse transformCaseData(
@@ -48,20 +40,6 @@ public class TransformationClient {
         HttpHeaders headers = new HttpHeaders();
         headers.add("ServiceAuthorization", s2sTokenGenerator.generate());
         headers.add("Content-Type", APPLICATION_JSON.toString());
-        try {
-            if (transformationRequest != null) {
-                var req = objectMapper.writeValueAsString(transformationRequest);
-                log.info(
-                    "Exception id={}, TransformationRequest ===>{}",
-                    transformationRequest.exceptionRecordCaseTypeId,
-                    req
-                );
-            } else {
-                log.info("TransformationRequest ===> null");
-            }
-        } catch (JsonProcessingException e) {
-            log.error("Error transformationRequest writeValueAsString ", e);
-        }
 
         SuccessfulTransformationResponse response = restTemplate.postForObject(
             getUrl(baseUrl),
