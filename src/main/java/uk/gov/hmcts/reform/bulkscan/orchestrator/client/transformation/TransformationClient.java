@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -38,7 +38,7 @@ public class TransformationClient {
         this.restTemplate = restTemplate;
         this.validator = validator;
         this.s2sTokenGenerator = s2sTokenGenerator;
-        objectMapper = new ObjectMapper().registerModule(new JSR310Module());
+        objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     }
 
     public SuccessfulTransformationResponse transformCaseData(
