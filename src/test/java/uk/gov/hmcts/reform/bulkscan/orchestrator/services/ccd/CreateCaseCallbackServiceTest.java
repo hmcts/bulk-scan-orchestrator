@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.time.LocalDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -292,6 +293,8 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
                 .willReturn(Validation.invalid("Event createNewCase not allowed "
                         + "for the current journey classification NEW_APPLICATION without OCR"));
+        given(callbackValidator.hasDateField(any(CaseDetails.class), anyString()))
+                .willReturn(Validation.valid(now()));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -333,6 +336,8 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
                 .willReturn(Validation.invalid("Event createNewCase not allowed "
                         + "for the current journey classification SUPPLEMENTARY_EVIDENCE"));
+        given(callbackValidator.hasDateField(any(CaseDetails.class), anyString()))
+                .willReturn(Validation.valid(now()));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -377,6 +382,8 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
         given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
+        given(callbackValidator.hasDateField(any(CaseDetails.class), anyString()))
+                .willReturn(Validation.valid(now()));
 
         // when
         ProcessResult result = service.process(new CcdCallbackRequest(
@@ -411,6 +418,8 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
         given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
+        given(callbackValidator.hasDateField(any(CaseDetails.class), anyString()))
+                .willReturn(Validation.valid(now()));
 
         assertThatThrownBy(
             () -> service.process(new CcdCallbackRequest(
@@ -453,6 +462,8 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
         given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
+        given(callbackValidator.hasDateField(any(CaseDetails.class), anyString()))
+                .willReturn(Validation.valid(now()));
 
         // when
         ProcessResult result =
@@ -512,6 +523,8 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
         given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
+        given(callbackValidator.hasDateField(any(CaseDetails.class), anyString()))
+                .willReturn(Validation.valid(now()));
 
         // when
         ProcessResult result =
@@ -565,6 +578,8 @@ class CreateCaseCallbackServiceTest {
         given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
         given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
+        given(callbackValidator.hasDateField(any(CaseDetails.class), anyString()))
+                .willReturn(Validation.valid(now()));
 
         // when
         ProcessResult result =

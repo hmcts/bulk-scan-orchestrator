@@ -19,13 +19,14 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
-import java.time.LocalDateTime;
 import java.util.function.Function;
 
+import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.JURSIDICTION;
@@ -69,6 +70,8 @@ class ExceptionRecordValidatorTest {
         given(callbackValidator.hasPoBox(any())).willReturn(Validation.valid(PO_BOX));
         given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
                 .willReturn(Validation.valid(NEW_APPLICATION));
+        given(callbackValidator.hasDateField(any(CaseDetails.class), anyString()))
+                .willReturn(Validation.valid(now()));
 
         // when
         var validation = exceptionRecordValidator.getValidation(validExceptionRecord);
@@ -91,6 +94,8 @@ class ExceptionRecordValidatorTest {
         given(callbackValidator.hasPoBox(any())).willReturn(Validation.valid(PO_BOX));
         given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
+        given(callbackValidator.hasDateField(any(CaseDetails.class), anyString()))
+                .willReturn(Validation.valid(now()));
 
         // when
         var validation = exceptionRecordValidator.getValidation(caseDetails);
@@ -146,6 +151,8 @@ class ExceptionRecordValidatorTest {
         given(callbackValidator.hasPoBox(any())).willReturn(Validation.valid(PO_BOX));
         given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
+        given(callbackValidator.hasDateField(any(CaseDetails.class), anyString()))
+                .willReturn(Validation.valid(now()));
 
         var invalidOcrData = ImmutableList.of(
             ImmutableMap.of("value", ImmutableMap.of(
@@ -188,6 +195,8 @@ class ExceptionRecordValidatorTest {
         given(callbackValidator.hasPoBox(any())).willReturn(Validation.valid(PO_BOX));
         given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
+        given(callbackValidator.hasDateField(any(CaseDetails.class), anyString()))
+                .willReturn(Validation.valid(now()));
 
         // when
         var validation = exceptionRecordValidator.getValidation(input);
@@ -225,6 +234,8 @@ class ExceptionRecordValidatorTest {
         given(callbackValidator.hasPoBox(any())).willReturn(Validation.valid(PO_BOX));
         given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
+        given(callbackValidator.hasDateField(any(CaseDetails.class), anyString()))
+                .willReturn(Validation.valid(now()));
 
         checkValidationErrorMatches(
             input,
@@ -244,6 +255,8 @@ class ExceptionRecordValidatorTest {
         given(callbackValidator.hasPoBox(any())).willReturn(Validation.valid(PO_BOX));
         given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
+        given(callbackValidator.hasDateField(any(CaseDetails.class), anyString()))
+                .willReturn(Validation.valid(now()));
 
         // then
         assertThatCode(() -> exceptionRecordValidator.getValidation(caseDetails))
@@ -291,8 +304,8 @@ class ExceptionRecordValidatorTest {
             softly.assertThat(exceptionRecord.poBoxJurisdiction).isEqualTo(JURSIDICTION);
             softly.assertThat(exceptionRecord.journeyClassification).isEqualTo(NEW_APPLICATION);
             softly.assertThat(exceptionRecord.formType).isEqualTo("personal");
-            softly.assertThat(exceptionRecord.deliveryDate).isBefore(LocalDateTime.now());
-            softly.assertThat(exceptionRecord.openingDate).isBefore(LocalDateTime.now());
+            softly.assertThat(exceptionRecord.deliveryDate).isBefore(now());
+            softly.assertThat(exceptionRecord.openingDate).isBefore(now());
             softly.assertThat(exceptionRecord.scannedDocuments).isNotEmpty();
             softly.assertThat(exceptionRecord.scannedDocuments.size()).isEqualTo(1);
 
@@ -311,8 +324,8 @@ class ExceptionRecordValidatorTest {
             softly.assertThat(document.fileName).isEqualTo("file1.pdf");
             softly.assertThat(document.documentUrl.url).isEqualTo("http://locahost");
             softly.assertThat(document.documentUrl.binaryUrl).isEqualTo("http://locahost/binary");
-            softly.assertThat(document.scannedDate).isBefore(LocalDateTime.now());
-            softly.assertThat(document.deliveryDate).isBefore(LocalDateTime.now());
+            softly.assertThat(document.scannedDate).isBefore(now());
+            softly.assertThat(document.deliveryDate).isBefore(now());
         });
     }
 }
