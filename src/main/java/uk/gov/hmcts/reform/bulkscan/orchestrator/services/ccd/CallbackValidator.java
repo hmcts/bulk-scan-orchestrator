@@ -260,7 +260,7 @@ public class CallbackValidator {
     }
 
     @SuppressWarnings("unchecked")
-    private Optional<List<Map<String, Object>>> getOcrData(CaseDetails theCase) {
+    public Optional<List<Map<String, Object>>> getOcrData(CaseDetails theCase) {
         return Optional.ofNullable(theCase)
                 .map(CaseDetails::getData)
                 .map(data -> (List<Map<String, Object>>) data.get("scanOCRData"));
