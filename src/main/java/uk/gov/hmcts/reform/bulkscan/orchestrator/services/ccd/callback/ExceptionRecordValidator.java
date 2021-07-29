@@ -24,7 +24,6 @@ import java.util.function.Supplier;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidations.getOcrData;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidator.FORMATTER;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.ENVELOPE_ID;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
@@ -169,7 +168,7 @@ public class ExceptionRecordValidator {
 
     @SuppressWarnings("unchecked")
     private Validation<String, List<OcrDataField>> getOcrDataFields(CaseDetails caseDetails) {
-        return getOcrData(caseDetails)
+        return callbackValidator.getOcrData(caseDetails)
             .map(ocrDataList ->
                 Try.of(() -> ocrDataList
                     .stream()

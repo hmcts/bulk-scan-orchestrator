@@ -19,6 +19,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.util.Collections;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static java.time.LocalDateTime.now;
@@ -72,6 +74,10 @@ class ExceptionRecordValidatorTest {
                 .willReturn(Validation.valid(NEW_APPLICATION));
         given(callbackValidator.hasDateField(any(CaseDetails.class), anyString()))
                 .willReturn(Validation.valid(now()));
+        given(callbackValidator.getOcrData(any(CaseDetails.class)))
+                .willReturn(Optional.of(
+                        ImmutableList.of(ImmutableMap.of("value", ImmutableMap.of("key", "firstName", "value", "John")))
+                ));
 
         // when
         var validation = exceptionRecordValidator.getValidation(validExceptionRecord);
@@ -159,6 +165,11 @@ class ExceptionRecordValidatorTest {
                 "key", "first_name",
                 "value", 1
             )));
+        given(callbackValidator.getOcrData(any(CaseDetails.class)))
+                .willReturn(Optional.of(Collections.singletonList(ImmutableMap.of("value", ImmutableMap.of(
+                        "key", "first_name",
+                        "value", 1
+                )))));
 
         String errorPattern = "Invalid OCR data format. Error: (class )?java.lang.Integer "
             + "cannot be cast to (class )?java.lang.String.*";
