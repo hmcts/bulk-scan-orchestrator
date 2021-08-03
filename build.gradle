@@ -93,6 +93,12 @@ task contract(type: Test) {
   classpath = sourceSets.contractTest.runtimeClasspath
 }
 
+task fortifyScan(type: JavaExec)  {
+  main = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
+  classpath += sourceSets.test.runtimeClasspath
+  jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
+}
+
 checkstyle {
   maxWarnings = 0
   toolVersion = '8.29'
@@ -208,6 +214,7 @@ repositories {
   maven {
     url 'https://dl.bintray.com/hmcts/hmcts-maven'
   }
+  maven { url 'https://jitpack.io' }
 }
 
 // it is important to specify logback classic and core packages explicitly as libraries like spring boot
@@ -290,6 +297,7 @@ dependencies {
   testImplementation group: 'org.junit.platform', name: 'junit-platform-commons', version: versions.junitPlatform
   testImplementation group: 'org.junit.platform', name: 'junit-platform-engine', version: versions.junitPlatform
   testImplementation group: 'io.github.netmikey.logunit', name: 'logunit-core', version: '1.1.0'
+  testImplementation group: 'com.github.hmcts', name: 'fortify-client', version: '1.2.1', classifier: 'all'
   testRuntimeOnly group: 'io.github.netmikey.logunit', name: 'logunit-logback', version: '1.1.0'
 
   integrationTestImplementation sourceSets.main.runtimeClasspath
