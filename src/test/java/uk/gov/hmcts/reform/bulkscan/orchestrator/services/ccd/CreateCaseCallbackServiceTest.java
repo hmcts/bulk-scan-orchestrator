@@ -40,7 +40,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -502,7 +502,7 @@ class CreateCaseCallbackServiceTest {
             anyString()
         )).willReturn(new CreateCaseResult(newCaseId));
 
-        doThrow(PaymentsPublishingException.class).when(paymentsProcessor)
+        willThrow(PaymentsPublishingException.class).given(paymentsProcessor)
             .updatePayments(any(), anyString(), anyString(), eq(Long.toString(newCaseId)));
 
         // when
