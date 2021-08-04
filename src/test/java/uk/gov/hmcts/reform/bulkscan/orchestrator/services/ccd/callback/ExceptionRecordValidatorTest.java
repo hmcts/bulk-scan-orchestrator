@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.OcrDataFie
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.Collections;
@@ -84,6 +85,31 @@ class ExceptionRecordValidatorTest {
 
         // then
         assertExceptionRecordMappings(validation);
+    }
+
+    @Test
+    void should_map_to_exception_record_when_case_details_are_valid_classification_exception() {
+        // given
+        var validExceptionRecord = createValidExceptionRecordCase();
+        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid("BULKSCAN_ExceptionRecord"));
+        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid("personal"));
+        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid("BULKSCAN"));
+        given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(1234L));
+        given(callbackValidator.hasPoBox(any())).willReturn(Validation.valid(PO_BOX));
+        given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
+                .willReturn(Validation.valid(EXCEPTION));
+        given(callbackValidator.hasDateField(any(CaseDetails.class), anyString()))
+                .willReturn(Validation.valid(now()));
+        given(callbackValidator.getOcrData(any(CaseDetails.class)))
+                .willReturn(Optional.of(
+                        ImmutableList.of(ImmutableMap.of("value", ImmutableMap.of("key", "firstName", "value", "John")))
+                ));
+
+        // when
+        var validation = exceptionRecordValidator.getValidation(validExceptionRecord);
+
+        // then
+        assertExceptionRecordMappings(validation, EXCEPTION);
     }
 
     @Test
@@ -289,6 +315,32 @@ class ExceptionRecordValidatorTest {
         assertThat(res).isSameAs(validationRes);
     }
 
+    @Test
+    void hasIdamToken_calls_callbackValidator() {
+        // given
+        Validation<String, String> validationRes = Validation.valid("idamToken");
+        given(callbackValidator.hasIdamToken("idamToken")).willReturn(validationRes);
+
+        // when
+        Validation<String,String> res = exceptionRecordValidator.hasIdamToken("idamToken");
+
+        // then
+        assertThat(res).isSameAs(validationRes);
+    }
+
+    @Test
+    void hasUserId_calls_callbackValidator() {
+        // given
+        Validation<String, String> validationRes = Validation.valid("userId");
+        given(callbackValidator.hasUserId("userId")).willReturn(validationRes);
+
+        // when
+        Validation<String,String> res = exceptionRecordValidator.hasUserId("userId");
+
+        // then
+        assertThat(res).isSameAs(validationRes);
+    }
+
     private void checkValidationErrorMatches(
         CaseDetails input,
         Function<CaseDetails, Validation<Seq<String>, ExceptionRecord>> validationMethod,
@@ -305,6 +357,13 @@ class ExceptionRecordValidatorTest {
     }
 
     private void assertExceptionRecordMappings(Validation<Seq<String>, ExceptionRecord> validation) {
+        assertExceptionRecordMappings(validation, NEW_APPLICATION);
+    }
+
+    private void assertExceptionRecordMappings(
+            Validation<Seq<String>, ExceptionRecord> validation,
+            Classification classification
+    ) {
         assertSoftly(softly -> {
             softly.assertThat(validation.isValid()).isTrue();
             ExceptionRecord exceptionRecord = validation.get();
@@ -313,7 +372,7 @@ class ExceptionRecordValidatorTest {
             softly.assertThat(exceptionRecord.envelopeId).isEqualTo("envelopeId123");
             softly.assertThat(exceptionRecord.poBox).isEqualTo(PO_BOX);
             softly.assertThat(exceptionRecord.poBoxJurisdiction).isEqualTo(JURSIDICTION);
-            softly.assertThat(exceptionRecord.journeyClassification).isEqualTo(NEW_APPLICATION);
+            softly.assertThat(exceptionRecord.journeyClassification).isEqualTo(classification);
             softly.assertThat(exceptionRecord.formType).isEqualTo("personal");
             softly.assertThat(exceptionRecord.deliveryDate).isBefore(now());
             softly.assertThat(exceptionRecord.openingDate).isBefore(now());
