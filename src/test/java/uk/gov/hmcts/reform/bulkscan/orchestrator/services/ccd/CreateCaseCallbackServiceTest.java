@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
+import io.vavr.collection.Array;
 import io.vavr.control.Validation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,10 +29,11 @@ import java.util.Map;
 
 import static java.time.LocalDateTime.now;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -42,13 +44,10 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.RequestType.CREATE_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdCallbackType.CASE_CREATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("checkstyle:LineLength")
@@ -59,13 +58,8 @@ class CreateCaseCallbackServiceTest {
     private static final String SERVICE = "service";
     private static final String CASE_ID = "123";
     private static final String CASE_TYPE_ID = SERVICE + "_ExceptionRecord";
-    private static final String PO_BOX = "pobox";
 
-    @Mock
-    private CallbackValidator callbackValidator;
-
-    // TODO: mock this!
-    private ExceptionRecordValidator exceptionRecordValidator;
+    @Mock private ExceptionRecordValidator exceptionRecordValidator;
     @Mock private ServiceConfigProvider serviceConfigProvider;
     @Mock private CaseFinder caseFinder;
     @Mock private CcdNewCaseCreator ccdNewCaseCreator;
@@ -73,12 +67,11 @@ class CreateCaseCallbackServiceTest {
     @Mock private PaymentsProcessor paymentsProcessor;
     @Mock private CallbackResultRepositoryProxy callbackResultRepositoryProxy;
 
-    private CreateCaseCallbackService service;
+    private CreateCaseCallbackService createCaseCallbackService;
 
     @BeforeEach
     void setUp() {
-        exceptionRecordValidator = new ExceptionRecordValidator(callbackValidator);
-        service = new CreateCaseCallbackService(
+        createCaseCallbackService = new CreateCaseCallbackService(
             exceptionRecordValidator,
             serviceConfigProvider,
             caseFinder,
@@ -91,18 +84,26 @@ class CreateCaseCallbackServiceTest {
 
     @Test
     void should_not_allow_to_process_callback_in_case_wrong_event_id_is_received() {
-        CallbackException callbackException = catchThrowableOfType(() ->
-            service.process(new CcdCallbackRequest(
-                "some event",
-                null,
-                true
-            ), IDAM_TOKEN, USER_ID),
-            CallbackException.class
-        );
+        // given
+        given(exceptionRecordValidator.mandatoryPrerequisites(any()))
+                .willReturn(Validation.invalid("The some event event is not supported. "
+                        + "Please contact service team"));
 
-        assertThat(callbackException.getCause()).isNull();
-        assertThat(callbackException).hasMessage("The some event event is not supported. Please contact service team");
+        // when
+        assertThatCode(() -> createCaseCallbackService.process(
+                new CcdCallbackRequest(
+                        "some event",
+                        null,
+                        true
+                ),
+                IDAM_TOKEN,
+                USER_ID
+        ))
+                .isInstanceOf(CallbackException.class)
+                .hasCause(null)
+                .hasMessage("The some event event is not supported. Please contact service team");
 
+        // then
         verifyNoInteractions(callbackResultRepositoryProxy);
         verify(serviceConfigProvider, never()).getConfig(anyString());
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
@@ -112,22 +113,24 @@ class CreateCaseCallbackServiceTest {
     void should_not_allow_to_process_callback_when_case_type_id_is_missing() {
         // given
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.id(1L));
-        given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
+        given(exceptionRecordValidator.mandatoryPrerequisites(any()))
                 .willReturn(Validation.invalid("No case type ID supplied"));
 
         // when
-        CallbackException callbackException = catchThrowableOfType(() ->
-            service.process(new CcdCallbackRequest(
-                EventIds.CREATE_NEW_CASE,
-                caseDetails,
-                true
-            ), IDAM_TOKEN, USER_ID),
-            CallbackException.class
-        );
+        assertThatCode(() -> createCaseCallbackService.process(
+                new CcdCallbackRequest(
+                        EventIds.CREATE_NEW_CASE,
+                        caseDetails,
+                        true
+                ),
+                IDAM_TOKEN,
+                USER_ID
+        ))
+                .isInstanceOf(CallbackException.class)
+                .hasCause(null)
+                .hasMessage("No case type ID supplied");
 
-        assertThat(callbackException.getCause()).isNull();
-        assertThat(callbackException).hasMessage("No case type ID supplied");
-
+        // then
         verifyNoInteractions(callbackResultRepositoryProxy);
         verify(serviceConfigProvider, never()).getConfig(anyString());
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
@@ -137,23 +140,24 @@ class CreateCaseCallbackServiceTest {
     void should_not_allow_to_process_callback_when_case_type_id_is_empty() {
         // given
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(""));
-        given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
+        given(exceptionRecordValidator.mandatoryPrerequisites(any()))
                 .willReturn(Validation.invalid("Case type ID () has invalid format"));
 
         // when
-        CallbackException callbackException = catchThrowableOfType(() ->
-            service.process(new CcdCallbackRequest(
-                EventIds.CREATE_NEW_CASE,
-                caseDetails,
-                true
-            ), IDAM_TOKEN, USER_ID),
-            CallbackException.class
-        );
+        assertThatCode(() -> createCaseCallbackService.process(
+                new CcdCallbackRequest(
+                        EventIds.CREATE_NEW_CASE,
+                        caseDetails,
+                        true
+                ),
+                IDAM_TOKEN,
+                USER_ID
+        ))
+                .isInstanceOf(CallbackException.class)
+                .hasCause(null)
+                .hasMessage("Case type ID () has invalid format");
 
         // then
-        assertThat(callbackException.getCause()).isNull();
-        assertThat(callbackException).hasMessage("Case type ID () has invalid format");
-
         verifyNoInteractions(callbackResultRepositoryProxy);
         verify(serviceConfigProvider, never()).getConfig(anyString());
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
@@ -163,23 +167,22 @@ class CreateCaseCallbackServiceTest {
     void should_not_allow_to_process_callback_in_case_service_not_configured() {
         // given
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(CASE_TYPE_ID));
-        given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
-                .willReturn(Validation.invalid("oh no"));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.invalid("oh no"));
 
         // when
-        CallbackException callbackException = catchThrowableOfType(() ->
-            service.process(new CcdCallbackRequest(
-                EventIds.CREATE_NEW_CASE,
-                caseDetails,
-                true
-            ), IDAM_TOKEN, USER_ID),
-            CallbackException.class
-        );
+        assertThatCode(() -> createCaseCallbackService.process(
+                new CcdCallbackRequest(
+                        EventIds.CREATE_NEW_CASE,
+                        caseDetails,
+                        true
+                ),
+                IDAM_TOKEN,
+                USER_ID))
+                .isInstanceOf(CallbackException.class)
+                .hasCause(null)
+                .hasMessage("oh no");
 
         // then
-        assertThat(callbackException.getCause()).isNull();
-        assertThat(callbackException).hasMessage("oh no");
-
         verifyNoInteractions(callbackResultRepositoryProxy);
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
@@ -188,23 +191,24 @@ class CreateCaseCallbackServiceTest {
     void should_not_allow_to_process_callback_in_case_transformation_url_not_configured() {
         // given
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(CASE_TYPE_ID));
-        given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
+        given(exceptionRecordValidator.mandatoryPrerequisites(any()))
                 .willReturn(Validation.invalid("Transformation URL is not configured"));
 
         // when
-        CallbackException callbackException = catchThrowableOfType(() ->
-            service.process(new CcdCallbackRequest(
-                EventIds.CREATE_NEW_CASE,
-                caseDetails,
-                true
-            ), IDAM_TOKEN, USER_ID),
-            CallbackException.class
-        );
+        assertThatCode(() -> createCaseCallbackService.process(
+                new CcdCallbackRequest(
+                        EventIds.CREATE_NEW_CASE,
+                        caseDetails,
+                        true
+                ),
+                IDAM_TOKEN,
+                USER_ID
+        ))
+                .isInstanceOf(CallbackException.class)
+                .hasCause(null)
+                .hasMessage("Transformation URL is not configured");
 
         // then
-        assertThat(callbackException.getCause()).isNull();
-        assertThat(callbackException).hasMessage("Transformation URL is not configured");
-
         verifyNoInteractions(callbackResultRepositoryProxy);
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
@@ -217,55 +221,54 @@ class CreateCaseCallbackServiceTest {
             .caseTypeId(CASE_TYPE_ID)
             .jurisdiction("some jurisdiction")
         );
-        given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
+        given(exceptionRecordValidator.mandatoryPrerequisites(any()))
                 .willReturn(Validation.invalid("Callback has no Idam token received in the header"));
 
         // when
-        CallbackException callbackException = catchThrowableOfType(() ->
-            service.process(new CcdCallbackRequest(
-                EventIds.CREATE_NEW_CASE,
-                caseDetails,
-                true
-            ), null, USER_ID),
-            CallbackException.class
-        );
+        assertThatCode(() -> createCaseCallbackService.process(
+                new CcdCallbackRequest(
+                        EventIds.CREATE_NEW_CASE,
+                        caseDetails,
+                        true
+                ),
+                null,
+                USER_ID
+        ))
+                .isInstanceOf(CallbackException.class)
+                .hasCause(null)
+                .hasMessage("Callback has no Idam token received in the header");
 
         // then
         verifyNoInteractions(callbackResultRepositoryProxy);
-        assertThat(callbackException.getCause()).isNull();
-        assertThat(callbackException).hasMessage("Callback has no Idam token received in the header");
     }
 
     @Test
     void should_not_allow_to_process_callback_when_user_id_is_missing() {
         // given
-        setUpServiceConfig();
-
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder
             .id(Long.valueOf(CASE_ID))
             .caseTypeId(CASE_TYPE_ID)
             .jurisdiction("some jurisdiction")
         );
-        given(callbackValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
-                .willReturn(Validation.valid(SERVICE));
-        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(null));
-        given(callbackValidator.hasUserId(any()))
+        given(exceptionRecordValidator.mandatoryPrerequisites(any()))
                 .willReturn(Validation.invalid("Callback has no user id received in the header"));
 
         // when
-        CallbackException callbackException = catchThrowableOfType(() ->
-            service.process(new CcdCallbackRequest(
-                EventIds.CREATE_NEW_CASE,
-                caseDetails,
-                true
-            ), IDAM_TOKEN, null),
-            CallbackException.class
-        );
+        assertThatCode(() -> createCaseCallbackService.process(
+                new CcdCallbackRequest(
+                        EventIds.CREATE_NEW_CASE,
+                        caseDetails,
+                        true
+                ),
+                IDAM_TOKEN,
+                null
+        ))
+                .isInstanceOf(CallbackException.class)
+                .hasCause(null)
+                .hasMessage("Callback has no user id received in the header");
 
         // then
         verifyNoInteractions(callbackResultRepositoryProxy);
-        assertThat(callbackException.getCause()).isNull();
-        assertThat(callbackException).hasMessage("Callback has no user id received in the header");
     }
 
     @Test
@@ -282,22 +285,16 @@ class CreateCaseCallbackServiceTest {
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
 
-        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
-        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
-        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
-        given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(Long.valueOf(CASE_ID)));
-        given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
-        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
-        given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
-        given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
-        given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
-                .willReturn(Validation.invalid("Event createNewCase not allowed "
-                        + "for the current journey classification NEW_APPLICATION without OCR"));
-        given(callbackValidator.hasDateField(any(CaseDetails.class), anyString()))
-                .willReturn(Validation.valid(now()));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+
+        given(exceptionRecordValidator.getCaseId(any(CaseDetails.class))).willReturn(Validation.valid(CASE_ID));
+        given(exceptionRecordValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class))).willReturn(Validation.valid(SERVICE));
+        given(exceptionRecordValidator.getValidation(any(CaseDetails.class)))
+                .willReturn(Validation.invalid(Array.of("Event createNewCase not allowed "
+                        + "for the current journey classification NEW_APPLICATION without OCR")));
 
         // when
-        ProcessResult result = service.process(new CcdCallbackRequest(
+        ProcessResult result = createCaseCallbackService.process(new CcdCallbackRequest(
             EventIds.CREATE_NEW_CASE,
             caseDetails(data),
             true
@@ -318,75 +315,24 @@ class CreateCaseCallbackServiceTest {
     }
 
     @Test
-    void should_report_error_if_classification_is_supplementary_evidence() {
-        // given
-        setUpServiceConfig();
-
-        Map<String, Object> data = basicCaseData();
-        data.put("journeyClassification", SUPPLEMENTARY_EVIDENCE.name());
-
-        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
-        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
-        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
-        given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(Long.valueOf(CASE_ID)));
-        given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
-        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
-        given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
-        given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
-        given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
-                .willReturn(Validation.invalid("Event createNewCase not allowed "
-                        + "for the current journey classification SUPPLEMENTARY_EVIDENCE"));
-        given(callbackValidator.hasDateField(any(CaseDetails.class), anyString()))
-                .willReturn(Validation.valid(now()));
-
-        // when
-        ProcessResult result = service.process(new CcdCallbackRequest(
-            EventIds.CREATE_NEW_CASE,
-            caseDetails(data),
-            true
-        ), IDAM_TOKEN, USER_ID);
-
-        // then
-        assertThat(result.getWarnings()).isEmpty();
-        assertThat(result.getErrors()).containsOnly(
-            String.format(
-                "Event %s not allowed for the current journey classification %s",
-                EventIds.CREATE_NEW_CASE,
-                SUPPLEMENTARY_EVIDENCE.name()
-            )
-        );
-
-        verifyNoInteractions(callbackResultRepositoryProxy);
-        verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
-    }
-
-    @Test
     void should_return_existing_case_if_it_exists_in_ccd_for_a_given_exception_record() {
         // given
         setUpServiceConfig();
 
-        when(caseFinder.findCases(any(), any()))
-            .thenReturn(singletonList(345L));
+        given(caseFinder.findCases(any(), any())).willReturn(singletonList(345L));
         Map<String, Object> caseData = basicCaseData();
         Map<String, Object> finalizedCaseData = new HashMap<>();
-        when(exceptionRecordFinalizer.finalizeExceptionRecord(caseData, "345", CASE_CREATION))
-            .thenReturn(finalizedCaseData);
+        given(exceptionRecordFinalizer.finalizeExceptionRecord(caseData, "345", CASE_CREATION))
+            .willReturn(finalizedCaseData);
 
-        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
-        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
-        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
-        given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(Long.valueOf(CASE_ID)));
-        given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
-        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
-        given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
-        given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
-        given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
-                .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
-        given(callbackValidator.hasDateField(any(CaseDetails.class), anyString()))
-                .willReturn(Validation.valid(now()));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+        given(exceptionRecordValidator.getCaseId(any())).willReturn(Validation.valid(CASE_ID));
+        given(exceptionRecordValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
+        given(exceptionRecordValidator.getValidation(any(CaseDetails.class)))
+                .willReturn(Validation.valid(getExceptionRecord()));
 
         // when
-        ProcessResult result = service.process(new CcdCallbackRequest(
+        ProcessResult result = createCaseCallbackService.process(new CcdCallbackRequest(
             EventIds.CREATE_NEW_CASE,
             caseDetails(caseData),
             true
@@ -403,26 +349,21 @@ class CreateCaseCallbackServiceTest {
 
     @Test
     void should_return_error_if_multiple_cases_exist_in_ccd_for_a_given_exception_record() {
+        // given
         setUpServiceConfig();
 
-        when(caseFinder.findCases(any(), any()))
-            .thenReturn(asList(345L, 456L));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+        given(caseFinder.findCases(any(), any())).willReturn(asList(345L, 456L));
 
-        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
-        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
-        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
-        given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(Long.valueOf(CASE_ID)));
-        given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
-        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
-        given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
-        given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
-        given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
-                .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
-        given(callbackValidator.hasDateField(any(CaseDetails.class), anyString()))
-                .willReturn(Validation.valid(now()));
+        given(exceptionRecordValidator.getCaseId(any(CaseDetails.class))).willReturn(Validation.valid(CASE_ID));
+        given(exceptionRecordValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
+                .willReturn(Validation.valid(SERVICE));
+        given(exceptionRecordValidator.getValidation(any(CaseDetails.class)))
+                .willReturn(Validation.valid(getExceptionRecord()));
 
+        // when
         assertThatThrownBy(
-            () -> service.process(new CcdCallbackRequest(
+            () -> createCaseCallbackService.process(new CcdCallbackRequest(
                 EventIds.CREATE_NEW_CASE,
                 caseDetails(basicCaseData()),
                 true
@@ -431,6 +372,7 @@ class CreateCaseCallbackServiceTest {
             .isInstanceOf(MultipleCasesFoundException.class)
             .hasMessage("Multiple cases (345, 456) found for the given bulk scan case reference: 123");
 
+        //then
         verifyNoInteractions(callbackResultRepositoryProxy);
         verify(exceptionRecordFinalizer, never()).finalizeExceptionRecord(anyMap(), anyString(), any());
     }
@@ -452,22 +394,16 @@ class CreateCaseCallbackServiceTest {
         Map<String, Object> data = basicCaseData();
         data.put(ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING, YesNoFieldValues.YES);
 
-        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
-        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
-        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
-        given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(Long.valueOf(CASE_ID)));
-        given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
-        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
-        given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
-        given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
-        given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
-                .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
-        given(callbackValidator.hasDateField(any(CaseDetails.class), anyString()))
-                .willReturn(Validation.valid(now()));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+        given(exceptionRecordValidator.getCaseId(any(CaseDetails.class))).willReturn(Validation.valid(CASE_ID));
+        given(exceptionRecordValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
+                .willReturn(Validation.valid(SERVICE));
+        given(exceptionRecordValidator.getValidation(any(CaseDetails.class)))
+                .willReturn(Validation.valid(getExceptionRecord()));
 
         // when
         ProcessResult result =
-            service
+            createCaseCallbackService
                 .process(
                     new CcdCallbackRequest(EventIds.CREATE_NEW_CASE, caseDetails(data), ignoresWarnings),
                     IDAM_TOKEN,
@@ -513,22 +449,16 @@ class CreateCaseCallbackServiceTest {
             anyString()
         )).willReturn(new CreateCaseResult(newCaseId));
 
-        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
-        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
-        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
-        given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(Long.valueOf(CASE_ID)));
-        given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
-        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
-        given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
-        given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
-        given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
-                .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
-        given(callbackValidator.hasDateField(any(CaseDetails.class), anyString()))
-                .willReturn(Validation.valid(now()));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+        given(exceptionRecordValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
+                .willReturn(Validation.valid(SERVICE));
+        given(exceptionRecordValidator.getCaseId(any(CaseDetails.class))).willReturn(Validation.valid(CASE_ID));
+        given(exceptionRecordValidator.getValidation(any(CaseDetails.class)))
+                .willReturn(Validation.valid(getExceptionRecord()));
 
         // when
         ProcessResult result =
-            service
+            createCaseCallbackService
                 .process(
                     new CcdCallbackRequest(EventIds.CREATE_NEW_CASE, caseDetails(data), true), // ignore warnings
                     IDAM_TOKEN,
@@ -553,6 +483,13 @@ class CreateCaseCallbackServiceTest {
         // given
         setUpServiceConfig("https://localhost", true); // allowed to create case despite pending payments
 
+        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+        given(exceptionRecordValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
+                .willReturn(Validation.valid(SERVICE));
+        given(exceptionRecordValidator.getCaseId(any(CaseDetails.class))).willReturn(Validation.valid(CASE_ID));
+        given(exceptionRecordValidator.getValidation(any(CaseDetails.class)))
+                .willReturn(Validation.valid(getExceptionRecord()));
+
         Map<String, Object> data = basicCaseData();
         data.put(ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING, YesNoFieldValues.YES);
 
@@ -568,22 +505,9 @@ class CreateCaseCallbackServiceTest {
         willThrow(PaymentsPublishingException.class).given(paymentsProcessor)
             .updatePayments(any(), anyString(), anyString(), eq(Long.toString(newCaseId)));
 
-        given(callbackValidator.hasCaseTypeId(any())).willReturn(Validation.valid(null));
-        given(callbackValidator.hasFormType(any())).willReturn(Validation.valid(null));
-        given(callbackValidator.hasJurisdiction(any())).willReturn(Validation.valid(null));
-        given(callbackValidator.hasAnId(any())).willReturn(Validation.valid(Long.valueOf(CASE_ID)));
-        given(callbackValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
-        given(callbackValidator.hasIdamToken(anyString())).willReturn(Validation.valid(IDAM_TOKEN));
-        given(callbackValidator.hasUserId(anyString())).willReturn(Validation.valid(USER_ID));
-        given(callbackValidator.hasPoBox(any(CaseDetails.class))).willReturn(Validation.valid(PO_BOX));
-        given(callbackValidator.hasJourneyClassification(any(CaseDetails.class)))
-                .willReturn(Validation.valid(SUPPLEMENTARY_EVIDENCE_WITH_OCR));
-        given(callbackValidator.hasDateField(any(CaseDetails.class), anyString()))
-                .willReturn(Validation.valid(now()));
-
         // when
         ProcessResult result =
-            service
+            createCaseCallbackService
                 .process(
                     new CcdCallbackRequest(EventIds.CREATE_NEW_CASE, caseDetails(data), true), // ignore warnings
                     IDAM_TOKEN,
@@ -612,7 +536,7 @@ class CreateCaseCallbackServiceTest {
         configItem.setTransformationUrl(transformationUrl);
         configItem.setAllowCreatingCaseBeforePaymentsAreProcessed(allowCreatingCaseBeforePaymentsAreProcessed);
 
-        when(serviceConfigProvider.getConfig(SERVICE)).thenReturn(configItem);
+        given(serviceConfigProvider.getConfig(SERVICE)).willReturn(configItem);
     }
 
     private Map<String, Object> basicCaseData() {
@@ -637,6 +561,22 @@ class CreateCaseCallbackServiceTest {
             .caseTypeId(CASE_TYPE_ID)
             .jurisdiction("some jurisdiction")
             .data(data)
+        );
+    }
+
+    private ExceptionRecord getExceptionRecord() {
+        return new ExceptionRecord(
+                CASE_ID,
+                CASE_TYPE_ID,
+                "envelopeId123",
+                "12345",
+                "some jurisdiction",
+                EXCEPTION,
+                "Form1",
+                now(),
+                now(),
+                emptyList(),
+                emptyList()
         );
     }
 }
