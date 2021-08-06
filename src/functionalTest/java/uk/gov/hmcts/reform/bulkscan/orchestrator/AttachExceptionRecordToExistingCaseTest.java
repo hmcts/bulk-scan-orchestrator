@@ -334,8 +334,15 @@ class AttachExceptionRecordToExistingCaseTest {
             .header(AUTHORIZATION, ccdAuthenticator.getUserToken())
             .header(CcdCallbackController.USER_ID, ccdAuthenticator.getUserId())
             .body(callbackRequest)
+            .then()
             .when()
-            .post("/callback/attach_case?ignore-warning=true");
+            .post("/callback/attach_case?ignore-warning=true")
+            .then()
+            .log()
+            .all()
+            .and()
+            .extract()
+            .response();
     }
 
     private Map<String, Object> exceptionRecordDataWithSearchFields(
