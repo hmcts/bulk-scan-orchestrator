@@ -31,7 +31,6 @@ IDAM_USERS_BULKSCAN_PASSWORD = Password12
     - XXXX is the connection string from azure to the queue you intend to use.
     - YYYY is the name of the queue
 
-
 - add a case into ccd using the [case management ui](http://localhost:3451)
 - copy the case number from the UI (excluding the # and -'s) and place it into the example1.json#case_ref to reference the created case.
 - get the secret and run the getSasSecret script to create the queue jwt token.
