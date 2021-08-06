@@ -32,11 +32,16 @@ public class CaseSearcher {
     // only used in tests
     public Optional<CaseDetails> findExceptionRecord(String poBox, String container) {
         String caseTypeId = container.toUpperCase() + "_" + CreateExceptionRecord.CASE_TYPE;
-        return search(
-            SampleData.JURSIDICTION,
-            caseTypeId,
-            ImmutableMap.of("case.poBox", poBox)
-        ).stream().findFirst();
+        try {
+            return search(
+                SampleData.JURSIDICTION,
+                caseTypeId,
+                ImmutableMap.of("case.poBox", poBox)
+            ).stream().findFirst();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return Optional.empty();
+        }
     }
 
     // only used in tests. single source code call - only used in tests too
