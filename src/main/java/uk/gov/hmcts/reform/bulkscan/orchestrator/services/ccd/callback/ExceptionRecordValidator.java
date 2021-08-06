@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDoc
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -35,9 +36,14 @@ public class ExceptionRecordValidator {
     private static final String KEY = "key";
 
     private final CallbackValidator callbackValidator;
+    private final EventIdValidator eventIdValidator;
 
-    public ExceptionRecordValidator(CallbackValidator callbackValidator) {
+    public ExceptionRecordValidator(
+            CallbackValidator callbackValidator,
+            EventIdValidator eventIdValidator
+    ) {
         this.callbackValidator = callbackValidator;
+        this.eventIdValidator = eventIdValidator;
     }
 
     /**
@@ -131,6 +137,10 @@ public class ExceptionRecordValidator {
 
     public Validation<String, String> hasUserId(String userId) {
         return callbackValidator.hasUserId(userId);
+    }
+
+    public Validation<String, Void> isCreateNewCaseEvent(String eventId) {
+        return eventIdValidator.isCreateNewCaseEvent(eventId);
     }
 
     private Seq<String> getValidationErrors(Seq<Validation<String, ?>> validations) {

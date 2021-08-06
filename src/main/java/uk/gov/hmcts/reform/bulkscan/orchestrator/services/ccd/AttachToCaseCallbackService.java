@@ -19,7 +19,6 @@ import java.util.Map;
 
 import static io.vavr.control.Validation.valid;
 import static java.util.Collections.singletonList;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator.isAttachToCaseEvent;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.CCD_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SEARCH_CASE_REFERENCE_TYPE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
@@ -34,19 +33,22 @@ public class AttachToCaseCallbackService {
     private final ExceptionRecordFinalizer exceptionRecordFinalizer;
     private final ExceptionRecordAttacher exceptionRecordAttacher;
     private final CallbackValidator callbackValidator;
+    private final EventIdValidator eventIdValidator;
 
     public AttachToCaseCallbackService(
             ServiceConfigProvider serviceConfigProvider,
             ExceptionRecordValidator exceptionRecordValidator,
             ExceptionRecordFinalizer exceptionRecordFinalizer,
             ExceptionRecordAttacher exceptionRecordAttacher,
-            CallbackValidator callbackValidator
+            CallbackValidator callbackValidator,
+            EventIdValidator eventIdValidator
     ) {
         this.serviceConfigProvider = serviceConfigProvider;
         this.exceptionRecordValidator = exceptionRecordValidator;
         this.exceptionRecordFinalizer = exceptionRecordFinalizer;
         this.exceptionRecordAttacher = exceptionRecordAttacher;
         this.callbackValidator = callbackValidator;
+        this.eventIdValidator = eventIdValidator;
     }
 
     /**
@@ -63,7 +65,7 @@ public class AttachToCaseCallbackService {
         Boolean ignoreWarnings
     ) {
         Validation<String, Void> canAccess = exceptionRecordValidator.mandatoryPrerequisites(
-            () -> isAttachToCaseEvent(eventId),
+            () -> eventIdValidator.isAttachToCaseEvent(eventId),
             () -> callbackValidator.canBeAttachedToCase(exceptionRecordDetails),
             () -> callbackValidator.hasIdamToken(requesterIdamToken).map(item -> null),
             () -> callbackValidator.hasUserId(requesterUserId).map(item -> null)
