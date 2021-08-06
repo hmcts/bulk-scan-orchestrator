@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 
@@ -28,8 +27,7 @@ public class ExceptionRecordCreator {
         envelopeMessager.sendMessageFromFile(resourceName, "0000000000000000", null, poBox, fileUrl);
 
         await("Exception record is created")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollDelay(2, TimeUnit.SECONDS)
+            .forever()
             .until(() -> caseSearcher.findExceptionRecord(poBox.toString(), container).isPresent());
 
         return caseSearcher.findExceptionRecord(poBox.toString(), container).get();

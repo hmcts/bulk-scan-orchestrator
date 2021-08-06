@@ -15,11 +15,9 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.EnvelopeReference;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import static java.time.Instant.now;
 import static java.util.Arrays.asList;
@@ -211,8 +209,7 @@ public class AutomaticCaseCreationTest {
 
     private void waitForServiceCaseToBeInElasticSearch(String envelopeId) {
         await("Wait for service case to be searchable in ElasticSearch. Envelope ID: " + envelopeId)
-            .atMost(60, TimeUnit.SECONDS)
-            .pollInterval(Duration.ofSeconds(5))
+            .forever()
             .until(() ->
                 !caseSearcher.searchByEnvelopeId(
                     SERVICE_CASE_JURISDICTION,
@@ -225,8 +222,7 @@ public class AutomaticCaseCreationTest {
 
     private void waitForExceptionRecordToBeCreated(UUID poBox, String envelopeId, String caseTypeId) {
         await("Wait for exception record to be created. Envelope ID: " + envelopeId)
-            .atMost(60, TimeUnit.SECONDS)
-            .pollInterval(Duration.ofSeconds(5))
+            .forever()
             .until(() -> !findExceptionRecords(poBox, caseTypeId).isEmpty());
     }
 }

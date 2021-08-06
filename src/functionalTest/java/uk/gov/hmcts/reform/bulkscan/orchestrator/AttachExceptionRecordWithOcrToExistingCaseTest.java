@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import static java.time.Instant.now;
 import static java.util.Collections.emptyList;
@@ -141,15 +140,14 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
     }
 
     private CaseDetails createExceptionRecord(String resourceName) throws Exception {
-        UUID poBox = UUID.randomUUID();
+        var poBox = UUID.randomUUID();
 
         String dmUrl = dmUploadService.uploadToDmStore("doc.pdf", "documents/supplementary-evidence.pdf");
 
         envelopeMessager.sendMessageFromFile(resourceName, "0000000000000000", null, poBox, dmUrl);
 
         await("Exception record is created")
-            .atMost(30, TimeUnit.SECONDS)
-            .pollDelay(2, TimeUnit.SECONDS)
+            .forever()
             .until(() -> caseSearcher.findExceptionRecord(poBox.toString(), SampleData.CONTAINER).isPresent());
 
         return caseSearcher.findExceptionRecord(poBox.toString(), SampleData.CONTAINER).get();
@@ -189,8 +187,8 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
     }
 
     private CaseDetails createCaseWithDocument() {
-        String dmUrlOriginal = dmUploadService.uploadToDmStore("original.pdf", "documents/supplementary-evidence.pdf");
-        String documentUuid = StringUtils.substringAfterLast(dmUrlOriginal, "/");
+        var dmUrlOriginal = dmUploadService.uploadToDmStore("original.pdf", "documents/supplementary-evidence.pdf");
+        var documentUuid = StringUtils.substringAfterLast(dmUrlOriginal, "/");
 
         return ccdCaseCreator.createCase(
             singletonList(

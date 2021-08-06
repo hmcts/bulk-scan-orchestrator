@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.logging.appinsights.SyntheticHeaders;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -93,8 +92,7 @@ class CreateCaseTest {
         assertThat(caseExceptionRecordReference).isEqualTo(String.valueOf(exceptionRecord.getId()));
 
         await("Case is ingested")
-            .atMost(10, TimeUnit.SECONDS)
-            .pollInterval(1, TimeUnit.SECONDS)
+            .forever()
             .until(() -> caseIngested(caseExceptionRecordReference, service));
 
         // give ElasticSearch some time to reach consistency

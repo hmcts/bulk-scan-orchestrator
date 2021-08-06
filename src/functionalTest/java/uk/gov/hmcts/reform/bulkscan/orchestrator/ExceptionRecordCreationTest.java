@@ -13,12 +13,10 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.envelopehandlers.CreateExceptionRecord;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -67,8 +65,7 @@ class ExceptionRecordCreationTest {
 
         // then
         await("Exception record being created")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollInterval(Duration.ofSeconds(5))
+            .forever()
             .until(() -> caseSearcher.findExceptionRecord(randomPoBox.toString(), SampleData.CONTAINER).isPresent());
 
         CaseDetails caseDetails = caseSearcher.findExceptionRecord(randomPoBox.toString(), SampleData.CONTAINER).get();
@@ -94,8 +91,7 @@ class ExceptionRecordCreationTest {
 
         // then
         await("Exception record should be created")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollInterval(Duration.ofSeconds(5))
+            .forever()
             .until(() -> caseSearcher.findExceptionRecord(randomPoBox.toString(), SampleData.CONTAINER).isPresent());
 
         CaseDetails caseDetails = caseSearcher.findExceptionRecord(randomPoBox.toString(), SampleData.CONTAINER).get();
@@ -137,8 +133,7 @@ class ExceptionRecordCreationTest {
 
         // then
         await("Exception record being created")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollInterval(Duration.ofSeconds(5))
+            .forever()
             .until(() -> caseSearcher.findExceptionRecord(randomPoBox.toString(), SampleData.CONTAINER).isPresent());
     }
 
@@ -165,8 +160,7 @@ class ExceptionRecordCreationTest {
 
         // then
         await("Exception record being created")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollInterval(Duration.ofSeconds(5))
+            .forever()
             .until(() -> findCasesByEnvelopeId(envelopeId).size() == 1);
 
         CaseDetails exceptionRecord = findCasesByEnvelopeId(envelopeId).get(0);

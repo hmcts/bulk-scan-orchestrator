@@ -11,12 +11,10 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 import static java.util.Collections.emptyList;
 import static java.util.UUID.randomUUID;
@@ -50,8 +48,7 @@ public class AutomaticCaseUpdateTest {
 
         // then
         await("Case in CCD was updated with data from envelope")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollInterval(Duration.ofSeconds(2))
+            .forever()
             .until(() -> {
                 CaseDetails updatedCaseDetails = ccdApi.getCase(
                     String.valueOf(existingCase.getId()),
@@ -85,8 +82,7 @@ public class AutomaticCaseUpdateTest {
 
         // then
         await("Case in CCD was updated with data from envelope")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollInterval(Duration.ofSeconds(2))
+            .forever()
             .until(() -> {
                 CaseDetails updatedCaseDetails = ccdApi.getCase(
                     String.valueOf(existingCase.getId()),
@@ -120,8 +116,7 @@ public class AutomaticCaseUpdateTest {
 
         // then
         await("Case in CCD was updated with data from envelope")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollInterval(Duration.ofSeconds(2))
+            .forever()
             .until(() -> {
                 CaseDetails updatedCaseDetails = ccdApi.getCase(
                     String.valueOf(existingCase.getId()),
@@ -144,8 +139,7 @@ public class AutomaticCaseUpdateTest {
 
         // then
         await("Case in CCD was updated with data from envelope")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollInterval(Duration.ofSeconds(2))
+            .forever()
             .until(() -> {
                 CaseDetails updatedCaseDetails = ccdApi.getCase(
                     String.valueOf(existingCase.getId()),

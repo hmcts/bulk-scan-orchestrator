@@ -54,7 +54,7 @@ class SupplementaryEvidenceTest {
     public void should_attach_supplementary_evidence_to_the_case_with_no_evidence_docs() throws Exception {
         //given
         String dmUrl = dmUploadService.uploadToDmStore("Evidence2.pdf", "documents/supplementary-evidence.pdf");
-        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
+        var caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
 
         // when
         envelopeMessager.sendMessageFromFile(
@@ -77,10 +77,10 @@ class SupplementaryEvidenceTest {
     public void should_attach_supplementary_evidence_to_the_case_with_existing_evidence_docs() throws Exception {
         //given
         String dmUrlOriginal = dmUploadService.uploadToDmStore("original.pdf", "documents/supplementary-evidence.pdf");
-        String documentUuid = StringUtils.substringAfterLast(dmUrlOriginal, "/");
+        var documentUuid = StringUtils.substringAfterLast(dmUrlOriginal, "/");
         String dmUrlNew = dmUploadService.uploadToDmStore("new.pdf", "documents/supplementary-evidence.pdf");
 
-        CaseDetails caseDetails =
+        var caseDetails =
             ccdCaseCreator.createCase(
                 singletonList(
                     new Document("evidence.pdf", "123", "other", null, Instant.now(), documentUuid, Instant.now())
@@ -108,13 +108,12 @@ class SupplementaryEvidenceTest {
         //given
         String dmUrl = dmUploadService.uploadToDmStore("Evidence2.pdf", "documents/supplementary-evidence.pdf");
         assertThat(dmUrl).isNotNull();
-        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
+        var caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
         String legacyId = (String) caseDetails.getData().get("legacyId");
         assertThat(legacyId).isNotEmpty();
 
         await("The new case can be found by legacy ID")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollInterval(Duration.ofSeconds(1))
+            .forever()
             .until(() -> !ccdApi.getCaseRefsByLegacyId(legacyId, TEST_SERVICE_NAME).isEmpty());
 
         // when
@@ -128,8 +127,7 @@ class SupplementaryEvidenceTest {
 
         // then
         await("Supplementary evidence is attached to the case in ccd. LegacyId = " + legacyId)
-            .atMost(60, TimeUnit.SECONDS)
-            .pollInterval(Duration.ofSeconds(2))
+            .forever()
             .until(() -> hasCaseBeenUpdatedWithSupplementaryEvidence(caseDetails, 1));
     }
 
@@ -154,8 +152,7 @@ class SupplementaryEvidenceTest {
 
         // then
         await("Created new Exception record as attachScannedDocs event failed for BULKSCAN_ExceptionRecord case type")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollInterval(Duration.ofSeconds(2))
+            .forever()
             .until(() -> findCasesByEnvelopeId(envelopeId).size() == 1);
     }
 
@@ -172,8 +169,7 @@ class SupplementaryEvidenceTest {
 
         // then
         await("Created new Exception record")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollInterval(Duration.ofSeconds(5))
+            .forever()
             .until(() -> findCasesByEnvelopeId(envelopeId).size() == 1);
 
         return findCasesByEnvelopeId(envelopeId).get(0);
@@ -182,11 +178,11 @@ class SupplementaryEvidenceTest {
     private boolean hasCaseBeenUpdatedWithSupplementaryEvidence(
         CaseDetails caseDetails, int excpectedScannedDocuments
     ) {
-        CaseDetails updatedCaseDetails = ccdApi.getCase(
+        var updatedCaseDetails = ccdApi.getCase(
             String.valueOf(caseDetails.getId()),
             caseDetails.getJurisdiction()
         );
-        String evidenceHandled = Strings.nullToEmpty(
+        var evidenceHandled = Strings.nullToEmpty(
             (String) updatedCaseDetails.getData().getOrDefault("evidenceHandled", "NO_VALUE")
         );
 

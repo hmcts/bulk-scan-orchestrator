@@ -28,7 +28,6 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static java.time.Instant.now;
@@ -58,7 +57,7 @@ class AttachExceptionRecordToExistingCaseTest {
     String documentUuid;
 
     @BeforeEach
-    void setup() throws Exception {
+    void setup() {
 
         dmUrl = dmUploadService.uploadToDmStore(
             "Certificate.pdf",
@@ -82,8 +81,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
         //then
         await("Exception record is attached to the case")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollDelay(2, TimeUnit.SECONDS)
+            .forever()
             .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 1));
 
         verifyExistingCaseIsUpdatedWithExceptionRecordData(caseDetails, exceptionRecord, 1);
@@ -111,8 +109,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
         //then
         await("Exception record is attached to the case")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollDelay(2, TimeUnit.SECONDS)
+            .forever()
             .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 2));
 
         verifyExistingCaseIsUpdatedWithExceptionRecordData(caseDetails, exceptionRecord, 1);
@@ -150,8 +147,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
         //then
         await("Exception record is attached to the case")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollDelay(2, TimeUnit.SECONDS)
+            .forever()
             .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 1));
 
         CaseDetails updatedCase = ccdApi.getCase(
@@ -225,8 +221,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
         //then
         await("Exception record is attached to the case")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollDelay(2, TimeUnit.SECONDS)
+            .forever()
             .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 1));
 
         verifyExistingCaseIsUpdatedWithExceptionRecordData(caseDetails, exceptionRecord, 1);
@@ -261,8 +256,7 @@ class AttachExceptionRecordToExistingCaseTest {
 
         //then
         await("Exception record is attached to the case")
-            .atMost(60, TimeUnit.SECONDS)
-            .pollDelay(2, TimeUnit.SECONDS)
+            .forever()
             .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 1));
 
         verifyExistingCaseIsUpdatedWithExceptionRecordData(caseDetails, exceptionRecord, 1);

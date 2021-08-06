@@ -14,7 +14,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import static org.awaitility.Awaitility.await;
@@ -38,7 +37,7 @@ public class CleanupDlqMessagesTest {
         // when
         // Sending more than 1 invalid message so that we can make sure the dlq messages are completed
         // even when the dlq task acquires lock on some messages
-        for (int i = 0; i < 10; i++) {
+        for (var i = 0; i < 10; i++) {
             envelopeMessager.sendMessageFromFile(
                 "envelopes/dead-letter-envelope.json",
                 "1234",
@@ -50,10 +49,8 @@ public class CleanupDlqMessagesTest {
 
         // then
         await("Dead lettered messages are completed from envelopes dlq.")
-            .atMost(6, TimeUnit.MINUTES)
-            .pollDelay(120, TimeUnit.SECONDS)
-            .pollInterval(15, TimeUnit.SECONDS)
-            .until(() -> verifyDlqIsEmpty());
+            .forever()
+            .until(this::verifyDlqIsEmpty);
     }
 
     private boolean verifyDlqIsEmpty() throws ServiceBusException {
