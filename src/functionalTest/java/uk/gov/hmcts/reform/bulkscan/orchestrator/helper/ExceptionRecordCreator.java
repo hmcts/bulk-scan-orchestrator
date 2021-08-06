@@ -26,12 +26,12 @@ public class ExceptionRecordCreator {
         UUID poBox = UUID.randomUUID();
 
         envelopeMessager.sendMessageFromFile(resourceName, "0000000000000000", null, poBox, fileUrl);
-
+        TimeUnit.SECONDS.sleep(60);
+        caseSearcher.findExceptionRecord(poBox.toString(), container);
         await("Exception record is created, poBox=" + poBox)
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
             .until(() -> caseSearcher.findExceptionRecord(poBox.toString(), container).isPresent());
-
         return caseSearcher.findExceptionRecord(poBox.toString(), container).get();
     }
 }
