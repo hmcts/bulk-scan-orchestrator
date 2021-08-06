@@ -27,7 +27,7 @@ public class ExceptionRecordCreator {
 
         envelopeMessager.sendMessageFromFile(resourceName, "0000000000000000", null, poBox, fileUrl);
 
-        await("Exception record is created")
+        await("Exception record is created, poBox=" + poBox)
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
             .until(() -> caseSearcher.findExceptionRecord(poBox.toString(), container).isPresent());
