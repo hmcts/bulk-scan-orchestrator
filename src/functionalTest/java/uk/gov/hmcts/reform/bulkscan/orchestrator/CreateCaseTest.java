@@ -168,7 +168,7 @@ class CreateCaseTest {
             .when()
             .post("/callback/create-new-case");
 
-        assertThat(response.getBody()).isEqualTo("xmus");
+        assertThat(response.getBody().asString()).isEqualTo("xmus");
         assertThat(response.getStatusCode()).isEqualTo(200);
 
         return new ObjectMapper().readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
