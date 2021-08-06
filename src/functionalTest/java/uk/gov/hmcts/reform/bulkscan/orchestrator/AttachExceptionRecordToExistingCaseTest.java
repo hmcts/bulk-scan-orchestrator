@@ -81,7 +81,7 @@ class AttachExceptionRecordToExistingCaseTest {
         attachExceptionRecord(caseDetails, exceptionRecord, null);
 
         //then
-        await("Exception record is attached to the case")
+        await("Exception record is attached to the case exectionID" + exceptionRecord.getId())
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
             .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 1));
@@ -110,7 +110,7 @@ class AttachExceptionRecordToExistingCaseTest {
         attachExceptionRecord(caseDetails, exceptionRecord, null);
 
         //then
-        await("Exception record is attached to the case")
+        await("Exception record is attached to the case exectionID" + exceptionRecord.getId())
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
             .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 2));
@@ -149,7 +149,7 @@ class AttachExceptionRecordToExistingCaseTest {
         attachExceptionRecord(caseDetails, exceptionRecord, null);
 
         //then
-        await("Exception record is attached to the case")
+        await("Exception record is attached to the case exectionID" + exceptionRecord.getId())
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
             .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 1));
@@ -224,7 +224,7 @@ class AttachExceptionRecordToExistingCaseTest {
         attachExceptionRecord(caseDetails, exceptionRecord, null, true);
 
         //then
-        await("Exception record is attached to the case")
+        await("Exception record is attached to the case ex ID=" + exceptionRecord.getId())
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
             .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 1));
@@ -260,7 +260,7 @@ class AttachExceptionRecordToExistingCaseTest {
         attachExceptionRecord(caseDetails, exceptionRecord, searchCaseReferenceType);
 
         //then
-        await("Exception record is attached to the case")
+        await("Exception record is attached to the case Ex id" + exceptionRecord.getId())
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
             .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 1));
