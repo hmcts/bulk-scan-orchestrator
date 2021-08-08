@@ -168,6 +168,8 @@ class CreateCaseTest {
             .when()
             .post("/callback/create-new-case");
 
+        assertThat(response.getStatusCode()).isEqualTo(500);
+        assertThat(response.getBody().prettyPrint()).isEqualTo("aMus");
         assertThat(response.getBody().asString()).isEqualTo("xmus");
         assertThat(response.getStatusCode()).isEqualTo(200);
 
