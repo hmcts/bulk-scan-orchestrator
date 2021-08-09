@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.OcrDataFie
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidator;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -55,11 +56,14 @@ class ExceptionRecordValidatorTest {
     @Mock
     private CallbackValidator callbackValidator;
 
+    @Mock
+    private EventIdValidator eventIdValidator;
+
     private ExceptionRecordValidator exceptionRecordValidator;
 
     @BeforeEach
     void setUp() {
-        exceptionRecordValidator = new ExceptionRecordValidator(callbackValidator);
+        exceptionRecordValidator = new ExceptionRecordValidator(callbackValidator, eventIdValidator);
     }
 
     @Test
@@ -322,7 +326,7 @@ class ExceptionRecordValidatorTest {
         given(callbackValidator.hasIdamToken("idamToken")).willReturn(validationRes);
 
         // when
-        Validation<String,String> res = exceptionRecordValidator.hasIdamToken("idamToken");
+        Validation<String, String> res = exceptionRecordValidator.hasIdamToken("idamToken");
 
         // then
         assertThat(res).isSameAs(validationRes);
@@ -335,7 +339,34 @@ class ExceptionRecordValidatorTest {
         given(callbackValidator.hasUserId("userId")).willReturn(validationRes);
 
         // when
-        Validation<String,String> res = exceptionRecordValidator.hasUserId("userId");
+        Validation<String, String> res = exceptionRecordValidator.hasUserId("userId");
+
+        // then
+        assertThat(res).isSameAs(validationRes);
+    }
+
+    @Test
+    void getCaseId_calls_callbackValidator() {
+        // given
+        var validExceptionRecord = createValidExceptionRecordCase();
+        Validation<String, Long> validationRes = Validation.valid(1L);
+        given(callbackValidator.hasAnId(any(CaseDetails.class))).willReturn(validationRes);
+
+        // when
+        Validation<String, String> res = exceptionRecordValidator.getCaseId(validExceptionRecord);
+
+        // then
+        assertThat(res).isEqualTo(Validation.valid("1"));
+    }
+
+    @Test
+    void isCreateNewCaseEvent_calls_eventIdValidator() {
+        // given
+        Validation<String, Void> validationRes = Validation.valid(null);
+        given(eventIdValidator.isCreateNewCaseEvent("eventId")).willReturn(validationRes);
+
+        // when
+        Validation<String, Void> res = exceptionRecordValidator.isCreateNewCaseEvent("eventId");
 
         // then
         assertThat(res).isSameAs(validationRes);
