@@ -4,6 +4,7 @@ import io.vavr.collection.Array;
 import io.vavr.collection.Seq;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
@@ -25,12 +26,15 @@ import java.util.function.Supplier;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static org.slf4j.LoggerFactory.getLogger;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidator.FORMATTER;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.ENVELOPE_ID;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.EXCEPTION;
 
 @Component
 public class ExceptionRecordValidator {
+
+    private static final Logger log = getLogger(ExceptionRecordValidator.class);
 
     private static final String VALUE = "value";
     private static final String KEY = "key";
@@ -156,9 +160,12 @@ public class ExceptionRecordValidator {
                 .map(Documents::getScannedDocuments)
                 .orElse(emptyList())
                 .stream()
-                .peek(items -> System.out.println("items ==>" + items))
                 .map(items -> items.get(VALUE))
-                .filter(item -> item instanceof Map)
+                .filter(item -> {
+                        log.info("item ==>" + item);
+                        return item instanceof Map;
+                    }
+                )
                 .map(item -> (Map<String, Object>) item)
                 .map(this::mapScannedDocument)
                 .collect(toList())
