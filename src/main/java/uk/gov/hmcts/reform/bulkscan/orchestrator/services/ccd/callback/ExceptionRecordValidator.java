@@ -156,6 +156,7 @@ public class ExceptionRecordValidator {
                 .map(Documents::getScannedDocuments)
                 .orElse(emptyList())
                 .stream()
+                .peek(items -> System.out.println("items ==>" + items))
                 .map(items -> items.get(VALUE))
                 .filter(item -> item instanceof Map)
                 .map(item -> (Map<String, Object>) item)
