@@ -160,7 +160,12 @@ public class ExceptionRecordValidator {
                 .map(Documents::getScannedDocuments)
                 .orElse(emptyList())
                 .stream()
-                .map(items -> items.get(VALUE))
+                .map(
+                    items -> {
+                        log.info("itemxx ==>" + items);
+                        return items.get(VALUE);
+                    }
+                )
                 .filter(
                     item -> {
                         log.info("item ==>" + item);
