@@ -161,7 +161,8 @@ public class ExceptionRecordValidator {
                 .orElse(emptyList())
                 .stream()
                 .map(items -> items.get(VALUE))
-                .filter(item -> {
+                .filter(
+                    item -> {
                         log.info("item ==>" + item);
                         return item instanceof Map;
                     }
