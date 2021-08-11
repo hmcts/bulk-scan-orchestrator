@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUr
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.NewCallbackResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
@@ -28,6 +29,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -37,12 +39,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.RequestType.ATTACH_TO_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidatorTest.JOURNEY_CLASSIFICATION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.ATTACH_TO_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.CONTAINS_PAYMENTS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.ENVELOPE_ID;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.OCR_DATA;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SCANNED_DOCUMENTS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SEARCH_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues.YES;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.NEW_APPLICATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
@@ -226,6 +230,34 @@ class ExceptionRecordAttacherTest {
     }
 
     @Test
+    void should_store_call_back_result_when_attach_supplementary_evidence() {
+        // given
+        given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);
+        AttachToCaseEventData callBackEvent = getCallbackEvent(SUPPLEMENTARY_EVIDENCE);
+
+        given(supplementaryEvidenceUpdater
+            .updateSupplementaryEvidence(
+                callBackEvent,
+                EXISTING_CASE_DETAILS,
+                EXISTING_CASE_ID)
+        ).willReturn(true);
+
+        // when
+        exceptionRecordAttacher.tryAttachToCase(
+            callBackEvent,
+            CASE_DETAILS,
+            true
+        );
+        var callbackResultCaptor = ArgumentCaptor.forClass(NewCallbackResult.class);
+        verify(callbackResultRepositoryProxy).storeCallbackResult(callbackResultCaptor.capture());
+        assertThat(callbackResultCaptor.getValue()).satisfies(data -> {
+            assertThat(data.requestType).isEqualTo(ATTACH_TO_CASE);
+            assertThat(data.exceptionRecordId).isEqualTo(CASE_REF);
+            assertThat(data.caseId).isEqualTo(EXISTING_CASE_ID);
+        });
+    }
+
+    @Test
     void should_attach_supplementary_evidence_if_payments_publishing_fails() {
         // given
         given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);
@@ -258,6 +290,50 @@ class ExceptionRecordAttacherTest {
         assertThat(res.getLeft().getErrors()).hasSize(1);
         assertThat(res.getLeft().getErrors().get(0))
             .isEqualTo("Payment references cannot be processed. Please try again later");
+    }
+
+    @Test
+    void should_return_error_if_exception_record_already_attached_to_case() {
+        // given
+        CaseDetails caseDetails = CaseDetails.builder()
+                .jurisdiction(JURISDICTION)
+                .caseTypeId(EXISTING_CASE_TYPE)
+                .id(Long.parseLong(EXISTING_CASE_ID))
+                .data(Map.of(ATTACH_TO_CASE_REFERENCE, "caseRef"))
+                .build();
+        given(ccdApi.getCase(anyString(), anyString())).willReturn(caseDetails);
+        AttachToCaseEventData callBackEvent = getCallbackEvent(SUPPLEMENTARY_EVIDENCE_WITH_OCR);
+
+        // when
+        Either<ErrorsAndWarnings, String> res = exceptionRecordAttacher.tryAttachToCase(
+                callBackEvent,
+                CASE_DETAILS,
+                true
+        );
+
+        // then
+        assertThat(res.isLeft()).isTrue();
+        assertThat(res.getLeft().getWarnings()).isEmpty();
+        assertThat(res.getLeft().getErrors()).containsExactly("Exception record is already attached to case caseRef");
+    }
+
+    @Test
+    void should_return_error_if_wrong_classification() {
+        // given
+        given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);
+        AttachToCaseEventData callBackEvent = getCallbackEvent(NEW_APPLICATION);
+
+        // when
+        // then
+        assertThatThrownBy(() ->
+                exceptionRecordAttacher.tryAttachToCase(
+                        callBackEvent,
+                        CASE_DETAILS,
+                        true
+                )
+        )
+                .isInstanceOf(CallbackException.class)
+                .hasMessage("Invalid Journey Classification: NEW_APPLICATION");
     }
 
     private AttachToCaseEventData getCallbackEvent(Classification classification) {
