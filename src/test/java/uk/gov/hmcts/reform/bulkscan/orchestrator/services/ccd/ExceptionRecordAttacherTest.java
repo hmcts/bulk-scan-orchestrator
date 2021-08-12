@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.time.LocalDateTime.now;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
@@ -39,6 +40,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.RequestType.ATTACH_TO_CASE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidatorTest.JOURNEY_CLASSIFICATION;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.EXTERNAL_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.ATTACH_TO_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.CONTAINS_PAYMENTS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.ENVELOPE_ID;
@@ -78,6 +80,7 @@ class ExceptionRecordAttacherTest {
     private static final String IDAM_TOKEN = "IDAM_TOKEN";
     private static final String USER_ID = "USER_ID";
     private static final String EXISTING_CASE_ID = "12345";
+    private static final String LEGACY_CASE_ID = "23456";
     private static final String EXISTING_CASE_TYPE = "Bulk_Scanned";
 
     private static final String BULKSCAN_ENVELOPE_ID = "some-envelope-id";
@@ -301,7 +304,7 @@ class ExceptionRecordAttacherTest {
                 .id(Long.parseLong(EXISTING_CASE_ID))
                 .data(Map.of(ATTACH_TO_CASE_REFERENCE, "caseRef"))
                 .build();
-        given(ccdApi.getCase(anyString(), anyString())).willReturn(caseDetails);
+        given(ccdApi.getCase(CASE_REF, JURISDICTION)).willReturn(caseDetails);
         AttachToCaseEventData callBackEvent = getCallbackEvent(SUPPLEMENTARY_EVIDENCE_WITH_OCR);
 
         // when
@@ -320,7 +323,7 @@ class ExceptionRecordAttacherTest {
     @Test
     void should_return_error_if_wrong_classification() {
         // given
-        given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);
+        given(ccdApi.getCase(CASE_REF, JURISDICTION)).willReturn(EXISTING_CASE_DETAILS);
         AttachToCaseEventData callBackEvent = getCallbackEvent(NEW_APPLICATION);
 
         // when
@@ -336,12 +339,105 @@ class ExceptionRecordAttacherTest {
                 .hasMessage("Invalid Journey Classification: NEW_APPLICATION");
     }
 
+    @Test
+    void should_store_call_back_result_when_legacy_id() {
+        // given
+        given(ccdApi.getCase(anyString(), anyString())).willReturn(EXISTING_CASE_DETAILS);
+        AttachToCaseEventData callBackEvent = getCallbackEvent(
+                SUPPLEMENTARY_EVIDENCE,
+                EXTERNAL_CASE_REFERENCE,
+                LEGACY_CASE_ID
+        );
+        given(ccdApi.getCaseRefsByLegacyId(LEGACY_CASE_ID, SERVICE_NAME))
+                .willReturn(singletonList(Long.valueOf(EXISTING_CASE_ID)));
+
+        given(supplementaryEvidenceUpdater
+                .updateSupplementaryEvidence(
+                        callBackEvent,
+                        EXISTING_CASE_DETAILS,
+                        EXISTING_CASE_ID
+                )
+        ).willReturn(true);
+
+        // when
+        exceptionRecordAttacher.tryAttachToCase(
+                callBackEvent,
+                CASE_DETAILS,
+                true
+        );
+        var callbackResultCaptor = ArgumentCaptor.forClass(NewCallbackResult.class);
+        verify(callbackResultRepositoryProxy).storeCallbackResult(callbackResultCaptor.capture());
+        assertThat(callbackResultCaptor.getValue()).satisfies(data -> {
+            assertThat(data.requestType).isEqualTo(ATTACH_TO_CASE);
+            assertThat(data.exceptionRecordId).isEqualTo(CASE_REF);
+            assertThat(data.caseId).isEqualTo(EXISTING_CASE_ID);
+        });
+    }
+
+    @Test
+    void should_return_error_when_legacy_id_and_case_not_found() {
+        // given
+        given(ccdApi.getCase(CASE_REF, JURISDICTION)).willReturn(EXISTING_CASE_DETAILS);
+        AttachToCaseEventData callBackEvent = getCallbackEvent(
+                SUPPLEMENTARY_EVIDENCE,
+                EXTERNAL_CASE_REFERENCE,
+                LEGACY_CASE_ID
+        );
+        given(ccdApi.getCaseRefsByLegacyId(LEGACY_CASE_ID, SERVICE_NAME)).willReturn(emptyList());
+
+        // when
+        Either<ErrorsAndWarnings, String> res = exceptionRecordAttacher.tryAttachToCase(
+                callBackEvent,
+                CASE_DETAILS,
+                true
+        );
+
+        // then
+        assertThat(res.isLeft()).isTrue();
+        assertThat(res.getLeft().getWarnings()).isEmpty();
+        assertThat(res.getLeft().getErrors()).containsExactly("No case found for legacy case reference 23456");
+    }
+
+    @Test
+    void should_return_error_when_legacy_id_and_multiple_cases_found() {
+        // given
+        given(ccdApi.getCase(CASE_REF, JURISDICTION)).willReturn(EXISTING_CASE_DETAILS);
+        AttachToCaseEventData callBackEvent = getCallbackEvent(
+                SUPPLEMENTARY_EVIDENCE,
+                EXTERNAL_CASE_REFERENCE,
+                LEGACY_CASE_ID
+        );
+        given(ccdApi.getCaseRefsByLegacyId(LEGACY_CASE_ID, SERVICE_NAME))
+                .willReturn(asList(Long.valueOf(EXISTING_CASE_ID), 34567L));
+
+        // when
+        Either<ErrorsAndWarnings, String> res = exceptionRecordAttacher.tryAttachToCase(
+                callBackEvent,
+                CASE_DETAILS,
+                true
+        );
+
+        // then
+        assertThat(res.isLeft()).isTrue();
+        assertThat(res.getLeft().getWarnings()).isEmpty();
+        assertThat(res.getLeft().getErrors())
+                .containsExactly("Multiple cases (12345, 34567) found for the given legacy case reference: 23456");
+    }
+
     private AttachToCaseEventData getCallbackEvent(Classification classification) {
+        return getCallbackEvent(classification, EXISTING_CASE_TYPE, EXISTING_CASE_ID);
+    }
+
+    private AttachToCaseEventData getCallbackEvent(
+            Classification classification,
+            String targetCaseRefType,
+            String caseRef
+    ) {
         return new AttachToCaseEventData(
             JURISDICTION,
             SERVICE_NAME,
-            EXISTING_CASE_TYPE,
-            EXISTING_CASE_ID,
+            targetCaseRefType,
+            caseRef,
             Long.parseLong(CASE_REF),
             emptyList(),
             IDAM_TOKEN,
