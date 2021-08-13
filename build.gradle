@@ -246,7 +246,7 @@ dependencyManagement {
       entry 'commons-io'
     }
     // avoid CVE-2021-27568
-    dependencySet(group: 'com.nimbusds', version: '9.11') {
+    dependencySet(group: 'com.nimbusds', version: '9.12') {
       entry 'nimbus-jose-jwt'
     }
   }
