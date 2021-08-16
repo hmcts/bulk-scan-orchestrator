@@ -254,7 +254,7 @@ dependencyManagement {
 
 dependencies {
   implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.20'
-  implementation group: 'org.flywaydb', name: 'flyway-core', version: '7.9.0'
+  implementation group: 'org.flywaydb', name: 'flyway-core', version: '7.13.0'
 
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
