@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
@@ -68,7 +69,7 @@ class CaseReferenceValidator {
 
     private Validation<String, String> validateCcdCaseRef(Object caseRef) {
         return Optional.of(caseRef)
-            .filter(ref -> ref instanceof String)
+            .filter(String.class::isInstance)
             .map(ref -> ((String) ref).replaceAll("[^0-9]", ""))
             .filter(ref -> !Strings.isNullOrEmpty(ref))
             .map(Validation::<String, String>valid)
@@ -77,7 +78,7 @@ class CaseReferenceValidator {
 
     private Validation<String, String> validateExternalCaseRef(Object caseRef) {
         return Optional.of(caseRef)
-            .filter(ref -> ref instanceof String)
+            .filter(String.class::isInstance)
             .map(ref -> ((String) ref).trim())
             .filter(ref -> !Strings.isNullOrEmpty(ref))
             .map(Validation::<String, String>valid)
@@ -94,8 +95,8 @@ class CaseReferenceValidator {
         return Optional
             .ofNullable(theCase)
             .map(CaseDetails::getData)
-            .filter(data -> data != null)
+            .filter(Objects::nonNull)
             .map(data -> data.get(SEARCH_CASE_REFERENCE_TYPE))
-            .filter(refType -> refType != null);
+            .filter(Objects::nonNull);
     }
 }

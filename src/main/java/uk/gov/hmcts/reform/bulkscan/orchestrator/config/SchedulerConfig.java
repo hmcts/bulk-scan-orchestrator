@@ -24,7 +24,7 @@ import static java.time.LocalDateTime.now;
 public class SchedulerConfig implements SchedulingConfigurer {
 
     private static final int POOL_SIZE = 10;
-    private static AtomicInteger errorCount = new AtomicInteger(0);
+    private static final AtomicInteger errorCount = new AtomicInteger(0);
     private static final Logger log = LoggerFactory.getLogger(SchedulerConfig.class);
 
     // todo: move to global version of time handling

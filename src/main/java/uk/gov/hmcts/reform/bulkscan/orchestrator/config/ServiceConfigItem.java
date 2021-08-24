@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 
 import java.util.HashMap;
@@ -13,8 +11,6 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toMap;
 
 public class ServiceConfigItem {
-
-    private static final Logger log = LoggerFactory.getLogger(ServiceConfigItem.class);
 
     @NotNull
     private String service;

@@ -51,7 +51,7 @@ public class CaseUpdateDataClient {
                 .build()
                 .toString();
 
-        log.info("Requesting service to update case. " + requestInfo(caseUpdateRequest));
+        log.info("Requesting service to update case. {}", requestInfo(caseUpdateRequest));
 
         SuccessfulUpdateResponse response = restTemplate.postForObject(
             url,

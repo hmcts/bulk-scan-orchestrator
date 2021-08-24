@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.out.JurisdictionConfigurationStatus;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.AuthenticationChecker;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.LogInAttemptRejectedException;
 
@@ -92,7 +93,7 @@ public class QueueProcessingReadinessChecker {
         return authenticationChecker
             .checkSignInForAllJurisdictions()
             .stream()
-            .filter(status -> status.isClientError())
+            .filter(JurisdictionConfigurationStatus::isClientError)
             .map(status -> status.jurisdiction)
             .collect(toList());
     }

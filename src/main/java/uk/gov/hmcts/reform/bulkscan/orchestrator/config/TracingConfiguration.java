@@ -18,10 +18,10 @@ public class TracingConfiguration {
         return telemetry -> {
             String operationName = telemetry.getContext().getOperation().getName();
 
-            if (telemetry instanceof RemoteDependencyTelemetry && operationName != null) {
-                if (operationName.contains("/health")) {
-                    ((RemoteDependencyTelemetry) telemetry).setType("Health");
-                }
+            if (telemetry instanceof RemoteDependencyTelemetry
+                    && operationName != null
+                    && operationName.contains("/health")) {
+                ((RemoteDependencyTelemetry) telemetry).setType("Health");
             }
 
             return true;

@@ -21,12 +21,10 @@ public class ServiceResponseParser {
 
     public ClientServiceErrorResponse parseResponseBody(HttpStatusCodeException exception) {
         try {
-            ClientServiceErrorResponse errorResponse = objectMapper.readValue(
+            return objectMapper.readValue(
                 exception.getResponseBodyAsByteArray(),
                 ClientServiceErrorResponse.class
             );
-
-            return errorResponse;
         } catch (IOException ioException) {
             throw new CallbackException("Failed to parse response", ioException);
         }
