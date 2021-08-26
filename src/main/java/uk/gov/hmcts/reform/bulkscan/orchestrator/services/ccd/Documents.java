@@ -41,10 +41,10 @@ public final class Documents {
     public static String getDocumentId(Map<String, Object> document) {
         return Optional.ofNullable(document)
             .map(doc -> doc.get("value"))
-            .filter(item -> item instanceof Map)
+            .filter(Map.class::isInstance)
             .map(map -> ((Map) map).get("controlNumber"))
-            .filter(item -> item instanceof String)
-            .map(item -> (String) item)
+            .filter(String.class::isInstance)
+            .map(String.class::cast)
             .orElse("");
     }
 

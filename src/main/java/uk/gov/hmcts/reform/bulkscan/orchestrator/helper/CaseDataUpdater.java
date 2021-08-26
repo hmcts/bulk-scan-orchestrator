@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 
-import com.google.common.collect.ImmutableMap;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
@@ -47,7 +46,7 @@ public class CaseDataUpdater {
                 .map(doc -> {
                     if (exceptionRecordDcns.contains(doc.controlNumber)) {
                         // set exceptionReference if the document received with the exception record
-                        return ImmutableMap.of("value", new ScannedDocument(
+                        return Map.of("value", new ScannedDocument(
                             doc.fileName,
                             doc.controlNumber,
                             doc.type,
@@ -59,7 +58,7 @@ public class CaseDataUpdater {
                         ));
                     } else {
                         // do not update the document if it was received with some previous exception record
-                        return ImmutableMap.of("value", doc);
+                        return Map.of("value", doc);
                     }
                 })
                 .collect(toList());

@@ -57,8 +57,8 @@ public class CcdCallbackController {
                     callback.getEventId(),
                     callback.isIgnoreWarnings()
                 )
-                .map(modifiedFields -> okResponse(modifiedFields))
-                .getOrElseGet(errors -> errorResponse(errors));
+                .map(this::okResponse)
+                .getOrElseGet(this::errorResponse);
         } else {
             throw new InvalidRequestException("Callback or case details were empty");
         }

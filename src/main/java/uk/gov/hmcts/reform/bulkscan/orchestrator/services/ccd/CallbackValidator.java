@@ -17,6 +17,7 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nonnull;
 
@@ -117,7 +118,7 @@ public class CallbackValidator {
         return Optional
                 .ofNullable(theCase)
                 .map(CaseDetails::getCaseTypeId)
-                .filter(caseTypeId -> caseTypeId != null)
+                .filter(Objects::nonNull)
                 .map(caseTypeId -> {
                     if (caseTypeId.endsWith(CASE_TYPE_ID_SUFFIX)) {
                         String serviceName =
@@ -283,14 +284,14 @@ public class CallbackValidator {
         return Optional.ofNullable(theCase)
                 .map(CaseDetails::getData)
                 .map(data -> data.get("journeyClassification"))
-                .map(c -> (String) c);
+                .map(String.class::cast);
     }
 
     private Optional<String> getAwaitingPaymentDcnProcessing(CaseDetails theCase) {
         return Optional.ofNullable(theCase)
                 .map(CaseDetails::getData)
                 .map(data -> data.get("awaitingPaymentDCNProcessing"))
-                .map(c -> (String) c);
+                .map(String.class::cast);
     }
 
     private Validation<String, Classification> validateClassification(

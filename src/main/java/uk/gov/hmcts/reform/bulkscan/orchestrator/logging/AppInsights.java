@@ -1,9 +1,10 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.logging;
 
 import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
-import com.google.common.collect.ImmutableMap;
 import com.microsoft.applicationinsights.TelemetryClient;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 @Component
 public class AppInsights {
@@ -24,13 +25,13 @@ public class AppInsights {
     ) {
         telemetryClient.trackEvent(
             DEAD_LETTER_EVENT,
-            ImmutableMap.of(
+            Map.of(
                 "reason", reason,
                 "description", description,
                 "messageId", message.getMessageId(),
                 "queue", queue
             ),
-            ImmutableMap.of(
+            Map.of(
                 "deliveryCount", (double) (message.getDeliveryCount() + 1) // starts from 0
             )
         );
