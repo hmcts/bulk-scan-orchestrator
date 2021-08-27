@@ -31,9 +31,9 @@ public class ExceptionRecordFinalizer {
                 .build();
 
         Map<String, Object> finalizedMap = new HashMap<>();
-        for (String key : originalFields.keySet()) {
-            if (!fieldsToUpdate.containsKey(key)) {
-                finalizedMap.put(key, originalFields.get(key));
+        for (Map.Entry<String, Object> entry : originalFields.entrySet()) {
+            if (!fieldsToUpdate.containsKey(entry.getKey())) {
+                finalizedMap.put(entry.getKey(), entry.getValue());
             }
         }
         finalizedMap.putAll(fieldsToUpdate);
@@ -48,7 +48,7 @@ public class ExceptionRecordFinalizer {
             case ATTACHING_SUPPLEMENTARY_EVIDENCE:
                 return ATTACH_TO_CASE_REFERENCE;
             default:
-                throw new CallbackException(format("Unrecognised CCD callback type: {}", callbackType));
+                throw new CallbackException(format("Unrecognised CCD callback type: %s", callbackType));
         }
     }
 }

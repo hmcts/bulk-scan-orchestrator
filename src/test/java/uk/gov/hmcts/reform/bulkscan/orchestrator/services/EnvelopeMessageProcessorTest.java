@@ -72,7 +72,7 @@ class EnvelopeMessageProcessorTest {
     }
 
     @Test
-    public void should_not_throw_exception_when_queue_message_is_invalid() {
+    void should_not_throw_exception_when_queue_message_is_invalid() {
 
         given(messageContext.getMessage()).willReturn(message);
         given(message.getBody()).willReturn(BinaryData.fromString("invalid body"));
@@ -82,7 +82,7 @@ class EnvelopeMessageProcessorTest {
     }
 
     @Test
-    public void should_not_throw_exception_when_updating_ccd_fails() {
+    void should_not_throw_exception_when_updating_ccd_fails() {
         // given
         given(messageContext.getMessage()).willReturn(message);
         given(message.getBody()).willReturn(BinaryData.fromBytes(envelopeJson()));
@@ -94,7 +94,7 @@ class EnvelopeMessageProcessorTest {
     }
 
     @Test
-    public void should_complete_the_message_when_processing_is_successful() {
+    void should_complete_the_message_when_processing_is_successful() {
         // given
         given(messageContext.getMessage()).willReturn(message);
         given(message.getBody()).willReturn(BinaryData.fromBytes(envelopeJson()));
@@ -111,7 +111,7 @@ class EnvelopeMessageProcessorTest {
     }
 
     @Test
-    public void should_dead_letter_the_message_when_unrecoverable_failure() {
+    void should_dead_letter_the_message_when_unrecoverable_failure() {
         // given
         given(messageContext.getMessage()).willReturn(message);
         given(message.getBody()).willReturn(BinaryData.fromString("invalid body"));
@@ -146,7 +146,7 @@ class EnvelopeMessageProcessorTest {
 
 
     @Test
-    public void should_not_complete_the_message_when_notification_sending_fails() {
+    void should_not_complete_the_message_when_notification_sending_fails() {
         // given
         String exceptionMessage = "test exception";
         willThrow(new NotificationSendingException(exceptionMessage, null))
@@ -168,7 +168,7 @@ class EnvelopeMessageProcessorTest {
     }
 
     @Test
-    public void should_not_finalize_the_message_when_recoverable_failure() {
+    void should_not_finalize_the_message_when_recoverable_failure() {
         given(messageContext.getMessage()).willReturn(message);
         given(message.getBody()).willReturn(BinaryData.fromBytes(envelopeJson()));
 
@@ -188,7 +188,7 @@ class EnvelopeMessageProcessorTest {
     }
 
     @Test
-    public void should_finalize_the_message_when_recoverable_failure_but_delivery_maxed() {
+    void should_finalize_the_message_when_recoverable_failure_but_delivery_maxed() {
         // given
         given(messageContext.getMessage()).willReturn(message);
         given(message.getBody()).willReturn(BinaryData.fromBytes(envelopeJson()));
@@ -231,7 +231,7 @@ class EnvelopeMessageProcessorTest {
     }
 
     @Test
-    public void should_send_message_with_envelope_id_when_processing_successful() {
+    void should_send_message_with_envelope_id_when_processing_successful() {
         // given
         String envelopeId = UUID.randomUUID().toString();
         given(messageContext.getMessage()).willReturn(message);
@@ -251,7 +251,7 @@ class EnvelopeMessageProcessorTest {
     }
 
     @Test
-    public void should_not_send_processed_envelope_notification_when_processing_fails() {
+    void should_not_send_processed_envelope_notification_when_processing_fails() {
         // given
         given(messageContext.getMessage()).willReturn(message);
         given(message.getBody()).willReturn(BinaryData.fromBytes(envelopeJson()));
@@ -268,7 +268,7 @@ class EnvelopeMessageProcessorTest {
     }
 
     @Test
-    public void should_throw_exception_when_message_receiver_fails() {
+    void should_throw_exception_when_message_receiver_fails() {
         ServiceBusException receiverException =
             new ServiceBusException(new IllegalAccessException("test exception"), ServiceBusErrorSource.MANAGEMENT);
         willThrow(receiverException).given(messageContext).getMessage();
@@ -278,7 +278,7 @@ class EnvelopeMessageProcessorTest {
     }
 
     @Test
-    public void should_not_treat_heartbeat_messages_as_envelopes() {
+    void should_not_treat_heartbeat_messages_as_envelopes() {
         // given
         given(messageContext.getMessage()).willReturn(message);
         given(message.getSubject()).willReturn(EnvelopeMessageProcessor.HEARTBEAT_LABEL);

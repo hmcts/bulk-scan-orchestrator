@@ -29,7 +29,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.SampleData.sample
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.SampleData.sampleExceptionRecord;
 
 @ExtendWith(MockitoExtension.class)
-public class CaseUpdateRequestCreatorTest {
+class CaseUpdateRequestCreatorTest {
 
     @Mock DocumentMapper docMapper;
 
@@ -50,7 +50,7 @@ public class CaseUpdateRequestCreatorTest {
         CaseUpdateRequest request = reqCreator.create(exceptionRecord, caseDetails);
 
         // then
-        assertThat(request.isAutomatedProcess).isEqualTo(false); // always false when creating it from exception record
+        assertThat(request.isAutomatedProcess).isFalse(); // always false when creating it from exception record
         assertThat(request.caseDetails.id).isEqualTo(caseDetails.getId().toString());
         assertThat(request.caseDetails.caseTypeId).isEqualTo(caseDetails.getCaseTypeId());
         assertThat(request.caseDetails.data).isEqualTo(caseDetails.getData());

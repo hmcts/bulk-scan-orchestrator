@@ -157,8 +157,8 @@ public class ExceptionRecordValidator {
                 .orElse(emptyList())
                 .stream()
                 .map(items -> items.get(VALUE))
-                .filter(item -> item instanceof Map)
-                .map(item -> (Map<String, Object>) item)
+                .filter(Map.class::isInstance)
+                .map(Map.class::cast)
                 .map(this::mapScannedDocument)
                 .collect(toList())
         ).toValidation().mapError(throwable -> "Invalid scannedDocuments format. Error: " + throwable.getMessage());
@@ -183,7 +183,7 @@ public class ExceptionRecordValidator {
                 Try.of(() -> ocrDataList
                     .stream()
                     .map(items -> items.get(VALUE))
-                    .filter(item -> item instanceof Map)
+                    .filter(Map.class::isInstance)
                     .map(item -> (Map<String, String>) item)
                     .map(ocrData -> new OcrDataField(
                         ocrData.get(KEY),

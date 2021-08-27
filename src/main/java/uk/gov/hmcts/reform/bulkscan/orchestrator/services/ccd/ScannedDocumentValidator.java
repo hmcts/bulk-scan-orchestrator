@@ -17,8 +17,8 @@ class ScannedDocumentValidator {
     @SuppressWarnings("unchecked")
     Validation<String, List<Map<String, Object>>> validate(CaseDetails theCase) {
         return getScannedRecord(theCase)
-            .filter(list -> list instanceof List)
-            .map(scannedDocuments -> (List<Map<String, Object>>) scannedDocuments)
+            .filter(List.class::isInstance)
+            .map(List.class::cast)
             .filter(scannedDocuments -> !scannedDocuments.isEmpty())
             .map(Validation::<String, List<Map<String, Object>>>valid)
             .orElseGet(() -> invalid("There were no documents in exception record"));

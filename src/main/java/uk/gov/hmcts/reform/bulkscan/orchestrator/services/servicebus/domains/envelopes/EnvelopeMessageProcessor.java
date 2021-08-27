@@ -4,7 +4,6 @@ import com.azure.messaging.servicebus.ServiceBusErrorContext;
 import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
 import com.azure.messaging.servicebus.ServiceBusReceivedMessageContext;
 import com.azure.messaging.servicebus.models.DeadLetterOptions;
-import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +19,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.MessageProcessingException;
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.Objects;
 
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeParser.parse;
@@ -120,7 +120,7 @@ public class EnvelopeMessageProcessor {
         var message = context.getMessage();
         switch (processingResult.resultType) {
             case SUCCESS:
-                context.complete();;
+                context.complete();
                 log.info("Message with ID {} has been completed", message.getMessageId());
                 break;
             case UNRECOVERABLE_FAILURE:
@@ -167,7 +167,7 @@ public class EnvelopeMessageProcessor {
             new DeadLetterOptions()
                 .setDeadLetterReason(reason)
                 .setDeadLetterErrorDescription(description)
-                .setPropertiesToModify(ImmutableMap.of("deadLetteredAt", Instant.now().toString()))
+                .setPropertiesToModify(Map.of("deadLetteredAt", Instant.now().toString()))
         );
         var message = context.getMessage();
         log.info("Message with ID {} has been dead-lettered", message.getMessageId());
