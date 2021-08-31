@@ -15,11 +15,11 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.env
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -31,7 +31,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
-public class CaseFinderTest {
+class CaseFinderTest {
 
     private static final String JURISDICTION = "BULKSCAN";
     private static final String SERVICE = "bulkscan";
@@ -44,7 +44,7 @@ public class CaseFinderTest {
     private CaseFinder caseFinder;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         caseFinder = new CaseFinder(ccdApi);
     }
 
@@ -113,7 +113,7 @@ public class CaseFinderTest {
     }
 
     @Test
-    public void should_search_case_by_ccd_id_when_envelope_has_it() {
+    void should_search_case_by_ccd_id_when_envelope_has_it() {
         given(ccdApi.getCase(CASE_REF, JURISDICTION))
             .willReturn(CaseDetails.builder().build());
 
@@ -125,7 +125,7 @@ public class CaseFinderTest {
     }
 
     @Test
-    public void should_return_case_when_found_by_ccd_id() {
+    void should_return_case_when_found_by_ccd_id() {
         CaseDetails expectedCase = mock(CaseDetails.class);
         given(ccdApi.getCase(CASE_REF, JURISDICTION)).willReturn(expectedCase);
 
@@ -137,7 +137,7 @@ public class CaseFinderTest {
     }
 
     @Test
-    public void should_return_empty_when_case_not_found_by_ccd_id_and_legacy_id_is_absent() {
+    void should_return_empty_when_case_not_found_by_ccd_id_and_legacy_id_is_absent() {
         given(ccdApi.getCase(CASE_REF, JURISDICTION)).willThrow(
             new CaseNotFoundException("Case not found")
         );
@@ -150,7 +150,7 @@ public class CaseFinderTest {
     }
 
     @Test
-    public void should_return_empty_when_neither_id_is_present() {
+    void should_return_empty_when_neither_id_is_present() {
         Optional<CaseDetails> result = caseFinder.findCase(
             envelope(null, null)
         );
@@ -159,7 +159,7 @@ public class CaseFinderTest {
     }
 
     @Test
-    public void should_search_case_by_legacy_id_when_legacy_id_is_present_and_ccd_id_is_not() {
+    void should_search_case_by_legacy_id_when_legacy_id_is_present_and_ccd_id_is_not() {
         // given
         given(ccdApi.getCaseRefsByLegacyId(LEGACY_CASE_REF, SERVICE))
             .willReturn(emptyList());
@@ -175,7 +175,7 @@ public class CaseFinderTest {
     }
 
     @Test
-    public void should_search_case_by_legacy_id_when_not_found_by_ccd_id() {
+    void should_search_case_by_legacy_id_when_not_found_by_ccd_id() {
         // given
         given(ccdApi.getCase(CASE_REF, JURISDICTION)).willThrow(
             new CaseNotFoundException("Case not found")
@@ -197,7 +197,7 @@ public class CaseFinderTest {
     }
 
     @Test
-    public void should_search_case_by_legacy_id_when_ccd_id_is_rejected_by_ccd() {
+    void should_search_case_by_legacy_id_when_ccd_id_is_rejected_by_ccd() {
         // given
         given(ccdApi.getCase(CASE_REF, JURISDICTION)).willThrow(
             new InvalidCaseIdException("Invalid case ID", null)
@@ -219,7 +219,7 @@ public class CaseFinderTest {
     }
 
     @Test
-    public void should_return_empty_when_legacy_id_search_has_no_results() {
+    void should_return_empty_when_legacy_id_search_has_no_results() {
         given(ccdApi.getCaseRefsByLegacyId(LEGACY_CASE_REF, SERVICE))
             .willReturn(emptyList());
 
@@ -231,10 +231,10 @@ public class CaseFinderTest {
     }
 
     @Test
-    public void should_retrieve_case_by_ccd_id_when_search_by_legacy_id_has_one_result() {
+    void should_retrieve_case_by_ccd_id_when_search_by_legacy_id_has_one_result() {
         // given
         given(ccdApi.getCaseRefsByLegacyId(LEGACY_CASE_REF, SERVICE))
-            .willReturn(Arrays.asList(Long.parseLong(CASE_REF)));
+            .willReturn(singletonList(Long.parseLong(CASE_REF)));
 
         CaseDetails expectedCase = CaseDetails.builder().build();
 
@@ -252,10 +252,10 @@ public class CaseFinderTest {
     }
 
     @Test
-    public void should_return_case_when_found_by_legacy_id() {
+    void should_return_case_when_found_by_legacy_id() {
         // given
         given(ccdApi.getCaseRefsByLegacyId(LEGACY_CASE_REF, SERVICE))
-            .willReturn(Arrays.asList(Long.parseLong(CASE_REF)));
+            .willReturn(singletonList(Long.parseLong(CASE_REF)));
 
         CaseDetails expectedCase = CaseDetails.builder().build();
         given(ccdApi.getCase(CASE_REF, JURISDICTION)).willReturn(expectedCase);
@@ -270,10 +270,10 @@ public class CaseFinderTest {
     }
 
     @Test
-    public void should_return_empty_when_case_retrieval_based_on_legacy_id_results_does_not_find_case() {
+    void should_return_empty_when_case_retrieval_based_on_legacy_id_results_does_not_find_case() {
         // given
         given(ccdApi.getCaseRefsByLegacyId(LEGACY_CASE_REF, SERVICE))
-            .willReturn(Arrays.asList(Long.parseLong(CASE_REF)));
+            .willReturn(singletonList(Long.parseLong(CASE_REF)));
 
         given(ccdApi.getCase(CASE_REF, JURISDICTION)).willThrow(
             new CaseNotFoundException("Case not found")

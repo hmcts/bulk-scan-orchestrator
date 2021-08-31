@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -32,8 +33,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 
 class ExceptionRecordMapperTest {
 
-    private ServiceConfigProvider serviceConfigProvider = mock(ServiceConfigProvider.class);
-    private ServiceConfigItem serviceConfigItem = mock(ServiceConfigItem.class);
+    private final ServiceConfigProvider serviceConfigProvider = mock(ServiceConfigProvider.class);
+    private final ServiceConfigItem serviceConfigItem = mock(ServiceConfigItem.class);
 
     private final ExceptionRecordMapper mapper = new ExceptionRecordMapper(
         "https://example.gov.uk",
@@ -45,11 +46,11 @@ class ExceptionRecordMapperTest {
     void setupServiceConfig() {
         given(serviceConfigProvider.getConfig("bulkscan")).willReturn(serviceConfigItem);
         given(serviceConfigItem.getSurnameOcrFieldNameList("FORM_TYPE"))
-            .willReturn(asList("field_surname"));
+            .willReturn(singletonList("field_surname"));
     }
 
     @Test
-    public void mapEnvelope_maps_all_fields_correctly() {
+    void mapEnvelope_maps_all_fields_correctly() {
         // given
         Envelope envelope = envelope(
             2,
@@ -80,15 +81,15 @@ class ExceptionRecordMapperTest {
         assertThat(exceptionRecord.scannedDocuments.size()).isEqualTo(envelope.documents.size());
 
         assertThat(toEnvelopeDocuments(exceptionRecord.scannedDocuments))
-            .usingFieldByFieldElementComparator()
+            .usingRecursiveFieldByFieldElementComparator()
             .containsAll(envelope.documents);
 
         assertThat(ocrDataAsList(exceptionRecord.ocrData))
-            .usingFieldByFieldElementComparator()
+            .usingRecursiveFieldByFieldElementComparator()
             .containsAll(envelope.ocrData);
 
         assertThat(toEnvelopeOcrDataWarnings(exceptionRecord.ocrDataValidationWarnings))
-            .usingFieldByFieldElementComparator()
+            .usingRecursiveFieldByFieldElementComparator()
             .containsExactlyElementsOf(envelope.ocrDataValidationWarnings);
 
         assertThat(exceptionRecord.envelopeId).isEqualTo(envelope.id);
@@ -100,7 +101,7 @@ class ExceptionRecordMapperTest {
     }
 
     @Test
-    public void mapEnvelope_handles_null_ocr_data() {
+    void mapEnvelope_handles_null_ocr_data() {
         Envelope envelope = envelope(2, emptyList(), null, emptyList());
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
         assertThat(exceptionRecord.ocrData).isNull();
@@ -108,7 +109,7 @@ class ExceptionRecordMapperTest {
     }
 
     @Test
-    public void mapEnvelope_maps_subtype_values_in_documents() {
+    void mapEnvelope_maps_subtype_values_in_documents() {
         // given
         Envelope envelope = envelope(2, null, emptyList(), emptyList());
 
@@ -128,7 +129,7 @@ class ExceptionRecordMapperTest {
     }
 
     @Test
-    public void mapEnvelope_sets_warnings_presence_correctly() {
+    void mapEnvelope_sets_warnings_presence_correctly() {
         Envelope envelopeWithWarning = envelope(2, null, emptyList(), newArrayList("Warning"));
         Envelope envelopeWithoutWarning = envelope(2, null, emptyList(), emptyList());
 
@@ -137,7 +138,7 @@ class ExceptionRecordMapperTest {
     }
 
     @Test
-    public void mapEnvelope_copies_envelope_id_to_exception_record() {
+    void mapEnvelope_copies_envelope_id_to_exception_record() {
         // given
         String supportedJurisdiction = "supported-jurisdiction1";
 
@@ -151,7 +152,7 @@ class ExceptionRecordMapperTest {
     }
 
     @Test
-    public void mapEnvelope_sets_payment_fields_to_yes_when_envelope_contains_payments() {
+    void mapEnvelope_sets_payment_fields_to_yes_when_envelope_contains_payments() {
         //given
         Envelope envelope = envelope(
             2,
@@ -169,7 +170,7 @@ class ExceptionRecordMapperTest {
     }
 
     @Test
-    public void mapEnvelope_sets_payment_fields_to_no_when_envelope_does_not_contain_payments() {
+    void mapEnvelope_sets_payment_fields_to_no_when_envelope_does_not_contain_payments() {
         //given
         Envelope envelope = envelope(2, null, null, emptyList());
 
@@ -182,7 +183,7 @@ class ExceptionRecordMapperTest {
     }
 
     @Test
-    public void mapEnvelope_sets_display_case_reference_fields_to_no_when_envelope_case_reference_values_are_null() {
+    void mapEnvelope_sets_display_case_reference_fields_to_no_when_envelope_case_reference_values_are_null() {
         //given
         Envelope envelope = envelope(null, null, Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR);
 
@@ -197,7 +198,7 @@ class ExceptionRecordMapperTest {
     }
 
     @Test
-    public void mapEnvelope_sets_display_case_reference_fields_to_yes_when_envelope_case_reference_values_exist() {
+    void mapEnvelope_sets_display_case_reference_fields_to_yes_when_envelope_case_reference_values_exist() {
         //given
         Envelope envelope = envelope("CASE_123", "LEGACY_CASE_123", Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR);
 
@@ -212,7 +213,7 @@ class ExceptionRecordMapperTest {
     }
 
     @Test
-    public void mapEnvelope_sets_surname_null_when_no_surname_data_in_ocr() {
+    void mapEnvelope_sets_surname_null_when_no_surname_data_in_ocr() {
         //given
         Envelope envelope = envelope("CASE_123", "LEGACY_CASE_123", Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR);
         // when
@@ -223,7 +224,7 @@ class ExceptionRecordMapperTest {
     }
 
     @Test
-    public void mapEnvelope_sets_first_surname_when_multiple_surname_data_in_ocr() {
+    void mapEnvelope_sets_first_surname_when_multiple_surname_data_in_ocr() {
         //given
         Envelope envelope = envelope(
             1,
@@ -243,7 +244,7 @@ class ExceptionRecordMapperTest {
     }
 
     @Test
-    public void mapEnvelope_sets_non_empty_surname_when_ocr_surname_data_empty() {
+    void mapEnvelope_sets_non_empty_surname_when_ocr_surname_data_empty() {
 
         //given
         Envelope envelope = envelope(
@@ -264,7 +265,7 @@ class ExceptionRecordMapperTest {
     }
 
     @Test
-    public void mapEnvelope_sets_surname_with_first_matching_ocr_conf_when_multiple_conf_available() {
+    void mapEnvelope_sets_surname_with_first_matching_ocr_conf_when_multiple_conf_available() {
         //given
         given(serviceConfigItem.getSurnameOcrFieldNameList("FORM_TYPE"))
             .willReturn(asList("field_surname_not_found", "field_surname", "fieldName1"));
@@ -288,7 +289,7 @@ class ExceptionRecordMapperTest {
     }
 
     @Test
-    public void mapEnvelope_sets_surname_when_both_ocr_cof_available_by_using_first_surname_configuration() {
+    void mapEnvelope_sets_surname_when_both_ocr_cof_available_by_using_first_surname_configuration() {
         //given
         given(serviceConfigItem.getSurnameOcrFieldNameList("FORM_TYPE"))
             .willReturn(asList("field_surname", "fieldName1"));

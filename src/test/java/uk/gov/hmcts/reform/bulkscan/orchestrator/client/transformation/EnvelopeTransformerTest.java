@@ -31,7 +31,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-public class EnvelopeTransformerTest {
+class EnvelopeTransformerTest {
 
     @Mock
     private TransformationRequestCreator requestCreator;

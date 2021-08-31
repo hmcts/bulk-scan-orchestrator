@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(CcdCallbackController.class)
-public class CcdCallbackControllerReclassifyTest {
+class CcdCallbackControllerReclassifyTest {
 
     private static final String VALID_REQUEST_BODY =
         jsonString("{ 'case_details': { 'id' : 123, 'data': {} }, 'event_id': '' }");

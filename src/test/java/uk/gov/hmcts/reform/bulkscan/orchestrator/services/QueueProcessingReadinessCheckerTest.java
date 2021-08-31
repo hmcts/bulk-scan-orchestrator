@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
-public class QueueProcessingReadinessCheckerTest {
+class QueueProcessingReadinessCheckerTest {
 
     @Mock
     private AuthenticationChecker authenticationChecker;
@@ -26,13 +26,13 @@ public class QueueProcessingReadinessCheckerTest {
     private QueueProcessingReadinessChecker processingReadinessChecker;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         processingReadinessChecker =
             new QueueProcessingReadinessChecker(authenticationChecker, Duration.ofMinutes(1));
     }
 
     @Test
-    public void isNoLogInAttemptRejectedByIdam_returns_true_when_no_account_status_has_4xx_response() throws Exception {
+    void isNoLogInAttemptRejectedByIdam_returns_true_when_no_account_status_has_4xx_response() throws Exception {
         List<JurisdictionConfigurationStatus> noAccountLockedStatus = Arrays.asList(
             new JurisdictionConfigurationStatus("jurisdiction1", true, null, 200),
             new JurisdictionConfigurationStatus("jurisdiction2", false, "serverError", 500)
@@ -44,7 +44,7 @@ public class QueueProcessingReadinessCheckerTest {
     }
 
     @Test
-    public void isNoLogInAttemptRejectedByIdam_throws_exception_when_an_account_is_locked() {
+    void isNoLogInAttemptRejectedByIdam_throws_exception_when_an_account_is_locked() {
         List<JurisdictionConfigurationStatus> oneAccountLockedStatus = Arrays.asList(
             new JurisdictionConfigurationStatus("jurisdiction1", true, null, 200),
             new JurisdictionConfigurationStatus("jurisdiction2", false, "forbidden", 403),
@@ -63,7 +63,7 @@ public class QueueProcessingReadinessCheckerTest {
     }
 
     @Test
-    public void isNoLogInAttemptRejectedByIdamFallback_returns_false() {
+    void isNoLogInAttemptRejectedByIdamFallback_returns_false() {
         assertThat(
             processingReadinessChecker.isNoLogInAttemptRejectedByIdamFallback()
         ).isFalse();

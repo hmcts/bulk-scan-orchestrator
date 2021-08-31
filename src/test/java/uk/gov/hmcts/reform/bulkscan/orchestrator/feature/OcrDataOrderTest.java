@@ -17,24 +17,24 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.env
 import java.util.ArrayList;
 import java.util.ListIterator;
 
-import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-public class OcrDataOrderTest {
+class OcrDataOrderTest {
 
-    private ServiceConfigProvider serviceConfigProvider = mock(ServiceConfigProvider.class);
-    private ServiceConfigItem serviceConfigItem = mock(ServiceConfigItem.class);
+    private final ServiceConfigProvider serviceConfigProvider = mock(ServiceConfigProvider.class);
+    private final ServiceConfigItem serviceConfigItem = mock(ServiceConfigItem.class);
 
     @DisplayName("Should parse incoming envelope with OCR data and map to same order in CCD record")
     @Test
-    public void sameOrder() {
+    void sameOrder() {
         // given
         byte[] envelopeMessage = SampleData.exampleJsonAsBytes();
         given(serviceConfigProvider.getConfig("container")).willReturn(serviceConfigItem);
-        given(serviceConfigItem.getSurnameOcrFieldNameList(any())).willReturn(asList("field_surname"));
+        given(serviceConfigItem.getSurnameOcrFieldNameList(any())).willReturn(singletonList("field_surname"));
 
         // when
         Envelope envelope = EnvelopeParser.parse(envelopeMessage);

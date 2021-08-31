@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
-import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -96,7 +95,7 @@ public class SupplementaryEvidenceUpdater {
         List<Map<String, Object>> existingDocuments
     ) {
         List<Object> documents = Documents.concatDocuments(exceptionDocuments, existingDocuments);
-        return ImmutableMap.of(SCANNED_DOCUMENTS, documents, EVIDENCE_HANDLED, YesNoFieldValues.NO);
+        return Map.of(SCANNED_DOCUMENTS, documents, EVIDENCE_HANDLED, YesNoFieldValues.NO);
     }
 
     @SuppressWarnings("unchecked")
@@ -125,7 +124,7 @@ public class SupplementaryEvidenceUpdater {
                     String.valueOf(exceptionRecordReference)
                 );
 
-                return ImmutableMap.<String, Object>of("value", copiedDocumentContent);
+                return Map.<String, Object>of("value", copiedDocumentContent);
             })
             .collect(toList());
     }
