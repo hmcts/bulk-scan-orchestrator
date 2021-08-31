@@ -6,9 +6,9 @@ public class EventSummaryCreator {
 
     private static final String EVENT_SUMMARY_REPLACE = "{XX}";
     private static final String EVENT_SUMMARY_TRIM_DOTS = "...";
-    private static String EVENT_SUMMARY_TEMP =
+    private static final String EVENT_SUMMARY_TEMP =
         "Attaching exception record(%d) document numbers:" + EVENT_SUMMARY_REPLACE + " to case:%d";
-    private static int EVENT_SUMMARY_MAX_SIZE = 1024;
+    private static final int EVENT_SUMMARY_MAX_SIZE = 1024;
 
     private EventSummaryCreator() {
     }

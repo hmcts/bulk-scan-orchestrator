@@ -125,7 +125,7 @@ class DocumentsTest {
         String actual = Documents.getDocumentId(document);
 
         // then
-        assertThat(actual).isEqualTo("");
+        assertThat(actual).isEmpty();
     }
 
     @Test

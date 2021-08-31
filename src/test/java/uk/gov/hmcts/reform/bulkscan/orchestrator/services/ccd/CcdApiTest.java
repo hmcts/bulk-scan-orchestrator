@@ -162,14 +162,19 @@ class CcdApiTest {
         given(caseDetails.getId()).willReturn(1L);
         given(caseDetails.getCaseTypeId()).willReturn(EXISTING_CASE_TYPE_ID);
 
+        final CcdRequestCredentials ccdRequestCredentials =
+                new CcdRequestCredentials("idamToken", "serviceToken", "userId");
+        final ExceptionRecord exceptionRecord = getExceptionRecord();
+        final CaseDataContent caseDataContent = CaseDataContent.builder().build();
+
         // when
         CcdCallException exception = catchThrowableOfType(
             () -> ccdApi.updateCaseInCcd(
                 true,
-                new CcdRequestCredentials("idamToken","serviceToken","userId"),
-                getExceptionRecord(),
+                ccdRequestCredentials,
+                exceptionRecord,
                 caseDetails,
-                CaseDataContent.builder().build()
+                caseDataContent
             ),
             CcdCallException.class
         );
@@ -196,13 +201,18 @@ class CcdApiTest {
         given(caseDetails.getId()).willReturn(1L);
         given(caseDetails.getCaseTypeId()).willReturn(EXISTING_CASE_TYPE_ID);
 
+        final CcdRequestCredentials ccdRequestCredentials =
+                new CcdRequestCredentials("idamToken", "serviceToken", "userId");
+        final ExceptionRecord exceptionRecord = getExceptionRecord();
+        final CaseDataContent caseDataContent = CaseDataContent.builder().build();
+
         // when
         CaseDetails res = ccdApi.updateCaseInCcd(
                 true,
-                new CcdRequestCredentials("idamToken","serviceToken","userId"),
-                getExceptionRecord(),
+                ccdRequestCredentials,
+                exceptionRecord,
                 caseDetails,
-                CaseDataContent.builder().build()
+                caseDataContent
             );
 
         // then
@@ -230,14 +240,19 @@ class CcdApiTest {
         given(caseDetails.getId()).willReturn(1L);
         given(caseDetails.getCaseTypeId()).willReturn(EXISTING_CASE_TYPE_ID);
 
+        final ExceptionRecord exceptionRecord = getExceptionRecord();
+        final CcdRequestCredentials ccdRequestCredentials =
+                new CcdRequestCredentials("idamToken", "serviceToken", "userId");
+        final CaseDataContent caseDataContent = CaseDataContent.builder().build();
+
         // when
         FeignException.Conflict exception = catchThrowableOfType(
             () -> ccdApi.updateCaseInCcd(
                 true,
-                new CcdRequestCredentials("idamToken","serviceToken","userId"),
-                getExceptionRecord(),
+                ccdRequestCredentials,
+                exceptionRecord,
                 caseDetails,
-                CaseDataContent.builder().build()
+                caseDataContent
             ),
             FeignException.Conflict.class
         );
@@ -266,18 +281,22 @@ class CcdApiTest {
                     "Body".getBytes()
                 )
             );
-        final ExceptionRecord exceptionRecord = getExceptionRecord();
         given(caseDetails.getId()).willReturn(EXISTING_CASE_ID);
         given(caseDetails.getCaseTypeId()).willReturn(EXISTING_CASE_TYPE_ID);
+
+        final ExceptionRecord exceptionRecord = getExceptionRecord();
+        final CcdRequestCredentials ccdRequestCredentials =
+                new CcdRequestCredentials("idamToken", "serviceToken", "userId");
+        final CaseDataContent caseDataContent = CaseDataContent.builder().build();
 
         // when
         CcdCallException exception = catchThrowableOfType(
             () -> ccdApi.updateCaseInCcd(
                 true,
-                new CcdRequestCredentials("idamToken","serviceToken","userId"),
+                ccdRequestCredentials,
                 exceptionRecord,
                 caseDetails,
-                CaseDataContent.builder().build()
+                caseDataContent
             ),
             CcdCallException.class
         );

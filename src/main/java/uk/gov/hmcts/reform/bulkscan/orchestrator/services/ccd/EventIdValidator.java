@@ -4,7 +4,7 @@ import io.vavr.control.Validation;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 
 import static io.vavr.control.Validation.invalid;
@@ -32,8 +32,8 @@ public class EventIdValidator {
     }
 
     @Nonnull
-    private Validation<String, Void> hasValidEventId(Function<String, Boolean> isValid, String eventId) {
-        return isValid.apply(eventId)
+    private Validation<String, Void> hasValidEventId(Predicate<String> isValid, String eventId) {
+        return isValid.test(eventId)
             ? valid(null)
             : invalid(format("The %s event is not supported. Please contact service team", eventId));
     }

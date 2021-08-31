@@ -517,8 +517,7 @@ class CcdCaseUpdaterTest {
             );
         assertThat(callbackException.getCause().getMessage())
             .isEqualTo("400 bad request message");
-        assertThat(callbackException.getCause() instanceof HttpClientErrorException)
-            .isTrue();
+        assertThat(callbackException.getCause()).isInstanceOf(HttpClientErrorException.class);
         assertThat(((HttpClientErrorException) callbackException.getCause()).getStatusText())
             .isEqualTo("bad request message");
         assertThat(((HttpClientErrorException) callbackException.getCause()).getRawStatusCode())
