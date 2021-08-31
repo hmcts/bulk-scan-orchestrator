@@ -15,7 +15,7 @@ import static org.slf4j.event.Level.ERROR;
 import static org.slf4j.event.Level.INFO;
 
 @ExtendWith(MockitoExtension.class)
-public class EnvelopesQueueConsumeTaskTest {
+class EnvelopesQueueConsumeTaskTest {
 
     @RegisterExtension
     public LogCapturer logs = LogCapturer.create().captureForType(EnvelopesQueueConsumeTask.class);
@@ -27,7 +27,7 @@ public class EnvelopesQueueConsumeTaskTest {
     private ServiceBusProcessorClient serviceBusProcessorClient;
 
     @Test
-    public void should_log_when_listener_is_not_working() {
+    void should_log_when_listener_is_not_working() {
         given(serviceBusProcessorClient.isRunning()).willReturn(false);
         queueConsumeTask.checkServiceBusProcessorClient();
         assertThat(
@@ -36,12 +36,11 @@ public class EnvelopesQueueConsumeTaskTest {
     }
 
     @Test
-    public void should_log_when_listener_is_working() {
+    void should_log_when_listener_is_working() {
         given(serviceBusProcessorClient.isRunning()).willReturn(true);
         queueConsumeTask.checkServiceBusProcessorClient();
         assertThat(
             logs.assertContains(event -> event.getLevel() == INFO, "Info level log not found").getMessage())
             .isEqualTo("Envelopes queue consume listener is working.");
     }
-
 }

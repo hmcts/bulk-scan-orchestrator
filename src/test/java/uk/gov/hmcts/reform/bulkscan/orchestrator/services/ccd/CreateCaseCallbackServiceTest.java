@@ -89,16 +89,20 @@ class CreateCaseCallbackServiceTest {
                 .willReturn(Validation.invalid("The some event event is not supported. "
                         + "Please contact service team"));
 
+        final CcdCallbackRequest ccdCallbackRequest = new CcdCallbackRequest(
+                "some event",
+                null,
+                true
+        );
+
         // when
-        assertThatCode(() -> createCaseCallbackService.process(
-                new CcdCallbackRequest(
-                        "some event",
-                        null,
-                        true
-                ),
-                IDAM_TOKEN,
-                USER_ID
-        ))
+        assertThatCode(() -> {
+            createCaseCallbackService.process(
+                    ccdCallbackRequest,
+                    IDAM_TOKEN,
+                    USER_ID
+            );
+        })
                 .isInstanceOf(CallbackException.class)
                 .hasCause(null)
                 .hasMessage("The some event event is not supported. Please contact service team");
@@ -116,16 +120,20 @@ class CreateCaseCallbackServiceTest {
         given(exceptionRecordValidator.mandatoryPrerequisites(any()))
                 .willReturn(Validation.invalid("No case type ID supplied"));
 
+        final CcdCallbackRequest ccdCallbackRequest = new CcdCallbackRequest(
+                EventIds.CREATE_NEW_CASE,
+                caseDetails,
+                true
+        );
+
         // when
-        assertThatCode(() -> createCaseCallbackService.process(
-                new CcdCallbackRequest(
-                        EventIds.CREATE_NEW_CASE,
-                        caseDetails,
-                        true
-                ),
-                IDAM_TOKEN,
-                USER_ID
-        ))
+        assertThatCode(() -> {
+            createCaseCallbackService.process(
+                    ccdCallbackRequest,
+                    IDAM_TOKEN,
+                    USER_ID
+            );
+        })
                 .isInstanceOf(CallbackException.class)
                 .hasCause(null)
                 .hasMessage("No case type ID supplied");
@@ -143,16 +151,20 @@ class CreateCaseCallbackServiceTest {
         given(exceptionRecordValidator.mandatoryPrerequisites(any()))
                 .willReturn(Validation.invalid("Case type ID () has invalid format"));
 
+        final CcdCallbackRequest ccdCallbackRequest = new CcdCallbackRequest(
+                EventIds.CREATE_NEW_CASE,
+                caseDetails,
+                true
+        );
+
         // when
-        assertThatCode(() -> createCaseCallbackService.process(
-                new CcdCallbackRequest(
-                        EventIds.CREATE_NEW_CASE,
-                        caseDetails,
-                        true
-                ),
-                IDAM_TOKEN,
-                USER_ID
-        ))
+        assertThatCode(() -> {
+            createCaseCallbackService.process(
+                    ccdCallbackRequest,
+                    IDAM_TOKEN,
+                    USER_ID
+            );
+        })
                 .isInstanceOf(CallbackException.class)
                 .hasCause(null)
                 .hasMessage("Case type ID () has invalid format");
@@ -169,15 +181,19 @@ class CreateCaseCallbackServiceTest {
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(CASE_TYPE_ID));
         given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.invalid("oh no"));
 
+        final CcdCallbackRequest ccdCallbackRequest = new CcdCallbackRequest(
+                EventIds.CREATE_NEW_CASE,
+                caseDetails,
+                true
+        );
+
         // when
-        assertThatCode(() -> createCaseCallbackService.process(
-                new CcdCallbackRequest(
-                        EventIds.CREATE_NEW_CASE,
-                        caseDetails,
-                        true
-                ),
-                IDAM_TOKEN,
-                USER_ID))
+        assertThatCode(() -> {
+            createCaseCallbackService.process(
+                    ccdCallbackRequest,
+                    IDAM_TOKEN,
+                    USER_ID);
+        })
                 .isInstanceOf(CallbackException.class)
                 .hasCause(null)
                 .hasMessage("oh no");
@@ -194,16 +210,20 @@ class CreateCaseCallbackServiceTest {
         given(exceptionRecordValidator.mandatoryPrerequisites(any()))
                 .willReturn(Validation.invalid("Transformation URL is not configured"));
 
+        final CcdCallbackRequest ccdCallbackRequest = new CcdCallbackRequest(
+                EventIds.CREATE_NEW_CASE,
+                caseDetails,
+                true
+        );
+
         // when
-        assertThatCode(() -> createCaseCallbackService.process(
-                new CcdCallbackRequest(
-                        EventIds.CREATE_NEW_CASE,
-                        caseDetails,
-                        true
-                ),
-                IDAM_TOKEN,
-                USER_ID
-        ))
+        assertThatCode(() -> {
+            createCaseCallbackService.process(
+                    ccdCallbackRequest,
+                    IDAM_TOKEN,
+                    USER_ID
+            );
+        })
                 .isInstanceOf(CallbackException.class)
                 .hasCause(null)
                 .hasMessage("Transformation URL is not configured");
@@ -224,16 +244,20 @@ class CreateCaseCallbackServiceTest {
         given(exceptionRecordValidator.mandatoryPrerequisites(any()))
                 .willReturn(Validation.invalid("Callback has no Idam token received in the header"));
 
+        final CcdCallbackRequest ccdCallbackRequest = new CcdCallbackRequest(
+                EventIds.CREATE_NEW_CASE,
+                caseDetails,
+                true
+        );
+
         // when
-        assertThatCode(() -> createCaseCallbackService.process(
-                new CcdCallbackRequest(
-                        EventIds.CREATE_NEW_CASE,
-                        caseDetails,
-                        true
-                ),
-                null,
-                USER_ID
-        ))
+        assertThatCode(() -> {
+            createCaseCallbackService.process(
+                    ccdCallbackRequest,
+                    null,
+                    USER_ID
+            );
+        })
                 .isInstanceOf(CallbackException.class)
                 .hasCause(null)
                 .hasMessage("Callback has no Idam token received in the header");
@@ -253,16 +277,20 @@ class CreateCaseCallbackServiceTest {
         given(exceptionRecordValidator.mandatoryPrerequisites(any()))
                 .willReturn(Validation.invalid("Callback has no user id received in the header"));
 
+        final CcdCallbackRequest ccdCallbackRequest = new CcdCallbackRequest(
+                EventIds.CREATE_NEW_CASE,
+                caseDetails,
+                true
+        );
+
         // when
-        assertThatCode(() -> createCaseCallbackService.process(
-                new CcdCallbackRequest(
-                        EventIds.CREATE_NEW_CASE,
-                        caseDetails,
-                        true
-                ),
-                IDAM_TOKEN,
-                null
-        ))
+        assertThatCode(() -> {
+            createCaseCallbackService.process(
+                    ccdCallbackRequest,
+                    IDAM_TOKEN,
+                    null
+            );
+        })
                 .isInstanceOf(CallbackException.class)
                 .hasCause(null)
                 .hasMessage("Callback has no user id received in the header");
@@ -361,13 +389,17 @@ class CreateCaseCallbackServiceTest {
         given(exceptionRecordValidator.getValidation(any(CaseDetails.class)))
                 .willReturn(Validation.valid(getExceptionRecord()));
 
-        // when
-        assertThatThrownBy(
-            () -> createCaseCallbackService.process(new CcdCallbackRequest(
+        final CcdCallbackRequest ccdCallbackRequest = new CcdCallbackRequest(
                 EventIds.CREATE_NEW_CASE,
                 caseDetails(basicCaseData()),
                 true
-            ), IDAM_TOKEN, USER_ID)
+        );
+
+        // when
+        assertThatThrownBy(
+            () -> {
+                createCaseCallbackService.process(ccdCallbackRequest, IDAM_TOKEN, USER_ID);
+            }
         )
             .isInstanceOf(MultipleCasesFoundException.class)
             .hasMessage("Multiple cases (345, 456) found for the given bulk scan case reference: 123");

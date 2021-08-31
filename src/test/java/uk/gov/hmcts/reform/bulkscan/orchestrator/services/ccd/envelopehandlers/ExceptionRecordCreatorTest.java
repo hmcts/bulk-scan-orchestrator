@@ -31,7 +31,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 
 @ExtendWith(MockitoExtension.class)
-public class ExceptionRecordCreatorTest {
+class ExceptionRecordCreatorTest {
 
     @Mock
     private CcdApi ccdApi;
@@ -46,7 +46,7 @@ public class ExceptionRecordCreatorTest {
     private CreateExceptionRecord exceptionRecordCreator;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         exceptionRecordCreator = new CreateExceptionRecord(
             exceptionRecordMapper,
             ccdApi
@@ -54,7 +54,7 @@ public class ExceptionRecordCreatorTest {
     }
 
     @Test
-    public void should_create_exception_record_when_none_exists_for_the_envelope() {
+    void should_create_exception_record_when_none_exists_for_the_envelope() {
         // given
         given(ccdApi.getExceptionRecordRefsByEnvelopeId(any(), any())).willReturn(emptyList());
         Envelope envelope = envelope(1);
@@ -83,7 +83,7 @@ public class ExceptionRecordCreatorTest {
     }
 
     @Test
-    public void should_not_create_exception_record_when_one_exists_for_the_envelope() {
+    void should_not_create_exception_record_when_one_exists_for_the_envelope() {
         // given
         Long existingExceptionRecordId = 234L;
         given(ccdApi.getExceptionRecordRefsByEnvelopeId(any(), any()))

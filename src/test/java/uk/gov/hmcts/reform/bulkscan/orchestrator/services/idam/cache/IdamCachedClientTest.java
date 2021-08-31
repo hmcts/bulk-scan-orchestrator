@@ -72,7 +72,7 @@ class IdamCachedClientTest {
     );
 
     @BeforeEach
-    private void setUp() {
+    void setUp() {
         this.idamCachedClient = new IdamCachedClient(
             idamApi,
             users,
@@ -81,7 +81,7 @@ class IdamCachedClientTest {
     }
 
     @Test
-    public void should_get_credentials_when_no_error() {
+    void should_get_credentials_when_no_error() {
         String jurisdiction = "divorce";
 
         given(users.getUser(jurisdiction)).willReturn(new Credential(USERNAME, PASSWORD));
@@ -99,7 +99,7 @@ class IdamCachedClientTest {
     }
 
     @Test
-    public void should_cache_by_jurisdiction() {
+    void should_cache_by_jurisdiction() {
         String jurisdiction1 = "divorce";
         String jurisdiction2 = "cmc";
 
@@ -218,5 +218,4 @@ class IdamCachedClientTest {
         verify(idamApi, times(2)).getAccessTokenResponse(any(), any());
         verify(idamApi, times(2)).getUserInfo(any());
     }
-
 }

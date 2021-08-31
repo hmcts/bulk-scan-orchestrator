@@ -10,7 +10,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ReclassifyCallbackServiceTest {
+class ReclassifyCallbackServiceTest {
 
     private static final String NEW_APPLICATION_CLASSIFICATION = "NEW_APPLICATION";
     private static final String JOURNEY_CLASSIFICATION_FIELD_NAME = "journeyClassification";
@@ -41,8 +41,8 @@ public class ReclassifyCallbackServiceTest {
         Map<String, Object> updatedFields = result.getExceptionRecordData();
         assertThat(updatedFields).hasSize(3);
         assertThat(updatedFields.get(JOURNEY_CLASSIFICATION_FIELD_NAME)).isEqualTo("SUPPLEMENTARY_EVIDENCE_WITH_OCR");
-        assertThat(updatedFields.get("field1")).isEqualTo(originalFields.get("field1"));
-        assertThat(updatedFields.get("field2")).isEqualTo(originalFields.get("field2"));
+        assertThat(updatedFields).containsEntry("field1", originalFields.get("field1"));
+        assertThat(updatedFields).containsEntry("field2", originalFields.get("field2"));
     }
 
     @Test
@@ -67,14 +67,6 @@ public class ReclassifyCallbackServiceTest {
             "This exception record's journey classification is '%s'. "
                 + "Reclassification is only possible from 'NEW_APPLICATION' classification.",
             classification
-        );
-    }
-
-    private String expectedErrorForInvalidState(String state) {
-        return String.format(
-            "Reclassification is only allowed for 'ScannedRecordReceived' state. "
-                + "This Exception record's current state is '%s'.",
-            state
         );
     }
 

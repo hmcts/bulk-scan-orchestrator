@@ -117,8 +117,9 @@ class SupplementaryEvidenceWithOcrHandlerTest {
         var exc = catchThrowable(() -> handler.handle(envelope, 0));
 
         // then
-        assertThat(exc).isInstanceOf(CaseUpdateException.class);
-        assertThat(exc).hasMessageContaining("Updating case failed due to a potentially recoverable error");
+        assertThat(exc)
+                .isInstanceOf(CaseUpdateException.class)
+                .hasMessageContaining("Updating case failed due to a potentially recoverable error");
     }
 
     @Test

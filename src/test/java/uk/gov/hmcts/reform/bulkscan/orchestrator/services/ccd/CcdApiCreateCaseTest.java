@@ -27,7 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
-public class CcdApiCreateCaseTest {
+class CcdApiCreateCaseTest {
 
     @Mock
     private CoreCaseDataApi feignCcdApi;

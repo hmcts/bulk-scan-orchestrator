@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class ServiceConfigProviderTest {
 
     @Test
-    public void getConfig_should_return_the_right_service_configuration_when_present() {
+    void getConfig_should_return_the_right_service_configuration_when_present() {
         // given
         ServiceConfigItem service1Config =
             serviceConfigItem("service1", "jurisdiction1", Arrays.asList("ctid1", "ctid2"));
@@ -33,7 +33,7 @@ class ServiceConfigProviderTest {
     }
 
     @Test
-    public void getConfig_should_throw_exception_when_service_is_not_configured() {
+    void getConfig_should_throw_exception_when_service_is_not_configured() {
         ServiceConfigProvider serviceConfigProvider = serviceConfigProvider(
             Arrays.asList(
                 serviceConfigItem("service", "jurisdiction", singletonList("ctid"))
