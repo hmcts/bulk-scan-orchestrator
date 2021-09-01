@@ -44,13 +44,11 @@ class ExceptionRecordFinalizerTest {
 
         // then
         assertThat(res).containsOnlyKeys(
-            "field1",
-            FIELD_CASE_REFERENCE,
-            FIELD_DISPLAY_WARNINGS,
-            FIELD_OCR_DATA_VALIDATION_WARNINGS
-        );
-
-        assertThat(res)
+                "field1",
+                FIELD_CASE_REFERENCE,
+                FIELD_DISPLAY_WARNINGS,
+                FIELD_OCR_DATA_VALIDATION_WARNINGS
+        )
                 .containsEntry("field1", "value1")
                 .containsEntry(FIELD_CASE_REFERENCE, CASE_ID)
                 .containsEntry(FIELD_DISPLAY_WARNINGS, NO)
@@ -73,13 +71,12 @@ class ExceptionRecordFinalizerTest {
 
         // then
         assertThat(res).containsOnlyKeys(
-            "field1",
-            "field2",
-            FIELD_CASE_REFERENCE,
-            FIELD_DISPLAY_WARNINGS,
-            FIELD_OCR_DATA_VALIDATION_WARNINGS
-        );
-        assertThat(res)
+                "field1",
+                "field2",
+                FIELD_CASE_REFERENCE,
+                FIELD_DISPLAY_WARNINGS,
+                FIELD_OCR_DATA_VALIDATION_WARNINGS
+        )
                 .containsEntry("field1", "value1")
                 .containsEntry("field2", null)
                 .containsEntry(FIELD_CASE_REFERENCE, CASE_ID)
@@ -105,13 +102,11 @@ class ExceptionRecordFinalizerTest {
 
         // then
         assertThat(res).containsOnlyKeys(
-            "field1",
-            FIELD_CASE_REFERENCE,
-            FIELD_DISPLAY_WARNINGS,
-            FIELD_OCR_DATA_VALIDATION_WARNINGS
-        );
-
-        assertThat(res)
+                "field1",
+                FIELD_CASE_REFERENCE,
+                FIELD_DISPLAY_WARNINGS,
+                FIELD_OCR_DATA_VALIDATION_WARNINGS
+        )
                 .containsEntry("field1", "value1")
                 .containsEntry(FIELD_CASE_REFERENCE, CASE_ID)
                 .containsEntry(FIELD_DISPLAY_WARNINGS, NO)
