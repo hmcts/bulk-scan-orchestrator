@@ -39,10 +39,11 @@ class ReclassifyCallbackServiceTest {
         assertThat(result.getWarnings()).isEmpty();
 
         Map<String, Object> updatedFields = result.getExceptionRecordData();
-        assertThat(updatedFields).hasSize(3);
-        assertThat(updatedFields.get(JOURNEY_CLASSIFICATION_FIELD_NAME)).isEqualTo("SUPPLEMENTARY_EVIDENCE_WITH_OCR");
-        assertThat(updatedFields).containsEntry("field1", originalFields.get("field1"));
-        assertThat(updatedFields).containsEntry("field2", originalFields.get("field2"));
+        assertThat(updatedFields)
+                .hasSize(3)
+                .containsEntry(JOURNEY_CLASSIFICATION_FIELD_NAME, "SUPPLEMENTARY_EVIDENCE_WITH_OCR")
+                .containsEntry("field1", originalFields.get("field1"))
+                .containsEntry("field2", originalFields.get("field2"));
     }
 
     @Test
