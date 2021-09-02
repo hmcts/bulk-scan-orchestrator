@@ -65,9 +65,9 @@ public class SupplementaryEvidenceHandler {
             }
         } else {
             log.info(
-                    "Case not found, caseRef {}, legacyCaseRef {}. Creating exception record instead",
-                    envelope.caseRef,
-                    envelope.legacyCaseRef
+                    "Case not found, zipFileName {}, envelopeId {}. Creating exception record instead",
+                    envelope.zipFileName,
+                    envelope.id
             );
             Long erId = exceptionRecordCreator.tryCreateFrom(envelope);
             paymentsProcessor.createPayments(envelope, erId, true);
