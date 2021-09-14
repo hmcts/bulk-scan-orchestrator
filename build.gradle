@@ -266,7 +266,7 @@ dependencies {
   implementation group: 'com.azure', name: 'azure-messaging-servicebus', version: '7.2.3'
 
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.4'
-  implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '3.0.3'
+  implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '3.0.4'
 
   annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
 
