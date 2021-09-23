@@ -222,8 +222,8 @@ repositories {
 def versions = [
   reformLogging     : '5.1.6',
   springfoxSwagger  : '2.9.2',
-  junit             : '5.6.2',
-  junitPlatform     : '1.6.2',
+  junit             : '5.8.1',
+  junitPlatform     : '1.8.1',
 ]
 
 ext["rest-assured.version"] = '4.3.0'
@@ -285,6 +285,8 @@ dependencies {
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: versions.junit
   testImplementation group: 'org.junit.platform', name: 'junit-platform-commons', version: versions.junitPlatform
   testImplementation group: 'org.junit.platform', name: 'junit-platform-engine', version: versions.junitPlatform
+  testImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: '1.0.0'
+
   testImplementation group: 'io.github.netmikey.logunit', name: 'logunit-core', version: '1.1.0'
   testImplementation group: 'com.github.hmcts', name: 'fortify-client', version: '1.2.1', classifier: 'all'
   testRuntimeOnly group: 'io.github.netmikey.logunit', name: 'logunit-logback', version: '1.1.0'
@@ -292,6 +294,7 @@ dependencies {
   integrationTestImplementation sourceSets.main.runtimeClasspath
   integrationTestImplementation sourceSets.test.runtimeClasspath
   integrationTestImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '3.0.4'
+  integrationTestImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: '1.0.0'
 
   integrationTestImplementation group: 'com.github.tomakehurst', name: 'wiremock-jre8', version: '2.31.0'
 
@@ -303,6 +306,7 @@ dependencies {
   functionalTestImplementation sourceSets.main.runtimeClasspath
   functionalTestImplementation sourceSets.test.runtimeClasspath
   functionalTestImplementation group: 'uk.gov.hmcts.reform', name: 'document-management-client', version: '7.0.0'
+  functionalTestImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: '1.0.0'
 
   functionalTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.16.0', {
     exclude group: 'junit', module: 'junit'
