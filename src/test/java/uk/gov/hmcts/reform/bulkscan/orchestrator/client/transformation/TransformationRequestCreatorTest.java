@@ -43,12 +43,12 @@ class TransformationRequestCreatorTest {
         var exceptionRecord = sampleExceptionRecord();
 
         // when
-        var transformationRequest = requestCreator.create(exceptionRecord);
+        var transformationRequest = requestCreator.create(exceptionRecord, false);
 
         // then
         assertThat(transformationRequest)
             .usingRecursiveComparison()
-            .ignoringFields("exceptionRecordCaseTypeId", "exceptionRecordId", "isAutomatedProcess")
+            .ignoringFields("exceptionRecordCaseTypeId", "exceptionRecordId", "isAutomatedProcess", "ignoreWarnings")
             .isEqualTo(exceptionRecord);
 
         assertThat(transformationRequest.isAutomatedProcess).isFalse();

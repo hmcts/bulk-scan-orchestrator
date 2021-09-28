@@ -244,7 +244,8 @@ public class TransformationClientTest {
             asList(
                 new OcrDataField("name1", "value1"),
                 new OcrDataField("name2", "value2")
-            )
+            ),
+            false
         );
     }
 

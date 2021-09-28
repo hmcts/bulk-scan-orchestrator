@@ -59,6 +59,9 @@ public class TransformationRequest {
     @JsonProperty("ocr_data_fields")
     public final List<OcrDataField> ocrDataFields;
 
+    @JsonProperty("ignore_warnings")
+    public final boolean ignoreWarnings;
+
     public TransformationRequest(
         String id,
         String caseTypeId,
@@ -71,7 +74,8 @@ public class TransformationRequest {
         LocalDateTime deliveryDate,
         LocalDateTime openingDate,
         List<ScannedDocument> scannedDocuments,
-        List<OcrDataField> ocrDataFields
+        List<OcrDataField> ocrDataFields,
+        boolean ignoreWarnings
     ) {
         this.id = id;
         this.exceptionRecordId = id;
@@ -87,5 +91,6 @@ public class TransformationRequest {
         this.openingDate = openingDate;
         this.scannedDocuments = scannedDocuments;
         this.ocrDataFields = ocrDataFields;
+        this.ignoreWarnings = ignoreWarnings;
     }
 }
