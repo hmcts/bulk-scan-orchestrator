@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Service
 public class TransformationClient {
+
+    private static final Logger log = LoggerFactory.getLogger(TransformationClient.class);
 
     private final RestTemplate restTemplate;
     private final Validator validator;
@@ -41,6 +45,13 @@ public class TransformationClient {
         headers.add("ServiceAuthorization", s2sTokenGenerator.generate());
         headers.add("Content-Type", APPLICATION_JSON.toString());
 
+        if (transformationRequest != null) {
+            log.info(
+                "exceptionRecordId: {} ignoreWarnings: {}",
+                transformationRequest.exceptionRecordId,
+                transformationRequest.ignoreWarnings
+            );
+        }
         SuccessfulTransformationResponse response = restTemplate.postForObject(
             getUrl(baseUrl),
             new HttpEntity<>(transformationRequest, headers),
