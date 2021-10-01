@@ -25,7 +25,7 @@ public class TransformationRequestCreator {
         this.docMapper = docMapper;
     }
 
-    public TransformationRequest create(ExceptionRecord exceptionRecord) {
+    public TransformationRequest create(ExceptionRecord exceptionRecord, boolean ignoreWarnings) {
         return new TransformationRequest(
             exceptionRecord.id,
             exceptionRecord.caseTypeId,
@@ -38,7 +38,8 @@ public class TransformationRequestCreator {
             exceptionRecord.deliveryDate,
             exceptionRecord.openingDate,
             exceptionRecord.scannedDocuments,
-            exceptionRecord.ocrDataFields
+            exceptionRecord.ocrDataFields,
+            ignoreWarnings
         );
     }
 
@@ -55,7 +56,8 @@ public class TransformationRequestCreator {
             toLocalDateTime(envelope.deliveryDate),
             toLocalDateTime(envelope.openingDate),
             envelope.documents.stream().map(docMapper::toScannedDoc).collect(toList()),
-            mapOcrDataFields(envelope.ocrData)
+            mapOcrDataFields(envelope.ocrData),
+            true
         );
     }
 

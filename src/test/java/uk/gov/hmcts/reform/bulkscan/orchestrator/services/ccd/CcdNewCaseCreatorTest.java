@@ -113,8 +113,13 @@ class CcdNewCaseCreatorTest {
         );
 
         given(s2sTokenGenerator.generate()).willReturn(s2sToken);
-        given(exceptionRecordTransformer.transformExceptionRecord(configItem.getTransformationUrl(), exceptionRecord))
-            .willReturn(expectedTransformationResponse);
+        given(
+            exceptionRecordTransformer.transformExceptionRecord(
+                configItem.getTransformationUrl(),
+                exceptionRecord,
+                true
+            )
+        ).willReturn(expectedTransformationResponse);
 
         given(ccdApi.createCase(
                 any(CcdRequestCredentials.class),
@@ -168,8 +173,11 @@ class CcdNewCaseCreatorTest {
         );
 
         given(s2sTokenGenerator.generate()).willReturn(s2sToken);
-        given(exceptionRecordTransformer.transformExceptionRecord(configItem.getTransformationUrl(), exceptionRecord))
-            .willReturn(expectedTransformationResponse);
+        given(exceptionRecordTransformer.transformExceptionRecord(
+            configItem.getTransformationUrl(),
+            exceptionRecord,
+            true
+        )).willReturn(expectedTransformationResponse);
 
         given(ccdApi.createCase(
                 any(CcdRequestCredentials.class),
@@ -220,8 +228,11 @@ class CcdNewCaseCreatorTest {
             singletonList("warning1")
         );
 
-        given(exceptionRecordTransformer.transformExceptionRecord(configItem.getTransformationUrl(), exceptionRecord))
-            .willReturn(expectedTransformationResponse);
+        given(exceptionRecordTransformer.transformExceptionRecord(
+            configItem.getTransformationUrl(),
+            exceptionRecord,
+            false
+        )).willReturn(expectedTransformationResponse);
 
         // when
         CreateCaseResult result =
@@ -249,8 +260,11 @@ class CcdNewCaseCreatorTest {
         ExceptionRecord exceptionRecord = getExceptionRecord();
 
         given(s2sTokenGenerator.generate()).willReturn("s2s-token1");
-        given(exceptionRecordTransformer.transformExceptionRecord(configItem.getTransformationUrl(), exceptionRecord))
-                .willReturn(transformationResponse);
+        given(exceptionRecordTransformer.transformExceptionRecord(
+            configItem.getTransformationUrl(),
+            exceptionRecord,
+            true
+        )).willReturn(transformationResponse);
 
         // when
         // trigger case creation to capture data content builder which was passed to CCD client
@@ -287,7 +301,7 @@ class CcdNewCaseCreatorTest {
             .willReturn(new ClientServiceErrorResponse(singletonList("error"), singletonList("warning")));
         doThrow(unprocessableEntity)
             .when(exceptionRecordTransformer)
-            .transformExceptionRecord(configItem.getTransformationUrl(), exceptionRecord);
+            .transformExceptionRecord(configItem.getTransformationUrl(), exceptionRecord, true);
 
 
         // when
@@ -314,7 +328,7 @@ class CcdNewCaseCreatorTest {
 
         doThrow(badRequest)
             .when(exceptionRecordTransformer)
-            .transformExceptionRecord(configItem.getTransformationUrl(), exceptionRecord);
+            .transformExceptionRecord(configItem.getTransformationUrl(), exceptionRecord, true);
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -344,7 +358,7 @@ class CcdNewCaseCreatorTest {
         ConstraintViolationException exception = new ConstraintViolationException("msg", emptySet());
         doThrow(exception)
             .when(exceptionRecordTransformer)
-            .transformExceptionRecord(configItem.getTransformationUrl(), exceptionRecord);
+            .transformExceptionRecord(configItem.getTransformationUrl(), exceptionRecord, true);
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -379,7 +393,7 @@ class CcdNewCaseCreatorTest {
         RestClientException exception = new RestClientException("msg");
         doThrow(exception)
             .when(exceptionRecordTransformer)
-            .transformExceptionRecord(configItem.getTransformationUrl(), exceptionRecord);
+            .transformExceptionRecord(configItem.getTransformationUrl(), exceptionRecord, true);
 
         // when
         CallbackException callbackException = catchThrowableOfType(() ->
@@ -417,8 +431,11 @@ class CcdNewCaseCreatorTest {
         );
 
         given(s2sTokenGenerator.generate()).willReturn(s2sToken);
-        given(exceptionRecordTransformer.transformExceptionRecord(configItem.getTransformationUrl(), exceptionRecord))
-                .willReturn(expectedTransformationResponse);
+        given(exceptionRecordTransformer.transformExceptionRecord(
+            configItem.getTransformationUrl(),
+            exceptionRecord,
+            true
+        )).willReturn(expectedTransformationResponse);
 
         RuntimeException exception = new RuntimeException("msg");
         doThrow(exception)
@@ -466,8 +483,11 @@ class CcdNewCaseCreatorTest {
         );
 
         given(s2sTokenGenerator.generate()).willReturn(s2sToken);
-        given(exceptionRecordTransformer.transformExceptionRecord(configItem.getTransformationUrl(), exceptionRecord))
-                .willReturn(expectedTransformationResponse);
+        given(exceptionRecordTransformer.transformExceptionRecord(
+            configItem.getTransformationUrl(),
+            exceptionRecord,
+            true
+        )).willReturn(expectedTransformationResponse);
 
         FeignException exception = new FeignException.InternalServerError(
                 "msg",

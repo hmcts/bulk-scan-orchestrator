@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
@@ -41,7 +42,8 @@ class ExceptionRecordTransformerTest {
         ExceptionRecord exceptionRecord = mock(ExceptionRecord.class);
         TransformationRequest transformationRequest = mock(TransformationRequest.class);
 
-        given(requestCreator.create(ArgumentMatchers.<ExceptionRecord>any())).willReturn(transformationRequest);
+        given(requestCreator.create(ArgumentMatchers.<ExceptionRecord>any(), anyBoolean()))
+            .willReturn(transformationRequest);
 
         SuccessfulTransformationResponse expectedResponse = mock(SuccessfulTransformationResponse.class);
         given(transformationClient.transformCaseData(any(), any())).willReturn(expectedResponse);
@@ -50,11 +52,11 @@ class ExceptionRecordTransformerTest {
         String s2sToken = "s2sToken1";
 
         // when
-        var result = exceptionRecordTransformer.transformExceptionRecord(baseUrl, exceptionRecord);
+        var result = exceptionRecordTransformer.transformExceptionRecord(baseUrl, exceptionRecord, false);
 
         // then
         assertThat(result).isEqualTo(expectedResponse);
-        verify(requestCreator).create(exceptionRecord);
+        verify(requestCreator).create(exceptionRecord, false);
         verify(transformationClient).transformCaseData(baseUrl, transformationRequest);
     }
 
@@ -66,7 +68,7 @@ class ExceptionRecordTransformerTest {
 
         // when
         assertThatThrownBy(() ->
-            exceptionRecordTransformer.transformExceptionRecord("baseUrl1", mock(ExceptionRecord.class))
+            exceptionRecordTransformer.transformExceptionRecord("baseUrl1", mock(ExceptionRecord.class), true)
         )
             .isSameAs(expectedException);
     }

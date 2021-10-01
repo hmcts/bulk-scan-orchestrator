@@ -74,7 +74,11 @@ public class CcdNewCaseCreator {
 
         try {
             SuccessfulTransformationResponse transformationResponse =
-                exceptionRecordTransformer.transformExceptionRecord(configItem.getTransformationUrl(), exceptionRecord);
+                exceptionRecordTransformer.transformExceptionRecord(
+                    configItem.getTransformationUrl(),
+                    exceptionRecord,
+                    ignoreWarnings
+                );
 
             if (!ignoreWarnings && !transformationResponse.warnings.isEmpty()) {
                 log.info(

@@ -20,11 +20,12 @@ public class ExceptionRecordTransformer {
 
     public SuccessfulTransformationResponse transformExceptionRecord(
         String baseUrl,
-        ExceptionRecord exceptionRecord
+        ExceptionRecord exceptionRecord,
+        boolean ignoreWarnings
     ) {
         return transformationClient.transformCaseData(
             baseUrl,
-            requestCreator.create(exceptionRecord)
+            requestCreator.create(exceptionRecord, ignoreWarnings)
         );
     }
 }
