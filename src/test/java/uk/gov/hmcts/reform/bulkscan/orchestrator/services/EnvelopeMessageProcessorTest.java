@@ -48,7 +48,7 @@ class EnvelopeMessageProcessorTest {
     private ServiceBusReceivedMessageContext messageContext;
 
     @Mock
-    private ServiceBusReceivedMessage message = mock(ServiceBusReceivedMessage.class);
+    private final ServiceBusReceivedMessage message = mock(ServiceBusReceivedMessage.class);
 
     @Mock
     private AppInsights appInsights;
@@ -293,4 +293,37 @@ class EnvelopeMessageProcessorTest {
         );
     }
 
+    @Test
+    void should_handle_null_message() {
+        // given
+        given(messageContext.getMessage()).willReturn(null);
+
+        // when
+        processor.processMessage(messageContext);
+
+        // then
+        verifyNoInteractions(
+            envelopeHandler,
+            processedEnvelopeNotifier
+        );
+    }
+
+    @Test
+    void should_handle_runtime_exception_when_finalizing_processed_message() {
+        // given
+        given(messageContext.getMessage()).willReturn(message);
+        given(message.getBody()).willReturn(BinaryData.fromBytes(envelopeJson()));
+        willThrow(new RuntimeException()).given(messageContext).complete();
+
+        given(envelopeHandler.handleEnvelope(any(), anyLong()))
+                .willReturn(new EnvelopeProcessingResult(3221L, EXCEPTION_RECORD));
+
+        // when
+        assertThatCode(() -> processor.processMessage(messageContext)).doesNotThrowAnyException();
+
+        // then
+        verify(messageContext, times(3)).getMessage();
+        verify(messageContext).complete();
+        verifyNoMoreInteractions(appInsights, messageContext);
+    }
 }
