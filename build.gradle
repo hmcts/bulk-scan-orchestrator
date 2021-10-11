@@ -210,10 +210,7 @@ dependencyCheck {
 
 repositories {
   mavenLocal()
-  jcenter()
-  maven {
-    url 'https://dl.bintray.com/hmcts/hmcts-maven'
-  }
+  mavenCentral()
   maven { url 'https://jitpack.io' }
 }
 
