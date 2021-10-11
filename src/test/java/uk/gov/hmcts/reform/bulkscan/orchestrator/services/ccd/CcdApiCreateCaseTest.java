@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import feign.FeignException;
-import feign.Request;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -94,7 +93,7 @@ class CcdApiCreateCaseTest {
     @Test
     void createCase_should_not_submit_event_when_start_event_fails() {
         // given
-        var expectedException = new FeignException.BadRequest("test exception", mock(Request.class), null);
+        var expectedException = mock(FeignException.BadRequest.class);
 
         willThrow(expectedException)
             .given(feignCcdApi)
@@ -118,7 +117,7 @@ class CcdApiCreateCaseTest {
         var ccdAuthenticator = sampleCcdAuthenticator();
         given(authenticatorFactory.createForJurisdiction(any())).willReturn(ccdAuthenticator);
 
-        var expectedException = new FeignException.BadRequest("test exception", mock(Request.class), null);
+        var expectedException = mock(FeignException.BadRequest.class);
 
         willThrow(expectedException)
             .given(feignCcdApi)
@@ -134,7 +133,8 @@ class CcdApiCreateCaseTest {
     @Test
     void createCase_should_not_attempt_to_create_case_when_authentication_details_retrieval_fails() {
         // given
-        var expectedException = new FeignException.Unauthorized("test exception", mock(Request.class), null);
+        var expectedException = mock(FeignException.Unauthorized.class);
+
         willThrow(expectedException)
             .given(authenticatorFactory)
             .createForJurisdiction(any());
