@@ -266,7 +266,8 @@ class CcdCaseUpdaterTest {
             .willThrow(new FeignException.Conflict(
                 "Msg",
                 mock(Request.class),
-                "Body".getBytes()
+                "Body".getBytes(),
+                null
             ));
 
         // when
@@ -360,7 +361,8 @@ class CcdCaseUpdaterTest {
                     new FeignException.UnprocessableEntity(
                         "Msg",
                         mock(Request.class),
-                        "Body".getBytes()
+                        "Body".getBytes(),
+                        null
                     )
                 )
             );
@@ -583,7 +585,8 @@ class CcdCaseUpdaterTest {
             .willThrow(new FeignException.MethodNotAllowed(
                 "Msg",
                 mock(Request.class),
-                "Body".getBytes()
+                "Body".getBytes(),
+                null
             ));
 
         // when
@@ -664,7 +667,8 @@ class CcdCaseUpdaterTest {
             .willThrow(new FeignException.NotFound(
                 "case not found",
                 mock(Request.class),
-                "Body".getBytes()
+                "Body".getBytes(),
+                null
             ));
 
         // when
@@ -700,7 +704,8 @@ class CcdCaseUpdaterTest {
             .willThrow(new FeignException.BadRequest(
                 "invalid",
                 mock(Request.class),
-                "Body".getBytes()
+                "Body".getBytes(),
+                null
             ));
 
         // when

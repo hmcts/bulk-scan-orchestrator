@@ -144,11 +144,8 @@ class CcdApiTest {
     @Test
     void updateCaseInCcd_should_handle_feign_exception() {
         // given
-        final FeignException.BadRequest ex = new FeignException.BadRequest(
-            "Msg",
-            mock(Request.class),
-            "Body".getBytes()
-        );
+        final FeignException.BadRequest ex = mock(FeignException.BadRequest.class);
+
         given(feignCcdApi.submitEventForCaseWorker(
             anyString(),
             anyString(),
@@ -181,7 +178,6 @@ class CcdApiTest {
 
         // then
         assertThat(exception.getCause()).isSameAs(ex);
-        assertThat(exception.getMessage()).isEqualTo("Service response: Body");
     }
 
     @Test
@@ -222,11 +218,8 @@ class CcdApiTest {
     @Test
     void updateCaseInCcd_should_rethrow_feign_conflict() {
         // given
-        final FeignException.Conflict conflict = new FeignException.Conflict(
-            "Msg",
-            mock(Request.class),
-            "Body".getBytes()
-        );
+        final FeignException.Conflict conflict = mock(FeignException.Conflict.class);
+
         given(feignCcdApi.submitEventForCaseWorker(
             anyString(),
             anyString(),
@@ -278,7 +271,8 @@ class CcdApiTest {
                 new FeignException.UnprocessableEntity(
                     "Msg",
                     mock(Request.class),
-                    "Body".getBytes()
+                    "Body".getBytes(),
+                    null
                 )
             );
         given(caseDetails.getId()).willReturn(EXISTING_CASE_ID);

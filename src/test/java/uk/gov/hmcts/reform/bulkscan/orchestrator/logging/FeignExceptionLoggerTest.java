@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.logging;
 
 import feign.FeignException;
-import feign.Request;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -9,9 +8,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
-import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.verify;
+import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.logging.FeignExceptionLogger.debugCcdException;
 
 @ExtendWith(MockitoExtension.class)
@@ -23,12 +23,8 @@ class FeignExceptionLoggerTest {
     @Test
     void should_pick_from_response_body_when_it_is_present() {
         // given
-        FeignException exception = new FeignException.BadRequest(
-            "error message",
-            Request.create(Request.HttpMethod.POST, "url", emptyMap(), new byte[]{}, null, null),
-            "response body".getBytes()
-        );
-
+        var exception = mock(FeignException.BadRequest.class);
+        given(exception.getMessage()).willReturn("response body");
         // when
         debugCcdException(logger, exception, "Intro");
 
@@ -45,12 +41,8 @@ class FeignExceptionLoggerTest {
     @Test
     void should_pick_exception_message_when_response_body_is_not_present() {
         // given
-        FeignException exception = new FeignException.BadRequest(
-            "error message",
-            Request.create(Request.HttpMethod.POST, "url", emptyMap(), new byte[]{}, null, null),
-            null
-        );
-
+        var exception = mock(FeignException.BadRequest.class);
+        given(exception.getMessage()).willReturn("error message");
         // when
         debugCcdException(logger, exception, "Intro");
 
