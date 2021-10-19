@@ -25,6 +25,7 @@ public class EnvelopeHandler {
     }
 
     public EnvelopeProcessingResult handleEnvelope(Envelope envelope, long deliveryCount) {
+
         switch (envelope.classification) {
             case SUPPLEMENTARY_EVIDENCE:
                 return supplementaryEvidenceHandler.handle(envelope);
