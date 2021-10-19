@@ -111,12 +111,16 @@ public class CcdApi {
         CcdAuthenticator authenticator =
             authenticatorFactory.createForJurisdiction(jurisdiction);
 
+
         try {
-            return feignCcdApi.getCase(
+            CaseDetails caseDetails = feignCcdApi.getCase(
                 authenticator.getUserToken(),
                 authenticator.getServiceToken(),
                 caseRef
             );
+            log.info("caseDetails {}", caseDetails);
+            log.info("caseDetails data {}", caseDetails == null ? "" : caseDetails.getData());
+            return caseDetails;
         } catch (FeignException e) {
             debugCcdException(log, e, "Failed to call 'getCase'");
             removeFromIdamCacheIfAuthProblem(e.status(), jurisdiction);
@@ -208,6 +212,7 @@ public class CcdApi {
             //TODO We don't need to login here as we just need the service token
             CcdAuthenticator authenticator =
                 authenticatorFactory.createForJurisdiction(jurisdiction);
+            log.info("attachExceptionRecord data {}", data);
             feignCcdApi.submitEventForCaseWorker(
                 idamToken,
                 authenticator.getServiceToken(),
@@ -266,6 +271,7 @@ public class CcdApi {
             );
 
             CaseDataContent caseData = caseDataContentBuilder.apply(eventResponse);
+            log.info("createExceptionRecord caseData {}", caseData);
 
             return feignCcdApi.submitForCaseworker(
                 authenticator.getUserToken(),
@@ -307,6 +313,7 @@ public class CcdApi {
             log.info("Started event in CCD. Event: {}, case type: {}. {}", eventTypeId, caseTypeId, logContext);
 
             CaseDataContent caseData = caseDataContentBuilder.apply(eventResponse);
+            log.info("Attache scanned docs caseData {}", caseData);
 
             feignCcdApi.submitEventForCaseWorker(
                 authenticator.getUserToken(),
@@ -388,16 +395,18 @@ public class CcdApi {
                 caseTypeId,
                 logContext
             );
+            CaseDataContent caseData = caseDataContentBuilder.apply(eventResponse);
+            log.info("Create CASE caseData {}", caseData);
 
             long caseId = feignCcdApi.submitForCaseworker(
-                ccdRequestCredentials.idamToken,
-                ccdRequestCredentials.s2sToken,
-                ccdRequestCredentials.userId,
-                jurisdiction,
-                caseTypeId,
-                true,
-                caseDataContentBuilder.apply(eventResponse)
-            )
+                    ccdRequestCredentials.idamToken,
+                    ccdRequestCredentials.s2sToken,
+                    ccdRequestCredentials.userId,
+                    jurisdiction,
+                    caseTypeId,
+                    true,
+                    caseData
+                )
                 .getId();
 
             log.info(
@@ -448,6 +457,8 @@ public class CcdApi {
                 caseTypeId,
                 logContext
             );
+            CaseDataContent caseData = caseDataContentBuilder.apply(eventResponse);
+            log.info("UPDATE CASE caseData {}", caseData);
 
             feignCcdApi.submitEventForCaseWorker(
                 userToken,
@@ -457,7 +468,7 @@ public class CcdApi {
                 caseTypeId,
                 caseId,
                 true,
-                caseDataContentBuilder.apply(eventResponse)
+                caseData
             );
 
             log.info(
