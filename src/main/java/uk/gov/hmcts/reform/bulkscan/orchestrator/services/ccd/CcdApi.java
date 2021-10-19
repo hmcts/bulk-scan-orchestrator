@@ -113,14 +113,14 @@ public class CcdApi {
 
 
         try {
-            CaseDetails caseDetails = feignCcdApi.getCase(
+            CaseDetails caseDetail = feignCcdApi.getCase(
                 authenticator.getUserToken(),
                 authenticator.getServiceToken(),
                 caseRef
             );
-            log.info("caseDetails {}", caseDetails);
-            log.info("caseDetails data {}", caseDetails == null ? "" : caseDetails.getData());
-            return caseDetails;
+            log.info("caseDetails {}", caseDetail);
+            log.info("caseDetails data {}", caseDetail.getData());
+            return caseDetail;
         } catch (FeignException e) {
             debugCcdException(log, e, "Failed to call 'getCase'");
             removeFromIdamCacheIfAuthProblem(e.status(), jurisdiction);
