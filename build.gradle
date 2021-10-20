@@ -298,7 +298,7 @@ dependencies {
   integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.16.0', {
     exclude group: 'junit', module: 'junit'
   }
-  integrationTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.16.0'
+  integrationTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.16.1'
 
   functionalTestImplementation sourceSets.main.runtimeClasspath
   functionalTestImplementation sourceSets.test.runtimeClasspath
@@ -309,7 +309,7 @@ dependencies {
   functionalTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.16.0', {
     exclude group: 'junit', module: 'junit'
   }
-  functionalTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.15.2'
+  functionalTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.16.1'
 
   smokeTestImplementation sourceSets.main.runtimeClasspath
   smokeTestImplementation sourceSets.test.runtimeClasspath
