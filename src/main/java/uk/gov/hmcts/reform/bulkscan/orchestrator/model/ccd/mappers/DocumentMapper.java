@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class DocumentMapper {
@@ -19,20 +20,27 @@ public class DocumentMapper {
     }
 
     public static List<CcdCollectionElement<ScannedDocument>> mapDocuments(
-        List<Document> documents,
+        Map<Document, String> documentsAndHashes,
         String dmApiUrl,
         String contextPath,
         Instant deliveryDate
     ) {
-        return documents
+        return documentsAndHashes.entrySet()
             .stream()
-            .map(document -> mapDocument(document, dmApiUrl, contextPath, deliveryDate))
+            .map(e -> mapDocument(
+                    e.getKey(),
+                    e.getValue().equals("") ? null : e.getValue(),
+                    dmApiUrl,
+                    contextPath,
+                    deliveryDate
+            ))
             .map(CcdCollectionElement::new)
             .collect(Collectors.toList());
     }
 
     public static ScannedDocument mapDocument(
         Document document,
+        String documentHash,
         String dmApiUrl,
         String contextPath,
         Instant deliveryDate
@@ -46,7 +54,7 @@ public class DocumentMapper {
                 document.type,
                 document.subtype,
                 getLocalDateTime(document.scannedAt),
-                new CcdDocument(String.join("/", dmApiUrl, contextPath, document.uuid)),
+                new CcdDocument(String.join("/", dmApiUrl, contextPath, document.uuid), documentHash),
                 getLocalDateTime(document.deliveryDate != null ? document.deliveryDate : deliveryDate),
                 null
             );

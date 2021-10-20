@@ -90,9 +90,17 @@ public class CaseDataExtractor {
             document.type,
             document.subtype,
             ZonedDateTime.ofInstant(document.scannedAt, ZoneId.systemDefault()).toLocalDateTime(),
-            new CcdDocument(String.join("/", dmUrl, contextPath, document.uuid)),
+            new CcdDocument(
+                    String.join("/", dmUrl, contextPath, document.uuid),
+                    getDocumentHash(document)
+            ),
             ZonedDateTime.ofInstant(deliveryDate, ZoneId.systemDefault()).toLocalDateTime(),
             null
         );
+    }
+
+    private static String getDocumentHash(Document document) {
+        // real document hash will be fetched here
+        return null;
     }
 }

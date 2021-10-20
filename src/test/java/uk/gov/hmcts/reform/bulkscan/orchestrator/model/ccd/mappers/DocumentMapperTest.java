@@ -29,7 +29,7 @@ class DocumentMapperTest {
         );
 
         // when
-        ScannedDocument result = DocumentMapper.mapDocument(doc, "https://localhost", "files", deliveryDate);
+        ScannedDocument result = DocumentMapper.mapDocument(doc, "hash", "https://localhost", "files", deliveryDate);
 
         // then
         assertThat(result)
@@ -40,7 +40,7 @@ class DocumentMapperTest {
                     doc.type,
                     doc.subtype,
                     toLocalDateTime(doc.scannedAt),
-                    new CcdDocument("https://localhost/files/" + doc.uuid),
+                    new CcdDocument("https://localhost/files/" + doc.uuid, "hash"),
                     toLocalDateTime(doc.deliveryDate),
                     null // this should always be null;
                 )
@@ -53,7 +53,7 @@ class DocumentMapperTest {
         Document doc = null;
 
         // when
-        ScannedDocument result = DocumentMapper.mapDocument(doc, "https://localhost", "files", Instant.now());
+        ScannedDocument result = DocumentMapper.mapDocument(doc, "hash", "https://localhost", "files", Instant.now());
 
         // then
         assertThat(result).isNull();
@@ -65,7 +65,7 @@ class DocumentMapperTest {
         Document doc = new Document("name.zip", "123", "type", "subtype", null, "uuid1", Instant.now());
 
         // when
-        ScannedDocument result = DocumentMapper.mapDocument(doc, "https://localhost", "files", Instant.now());
+        ScannedDocument result = DocumentMapper.mapDocument(doc, "hash", "https://localhost", "files", Instant.now());
 
         // then
         assertThat(result.scannedDate).isNull();

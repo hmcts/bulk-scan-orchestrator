@@ -12,15 +12,18 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EnvelopeReferenceH
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentMapper.mapDocuments;
 
 @Component
@@ -56,16 +59,33 @@ public class SupplementaryEvidenceMapper {
             updateEnvelopeReferences(existingEnvelopeReferences, envelope);
 
         var scannedDocuments = mapDocuments(
-            Stream.concat(
-                existingDocs.stream(),
-                getDocsToAdd(existingDocs, envelope.documents).stream()
-            ).collect(toList()),
+            getDocumentsWithHashes(existingDocs, envelope),
             documentManagementUrl,
             contextPath,
             envelope.deliveryDate
         );
 
         return new SupplementaryEvidence(scannedDocuments, updatedEnvelopeReferences);
+    }
+
+    private Map<Document, String> getDocumentsWithHashes(List<Document> existingDocs, Envelope envelope) {
+        List<Document> documents = Stream.concat(
+                existingDocs.stream(),
+                getDocsToAdd(existingDocs, envelope.documents).stream()
+        ).collect(toList());
+
+        return getDocumentsAndHashes(documents);
+    }
+
+    private Map<Document, String> getDocumentsAndHashes(List<Document> documents) {
+        return documents
+                .stream()
+                .collect(toMap(Function.identity(), this::getDocumentHash, (k1, k2) -> k1, LinkedHashMap::new));
+    }
+
+    private String getDocumentHash(Document document) {
+        // real document hash will be fetched here
+        return "";
     }
 
     private List<CcdCollectionElement<EnvelopeReference>> updateEnvelopeReferences(

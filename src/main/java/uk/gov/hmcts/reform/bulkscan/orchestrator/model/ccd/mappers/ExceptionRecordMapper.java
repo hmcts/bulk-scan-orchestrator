@@ -11,14 +11,19 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdKeyValue;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.OcrDataField;
 
 import java.util.EnumSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentMapper.getLocalDateTime;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentMapper.mapDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues.NO;
@@ -52,6 +57,7 @@ public class ExceptionRecordMapper {
     }
 
     public ExceptionRecord mapEnvelope(Envelope envelope) {
+        Map<Document, String> documentsAndHashes = getDocumentsAndHashes(envelope.documents);
         return new ExceptionRecord(
             envelope.classification.name(),
             envelope.poBox,
@@ -59,7 +65,12 @@ public class ExceptionRecordMapper {
             envelope.formType,
             getLocalDateTime(envelope.deliveryDate),
             getLocalDateTime(envelope.openingDate),
-            mapDocuments(envelope.documents, documentManagementUrl, contextPath, envelope.deliveryDate),
+            mapDocuments(
+                    getDocumentsAndHashes(envelope.documents),
+                    documentManagementUrl,
+                    contextPath,
+                    envelope.deliveryDate
+            ),
             mapOcrData(envelope.ocrData),
             mapOcrDataWarnings(envelope.ocrDataValidationWarnings),
             envelope.ocrDataValidationWarnings.isEmpty() ? NO : YES,
@@ -73,6 +84,17 @@ public class ExceptionRecordMapper {
             setDisplayCaseReferenceFlag(envelope.legacyCaseRef, envelope.classification),
             extractSurnameFromOcrData(envelope)
         );
+    }
+
+    private Map<Document, String> getDocumentsAndHashes(List<Document> documents) {
+        return documents
+                .stream()
+                .collect(toMap(Function.identity(), this::getDocumentHash, (k1, k2) -> k1, LinkedHashMap::new));
+    }
+
+    private String getDocumentHash(Document document) {
+        // real document hash will be fetched here
+        return "";
     }
 
     private String setDisplayCaseReferenceFlag(String caseRef, Classification classification) {
