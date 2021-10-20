@@ -20,21 +20,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 @IntegrationTest
 public class CdamApiTest {
 
-    private static final String UPDATE_CASE_URL = "/update-case";
-
-    @Autowired
-    private CaseUpdateDataClient client;
-
     @Autowired
     private CdamApi cdamApi;
-
 
     @Test
     public void should_return_case_details_for_successful_update() throws Exception {
         // given
         String s2sToken = randomUUID().toString();
         String idamToken = randomUUID().toString();
-        String documentUuid= randomUUID().toString();
+        String documentUuid = randomUUID().toString();
 
         stubFor(
             get(urlPathMatching("/cases/documents/" + documentUuid + "/token"))

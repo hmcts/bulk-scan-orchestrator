@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.cache.IdamCachedClient;
@@ -14,13 +12,9 @@ import java.util.Map;
 @Component
 public class CdamApiClient {
 
-    private static final Logger log = LoggerFactory.getLogger(CdamApiClient.class);
-
     private final CdamApi cdamApi;
     private final AuthTokenGenerator s2sTokenGenerator;
     private final IdamCachedClient idamCachedClient;
-
-
 
     public CdamApiClient(
         CdamApi cdamApi,
@@ -32,7 +26,7 @@ public class CdamApiClient {
         this.idamCachedClient = idamCachedClient;
     }
 
-    public Map<String,String> getDocumentHash(
+    public Map<String, String> getDocumentHash(
         String jurisdiction,
         List<Document> documentList
     ) {
@@ -40,12 +34,23 @@ public class CdamApiClient {
         var s2sToken = s2sTokenGenerator.generate();
         var idamCredential = idamCachedClient.getIdamCredentials(jurisdiction);
 
-        Map<String,String> hashTokenMap = new HashMap();
+        Map<String, String> hashTokenMap = new HashMap<String, String>();
         for (Document document : documentList) {
             String docHashToken = cdamApi.getDocumentHash(s2sToken, idamCredential.accessToken, document.uuid);
             hashTokenMap.put(document.uuid, docHashToken);
         }
-      return hashTokenMap;
+        return hashTokenMap;
+    }
+
+    public String getDocumentHash(
+        String jurisdiction,
+        Document document
+    ) {
+
+        var s2sToken = s2sTokenGenerator.generate();
+        var idamCredential = idamCachedClient.getIdamCredentials(jurisdiction);
+
+        return cdamApi.getDocumentHash(s2sToken, idamCredential.accessToken, document.uuid);
     }
 
 }

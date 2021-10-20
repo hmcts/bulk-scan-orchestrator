@@ -10,8 +10,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.UUID;
-
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 
@@ -22,10 +20,10 @@ public class CdamApi {
 
     private final String documentManagementUrl;
     private final RestTemplate restTemplate;
-    private final static String GET_HASH_REQUEST_PATH = "/cases/documents/{documentId}/token";
+    private static final String GET_HASH_REQUEST_PATH = "/cases/documents/{documentId}/token";
 
     public CdamApi(
-        @Value("${document_management.url}") final String documentManagementUrl,
+        @Value("${cdam.api.url}") final String documentManagementUrl,
         RestTemplate restTemplate
     ) {
         this.documentManagementUrl = documentManagementUrl;
@@ -35,7 +33,7 @@ public class CdamApi {
     public String getDocumentHash(
         String s2sToken,
         String idamToken,
-        String documentUUID
+        String documentUuid
     ) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("ServiceAuthorization", s2sToken);
@@ -45,7 +43,7 @@ public class CdamApi {
         String url =
             UriComponentsBuilder
                 .fromHttpUrl(documentManagementUrl + GET_HASH_REQUEST_PATH)
-                .buildAndExpand(documentUUID.toString())
+                .buildAndExpand(documentUuid)
                 .toUri()
                 .toString();
 
@@ -53,7 +51,8 @@ public class CdamApi {
 
         return restTemplate
             .exchange(url, HttpMethod.GET, new HttpEntity<>(headers), GetDocumentHashResponse.class)
-            .getBody().hashToken;
+            .getBody()
+            .hashToken;
     }
 
 }
