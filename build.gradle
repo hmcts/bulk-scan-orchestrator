@@ -239,7 +239,7 @@ dependencyManagement {
 }
 
 dependencies {
-  implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.24'
+  implementation group: 'org.postgresql', name: 'postgresql', version: '42.3.0'
   implementation group: 'org.flywaydb', name: 'flyway-core', version: '8.0.1'
 
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
@@ -295,10 +295,10 @@ dependencies {
 
   integrationTestImplementation group: 'com.github.tomakehurst', name: 'wiremock-jre8', version: '2.31.0'
 
-  integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.16.0', {
+  integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.16.1', {
     exclude group: 'junit', module: 'junit'
   }
-  integrationTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.16.0'
+  integrationTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.16.1'
 
   functionalTestImplementation sourceSets.main.runtimeClasspath
   functionalTestImplementation sourceSets.test.runtimeClasspath
@@ -309,7 +309,7 @@ dependencies {
   functionalTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.16.0', {
     exclude group: 'junit', module: 'junit'
   }
-  functionalTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.15.2'
+  functionalTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.16.1'
 
   smokeTestImplementation sourceSets.main.runtimeClasspath
   smokeTestImplementation sourceSets.test.runtimeClasspath
