@@ -49,10 +49,14 @@ public class CdamApi {
 
         log.info("Get hashtoken for {}", url);
 
-        return restTemplate
+        GetDocumentHashResponse response = restTemplate
             .exchange(url, HttpMethod.GET, new HttpEntity<>(headers), GetDocumentHashResponse.class)
-            .getBody()
-            .hashToken;
+            .getBody();
+
+        if (response == null) {
+            throw new RuntimeException("Get Document Hash Response is null");
+        }
+        return response.hashToken;
     }
 
 }
