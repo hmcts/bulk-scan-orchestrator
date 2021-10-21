@@ -85,3 +85,7 @@ service-config:
 callback:
   store:
     retry-count: 3
+
+cdam:
+  api:
+    url: http://localhost/cdam
