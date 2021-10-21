@@ -9,12 +9,10 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam.CdamApiClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 
 import java.time.Instant;
-import java.util.Collections;
 import java.util.List;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
@@ -63,11 +61,11 @@ class DocumentHashProviderTest {
 
         // then
         assertThat(res)
-                .usingRecursiveFieldByFieldElementComparator()
-                .containsExactly(
-                        new DocumentHashProvider.DocumentAndHash(d1, "hash1"),
-                        new DocumentHashProvider.DocumentAndHash(d2, "hash2")
-                );
+            .usingRecursiveFieldByFieldElementComparator()
+            .containsExactly(
+                new DocumentHashProvider.DocumentAndHash(d1, "hash1"),
+                new DocumentHashProvider.DocumentAndHash(d2, "hash2")
+            );
     }
 
     @Test
