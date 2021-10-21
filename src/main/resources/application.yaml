@@ -259,3 +259,7 @@ logging:
 callback:
   store:
     retry-count: 3
+
+cdam:
+  api:
+    url: ${CDAM_URL}
