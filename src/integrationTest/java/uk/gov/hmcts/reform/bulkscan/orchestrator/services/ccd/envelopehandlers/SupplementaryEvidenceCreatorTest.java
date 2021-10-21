@@ -10,11 +10,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam.CdamApiClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeMessageProcessor;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 
 import java.util.concurrent.TimeUnit;
 
@@ -27,6 +30,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.fileContentAsString;
@@ -56,6 +61,9 @@ class SupplementaryEvidenceCreatorTest {
     @Autowired
     private EnvelopeMessageProcessor envelopeMessageProcessor;
 
+    @MockBean
+    private CdamApiClient cdamApiClient;
+
     private static final String CREATE_EXCEPTION_RECORD_SUBMIT_URL = Environment.CASE_SUBMIT_URL
         .replace(CASE_TYPE_BULK_SCAN, CASE_TYPE_EXCEPTION_RECORD);
 
@@ -78,6 +86,7 @@ class SupplementaryEvidenceCreatorTest {
         given(messageContext.getMessage()).willReturn(message);
         given(message.getBody()).willReturn(BinaryData.fromString(MOCK_MESSAGE));
 
+        given(cdamApiClient.getDocumentHash(anyString(), any(Document.class))).willReturn("hash");
     }
 
     @DisplayName("Should call ccd to attach supplementary evidence for caseworker")

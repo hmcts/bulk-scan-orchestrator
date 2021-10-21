@@ -9,11 +9,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam.CdamApiClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeMessageProcessor;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 
 import java.util.concurrent.TimeUnit;
 
@@ -25,6 +28,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.fileContentAsString;
@@ -52,6 +57,9 @@ class ExceptionRecordCreationTest {
     @Mock
     private ServiceBusReceivedMessage message = mock(ServiceBusReceivedMessage.class);
 
+    @MockBean
+    private CdamApiClient cdamApiClient;
+
     @Autowired
     private EnvelopeMessageProcessor envelopeMessageProcessor;
 
@@ -70,6 +78,8 @@ class ExceptionRecordCreationTest {
         givenThat(post(EXCEPTION_RECORD_SEARCH_URL).willReturn(
             aResponse().withBody(ELASTICSEARCH_EMPTY_RESPONSE)
         ));
+
+        given(cdamApiClient.getDocumentHash(anyString(), any(Document.class))).willReturn("hash");
     }
 
     @DisplayName("Should create exception record for supplementary evidence when case record is not found")

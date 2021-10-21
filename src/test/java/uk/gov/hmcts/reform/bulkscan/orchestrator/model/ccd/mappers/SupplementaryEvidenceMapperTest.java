@@ -24,13 +24,17 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.time.Instant.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.JURSIDICTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 
 @SuppressWarnings("checkstyle:LineLength")
@@ -40,6 +44,9 @@ class SupplementaryEvidenceMapperTest {
     @Mock
     private EnvelopeReferenceHelper envelopeReferenceHelper;
 
+    @Mock
+    private DocumentHashProvider documentHashProvider;
+
     private SupplementaryEvidenceMapper mapper;
     Instant deliveryDate = Instant.now();
 
@@ -47,7 +54,12 @@ class SupplementaryEvidenceMapperTest {
 
     @BeforeEach
     void setUp() {
-        mapper = new SupplementaryEvidenceMapper("http://localhost", "files", envelopeReferenceHelper);
+        mapper = new SupplementaryEvidenceMapper(
+                "http://localhost",
+                "files",
+                envelopeReferenceHelper,
+                documentHashProvider
+        );
 
         loggingEvents = LoggerTestUtil.getListAppenderForClass(SupplementaryEvidenceMapper.class);
     }
@@ -55,16 +67,20 @@ class SupplementaryEvidenceMapperTest {
     @Test
     void maps_all_fields_correctly() {
         // given
-        List<Document> existingDocs =
-            asList(
-                new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "uuida", now().minusSeconds(10)),
-                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "uuidb", now().minusSeconds(10))
-            );
+        Document d1 = new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "uuida", now().minusSeconds(10));
+        Document d2 = new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "uuidb", now().minusSeconds(10));
+        Document d3 = new Document("x.pdf", "xxx", "type_x", "subtype_x", now().plusSeconds(3), "uuidx", now().minusSeconds(10));
+        Document d4 = new Document("y.pdf", "yyy", "type_y", "subtype_y", now().plusSeconds(4), "uuidy", now().minusSeconds(10));
 
-        List<Document> envelopeDocs =
-            asList(
-                new Document("x.pdf", "xxx", "type_x", "subtype_x", now().plusSeconds(3), "uuidx", now().minusSeconds(10)),
-                new Document("y.pdf", "yyy", "type_y", "subtype_y", now().plusSeconds(4), "uuidy", now().minusSeconds(10))
+        List<Document> existingDocs = asList(d1, d2);
+        List<Document> envelopeDocs = asList(d3, d4);
+
+        given(documentHashProvider.getDocumentHashes(envelopeDocs, JURSIDICTION))
+            .willReturn(
+                asList(
+                    new DocumentHashProvider.DocumentAndHash(d3, "hash3"),
+                    new DocumentHashProvider.DocumentAndHash(d4, "hash4")
+                )
             );
 
         // when
@@ -103,17 +119,16 @@ class SupplementaryEvidenceMapperTest {
     @Test
     void should_not_add_document_from_envelope_if_document_with_the_same_url_is_already_present_in_case() {
         // given
-        List<Document> existingDocs =
-            asList(
-                new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "uuida", now().minusSeconds(10)),
-                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "uuidb", now().minusSeconds(10))
-            );
+        Document d1 = new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "uuida", now().minusSeconds(10));
+        Document d2 = new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "uuidb", now().minusSeconds(10));
+        Document d3 = new Document("a1.pdf", "aaa1", "type_a1", "subtype_a1", now().plusSeconds(3), "uuida", now().minusSeconds(10)); // same url!
+        Document d4 = new Document("b.pdf", "bbb1", "type_b", "subtype_b", now().plusSeconds(4), "uuidxxxxx", now().minusSeconds(10));
 
-        List<Document> envelopeDocs =
-            asList(
-                new Document("a1.pdf", "aaa1", "type_a1", "subtype_a1", now().plusSeconds(3), "uuida", now().minusSeconds(10)), // same url!
-                new Document("b.pdf", "bbb1", "type_b", "subtype_b", now().plusSeconds(4), "uuidxxxxx", now().minusSeconds(10)
-            ));
+        List<Document> existingDocs = asList(d1, d2);
+        List<Document> envelopeDocs = asList(d3, d4);
+
+        given(documentHashProvider.getDocumentHashes(anyList(), eq(JURSIDICTION)))
+                .willReturn(singletonList(new DocumentHashProvider.DocumentAndHash(d4, "hash4")));
 
         // when
         SupplementaryEvidence result = mapper.map(existingDocs, emptyList(), envelope(envelopeDocs, deliveryDate));
@@ -210,17 +225,16 @@ class SupplementaryEvidenceMapperTest {
     @Test
     void should_not_add_document_from_envelope_if_document_with_the_same_control_number_is_already_present_in_case() {
         // given
-        List<Document> existingDocs =
-            asList(
-                new Document("a.pdf", "AAA", "type_a", "subtype_a", now().plusSeconds(1), "uuida", now().minusSeconds(10)),
-                new Document("b.pdf", "BBB", "type_b", "subtype_b", now().plusSeconds(2), "uuidb", now().minusSeconds(10))
-            );
+        Document d1 = new Document("a.pdf", "AAA", "type_a", "subtype_a", now().plusSeconds(1), "uuida", now().minusSeconds(10));
+        Document d2 = new Document("b.pdf", "BBB", "type_b", "subtype_b", now().plusSeconds(2), "uuidb", now().minusSeconds(10));
+        Document d3 = new Document("c.pdf", "AAA", "type_c", "subtype_c", now().plusSeconds(3), "uuidc", now().minusSeconds(10)); // same control number!
+        Document d4 = new Document("d.pdf", "DDD", "type_d", "subtype_d", now().plusSeconds(4), "uuidd", now().minusSeconds(10));
 
-        List<Document> envelopeDocs =
-            asList(
-                new Document("c.pdf", "AAA", "type_c", "subtype_c", now().plusSeconds(3), "uuidc", now().minusSeconds(10)), // same control number!
-                new Document("d.pdf", "DDD", "type_d", "subtype_d", now().plusSeconds(4), "uuidd", now().minusSeconds(10))
-            );
+        List<Document> existingDocs = asList(d1, d2);
+        List<Document> envelopeDocs = asList(d3, d4);
+
+        given(documentHashProvider.getDocumentHashes(anyList(), eq(JURSIDICTION)))
+                .willReturn(singletonList(new DocumentHashProvider.DocumentAndHash(d4, "hash4")));
 
         // when
         SupplementaryEvidence result = mapper.map(existingDocs, emptyList(), envelope(envelopeDocs, deliveryDate));

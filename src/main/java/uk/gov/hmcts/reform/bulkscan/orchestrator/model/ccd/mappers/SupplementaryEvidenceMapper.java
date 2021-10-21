@@ -31,15 +31,18 @@ public class SupplementaryEvidenceMapper {
     private final String documentManagementUrl;
     private final String contextPath;
     private final EnvelopeReferenceHelper envelopeReferenceHelper;
+    private final DocumentHashProvider documentHashProvider;
 
     public SupplementaryEvidenceMapper(
-        @Value("${document_management.url}") final String documentManagementUrl,
-        @Value("${document_management.context-path}") final String contextPath,
-        final EnvelopeReferenceHelper envelopeReferenceHelper
+            @Value("${document_management.url}") final String documentManagementUrl,
+            @Value("${document_management.context-path}") final String contextPath,
+            final EnvelopeReferenceHelper envelopeReferenceHelper,
+            DocumentHashProvider documentHashProvider
     ) {
         this.documentManagementUrl = documentManagementUrl;
         this.contextPath = contextPath;
         this.envelopeReferenceHelper = envelopeReferenceHelper;
+        this.documentHashProvider = documentHashProvider;
     }
 
     public SupplementaryEvidence map(
@@ -55,10 +58,17 @@ public class SupplementaryEvidenceMapper {
         List<CcdCollectionElement<EnvelopeReference>> updatedEnvelopeReferences =
             updateEnvelopeReferences(existingEnvelopeReferences, envelope);
 
+        List<Document> docsToAdd = getDocsToAdd(existingDocs, envelope.documents);
+        List<DocumentHashProvider.DocumentAndHash> docsAndHashesToAdd =
+                documentHashProvider.getDocumentHashes(docsToAdd, envelope.jurisdiction);
+        List<DocumentHashProvider.DocumentAndHash> existingDocsAndHashes = existingDocs
+                .stream()
+                .map(d -> new DocumentHashProvider.DocumentAndHash(d, null))
+                .collect(toList());
         var scannedDocuments = mapDocuments(
             Stream.concat(
-                existingDocs.stream(),
-                getDocsToAdd(existingDocs, envelope.documents).stream()
+                existingDocsAndHashes.stream(),
+                docsAndHashesToAdd.stream()
             ).collect(toList()),
             documentManagementUrl,
             contextPath,
@@ -66,6 +76,15 @@ public class SupplementaryEvidenceMapper {
         );
 
         return new SupplementaryEvidence(scannedDocuments, updatedEnvelopeReferences);
+    }
+
+    private String getDocumentHashes(Document document, String jurisdiction) {
+        if (document == null) {
+            return null;
+        } else {
+            // TODO fetch documentHash here
+            return "hash";
+        }
     }
 
     private List<CcdCollectionElement<EnvelopeReference>> updateEnvelopeReferences(

@@ -40,18 +40,23 @@ public class ExceptionRecordMapper {
     private final String documentManagementUrl;
     private final String contextPath;
     private final ServiceConfigProvider serviceConfigProvider;
+    private final DocumentHashProvider documentHashProvider;
 
     public ExceptionRecordMapper(
-        @Value("${document_management.url}") final String documentManagementUrl,
-        @Value("${document_management.context-path}") final String contextPath,
-        ServiceConfigProvider serviceConfigProvider
+            @Value("${document_management.url}") final String documentManagementUrl,
+            @Value("${document_management.context-path}") final String contextPath,
+            ServiceConfigProvider serviceConfigProvider,
+            DocumentHashProvider documentHashProvider
     ) {
         this.documentManagementUrl = documentManagementUrl;
         this.contextPath = contextPath;
         this.serviceConfigProvider = serviceConfigProvider;
+        this.documentHashProvider = documentHashProvider;
     }
 
     public ExceptionRecord mapEnvelope(Envelope envelope) {
+        List<DocumentHashProvider.DocumentAndHash> docsAndHashes =
+                documentHashProvider.getDocumentHashes(envelope.documents, envelope.jurisdiction);
         return new ExceptionRecord(
             envelope.classification.name(),
             envelope.poBox,
@@ -59,7 +64,7 @@ public class ExceptionRecordMapper {
             envelope.formType,
             getLocalDateTime(envelope.deliveryDate),
             getLocalDateTime(envelope.openingDate),
-            mapDocuments(envelope.documents, documentManagementUrl, contextPath, envelope.deliveryDate),
+            mapDocuments(docsAndHashes, documentManagementUrl, contextPath, envelope.deliveryDate),
             mapOcrData(envelope.ocrData),
             mapOcrDataWarnings(envelope.ocrDataValidationWarnings),
             envelope.ocrDataValidationWarnings.isEmpty() ? NO : YES,

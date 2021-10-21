@@ -27,19 +27,24 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.JURSIDICTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 
 class ExceptionRecordMapperTest {
 
     private final ServiceConfigProvider serviceConfigProvider = mock(ServiceConfigProvider.class);
     private final ServiceConfigItem serviceConfigItem = mock(ServiceConfigItem.class);
+    private final DocumentHashProvider documentHashProvider = mock(DocumentHashProvider.class);
 
     private final ExceptionRecordMapper mapper = new ExceptionRecordMapper(
         "https://example.gov.uk",
         "files",
-        serviceConfigProvider
+        serviceConfigProvider,
+        documentHashProvider
     );
 
     @BeforeEach
@@ -61,6 +66,13 @@ class ExceptionRecordMapperTest {
             ),
             asList("warning 1", "warning 2")
         );
+        given(documentHashProvider.getDocumentHashes(anyList(), eq(JURSIDICTION)))
+            .willReturn(
+                asList(
+                    new DocumentHashProvider.DocumentAndHash(envelope.documents.get(0), "hash1"),
+                    new DocumentHashProvider.DocumentAndHash(envelope.documents.get(1), "hash2")
+                )
+            );
 
         // when
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
@@ -112,6 +124,13 @@ class ExceptionRecordMapperTest {
     void mapEnvelope_maps_subtype_values_in_documents() {
         // given
         Envelope envelope = envelope(2, null, emptyList(), emptyList());
+        given(documentHashProvider.getDocumentHashes(anyList(), eq(JURSIDICTION)))
+            .willReturn(
+                asList(
+                    new DocumentHashProvider.DocumentAndHash(envelope.documents.get(0), "hash1"),
+                    new DocumentHashProvider.DocumentAndHash(envelope.documents.get(1), "hash2")
+                )
+            );
 
         // when
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);

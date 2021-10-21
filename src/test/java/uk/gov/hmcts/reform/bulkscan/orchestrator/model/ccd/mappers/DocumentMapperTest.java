@@ -33,7 +33,12 @@ class DocumentMapperTest {
 
         // when
         List<CcdCollectionElement<ScannedDocument>> result =
-                DocumentMapper.mapDocuments(singletonList(doc), "https://localhost", "files", deliveryDate);
+                DocumentMapper.mapDocuments(
+                        singletonList(new DocumentHashProvider.DocumentAndHash(doc, "hash")),
+                        "https://localhost",
+                        "files",
+                        deliveryDate
+                );
 
         // then
         assertThat(result).hasSize(1);
@@ -45,7 +50,7 @@ class DocumentMapperTest {
                     doc.type,
                     doc.subtype,
                     toLocalDateTime(doc.scannedAt),
-                    new CcdDocument("https://localhost/files/" + doc.uuid),
+                    new CcdDocument("https://localhost/files/" + doc.uuid, "hash"),
                     toLocalDateTime(doc.deliveryDate),
                     null // this should always be null;
                 )
@@ -59,7 +64,12 @@ class DocumentMapperTest {
 
         // when
         List<CcdCollectionElement<ScannedDocument>> result =
-                DocumentMapper.mapDocuments(singletonList(doc), "https://localhost", "files", Instant.now());
+                DocumentMapper.mapDocuments(
+                        singletonList(new DocumentHashProvider.DocumentAndHash(doc, null)),
+                        "https://localhost",
+                        "files",
+                        Instant.now()
+                );
 
         // then
         assertThat(result).hasSize(1);
@@ -73,7 +83,12 @@ class DocumentMapperTest {
 
         // when
         List<CcdCollectionElement<ScannedDocument>> result =
-                DocumentMapper.mapDocuments(singletonList(doc), "https://localhost", "files", Instant.now());
+                DocumentMapper.mapDocuments(
+                        singletonList(new DocumentHashProvider.DocumentAndHash(doc, "hash")),
+                        "https://localhost",
+                        "files",
+                        Instant.now()
+                );
 
         // then
         assertThat(result).hasSize(1);
