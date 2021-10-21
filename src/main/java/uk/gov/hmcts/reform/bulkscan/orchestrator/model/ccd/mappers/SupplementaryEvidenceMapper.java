@@ -12,18 +12,15 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EnvelopeReferenceH
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentMapper.mapDocuments;
 
 @Component
@@ -68,7 +65,10 @@ public class SupplementaryEvidenceMapper {
         return new SupplementaryEvidence(scannedDocuments, updatedEnvelopeReferences);
     }
 
-    private Map<Document, String> getDocumentsWithHashes(List<Document> existingDocs, Envelope envelope) {
+    private List<DocumentMapper.DocumentAndHash> getDocumentsWithHashes(
+            List<Document> existingDocs,
+            Envelope envelope
+    ) {
         List<Document> documents = Stream.concat(
                 existingDocs.stream(),
                 getDocsToAdd(existingDocs, envelope.documents).stream()
@@ -77,10 +77,11 @@ public class SupplementaryEvidenceMapper {
         return getDocumentsAndHashes(documents);
     }
 
-    private Map<Document, String> getDocumentsAndHashes(List<Document> documents) {
+    private List<DocumentMapper.DocumentAndHash> getDocumentsAndHashes(List<Document> documents) {
         return documents
                 .stream()
-                .collect(toMap(Function.identity(), this::getDocumentHash, (k1, k2) -> k1, LinkedHashMap::new));
+                .map(d -> new DocumentMapper.DocumentAndHash(d, getDocumentHash(d)))
+                .collect(toList());
     }
 
     private String getDocumentHash(Document document) {

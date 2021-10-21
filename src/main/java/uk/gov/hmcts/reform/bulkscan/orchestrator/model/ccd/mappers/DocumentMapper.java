@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class DocumentMapper {
@@ -20,16 +19,16 @@ public class DocumentMapper {
     }
 
     public static List<CcdCollectionElement<ScannedDocument>> mapDocuments(
-        Map<Document, String> documentsAndHashes,
+        List<DocumentAndHash> documentsAndHashes,
         String dmApiUrl,
         String contextPath,
         Instant deliveryDate
     ) {
-        return documentsAndHashes.entrySet()
+        return documentsAndHashes
             .stream()
-            .map(e -> mapDocument(
-                    e.getKey(),
-                    e.getValue().equals("") ? null : e.getValue(),
+            .map(d -> mapDocument(
+                    d.document,
+                    d.hash.equals("") ? null : d.hash,
                     dmApiUrl,
                     contextPath,
                     deliveryDate
@@ -38,7 +37,13 @@ public class DocumentMapper {
             .collect(Collectors.toList());
     }
 
-    public static ScannedDocument mapDocument(
+    public static LocalDateTime getLocalDateTime(Instant instant) {
+        return instant == null
+            ? null
+            : ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDateTime();
+    }
+
+    private static ScannedDocument mapDocument(
         Document document,
         String documentHash,
         String dmApiUrl,
@@ -61,9 +66,13 @@ public class DocumentMapper {
         }
     }
 
-    public static LocalDateTime getLocalDateTime(Instant instant) {
-        return instant == null
-            ? null
-            : ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDateTime();
+    public static class DocumentAndHash {
+        final Document document;
+        final String hash;
+
+        public DocumentAndHash(Document document, String hash) {
+            this.document = document;
+            this.hash = hash;
+        }
     }
 }

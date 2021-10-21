@@ -16,14 +16,10 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.env
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.OcrDataField;
 
 import java.util.EnumSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentMapper.getLocalDateTime;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentMapper.mapDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues.NO;
@@ -57,7 +53,6 @@ public class ExceptionRecordMapper {
     }
 
     public ExceptionRecord mapEnvelope(Envelope envelope) {
-        Map<Document, String> documentsAndHashes = getDocumentsAndHashes(envelope.documents);
         return new ExceptionRecord(
             envelope.classification.name(),
             envelope.poBox,
@@ -86,10 +81,11 @@ public class ExceptionRecordMapper {
         );
     }
 
-    private Map<Document, String> getDocumentsAndHashes(List<Document> documents) {
+    private List<DocumentMapper.DocumentAndHash> getDocumentsAndHashes(List<Document> documents) {
         return documents
                 .stream()
-                .collect(toMap(Function.identity(), this::getDocumentHash, (k1, k2) -> k1, LinkedHashMap::new));
+                .map(d -> new DocumentMapper.DocumentAndHash(d, getDocumentHash(d)))
+                .collect(toList());
     }
 
     private String getDocumentHash(Document document) {

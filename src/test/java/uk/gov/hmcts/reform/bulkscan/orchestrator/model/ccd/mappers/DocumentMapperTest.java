@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
 import org.junit.jupiter.api.Test;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
@@ -9,7 +10,9 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class DocumentMapperTest {
@@ -29,10 +32,17 @@ class DocumentMapperTest {
         );
 
         // when
-        ScannedDocument result = DocumentMapper.mapDocument(doc, "hash", "https://localhost", "files", deliveryDate);
+        List<CcdCollectionElement<ScannedDocument>> result =
+                DocumentMapper.mapDocuments(
+                        singletonList(new DocumentMapper.DocumentAndHash(doc, "hash")),
+                        "https://localhost",
+                        "files",
+                        deliveryDate
+                );
 
         // then
-        assertThat(result)
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).value)
             .isEqualToComparingFieldByField(
                 new ScannedDocument(
                     doc.fileName,
@@ -53,10 +63,17 @@ class DocumentMapperTest {
         Document doc = null;
 
         // when
-        ScannedDocument result = DocumentMapper.mapDocument(doc, "hash", "https://localhost", "files", Instant.now());
+        List<CcdCollectionElement<ScannedDocument>> result =
+                DocumentMapper.mapDocuments(
+                        singletonList(new DocumentMapper.DocumentAndHash(doc, "hash")),
+                        "https://localhost",
+                        "files",
+                        Instant.now()
+                );
 
         // then
-        assertThat(result).isNull();
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).value).isNull();
     }
 
     @Test
@@ -65,10 +82,17 @@ class DocumentMapperTest {
         Document doc = new Document("name.zip", "123", "type", "subtype", null, "uuid1", Instant.now());
 
         // when
-        ScannedDocument result = DocumentMapper.mapDocument(doc, "hash", "https://localhost", "files", Instant.now());
+        List<CcdCollectionElement<ScannedDocument>> result =
+                DocumentMapper.mapDocuments(
+                        singletonList(new DocumentMapper.DocumentAndHash(doc, "hash")),
+                        "https://localhost",
+                        "files",
+                        Instant.now()
+                );
 
         // then
-        assertThat(result.scannedDate).isNull();
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).value.scannedDate).isNull();
     }
 
     private LocalDateTime toLocalDateTime(Instant instant) {
