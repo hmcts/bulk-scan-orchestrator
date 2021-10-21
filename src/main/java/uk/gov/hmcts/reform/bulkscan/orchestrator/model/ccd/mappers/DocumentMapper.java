@@ -31,7 +31,7 @@ public class DocumentMapper {
             .collect(Collectors.toList());
     }
 
-    public static ScannedDocument mapDocument(
+    private static ScannedDocument mapDocument(
         Document document,
         String dmApiUrl,
         String contextPath,
