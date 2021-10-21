@@ -19,8 +19,6 @@ import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.stream.Collectors.toList;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentMapper.getLocalDateTime;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentMapper.mapDocuments;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues.NO;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues.YES;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
@@ -40,15 +38,18 @@ public class ExceptionRecordMapper {
     private final String documentManagementUrl;
     private final String contextPath;
     private final ServiceConfigProvider serviceConfigProvider;
+    private final DocMapper docMapper;
 
     public ExceptionRecordMapper(
-        @Value("${document_management.url}") final String documentManagementUrl,
-        @Value("${document_management.context-path}") final String contextPath,
-        ServiceConfigProvider serviceConfigProvider
+            @Value("${document_management.url}") final String documentManagementUrl,
+            @Value("${document_management.context-path}") final String contextPath,
+            ServiceConfigProvider serviceConfigProvider,
+            DocMapper docMapper
     ) {
         this.documentManagementUrl = documentManagementUrl;
         this.contextPath = contextPath;
         this.serviceConfigProvider = serviceConfigProvider;
+        this.docMapper = docMapper;
     }
 
     public ExceptionRecord mapEnvelope(Envelope envelope) {
@@ -57,9 +58,9 @@ public class ExceptionRecordMapper {
             envelope.poBox,
             envelope.jurisdiction,
             envelope.formType,
-            getLocalDateTime(envelope.deliveryDate),
-            getLocalDateTime(envelope.openingDate),
-            mapDocuments(envelope.documents, documentManagementUrl, contextPath, envelope.deliveryDate),
+            docMapper.getLocalDateTime(envelope.deliveryDate),
+            docMapper.getLocalDateTime(envelope.openingDate),
+            docMapper.mapDocuments(envelope.documents, documentManagementUrl, contextPath, envelope.deliveryDate),
             mapOcrData(envelope.ocrData),
             mapOcrDataWarnings(envelope.ocrDataValidationWarnings),
             envelope.ocrDataValidationWarnings.isEmpty() ? NO : YES,

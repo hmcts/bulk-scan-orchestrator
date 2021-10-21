@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
@@ -12,13 +13,10 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DocumentMapper {
+@Component
+public class DocMapper {
 
-    private DocumentMapper() {
-        // util class
-    }
-
-    public static List<CcdCollectionElement<ScannedDocument>> mapDocuments(
+    public List<CcdCollectionElement<ScannedDocument>> mapDocuments(
         List<Document> documents,
         String dmApiUrl,
         String contextPath,
@@ -31,7 +29,13 @@ public class DocumentMapper {
             .collect(Collectors.toList());
     }
 
-    private static ScannedDocument mapDocument(
+    public LocalDateTime getLocalDateTime(Instant instant) {
+        return instant == null
+            ? null
+            : ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDateTime();
+    }
+
+    private ScannedDocument mapDocument(
         Document document,
         String dmApiUrl,
         String contextPath,
@@ -51,11 +55,5 @@ public class DocumentMapper {
                 null
             );
         }
-    }
-
-    public static LocalDateTime getLocalDateTime(Instant instant) {
-        return instant == null
-            ? null
-            : ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDateTime();
     }
 }

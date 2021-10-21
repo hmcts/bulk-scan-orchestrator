@@ -21,7 +21,6 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocumentMapper.mapDocuments;
 
 @Component
 public class SupplementaryEvidenceMapper {
@@ -31,15 +30,18 @@ public class SupplementaryEvidenceMapper {
     private final String documentManagementUrl;
     private final String contextPath;
     private final EnvelopeReferenceHelper envelopeReferenceHelper;
+    private final DocMapper docMapper;
 
     public SupplementaryEvidenceMapper(
-        @Value("${document_management.url}") final String documentManagementUrl,
-        @Value("${document_management.context-path}") final String contextPath,
-        final EnvelopeReferenceHelper envelopeReferenceHelper
+            @Value("${document_management.url}") final String documentManagementUrl,
+            @Value("${document_management.context-path}") final String contextPath,
+            final EnvelopeReferenceHelper envelopeReferenceHelper,
+            DocMapper docMapper
     ) {
         this.documentManagementUrl = documentManagementUrl;
         this.contextPath = contextPath;
         this.envelopeReferenceHelper = envelopeReferenceHelper;
+        this.docMapper = docMapper;
     }
 
     public SupplementaryEvidence map(
@@ -55,7 +57,7 @@ public class SupplementaryEvidenceMapper {
         List<CcdCollectionElement<EnvelopeReference>> updatedEnvelopeReferences =
             updateEnvelopeReferences(existingEnvelopeReferences, envelope);
 
-        var scannedDocuments = mapDocuments(
+        var scannedDocuments = docMapper.mapDocuments(
             Stream.concat(
                 existingDocs.stream(),
                 getDocsToAdd(existingDocs, envelope.documents).stream()
