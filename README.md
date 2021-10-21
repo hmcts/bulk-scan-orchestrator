@@ -17,6 +17,7 @@ service cases or be attached to existing service cases)
 - You will have to setup these environment variables on either your
 run configuration or bash shell
 ```
+
 IDAM_USERS_BULKSCAN_USERNAME = bulkscan+ccd@gmail.com
 IDAM_USERS_BULKSCAN_PASSWORD = Password12
 ```
