@@ -12,7 +12,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
-
 @Component
 public class CdamApi {
 

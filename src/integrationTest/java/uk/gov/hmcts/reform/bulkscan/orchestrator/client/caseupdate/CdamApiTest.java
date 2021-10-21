@@ -15,7 +15,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SuppressWarnings("checkstyle:LineLength")
 @AutoConfigureWireMock(port = 0)
 @IntegrationTest
 public class CdamApiTest {
