@@ -2,7 +2,10 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.BDDMockito;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam.CdamApiClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdDocument;
@@ -17,8 +20,12 @@ import java.util.List;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 
+@ExtendWith(MockitoExtension.class)
 class DocMapperTest {
+    private static final String JURISDICTION = "BULKSCAN";
+
     @Mock
     private CdamApiClient cdamApiClient;
 
@@ -90,6 +97,73 @@ class DocMapperTest {
         // when
         List<CcdCollectionElement<ScannedDocument>> result =
                 docMapper.mapDocuments(singletonList(doc), Instant.now());
+
+        // then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).value.scannedDate).isNull();
+    }
+
+    @Test
+    void should_map_new_document_properly() {
+        // given
+        Instant deliveryDate = Instant.now();
+        Document doc = new Document(
+            "name.zip",
+            "123",
+            "type",
+            "subtype",
+            Instant.now(),
+            "uuid1",
+            Instant.now()
+        );
+
+        given(cdamApiClient.getDocumentHash(JURISDICTION, doc)).willReturn("hash");
+
+        // when
+        List<CcdCollectionElement<ScannedDocument>> result =
+                docMapper.mapNewDocuments(singletonList(doc), deliveryDate, JURISDICTION);
+
+        // then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).value)
+            .isEqualToComparingFieldByField(
+                new ScannedDocument(
+                    doc.fileName,
+                    doc.controlNumber,
+                    doc.type,
+                    doc.subtype,
+                    toLocalDateTime(doc.scannedAt),
+                    new CcdDocument("https://localhost/files/" + doc.uuid, "hash"),
+                    toLocalDateTime(doc.deliveryDate),
+                    null // this should always be null;
+                )
+            );
+    }
+
+    @Test
+    void should_map_null_new_document_properly() {
+        // given
+        Document doc = null;
+
+        // when
+        List<CcdCollectionElement<ScannedDocument>> result =
+                docMapper.mapNewDocuments(singletonList(doc), Instant.now(), JURISDICTION);
+
+        // then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).value).isNull();
+    }
+
+    @Test
+    void should_map_new_null_scanned_date() {
+        // given
+        Document doc = new Document("name.zip", "123", "type", "subtype", null, "uuid1", Instant.now());
+
+        given(cdamApiClient.getDocumentHash(JURISDICTION, doc)).willReturn("hash");
+
+        // when
+        List<CcdCollectionElement<ScannedDocument>> result =
+                docMapper.mapNewDocuments(singletonList(doc), Instant.now(), JURISDICTION);
 
         // then
         assertThat(result).hasSize(1);
