@@ -32,7 +32,6 @@ import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
@@ -73,7 +72,7 @@ class ExceptionRecordMapperTest {
             asList("warning 1", "warning 2")
         );
 
-        given(docMapper.mapDocuments(anyList(), anyString(), anyString(), any(Instant.class)))
+        given(docMapper.mapDocuments(anyList(), any(Instant.class)))
             .willReturn(
                 asList(
                     getScannedDocumentCcdCollectionElement(envelope.documents.get(0)),
@@ -136,7 +135,7 @@ class ExceptionRecordMapperTest {
         // given
         Envelope envelope = envelope(2, null, emptyList(), emptyList());
 
-        given(docMapper.mapDocuments(anyList(), anyString(), anyString(), any(Instant.class)))
+        given(docMapper.mapDocuments(anyList(), any(Instant.class)))
             .willReturn(
                 asList(
                     getScannedDocumentCcdCollectionElement(envelope.documents.get(0)),

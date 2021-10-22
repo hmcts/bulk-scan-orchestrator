@@ -21,7 +21,7 @@ class DocMapperTest {
 
     @BeforeEach
     public void setUp() {
-        docMapper = new DocMapper();
+        docMapper = new DocMapper("https://localhost", "files");
     }
 
     @Test
@@ -40,7 +40,7 @@ class DocMapperTest {
 
         // when
         List<CcdCollectionElement<ScannedDocument>> result =
-                docMapper.mapDocuments(singletonList(doc), "https://localhost", "files", deliveryDate);
+                docMapper.mapDocuments(singletonList(doc), deliveryDate);
 
         // then
         assertThat(result).hasSize(1);
@@ -66,7 +66,7 @@ class DocMapperTest {
 
         // when
         List<CcdCollectionElement<ScannedDocument>> result =
-                docMapper.mapDocuments(singletonList(doc), "https://localhost", "files", Instant.now());
+                docMapper.mapDocuments(singletonList(doc), Instant.now());
 
         // then
         assertThat(result).hasSize(1);
@@ -80,7 +80,7 @@ class DocMapperTest {
 
         // when
         List<CcdCollectionElement<ScannedDocument>> result =
-                docMapper.mapDocuments(singletonList(doc), "https://localhost", "files", Instant.now());
+                docMapper.mapDocuments(singletonList(doc), Instant.now());
 
         // then
         assertThat(result).hasSize(1);

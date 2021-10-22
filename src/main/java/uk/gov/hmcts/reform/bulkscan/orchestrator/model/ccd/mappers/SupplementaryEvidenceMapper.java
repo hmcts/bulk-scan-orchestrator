@@ -62,8 +62,6 @@ public class SupplementaryEvidenceMapper {
                 existingDocs.stream(),
                 getDocsToAdd(existingDocs, envelope.documents).stream()
             ).collect(toList()),
-            documentManagementUrl,
-            contextPath,
             envelope.deliveryDate
         );
 

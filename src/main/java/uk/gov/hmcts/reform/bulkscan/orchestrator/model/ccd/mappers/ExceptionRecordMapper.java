@@ -60,7 +60,7 @@ public class ExceptionRecordMapper {
             envelope.formType,
             docMapper.getLocalDateTime(envelope.deliveryDate),
             docMapper.getLocalDateTime(envelope.openingDate),
-            docMapper.mapDocuments(envelope.documents, documentManagementUrl, contextPath, envelope.deliveryDate),
+            docMapper.mapDocuments(envelope.documents, envelope.deliveryDate),
             mapOcrData(envelope.ocrData),
             mapOcrDataWarnings(envelope.ocrDataValidationWarnings),
             envelope.ocrDataValidationWarnings.isEmpty() ? NO : YES,

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdDocument;
@@ -16,15 +17,24 @@ import java.util.stream.Collectors;
 @Component
 public class DocMapper {
 
+    private final String documentManagementUrl;
+    private final String documentManagementContextPath;
+
+    public DocMapper(
+        @Value("${document_management.url}") final String documentManagementUrl,
+        @Value("${document_management.context-path}") final String documentManagementContextPath
+    ) {
+        this.documentManagementUrl = documentManagementUrl;
+        this.documentManagementContextPath = documentManagementContextPath;
+    }
+    
     public List<CcdCollectionElement<ScannedDocument>> mapDocuments(
         List<Document> documents,
-        String dmApiUrl,
-        String contextPath,
         Instant deliveryDate
     ) {
         return documents
             .stream()
-            .map(document -> mapDocument(document, dmApiUrl, contextPath, deliveryDate))
+            .map(document -> mapDocument(document, deliveryDate))
             .map(CcdCollectionElement::new)
             .collect(Collectors.toList());
     }
@@ -37,8 +47,6 @@ public class DocMapper {
 
     private ScannedDocument mapDocument(
         Document document,
-        String dmApiUrl,
-        String contextPath,
         Instant deliveryDate
     ) {
         if (document == null) {
@@ -50,7 +58,7 @@ public class DocMapper {
                 document.type,
                 document.subtype,
                 getLocalDateTime(document.scannedAt),
-                new CcdDocument(String.join("/", dmApiUrl, contextPath, document.uuid)),
+                new CcdDocument(String.join("/", documentManagementUrl, documentManagementContextPath, document.uuid)),
                 getLocalDateTime(document.deliveryDate != null ? document.deliveryDate : deliveryDate),
                 null
             );

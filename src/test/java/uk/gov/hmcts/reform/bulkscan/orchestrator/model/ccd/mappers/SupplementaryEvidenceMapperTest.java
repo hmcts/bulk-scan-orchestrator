@@ -31,7 +31,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -79,7 +78,7 @@ class SupplementaryEvidenceMapperTest {
         List<Document> existingDocs = asList(d1, d2);
         List<Document> envelopeDocs = asList(d3, d4);
 
-        given(docMapper.mapDocuments(anyList(), anyString(), anyString(), any(Instant.class)))
+        given(docMapper.mapDocuments(anyList(), any(Instant.class)))
             .willReturn(
                 asList(
                     getScannedDocumentCcdCollectionElement(d1),
@@ -133,7 +132,7 @@ class SupplementaryEvidenceMapperTest {
         List<Document> existingDocs = asList(d1, d2);
         List<Document> envelopeDocs = asList(d3, d4);
 
-        given(docMapper.mapDocuments(anyList(), anyString(), anyString(), any(Instant.class)))
+        given(docMapper.mapDocuments(anyList(), any(Instant.class)))
             .willReturn(
                 asList(
                     getScannedDocumentCcdCollectionElement(d1),
@@ -245,7 +244,7 @@ class SupplementaryEvidenceMapperTest {
         List<Document> existingDocs = asList(d1, d2);
         List<Document> envelopeDocs = asList(d3, d4);
 
-        given(docMapper.mapDocuments(anyList(), anyString(), anyString(), any(Instant.class)))
+        given(docMapper.mapDocuments(anyList(), any(Instant.class)))
             .willReturn(
                 asList(
                     getScannedDocumentCcdCollectionElement(d1),
