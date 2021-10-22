@@ -43,7 +43,7 @@ class CdamApiClientTest {
     private static final String JURISDICTION = "JUR_TEST";
 
     @BeforeEach
-    void enabledCdam(){
+    void enabledCdam() {
         cdamApiClient.setCdamEnabled(true);
     }
 
