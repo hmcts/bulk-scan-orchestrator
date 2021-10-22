@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
@@ -27,19 +26,13 @@ public class SupplementaryEvidenceMapper {
 
     private static final Logger log = LoggerFactory.getLogger(SupplementaryEvidenceMapper.class);
 
-    private final String documentManagementUrl;
-    private final String contextPath;
     private final EnvelopeReferenceHelper envelopeReferenceHelper;
     private final DocMapper docMapper;
 
     public SupplementaryEvidenceMapper(
-            @Value("${document_management.url}") final String documentManagementUrl,
-            @Value("${document_management.context-path}") final String contextPath,
             final EnvelopeReferenceHelper envelopeReferenceHelper,
             DocMapper docMapper
     ) {
-        this.documentManagementUrl = documentManagementUrl;
-        this.contextPath = contextPath;
         this.envelopeReferenceHelper = envelopeReferenceHelper;
         this.docMapper = docMapper;
     }

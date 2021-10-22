@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -35,19 +34,13 @@ public class ExceptionRecordMapper {
         SUPPLEMENTARY_EVIDENCE_WITH_OCR
     );
 
-    private final String documentManagementUrl;
-    private final String contextPath;
     private final ServiceConfigProvider serviceConfigProvider;
     private final DocMapper docMapper;
 
     public ExceptionRecordMapper(
-            @Value("${document_management.url}") final String documentManagementUrl,
-            @Value("${document_management.context-path}") final String contextPath,
             ServiceConfigProvider serviceConfigProvider,
             DocMapper docMapper
     ) {
-        this.documentManagementUrl = documentManagementUrl;
-        this.contextPath = contextPath;
         this.serviceConfigProvider = serviceConfigProvider;
         this.docMapper = docMapper;
     }
