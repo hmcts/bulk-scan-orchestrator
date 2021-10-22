@@ -36,6 +36,9 @@ public class CdamApiClient {
 
         Map<String, String> hashTokenMap = new HashMap<String, String>();
         for (Document document : documentList) {
+            if (document == null) {
+                continue;
+            }
             String docHashToken = cdamApi.getDocumentHash(s2sToken, idamCredential.accessToken, document.uuid);
             hashTokenMap.put(document.uuid, docHashToken);
         }

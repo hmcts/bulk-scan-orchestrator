@@ -4,6 +4,11 @@ import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdDocument;
@@ -21,6 +26,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,29 +38,40 @@ import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 
+@ExtendWith(MockitoExtension.class)
 class ExceptionRecordMapperTest {
 
     private static final String DOCUMENT_MANAGEMENT_URL = "https://example.gov.uk";
     private static final String CONTEXT_PATH = "files";
 
-    private final ServiceConfigProvider serviceConfigProvider = mock(ServiceConfigProvider.class);
-    private final ServiceConfigItem serviceConfigItem = mock(ServiceConfigItem.class);
-    private final DocMapper docMapper = mock(DocMapper.class);
+    @Mock
+    private ServiceConfigProvider serviceConfigProvider;
+    @Mock
+    private ServiceConfigItem serviceConfigItem;
 
-    private final ExceptionRecordMapper mapper = new ExceptionRecordMapper(
-        serviceConfigProvider,
-            docMapper
-    );
+    @Mock
+    private DocMapper docMapper;
+    @Captor
+    private ArgumentCaptor<List<Document>> captor;
+
+    private ExceptionRecordMapper mapper;
 
     @BeforeEach
     void setupServiceConfig() {
         given(serviceConfigProvider.getConfig("bulkscan")).willReturn(serviceConfigItem);
         given(serviceConfigItem.getSurnameOcrFieldNameList("FORM_TYPE"))
             .willReturn(singletonList("field_surname"));
+
+        mapper = new ExceptionRecordMapper(
+            serviceConfigProvider,
+            docMapper
+        );
     }
 
     @Test
@@ -70,7 +87,7 @@ class ExceptionRecordMapperTest {
             asList("warning 1", "warning 2")
         );
 
-        given(docMapper.mapDocuments(anyList(), any(Instant.class)))
+        given(docMapper.mapDocuments(anyList(), anyList(), any(Instant.class), anyString()))
             .willReturn(
                 asList(
                     getScannedDocumentCcdCollectionElement(envelope.documents.get(0)),
@@ -118,6 +135,16 @@ class ExceptionRecordMapperTest {
         assertThat(exceptionRecord.showEnvelopeCaseReference).isEqualTo("No"); // for "New Application"
         assertThat(exceptionRecord.showEnvelopeLegacyCaseReference).isEqualTo("No"); // for "New Application"
         assertThat(exceptionRecord.surname).isEqualTo("surname1");
+
+        verify(docMapper).mapDocuments(
+            eq(emptyList()),
+            captor.capture(),
+            any(Instant.class),
+            eq(envelope.jurisdiction)
+        );
+
+        List<Document> docList = captor.getValue();
+        assertThat(docList).usingRecursiveComparison().isEqualTo(envelope.documents);
     }
 
     @Test
@@ -133,7 +160,7 @@ class ExceptionRecordMapperTest {
         // given
         Envelope envelope = envelope(2, null, emptyList(), emptyList());
 
-        given(docMapper.mapDocuments(anyList(), any(Instant.class)))
+        given(docMapper.mapDocuments(anyList(), anyList(), any(Instant.class), anyString()))
             .willReturn(
                 asList(
                     getScannedDocumentCcdCollectionElement(envelope.documents.get(0)),
@@ -380,7 +407,7 @@ class ExceptionRecordMapperTest {
                         doc.type,
                         doc.subtype,
                         ZonedDateTime.ofInstant(doc.scannedAt, ZoneId.systemDefault()).toLocalDateTime(),
-                        new CcdDocument(String.join("/", DOCUMENT_MANAGEMENT_URL, CONTEXT_PATH, doc.uuid)),
+                        new CcdDocument(String.join("/", DOCUMENT_MANAGEMENT_URL, CONTEXT_PATH, doc.uuid), null),
                         ZonedDateTime.ofInstant(doc.deliveryDate, ZoneId.systemDefault()).toLocalDateTime(),
                         null
                 )
