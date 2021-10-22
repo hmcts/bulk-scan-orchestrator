@@ -1,7 +1,9 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DocumentUrl {
 
     @JsonProperty("document_url")
