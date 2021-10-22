@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -41,6 +42,11 @@ class CdamApiClientTest {
     private static final String IDAM_TOKEN = "idamToken-Dfd322";
     private static final String JURISDICTION = "JUR_TEST";
 
+    @BeforeEach
+    void enabledCdam(){
+        cdamApiClient.setCdamEnabled(true);
+    }
+
     @Test
     void should_get_allHashTokens_for_all_docs() {
 
@@ -54,8 +60,6 @@ class CdamApiClientTest {
         var docHash2 = "asdadad2323232223432cddc";
         given(cdamApi.getDocumentHash(S2S_TOKEN, IDAM_TOKEN, document1Uuid)).willReturn(docHash1);
         given(cdamApi.getDocumentHash(S2S_TOKEN, IDAM_TOKEN, document2Uuid)).willReturn(docHash2);
-
-        cdamApiClient.setCdamEnabled(true);
 
         Map<String, String> resultMap = cdamApiClient.getDocumentHash(
             JURISDICTION,
@@ -108,8 +112,6 @@ class CdamApiClientTest {
         var document1Uuid = UUID.randomUUID().toString();
         var docHash1 = "23fdasaf3123sdvvs21wdeqa";
         given(cdamApi.getDocumentHash(S2S_TOKEN, IDAM_TOKEN, document1Uuid)).willReturn(docHash1);
-
-        cdamApiClient.setCdamEnabled(true);
 
         String result = cdamApiClient.getDocumentHash(
             JURISDICTION,
