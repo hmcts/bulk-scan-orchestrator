@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdKeyValue;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
@@ -16,8 +17,10 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.env
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Payment;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,19 +30,26 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 
 class ExceptionRecordMapperTest {
 
+    private static final String DOCUMENT_MANAGEMENT_URL = "https://example.gov.uk";
+    private static final String CONTEXT_PATH = "files";
+
     private final ServiceConfigProvider serviceConfigProvider = mock(ServiceConfigProvider.class);
     private final ServiceConfigItem serviceConfigItem = mock(ServiceConfigItem.class);
+    private final DocMapper docMapper = mock(DocMapper.class);
 
     private final ExceptionRecordMapper mapper = new ExceptionRecordMapper(
-        "https://example.gov.uk",
-        "files",
-        serviceConfigProvider
+        DOCUMENT_MANAGEMENT_URL,
+        CONTEXT_PATH,
+        serviceConfigProvider,
+            docMapper
     );
 
     @BeforeEach
@@ -61,6 +71,18 @@ class ExceptionRecordMapperTest {
             ),
             asList("warning 1", "warning 2")
         );
+
+        given(docMapper.mapDocuments(anyList(), any(Instant.class)))
+            .willReturn(
+                asList(
+                    getScannedDocumentCcdCollectionElement(envelope.documents.get(0)),
+                    getScannedDocumentCcdCollectionElement(envelope.documents.get(1))
+                )
+            );
+        given(docMapper.getLocalDateTime(envelope.deliveryDate))
+                .willReturn(getLocalDateTime(envelope.deliveryDate));
+        given(docMapper.getLocalDateTime(envelope.openingDate))
+                .willReturn(getLocalDateTime(envelope.openingDate));
 
         // when
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
@@ -112,6 +134,14 @@ class ExceptionRecordMapperTest {
     void mapEnvelope_maps_subtype_values_in_documents() {
         // given
         Envelope envelope = envelope(2, null, emptyList(), emptyList());
+
+        given(docMapper.mapDocuments(anyList(), any(Instant.class)))
+            .willReturn(
+                asList(
+                    getScannedDocumentCcdCollectionElement(envelope.documents.get(0)),
+                    getScannedDocumentCcdCollectionElement(envelope.documents.get(1))
+                )
+            );
 
         // when
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
@@ -342,5 +372,26 @@ class ExceptionRecordMapperTest {
                     scannedDocument.deliveryDate.atZone(ZoneId.systemDefault()).toInstant()
                 )
             ).collect(toList());
+    }
+
+    private CcdCollectionElement<ScannedDocument> getScannedDocumentCcdCollectionElement(Document doc) {
+        return new CcdCollectionElement<>(
+                new ScannedDocument(
+                        doc.fileName,
+                        doc.controlNumber,
+                        doc.type,
+                        doc.subtype,
+                        ZonedDateTime.ofInstant(doc.scannedAt, ZoneId.systemDefault()).toLocalDateTime(),
+                        new CcdDocument(String.join("/", DOCUMENT_MANAGEMENT_URL, CONTEXT_PATH, doc.uuid)),
+                        ZonedDateTime.ofInstant(doc.deliveryDate, ZoneId.systemDefault()).toLocalDateTime(),
+                        null
+                )
+        );
+    }
+
+    public LocalDateTime getLocalDateTime(Instant instant) {
+        return instant == null
+                ? null
+                : ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDateTime();
     }
 }

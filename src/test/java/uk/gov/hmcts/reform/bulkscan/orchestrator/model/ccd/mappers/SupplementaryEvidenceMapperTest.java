@@ -10,7 +10,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.LoggerTestUtil;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.EnvelopeReference;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.SupplementaryEvidence;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EnvelopeReferenceHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
@@ -18,6 +20,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.env
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -27,6 +30,7 @@ import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -37,8 +41,14 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 @ExtendWith(MockitoExtension.class)
 class SupplementaryEvidenceMapperTest {
 
+    private static final String DOCUMENT_MANAGEMENT_URL = "http://localhost";
+    private static final String CONTEXT_PATH = "files";
+
     @Mock
     private EnvelopeReferenceHelper envelopeReferenceHelper;
+
+    @Mock
+    private DocMapper docMapper;
 
     private SupplementaryEvidenceMapper mapper;
     Instant deliveryDate = Instant.now();
@@ -47,7 +57,12 @@ class SupplementaryEvidenceMapperTest {
 
     @BeforeEach
     void setUp() {
-        mapper = new SupplementaryEvidenceMapper("http://localhost", "files", envelopeReferenceHelper);
+        mapper = new SupplementaryEvidenceMapper(
+            DOCUMENT_MANAGEMENT_URL,
+            CONTEXT_PATH,
+            envelopeReferenceHelper,
+                docMapper
+        );
 
         loggingEvents = LoggerTestUtil.getListAppenderForClass(SupplementaryEvidenceMapper.class);
     }
@@ -55,16 +70,22 @@ class SupplementaryEvidenceMapperTest {
     @Test
     void maps_all_fields_correctly() {
         // given
-        List<Document> existingDocs =
-            asList(
-                new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "uuida", now().minusSeconds(10)),
-                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "uuidb", now().minusSeconds(10))
-            );
+        Document d1 = new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "uuida", now().minusSeconds(10));
+        Document d2 = new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "uuidb", now().minusSeconds(10));
+        Document d3 = new Document("x.pdf", "xxx", "type_x", "subtype_x", now().plusSeconds(3), "uuidx", now().minusSeconds(10));
+        Document d4 = new Document("y.pdf", "yyy", "type_y", "subtype_y", now().plusSeconds(4), "uuidy", now().minusSeconds(10));
 
-        List<Document> envelopeDocs =
-            asList(
-                new Document("x.pdf", "xxx", "type_x", "subtype_x", now().plusSeconds(3), "uuidx", now().minusSeconds(10)),
-                new Document("y.pdf", "yyy", "type_y", "subtype_y", now().plusSeconds(4), "uuidy", now().minusSeconds(10))
+        List<Document> existingDocs = asList(d1, d2);
+        List<Document> envelopeDocs = asList(d3, d4);
+
+        given(docMapper.mapDocuments(anyList(), any(Instant.class)))
+            .willReturn(
+                asList(
+                    getScannedDocumentCcdCollectionElement(d1),
+                    getScannedDocumentCcdCollectionElement(d2),
+                    getScannedDocumentCcdCollectionElement(d3),
+                    getScannedDocumentCcdCollectionElement(d4)
+                )
             );
 
         // when
@@ -103,17 +124,22 @@ class SupplementaryEvidenceMapperTest {
     @Test
     void should_not_add_document_from_envelope_if_document_with_the_same_url_is_already_present_in_case() {
         // given
-        List<Document> existingDocs =
-            asList(
-                new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "uuida", now().minusSeconds(10)),
-                new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "uuidb", now().minusSeconds(10))
-            );
+        Document d1 = new Document("a.pdf", "aaa", "type_a", "subtype_a", now().plusSeconds(1), "uuida", now().minusSeconds(10));
+        Document d2 = new Document("b.pdf", "bbb", "type_b", "subtype_b", now().plusSeconds(2), "uuidb", now().minusSeconds(10));
+        Document d3 = new Document("a1.pdf", "aaa1", "type_a1", "subtype_a1", now().plusSeconds(3), "uuida", now().minusSeconds(10)); // same url!
+        Document d4 = new Document("b.pdf", "bbb1", "type_b", "subtype_b", now().plusSeconds(4), "uuidxxxxx", now().minusSeconds(10));
 
-        List<Document> envelopeDocs =
-            asList(
-                new Document("a1.pdf", "aaa1", "type_a1", "subtype_a1", now().plusSeconds(3), "uuida", now().minusSeconds(10)), // same url!
-                new Document("b.pdf", "bbb1", "type_b", "subtype_b", now().plusSeconds(4), "uuidxxxxx", now().minusSeconds(10)
-            ));
+        List<Document> existingDocs = asList(d1, d2);
+        List<Document> envelopeDocs = asList(d3, d4);
+
+        given(docMapper.mapDocuments(anyList(), any(Instant.class)))
+            .willReturn(
+                asList(
+                    getScannedDocumentCcdCollectionElement(d1),
+                    getScannedDocumentCcdCollectionElement(d2),
+                    getScannedDocumentCcdCollectionElement(d4)
+                )
+            );
 
         // when
         SupplementaryEvidence result = mapper.map(existingDocs, emptyList(), envelope(envelopeDocs, deliveryDate));
@@ -210,16 +236,21 @@ class SupplementaryEvidenceMapperTest {
     @Test
     void should_not_add_document_from_envelope_if_document_with_the_same_control_number_is_already_present_in_case() {
         // given
-        List<Document> existingDocs =
-            asList(
-                new Document("a.pdf", "AAA", "type_a", "subtype_a", now().plusSeconds(1), "uuida", now().minusSeconds(10)),
-                new Document("b.pdf", "BBB", "type_b", "subtype_b", now().plusSeconds(2), "uuidb", now().minusSeconds(10))
-            );
+        Document d1 = new Document("a.pdf", "AAA", "type_a", "subtype_a", now().plusSeconds(1), "uuida", now().minusSeconds(10));
+        Document d2 = new Document("b.pdf", "BBB", "type_b", "subtype_b", now().plusSeconds(2), "uuidb", now().minusSeconds(10));
+        Document d3 = new Document("c.pdf", "AAA", "type_c", "subtype_c", now().plusSeconds(3), "uuidc", now().minusSeconds(10)); // same control number!
+        Document d4 = new Document("d.pdf", "DDD", "type_d", "subtype_d", now().plusSeconds(4), "uuidd", now().minusSeconds(10));
 
-        List<Document> envelopeDocs =
-            asList(
-                new Document("c.pdf", "AAA", "type_c", "subtype_c", now().plusSeconds(3), "uuidc", now().minusSeconds(10)), // same control number!
-                new Document("d.pdf", "DDD", "type_d", "subtype_d", now().plusSeconds(4), "uuidd", now().minusSeconds(10))
+        List<Document> existingDocs = asList(d1, d2);
+        List<Document> envelopeDocs = asList(d3, d4);
+
+        given(docMapper.mapDocuments(anyList(), any(Instant.class)))
+            .willReturn(
+                asList(
+                    getScannedDocumentCcdCollectionElement(d1),
+                    getScannedDocumentCcdCollectionElement(d2),
+                    getScannedDocumentCcdCollectionElement(d4)
+                )
             );
 
         // when
@@ -280,5 +311,20 @@ class SupplementaryEvidenceMapperTest {
 
     private LocalDateTime toLocalDateTime(Instant instant) {
         return instant.atZone(ZoneId.systemDefault()).toLocalDateTime();
+    }
+
+    private CcdCollectionElement<ScannedDocument> getScannedDocumentCcdCollectionElement(Document doc) {
+        return new CcdCollectionElement<>(
+                new ScannedDocument(
+                        doc.fileName,
+                        doc.controlNumber,
+                        doc.type,
+                        doc.subtype,
+                        ZonedDateTime.ofInstant(doc.scannedAt, ZoneId.systemDefault()).toLocalDateTime(),
+                        new CcdDocument(String.join("/", DOCUMENT_MANAGEMENT_URL, CONTEXT_PATH, doc.uuid)),
+                        ZonedDateTime.ofInstant(doc.deliveryDate, ZoneId.systemDefault()).toLocalDateTime(),
+                        null
+                )
+        );
     }
 }

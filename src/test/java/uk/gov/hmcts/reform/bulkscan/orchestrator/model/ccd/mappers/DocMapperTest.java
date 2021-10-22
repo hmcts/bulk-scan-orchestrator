@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdDocument;
@@ -15,7 +16,13 @@ import java.util.List;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class DocumentMapperTest {
+class DocMapperTest {
+    private DocMapper docMapper;
+
+    @BeforeEach
+    public void setUp() {
+        docMapper = new DocMapper("https://localhost", "files");
+    }
 
     @Test
     void should_map_document_properly() {
@@ -33,7 +40,7 @@ class DocumentMapperTest {
 
         // when
         List<CcdCollectionElement<ScannedDocument>> result =
-                DocumentMapper.mapDocuments(singletonList(doc), "https://localhost", "files", deliveryDate);
+                docMapper.mapDocuments(singletonList(doc), deliveryDate);
 
         // then
         assertThat(result).hasSize(1);
@@ -59,7 +66,7 @@ class DocumentMapperTest {
 
         // when
         List<CcdCollectionElement<ScannedDocument>> result =
-                DocumentMapper.mapDocuments(singletonList(doc), "https://localhost", "files", Instant.now());
+                docMapper.mapDocuments(singletonList(doc), Instant.now());
 
         // then
         assertThat(result).hasSize(1);
@@ -73,7 +80,7 @@ class DocumentMapperTest {
 
         // when
         List<CcdCollectionElement<ScannedDocument>> result =
-                DocumentMapper.mapDocuments(singletonList(doc), "https://localhost", "files", Instant.now());
+                docMapper.mapDocuments(singletonList(doc), Instant.now());
 
         // then
         assertThat(result).hasSize(1);
