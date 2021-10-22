@@ -43,11 +43,7 @@ public class CaseUpdateDetailsService {
         CaseDetails existingCase,
         ExceptionRecord exceptionRecord
     ) {
-        String s2sToken = s2sTokenGenerator.generate();
-        String url = serviceConfigProvider.getConfig(service).getUpdateUrl();
-        CaseUpdateRequest request = requestCreator.create(exceptionRecord, existingCase);
-
-        return caseUpdateDataClient.getCaseUpdateData(url, s2sToken, request);
+        return updateCase(service,requestCreator.create(exceptionRecord, existingCase));
     }
 
     /**
@@ -62,10 +58,12 @@ public class CaseUpdateDetailsService {
         CaseDetails existingCase,
         Envelope envelope
     ) {
+        return updateCase(service,requestCreator.create(envelope, existingCase));
+    }
+
+    private SuccessfulUpdateResponse updateCase(String service, CaseUpdateRequest request) {
         String s2sToken = s2sTokenGenerator.generate();
         String url = serviceConfigProvider.getConfig(service).getUpdateUrl();
-        CaseUpdateRequest request = requestCreator.create(envelope, existingCase);
-
         return caseUpdateDataClient.getCaseUpdateData(url, s2sToken, request);
     }
 }
