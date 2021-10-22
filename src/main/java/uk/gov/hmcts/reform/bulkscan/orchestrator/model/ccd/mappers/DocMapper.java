@@ -50,7 +50,10 @@ public class DocMapper {
         Map<String, String>  map = cdamApiClient.getDocumentHash(jurisdiction, docsToAdd);
         return allDocs
             .stream()
-            .map(document -> mapDocument(document, deliveryDate, document == null ? null : map.get(document.uuid)))
+            .map(document -> mapDocument(
+                document,
+                deliveryDate,
+                (document == null || document.uuid == null) ? null : map.get(document.uuid)))
             .map(CcdCollectionElement::new)
             .collect(Collectors.toList());
 
