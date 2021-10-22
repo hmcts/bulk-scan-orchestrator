@@ -7,6 +7,9 @@ public class DocumentUrl {
     @JsonProperty("document_url")
     public final String url;
 
+    @JsonProperty("document_hash")
+    public final String documentHash;
+
     @JsonProperty("document_binary_url")
     public final String binaryUrl;
 
@@ -14,11 +17,13 @@ public class DocumentUrl {
     public final String filename;
 
     public DocumentUrl(
-        String url,
-        String binaryUrl,
-        String filename
+            String url,
+            String documentHash,
+            String binaryUrl,
+            String filename
     ) {
         this.url = url;
+        this.documentHash = documentHash;
         this.binaryUrl = binaryUrl;
         this.filename = filename;
     }

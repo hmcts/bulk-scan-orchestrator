@@ -79,8 +79,8 @@ class CaseUpdateRequestCreatorTest {
         var mappedDoc1 = mock(ScannedDocument.class);
         var mappedDoc2 = mock(ScannedDocument.class);
 
-        given(docMapper.toScannedDoc(doc1)).willReturn(mappedDoc1);
-        given(docMapper.toScannedDoc(doc2)).willReturn(mappedDoc2);
+        given(docMapper.toScannedDoc(doc1, "jurisdiction1")).willReturn(mappedDoc1);
+        given(docMapper.toScannedDoc(doc2, "jurisdiction1")).willReturn(mappedDoc2);
 
         Envelope envelope = sampleEnvelope(
             asList(

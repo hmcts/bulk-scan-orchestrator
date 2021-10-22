@@ -100,7 +100,10 @@ public class CaseUpdateRequestCreator {
             envelope.formType,
             toLocalDateTime(envelope.deliveryDate),
             toLocalDateTime(envelope.openingDate),
-            envelope.documents.stream().map(documentMapper::toScannedDoc).collect(Collectors.toList()),
+            envelope.documents
+                    .stream()
+                    .map(doc -> documentMapper.toScannedDoc(doc, envelope.jurisdiction))
+                    .collect(Collectors.toList()),
             envelope
                 .ocrData
                 .stream()

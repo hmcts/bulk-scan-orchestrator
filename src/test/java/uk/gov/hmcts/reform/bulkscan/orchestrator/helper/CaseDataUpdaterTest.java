@@ -133,7 +133,7 @@ class CaseDataUpdaterTest {
         return new uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument(
             FORM,
             "subtype",
-            new DocumentUrl("url", "binaryUrl", "fileName"),
+            new DocumentUrl("url", null, "binaryUrl", "fileName"),
             controlNumber,
             "fileName",
             now(),

@@ -27,6 +27,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.SampleData.sample
 
 @ExtendWith(MockitoExtension.class)
 class TransformationRequestCreatorTest {
+    private static final String JURISDICTION = "jurisdiction1";
 
     @Mock DocumentMapper documentMapper;
 
@@ -69,8 +70,8 @@ class TransformationRequestCreatorTest {
         var mappedDoc1 = mock(ScannedDocument.class);
         var mappedDoc2 = mock(ScannedDocument.class);
 
-        given(documentMapper.toScannedDoc(doc1)).willReturn(mappedDoc1);
-        given(documentMapper.toScannedDoc(doc2)).willReturn(mappedDoc2);
+        given(documentMapper.toScannedDoc(doc1, JURISDICTION)).willReturn(mappedDoc1);
+        given(documentMapper.toScannedDoc(doc2, JURISDICTION)).willReturn(mappedDoc2);
 
         // when
         var transformationRequest = requestCreator.create(envelope);
@@ -116,7 +117,7 @@ class TransformationRequestCreatorTest {
             "caseRef1",
             "legacyCaseRef1",
             "poBox1",
-            "jurisdiction1",
+            JURISDICTION,
             "container1",
             "zipFileName1",
             "formType1",

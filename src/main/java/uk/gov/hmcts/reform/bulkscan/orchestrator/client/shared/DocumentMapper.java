@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.client.shared;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam.CdamApiClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
@@ -17,23 +18,26 @@ public class DocumentMapper {
 
     private final String documentManagementUrl;
     private final String documentManagementContextPath;
+    private final CdamApiClient cdamApiClient;
 
     public DocumentMapper(
-        @Value("${document_management.url}") final String documentManagementUrl,
-        @Value("${document_management.context-path}") final String documentManagementContextPath
+            @Value("${document_management.url}") final String documentManagementUrl,
+            @Value("${document_management.context-path}") final String documentManagementContextPath,
+            CdamApiClient cdamApiClient
     ) {
         this.documentManagementUrl = documentManagementUrl;
         this.documentManagementContextPath = documentManagementContextPath;
+        this.cdamApiClient = cdamApiClient;
     }
 
-    public ScannedDocument toScannedDoc(Document doc) {
+    public ScannedDocument toScannedDoc(Document doc, String jurisdiction) {
         if (doc == null) {
             return null;
         } else {
             return new ScannedDocument(
                 DocumentType.valueOf(doc.type.toUpperCase()),
                 doc.subtype,
-                documentUrl(doc),
+                documentUrl(doc, cdamApiClient.getDocumentHash(jurisdiction, doc)),
                 doc.controlNumber,
                 doc.fileName,
                 toLocalDateTime(doc.scannedAt),
@@ -42,7 +46,7 @@ public class DocumentMapper {
         }
     }
 
-    private DocumentUrl documentUrl(Document doc) {
+    private DocumentUrl documentUrl(Document doc, String documentHash) {
         String documentUrl = String.join(
             "/",
             documentManagementUrl,
@@ -52,6 +56,7 @@ public class DocumentMapper {
 
         return new DocumentUrl(
             documentUrl,
+            documentHash,
             documentUrl + "/binary",
             doc.fileName
         );

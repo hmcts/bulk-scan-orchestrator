@@ -203,6 +203,7 @@ public class ExceptionRecordValidator {
             (String) document.get("subtype"),
             new DocumentUrl(
                 ccdUrl.get("document_url"),
+                null,
                 ccdUrl.get("document_binary_url"),
                 ccdUrl.get("document_filename")
             ),

@@ -55,7 +55,10 @@ public class TransformationRequestCreator {
             envelope.formType,
             toLocalDateTime(envelope.deliveryDate),
             toLocalDateTime(envelope.openingDate),
-            envelope.documents.stream().map(docMapper::toScannedDoc).collect(toList()),
+            envelope.documents
+                    .stream()
+                    .map(doc -> docMapper.toScannedDoc(doc, envelope.jurisdiction))
+                    .collect(toList()),
             mapOcrDataFields(envelope.ocrData),
             true
         );

@@ -2,6 +2,10 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.client.shared;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam.CdamApiClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
@@ -13,16 +17,22 @@ import java.time.ZonedDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ExtendWith(MockitoExtension.class)
 class DocumentMapperTest {
+
+    private static final String JURISDICTION = "BULKSCAN";
 
     final String dmUrl = "https://dm-url";
     final String dmContextPath = "hello";
+
+    @Mock
+    private CdamApiClient cdamApiClient;
 
     DocumentMapper documentMapper;
 
     @BeforeEach
     void setUp() {
-        documentMapper = new DocumentMapper(dmUrl, dmContextPath);
+        documentMapper = new DocumentMapper(dmUrl, dmContextPath, cdamApiClient);
     }
 
     @Test
@@ -39,7 +49,7 @@ class DocumentMapperTest {
         );
 
         // when
-        ScannedDocument result = documentMapper.toScannedDoc(doc);
+        ScannedDocument result = documentMapper.toScannedDoc(doc, JURISDICTION);
 
         // then
         assertThat(result.controlNumber).isEqualTo(doc.controlNumber);
@@ -59,7 +69,7 @@ class DocumentMapperTest {
         Document doc = null;
 
         // when
-        ScannedDocument result = documentMapper.toScannedDoc(doc);
+        ScannedDocument result = documentMapper.toScannedDoc(doc, JURISDICTION);
 
         // then
         assertThat(result).isNull();

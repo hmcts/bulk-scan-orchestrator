@@ -233,6 +233,7 @@ public class TransformationClientTest {
                 "D8",
                 new DocumentUrl(
                     "http://locahost",
+                    null,
                     "http://locahost/binary",
                     "file1.pdf"
                 ),

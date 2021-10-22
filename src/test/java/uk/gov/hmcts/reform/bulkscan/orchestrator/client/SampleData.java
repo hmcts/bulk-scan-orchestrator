@@ -101,7 +101,7 @@ public class SampleData {
             new ScannedDocument(
                 DocumentType.FORM,
                 "subtype1",
-                new DocumentUrl("url1", "binaryUrl1", "filename1"),
+                new DocumentUrl("url1", null, "binaryUrl1", "filename1"),
                 "controlNumber1",
                 "filename1",
                 LocalDateTime.now().plusSeconds(2),
@@ -110,7 +110,7 @@ public class SampleData {
             new ScannedDocument(
                 DocumentType.OTHER,
                 "subtype2",
-                new DocumentUrl("url2", "binaryUrl2", "filename2"),
+                new DocumentUrl("url2", null, "binaryUrl2", "filename2"),
                 "controlNumber2",
                 "filename2",
                 LocalDateTime.now().plusSeconds(22),
