@@ -32,8 +32,10 @@ import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.JURSIDICTION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 
 class ExceptionRecordMapperTest {
@@ -70,7 +72,7 @@ class ExceptionRecordMapperTest {
             asList("warning 1", "warning 2")
         );
 
-        given(docMapper.mapDocuments(anyList(), any(Instant.class)))
+        given(docMapper.mapNewDocuments(anyList(), any(Instant.class), eq(JURSIDICTION)))
             .willReturn(
                 asList(
                     getScannedDocumentCcdCollectionElement(envelope.documents.get(0)),
@@ -133,7 +135,7 @@ class ExceptionRecordMapperTest {
         // given
         Envelope envelope = envelope(2, null, emptyList(), emptyList());
 
-        given(docMapper.mapDocuments(anyList(), any(Instant.class)))
+        given(docMapper.mapNewDocuments(anyList(), any(Instant.class), eq(JURSIDICTION)))
             .willReturn(
                 asList(
                     getScannedDocumentCcdCollectionElement(envelope.documents.get(0)),
@@ -380,7 +382,10 @@ class ExceptionRecordMapperTest {
                         doc.type,
                         doc.subtype,
                         ZonedDateTime.ofInstant(doc.scannedAt, ZoneId.systemDefault()).toLocalDateTime(),
-                        new CcdDocument(String.join("/", DOCUMENT_MANAGEMENT_URL, CONTEXT_PATH, doc.uuid)),
+                        new CcdDocument(
+                            String.join("/", DOCUMENT_MANAGEMENT_URL, CONTEXT_PATH, doc.uuid),
+                            null
+                        ),
                         ZonedDateTime.ofInstant(doc.deliveryDate, ZoneId.systemDefault()).toLocalDateTime(),
                         null
                 )

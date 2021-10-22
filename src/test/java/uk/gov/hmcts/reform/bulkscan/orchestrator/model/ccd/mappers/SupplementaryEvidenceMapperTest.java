@@ -319,7 +319,10 @@ class SupplementaryEvidenceMapperTest {
                         doc.type,
                         doc.subtype,
                         ZonedDateTime.ofInstant(doc.scannedAt, ZoneId.systemDefault()).toLocalDateTime(),
-                        new CcdDocument(String.join("/", DOCUMENT_MANAGEMENT_URL, CONTEXT_PATH, doc.uuid)),
+                        new CcdDocument(
+                            String.join("/", DOCUMENT_MANAGEMENT_URL, CONTEXT_PATH, doc.uuid),
+                            null
+                        ),
                         ZonedDateTime.ofInstant(doc.deliveryDate, ZoneId.systemDefault()).toLocalDateTime(),
                         null
                 )

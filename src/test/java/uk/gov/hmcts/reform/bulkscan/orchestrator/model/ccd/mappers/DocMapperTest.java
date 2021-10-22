@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam.CdamApiClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
@@ -17,11 +19,18 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class DocMapperTest {
+    @Mock
+    private CdamApiClient cdamApiClient;
+
     private DocMapper docMapper;
 
     @BeforeEach
     public void setUp() {
-        docMapper = new DocMapper("https://localhost", "files");
+        docMapper = new DocMapper(
+            "https://localhost",
+            "files",
+            cdamApiClient
+        );
     }
 
     @Test
@@ -52,7 +61,7 @@ class DocMapperTest {
                     doc.type,
                     doc.subtype,
                     toLocalDateTime(doc.scannedAt),
-                    new CcdDocument("https://localhost/files/" + doc.uuid),
+                    new CcdDocument("https://localhost/files/" + doc.uuid, null),
                     toLocalDateTime(doc.deliveryDate),
                     null // this should always be null;
                 )

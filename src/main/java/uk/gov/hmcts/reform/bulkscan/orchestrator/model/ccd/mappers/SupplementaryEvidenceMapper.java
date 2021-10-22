@@ -50,15 +50,19 @@ public class SupplementaryEvidenceMapper {
         List<CcdCollectionElement<EnvelopeReference>> updatedEnvelopeReferences =
             updateEnvelopeReferences(existingEnvelopeReferences, envelope);
 
-        var scannedDocuments = docMapper.mapDocuments(
-            Stream.concat(
-                existingDocs.stream(),
-                getDocsToAdd(existingDocs, envelope.documents).stream()
-            ).collect(toList()),
-            envelope.deliveryDate
-        );
+        var existingScannedDocuments =
+                docMapper.mapDocuments(existingDocs, envelope.deliveryDate);
+        var scannedDocumentsToAdd =
+                docMapper.mapNewDocuments(
+                        getDocsToAdd(existingDocs, envelope.documents),
+                        envelope.deliveryDate,
+                        envelope.jurisdiction
+                );
 
-        return new SupplementaryEvidence(scannedDocuments, updatedEnvelopeReferences);
+        return new SupplementaryEvidence(Stream.concat(
+                existingScannedDocuments.stream(),
+                scannedDocumentsToAdd.stream()
+        ).collect(toList()), updatedEnvelopeReferences);
     }
 
     private List<CcdCollectionElement<EnvelopeReference>> updateEnvelopeReferences(

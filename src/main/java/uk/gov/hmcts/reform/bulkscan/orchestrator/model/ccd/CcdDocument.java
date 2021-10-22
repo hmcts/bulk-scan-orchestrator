@@ -11,13 +11,15 @@ public class CcdDocument {
     @JsonProperty("document_url")
     public final String documentUrl;
 
-    public CcdDocument(@JsonProperty("document_url") String documentUrl) {
-        this.documentUrl = documentUrl;
-    }
+    @JsonProperty("document_hash")
+    public final String documentHash;
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(documentUrl);
+    public CcdDocument(
+            @JsonProperty("document_url") String documentUrl,
+            @JsonProperty("document_hash") String documentHash
+    ) {
+        this.documentUrl = documentUrl;
+        this.documentHash = documentHash;
     }
 
     @Override
@@ -28,7 +30,13 @@ public class CcdDocument {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
+
         CcdDocument that = (CcdDocument) o;
-        return Objects.equals(documentUrl, that.documentUrl);
+        return Objects.equals(documentUrl, that.documentUrl) && Objects.equals(documentHash, that.documentHash);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(documentUrl, documentHash);
     }
 }
