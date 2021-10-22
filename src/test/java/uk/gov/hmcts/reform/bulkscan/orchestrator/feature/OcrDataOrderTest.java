@@ -44,8 +44,6 @@ class OcrDataOrderTest {
 
         // and
         ExceptionRecordMapper mapper = new ExceptionRecordMapper(
-            "http://localhost",
-            "files",
             serviceConfigProvider,
                 docMapper
         );

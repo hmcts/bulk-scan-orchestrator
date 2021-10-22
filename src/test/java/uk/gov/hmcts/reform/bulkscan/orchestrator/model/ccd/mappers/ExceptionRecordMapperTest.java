@@ -46,8 +46,6 @@ class ExceptionRecordMapperTest {
     private final DocMapper docMapper = mock(DocMapper.class);
 
     private final ExceptionRecordMapper mapper = new ExceptionRecordMapper(
-        DOCUMENT_MANAGEMENT_URL,
-        CONTEXT_PATH,
         serviceConfigProvider,
             docMapper
     );

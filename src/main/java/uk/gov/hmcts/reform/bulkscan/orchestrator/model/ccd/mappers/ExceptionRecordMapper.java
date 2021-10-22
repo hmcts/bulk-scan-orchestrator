@@ -35,19 +35,13 @@ public class ExceptionRecordMapper {
         SUPPLEMENTARY_EVIDENCE_WITH_OCR
     );
 
-    private final String documentManagementUrl;
-    private final String contextPath;
     private final ServiceConfigProvider serviceConfigProvider;
     private final DocMapper docMapper;
 
     public ExceptionRecordMapper(
-            @Value("${document_management.url}") final String documentManagementUrl,
-            @Value("${document_management.context-path}") final String contextPath,
             ServiceConfigProvider serviceConfigProvider,
             DocMapper docMapper
     ) {
-        this.documentManagementUrl = documentManagementUrl;
-        this.contextPath = contextPath;
         this.serviceConfigProvider = serviceConfigProvider;
         this.docMapper = docMapper;
     }

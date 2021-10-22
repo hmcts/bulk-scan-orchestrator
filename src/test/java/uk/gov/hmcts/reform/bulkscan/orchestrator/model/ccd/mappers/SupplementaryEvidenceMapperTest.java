@@ -58,8 +58,6 @@ class SupplementaryEvidenceMapperTest {
     @BeforeEach
     void setUp() {
         mapper = new SupplementaryEvidenceMapper(
-            DOCUMENT_MANAGEMENT_URL,
-            CONTEXT_PATH,
             envelopeReferenceHelper,
                 docMapper
         );
