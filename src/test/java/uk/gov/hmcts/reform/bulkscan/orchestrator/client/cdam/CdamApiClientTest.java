@@ -55,6 +55,8 @@ class CdamApiClientTest {
         given(cdamApi.getDocumentHash(S2S_TOKEN, IDAM_TOKEN, document1Uuid)).willReturn(docHash1);
         given(cdamApi.getDocumentHash(S2S_TOKEN, IDAM_TOKEN, document2Uuid)).willReturn(docHash2);
 
+        cdamApiClient.setCdamEnabled(true);
+
         Map<String, String> resultMap = cdamApiClient.getDocumentHash(
             JURISDICTION,
             List.of(getDocument(document1Uuid), getDocument(document2Uuid))
@@ -106,6 +108,8 @@ class CdamApiClientTest {
         var document1Uuid = UUID.randomUUID().toString();
         var docHash1 = "23fdasaf3123sdvvs21wdeqa";
         given(cdamApi.getDocumentHash(S2S_TOKEN, IDAM_TOKEN, document1Uuid)).willReturn(docHash1);
+
+        cdamApiClient.setCdamEnabled(true);
 
         String result = cdamApiClient.getDocumentHash(
             JURISDICTION,

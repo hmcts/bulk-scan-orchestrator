@@ -42,8 +42,11 @@ public class DocMapper {
         Instant deliveryDate,
         String jurisdiction
     ) {
-        var allDocs = Stream.concat(existingDocuments.stream(), docsToAdd.stream())
-            .collect(toList());
+        var allDocs =
+            Stream
+                .concat(existingDocuments.stream(), docsToAdd.stream())
+                .collect(toList());
+
         Map<String, String>  map = cdamApiClient.getDocumentHash(jurisdiction, docsToAdd);
         return allDocs
             .stream()

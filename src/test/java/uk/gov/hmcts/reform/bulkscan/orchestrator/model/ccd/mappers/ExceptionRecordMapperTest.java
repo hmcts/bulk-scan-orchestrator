@@ -2,11 +2,11 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
@@ -26,7 +26,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,23 +59,14 @@ class ExceptionRecordMapperTest {
     @Captor
     private ArgumentCaptor<List<Document>> captor;
 
+    @InjectMocks
     private ExceptionRecordMapper mapper;
 
-    @BeforeEach
-    void setupServiceConfig() {
-        given(serviceConfigProvider.getConfig("bulkscan")).willReturn(serviceConfigItem);
-        given(serviceConfigItem.getSurnameOcrFieldNameList("FORM_TYPE"))
-            .willReturn(singletonList("field_surname"));
-
-        mapper = new ExceptionRecordMapper(
-            serviceConfigProvider,
-            docMapper
-        );
-    }
 
     @Test
     void mapEnvelope_maps_all_fields_correctly() {
         // given
+        mockServiceConfig();
         Envelope envelope = envelope(
             2,
             ImmutableList.of(new Payment("dcn1")),
@@ -195,6 +185,8 @@ class ExceptionRecordMapperTest {
     @Test
     void mapEnvelope_copies_envelope_id_to_exception_record() {
         // given
+        mockServiceConfig();
+
         String supportedJurisdiction = "supported-jurisdiction1";
 
         // when
@@ -241,7 +233,7 @@ class ExceptionRecordMapperTest {
     void mapEnvelope_sets_display_case_reference_fields_to_no_when_envelope_case_reference_values_are_null() {
         //given
         Envelope envelope = envelope(null, null, Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR);
-
+        mockServiceConfig();
         // when
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
 
@@ -256,7 +248,7 @@ class ExceptionRecordMapperTest {
     void mapEnvelope_sets_display_case_reference_fields_to_yes_when_envelope_case_reference_values_exist() {
         //given
         Envelope envelope = envelope("CASE_123", "LEGACY_CASE_123", Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR);
-
+        mockServiceConfig();
         // when
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
 
@@ -269,8 +261,13 @@ class ExceptionRecordMapperTest {
 
     @Test
     void mapEnvelope_sets_surname_null_when_no_surname_data_in_ocr() {
+        mockServiceConfig();
         //given
         Envelope envelope = envelope("CASE_123", "LEGACY_CASE_123", Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR);
+        given(serviceConfigProvider.getConfig("bulkscan")).willReturn(serviceConfigItem);
+        given(serviceConfigItem.getSurnameOcrFieldNameList("FORM_TYPE"))
+            .willReturn(singletonList("field_surname"));
+
         // when
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
 
@@ -280,6 +277,7 @@ class ExceptionRecordMapperTest {
 
     @Test
     void mapEnvelope_sets_first_surname_when_multiple_surname_data_in_ocr() {
+        mockServiceConfig();
         //given
         Envelope envelope = envelope(
             1,
@@ -300,7 +298,7 @@ class ExceptionRecordMapperTest {
 
     @Test
     void mapEnvelope_sets_non_empty_surname_when_ocr_surname_data_empty() {
-
+        mockServiceConfig();
         //given
         Envelope envelope = envelope(
             1,
@@ -324,7 +322,7 @@ class ExceptionRecordMapperTest {
         //given
         given(serviceConfigItem.getSurnameOcrFieldNameList("FORM_TYPE"))
             .willReturn(asList("field_surname_not_found", "field_surname", "fieldName1"));
-
+        mockServiceConfig();
 
         Envelope envelope = envelope(
             1,
@@ -348,7 +346,7 @@ class ExceptionRecordMapperTest {
         //given
         given(serviceConfigItem.getSurnameOcrFieldNameList("FORM_TYPE"))
             .willReturn(asList("field_surname", "fieldName1"));
-
+        mockServiceConfig();
         Envelope envelope = envelope(
             1,
             ImmutableList.of(new Payment("dcn1")),
@@ -362,6 +360,12 @@ class ExceptionRecordMapperTest {
 
         // then
         assertThat(exceptionRecord.surname).isEqualTo("surname_x");
+    }
+
+    private void mockServiceConfig() {
+        given(serviceConfigProvider.getConfig("bulkscan")).willReturn(serviceConfigItem);
+        given(serviceConfigItem.getSurnameOcrFieldNameList("FORM_TYPE"))
+            .willReturn(singletonList("field_surname"));
     }
 
     private Envelope envelopeWithJurisdiction(String jurisdiction) {
