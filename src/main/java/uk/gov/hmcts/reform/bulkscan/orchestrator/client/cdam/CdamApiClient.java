@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Collections.emptyMap;
+
 @Component
 public class CdamApiClient {
 
@@ -42,7 +44,7 @@ public class CdamApiClient {
 
         if (!cdamEnabled) {
             log.info("CDAM not enabled returninf empty Map");
-            return Map.of();
+            return emptyMap();
         }
         var s2sToken = s2sTokenGenerator.generate();
         var idamCredential = idamCachedClient.getIdamCredentials(jurisdiction);
