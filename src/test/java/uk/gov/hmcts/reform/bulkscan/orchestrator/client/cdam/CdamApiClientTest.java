@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -40,6 +41,11 @@ class CdamApiClientTest {
     private static final String S2S_TOKEN = "s2sToken-123123";
     private static final String IDAM_TOKEN = "idamToken-Dfd322";
     private static final String JURISDICTION = "JUR_TEST";
+
+    @BeforeEach
+    void enabledCdam() {
+        cdamApiClient.setCdamEnabled(true);
+    }
 
     @Test
     void should_get_allHashTokens_for_all_docs() {

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.cache.IdamCachedClient;
@@ -15,6 +16,9 @@ public class CdamApiClient {
     private final CdamApi cdamApi;
     private final AuthTokenGenerator s2sTokenGenerator;
     private final IdamCachedClient idamCachedClient;
+
+    @Value("${cdam.api.enabled}")
+    private boolean cdamEnabled;
 
     public CdamApiClient(
         CdamApi cdamApi,
@@ -46,6 +50,9 @@ public class CdamApiClient {
         String jurisdiction,
         Document document
     ) {
+        if (!cdamEnabled) {
+            return null;
+        }
 
         var s2sToken = s2sTokenGenerator.generate();
         var idamCredential = idamCachedClient.getIdamCredentials(jurisdiction);
@@ -53,4 +60,7 @@ public class CdamApiClient {
         return cdamApi.getDocumentHash(s2sToken, idamCredential.accessToken, document.uuid);
     }
 
+    public void setCdamEnabled(boolean cdamEnabled) {
+        this.cdamEnabled = cdamEnabled;
+    }
 }
