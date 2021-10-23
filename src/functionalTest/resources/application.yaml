@@ -89,3 +89,4 @@ callback:
 cdam:
   api:
     url: http://localhost/cdam
+    enabled: false
