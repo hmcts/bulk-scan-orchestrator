@@ -31,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -76,7 +77,7 @@ class SupplementaryEvidenceMapperTest {
         List<Document> existingDocs = asList(d1, d2);
         List<Document> envelopeDocs = asList(d3, d4);
 
-        given(docMapper.mapDocuments(anyList(), any(Instant.class)))
+        given(docMapper.mapDocuments(anyList(), anyList(), any(Instant.class), anyString()))
             .willReturn(
                 asList(
                     getScannedDocumentCcdCollectionElement(d1),
@@ -130,7 +131,7 @@ class SupplementaryEvidenceMapperTest {
         List<Document> existingDocs = asList(d1, d2);
         List<Document> envelopeDocs = asList(d3, d4);
 
-        given(docMapper.mapDocuments(anyList(), any(Instant.class)))
+        given(docMapper.mapDocuments(anyList(), anyList(), any(Instant.class), anyString()))
             .willReturn(
                 asList(
                     getScannedDocumentCcdCollectionElement(d1),
@@ -242,7 +243,7 @@ class SupplementaryEvidenceMapperTest {
         List<Document> existingDocs = asList(d1, d2);
         List<Document> envelopeDocs = asList(d3, d4);
 
-        given(docMapper.mapDocuments(anyList(), any(Instant.class)))
+        given(docMapper.mapDocuments(anyList(), anyList(), any(Instant.class), anyString()))
             .willReturn(
                 asList(
                     getScannedDocumentCcdCollectionElement(d1),
@@ -319,7 +320,7 @@ class SupplementaryEvidenceMapperTest {
                         doc.type,
                         doc.subtype,
                         ZonedDateTime.ofInstant(doc.scannedAt, ZoneId.systemDefault()).toLocalDateTime(),
-                        new CcdDocument(String.join("/", DOCUMENT_MANAGEMENT_URL, CONTEXT_PATH, doc.uuid)),
+                        new CcdDocument(String.join("/", DOCUMENT_MANAGEMENT_URL, CONTEXT_PATH, doc.uuid), null),
                         ZonedDateTime.ofInstant(doc.deliveryDate, ZoneId.systemDefault()).toLocalDateTime(),
                         null
                 )

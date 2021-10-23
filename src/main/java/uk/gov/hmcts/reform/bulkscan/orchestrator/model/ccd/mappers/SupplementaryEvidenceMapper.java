@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.joining;
@@ -51,11 +50,10 @@ public class SupplementaryEvidenceMapper {
             updateEnvelopeReferences(existingEnvelopeReferences, envelope);
 
         var scannedDocuments = docMapper.mapDocuments(
-            Stream.concat(
-                existingDocs.stream(),
-                getDocsToAdd(existingDocs, envelope.documents).stream()
-            ).collect(toList()),
-            envelope.deliveryDate
+            existingDocs,
+            getDocsToAdd(existingDocs, envelope.documents),
+            envelope.deliveryDate,
+            envelope.jurisdiction
         );
 
         return new SupplementaryEvidence(scannedDocuments, updatedEnvelopeReferences);
