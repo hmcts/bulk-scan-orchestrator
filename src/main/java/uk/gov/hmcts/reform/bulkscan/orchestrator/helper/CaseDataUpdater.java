@@ -1,8 +1,10 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam.CdamApiClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.EnvelopeReference;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
@@ -22,12 +24,17 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 public class CaseDataUpdater {
 
     private final EnvelopeReferenceHelper envelopeReferenceHelper;
+    private final CdamApiClient cdamApiClient;
 
-    public CaseDataUpdater(EnvelopeReferenceHelper envelopeReferenceHelper) {
+    public CaseDataUpdater(
+        EnvelopeReferenceHelper envelopeReferenceHelper,
+        CdamApiClient cdamApiClient
+    ) {
         this.envelopeReferenceHelper = envelopeReferenceHelper;
+        this.cdamApiClient = cdamApiClient;
     }
 
-    public Map<String, Object> setExceptionRecordIdToScannedDocuments(
+    public Map<String, Object> setExceptionRecordIdAndHashTokenToScannedDocuments(
         ExceptionRecord exceptionRecord,
         Map<String, Object> caseData
     ) {
@@ -39,7 +46,6 @@ public class CaseDataUpdater {
                 .stream()
                 .map(doc -> doc.controlNumber)
                 .collect(toList());
-
         List<Map<String, ScannedDocument>> updatedScannedDocuments =
             getScannedDocuments(caseData)
                 .stream()
@@ -52,7 +58,12 @@ public class CaseDataUpdater {
                             doc.type,
                             doc.subtype,
                             doc.scannedDate,
-                            doc.url,
+                            new CcdDocument(doc.url.documentUrl,
+                                cdamApiClient.getDocumentHash(
+                                    exceptionRecord.poBoxJurisdiction,
+                                    doc.url.documentUrl.substring(doc.url.documentUrl.lastIndexOf("/") + 1)
+                                )
+                            ),
                             doc.deliveryDate,
                             exceptionRecord.id
                         ));

@@ -137,7 +137,7 @@ public class CcdCaseUpdater {
                 var caseDataAfterClientUpdate = updateResponse.caseDetails.caseData;
 
                 var caseDataAfterDocUpdate =
-                    caseDataUpdater.setExceptionRecordIdToScannedDocuments(
+                    caseDataUpdater.setExceptionRecordIdAndHashTokenToScannedDocuments(
                         exceptionRecord,
                         caseDataAfterClientUpdate
                     );

@@ -6,7 +6,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.CaseUpdateDetails;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam.CdamApiClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.EnvelopeReference;
@@ -37,19 +39,31 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 class CaseDataUpdaterTest {
 
     @Mock EnvelopeReferenceHelper envelopeReferenceHelper;
+    @Mock CdamApiClient cdamApiClient;
+
 
     CaseDataUpdater caseDataUpdater;
 
     @BeforeEach
     void setUp() {
-        this.caseDataUpdater = new CaseDataUpdater(envelopeReferenceHelper);
+        this.caseDataUpdater = new CaseDataUpdater(envelopeReferenceHelper, cdamApiClient);
     }
 
     @Test
-    void sets_exception_record_id_to_scanned_documents() throws Exception {
+    void sets_exception_record_id_and_hashToken_to_scanned_documents() throws Exception {
         // given
-        // case contains documents with control numbers 1000, 2000, 3000
+        var jurisdiction = "poBoxJurisdiction";
+        var serviceConfigItem = new ServiceConfigItem();
+        serviceConfigItem.setJurisdiction(jurisdiction);
+
+        var hashToken1 = "321hhjRETE31321dsds";
+        var hashToken2 = "321hhjRETE31321dsds";
+        given(cdamApiClient.getDocumentHash(jurisdiction, "uuid1"))
+            .willReturn(hashToken1);
+        given(cdamApiClient.getDocumentHash(jurisdiction, "uuid2"))
+            .willReturn(hashToken2);
         var caseDetails = getCaseUpdateDetails("case-data/multiple-scanned-docs.json");
+        // case contains documents with control numbers 1000, 2000, 3000
         var scannedDocuments = asList(
             getScannedDocument("1000"),
             getScannedDocument("2000")
@@ -67,9 +81,8 @@ class CaseDataUpdaterTest {
             scannedDocuments,
             emptyList()
         );
-
         // when
-        var updatedCaseData = caseDataUpdater.setExceptionRecordIdToScannedDocuments(
+        var updatedCaseData = caseDataUpdater.setExceptionRecordIdAndHashTokenToScannedDocuments(
             exceptionRecord,
             caseDetails.caseData
         );
@@ -79,11 +92,16 @@ class CaseDataUpdaterTest {
         assertThat(updatedScannedDocuments).hasSize(3);
         assertThat(updatedScannedDocuments.get(0).controlNumber).isEqualTo("1000");
         assertThat(updatedScannedDocuments.get(0).exceptionReference).isEqualTo(exceptionRecord.id);
+        assertThat(updatedScannedDocuments.get(0).url.documentHash).isEqualTo(hashToken1);
         assertThat(updatedScannedDocuments.get(1).controlNumber).isEqualTo("2000");
         assertThat(updatedScannedDocuments.get(1).exceptionReference).isEqualTo(exceptionRecord.id);
+        assertThat(updatedScannedDocuments.get(1).url.documentHash).isEqualTo(hashToken2);
+
         // not present in the exception record and should not be set
         assertThat(updatedScannedDocuments.get(2).controlNumber).isEqualTo("3000");
         assertThat(updatedScannedDocuments.get(2).exceptionReference).isNull();
+        assertThat(updatedScannedDocuments.get(2).url.documentHash).isNull();
+
     }
 
     @Test

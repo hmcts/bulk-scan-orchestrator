@@ -129,7 +129,7 @@ class CcdCaseUpdaterTest {
         assertThat(res).isEmpty();
 
         verify(caseDataUpdater)
-            .setExceptionRecordIdToScannedDocuments(
+            .setExceptionRecordIdAndHashTokenToScannedDocuments(
                 exceptionRecord,
                 caseUpdateDetails.caseData
             );
@@ -142,7 +142,7 @@ class CcdCaseUpdaterTest {
         given(envelopeReferenceHelper
             .serviceSupportsEnvelopeReferences(any())).willReturn(true);
         given(caseDataUpdater
-            .setExceptionRecordIdToScannedDocuments(
+            .setExceptionRecordIdAndHashTokenToScannedDocuments(
                 exceptionRecord,
                 caseUpdateDetails.caseData
             ))
@@ -175,7 +175,7 @@ class CcdCaseUpdaterTest {
 
         // then
         verify(caseDataUpdater)
-            .setExceptionRecordIdToScannedDocuments(
+            .setExceptionRecordIdAndHashTokenToScannedDocuments(
                 exceptionRecord,
                 caseUpdateDetails.caseData
             );
@@ -216,7 +216,7 @@ class CcdCaseUpdaterTest {
         assertThat(res).isEmpty();
 
         verify(caseDataUpdater)
-            .setExceptionRecordIdToScannedDocuments(
+            .setExceptionRecordIdAndHashTokenToScannedDocuments(
                 exceptionRecord,
                 caseUpdateDetails.caseData
             );
@@ -291,7 +291,7 @@ class CcdCaseUpdaterTest {
         assertThat(res.get().getWarnings()).isEmpty();
 
         verify(caseDataUpdater)
-            .setExceptionRecordIdToScannedDocuments(
+            .setExceptionRecordIdAndHashTokenToScannedDocuments(
                 exceptionRecord,
                 caseUpdateDetails.caseData
             );
@@ -337,7 +337,7 @@ class CcdCaseUpdaterTest {
         assertThat(callbackException.getCause()).isSameAs(ex);
 
         verify(caseDataUpdater)
-            .setExceptionRecordIdToScannedDocuments(
+            .setExceptionRecordIdAndHashTokenToScannedDocuments(
                 exceptionRecord,
                 caseUpdateDetails.caseData
             );
@@ -393,7 +393,7 @@ class CcdCaseUpdaterTest {
             );
 
         verify(caseDataUpdater)
-            .setExceptionRecordIdToScannedDocuments(
+            .setExceptionRecordIdAndHashTokenToScannedDocuments(
                 exceptionRecord,
                 caseUpdateDetails.caseData
             );

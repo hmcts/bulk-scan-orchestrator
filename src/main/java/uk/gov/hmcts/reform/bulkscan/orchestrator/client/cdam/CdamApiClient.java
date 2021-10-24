@@ -43,7 +43,7 @@ public class CdamApiClient {
     ) {
 
         if (!cdamEnabled) {
-            log.info("CDAM not enabled returninf empty Map");
+            log.info("CDAM not enabled returning empty Map, get by doc list");
             return emptyMap();
         }
         var s2sToken = s2sTokenGenerator.generate();
@@ -64,6 +64,7 @@ public class CdamApiClient {
         Document document
     ) {
         if (!cdamEnabled) {
+            log.info("CDAM not enabled returning empty Map");
             return null;
         }
 
@@ -71,6 +72,21 @@ public class CdamApiClient {
         var idamCredential = idamCachedClient.getIdamCredentials(jurisdiction);
 
         return cdamApi.getDocumentHash(s2sToken, idamCredential.accessToken, document.uuid);
+    }
+
+    public String getDocumentHash(
+        String jurisdiction,
+        String uuid
+    ) {
+        if (!cdamEnabled) {
+            log.info("CDAM not enabled returning empty Map, get by UUID= ", uuid);
+            return null;
+        }
+
+        var s2sToken = s2sTokenGenerator.generate();
+        var idamCredential = idamCachedClient.getIdamCredentials(jurisdiction);
+
+        return cdamApi.getDocumentHash(s2sToken, idamCredential.accessToken, uuid);
     }
 
     public void setCdamEnabled(boolean cdamEnabled) {

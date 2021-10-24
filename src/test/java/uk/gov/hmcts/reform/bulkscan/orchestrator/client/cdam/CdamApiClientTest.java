@@ -144,6 +144,29 @@ class CdamApiClientTest {
     }
 
 
+    @Test
+    void should_get_hashToken_by_uuid_for_a_doc() {
+
+        var cachedIdamCredential = new CachedIdamCredential(IDAM_TOKEN, "user-1", 132131);
+        given(s2sTokenGenerator.generate()).willReturn(S2S_TOKEN);
+        given(idamCachedClient.getIdamCredentials(JURISDICTION)).willReturn(cachedIdamCredential);
+
+        var document1Uuid = UUID.randomUUID().toString();
+        var docHash1 = "23fdasaf3123sdvvs21wdeqa";
+        given(cdamApi.getDocumentHash(S2S_TOKEN, IDAM_TOKEN, document1Uuid)).willReturn(docHash1);
+
+        String result = cdamApiClient.getDocumentHash(
+            JURISDICTION,
+            document1Uuid
+        );
+
+        assertThat(result).isEqualTo(docHash1);
+
+        verify(s2sTokenGenerator).generate();
+        verify(idamCachedClient).getIdamCredentials(JURISDICTION);
+        verify(cdamApi).getDocumentHash(S2S_TOKEN, IDAM_TOKEN, document1Uuid);
+    }
+
     private static Document getDocument(String documentUuid) {
         return new Document(
             "certificate1.pdf",
