@@ -30,14 +30,14 @@ public class DocumentMapper {
         this.cdamApiClient = cdamApiClient;
     }
 
-    public ScannedDocument toScannedDoc(Document doc, String jurisdiction) {
+    public ScannedDocument toScannedDoc(Document doc, String jurisdiction, boolean useDocumentHash) {
         if (doc == null) {
             return null;
         } else {
             return new ScannedDocument(
                 DocumentType.valueOf(doc.type.toUpperCase()),
                 doc.subtype,
-                documentUrl(doc, cdamApiClient.getDocumentHash(jurisdiction, doc)),
+                documentUrl(doc, useDocumentHash ? cdamApiClient.getDocumentHash(jurisdiction, doc) : null),
                 doc.controlNumber,
                 doc.fileName,
                 toLocalDateTime(doc.scannedAt),

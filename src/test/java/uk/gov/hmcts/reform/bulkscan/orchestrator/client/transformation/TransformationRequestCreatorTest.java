@@ -70,8 +70,8 @@ class TransformationRequestCreatorTest {
         var mappedDoc1 = mock(ScannedDocument.class);
         var mappedDoc2 = mock(ScannedDocument.class);
 
-        given(documentMapper.toScannedDoc(doc1, JURISDICTION)).willReturn(mappedDoc1);
-        given(documentMapper.toScannedDoc(doc2, JURISDICTION)).willReturn(mappedDoc2);
+        given(documentMapper.toScannedDoc(doc1, JURISDICTION, false)).willReturn(mappedDoc1);
+        given(documentMapper.toScannedDoc(doc2, JURISDICTION, false)).willReturn(mappedDoc2);
 
         // when
         var transformationRequest = requestCreator.create(envelope);

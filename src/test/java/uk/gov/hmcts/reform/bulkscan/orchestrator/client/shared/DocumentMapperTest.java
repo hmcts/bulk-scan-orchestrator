@@ -16,6 +16,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class DocumentMapperTest {
@@ -49,7 +51,36 @@ class DocumentMapperTest {
         );
 
         // when
-        ScannedDocument result = documentMapper.toScannedDoc(doc, JURISDICTION);
+        ScannedDocument result = documentMapper.toScannedDoc(doc, JURISDICTION, false);
+
+        // then
+        assertThat(result.controlNumber).isEqualTo(doc.controlNumber);
+        assertThat(result.fileName).isEqualTo(doc.fileName);
+        assertThat(result.type).isEqualTo(DocumentType.FORM);
+        assertThat(result.subtype).isEqualTo(doc.subtype);
+        assertThat(result.documentUrl.filename).isEqualTo(doc.fileName);
+        assertThat(result.documentUrl.documentHash).isNull();
+        assertThat(result.documentUrl.binaryUrl).isEqualTo("https://dm-url/hello/123-123/binary");
+        assertThat(result.deliveryDate).isEqualTo(toLocalDateTime(doc.deliveryDate));
+        assertThat(result.scannedDate).isEqualTo(toLocalDateTime(doc.scannedAt));
+        verifyNoInteractions(cdamApiClient);
+    }
+
+    void should_map_document_with_hash_correctly() {
+        // given
+        Document doc = new Document(
+            "file-name",
+            "dcn",
+            "form",
+            "subtype",
+            Instant.now(),
+            "123-123",
+            Instant.now()
+        );
+        given(cdamApiClient.getDocumentHash(JURISDICTION, doc)).willReturn("hash");
+
+        // when
+        ScannedDocument result = documentMapper.toScannedDoc(doc, JURISDICTION, false);
 
         // then
         assertThat(result.controlNumber).isEqualTo(doc.controlNumber);
@@ -58,6 +89,7 @@ class DocumentMapperTest {
         assertThat(result.subtype).isEqualTo(doc.subtype);
         assertThat(result.documentUrl.filename).isEqualTo(doc.fileName);
         assertThat(result.documentUrl.url).isEqualTo("https://dm-url/hello/123-123");
+        assertThat(result.documentUrl.documentHash).isEqualTo("hash");
         assertThat(result.documentUrl.binaryUrl).isEqualTo("https://dm-url/hello/123-123/binary");
         assertThat(result.deliveryDate).isEqualTo(toLocalDateTime(doc.deliveryDate));
         assertThat(result.scannedDate).isEqualTo(toLocalDateTime(doc.scannedAt));
@@ -69,7 +101,7 @@ class DocumentMapperTest {
         Document doc = null;
 
         // when
-        ScannedDocument result = documentMapper.toScannedDoc(doc, JURISDICTION);
+        ScannedDocument result = documentMapper.toScannedDoc(doc, JURISDICTION, false);
 
         // then
         assertThat(result).isNull();

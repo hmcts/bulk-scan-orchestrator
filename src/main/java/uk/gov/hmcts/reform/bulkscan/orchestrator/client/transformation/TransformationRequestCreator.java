@@ -57,7 +57,7 @@ public class TransformationRequestCreator {
             toLocalDateTime(envelope.openingDate),
             envelope.documents
                     .stream()
-                    .map(doc -> docMapper.toScannedDoc(doc, envelope.jurisdiction))
+                    .map(doc -> docMapper.toScannedDoc(doc, envelope.jurisdiction, false))
                     .collect(toList()),
             mapOcrDataFields(envelope.ocrData),
             true

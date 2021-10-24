@@ -102,7 +102,7 @@ public class CaseUpdateRequestCreator {
             toLocalDateTime(envelope.openingDate),
             envelope.documents
                     .stream()
-                    .map(doc -> documentMapper.toScannedDoc(doc, envelope.jurisdiction))
+                    .map(doc -> documentMapper.toScannedDoc(doc, envelope.jurisdiction, true))
                     .collect(Collectors.toList()),
             envelope
                 .ocrData
