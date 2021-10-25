@@ -39,6 +39,7 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -114,6 +115,7 @@ class AutoCaseCreatorTest {
 
         var transformationResponse = sampleSuccessfulTransformationResponse();
         given(envelopeTransformer.transformEnvelope(any())).willReturn(right(transformationResponse));
+        given(cdamApiClient.getDocumentHash("BULKSCAN", "uuid1")).willReturn("hash");
 
         Envelope envelope = envelope(1);
 
@@ -153,6 +155,7 @@ class AutoCaseCreatorTest {
         // given
         var transformationResponse = sampleSuccessfulTransformationResponse();
         given(envelopeTransformer.transformEnvelope(any())).willReturn(right(transformationResponse));
+        given(cdamApiClient.getDocumentHash("BULKSCAN", "uuid1")).willReturn("hash");
 
         Envelope envelope = envelope(1);
 
@@ -250,6 +253,7 @@ class AutoCaseCreatorTest {
 
         given(envelopeTransformer.transformEnvelope(any()))
             .willReturn(right(sampleSuccessfulTransformationResponse()));
+        given(cdamApiClient.getDocumentHash("BULKSCAN", "uuid1")).willReturn("hash");
 
         // when
         var result = autoCaseCreator.createCase(envelope(1));
@@ -260,6 +264,7 @@ class AutoCaseCreatorTest {
         verify(ccdApi).createCase(any(), any(), any(), any(), any());
     }
 
+    @SuppressWarnings("unchecked")
     private void verifyCaseDataContentBuilderProducesCorrectResult(
         Function<StartEventResponse, CaseDataContent> caseDataContentBuilder,
         Envelope inputEnvelope,
@@ -286,6 +291,24 @@ class AutoCaseCreatorTest {
             .isEqualTo(
                 getExpectedCaseDataInCaseCreationEvent(transformationResponse, inputEnvelope.id)
             );
+
+        Map caseData = (Map)caseDataContent.getData();
+        assertThat(caseData).containsKey("scannedDocuments");
+        List scannedDocuments = (List)((Map)caseDataContent.getData()).get("scannedDocuments");
+        assertThat(scannedDocuments).hasSize(1);
+        Map scannedDocumentValue = (Map)scannedDocuments.get(0);
+        assertThat(scannedDocumentValue).containsKey("value");
+        Map scannedDocument = (Map)scannedDocumentValue.get("value");
+        assertThat(scannedDocument).containsKey("url");
+        Map url = (Map)scannedDocument.get("url");
+        assertThat(url).containsKey("document_url");
+        assertThat(url.get("document_url")).isEqualTo("https://doc-url-1.example.com/uuid1");
+        assertThat(url).containsKey("document_hash");
+        assertThat(url.get("document_hash")).isEqualTo("hash");
+        assertThat(url).containsKey("document_binary_url");
+        assertThat(url.get("document_binary_url")).isEqualTo("https://doc-url-1.example.com/binary");
+        assertThat(url).containsKey("document_filename");
+        assertThat(url.get("document_filename")).isEqualTo("abc.pdf");
     }
 
     private FeignException ccdErrorResponseException(HttpStatus status) {
@@ -325,10 +348,22 @@ class AutoCaseCreatorTest {
     }
 
     private SuccessfulTransformationResponse sampleSuccessfulTransformationResponse() {
+        Map<String, String> url = new HashMap<>();
+        url.put("document_url", "https://doc-url-1.example.com/uuid1");
+        url.put("document_binary_url", "https://doc-url-1.example.com/binary");
+        url.put("document_filename", "abc.pdf");
         var caseCreationDetails = new CaseCreationDetails(
             "caseTypeId1",
             "eventId1",
-            ImmutableMap.of("key1", "value1")
+            ImmutableMap.of(
+                "key1", "value1",
+                "scannedDocuments", singletonList(
+                    Map.of(
+                        "value", Map.of(
+                            "url", url)
+                        )
+                    )
+            )
         );
 
         return new SuccessfulTransformationResponse(caseCreationDetails, emptyList());
