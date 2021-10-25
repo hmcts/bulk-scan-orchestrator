@@ -79,7 +79,7 @@ public class CdamApiClient {
         String uuid
     ) {
         if (!cdamEnabled) {
-            log.info("CDAM not enabled returning empty Map, get by UUID= ", uuid);
+            log.info("CDAM not enabled returning empty Map, get by UUID= {}", uuid);
             return null;
         }
 

@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -165,6 +166,46 @@ class CdamApiClientTest {
         verify(s2sTokenGenerator).generate();
         verify(idamCachedClient).getIdamCredentials(JURISDICTION);
         verify(cdamApi).getDocumentHash(S2S_TOKEN, IDAM_TOKEN, document1Uuid);
+    }
+
+    @Test
+    void should_hashToken_by_uuid_return_null_when_cdam_disabled() {
+        cdamApiClient.setCdamEnabled(false);
+        String result = cdamApiClient.getDocumentHash(
+            JURISDICTION,
+            "eewwew"
+        );
+
+        assertThat(result).isNull();
+        verify(s2sTokenGenerator, never()).generate();
+        verify(idamCachedClient, never()).getIdamCredentials(anyString());
+        verify(cdamApi, never()).getDocumentHash(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void should_hashToken_for_list_return_emptyMap_when_cdam_disabled() {
+        cdamApiClient.setCdamEnabled(false);
+        Map<String, String> result = cdamApiClient.getDocumentHash(
+            JURISDICTION,
+            List.of(getDocument("2312"), getDocument("321321"))
+        );
+        assertThat(result).isEmpty();
+        verify(s2sTokenGenerator, never()).generate();
+        verify(idamCachedClient, never()).getIdamCredentials(anyString());
+        verify(cdamApi, never()).getDocumentHash(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void should_hashToken_for_doc_return_null_when_cdam_disabled() {
+        cdamApiClient.setCdamEnabled(false);
+        String result = cdamApiClient.getDocumentHash(
+            JURISDICTION,
+            getDocument("2312")
+        );
+        assertThat(result).isNull();
+        verify(s2sTokenGenerator, never()).generate();
+        verify(idamCachedClient, never()).getIdamCredentials(anyString());
+        verify(cdamApi, never()).getDocumentHash(anyString(), anyString(), anyString());
     }
 
     private static Document getDocument(String documentUuid) {
