@@ -11,6 +11,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam.CdamApiClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.EnvelopeTransformer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
@@ -64,6 +65,8 @@ class AutoCaseCreatorTest {
     private ServiceConfigProvider serviceConfigProvider;
     @Mock
     private ServiceConfigItem serviceConfigItem;
+    @Mock
+    private CdamApiClient cdamApiClient;
 
     private AutoCaseCreator autoCaseCreator;
 
@@ -72,7 +75,7 @@ class AutoCaseCreatorTest {
         given(serviceConfigItem.getAutoCaseCreationEnabled()).willReturn(true);
         given(serviceConfigProvider.getConfig(any())).willReturn(serviceConfigItem);
 
-        autoCaseCreator = new AutoCaseCreator(envelopeTransformer, ccdApi, serviceConfigProvider);
+        autoCaseCreator = new AutoCaseCreator(envelopeTransformer, ccdApi, serviceConfigProvider, cdamApiClient);
     }
 
     @Test
