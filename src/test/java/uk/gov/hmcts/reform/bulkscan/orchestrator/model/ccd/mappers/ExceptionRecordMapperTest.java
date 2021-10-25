@@ -2,8 +2,13 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdDocument;
@@ -32,34 +37,36 @@ import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.envelope;
 
+@ExtendWith(MockitoExtension.class)
 class ExceptionRecordMapperTest {
 
     private static final String DOCUMENT_MANAGEMENT_URL = "https://example.gov.uk";
     private static final String CONTEXT_PATH = "files";
 
-    private final ServiceConfigProvider serviceConfigProvider = mock(ServiceConfigProvider.class);
-    private final ServiceConfigItem serviceConfigItem = mock(ServiceConfigItem.class);
-    private final DocMapper docMapper = mock(DocMapper.class);
+    @Mock
+    private ServiceConfigProvider serviceConfigProvider;
+    @Mock
+    private ServiceConfigItem serviceConfigItem;
 
-    private final ExceptionRecordMapper mapper = new ExceptionRecordMapper(
-        serviceConfigProvider,
-            docMapper
-    );
+    @Mock
+    private DocMapper docMapper;
+    @Captor
+    private ArgumentCaptor<List<Document>> captor;
 
-    @BeforeEach
-    void setupServiceConfig() {
-        given(serviceConfigProvider.getConfig("bulkscan")).willReturn(serviceConfigItem);
-        given(serviceConfigItem.getSurnameOcrFieldNameList("FORM_TYPE"))
-            .willReturn(singletonList("field_surname"));
-    }
+    @InjectMocks
+    private ExceptionRecordMapper mapper;
+
 
     @Test
     void mapEnvelope_maps_all_fields_correctly() {
         // given
+        mockServiceConfig();
         Envelope envelope = envelope(
             2,
             ImmutableList.of(new Payment("dcn1")),
@@ -70,7 +77,7 @@ class ExceptionRecordMapperTest {
             asList("warning 1", "warning 2")
         );
 
-        given(docMapper.mapDocuments(anyList(), any(Instant.class)))
+        given(docMapper.mapDocuments(anyList(), anyList(), any(Instant.class), anyString()))
             .willReturn(
                 asList(
                     getScannedDocumentCcdCollectionElement(envelope.documents.get(0)),
@@ -118,6 +125,16 @@ class ExceptionRecordMapperTest {
         assertThat(exceptionRecord.showEnvelopeCaseReference).isEqualTo("No"); // for "New Application"
         assertThat(exceptionRecord.showEnvelopeLegacyCaseReference).isEqualTo("No"); // for "New Application"
         assertThat(exceptionRecord.surname).isEqualTo("surname1");
+
+        verify(docMapper).mapDocuments(
+            eq(emptyList()),
+            captor.capture(),
+            any(Instant.class),
+            eq(envelope.jurisdiction)
+        );
+
+        List<Document> docList = captor.getValue();
+        assertThat(docList).usingRecursiveComparison().isEqualTo(envelope.documents);
     }
 
     @Test
@@ -133,7 +150,7 @@ class ExceptionRecordMapperTest {
         // given
         Envelope envelope = envelope(2, null, emptyList(), emptyList());
 
-        given(docMapper.mapDocuments(anyList(), any(Instant.class)))
+        given(docMapper.mapDocuments(anyList(), anyList(), any(Instant.class), anyString()))
             .willReturn(
                 asList(
                     getScannedDocumentCcdCollectionElement(envelope.documents.get(0)),
@@ -168,6 +185,8 @@ class ExceptionRecordMapperTest {
     @Test
     void mapEnvelope_copies_envelope_id_to_exception_record() {
         // given
+        mockServiceConfig();
+
         String supportedJurisdiction = "supported-jurisdiction1";
 
         // when
@@ -214,7 +233,7 @@ class ExceptionRecordMapperTest {
     void mapEnvelope_sets_display_case_reference_fields_to_no_when_envelope_case_reference_values_are_null() {
         //given
         Envelope envelope = envelope(null, null, Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR);
-
+        mockServiceConfig();
         // when
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
 
@@ -229,7 +248,7 @@ class ExceptionRecordMapperTest {
     void mapEnvelope_sets_display_case_reference_fields_to_yes_when_envelope_case_reference_values_exist() {
         //given
         Envelope envelope = envelope("CASE_123", "LEGACY_CASE_123", Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR);
-
+        mockServiceConfig();
         // when
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
 
@@ -242,8 +261,13 @@ class ExceptionRecordMapperTest {
 
     @Test
     void mapEnvelope_sets_surname_null_when_no_surname_data_in_ocr() {
+        mockServiceConfig();
         //given
         Envelope envelope = envelope("CASE_123", "LEGACY_CASE_123", Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR);
+        given(serviceConfigProvider.getConfig("bulkscan")).willReturn(serviceConfigItem);
+        given(serviceConfigItem.getSurnameOcrFieldNameList("FORM_TYPE"))
+            .willReturn(singletonList("field_surname"));
+
         // when
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);
 
@@ -253,6 +277,7 @@ class ExceptionRecordMapperTest {
 
     @Test
     void mapEnvelope_sets_first_surname_when_multiple_surname_data_in_ocr() {
+        mockServiceConfig();
         //given
         Envelope envelope = envelope(
             1,
@@ -273,7 +298,7 @@ class ExceptionRecordMapperTest {
 
     @Test
     void mapEnvelope_sets_non_empty_surname_when_ocr_surname_data_empty() {
-
+        mockServiceConfig();
         //given
         Envelope envelope = envelope(
             1,
@@ -297,7 +322,7 @@ class ExceptionRecordMapperTest {
         //given
         given(serviceConfigItem.getSurnameOcrFieldNameList("FORM_TYPE"))
             .willReturn(asList("field_surname_not_found", "field_surname", "fieldName1"));
-
+        mockServiceConfig();
 
         Envelope envelope = envelope(
             1,
@@ -321,7 +346,7 @@ class ExceptionRecordMapperTest {
         //given
         given(serviceConfigItem.getSurnameOcrFieldNameList("FORM_TYPE"))
             .willReturn(asList("field_surname", "fieldName1"));
-
+        mockServiceConfig();
         Envelope envelope = envelope(
             1,
             ImmutableList.of(new Payment("dcn1")),
@@ -335,6 +360,12 @@ class ExceptionRecordMapperTest {
 
         // then
         assertThat(exceptionRecord.surname).isEqualTo("surname_x");
+    }
+
+    private void mockServiceConfig() {
+        given(serviceConfigProvider.getConfig("bulkscan")).willReturn(serviceConfigItem);
+        given(serviceConfigItem.getSurnameOcrFieldNameList("FORM_TYPE"))
+            .willReturn(singletonList("field_surname"));
     }
 
     private Envelope envelopeWithJurisdiction(String jurisdiction) {
@@ -380,7 +411,7 @@ class ExceptionRecordMapperTest {
                         doc.type,
                         doc.subtype,
                         ZonedDateTime.ofInstant(doc.scannedAt, ZoneId.systemDefault()).toLocalDateTime(),
-                        new CcdDocument(String.join("/", DOCUMENT_MANAGEMENT_URL, CONTEXT_PATH, doc.uuid)),
+                        new CcdDocument(String.join("/", DOCUMENT_MANAGEMENT_URL, CONTEXT_PATH, doc.uuid), null),
                         ZonedDateTime.ofInstant(doc.deliveryDate, ZoneId.systemDefault()).toLocalDateTime(),
                         null
                 )

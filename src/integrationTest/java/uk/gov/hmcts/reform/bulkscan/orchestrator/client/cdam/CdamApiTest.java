@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam;
 
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
