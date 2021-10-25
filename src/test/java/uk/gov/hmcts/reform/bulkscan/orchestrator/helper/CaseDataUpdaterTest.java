@@ -93,14 +93,18 @@ class CaseDataUpdaterTest {
         assertThat(updatedScannedDocuments.get(0).controlNumber).isEqualTo("1000");
         assertThat(updatedScannedDocuments.get(0).exceptionReference).isEqualTo(exceptionRecord.id);
         assertThat(updatedScannedDocuments.get(0).url.documentHash).isEqualTo(hashToken1);
+        assertThat(updatedScannedDocuments.get(0).url.documentUrl).isEqualTo("https://doc-url-1.example.com/uuid1");
         assertThat(updatedScannedDocuments.get(1).controlNumber).isEqualTo("2000");
         assertThat(updatedScannedDocuments.get(1).exceptionReference).isEqualTo(exceptionRecord.id);
         assertThat(updatedScannedDocuments.get(1).url.documentHash).isEqualTo(hashToken2);
+        assertThat(updatedScannedDocuments.get(1).url.documentUrl).isEqualTo("https://doc-url-2.example.com/uuid2");
 
         // not present in the exception record and should not be set
         assertThat(updatedScannedDocuments.get(2).controlNumber).isEqualTo("3000");
         assertThat(updatedScannedDocuments.get(2).exceptionReference).isNull();
         assertThat(updatedScannedDocuments.get(2).url.documentHash).isNull();
+        assertThat(updatedScannedDocuments.get(2).url.documentUrl).isEqualTo("https://doc-url-3.example.com");
+
 
     }
 
