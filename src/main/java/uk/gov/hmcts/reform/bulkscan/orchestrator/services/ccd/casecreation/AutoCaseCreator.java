@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 
 @Service
 public class AutoCaseCreator {
@@ -102,16 +102,20 @@ public class AutoCaseCreator {
 
         if (scannedDocuments != null) {
             for (Object scannedDocumentValue : scannedDocuments) {
-                Map scannedDocument = (Map) ((Map) scannedDocumentValue).get("value");
-                Map url = (Map) scannedDocument.get("url");
+                Map scannedDocument = (Map)((Map) scannedDocumentValue).get("value");
+                Map url = (Map)scannedDocument.get("url");
                 String documentUrl = (String) url.get("document_url");
-                String documentUuid = documentUrl.substring(documentUrl.lastIndexOf("/") + 1);
+                String documentUuid = getDocumentUuid(documentUrl);
                 String documentHash = cdamApiClient.getDocumentHash(jurisdiction, documentUuid);
                 url.put("document_hash", documentHash);
             }
         }
 
         return caseCreationDetails;
+    }
+
+    private String getDocumentUuid(String documentUrl) {
+        return documentUrl.substring(documentUrl.lastIndexOf("/") + 1);
     }
 
     private CaseCreationResult createCaseInCcd(
@@ -175,7 +179,7 @@ public class AutoCaseCreator {
 
         data.put(
             "bulkScanEnvelopes",
-            asList(new CcdCollectionElement<>(new EnvelopeReference(envelopeId, CaseAction.CREATE)))
+            singletonList(new CcdCollectionElement<>(new EnvelopeReference(envelopeId, CaseAction.CREATE)))
         );
 
         return CaseDataContent
