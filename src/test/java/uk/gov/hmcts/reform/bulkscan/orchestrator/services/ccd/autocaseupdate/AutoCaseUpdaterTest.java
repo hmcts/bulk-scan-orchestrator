@@ -82,7 +82,6 @@ class AutoCaseUpdaterTest {
     @Test
     void should_update_case_if_it_is_found() {
         // given
-        Long existingCaseRef = 1L;
         CaseDetails existingCaseDetails = sampleCaseDetails();
         Envelope envelope = sampleEnvelope();
         SuccessfulUpdateResponse updateDataResponse = sampleUpdateDataResponse();
@@ -100,6 +99,9 @@ class AutoCaseUpdaterTest {
                 CaseAction.UPDATE,
                 existingCaseDetails.getData())
         ).willReturn(updateDataResponse.caseDetails.caseData);
+
+        given(caseDataUpdater.setDocumentHash(envelope, updateDataResponse.caseDetails.caseData))
+            .willReturn(updateDataResponse.caseDetails.caseData);
 
         given(caseDataBuilder.getBuilder(updateDataResponse.caseDetails.caseData, envelope.id))
             .willReturn(caseDataContentBuilder);

@@ -72,6 +72,8 @@ public class AutoCaseUpdater {
                                 existingCase.getData()
                             );
 
+                        updatedCaseData = caseDataUpdater.setDocumentHash(envelope, updatedCaseData);
+
                         ccdApi.updateCase(
                             existingCase.getJurisdiction(),
                             existingCase.getCaseTypeId(),

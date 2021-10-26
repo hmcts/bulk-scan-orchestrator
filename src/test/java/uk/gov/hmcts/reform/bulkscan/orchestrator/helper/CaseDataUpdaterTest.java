@@ -16,10 +16,14 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EnvelopeReferenceHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static java.time.LocalDateTime.now;
 import static java.util.Arrays.asList;
@@ -30,6 +34,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.fileContentAsBytes;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.objectMapper;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.SampleData.sampleEnvelope;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType.FORM;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SCANNED_DOCUMENTS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ServiceCaseFields.BULK_SCAN_ENVELOPES;
@@ -106,6 +111,64 @@ class CaseDataUpdaterTest {
         assertThat(updatedScannedDocuments.get(2).url.documentUrl).isEqualTo("https://doc-url-3.example.com");
 
 
+    }
+
+    @Test
+    void sets_document_hashToken_to_scanned_documents_for_envelope() throws Exception {
+
+        String docUuid1 = UUID.randomUUID().toString();
+        String docUuid2 = UUID.randomUUID().toString();
+        var document1 = new Document(
+            "evidence1.pdf",
+            "1000",
+            "other",
+            null,
+            Instant.now(),
+            docUuid1,
+            Instant.now()
+        );
+        var document2 = new Document(
+            "evidence2.pdf",
+            "2000",
+            "PB1",
+            null,
+            Instant.now(),
+            docUuid2,
+            Instant.now()
+        );
+
+        var hashToken1 = "321hhjRETE31321dsds";
+        var hashToken2 = "321hhjRETE31321dsds";
+        given(cdamApiClient.getDocumentHash("jurisdiction1", docUuid1))
+            .willReturn(hashToken1);
+        given(cdamApiClient.getDocumentHash("jurisdiction1", docUuid2))
+            .willReturn(hashToken2);
+
+        Envelope envelope = sampleEnvelope(List.of(), List.of(document1, document2));
+        var caseDetails = getCaseUpdateDetails("case-data/multiple-scanned-docs.json");
+
+        var updatedCaseData = caseDataUpdater.setDocumentHash(
+            envelope,
+            caseDetails.caseData
+        );
+
+        var updatedScannedDocuments = getScannedDocuments(updatedCaseData);
+
+        assertThat(updatedScannedDocuments).hasSize(3);
+        assertThat(updatedScannedDocuments.get(0).controlNumber).isEqualTo("1000");
+        assertThat(updatedScannedDocuments.get(0).exceptionReference).isNull();
+        assertThat(updatedScannedDocuments.get(0).url.documentHash).isEqualTo(hashToken1);
+        assertThat(updatedScannedDocuments.get(0).url.documentUrl).isEqualTo("https://doc-url-1.example.com/uuid1");
+        assertThat(updatedScannedDocuments.get(1).controlNumber).isEqualTo("2000");
+        assertThat(updatedScannedDocuments.get(1).exceptionReference).isNull();
+        assertThat(updatedScannedDocuments.get(1).url.documentHash).isEqualTo(hashToken2);
+        assertThat(updatedScannedDocuments.get(1).url.documentUrl).isEqualTo("https://doc-url-2.example.com/uuid2");
+
+        // not present in the envelope and should not be set
+        assertThat(updatedScannedDocuments.get(2).controlNumber).isEqualTo("3000");
+        assertThat(updatedScannedDocuments.get(2).exceptionReference).isNull();
+        assertThat(updatedScannedDocuments.get(2).url.documentHash).isNull();
+        assertThat(updatedScannedDocuments.get(2).url.documentUrl).isEqualTo("https://doc-url-3.example.com");
     }
 
     @Test
