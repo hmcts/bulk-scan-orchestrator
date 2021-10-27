@@ -190,9 +190,11 @@ public class ExceptionRecordAttacher {
         boolean ignoreWarnings
     ) {
         log.info(
-            "Attaching exception record '{}' to a case by CCD ID '{}'",
+            "Attaching exception record '{}' to a case by CCD ID '{}', exceptionRecordDocuments{} ExcepDocs {}",
             callBackEvent.exceptionRecordId,
-            targetCaseCcdRef
+            targetCaseCcdRef,
+            callBackEvent.exceptionRecordDocuments,
+            callBackEvent.exceptionRecord == null ? "null" : callBackEvent.exceptionRecord.scannedDocuments
         );
 
         CaseDetails targetCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
