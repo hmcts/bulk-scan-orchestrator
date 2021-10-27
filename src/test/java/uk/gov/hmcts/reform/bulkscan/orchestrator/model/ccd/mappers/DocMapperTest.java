@@ -60,7 +60,7 @@ class DocMapperTest {
         );
         List<Document> newDocList = List.of(doc);
         String jurisdiction = "Bulk_Scan_Jur";
-        String hashToken = "w3dsfwSADDAQ98754wq";
+        String hashToken = "test-token-123";
         given(cdamApiClient.getDocumentHash(jurisdiction, newDocList))
             .willReturn(Map.<String, String>of("uuid1", hashToken));
 
