@@ -194,7 +194,7 @@ public class ExceptionRecordAttacher {
             callBackEvent.exceptionRecordId,
             targetCaseCcdRef,
             callBackEvent.exceptionRecordDocuments,
-            callBackEvent.exceptionRecord == null ? "null" : callBackEvent.exceptionRecord.scannedDocuments
+            callBackEvent.exceptionRecord == null ? "null" : callBackEvent.exceptionRecord.scannedDocuments.toString()
         );
 
         CaseDetails targetCase = ccdApi.getCase(targetCaseCcdRef, callBackEvent.exceptionRecordJurisdiction);
