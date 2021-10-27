@@ -60,9 +60,9 @@ class DocMapperTest {
         );
         List<Document> newDocList = List.of(doc);
         String jurisdiction = "Bulk_Scan_Jur";
-        String hashToken = "w3dsfwSADDAQ98754wq";
+        String hash = "test-token-123";
         given(cdamApiClient.getDocumentHash(jurisdiction, newDocList))
-            .willReturn(Map.<String, String>of("uuid1", hashToken));
+            .willReturn(Map.<String, String>of("uuid1", hash));
 
         // when
         List<CcdCollectionElement<ScannedDocument>> result =
@@ -94,7 +94,7 @@ class DocMapperTest {
                     doc.type,
                     doc.subtype,
                     toLocalDateTime(doc.scannedAt),
-                    new CcdDocument("https://localhost/files/" + doc.uuid, hashToken),
+                    new CcdDocument("https://localhost/files/" + doc.uuid, hash),
                     toLocalDateTime(doc.deliveryDate),
                     null // this should always be null;
                 )
