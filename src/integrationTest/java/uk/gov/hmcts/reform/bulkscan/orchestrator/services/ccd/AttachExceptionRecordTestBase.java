@@ -87,6 +87,7 @@ public class AttachExceptionRecordTestBase {
 
     private static final String EXCEPTION_RECORD_FILENAME = "record.pdf";
     static final String EXCEPTION_RECORD_DOCUMENT_NUMBER = "654321";
+    static final String EXCEPTION_RECORD_DOCUMENT_UUID = "UUID-1";
 
     private static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
     private static final String RESPONSE_FIELD_DATA = "data";
@@ -450,11 +451,22 @@ public class AttachExceptionRecordTestBase {
         String documentNumber,
         Long exceptionRecordReference
     ) {
+
+        var docUrl = ImmutableMap.of(
+            "document_url", "http://localhost:3000/case/" + EXCEPTION_RECORD_DOCUMENT_UUID,
+            "document_filename", filename,
+            "document_binary_url", "http://localhost:3000/case/" + EXCEPTION_RECORD_DOCUMENT_UUID + "/binary"
+        );
         ImmutableMap.Builder<Object, Object> doc = ImmutableMap
             .builder()
+            .put("id", "e2cdab78-f299-4930-a84c-55271a97202e")
+            .put("type", "other")
+            .put("subtype", "OtherSupportDocuments")
             .put("fileName", filename)
             .put("controlNumber", documentNumber)
-            .put("someNumber", 3);
+            .put("someNumber", 3)
+            .put("url", docUrl);
+
 
         if (exceptionRecordReference != null) {
             doc.put("exceptionRecordReference", Long.toString(exceptionRecordReference));
