@@ -49,4 +49,21 @@ public class ExceptionRecord {
         this.scannedDocuments = scannedDocuments;
         this.ocrDataFields = ocrDataFields;
     }
+
+    @Override
+    public String toString() {
+        return "ExceptionRecord{"
+            + "id='" + id + '\''
+            + ", caseTypeId='" + caseTypeId + '\''
+            + ", envelopeId='" + envelopeId + '\''
+            + ", poBox='" + poBox + '\''
+            + ", poBoxJurisdiction='" + poBoxJurisdiction + '\''
+            + ", journeyClassification=" + journeyClassification
+            + ", formType='" + formType + '\''
+            + ", deliveryDate=" + deliveryDate
+            + ", openingDate=" + openingDate
+            + ", scannedDocuments=" + scannedDocuments
+            + ", ocrDataFields=" + ocrDataFields
+            + '}';
+    }
 }
