@@ -22,4 +22,13 @@ public class DocumentUrl {
         this.binaryUrl = binaryUrl;
         this.filename = filename;
     }
+
+    @Override
+    public String toString() {
+        return "DocumentUrl{"
+            + "url='" + url + '\''
+            + ", binaryUrl='" + binaryUrl + '\''
+            + ", filename='" + filename + '\''
+            + '}';
+    }
 }

@@ -44,4 +44,17 @@ public class ScannedDocument {
         this.scannedDate = scannedDate;
         this.deliveryDate = deliveryDate;
     }
+
+    @Override
+    public String toString() {
+        return "ScannedDocument{"
+            + "type=" + type
+            + ", subtype='" + subtype + '\''
+            + ", documentUrl=" + documentUrl
+            + ", controlNumber='" + controlNumber + '\''
+            + ", fileName='" + fileName + '\''
+            + ", scannedDate=" + scannedDate
+            + ", deliveryDate=" + deliveryDate
+            + '}';
+    }
 }
