@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.envelopehandlers;
 import com.azure.core.util.BinaryData;
 import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
 import com.azure.messaging.servicebus.ServiceBusReceivedMessageContext;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.MappingBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +14,7 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam.GetDocumentHashResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeMessageProcessor;
@@ -22,6 +25,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
+import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
@@ -46,6 +50,7 @@ class SupplementaryEvidenceCreatorTest {
         "servicebus/message/supplementary-evidence-example.json"
     );
     private static final String MOCK_RESPONSE = fileContentAsString("ccd/response/sample-case.json");
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Mock
     private ServiceBusReceivedMessageContext messageContext;
@@ -72,12 +77,13 @@ class SupplementaryEvidenceCreatorTest {
     private static final String ELASTICSEARCH_EMPTY_RESPONSE = "{\"total\": 0,\"cases\": []}";
 
     @BeforeEach
-    void before() {
+    void before() throws JsonProcessingException {
         WireMock.reset();
         givenThat(get(GET_CASE_URL).willReturn(aResponse().withBody(MOCK_RESPONSE)));
         given(messageContext.getMessage()).willReturn(message);
         given(message.getBody()).willReturn(BinaryData.fromString(MOCK_MESSAGE));
 
+        mockCdamHash("ee69aee8-1a33-40dd-9af9-d90da1b104babc", "hashtoken-s332aasaasasa31221");
     }
 
     @DisplayName("Should call ccd to attach supplementary evidence for caseworker")
@@ -168,5 +174,14 @@ class SupplementaryEvidenceCreatorTest {
         return get(CREATE_EXCEPTION_START_EVENT_URL)
             .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
             .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(MOCKED_S2S_TOKEN_SIG));
+    }
+
+    private void mockCdamHash(String documentUuid, String hashToken) throws JsonProcessingException {
+        givenThat(
+            get("/cases/documents/" + documentUuid + "/token")
+                .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
+                .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(MOCKED_S2S_TOKEN_SIG))
+                .willReturn(okJson(MAPPER.writeValueAsString(new GetDocumentHashResponse(hashToken))))
+        );
     }
 }

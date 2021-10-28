@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.envelopehandlers;
 import com.azure.core.util.BinaryData;
 import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
 import com.azure.messaging.servicebus.ServiceBusReceivedMessageContext;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,6 +13,7 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam.GetDocumentHashResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeMessageProcessor;
@@ -18,12 +21,15 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.env
 import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
+import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -46,6 +52,14 @@ class ExceptionRecordCreationTest {
 
     private static final String ELASTICSEARCH_EMPTY_RESPONSE = "{\"total\": 0,\"cases\": []}";
 
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
+
+    // see WireMock mapping json files
+    private static final String MOCKED_IDAM_TOKEN_SIG = "q6hDG0Z1Qbinwtl8TgeDrAVV0LlCTRtbQqBYoMjd03k";
+    private static final String MOCKED_S2S_TOKEN_SIG =
+        "X1-LdZAd5YgGFP16-dQrpqEICqRmcu1zL_zeCLyUqMjb5DVx7xoU-r8yXHfgd4tmmjGqbsBz_kLqgu8yruSbtg";
+
     @Mock
     private ServiceBusReceivedMessageContext messageContext;
 
@@ -56,7 +70,7 @@ class ExceptionRecordCreationTest {
     private EnvelopeMessageProcessor envelopeMessageProcessor;
 
     @BeforeEach
-    void before() {
+    void before() throws JsonProcessingException {
         givenThat(get(GET_CASE_URL).willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())));
 
         givenThat(get(CASE_EVENT_TRIGGER_START_URL).willReturn(aResponse().withBody(
@@ -70,6 +84,9 @@ class ExceptionRecordCreationTest {
         givenThat(post(EXCEPTION_RECORD_SEARCH_URL).willReturn(
             aResponse().withBody(ELASTICSEARCH_EMPTY_RESPONSE)
         ));
+
+        mockCdamHash("ee69aee8-1a33-40dd-9af9-d90da1b104babc", "token-sF332Fasa31221");
+
     }
 
     @DisplayName("Should create exception record for supplementary evidence when case record is not found")
@@ -173,4 +190,12 @@ class ExceptionRecordCreationTest {
             });
     }
 
+    private void mockCdamHash(String documentUuid, String hashToken) throws JsonProcessingException {
+        givenThat(
+            get("/cases/documents/" + documentUuid + "/token")
+                .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
+                .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(MOCKED_S2S_TOKEN_SIG))
+                .willReturn(okJson(MAPPER.writeValueAsString(new GetDocumentHashResponse(hashToken))))
+        );
+    }
 }
