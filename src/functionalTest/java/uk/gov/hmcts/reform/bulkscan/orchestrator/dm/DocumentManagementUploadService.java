@@ -21,7 +21,7 @@ public class DocumentManagementUploadService {
 
     private static final Logger log = LoggerFactory.getLogger(DocumentManagementUploadService.class);
 
-    // needs `case-document-am-client-api` env var
+    // needs `case_document_am.url` env var
     private final CaseDocumentClientApi documentUploadClientApi;
 
     private final CcdAuthenticatorFactory ccdAuthenticatorFactory;
