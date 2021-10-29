@@ -60,7 +60,7 @@ public class CaseDataUpdater {
                 .map(doc -> {
                     if (exceptionRecordDcns.contains(doc.controlNumber)) {
                         // set exceptionReference if the document received with the exception record
-                        return getScannedDocument(
+                        return getScannedDocumentInAMap(
                             doc,
                             exceptionRecord.poBoxJurisdiction,
                             getDocumentUuid(doc.url.documentUrl),
@@ -98,7 +98,7 @@ public class CaseDataUpdater {
                     if ((document = envelopeDocs.get(doc.controlNumber)) != null) {
                         // set document hash if the document received with the envelope
                         log.info("Set document hash for DCN {}", document.controlNumber);
-                        return getScannedDocument(
+                        return getScannedDocumentInAMap(
                             doc,
                             envelope.jurisdiction,
                             document.uuid,
@@ -141,7 +141,7 @@ public class CaseDataUpdater {
         return updatedCaseData;
     }
 
-    private Map<String, ScannedDocument> getScannedDocument(
+    private Map<String, ScannedDocument> getScannedDocumentInAMap(
         ScannedDocument doc,
         String poBoxJurisdiction,
         String documentUuid,
