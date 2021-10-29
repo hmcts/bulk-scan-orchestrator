@@ -23,7 +23,6 @@ import java.util.Map;
 
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
-
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.util.Util.getDocumentUuid;
 
 @Service
