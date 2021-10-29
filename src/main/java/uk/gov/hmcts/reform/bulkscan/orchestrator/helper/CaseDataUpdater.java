@@ -66,7 +66,8 @@ public class CaseDataUpdater {
                             doc.type,
                             doc.subtype,
                             doc.scannedDate,
-                            new CcdDocument(doc.url.documentUrl,
+                            new CcdDocument(
+                                doc.url.documentUrl,
                                 cdamApiClient.getDocumentHash(
                                     exceptionRecord.poBoxJurisdiction,
                                     getDocumentUuid(doc.url.documentUrl)
