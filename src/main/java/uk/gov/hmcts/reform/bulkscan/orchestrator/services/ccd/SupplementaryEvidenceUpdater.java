@@ -17,6 +17,7 @@ import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventSummaryCreator.createEventSummary;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.EVIDENCE_HANDLED;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SCANNED_DOCUMENTS;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.util.Util.getDocumentUuid;
 
 @Component
 public class SupplementaryEvidenceUpdater {
@@ -148,10 +149,4 @@ public class SupplementaryEvidenceUpdater {
             })
             .collect(toList());
     }
-
-
-    private String getDocumentUuid(String documentUrl) {
-        return documentUrl.substring(documentUrl.lastIndexOf("/") + 1);
-    }
-
 }
