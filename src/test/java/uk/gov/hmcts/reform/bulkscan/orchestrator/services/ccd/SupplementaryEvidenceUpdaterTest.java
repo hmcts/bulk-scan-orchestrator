@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam.CdamApiClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
@@ -23,7 +24,6 @@ import java.util.Map;
 import static java.time.LocalDateTime.now;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -47,6 +47,9 @@ class SupplementaryEvidenceUpdaterTest {
     @Mock
     private AttachScannedDocumentsValidator scannedDocumentsValidator;
 
+    @Mock
+    private CdamApiClient cdamApiClient;
+
     private SupplementaryEvidenceUpdater supplementaryEvidenceUpdater;
 
     private ExceptionRecord exceptionRecord;
@@ -68,7 +71,8 @@ class SupplementaryEvidenceUpdaterTest {
     public void setUp() {
         supplementaryEvidenceUpdater = new SupplementaryEvidenceUpdater(
             ccdApi,
-            scannedDocumentsValidator
+            scannedDocumentsValidator,
+            cdamApiClient
         );
 
         exceptionRecord = getExceptionRecord();
@@ -95,8 +99,15 @@ class SupplementaryEvidenceUpdaterTest {
 
         List<Map<String, Object>> exceptionRecordDocuments = new ArrayList<>();
         Map<String, Object> doc1 = new HashMap<>();
-        doc1.put(VALUE, singletonMap(EXCEPTION_RECORD_REFERENCE, CASE_REF));
+        Map<String, Object> docUrl = new HashMap<>();
+        docUrl.put("document_url", "http://localhost/uuid1");
+        doc1.put(VALUE, Map.of(EXCEPTION_RECORD_REFERENCE, CASE_REF, "url", docUrl));
+
         exceptionRecordDocuments.add(doc1);
+
+        var hashToken1 = "321hhjRETE31321dsds";
+        given(cdamApiClient.getDocumentHash(JURISDICTION, "uuid1"))
+            .willReturn(hashToken1);
 
         AttachToCaseEventData callBackEvent = getCallbackEvent(exceptionRecordDocuments);
 

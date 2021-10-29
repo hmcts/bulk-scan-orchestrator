@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam.CdamApiClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.AttachScannedDocumentsValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -23,13 +24,16 @@ public class SupplementaryEvidenceUpdater {
 
     private final CcdApi ccdApi;
     private final AttachScannedDocumentsValidator scannedDocumentsValidator;
+    private final CdamApiClient cdamApiClient;
 
     public SupplementaryEvidenceUpdater(
         CcdApi ccdApi,
-        AttachScannedDocumentsValidator scannedDocumentsValidator
+        AttachScannedDocumentsValidator scannedDocumentsValidator,
+        CdamApiClient cdamApiClient
     ) {
         this.ccdApi = ccdApi;
         this.scannedDocumentsValidator = scannedDocumentsValidator;
+        this.cdamApiClient = cdamApiClient;
     }
 
     public boolean updateSupplementaryEvidence(
@@ -54,10 +58,13 @@ public class SupplementaryEvidenceUpdater {
         );
 
         if (!documentsToAttach.isEmpty()) {
-            List<Map<String, Object>> newCaseDocuments = attachExceptionRecordReference(
+            List<Map<String, Object>> newCaseDocuments = amendScanDocs(
                 documentsToAttach,
-                callBackEvent.exceptionRecordId
+                callBackEvent.exceptionRecordId,
+                callBackEvent.exceptionRecordJurisdiction
             );
+
+            log.info("Update SupplementaryEvidence newCaseDocuments {}", newCaseDocuments);
 
             StartEventResponse ccdStartEvent =
                 ccdApi.startAttachScannedDocs(targetCase, callBackEvent.idamToken, callBackEvent.userId);
@@ -99,9 +106,10 @@ public class SupplementaryEvidenceUpdater {
     }
 
     @SuppressWarnings("unchecked")
-    private List<Map<String, Object>> attachExceptionRecordReference(
+    private List<Map<String, Object>> amendScanDocs(
         List<Map<String, Object>> exceptionDocuments,
-        Long exceptionRecordReference
+        Long exceptionRecordReference,
+        String jurisdiction
     ) {
         List<String> exceptionDocumentsDcns = exceptionDocuments
             .stream()
@@ -124,9 +132,26 @@ public class SupplementaryEvidenceUpdater {
                     String.valueOf(exceptionRecordReference)
                 );
 
+                Map url = (Map) copiedDocumentContent.get("url");
+                String documentUrl = (String) url.get("document_url");
+                String documentUuid = getDocumentUuid(documentUrl);
+                log.info(
+                    "Call back attach supplemantary evidence to case,jurisdiction {}, exception, {},uuid {}",
+                    jurisdiction,
+                    exceptionRecordReference,
+                    documentUuid
+                );
+                String documentHash = cdamApiClient.getDocumentHash(jurisdiction, documentUuid);
+                url.put("document_hash", documentHash);
+
                 return Map.<String, Object>of("value", copiedDocumentContent);
             })
             .collect(toList());
+    }
+
+
+    private String getDocumentUuid(String documentUrl) {
+        return documentUrl.substring(documentUrl.lastIndexOf("/") + 1);
     }
 
 }

@@ -121,7 +121,7 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
             .then()
             .statusCode(200);
 
-        verifySuccessResponse(response, callbackRequest);
+        verifySuccessResponse(response, callbackRequest, false);
         verify(exactly(0), startEventRequest());
         verify(exactly(0), submittedScannedRecords());
     }

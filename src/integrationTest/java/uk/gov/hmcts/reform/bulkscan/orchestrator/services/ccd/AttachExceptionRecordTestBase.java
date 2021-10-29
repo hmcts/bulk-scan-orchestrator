@@ -18,6 +18,7 @@ import io.restassured.response.ValidatableResponse;
 import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.web.server.LocalServerPort;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam.GetDocumentHashResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -43,6 +44,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static io.restassured.http.ContentType.JSON;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -88,13 +90,15 @@ public class AttachExceptionRecordTestBase {
     private static final String EXCEPTION_RECORD_FILENAME = "record.pdf";
     static final String EXCEPTION_RECORD_DOCUMENT_NUMBER = "654321";
     static final String EXCEPTION_RECORD_DOCUMENT_UUID = "UUID-1";
+    static final String EXCEPTION_RECORD_DOCUMENT_HASH = "UUID-1-sasdas-sdada";
 
     private static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
     private static final String RESPONSE_FIELD_DATA = "data";
     private static final String ATTACH_TO_CASE_REFERENCE_FIELD_NAME = "attachToCaseReference";
+    private static final String SCANNED_DOCUMENTS_FIELD_NAME = "scannedDocuments";
 
     private static final Map<String, Object> CASE_DATA = ImmutableMap.of(
-        "scannedDocuments", ImmutableList.of(EXISTING_DOC)
+        SCANNED_DOCUMENTS_FIELD_NAME, ImmutableList.of(EXISTING_DOC)
     );
 
     private static final CaseDetails CASE_DETAILS = CaseDetails.builder()
@@ -132,7 +136,7 @@ public class AttachExceptionRecordTestBase {
                 MAPPER.writeValueAsString(exceptionRecord(null))
             )
         );
-
+        mockCdamHash(EXCEPTION_RECORD_DOCUMENT_UUID, EXCEPTION_RECORD_DOCUMENT_HASH);
         RestAssured.requestSpecification = new RequestSpecBuilder()
             .setPort(applicationPort)
             .setContentType(JSON)
@@ -194,6 +198,15 @@ public class AttachExceptionRecordTestBase {
         ValidatableResponse response,
         CallbackRequest request
     ) {
+        verifySuccessResponse(response, request, true);
+    }
+
+    @SuppressWarnings("unchecked")
+    void verifySuccessResponse(
+        ValidatableResponse response,
+        CallbackRequest request,
+        boolean hashTokenValidation
+    ) {
         JsonPath responseJson = response.extract().jsonPath();
 
         assertThat(responseJson.getList(RESPONSE_FIELD_ERRORS)).isNullOrEmpty();
@@ -205,6 +218,35 @@ public class AttachExceptionRecordTestBase {
         assertThat(responseData.get(DISPLAY_WARNINGS)).isEqualTo(NO);
         assertThat(responseData.get(OCR_DATA_VALIDATION_WARNINGS)).isEqualTo(emptyList());
 
+        List<Map> expectedDocList = (List)responseData.get(SCANNED_DOCUMENTS_FIELD_NAME);
+
+        if (hashTokenValidation) {
+
+            Map<String, String> documentHashMap =
+                expectedDocList
+                    .stream()
+                    .collect(
+                        toMap(
+                            obj ->
+                                ((String) (((Map<String, Object>)
+                                    ((Map<String, Object>) obj).get("value")))
+                                    .get("controlNumber")),
+                            obj -> {
+                                String hash = (String) (((Map<String, Object>) (((Map<String, Object>)
+                                    (((Map<String, Object>) obj).get("value")))
+                                    .get("url"))
+                                )
+                                    .remove("document_hash")
+
+                                );
+                                return hash == null ? "" : hash;
+                            }
+                        )
+                    );
+
+            assertThat(documentHashMap.get(EXCEPTION_RECORD_DOCUMENT_NUMBER)).isEqualTo(EXCEPTION_RECORD_DOCUMENT_HASH);
+
+        }
         assertMapsAreEqualIgnoringFields(
             responseData,
             request.getCaseDetails().getData(),
@@ -254,6 +296,15 @@ public class AttachExceptionRecordTestBase {
                 .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
                 .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(MOCKED_S2S_TOKEN_SIG))
                 .willReturn(responseBuilder)
+        );
+    }
+
+    void mockCdamHash(String documentUuid, String hashToken) throws JsonProcessingException {
+        givenThat(
+            get("/cases/documents/" + documentUuid + "/token")
+                .withHeader(AUTHORIZATION, containing(MOCKED_IDAM_TOKEN_SIG))
+                .withHeader(SERVICE_AUTHORIZATION_HEADER, containing(MOCKED_S2S_TOKEN_SIG))
+                .willReturn(okJson(MAPPER.writeValueAsString(new GetDocumentHashResponse(hashToken))))
         );
     }
 
