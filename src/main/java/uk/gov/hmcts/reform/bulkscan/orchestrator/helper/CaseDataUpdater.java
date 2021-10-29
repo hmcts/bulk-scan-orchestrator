@@ -25,6 +25,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SCANNED_DOCUMENTS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ServiceCaseFields.BULK_SCAN_ENVELOPES;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.util.Util.getDocumentUuid;
 
 @Component
 public class CaseDataUpdater {
@@ -68,7 +69,7 @@ public class CaseDataUpdater {
                             new CcdDocument(doc.url.documentUrl,
                                 cdamApiClient.getDocumentHash(
                                     exceptionRecord.poBoxJurisdiction,
-                                    doc.url.documentUrl.substring(doc.url.documentUrl.lastIndexOf("/") + 1)
+                                    getDocumentUuid(doc.url.documentUrl)
                                 )
                             ),
                             doc.deliveryDate,
