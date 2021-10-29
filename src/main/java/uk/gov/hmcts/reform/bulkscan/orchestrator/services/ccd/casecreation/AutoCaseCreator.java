@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.EnvelopeReference;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.util.Util;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 
@@ -23,6 +24,8 @@ import java.util.Map;
 
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
+
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.util.Util.getDocumentUuid;
 
 @Service
 public class AutoCaseCreator {
@@ -112,10 +115,6 @@ public class AutoCaseCreator {
         }
 
         return caseCreationDetails;
-    }
-
-    private String getDocumentUuid(String documentUrl) {
-        return documentUrl.substring(documentUrl.lastIndexOf("/") + 1);
     }
 
     private CaseCreationResult createCaseInCcd(
