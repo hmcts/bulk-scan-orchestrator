@@ -8,9 +8,11 @@ import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
-import uk.gov.hmcts.reform.document.DocumentUploadClientApi;
-import uk.gov.hmcts.reform.document.domain.UploadResponse;
-import uk.gov.hmcts.reform.document.utils.InMemoryMultipartFile;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClientApi;
+import uk.gov.hmcts.reform.ccd.document.am.model.Classification;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentUploadRequest;
+import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
+import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 
 import static java.util.Collections.singletonList;
 
@@ -19,7 +21,8 @@ public class DocumentManagementUploadService {
 
     private static final Logger log = LoggerFactory.getLogger(DocumentManagementUploadService.class);
 
-    private final DocumentUploadClientApi documentUploadClientApi;
+    // needs `case-document-am-client-api` env var
+    private final CaseDocumentClientApi documentUploadClientApi;
 
     private final CcdAuthenticatorFactory ccdAuthenticatorFactory;
 
@@ -27,7 +30,7 @@ public class DocumentManagementUploadService {
 
     DocumentManagementUploadService(
         CcdAuthenticatorFactory ccdAuthenticatorFactory,
-        DocumentUploadClientApi documentUploadClientApi
+        CaseDocumentClientApi documentUploadClientApi
     ) {
         this.ccdAuthenticatorFactory = ccdAuthenticatorFactory;
         this.documentUploadClientApi = documentUploadClientApi;
@@ -49,16 +52,20 @@ public class DocumentManagementUploadService {
 
         CcdAuthenticator authenticator = ccdAuthenticatorFactory.createForJurisdiction(SampleData.JURSIDICTION);
 
-        UploadResponse uploadResponse = documentUploadClientApi.upload(
+        DocumentUploadRequest uploadRequest = new DocumentUploadRequest(
+            Classification.RESTRICTED.toString(),
+            "Bulkscan_ExceptionRecord",
+            "BULKSCAN",
+            singletonList(file)
+        );
+        UploadResponse uploadResponse = documentUploadClientApi.uploadDocuments(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
-            authenticator.getUserId(),
-            singletonList(file)
+            uploadRequest
         );
         log.info("{} uploaded to DM store", displayName);
 
         return uploadResponse
-            .getEmbedded()
             .getDocuments()
             .get(0)
             .links
