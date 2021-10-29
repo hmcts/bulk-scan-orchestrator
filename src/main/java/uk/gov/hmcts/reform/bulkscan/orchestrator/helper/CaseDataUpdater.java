@@ -61,10 +61,10 @@ public class CaseDataUpdater {
                     if (exceptionRecordDcns.contains(doc.controlNumber)) {
                         // set exceptionReference if the document received with the exception record
                         return getScannedDocument(
-                                doc,
-                                exceptionRecord.poBoxJurisdiction,
-                                getDocumentUuid(doc.url.documentUrl),
-                                exceptionRecord.id
+                            doc,
+                            exceptionRecord.poBoxJurisdiction,
+                            getDocumentUuid(doc.url.documentUrl),
+                            exceptionRecord.id
                         );
                     } else {
                         // do not update the document if it was received with some previous exception record
@@ -99,10 +99,10 @@ public class CaseDataUpdater {
                         // set document hash if the document received with the envelope
                         log.info("Set document hash for DCN {}", document.controlNumber);
                         return getScannedDocument(
-                                doc,
-                                envelope.jurisdiction,
-                                document.uuid,
-                                null
+                            doc,
+                            envelope.jurisdiction,
+                            document.uuid,
+                            null
                         );
                     } else {
                         // do not update the document if it was received with some previous exception record
