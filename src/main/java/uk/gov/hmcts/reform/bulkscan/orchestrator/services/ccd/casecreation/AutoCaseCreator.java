@@ -23,6 +23,7 @@ import java.util.Map;
 
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.util.Util.getDocumentUuid;
 
 @Service
 public class AutoCaseCreator {
@@ -112,10 +113,6 @@ public class AutoCaseCreator {
         }
 
         return caseCreationDetails;
-    }
-
-    private String getDocumentUuid(String documentUrl) {
-        return documentUrl.substring(documentUrl.lastIndexOf("/") + 1);
     }
 
     private CaseCreationResult createCaseInCcd(
