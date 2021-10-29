@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.EnvelopeReference;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.util.Util;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 
