@@ -48,7 +48,7 @@ idam:
     secret: ${S2S_SECRET:AAAAAAAAAAAAAAAA}
     name:   ${S2S_NAME:bulk_scan_orchestrator}
     processor:
-      name: ${PROCESSOR_S2S_NAME:bulk_scan_processor}
+      name: ${PROCESSOR_S2S_NAME:bulk_scan_processor_tests}
       secret: ${PROCESSOR_S2S_SECRET:AAAAAAAAAAAAAAAA}
   api:
     url: http://localhost:8080

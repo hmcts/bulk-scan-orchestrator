@@ -17,7 +17,7 @@ GradleBuilder builder = new GradleBuilder(this, product)
 def nonPrSecrets = [
   's2s-${env}': [
     secret('microservicekey-bulk-scan-orchestrator', 'S2S_SECRET'),
-    secret('microservicekey-bulk-scan-processor', 'PROCESSOR_S2S_SECRET')
+    secret('microservicekey-bulk-scan-processor-tests', 'PROCESSOR_S2S_SECRET')
   ],
   'bulk-scan-${env}': [
     secret('idam-users-bulkscan-username', 'IDAM_USER_NAME'),
@@ -31,7 +31,7 @@ def nonPrSecrets = [
 def prSecrets = [
   's2s-${env}': [
     secret('microservicekey-bulk-scan-orchestrator', 'S2S_SECRET'),
-    secret('microservicekey-bulk-scan-processor', 'PROCESSOR_S2S_SECRET')
+    secret('microservicekey-bulk-scan-processor-tests', 'PROCESSOR_S2S_SECRET')
   ],
   'bulk-scan-${env}': [
     secret('idam-users-bulkscan-username', 'IDAM_USER_NAME'),
@@ -53,7 +53,7 @@ withPipeline(type, product, component) {
   after('akschartsinstall'){
     // Vars needed for AKS testing
     env.S2S_NAME = 'bulk_scan_orchestrator'
-    env.PROCESSOR_S2S_NAME = 'bulk_scan_processor'
+    env.PROCESSOR_S2S_NAME = 'bulk_scan_processor_tests'
     env.S2S_URL = 'http://rpe-service-auth-provider-aat.service.core-compute-aat.internal'
     env.DOCUMENT_MANAGEMENT_URL = 'http://dm-store-aat.service.core-compute-aat.internal'
     env.CORE_CASE_DATA_API_URL = 'http://ccd-data-store-api-aat.service.core-compute-aat.internal'
