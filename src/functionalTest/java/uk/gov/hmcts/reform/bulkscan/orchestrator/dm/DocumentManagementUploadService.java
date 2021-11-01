@@ -57,8 +57,8 @@ public class DocumentManagementUploadService {
         String s2sToken = s2sTokenGenerator.generate();
 
         UploadResponse uploadResponse = documentUploadClientApi.upload(
-            s2sToken,
             idamCredentials.accessToken,
+            s2sToken,
             idamCredentials.userId,
             singletonList(file)
         );
