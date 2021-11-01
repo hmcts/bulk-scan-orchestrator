@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.idam.client.IdamApi;
 
 @Configuration
 @EnableFeignClients(clients = IdamApi.class)
-public class AuthConfig {
+public class ProcessorAuthConfig {
 
     @Bean("processor-s2s-auth")
     public AuthTokenGenerator authTokenGenerator(
