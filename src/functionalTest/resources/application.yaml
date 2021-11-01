@@ -48,7 +48,7 @@ idam:
     secret: ${S2S_SECRET:AAAAAAAAAAAAAAAA}
     name:   ${S2S_NAME:bulk_scan_orchestrator}
     processor:
-      name: ${PROCESSOR_S2S_NAME:bulk_scan_processor}
+      name: ${PROCESSOR_S2S_NAME:bulk_scan_processor_tests}
       secret: ${PROCESSOR_S2S_SECRET:AAAAAAAAAAAAAAAA}
   api:
     url: http://localhost:8080
@@ -62,8 +62,6 @@ idam:
     bulkscan:
       username: ${IDAM_USER_NAME:bulkscan+ccd@gmail.com}
       password: ${IDAM_USER_PASSWORD:Password12}
-
-
 
 document_management:
   url: http://dm-store:4460
