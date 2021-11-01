@@ -2,12 +2,14 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.dm;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticatorFactory;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.cache.CachedIdamCredential;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.cache.IdamCachedClient;
 import uk.gov.hmcts.reform.document.DocumentUploadClientApi;
 import uk.gov.hmcts.reform.document.domain.UploadResponse;
 import uk.gov.hmcts.reform.document.utils.InMemoryMultipartFile;
@@ -21,16 +23,20 @@ public class DocumentManagementUploadService {
 
     private final DocumentUploadClientApi documentUploadClientApi;
 
-    private final CcdAuthenticatorFactory ccdAuthenticatorFactory;
+    private final AuthTokenGenerator s2sTokenGenerator;
+    private final IdamCachedClient idamCachedClient;
 
     private static final String FILES_NAME = "files";
 
     DocumentManagementUploadService(
-        CcdAuthenticatorFactory ccdAuthenticatorFactory,
-        DocumentUploadClientApi documentUploadClientApi
+        @Qualifier("processor-s2s-auth") AuthTokenGenerator s2sTokenGenerator,
+        DocumentUploadClientApi documentUploadClientApi,
+        IdamCachedClient idamCachedClient
     ) {
-        this.ccdAuthenticatorFactory = ccdAuthenticatorFactory;
+        this.s2sTokenGenerator = s2sTokenGenerator;
         this.documentUploadClientApi = documentUploadClientApi;
+        this.idamCachedClient = idamCachedClient;
+
     }
 
     /**
@@ -47,12 +53,13 @@ public class DocumentManagementUploadService {
             SampleData.fileContentAsBytes(filePath)
         );
 
-        CcdAuthenticator authenticator = ccdAuthenticatorFactory.createForJurisdiction(SampleData.JURSIDICTION);
+        CachedIdamCredential idamCredentials = idamCachedClient.getIdamCredentials(SampleData.JURSIDICTION);
+        String s2sToken = s2sTokenGenerator.generate();
 
         UploadResponse uploadResponse = documentUploadClientApi.upload(
-            authenticator.getUserToken(),
-            authenticator.getServiceToken(),
-            authenticator.getUserId(),
+            idamCredentials.accessToken,
+            s2sToken,
+            idamCredentials.userId,
             singletonList(file)
         );
         log.info("{} uploaded to DM store", displayName);
