@@ -25,6 +25,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SCANNED_DOCUMENTS;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ServiceCaseFields.BULK_SCAN_ENVELOPES;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.util.Util.getDocumentUuid;
 
 @Component
 public class CaseDataUpdater {
@@ -59,21 +60,12 @@ public class CaseDataUpdater {
                 .map(doc -> {
                     if (exceptionRecordDcns.contains(doc.controlNumber)) {
                         // set exceptionReference if the document received with the exception record
-                        return Map.of("value", new ScannedDocument(
-                            doc.fileName,
-                            doc.controlNumber,
-                            doc.type,
-                            doc.subtype,
-                            doc.scannedDate,
-                            new CcdDocument(doc.url.documentUrl,
-                                cdamApiClient.getDocumentHash(
-                                    exceptionRecord.poBoxJurisdiction,
-                                    doc.url.documentUrl.substring(doc.url.documentUrl.lastIndexOf("/") + 1)
-                                )
-                            ),
-                            doc.deliveryDate,
+                        return getScannedDocumentWithDocumentHash(
+                            doc,
+                            exceptionRecord.poBoxJurisdiction,
+                            getDocumentUuid(doc.url.documentUrl),
                             exceptionRecord.id
-                        ));
+                        );
                     } else {
                         // do not update the document if it was received with some previous exception record
                         return Map.of("value", doc);
@@ -102,25 +94,16 @@ public class CaseDataUpdater {
             getScannedDocuments(transformedCaseData)
                 .stream()
                 .map(doc -> {
-                    Document document;
-                    if ((document = envelopeDocs.get(doc.controlNumber)) != null) {
+                    Document document = envelopeDocs.get(doc.controlNumber);
+                    if (document != null) {
                         // set document hash if the document received with the envelope
                         log.info("Set document hash for DCN {}", document.controlNumber);
-                        return Map.of("value", new ScannedDocument(
-                            doc.fileName,
-                            doc.controlNumber,
-                            doc.type,
-                            doc.subtype,
-                            doc.scannedDate,
-                            new CcdDocument(doc.url.documentUrl,
-                                cdamApiClient.getDocumentHash(
-                                    envelope.jurisdiction,
-                                    document.uuid
-                                )
-                            ),
-                            doc.deliveryDate,
+                        return getScannedDocumentWithDocumentHash(
+                            doc,
+                            envelope.jurisdiction,
+                            document.uuid,
                             null
-                        ));
+                        );
                     } else {
                         // do not update the document if it was received with some previous exception record
                         return Map.of("value", doc);
@@ -158,6 +141,29 @@ public class CaseDataUpdater {
         return updatedCaseData;
     }
 
+    private Map<String, ScannedDocument> getScannedDocumentWithDocumentHash(
+        ScannedDocument doc,
+        String poBoxJurisdiction,
+        String documentUuid,
+        String exceptionRecordId
+    ) {
+        return Map.of("value", new ScannedDocument(
+            doc.fileName,
+            doc.controlNumber,
+            doc.type,
+            doc.subtype,
+            doc.scannedDate,
+            new CcdDocument(
+                doc.url.documentUrl,
+                cdamApiClient.getDocumentHash(
+                    poBoxJurisdiction,
+                    documentUuid
+                )
+            ),
+            doc.deliveryDate,
+            exceptionRecordId
+        ));
+    }
 
     @SuppressWarnings("unchecked")
     private List<ScannedDocument> getScannedDocuments(Map<String, Object> caseData) {
