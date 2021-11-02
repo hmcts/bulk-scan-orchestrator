@@ -263,4 +263,4 @@ callback:
 cdam:
   api:
     url: ${CDAM_URL}
-    enabled: false
+    enabled: true
