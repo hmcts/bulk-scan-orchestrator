@@ -10,13 +10,10 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.shared.DocumentMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.util.Util.getLocalDateTime;
 
 @Service
 public class CaseUpdateRequestCreator {
@@ -98,8 +95,8 @@ public class CaseUpdateRequestCreator {
             envelope.poBox,
             envelope.jurisdiction,
             envelope.formType,
-            toLocalDateTime(envelope.deliveryDate),
-            toLocalDateTime(envelope.openingDate),
+            getLocalDateTime(envelope.deliveryDate),
+            getLocalDateTime(envelope.openingDate),
             envelope.documents.stream().map(documentMapper::toScannedDoc).collect(Collectors.toList()),
             envelope
                 .ocrData
@@ -107,13 +104,5 @@ public class CaseUpdateRequestCreator {
                 .map(field -> new OcrDataField(field.name, field.value))
                 .collect(toList())
         );
-    }
-
-    private LocalDateTime toLocalDateTime(Instant instant) {
-        if (instant == null) {
-            return null;
-        } else {
-            return ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDateTime();
-        }
     }
 }

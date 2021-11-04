@@ -84,10 +84,6 @@ class ExceptionRecordMapperTest {
                     getScannedDocumentCcdCollectionElement(envelope.documents.get(1))
                 )
             );
-        given(docMapper.getLocalDateTime(envelope.deliveryDate))
-                .willReturn(getLocalDateTime(envelope.deliveryDate));
-        given(docMapper.getLocalDateTime(envelope.openingDate))
-                .willReturn(getLocalDateTime(envelope.openingDate));
 
         // when
         ExceptionRecord exceptionRecord = mapper.mapEnvelope(envelope);

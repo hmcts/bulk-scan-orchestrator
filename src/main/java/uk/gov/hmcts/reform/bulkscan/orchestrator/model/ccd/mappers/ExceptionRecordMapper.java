@@ -22,6 +22,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues.YES;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.util.Util.getLocalDateTime;
 
 @Component
 public class ExceptionRecordMapper {
@@ -51,8 +52,8 @@ public class ExceptionRecordMapper {
             envelope.poBox,
             envelope.jurisdiction,
             envelope.formType,
-            docMapper.getLocalDateTime(envelope.deliveryDate),
-            docMapper.getLocalDateTime(envelope.openingDate),
+            getLocalDateTime(envelope.deliveryDate),
+            getLocalDateTime(envelope.openingDate),
             docMapper.mapDocuments(List.of(), envelope.documents, envelope.deliveryDate, envelope.jurisdiction),
             mapOcrData(envelope.ocrData),
             mapOcrDataWarnings(envelope.ocrDataValidationWarnings),

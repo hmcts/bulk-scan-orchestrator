@@ -7,10 +7,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUr
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.util.Util.getLocalDateTime;
 
 @Component
 public class DocumentMapper {
@@ -36,8 +33,8 @@ public class DocumentMapper {
                 documentUrl(doc),
                 doc.controlNumber,
                 doc.fileName,
-                toLocalDateTime(doc.scannedAt),
-                toLocalDateTime(doc.deliveryDate)
+                getLocalDateTime(doc.scannedAt),
+                getLocalDateTime(doc.deliveryDate)
             );
         }
     }
@@ -55,13 +52,5 @@ public class DocumentMapper {
             documentUrl + "/binary",
             doc.fileName
         );
-    }
-
-    private LocalDateTime toLocalDateTime(Instant instant) {
-        if (instant == null) {
-            return null;
-        } else {
-            return ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDateTime();
-        }
     }
 }
