@@ -40,4 +40,12 @@ public class CcdDocument {
         CcdDocument that = (CcdDocument) o;
         return Objects.equals(documentUrl, that.documentUrl);
     }
+
+    @Override
+    public String toString() {
+        return "CcdDocument{"
+            + "documentUrl='" + documentUrl + '\''
+            + ", documentHash='" + documentHash + '\''
+            + '}';
+    }
 }

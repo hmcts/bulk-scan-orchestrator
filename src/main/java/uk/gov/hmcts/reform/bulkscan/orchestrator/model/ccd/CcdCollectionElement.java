@@ -10,4 +10,11 @@ public class CcdCollectionElement<T> {
     public CcdCollectionElement(T value) {
         this.value = value;
     }
+
+    @Override
+    public String toString() {
+        return "CcdCollectionElement{"
+            + "value=" + value
+            + '}';
+    }
 }

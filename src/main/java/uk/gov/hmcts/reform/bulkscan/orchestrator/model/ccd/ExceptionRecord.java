@@ -105,4 +105,28 @@ public class ExceptionRecord {
         this.showEnvelopeLegacyCaseReference = showEnvelopeLegacyCaseReference;
         this.surname = surname;
     }
+
+    @Override
+    public String toString() {
+        return "ExceptionRecord{"
+            + "classification='" + classification + '\''
+            + ", poBox='" + poBox + '\''
+            + ", jurisdiction='" + jurisdiction + '\''
+            + ", formType='" + formType + '\''
+            + ", deliveryDate=" + deliveryDate
+            + ", openingDate=" + openingDate
+            + ", scannedDocuments=" + scannedDocuments
+            + ", ocrData=" + ocrData
+            + ", ocrDataValidationWarnings=" + ocrDataValidationWarnings
+            + ", envelopeId='" + envelopeId + '\''
+            + ", displayWarnings='" + displayWarnings + '\''
+            + ", awaitingPaymentDcnProcessing='" + awaitingPaymentDcnProcessing + '\''
+            + ", containsPayments='" + containsPayments + '\''
+            + ", envelopeCaseReference='" + envelopeCaseReference + '\''
+            + ", envelopeLegacyCaseReference='" + envelopeLegacyCaseReference + '\''
+            + ", showEnvelopeCaseReference='" + showEnvelopeCaseReference + '\''
+            + ", showEnvelopeLegacyCaseReference='" + showEnvelopeLegacyCaseReference + '\''
+            + ", surname='" + surname + '\''
+            + '}';
+    }
 }

@@ -61,4 +61,18 @@ public class ScannedDocument {
     public int hashCode() {
         return Objects.hash(fileName, controlNumber, type, scannedDate, url);
     }
+
+    @Override
+    public String toString() {
+        return "ScannedDocument{"
+            + "fileName='" + fileName + '\''
+            + ", controlNumber='" + controlNumber + '\''
+            + ", type='" + type + '\''
+            + ", subtype='" + subtype + '\''
+            + ", exceptionReference='" + exceptionReference + '\''
+            + ", scannedDate=" + scannedDate
+            + ", deliveryDate=" + deliveryDate
+            + ", url=" + url
+            + '}';
+    }
 }
