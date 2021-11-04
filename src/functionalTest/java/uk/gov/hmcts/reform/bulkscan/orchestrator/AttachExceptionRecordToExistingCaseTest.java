@@ -77,6 +77,7 @@ class AttachExceptionRecordToExistingCaseTest {
             dmUrl
         );
 
+        assertThat(dmUrl).isEqualTo("http://dm-smcklam-must");
         // when
         attachExceptionRecord(caseDetails, exceptionRecord, null);
 
