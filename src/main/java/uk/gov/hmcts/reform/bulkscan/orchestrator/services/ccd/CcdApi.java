@@ -270,7 +270,7 @@ public class CcdApi {
 
             CaseDataContent caseData = caseDataContentBuilder.apply(eventResponse);
 
-            log.info("createExceptionRecord caseData {}", caseData);
+            log.info("createExceptionRecord caseData----> {}", caseData.getData());
 
             return feignCcdApi.submitForCaseworker(
                 authenticator.getUserToken(),
@@ -312,6 +312,7 @@ public class CcdApi {
             log.info("Started event in CCD. Event: {}, case type: {}. {}", eventTypeId, caseTypeId, logContext);
 
             CaseDataContent caseData = caseDataContentBuilder.apply(eventResponse);
+            log.info("attachScannedDocs data ==> {}", caseData.getData());
 
             feignCcdApi.submitEventForCaseWorker(
                 authenticator.getUserToken(),

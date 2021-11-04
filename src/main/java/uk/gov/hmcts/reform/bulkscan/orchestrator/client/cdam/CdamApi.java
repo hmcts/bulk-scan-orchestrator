@@ -55,6 +55,8 @@ public class CdamApi {
         if (response == null) {
             throw new RuntimeException("Get Document Hash Response is null");
         }
+
+        log.info("Get hashtoken result {}", response.hashToken);
         return response.hashToken;
     }
 
