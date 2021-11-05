@@ -49,7 +49,7 @@ class FeignExceptionLoggerTest {
         // then
         var logParamCaptor = ArgumentCaptor.forClass(String.class);
 
-        verify(logger).debug(logParamCaptor.capture(), logParamCaptor.capture(), logParamCaptor.capture());
+        verify(logger).info(logParamCaptor.capture(), logParamCaptor.capture(), logParamCaptor.capture());
 
         assertThat(logParamCaptor.getAllValues())
             .hasSize(3)
