@@ -7,14 +7,11 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.req
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.util.Util.getLocalDateTime;
 
 @Service
 public class TransformationRequestCreator {
@@ -53,8 +50,8 @@ public class TransformationRequestCreator {
             envelope.jurisdiction,
             envelope.classification,
             envelope.formType,
-            toLocalDateTime(envelope.deliveryDate),
-            toLocalDateTime(envelope.openingDate),
+            getLocalDateTime(envelope.deliveryDate),
+            getLocalDateTime(envelope.openingDate),
             envelope.documents.stream().map(docMapper::toScannedDoc).collect(toList()),
             mapOcrDataFields(envelope.ocrData),
             true
@@ -72,14 +69,6 @@ public class TransformationRequestCreator {
                 .collect(toList());
         } else {
             return emptyList();
-        }
-    }
-
-    private LocalDateTime toLocalDateTime(Instant instant) {
-        if (instant == null) {
-            return null;
-        } else {
-            return ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDateTime();
         }
     }
 }
