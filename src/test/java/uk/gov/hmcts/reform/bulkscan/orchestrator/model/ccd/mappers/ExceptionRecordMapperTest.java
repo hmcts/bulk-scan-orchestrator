@@ -9,6 +9,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.shared.DocumentMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdDocument;
@@ -55,13 +56,13 @@ class ExceptionRecordMapperTest {
     private ServiceConfigItem serviceConfigItem;
 
     @Mock
-    private DocMapper docMapper;
+    private DocumentMapper documentMapper;
+
     @Captor
     private ArgumentCaptor<List<Document>> captor;
 
     @InjectMocks
     private ExceptionRecordMapper mapper;
-
 
     @Test
     void mapEnvelope_maps_all_fields_correctly() {
@@ -77,7 +78,7 @@ class ExceptionRecordMapperTest {
             asList("warning 1", "warning 2")
         );
 
-        given(docMapper.mapDocuments(anyList(), anyList(), any(Instant.class), anyString()))
+        given(documentMapper.mapToCcdScannedDocuments(anyList(), anyList(), any(Instant.class), anyString()))
             .willReturn(
                 asList(
                     getScannedDocumentCcdCollectionElement(envelope.documents.get(0)),
@@ -122,7 +123,7 @@ class ExceptionRecordMapperTest {
         assertThat(exceptionRecord.showEnvelopeLegacyCaseReference).isEqualTo("No"); // for "New Application"
         assertThat(exceptionRecord.surname).isEqualTo("surname1");
 
-        verify(docMapper).mapDocuments(
+        verify(documentMapper).mapToCcdScannedDocuments(
             eq(emptyList()),
             captor.capture(),
             any(Instant.class),
@@ -146,7 +147,7 @@ class ExceptionRecordMapperTest {
         // given
         Envelope envelope = envelope(2, null, emptyList(), emptyList());
 
-        given(docMapper.mapDocuments(anyList(), anyList(), any(Instant.class), anyString()))
+        given(documentMapper.mapToCcdScannedDocuments(anyList(), anyList(), any(Instant.class), anyString()))
             .willReturn(
                 asList(
                     getScannedDocumentCcdCollectionElement(envelope.documents.get(0)),
@@ -412,11 +413,5 @@ class ExceptionRecordMapperTest {
                         null
                 )
         );
-    }
-
-    public LocalDateTime getLocalDateTime(Instant instant) {
-        return instant == null
-                ? null
-                : ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDateTime();
     }
 }

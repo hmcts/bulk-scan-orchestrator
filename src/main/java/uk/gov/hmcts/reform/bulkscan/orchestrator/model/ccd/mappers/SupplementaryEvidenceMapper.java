@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.shared.DocumentMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.EnvelopeReference;
@@ -26,14 +27,14 @@ public class SupplementaryEvidenceMapper {
     private static final Logger log = LoggerFactory.getLogger(SupplementaryEvidenceMapper.class);
 
     private final EnvelopeReferenceHelper envelopeReferenceHelper;
-    private final DocMapper docMapper;
+    private final DocumentMapper documentMapper;
 
     public SupplementaryEvidenceMapper(
-            final EnvelopeReferenceHelper envelopeReferenceHelper,
-            DocMapper docMapper
+        final EnvelopeReferenceHelper envelopeReferenceHelper,
+        DocumentMapper documentMapper
     ) {
         this.envelopeReferenceHelper = envelopeReferenceHelper;
-        this.docMapper = docMapper;
+        this.documentMapper = documentMapper;
     }
 
     public SupplementaryEvidence map(
@@ -49,7 +50,7 @@ public class SupplementaryEvidenceMapper {
         List<CcdCollectionElement<EnvelopeReference>> updatedEnvelopeReferences =
             updateEnvelopeReferences(existingEnvelopeReferences, envelope);
 
-        var scannedDocuments = docMapper.mapDocuments(
+        var scannedDocuments = documentMapper.mapToCcdScannedDocuments(
             existingDocs,
             getDocsToAdd(existingDocs, envelope.documents),
             envelope.deliveryDate,

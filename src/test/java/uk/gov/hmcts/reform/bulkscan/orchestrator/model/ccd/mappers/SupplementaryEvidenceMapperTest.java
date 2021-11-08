@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.shared.DocumentMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.LoggerTestUtil;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
@@ -49,7 +50,7 @@ class SupplementaryEvidenceMapperTest {
     private EnvelopeReferenceHelper envelopeReferenceHelper;
 
     @Mock
-    private DocMapper docMapper;
+    private DocumentMapper documentMapper;
 
     private SupplementaryEvidenceMapper mapper;
     Instant deliveryDate = Instant.now();
@@ -60,7 +61,7 @@ class SupplementaryEvidenceMapperTest {
     void setUp() {
         mapper = new SupplementaryEvidenceMapper(
             envelopeReferenceHelper,
-                docMapper
+            documentMapper
         );
 
         loggingEvents = LoggerTestUtil.getListAppenderForClass(SupplementaryEvidenceMapper.class);
@@ -77,7 +78,7 @@ class SupplementaryEvidenceMapperTest {
         List<Document> existingDocs = asList(d1, d2);
         List<Document> envelopeDocs = asList(d3, d4);
 
-        given(docMapper.mapDocuments(anyList(), anyList(), any(Instant.class), anyString()))
+        given(documentMapper.mapToCcdScannedDocuments(anyList(), anyList(), any(Instant.class), anyString()))
             .willReturn(
                 asList(
                     getScannedDocumentCcdCollectionElement(d1),
@@ -131,7 +132,7 @@ class SupplementaryEvidenceMapperTest {
         List<Document> existingDocs = asList(d1, d2);
         List<Document> envelopeDocs = asList(d3, d4);
 
-        given(docMapper.mapDocuments(anyList(), anyList(), any(Instant.class), anyString()))
+        given(documentMapper.mapToCcdScannedDocuments(anyList(), anyList(), any(Instant.class), anyString()))
             .willReturn(
                 asList(
                     getScannedDocumentCcdCollectionElement(d1),
@@ -243,7 +244,7 @@ class SupplementaryEvidenceMapperTest {
         List<Document> existingDocs = asList(d1, d2);
         List<Document> envelopeDocs = asList(d3, d4);
 
-        given(docMapper.mapDocuments(anyList(), anyList(), any(Instant.class), anyString()))
+        given(documentMapper.mapToCcdScannedDocuments(anyList(), anyList(), any(Instant.class), anyString()))
             .willReturn(
                 asList(
                     getScannedDocumentCcdCollectionElement(d1),

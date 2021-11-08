@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.shared.DocumentMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdKeyValue;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ExceptionRecord;
@@ -17,6 +18,7 @@ import java.util.EnumSet;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues.NO;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues.YES;
@@ -36,14 +38,14 @@ public class ExceptionRecordMapper {
     );
 
     private final ServiceConfigProvider serviceConfigProvider;
-    private final DocMapper docMapper;
+    private final DocumentMapper documentMapper;
 
     public ExceptionRecordMapper(
             ServiceConfigProvider serviceConfigProvider,
-            DocMapper docMapper
+            DocumentMapper documentMapper
     ) {
         this.serviceConfigProvider = serviceConfigProvider;
-        this.docMapper = docMapper;
+        this.documentMapper = documentMapper;
     }
 
     public ExceptionRecord mapEnvelope(Envelope envelope) {
@@ -54,7 +56,12 @@ public class ExceptionRecordMapper {
             envelope.formType,
             getLocalDateTime(envelope.deliveryDate),
             getLocalDateTime(envelope.openingDate),
-            docMapper.mapDocuments(List.of(), envelope.documents, envelope.deliveryDate, envelope.jurisdiction),
+            documentMapper.mapToCcdScannedDocuments(
+                emptyList(),
+                envelope.documents,
+                envelope.deliveryDate,
+                envelope.jurisdiction
+            ),
             mapOcrData(envelope.ocrData),
             mapOcrDataWarnings(envelope.ocrDataValidationWarnings),
             envelope.ocrDataValidationWarnings.isEmpty() ? NO : YES,

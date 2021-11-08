@@ -3,12 +3,12 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.feature;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.shared.DocumentMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCollectionElementComparator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdKeyValue;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ExceptionRecord;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.DocMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.mappers.ExceptionRecordMapper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeParser;
@@ -28,7 +28,7 @@ class OcrDataOrderTest {
 
     private final ServiceConfigProvider serviceConfigProvider = mock(ServiceConfigProvider.class);
     private final ServiceConfigItem serviceConfigItem = mock(ServiceConfigItem.class);
-    private final DocMapper docMapper = mock(DocMapper.class);
+    private final DocumentMapper docMapper = mock(DocumentMapper.class);
 
     @DisplayName("Should parse incoming envelope with OCR data and map to same order in CCD record")
     @Test
@@ -45,7 +45,7 @@ class OcrDataOrderTest {
         // and
         ExceptionRecordMapper mapper = new ExceptionRecordMapper(
             serviceConfigProvider,
-                docMapper
+            docMapper
         );
 
         ExceptionRecord record = mapper.mapEnvelope(envelope);
