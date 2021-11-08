@@ -9,15 +9,13 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Document;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.util.Util.getLocalDateTime;
 
 @Component
 public class DocMapper {
@@ -57,12 +55,6 @@ public class DocMapper {
             .map(CcdCollectionElement::new)
             .collect(Collectors.toList());
 
-    }
-
-    public LocalDateTime getLocalDateTime(Instant instant) {
-        return instant == null
-            ? null
-            : ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDateTime();
     }
 
     private ScannedDocument mapDocument(
