@@ -63,6 +63,7 @@ java:
     CAN_SEARCH_CASES_BY_ENVELOPE_ID_PUBLICLAW: "false"
     FLYWAY_SKIP_MIGRATIONS: "true"
     ENVELOPE_QUEUE_CHECK_POLL_INTERVAL: "PT1H"
+    CDAM_ENABLED: "false"
   keyVaults:
     bulk-scan:
       secrets:
