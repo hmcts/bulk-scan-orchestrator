@@ -50,9 +50,11 @@ public class CcdCallbackController {
         @RequestHeader(value = "Authorization", required = false) String idamToken,
         @RequestHeader(value = USER_ID, required = false) String userId
     ) {
+        log.info("callback  id {}", callback.getCaseDetails().getId());
+
         if (callback != null && callback.getCaseDetails() != null) {
 
-            return attachToCaseCallbackService
+            var response = attachToCaseCallbackService
                 .process(
                     callback.getCaseDetails(),
                     idamToken,
@@ -62,6 +64,8 @@ public class CcdCallbackController {
                 )
                 .map(this::okResponse)
                 .getOrElseGet(this::errorResponse);
+            log.info("response {}", response);
+            return response;
         } else {
             throw new InvalidRequestException("Callback or case details were empty");
         }
