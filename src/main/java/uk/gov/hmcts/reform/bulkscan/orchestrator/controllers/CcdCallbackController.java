@@ -50,7 +50,7 @@ public class CcdCallbackController {
         @RequestHeader(value = "Authorization", required = false) String idamToken,
         @RequestHeader(value = USER_ID, required = false) String userId
     ) {
-        log.info("callback  id {}", callback.getCaseDetails().getId());
+        log.info("callback  id {}", callback.getEventId());
 
         if (callback != null && callback.getCaseDetails() != null) {
 
