@@ -82,7 +82,10 @@ public class AttachToCaseCallbackService {
                 exceptionRecordAttacher.tryAttachToCase(callBackEvent, exceptionRecordDetails, ignoreWarnings)
             )
             .map(errorsOrRef -> errorsOrRef.map(caseRef -> finalizeExceptionRecData(exceptionRecordDetails, caseRef)))
-            .getOrElseGet(errors -> Either.left(ErrorsAndWarnings.withErrors(errors.toJavaList())));
+            .getOrElseGet(errors -> {
+                log.info("errors.toJavaList {} ", errors.toJavaList());
+                return Either.left(ErrorsAndWarnings.withErrors(errors.toJavaList()));
+            });
     }
 
     private Map<String, Object> finalizeExceptionRecData(CaseDetails exceptionRec, String caseRef) {

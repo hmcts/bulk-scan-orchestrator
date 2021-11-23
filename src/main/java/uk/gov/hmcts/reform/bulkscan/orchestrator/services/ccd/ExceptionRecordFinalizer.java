@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.collect.ImmutableMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
@@ -17,6 +19,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.
 
 @Service
 public class ExceptionRecordFinalizer {
+    private static final Logger log = LoggerFactory.getLogger(ExceptionRecordFinalizer.class);
 
     public Map<String, Object> finalizeExceptionRecord(
         Map<String, Object> originalFields,
@@ -37,6 +40,7 @@ public class ExceptionRecordFinalizer {
             }
         }
         finalizedMap.putAll(fieldsToUpdate);
+        log.info("finalizedMap caseref {}, map={}", caseReference, finalizedMap);
 
         return finalizedMap;
     }
