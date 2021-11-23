@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,6 +25,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RestController
 @RequestMapping(path = "/callback", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 public class CcdCallbackController {
+    private static final Logger log = LoggerFactory.getLogger(CcdCallbackController.class);
 
     private final AttachToCaseCallbackService attachToCaseCallbackService;
     private final CreateCaseCallbackService createCaseCallbackService;
@@ -111,6 +114,8 @@ public class CcdCallbackController {
     }
 
     private AboutToStartOrSubmitCallbackResponse okResponse(Map<String, Object> modifiedFields) {
+        log.info("modifiedFields {}", modifiedFields);
+
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(modifiedFields)
             .errors(emptyList())
@@ -119,6 +124,8 @@ public class CcdCallbackController {
     }
 
     private AboutToStartOrSubmitCallbackResponse errorResponse(ErrorsAndWarnings errorsAndWarnings) {
+        log.info("error {}", errorsAndWarnings.getErrors());
+        log.info("getWarnings {}", errorsAndWarnings.getWarnings());
         return AboutToStartOrSubmitCallbackResponse
             .builder()
             .errors(errorsAndWarnings.getErrors())
