@@ -152,6 +152,10 @@ service-config:
         - formType: SSCS2
           ocrFields:
             - person1_last_name
+        - formType: SSCS5
+          ocrFields:
+            - person2_last_name
+            - person1_last_name
       auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_SSCS}
       auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_SSCS}
       case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_SSCS}
