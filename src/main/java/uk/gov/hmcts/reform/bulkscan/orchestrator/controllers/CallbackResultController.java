@@ -1,7 +1,9 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,11 +32,12 @@ public class CallbackResultController {
     }
 
     @GetMapping
-    @ApiOperation(
-        value = "Retrieves callback results",
-        notes = "Returns an empty list when no callback results were found"
+    @Operation(
+        summary = "Retrieves callback results",
+        description = "Returns an empty list when no callback results were found"
     )
-    @ApiResponse(code = 200, message = "Success", response = CallbackResultListResponse.class)
+    @ApiResponse(responseCode = "200", description = "Success",
+        content = @Content(schema = @Schema(implementation = CallbackResultListResponse.class)))
     public CallbackResultListResponse getCallbackResults(@RequestParam Map<String, String> filters) {
         if (filters.size() == 1) {
             if (filters.containsKey(CASE_ID) && !filters.get(CASE_ID).isEmpty()) {
