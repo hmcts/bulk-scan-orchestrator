@@ -235,14 +235,13 @@ dependencyManagement {
     dependencySet(group: 'commons-io', version: '2.11.0') {
       entry 'commons-io'
     }
-    // CVE-2021-42340
-    dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.54') {
-      entry 'tomcat-embed-websocket'
-      entry 'tomcat-embed-core'
-    }
     // CVE-2021-22044
     dependencySet(group: 'org.springframework.cloud', version: '3.1.0') {
       entry 'spring-cloud-starter-openfeign'
+    }
+    // CVE-2014-3488 CVE-2015-2156
+    dependencySet(group: 'io.netty', version: '2.0.43.Final') {
+      entry 'netty-tcnative-boringssl-static'
     }
   }
 }
