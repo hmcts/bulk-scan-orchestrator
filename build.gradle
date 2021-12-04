@@ -265,6 +265,7 @@ dependencies {
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.4'
   implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '3.0.4'
 
+  implementation group: 'com.google.guava', name: 'guava', version: '31.0.1-jre'
   annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
 
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
