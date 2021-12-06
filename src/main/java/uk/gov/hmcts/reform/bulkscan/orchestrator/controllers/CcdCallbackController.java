@@ -43,19 +43,17 @@ public class CcdCallbackController {
 
     @PostMapping(path = "/attach_case")
     public CallbackResponse attachToCase(
-        @RequestBody CcdCallbackRequest callback,
+        @RequestBody CcdCallbackRequest callbackRequest,
         @RequestHeader(value = "Authorization", required = false) String idamToken,
         @RequestHeader(value = USER_ID, required = false) String userId
     ) {
-        if (callback != null && callback.getCaseDetails() != null) {
+        if (callbackRequest != null && callbackRequest.getCaseDetails() != null) {
 
             return attachToCaseCallbackService
                 .process(
-                    callback.getCaseDetails(),
+                    callbackRequest,
                     idamToken,
-                    userId,
-                    callback.getEventId(),
-                    callback.isIgnoreWarnings()
+                    userId
                 )
                 .map(this::okResponse)
                 .getOrElseGet(this::errorResponse);

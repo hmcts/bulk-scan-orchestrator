@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentTy
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ExceptionRecordValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
@@ -138,11 +139,9 @@ class AttachToCaseCallbackServiceTest {
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
-            caseDetails,
+            getRequest(caseDetails),
             IDAM_TOKEN,
-            USER_ID,
-            EventIds.ATTACH_TO_CASE,
-            true
+            USER_ID
         );
 
         // then
@@ -165,11 +164,9 @@ class AttachToCaseCallbackServiceTest {
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
-            caseDetails,
+            getRequest(caseDetails),
             IDAM_TOKEN,
-            USER_ID,
-            EventIds.ATTACH_TO_CASE,
-            true
+            USER_ID
         );
 
         // then
@@ -211,11 +208,9 @@ class AttachToCaseCallbackServiceTest {
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
-            caseDetails,
+            getRequest(caseDetails),
             IDAM_TOKEN,
-            USER_ID,
-            EventIds.ATTACH_TO_CASE,
-            true
+            USER_ID
         );
 
         // then
@@ -256,11 +251,9 @@ class AttachToCaseCallbackServiceTest {
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
-            caseDetails,
+            getRequest(caseDetails),
             IDAM_TOKEN,
-            USER_ID,
-            EventIds.ATTACH_TO_CASE,
-            true
+            USER_ID
         );
 
         // then
@@ -295,11 +288,9 @@ class AttachToCaseCallbackServiceTest {
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
-            caseDetails,
+            getRequest(caseDetails),
             IDAM_TOKEN,
-            USER_ID,
-            EventIds.ATTACH_TO_CASE,
-            true
+            USER_ID
         );
 
         // then
@@ -334,11 +325,9 @@ class AttachToCaseCallbackServiceTest {
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
-            caseDetails,
+            getRequest(caseDetails),
             IDAM_TOKEN,
-            USER_ID,
-            EventIds.ATTACH_TO_CASE,
-            true
+            USER_ID
         );
 
         // then
@@ -381,11 +370,9 @@ class AttachToCaseCallbackServiceTest {
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
-            caseDetails,
+            getRequest(caseDetails),
             IDAM_TOKEN,
-            USER_ID,
-            EventIds.ATTACH_TO_CASE,
-            true
+            USER_ID
         );
 
         // then
@@ -428,11 +415,9 @@ class AttachToCaseCallbackServiceTest {
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
-            caseDetails,
+            getRequest(caseDetails),
             null,
-            USER_ID,
-            EventIds.ATTACH_TO_CASE,
-            true
+            USER_ID
         );
 
         // then
@@ -475,11 +460,9 @@ class AttachToCaseCallbackServiceTest {
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
-            caseDetails,
+            getRequest(caseDetails),
             IDAM_TOKEN,
-            null,
-            EventIds.ATTACH_TO_CASE,
-            true
+            null
         );
 
         // then
@@ -513,11 +496,9 @@ class AttachToCaseCallbackServiceTest {
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
-            caseDetails,
+            getRequest(caseDetails),
             IDAM_TOKEN,
-            USER_ID,
-            EventIds.ATTACH_TO_CASE,
-            true
+            USER_ID
         );
 
         // then
@@ -552,11 +533,9 @@ class AttachToCaseCallbackServiceTest {
 
         // when
         Either<ErrorsAndWarnings, Map<String, Object>> res = attachToCaseCallbackService.process(
-            caseDetails,
+            getRequest(caseDetails),
             IDAM_TOKEN,
-            USER_ID,
-            EventIds.ATTACH_TO_CASE,
-            true
+            USER_ID
         );
 
         // then
@@ -637,5 +616,9 @@ class AttachToCaseCallbackServiceTest {
             .id(id)
             .data(dataMap)
             .build();
+    }
+
+    private CcdCallbackRequest getRequest(CaseDetails caseDetails) {
+        return new CcdCallbackRequest(EventIds.ATTACH_TO_CASE, caseDetails, true);
     }
 }
