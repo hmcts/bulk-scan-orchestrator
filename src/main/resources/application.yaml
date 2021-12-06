@@ -267,3 +267,7 @@ cdam:
   api:
     url: ${CDAM_URL}
     enabled: false
+
+springdoc:
+  packagesToScan: uk.gov.hmcts.reform.bulkscan.orchestrator.controllers
+  pathsToMatch: /**
