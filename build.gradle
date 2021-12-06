@@ -5,7 +5,7 @@ plugins {
   id 'jacoco'
   id 'io.spring.dependency-management' version '1.0.11.RELEASE'
   id 'org.owasp.dependencycheck' version '6.5.0.1'
-  id 'org.springframework.boot' version '2.5.6'
+  id 'org.springframework.boot' version '2.6.1'
   id 'com.github.ben-manes.versions' version '0.39.0'
   id 'org.sonarqube' version '3.3'
   id 'info.solidsoft.pitest' version '1.7.0'
@@ -235,14 +235,13 @@ dependencyManagement {
     dependencySet(group: 'commons-io', version: '2.11.0') {
       entry 'commons-io'
     }
-    // CVE-2021-42340
-    dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.54') {
-      entry 'tomcat-embed-websocket'
-      entry 'tomcat-embed-core'
-    }
     // CVE-2021-22044
-    dependencySet(group: 'org.springframework.cloud', version: '3.0.5') {
+    dependencySet(group: 'org.springframework.cloud', version: '3.1.0') {
       entry 'spring-cloud-starter-openfeign'
+    }
+    // CVE-2014-3488 CVE-2015-2156
+    dependencySet(group: 'io.netty', version: '2.0.43.Final') {
+      entry 'netty-tcnative-boringssl-static'
     }
   }
 }
@@ -257,11 +256,11 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-jdbc'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
-  implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap', version: '3.0.4'
+  implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap', version: '3.1.0'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.2.10.RELEASE'
 
-  implementation group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
-  implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
+  implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.5.13'
+  implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
 
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformLogging
   implementation group: 'com.github.hmcts.java-logging', name: 'logging-appinsights', version: versions.reformLogging
