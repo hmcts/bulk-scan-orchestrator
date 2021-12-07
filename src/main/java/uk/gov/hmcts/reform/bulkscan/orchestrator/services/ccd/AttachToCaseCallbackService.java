@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ExceptionRecordValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
@@ -58,15 +59,13 @@ public class AttachToCaseCallbackService {
      *         or the list of errors, in case of errors
      */
     public Either<ErrorsAndWarnings, Map<String, Object>> process(
-        CaseDetails exceptionRecordDetails,
+        CcdCallbackRequest request,
         String requesterIdamToken,
-        String requesterUserId,
-        String eventId,
-        Boolean ignoreWarnings
+        String requesterUserId
     ) {
         Validation<String, Void> canAccess = exceptionRecordValidator.mandatoryPrerequisites(
-            () -> eventIdValidator.isAttachToCaseEvent(eventId),
-            () -> callbackValidator.canBeAttachedToCase(exceptionRecordDetails),
+            () -> eventIdValidator.isAttachToCaseEvent(request.getEventId()),
+            () -> callbackValidator.canBeAttachedToCase(request.getCaseDetails()),
             () -> callbackValidator.hasIdamToken(requesterIdamToken).map(item -> null),
             () -> callbackValidator.hasUserId(requesterUserId).map(item -> null)
         );
@@ -77,11 +76,15 @@ public class AttachToCaseCallbackService {
             return Either.left(ErrorsAndWarnings.withErrors(singletonList(canAccess.getError())));
         }
 
-        return getValidation(exceptionRecordDetails, requesterIdamToken, requesterUserId)
+        return getValidation(request.getCaseDetails(), requesterIdamToken, requesterUserId)
             .map(callBackEvent ->
-                exceptionRecordAttacher.tryAttachToCase(callBackEvent, exceptionRecordDetails, ignoreWarnings)
+                exceptionRecordAttacher.tryAttachToCase(
+                        callBackEvent,
+                        request.getCaseDetails(),
+                        request.isIgnoreWarnings()
+                )
             )
-            .map(errorsOrRef -> errorsOrRef.map(caseRef -> finalizeExceptionRecData(exceptionRecordDetails, caseRef)))
+            .map(errorsOrRef -> errorsOrRef.map(caseRef -> finalizeExceptionRecData(request.getCaseDetails(), caseRef)))
             .getOrElseGet(errors -> Either.left(ErrorsAndWarnings.withErrors(errors.toJavaList())));
     }
 
