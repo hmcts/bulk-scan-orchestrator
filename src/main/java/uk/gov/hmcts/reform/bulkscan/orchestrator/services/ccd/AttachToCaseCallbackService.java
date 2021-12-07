@@ -19,18 +19,17 @@ import java.util.List;
 import java.util.Map;
 
 import static io.vavr.control.Validation.valid;
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.CaseReferenceTypes.CCD_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SEARCH_CASE_REFERENCE_TYPE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification.SUPPLEMENTARY_EVIDENCE_WITH_OCR;
 
 @Service
-public class AttachToCaseCallbackService {
+public class AttachToCaseCallbackService extends CallbackService {
 
     private static final Logger log = LoggerFactory.getLogger(AttachToCaseCallbackService.class);
 
-    private final ServiceConfigProvider serviceConfigProvider;
-    private final ExceptionRecordValidator exceptionRecordValidator;
     private final ExceptionRecordFinalizer exceptionRecordFinalizer;
     private final ExceptionRecordAttacher exceptionRecordAttacher;
     private final CallbackValidator callbackValidator;
@@ -44,8 +43,7 @@ public class AttachToCaseCallbackService {
             CallbackValidator callbackValidator,
             EventIdValidator eventIdValidator
     ) {
-        this.serviceConfigProvider = serviceConfigProvider;
-        this.exceptionRecordValidator = exceptionRecordValidator;
+        super(serviceConfigProvider, exceptionRecordValidator);
         this.exceptionRecordFinalizer = exceptionRecordFinalizer;
         this.exceptionRecordAttacher = exceptionRecordAttacher;
         this.callbackValidator = callbackValidator;
@@ -63,11 +61,13 @@ public class AttachToCaseCallbackService {
         String requesterIdamToken,
         String requesterUserId
     ) {
-        Validation<String, Void> canAccess = exceptionRecordValidator.mandatoryPrerequisites(
-            () -> eventIdValidator.isAttachToCaseEvent(request.getEventId()),
-            () -> callbackValidator.canBeAttachedToCase(request.getCaseDetails()),
-            () -> callbackValidator.hasIdamToken(requesterIdamToken).map(item -> null),
-            () -> callbackValidator.hasUserId(requesterUserId).map(item -> null)
+        Validation<String, Void> canAccess = canAccess(
+            requesterIdamToken,
+            requesterUserId,
+            asList(
+                () -> eventIdValidator.isAttachToCaseEvent(request.getEventId()),
+                () -> callbackValidator.canBeAttachedToCase(request.getCaseDetails())
+            )
         );
 
         if (canAccess.isInvalid()) {

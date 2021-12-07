@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
@@ -30,15 +31,13 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.NewC
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING;
 
 @Service
-public class CreateCaseCallbackService {
+public class CreateCaseCallbackService extends CallbackService {
 
     private static final Logger log = LoggerFactory.getLogger(CreateCaseCallbackService.class);
 
     public static final String AWAITING_PAYMENTS_MESSAGE =
         "Payments for this Exception Record have not been processed yet";
 
-    private final ExceptionRecordValidator exceptionRecordValidator;
-    private final ServiceConfigProvider serviceConfigProvider;
     private final CaseFinder caseFinder;
     private final CcdNewCaseCreator ccdNewCaseCreator;
     private final ExceptionRecordFinalizer exceptionRecordFinalizer;
@@ -54,8 +53,7 @@ public class CreateCaseCallbackService {
         PaymentsProcessor paymentsProcessor,
         CallbackResultRepositoryProxy callbackResultRepositoryProxy
     ) {
-        this.exceptionRecordValidator = exceptionRecordValidator;
-        this.serviceConfigProvider = serviceConfigProvider;
+        super(serviceConfigProvider, exceptionRecordValidator);
         this.caseFinder = caseFinder;
         this.ccdNewCaseCreator = ccdNewCaseCreator;
         this.exceptionRecordFinalizer = exceptionRecordFinalizer;
@@ -131,11 +129,13 @@ public class CreateCaseCallbackService {
         String idamToken,
         String userId
     ) {
-        return exceptionRecordValidator.mandatoryPrerequisites(
-            () -> exceptionRecordValidator.isCreateNewCaseEvent(eventId),
-            () -> getServiceConfig(caseDetails).map(item -> null),
-            () -> exceptionRecordValidator.hasIdamToken(idamToken).map(item -> null),
-            () -> exceptionRecordValidator.hasUserId(userId).map(item -> null)
+        return canAccess(
+            idamToken,
+            userId,
+            asList(
+                () -> exceptionRecordValidator.isCreateNewCaseEvent(eventId),
+                () -> getServiceConfig(caseDetails).map(item -> null)
+            )
         );
     }
 
