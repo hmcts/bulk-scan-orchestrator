@@ -45,8 +45,8 @@ public class CreateCaseCallbackService extends CallbackService {
     private final CallbackResultRepositoryProxy callbackResultRepositoryProxy;
 
     public CreateCaseCallbackService(
-        ExceptionRecordValidator exceptionRecordValidator,
         ServiceConfigProvider serviceConfigProvider,
+        ExceptionRecordValidator exceptionRecordValidator,
         CaseFinder caseFinder,
         CcdNewCaseCreator ccdNewCaseCreator,
         ExceptionRecordFinalizer exceptionRecordFinalizer,
@@ -67,11 +67,13 @@ public class CreateCaseCallbackService extends CallbackService {
      * @return ProcessResult map of changes or list of errors/warnings
      */
     public ProcessResult process(CcdCallbackRequest request, String idamToken, String userId) {
-        Validation<String, Void> canAccess = assertAllowToAccess(
-            request.getCaseDetails(),
-            request.getEventId(),
+        Validation<String, Void> canAccess = canAccess(
             idamToken,
-            userId
+            userId,
+            asList(
+                () -> exceptionRecordValidator.isCreateNewCaseEvent(request.getEventId()),
+                () -> getServiceConfig(request.getCaseDetails()).map(item -> null)
+            )
         );
 
         if (canAccess.isInvalid()) {
@@ -121,22 +123,6 @@ public class CreateCaseCallbackService extends CallbackService {
         }
 
         return result;
-    }
-
-    private Validation<String, Void> assertAllowToAccess(
-        CaseDetails caseDetails,
-        String eventId,
-        String idamToken,
-        String userId
-    ) {
-        return canAccess(
-            idamToken,
-            userId,
-            asList(
-                () -> exceptionRecordValidator.isCreateNewCaseEvent(eventId),
-                () -> getServiceConfig(caseDetails).map(item -> null)
-            )
-        );
     }
 
     private Validation<String, ServiceConfigItem> getServiceConfig(CaseDetails caseDetails) {

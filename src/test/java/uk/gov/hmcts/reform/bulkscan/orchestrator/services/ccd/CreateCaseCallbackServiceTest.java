@@ -72,8 +72,8 @@ class CreateCaseCallbackServiceTest {
     @BeforeEach
     void setUp() {
         createCaseCallbackService = new CreateCaseCallbackService(
-            exceptionRecordValidator,
             serviceConfigProvider,
+            exceptionRecordValidator,
             caseFinder,
             ccdNewCaseCreator,
             exceptionRecordFinalizer,
