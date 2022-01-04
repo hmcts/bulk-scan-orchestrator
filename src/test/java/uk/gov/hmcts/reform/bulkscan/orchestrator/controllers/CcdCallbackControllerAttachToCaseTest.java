@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CreateCaseCallback
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.ReclassifyCallbackService;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -28,7 +27,7 @@ class CcdCallbackControllerAttachToCaseTest {
     @Test
     void should_return_500_in_case_of_internal_error() throws Exception {
 
-        given(attachService.process(any(), any(), any(), any(), anyBoolean()))
+        given(attachService.process(any(), any(), any()))
             .willThrow(new RuntimeException("Some internal unhandled exception"));
 
         mvc

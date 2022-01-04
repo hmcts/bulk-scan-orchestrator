@@ -4,13 +4,13 @@ plugins {
   id 'pmd'
   id 'jacoco'
   id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-  id 'org.owasp.dependencycheck' version '6.5.0.1'
-  id 'org.springframework.boot' version '2.5.6'
-  id 'com.github.ben-manes.versions' version '0.39.0'
+  id 'org.owasp.dependencycheck' version '6.5.2.1'
+  id 'org.springframework.boot' version '2.6.1'
+  id 'com.github.ben-manes.versions' version '0.40.0'
   id 'org.sonarqube' version '3.3'
   id 'info.solidsoft.pitest' version '1.7.0'
-  id 'au.com.dius.pact' version '4.3.1'
-  id 'org.flywaydb.flyway' version '8.2.0'
+  id 'au.com.dius.pact' version '4.3.2'
+  id 'org.flywaydb.flyway' version '8.3.0'
 }
 
 group = 'uk.gov.hmcts.reform'
@@ -235,21 +235,24 @@ dependencyManagement {
     dependencySet(group: 'commons-io', version: '2.11.0') {
       entry 'commons-io'
     }
-    // CVE-2021-42340
-    dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.54') {
-      entry 'tomcat-embed-websocket'
-      entry 'tomcat-embed-core'
-    }
     // CVE-2021-22044
-    dependencySet(group: 'org.springframework.cloud', version: '3.0.5') {
+    dependencySet(group: 'org.springframework.cloud', version: '3.1.0') {
       entry 'spring-cloud-starter-openfeign'
+    }
+    // CVE-2014-3488 CVE-2015-2156
+    dependencySet(group: 'io.netty', version: '2.0.43.Final') {
+      entry 'netty-tcnative-boringssl-static'
+    }
+    dependencySet(group: 'org.apache.logging.log4j', version: '2.17.1') {
+      entry 'log4j-api'
+      entry 'log4j-to-slf4j'
     }
   }
 }
 
 dependencies {
   implementation group: 'org.postgresql', name: 'postgresql', version: '42.3.1'
-  implementation group: 'org.flywaydb', name: 'flyway-core', version: '8.2.0'
+  implementation group: 'org.flywaydb', name: 'flyway-core', version: '8.3.0'
 
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
@@ -257,11 +260,11 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-jdbc'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
-  implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap', version: '3.0.4'
+  implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap', version: '3.1.0'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.2.10.RELEASE'
 
-  implementation group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
-  implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
+  implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.6.3'
+  implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
 
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformLogging
   implementation group: 'com.github.hmcts.java-logging', name: 'logging-appinsights', version: versions.reformLogging
@@ -272,7 +275,7 @@ dependencies {
   implementation group: 'com.azure', name: 'azure-messaging-servicebus', version: '7.4.2'
 
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.4'
-  implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '3.0.4'
+  implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '3.0.5'
 
   annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
 
@@ -281,8 +284,8 @@ dependencies {
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
   testImplementation group: 'com.typesafe', name: 'config', version: '1.4.1'
-  testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '4.1.0'
-  testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.21.0'
+  testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '4.2.0'
+  testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.22.0'
   testImplementation group: 'org.awaitility', name: 'awaitility', version: '4.1.1'
   testImplementation group: 'io.rest-assured', name: 'rest-assured'
 
@@ -293,9 +296,9 @@ dependencies {
   testImplementation group: 'org.junit.platform', name: 'junit-platform-engine', version: versions.junitPlatform
   testImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.2'
 
-  testImplementation group: 'io.github.netmikey.logunit', name: 'logunit-core', version: '1.1.0'
+  testImplementation group: 'io.github.netmikey.logunit', name: 'logunit-core', version: '1.1.2'
   testImplementation group: 'com.github.hmcts', name: 'fortify-client', version: '1.2.2', classifier: 'all'
-  testRuntimeOnly group: 'io.github.netmikey.logunit', name: 'logunit-logback', version: '1.1.0'
+  testRuntimeOnly group: 'io.github.netmikey.logunit', name: 'logunit-logback', version: '1.1.2'
 
   integrationTestImplementation sourceSets.main.runtimeClasspath
   integrationTestImplementation sourceSets.test.runtimeClasspath
