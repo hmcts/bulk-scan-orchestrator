@@ -263,7 +263,7 @@ dependencies {
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap', version: '3.1.0'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.2.10.RELEASE'
 
-  implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.6.2'
+  implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.6.3'
   implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
 
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformLogging
@@ -285,7 +285,7 @@ dependencies {
   }
   testImplementation group: 'com.typesafe', name: 'config', version: '1.4.1'
   testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '4.2.0'
-  testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.21.0'
+  testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.22.0'
   testImplementation group: 'org.awaitility', name: 'awaitility', version: '4.1.1'
   testImplementation group: 'io.rest-assured', name: 'rest-assured'
 
