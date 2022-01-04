@@ -19,14 +19,10 @@ public class CallbackResultService {
     }
 
     public List<CallbackResult> findByExceptionRecordId(String exceptionRecordId) {
-        log.info("Fetching callback results for exceptionRecordId {}", exceptionRecordId);
-
         return callbackResultRepository.findByExceptionRecordId(exceptionRecordId);
     }
 
     public List<CallbackResult> findByCaseId(String caseId) {
-        log.info("Fetching callback results for exceptionRecordId {}", caseId);
-
         return callbackResultRepository.findByCaseId(caseId);
     }
 }
