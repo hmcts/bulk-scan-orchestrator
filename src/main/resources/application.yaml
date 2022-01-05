@@ -267,7 +267,6 @@ cdam:
   api:
     url: ${CDAM_URL}
     enabled: ${CDAM_ENABLED}
-    enabled: false
 
 springdoc:
   packagesToScan: uk.gov.hmcts.reform.bulkscan.orchestrator.controllers
