@@ -51,9 +51,7 @@ public class CcdCallbackController {
         @RequestHeader(value = USER_ID, required = false) String userId
     ) {
         log.info("callback  ----");
-
-        if (callback != null && callback.getCaseDetails() != null) {
-
+        if (callbackRequest != null && callbackRequest.getCaseDetails() != null) {
 
             var response = attachToCaseCallbackService
                 .process(

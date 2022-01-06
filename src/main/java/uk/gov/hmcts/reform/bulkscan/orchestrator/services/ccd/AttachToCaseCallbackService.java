@@ -84,7 +84,7 @@ public class AttachToCaseCallbackService {
                         request.isIgnoreWarnings()
                 )
             )
-            .map(errorsOrRef -> errorsOrRef.map(caseRef -> finalizeExceptionRecData(exceptionRecordDetails, caseRef)))
+            .map(errorsOrRef -> errorsOrRef.map(caseRef -> finalizeExceptionRecData(request.getCaseDetails(), caseRef)))
             .getOrElseGet(errors -> {
                 log.info("errors.toJavaList {} ", errors.toJavaList());
                 return Either.left(ErrorsAndWarnings.withErrors(errors.toJavaList()));
