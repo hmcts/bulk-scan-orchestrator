@@ -205,6 +205,7 @@ public class CcdNewCaseCreator {
         Map<String, Object> completeCaseData =
             setBulkScanSpecificFieldsInCaseData(caseData, service, exceptionRecordId, envelopeId, loggingContext);
 
+        log.info("ccd case create complere casedata {} ", completeCaseData);
         return CaseDataContent
             .builder()
             .caseReference(exceptionRecordId)
