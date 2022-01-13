@@ -40,6 +40,7 @@ public class ServiceConfigItem {
     private boolean autoCaseUpdateEnabled = false;
     private boolean caseDefinitionHasEnvelopeIds = false;
     private boolean searchCasesByEnvelopeId = false;
+    private boolean supplementaryDataEnabled = false;
 
     // region getters & setters
 
@@ -151,6 +152,14 @@ public class ServiceConfigItem {
 
     public void setSearchCasesByEnvelopeId(boolean value) {
         this.searchCasesByEnvelopeId = value;
+    }
+
+    public boolean getSupplementaryDataEnabled() {
+        return supplementaryDataEnabled;
+    }
+
+    public void setSupplementaryDataEnabled(boolean supplementaryDataEnabled) {
+        this.supplementaryDataEnabled = supplementaryDataEnabled;
     }
 
     // endregion

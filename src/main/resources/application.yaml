@@ -160,6 +160,7 @@ service-config:
       auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_SSCS}
       case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_SSCS}
       search-cases-by-envelope-id: ${CAN_SEARCH_CASES_BY_ENVELOPE_ID_SSCS}
+      supplementary-data-enabled: false
 
     - service: probate
       jurisdiction: PROBATE
