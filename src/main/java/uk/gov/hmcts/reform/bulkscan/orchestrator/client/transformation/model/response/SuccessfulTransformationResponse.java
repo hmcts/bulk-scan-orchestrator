@@ -15,12 +15,12 @@ public class SuccessfulTransformationResponse {
 
     public final List<String> warnings;
 
-    public final Map<String, Object> supplementaryData;
+    public final Map<String, Map<String, Object>> supplementaryData;
 
     public SuccessfulTransformationResponse(
         @JsonProperty("case_creation_details") CaseCreationDetails caseCreationDetails,
         @JsonProperty("warnings") List<String> warnings,
-        @JsonProperty("supplementary_data") Map<String, Object> supplementaryData
+        @JsonProperty("supplementary_data") Map<String, Map<String, Object>> supplementaryData
     ) {
         this.caseCreationDetails = caseCreationDetails;
         this.warnings = warnings;
