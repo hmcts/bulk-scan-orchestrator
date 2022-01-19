@@ -366,7 +366,7 @@ class AutoCaseCreatorTest {
             )
         );
 
-        return new SuccessfulTransformationResponse(caseCreationDetails, emptyList(), null);
+        return new SuccessfulTransformationResponse(caseCreationDetails, emptyList());
     }
 
     private String getExpectedLogContext(Envelope envelope) {

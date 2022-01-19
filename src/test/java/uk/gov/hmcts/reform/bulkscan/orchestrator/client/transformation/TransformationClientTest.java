@@ -88,7 +88,7 @@ class TransformationClientTest {
     @Test
     void should_throw_exception_when_model_is_invalid() {
         given(restTemplate.postForObject(anyString(), any(), any()))
-            .willReturn(new SuccessfulTransformationResponse(null, emptyList(), null));
+            .willReturn(new SuccessfulTransformationResponse(null, emptyList()));
 
         assertThatCode(() -> transformationClient.transformCaseData(URL, null))
             .isInstanceOf(ConstraintViolationException.class)
@@ -102,8 +102,7 @@ class TransformationClientTest {
                 "event id",
                 singletonMap("key", "value")
             ),
-            emptyList(),
-            null
+            emptyList()
         );
     }
 }
