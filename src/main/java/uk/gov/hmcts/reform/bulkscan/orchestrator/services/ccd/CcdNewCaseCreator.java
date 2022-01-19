@@ -98,8 +98,9 @@ public class CcdNewCaseCreator {
             long newCaseId = createNewCaseInCcd(
                 new CcdRequestCredentials(idamToken, s2sTokenGenerator.generate(), userId),
                 exceptionRecord,
-                transformationResponse.caseCreationDetails,
-                configItem.getService()
+                transformationResponse,
+                configItem.getService(),
+                configItem.getSupplementaryDataEnabled()
             );
 
             log.info(
@@ -166,8 +167,9 @@ public class CcdNewCaseCreator {
     private long createNewCaseInCcd(
         CcdRequestCredentials ccdRequestCredentials,
         ExceptionRecord exceptionRecord,
-        CaseCreationDetails caseCreationDetails,
-        String service
+        SuccessfulTransformationResponse transformationResponse,
+        String service,
+        boolean isSupplementaryDataEnabled
     ) {
         var loggingContext = String.format(
             "Exception ID: %s, jurisdiction: %s, form type: %s",
@@ -175,7 +177,7 @@ public class CcdNewCaseCreator {
             exceptionRecord.poBoxJurisdiction,
             exceptionRecord.formType
         );
-
+        CaseCreationDetails caseCreationDetails = transformationResponse.caseCreationDetails;
         return ccdApi.createCase(
             ccdRequestCredentials,
             exceptionRecord.poBoxJurisdiction,
@@ -188,7 +190,8 @@ public class CcdNewCaseCreator {
                 exceptionRecord.envelopeId,
                 startEventResponse,
                 service,
-                loggingContext
+                loggingContext,
+                isSupplementaryDataEnabled ? transformationResponse.supplementaryData : null
             ),
             loggingContext
         );
@@ -200,7 +203,8 @@ public class CcdNewCaseCreator {
         String envelopeId,
         StartEventResponse startEventResponse,
         String service,
-        String loggingContext
+        String loggingContext,
+        Map<String, Map<String, Object>> supplementaryData
     ) {
         Map<String, Object> completeCaseData =
             setBulkScanSpecificFieldsInCaseData(caseData, service, exceptionRecordId, envelopeId, loggingContext);
@@ -210,6 +214,7 @@ public class CcdNewCaseCreator {
             .builder()
             .caseReference(exceptionRecordId)
             .data(completeCaseData)
+            .supplementaryDataRequest(supplementaryData)
             .event(Event
                 .builder()
                 .id(startEventResponse.getEventId())
