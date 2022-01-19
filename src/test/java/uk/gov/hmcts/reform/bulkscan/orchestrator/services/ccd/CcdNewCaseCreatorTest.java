@@ -107,7 +107,8 @@ class CcdNewCaseCreatorTest {
 
         var expectedTransformationResponse = new SuccessfulTransformationResponse(
             new CaseCreationDetails("some_case_type", "some_event_id", basicCaseData()),
-            emptyList()
+            emptyList(),
+            null
         );
 
         given(s2sTokenGenerator.generate()).willReturn(s2sToken);
@@ -167,7 +168,8 @@ class CcdNewCaseCreatorTest {
 
         var expectedTransformationResponse = new SuccessfulTransformationResponse(
             new CaseCreationDetails("some_case_type", "some_event_id", basicCaseData()),
-            singletonList("warning1")
+            singletonList("warning1"),
+            null
         );
 
         given(s2sTokenGenerator.generate()).willReturn(s2sToken);
@@ -223,7 +225,8 @@ class CcdNewCaseCreatorTest {
 
         var expectedTransformationResponse = new SuccessfulTransformationResponse(
             new CaseCreationDetails("some_case_type", "some_event_id", basicCaseData()),
-            singletonList("warning1")
+            singletonList("warning1"),
+            null
         );
 
         given(exceptionRecordTransformer.transformExceptionRecord(
@@ -251,7 +254,8 @@ class CcdNewCaseCreatorTest {
         // given
         var transformationResponse = new SuccessfulTransformationResponse(
             new CaseCreationDetails("case_type_1", "event_id_1", basicCaseData()),
-            emptyList()
+            emptyList(),
+            null
         );
 
         ServiceConfigItem configItem = getConfigItem();
@@ -425,7 +429,8 @@ class CcdNewCaseCreatorTest {
 
         var expectedTransformationResponse = new SuccessfulTransformationResponse(
                 new CaseCreationDetails("some_case_type", "some_event_id", basicCaseData()),
-                emptyList()
+                emptyList(),
+            null
         );
 
         given(s2sTokenGenerator.generate()).willReturn(s2sToken);
@@ -477,7 +482,8 @@ class CcdNewCaseCreatorTest {
 
         var expectedTransformationResponse = new SuccessfulTransformationResponse(
                 new CaseCreationDetails("some_case_type", "some_event_id", basicCaseData()),
-                emptyList()
+                emptyList(),
+            null
         );
 
         given(s2sTokenGenerator.generate()).willReturn(s2sToken);
