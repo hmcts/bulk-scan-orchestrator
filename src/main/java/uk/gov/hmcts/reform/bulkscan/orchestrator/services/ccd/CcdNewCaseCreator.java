@@ -221,8 +221,8 @@ public class CcdNewCaseCreator {
         Map<String, Object> completeCaseData =
             setBulkScanSpecificFieldsInCaseData(caseData, service, exceptionRecordId, envelopeId, loggingContext);
 
-        log.info("ccd case create complere casedata {} ", completeCaseData);
-        return CaseDataContent
+        log.info("ccd case create complete {} casedata: {} ", jurisdiction, completeCaseData);
+        var caseDataContent = CaseDataContent
             .builder()
             .caseReference(exceptionRecordId)
             .data(completeCaseData)
@@ -236,6 +236,9 @@ public class CcdNewCaseCreator {
             )
             .eventToken(startEventResponse.getToken())
             .build();
+        log.info("ccd case create complete caseDataContent {} ", caseDataContent);
+
+        return caseDataContent;
     }
 
     private Map<String, Object> setBulkScanSpecificFieldsInCaseData(
