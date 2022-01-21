@@ -66,11 +66,6 @@ public class SupplementaryEvidenceUpdater {
             );
 
             log.info("Update SupplementaryEvidence newCaseDocuments {}", newCaseDocuments);
-            log.info(
-                "Update SupplementaryEvidence callBackEvent.exceptionRecordDocuments {}",
-                callBackEvent.exceptionRecordDocuments
-            );
-
 
             StartEventResponse ccdStartEvent =
                 ccdApi.startAttachScannedDocs(targetCase, callBackEvent.idamToken, callBackEvent.userId);

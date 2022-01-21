@@ -122,7 +122,6 @@ public class AutoCaseCreator {
     ) {
         try {
             log.info("About to auto create a case in CCD from envelope. {}", loggingContext);
-            log.info("About to auto create a case in CCD caseCreationDetails {}", caseCreationDetails);
             long caseId = callCcdApiToCreateCase(caseCreationDetails, envelope, loggingContext);
             log.info("Auto created a case in CCD from envelope. Case Id: {}. {}", caseId, loggingContext);
 

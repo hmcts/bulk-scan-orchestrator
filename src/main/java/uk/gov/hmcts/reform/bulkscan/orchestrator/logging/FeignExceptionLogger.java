@@ -10,7 +10,7 @@ public final class FeignExceptionLogger {
     }
 
     public static void debugCcdException(Logger logger, FeignException exception, String introMessage) {
-        logger.info(
+        logger.debug(
             "{}. CCD response: {}",
             introMessage,
             // exception.contentUTF8() uses response body internally

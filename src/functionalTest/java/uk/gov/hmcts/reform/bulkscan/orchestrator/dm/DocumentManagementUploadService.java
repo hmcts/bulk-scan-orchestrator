@@ -70,8 +70,6 @@ public class DocumentManagementUploadService {
             s2sToken,
             uploadRequest
         );
-
-
         log.info("{} uploaded to DM store", displayName);
 
         return uploadResponse

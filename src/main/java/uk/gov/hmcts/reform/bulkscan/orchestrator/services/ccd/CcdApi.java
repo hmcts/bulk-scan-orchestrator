@@ -204,9 +204,6 @@ public class CcdApi {
         String caseRef = String.valueOf(theCase.getId());
         String jurisdiction = theCase.getJurisdiction();
         String caseTypeId = theCase.getCaseTypeId();
-
-        log.info("attachExceptionRecord data {}", data);
-
         try {
             //TODO We don't need to login here as we just need the service token
             CcdAuthenticator authenticator =
@@ -270,8 +267,6 @@ public class CcdApi {
 
             CaseDataContent caseData = caseDataContentBuilder.apply(eventResponse);
 
-            log.info("createExceptionRecord caseData----> {}", caseData.getData());
-
             return feignCcdApi.submitForCaseworker(
                 authenticator.getUserToken(),
                 authenticator.getServiceToken(),
@@ -312,7 +307,6 @@ public class CcdApi {
             log.info("Started event in CCD. Event: {}, case type: {}. {}", eventTypeId, caseTypeId, logContext);
 
             CaseDataContent caseData = caseDataContentBuilder.apply(eventResponse);
-            log.info("attachScannedDocs data ==> {}", caseData.getData());
 
             feignCcdApi.submitEventForCaseWorker(
                 authenticator.getUserToken(),
