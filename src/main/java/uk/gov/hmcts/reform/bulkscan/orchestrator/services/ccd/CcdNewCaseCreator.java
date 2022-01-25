@@ -285,16 +285,16 @@ public class CcdNewCaseCreator {
         if (scannedDocuments != null) {
             ArrayList modifiedDocs = new ArrayList();
             for (Object scannedDocumentValue : scannedDocuments) {
-                Map scannedDocument = new HashMap((Map)((Map) scannedDocumentValue).get("value"));
-                Map url = new HashMap((Map)scannedDocument.get("url"));
+                Map<String, Object> scannedDocument = new HashMap((Map) ((Map) scannedDocumentValue).get("value"));
+                Map<String, String> url = new HashMap((Map) scannedDocument.get("url"));
 
-                String documentUrl = (String) url.get("document_url");
+                String documentUrl =  url.get("document_url");
                 String documentUuid = getDocumentUuid(documentUrl);
                 String documentHash = cdamApiClient.getDocumentHash(jurisdiction, documentUuid);
                 url.put("document_hash", documentHash);
 
                 scannedDocument.put("url", url);
-                Map modScannedDocumentValue = new HashMap((Map)scannedDocumentValue);
+                Map<String, Object> modScannedDocumentValue = new HashMap((Map) scannedDocumentValue);
                 modScannedDocumentValue.put("value", scannedDocument);
                 modifiedDocs.add(modScannedDocumentValue);
             }
