@@ -228,6 +228,21 @@ service-config:
       case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_PUBLICLAW}
       search-cases-by-envelope-id: ${CAN_SEARCH_CASES_BY_ENVELOPE_ID_PUBLICLAW}
 
+    - service: nfd
+      jurisdiction: DIVORCE
+      transformation-url: ${TRANSFORMATION_URL_NFD}
+      update-url: ${UPDATE_URL_NFD}
+      case-type-ids:
+        - GrantOfRepresentation
+        - Caveat
+        - StandingSearch
+        - WillLodgement
+      allow-creating-case-before-payments-are-processed: true
+      auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_NFD}
+      auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_NFD}
+      case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_NFD}
+      search-cases-by-envelope-id: ${CAN_SEARCH_CASES_BY_ENVELOPE_ID_NFD}
+
 scheduling:
   task:
     delete-envelopes-dlq-messages:
