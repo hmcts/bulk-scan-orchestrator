@@ -10,9 +10,11 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.cache.CachedIdamCredential;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.cache.IdamCachedClient;
-import uk.gov.hmcts.reform.document.DocumentUploadClientApi;
-import uk.gov.hmcts.reform.document.domain.UploadResponse;
-import uk.gov.hmcts.reform.document.utils.InMemoryMultipartFile;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClientApi;
+import uk.gov.hmcts.reform.ccd.document.am.model.Classification;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentUploadRequest;
+import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
+import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 
 import static java.util.Collections.singletonList;
 
@@ -21,7 +23,8 @@ public class DocumentManagementUploadService {
 
     private static final Logger log = LoggerFactory.getLogger(DocumentManagementUploadService.class);
 
-    private final DocumentUploadClientApi documentUploadClientApi;
+    // needs `case_document_am.url` env var
+    private final CaseDocumentClientApi documentUploadClientApi;
 
     private final AuthTokenGenerator s2sTokenGenerator;
     private final IdamCachedClient idamCachedClient;
@@ -30,7 +33,7 @@ public class DocumentManagementUploadService {
 
     DocumentManagementUploadService(
         @Qualifier("processor-s2s-auth") AuthTokenGenerator s2sTokenGenerator,
-        DocumentUploadClientApi documentUploadClientApi,
+        CaseDocumentClientApi documentUploadClientApi,
         IdamCachedClient idamCachedClient
     ) {
         this.s2sTokenGenerator = s2sTokenGenerator;
@@ -56,16 +59,20 @@ public class DocumentManagementUploadService {
         CachedIdamCredential idamCredentials = idamCachedClient.getIdamCredentials(SampleData.JURSIDICTION);
         String s2sToken = s2sTokenGenerator.generate();
 
-        UploadResponse uploadResponse = documentUploadClientApi.upload(
+        DocumentUploadRequest uploadRequest = new DocumentUploadRequest(
+            Classification.RESTRICTED.toString(),
+            "Bulkscan_ExceptionRecord",
+            "BULKSCAN",
+            singletonList(file)
+        );
+        UploadResponse uploadResponse = documentUploadClientApi.uploadDocuments(
             idamCredentials.accessToken,
             s2sToken,
-            idamCredentials.userId,
-            singletonList(file)
+            uploadRequest
         );
         log.info("{} uploaded to DM store", displayName);
 
         return uploadResponse
-            .getEmbedded()
             .getDocuments()
             .get(0)
             .links

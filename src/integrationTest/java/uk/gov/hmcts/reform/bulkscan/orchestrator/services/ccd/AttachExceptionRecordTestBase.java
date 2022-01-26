@@ -244,7 +244,7 @@ public class AttachExceptionRecordTestBase {
                         )
                     );
 
-            assertThat(documentHashMap.get(EXCEPTION_RECORD_DOCUMENT_NUMBER)).isEqualTo(EXCEPTION_RECORD_DOCUMENT_HASH);
+            assertThat(documentHashMap.get(EXCEPTION_RECORD_DOCUMENT_NUMBER)).isEqualTo("");
 
         }
         assertMapsAreEqualIgnoringFields(

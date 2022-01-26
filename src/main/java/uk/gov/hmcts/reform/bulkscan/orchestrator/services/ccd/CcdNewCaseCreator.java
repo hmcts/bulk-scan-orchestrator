@@ -9,6 +9,7 @@ import org.springframework.web.client.HttpClientErrorException.UnprocessableEnti
 import org.springframework.web.client.RestClientException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam.CdamApiClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.ExceptionRecordTransformer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
@@ -24,7 +25,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.validation.ConstraintViolationException;
 
@@ -33,6 +36,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ServiceCaseFields.BULK_SCAN_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ServiceCaseFields.BULK_SCAN_ENVELOPES;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.util.Util.getDocumentUuid;
 
 @Service
 public class CcdNewCaseCreator {
@@ -43,19 +47,22 @@ public class CcdNewCaseCreator {
     private final AuthTokenGenerator s2sTokenGenerator;
     private final CcdApi ccdApi;
     private final EnvelopeReferenceHelper envelopeReferenceHelper;
+    private final CdamApiClient cdamApiClient;
 
     public CcdNewCaseCreator(
         ExceptionRecordTransformer exceptionRecordTransformer,
         ServiceResponseParser serviceResponseParser,
         AuthTokenGenerator s2sTokenGenerator,
         CcdApi ccdApi,
-        EnvelopeReferenceHelper envelopeReferenceHelper
+        EnvelopeReferenceHelper envelopeReferenceHelper,
+        CdamApiClient cdamApiClient
     ) {
         this.exceptionRecordTransformer = exceptionRecordTransformer;
         this.serviceResponseParser = serviceResponseParser;
         this.s2sTokenGenerator = s2sTokenGenerator;
         this.ccdApi = ccdApi;
         this.envelopeReferenceHelper = envelopeReferenceHelper;
+        this.cdamApiClient = cdamApiClient;
     }
 
     @SuppressWarnings("squid:S2139") // squid for exception handle + logging
@@ -100,7 +107,8 @@ public class CcdNewCaseCreator {
                 exceptionRecord,
                 transformationResponse,
                 configItem.getService(),
-                configItem.getSupplementaryDataEnabled()
+                configItem.getSupplementaryDataEnabled(),
+                configItem.getJurisdiction()
             );
 
             log.info(
@@ -169,7 +177,8 @@ public class CcdNewCaseCreator {
         ExceptionRecord exceptionRecord,
         SuccessfulTransformationResponse transformationResponse,
         String service,
-        boolean isSupplementaryDataEnabled
+        boolean isSupplementaryDataEnabled,
+        String jurisdiction
     ) {
         var loggingContext = String.format(
             "Exception ID: %s, jurisdiction: %s, form type: %s",
@@ -191,7 +200,8 @@ public class CcdNewCaseCreator {
                 startEventResponse,
                 service,
                 loggingContext,
-                isSupplementaryDataEnabled ? transformationResponse.supplementaryData : null
+                isSupplementaryDataEnabled ? transformationResponse.supplementaryData : null,
+                jurisdiction
             ),
             loggingContext
         );
@@ -204,8 +214,10 @@ public class CcdNewCaseCreator {
         StartEventResponse startEventResponse,
         String service,
         String loggingContext,
-        Map<String, Map<String, Object>> supplementaryData
+        Map<String, Map<String, Object>> supplementaryData,
+        String jurisdiction
     ) {
+        caseData = updateDocumentHash(jurisdiction, caseData);
         Map<String, Object> completeCaseData =
             setBulkScanSpecificFieldsInCaseData(caseData, service, exceptionRecordId, envelopeId, loggingContext);
 
@@ -260,5 +272,35 @@ public class CcdNewCaseCreator {
         }
 
         return updatedCaseData;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> updateDocumentHash(
+        String jurisdiction,
+        Map<String, Object> caseData
+    ) {
+        List<?> scannedDocuments =
+            (List<?>)caseData.get("scannedDocuments");
+
+        if (scannedDocuments != null) {
+            ArrayList modifiedDocs = new ArrayList();
+            for (Object scannedDocumentValue : scannedDocuments) {
+                Map<String, Object> scannedDocument = new HashMap((Map) ((Map) scannedDocumentValue).get("value"));
+                Map<String, String> url = new HashMap((Map) scannedDocument.get("url"));
+
+                String documentUrl =  url.get("document_url");
+                String documentUuid = getDocumentUuid(documentUrl);
+                String documentHash = cdamApiClient.getDocumentHash(jurisdiction, documentUuid);
+                url.put("document_hash", documentHash);
+
+                scannedDocument.put("url", url);
+                Map<String, Object> modScannedDocumentValue = new HashMap((Map) scannedDocumentValue);
+                modScannedDocumentValue.put("value", scannedDocument);
+                modifiedDocs.add(modScannedDocumentValue);
+            }
+            caseData.put("scannedDocuments", modifiedDocs);
+        }
+
+        return caseData;
     }
 }

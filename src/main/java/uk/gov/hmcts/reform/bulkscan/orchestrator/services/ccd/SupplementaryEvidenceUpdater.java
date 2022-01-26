@@ -132,8 +132,8 @@ public class SupplementaryEvidenceUpdater {
                     "exceptionRecordReference",
                     String.valueOf(exceptionRecordReference)
                 );
-
-                Map url = (Map) copiedDocumentContent.get("url");
+                // do not update exception record's documents
+                Map url = new HashMap((Map)copiedDocumentContent.get("url"));
                 String documentUrl = (String) url.get("document_url");
                 String documentUuid = getDocumentUuid(documentUrl);
                 log.info(
@@ -144,7 +144,7 @@ public class SupplementaryEvidenceUpdater {
                 );
                 String documentHash = cdamApiClient.getDocumentHash(jurisdiction, documentUuid);
                 url.put("document_hash", documentHash);
-
+                copiedDocumentContent.put("url", url);
                 return Map.<String, Object>of("value", copiedDocumentContent);
             })
             .collect(toList());

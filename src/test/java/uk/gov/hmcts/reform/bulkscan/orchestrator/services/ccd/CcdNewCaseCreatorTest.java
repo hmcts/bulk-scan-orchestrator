@@ -13,6 +13,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.ServiceResponseParser;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam.CdamApiClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.ExceptionRecordTransformer;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.CaseCreationDetails;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,8 +62,11 @@ class CcdNewCaseCreatorTest {
     private static final String IDAM_TOKEN = "idam-token";
     private static final String USER_ID = "user-id";
     private static final String SERVICE = "service";
+    private static final String JURISDICTION = "jurisdiction1";
+    private static final String DOCUMENT_HASH_1 = "DOCUMENT_HASH-1";
     private static final long CASE_ID = 123;
     private static final String CASE_TYPE_ID = SERVICE + "_ExceptionRecord";
+    private static final String DOCUMENT_UUID = "2erew11-23FRF11-3345";
 
     @Mock
     private ExceptionRecordTransformer exceptionRecordTransformer;
@@ -86,6 +91,9 @@ class CcdNewCaseCreatorTest {
     @Mock
     private HttpClientErrorException.BadRequest badRequest;
 
+    @Mock
+    private CdamApiClient cdamApiClient;
+
     @BeforeEach
     void setUp() {
         ccdNewCaseCreator = new CcdNewCaseCreator(
@@ -93,7 +101,8 @@ class CcdNewCaseCreatorTest {
             serviceResponseParser,
             s2sTokenGenerator,
             ccdApi,
-            envelopeReferenceHelper
+            envelopeReferenceHelper,
+            cdamApiClient
         );
     }
 
@@ -257,6 +266,8 @@ class CcdNewCaseCreatorTest {
             emptyList(),
             null
         );
+
+        given(cdamApiClient.getDocumentHash(JURISDICTION, DOCUMENT_UUID)).willReturn(DOCUMENT_HASH_1);
 
         ServiceConfigItem configItem = getConfigItem();
         ExceptionRecord exceptionRecord = getExceptionRecord();
@@ -549,7 +560,7 @@ class CcdNewCaseCreatorTest {
         data.put("formType", "A1");
         data.put("deliveryDate", "2019-09-06T15:30:03.000Z");
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
-        data.put("scannedDocuments", TestCaseBuilder.document("https://url", "name"));
+        data.put("scannedDocuments", TestCaseBuilder.document("https://url/" + DOCUMENT_UUID, "name"));
         data.put("scanOCRData", TestCaseBuilder.ocrDataEntry("key", "value"));
         data.put(ExceptionRecordFields.CONTAINS_PAYMENTS, YesNoFieldValues.YES);
         data.put(ExceptionRecordFields.ENVELOPE_ID, "987");
@@ -594,6 +605,7 @@ class CcdNewCaseCreatorTest {
             .isEqualTo("Case created from exception record ref " + exceptionRecordId);
     }
 
+    @SuppressWarnings("unchecked")
     private HashMap<String, Object> getExpectedCaseDataToPassToCcd(
         SuccessfulTransformationResponse transformationResponse,
         String exceptionRecordId,
@@ -605,7 +617,17 @@ class CcdNewCaseCreatorTest {
         if (isServiceEnabledForAutoCaseCreation) {
             expectedCaseData.put("bulkScanEnvelopes", expectedEnvelopeReferences);
         }
+        List<Map> scannedDocuments =
+            new ArrayList<>((List<Map>)expectedCaseData.get("scannedDocuments"));
+        var docMap = new HashMap(((Map)scannedDocuments.get(0)));
+        var doc = new HashMap((Map)docMap.get("value"));
+        var docDetails = new HashMap((Map)doc.get("url"));
+        docDetails.put("document_hash", DOCUMENT_HASH_1);
 
+        doc.put("url", docDetails);
+        docMap.put("value", doc);
+        scannedDocuments.set(0, docMap);
+        expectedCaseData.put("scannedDocuments", scannedDocuments);
         expectedCaseData.put("bulkScanCaseReference", exceptionRecordId);
         return expectedCaseData;
     }
@@ -613,6 +635,7 @@ class CcdNewCaseCreatorTest {
     private ServiceConfigItem getConfigItem() {
         ServiceConfigItem configItem = new ServiceConfigItem();
         configItem.setTransformationUrl("url");
+        configItem.setJurisdiction(JURISDICTION);
         return configItem;
     }
 
