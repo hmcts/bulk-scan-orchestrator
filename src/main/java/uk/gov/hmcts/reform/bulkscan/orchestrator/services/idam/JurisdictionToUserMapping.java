@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.AbstractMap;
@@ -14,8 +12,6 @@ import static java.util.stream.Collectors.toMap;
 
 @ConfigurationProperties(prefix = "idam")
 public class JurisdictionToUserMapping {
-
-    private static final Logger log = LoggerFactory.getLogger(JurisdictionToUserMapping.class);
 
     private Map<String, Credential> users = new HashMap<>();
 
@@ -33,7 +29,6 @@ public class JurisdictionToUserMapping {
 
     private Entry<String, Credential> createEntry(Entry<String, Map<String, String>> entry) {
         String key = entry.getKey().toLowerCase(Locale.getDefault());
-        log.info("--------key: {}", key);
         Credential cred = new Credential(entry.getValue().get("username"), entry.getValue().get("password"));
 
         return new AbstractMap.SimpleEntry<>(key, cred);
