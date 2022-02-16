@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CreateCaseCallbackService;
 
 import java.util.AbstractMap;
 import java.util.HashMap;
