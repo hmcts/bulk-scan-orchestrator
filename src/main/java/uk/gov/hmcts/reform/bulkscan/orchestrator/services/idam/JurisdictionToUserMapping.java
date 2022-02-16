@@ -34,6 +34,8 @@ public class JurisdictionToUserMapping {
     private Entry<String, Credential> createEntry(Entry<String, Map<String, String>> entry) {
         String key = entry.getKey().toLowerCase(Locale.getDefault());
         log.info("--------key: {}", key);
+        log.info("--------username: {}", entry.getValue().get("username"));
+        log.info("--------password: {}", entry.getValue().get("password"));
         Credential cred = new Credential(entry.getValue().get("username"), entry.getValue().get("password"));
 
         return new AbstractMap.SimpleEntry<>(key, cred);
