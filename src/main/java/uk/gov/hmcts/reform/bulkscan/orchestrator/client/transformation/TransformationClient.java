@@ -52,12 +52,18 @@ public class TransformationClient {
                 transformationRequest.ignoreWarnings
             );
         }
-        SuccessfulTransformationResponse response = restTemplate.postForObject(
-            getUrl(baseUrl),
-            new HttpEntity<>(transformationRequest, headers),
-            SuccessfulTransformationResponse.class
-        );
 
+        SuccessfulTransformationResponse response;
+        try {
+            response = restTemplate.postForObject(
+                getUrl(baseUrl),
+                new HttpEntity<>(transformationRequest, headers),
+                SuccessfulTransformationResponse.class
+            );
+        } catch (Exception ex) {
+            log.error("TransformCaseData error ", ex);
+            throw ex;
+        }
         Set<ConstraintViolation<SuccessfulTransformationResponse>> violations = validator.validate(response);
 
         if (violations.isEmpty()) {
