@@ -58,6 +58,7 @@ public class TransformationClient {
             SuccessfulTransformationResponse.class
         );
 
+        log.info("Transformation successful for exceptionRecordId: {} ", transformationRequest.exceptionRecordId);
         Set<ConstraintViolation<SuccessfulTransformationResponse>> violations = validator.validate(response);
 
         if (violations.isEmpty()) {
