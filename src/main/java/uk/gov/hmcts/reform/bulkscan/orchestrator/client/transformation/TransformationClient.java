@@ -16,6 +16,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Service
@@ -42,7 +43,7 @@ public class TransformationClient {
         TransformationRequest transformationRequest
     ) {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("ServiceAuthorization", s2sTokenGenerator.generate());
+        headers.add("ServiceAuthorization", getS2sToken());
         headers.add("Content-Type", APPLICATION_JSON.toString());
 
         if (transformationRequest != null) {
@@ -73,4 +74,13 @@ public class TransformationClient {
             .build()
             .toString();
     }
+
+    private String getS2sToken() {
+        var token = s2sTokenGenerator.generate();
+        if(isNotEmpty(token) && !token.startsWith("Bearer ")) {
+            return "Bearer " + token;
+        }
+        return token;
+    }
+
 }
