@@ -77,7 +77,7 @@ public class TransformationClient {
 
     private String getS2sToken() {
         var token = s2sTokenGenerator.generate();
-        if(isNotEmpty(token) && !token.startsWith("Bearer ")) {
+        if (isNotEmpty(token) && !token.startsWith("Bearer ")) {
             return "Bearer " + token;
         }
         return token;
