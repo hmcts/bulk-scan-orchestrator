@@ -250,8 +250,8 @@ public class TransformationClientTest {
     }
 
     private String setupS2sTokenGeneratorToReturnOneToken() {
-        String s2sToken = randomUUID().toString();
-        given(s2sTokenGenerator.generate()).willReturn("Bearer " + s2sToken);
+        String s2sToken = String.format("Bearer %s", randomUUID().toString());
+        given(s2sTokenGenerator.generate()).willReturn(s2sToken);
         return s2sToken;
     }
 }
