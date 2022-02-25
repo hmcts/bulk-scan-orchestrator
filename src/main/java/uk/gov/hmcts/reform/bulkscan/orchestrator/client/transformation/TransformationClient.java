@@ -45,6 +45,7 @@ public class TransformationClient {
         HttpHeaders headers = new HttpHeaders();
         headers.add("ServiceAuthorization", getS2sToken());
         headers.add("Content-Type", APPLICATION_JSON.toString());
+        headers.add("Accept", APPLICATION_JSON.toString());
 
         if (transformationRequest != null) {
             log.info(
