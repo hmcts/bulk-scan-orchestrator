@@ -239,6 +239,14 @@ service-config:
       case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_NFD}
       search-cases-by-envelope-id: ${CAN_SEARCH_CASES_BY_ENVELOPE_ID_NFD}
 
+    - service: privatelaw
+      jurisdiction: PRIVATELAW
+      case-type-ids: []
+      auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_PRIVATELAW}
+      auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_PRIVATELAW}
+      case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_PRIVATELAW}
+      search-cases-by-envelope-id: ${CAN_SEARCH_CASES_BY_ENVELOPE_ID_PRIVATELAW}
+
 scheduling:
   task:
     delete-envelopes-dlq-messages:
