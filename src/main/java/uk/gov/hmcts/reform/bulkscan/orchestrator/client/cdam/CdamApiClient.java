@@ -49,7 +49,7 @@ public class CdamApiClient {
         var s2sToken = s2sTokenGenerator.generate();
         var idamCredential = idamCachedClient.getIdamCredentials(jurisdiction);
 
-        Map<String, String> hashTokenMap = new HashMap<String, String>();
+        Map<String, String> hashTokenMap = new HashMap<>();
         for (Document document : documentList) {
             if (document != null) {
                 String docHashToken = cdamApi.getDocumentHash(s2sToken, idamCredential.accessToken, document.uuid);
@@ -57,21 +57,6 @@ public class CdamApiClient {
             }
         }
         return hashTokenMap;
-    }
-
-    public String getDocumentHash(
-        String jurisdiction,
-        Document document
-    ) {
-        if (!cdamEnabled) {
-            log.info("CDAM not enabled returning empty Map");
-            return null;
-        }
-
-        var s2sToken = s2sTokenGenerator.generate();
-        var idamCredential = idamCachedClient.getIdamCredentials(jurisdiction);
-
-        return cdamApi.getDocumentHash(s2sToken, idamCredential.accessToken, document.uuid);
     }
 
     public String getDocumentHash(

@@ -104,48 +104,6 @@ class CdamApiClientTest {
     }
 
     @Test
-    void should_get_hashToken_for_a_doc() {
-
-        var cachedIdamCredential = new CachedIdamCredential(IDAM_TOKEN, "user-1", 132131);
-        given(s2sTokenGenerator.generate()).willReturn(S2S_TOKEN);
-        given(idamCachedClient.getIdamCredentials(JURISDICTION)).willReturn(cachedIdamCredential);
-
-        var document1Uuid = UUID.randomUUID().toString();
-        var docHash1 = "23fdasaf3123sdvvs21wdeqa";
-        given(cdamApi.getDocumentHash(S2S_TOKEN, IDAM_TOKEN, document1Uuid)).willReturn(docHash1);
-
-        String result = cdamApiClient.getDocumentHash(
-            JURISDICTION,
-            getDocument(document1Uuid)
-        );
-
-        assertThat(result).isEqualTo(docHash1);
-
-        verify(s2sTokenGenerator).generate();
-        verify(idamCachedClient).getIdamCredentials(JURISDICTION);
-        verify(cdamApi).getDocumentHash(S2S_TOKEN, IDAM_TOKEN, document1Uuid);
-    }
-
-    @Test
-    void should_throw_exception_when_get_hashToken_get_errors() {
-        given(s2sTokenGenerator.generate()).willReturn(S2S_TOKEN);
-        var cachedIdamCredential = new CachedIdamCredential(IDAM_TOKEN, "user-1", 132131);
-        given(idamCachedClient.getIdamCredentials(JURISDICTION)).willReturn(cachedIdamCredential);
-
-        var document1Uuid = UUID.randomUUID().toString();
-        given(cdamApi.getDocumentHash(anyString(), anyString(), anyString()))
-            .willThrow(new HttpClientErrorException(HttpStatus.NOT_IMPLEMENTED));
-
-        assertThatCode(() -> cdamApiClient.getDocumentHash(
-            JURISDICTION,
-            getDocument(document1Uuid)
-        ))
-            .isInstanceOf(HttpClientErrorException.class)
-            .hasMessage("501 NOT_IMPLEMENTED");
-    }
-
-
-    @Test
     void should_get_hashToken_by_uuid_for_a_doc() {
 
         var cachedIdamCredential = new CachedIdamCredential(IDAM_TOKEN, "user-1", 132131);
@@ -190,19 +148,6 @@ class CdamApiClientTest {
             List.of(getDocument("2312"), getDocument("321321"))
         );
         assertThat(result).isEmpty();
-        verify(s2sTokenGenerator, never()).generate();
-        verify(idamCachedClient, never()).getIdamCredentials(anyString());
-        verify(cdamApi, never()).getDocumentHash(anyString(), anyString(), anyString());
-    }
-
-    @Test
-    void should_hashToken_for_doc_return_null_when_cdam_disabled() {
-        cdamApiClient.setCdamEnabled(false);
-        String result = cdamApiClient.getDocumentHash(
-            JURISDICTION,
-            getDocument("2312")
-        );
-        assertThat(result).isNull();
         verify(s2sTokenGenerator, never()).generate();
         verify(idamCachedClient, never()).getIdamCredentials(anyString());
         verify(cdamApi, never()).getDocumentHash(anyString(), anyString(), anyString());
