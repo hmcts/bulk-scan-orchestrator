@@ -26,7 +26,7 @@ java:
     DELETE_ENVELOPES_DLQ_MESSAGES_TTL: "10s"
     QUEUE_ACCESS_KEY_LISTEN_NAME: "ListenSharedAccessKey"
     QUEUE_ACCESS_KEY_SEND_NAME: "SendSharedAccessKey"
-    QUEUE_NAMESPACE: "bulk-scan-servicebus-{{ .Values.global.environment }}"
+    QUEUE_NAMESPACE: "bulk-scan-servicebus-{{ .Values.global.environment }}-premium"
     ENVELOPES_QUEUE_NAME: "envelopes"
     PROCESSED_ENVELOPES_QUEUE_NAME: "processed-envelopes"
     PAYMENTS_QUEUE_NAME: "payments"
@@ -109,11 +109,11 @@ java:
           alias: idam.users.sscs.username
         - name: idam-users-sscs-password
           alias: idam.users.sscs.password
-        - name: envelopes-queue-listen-shared-access-key
+        - name: envelopes-queue-listen-shared-access-key-premium
           alias: ENVELOPES_QUEUE_READ_ACCESS_KEY
-        - name: payments-queue-send-shared-access-key
+        - name: payments-queue-send-shared-access-key-premium
           alias: PAYMENTS_QUEUE_WRITE_ACCESS_KEY
-        - name: processed-envelopes-queue-send-shared-access-key
+        - name: processed-envelopes-queue-send-shared-access-key-premium
           alias: PROCESSED_ENVELOPES_QUEUE_WRITE_ACCESS_KEY
         - name: envelopes-queue-max-delivery-count
           alias: ENVELOPES_QUEUE_MAX_DELIVERY_COUNT
