@@ -3,9 +3,9 @@ plugins {
   id 'checkstyle'
   id 'pmd'
   id 'jacoco'
-  id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+  id 'io.spring.dependency-management' version '1.0.12.RELEASE'
   id 'org.owasp.dependencycheck' version '7.1.0.1'
-  id 'org.springframework.boot' version '2.7.0'
+  id 'org.springframework.boot' version '2.7.1'
   id 'com.github.ben-manes.versions' version '0.42.0'
   id 'org.sonarqube' version '3.4.0.2513'
   id 'info.solidsoft.pitest' version '1.7.0'
@@ -347,7 +347,7 @@ dependencies {
   integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.17.2', {
     exclude group: 'junit', module: 'junit'
   }
-  integrationTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.17.2'
+  integrationTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.17.3'
 
   functionalTestImplementation sourceSets.main.runtimeClasspath
   functionalTestImplementation sourceSets.test.runtimeClasspath
@@ -359,7 +359,7 @@ dependencies {
   functionalTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.17.1', {
     exclude group: 'junit', module: 'junit'
   }
-  functionalTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.17.2'
+  functionalTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.17.3'
 
   smokeTestImplementation sourceSets.main.runtimeClasspath
   smokeTestImplementation sourceSets.test.runtimeClasspath
