@@ -1,7 +1,7 @@
 {
   "id": "{ENVELOPE_ID}",
   "case_ref": "this-will-get-updated-in-code",
-  "po_box": "BULKSCANPO",
+  "po_box": "BULKSCAN PO BOX",
   "jurisdiction": "BULKSCAN",
   "container": "bulkscanauto",
   "formType": "B123",
