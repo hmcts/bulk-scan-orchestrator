@@ -39,6 +39,16 @@ public class CaseSearcher {
         ).stream().findFirst();
     }
 
+    // only used in tests
+    public Optional<CaseDetails> findExceptionRecordByEnvelopeId(String envelopeId, String container) {
+        String caseTypeId = container.toUpperCase() + "_" + CreateExceptionRecord.CASE_TYPE;
+        return search(
+            SampleData.JURSIDICTION,
+            caseTypeId,
+            ImmutableMap.of("case.envelopeId", envelopeId)
+        ).stream().findFirst();
+    }
+
     // only used in tests. single source code call - only used in tests too
     public List<CaseDetails> search(
         String jurisdiction,

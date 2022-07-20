@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import com.azure.messaging.servicebus.ServiceBusException;
 import com.azure.messaging.servicebus.ServiceBusReceiverClient;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
@@ -21,6 +22,7 @@ import static org.awaitility.Awaitility.await;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
+@Disabled
 @ActiveProfiles("nosb")  // no servicebus queue handler registration
 @Import(FunctionalQueueConfig.class)
 public class CleanupDlqMessagesTest {
