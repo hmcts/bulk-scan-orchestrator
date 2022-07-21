@@ -38,14 +38,12 @@ public class EnvelopeMessager {
         String jsonFileName,
         String caseRef,
         String legacyCaseRef,
-        UUID poBox,
         String documentUrl
     ) throws JSONException {
         return sendMessageFromFile(
             jsonFileName,
             caseRef,
             legacyCaseRef,
-            poBox,
             documentUrl,
             UUID.randomUUID().toString()
         );
@@ -60,7 +58,6 @@ public class EnvelopeMessager {
         String jsonFileName,
         String caseRef,
         String legacyCaseRef,
-        UUID poBox,
         String documentUrl,
         String envelopeId
     ) throws JSONException {
@@ -72,10 +69,6 @@ public class EnvelopeMessager {
 
         updateCaseData.put("case_ref", caseRef);
         updateCaseData.put("previous_service_case_ref", legacyCaseRef);
-
-        if (poBox != null) {
-            updateCaseData.put("po_box", poBox);
-        }
 
         JSONArray documents = (JSONArray) updateCaseData.get("documents");
         JSONObject document = (JSONObject) documents.get(0);
