@@ -25,9 +25,9 @@ java:
     PAYMENTS_QUEUE_WRITE_ACCESS_KEY: "$(SB_ACCESS_KEY)"
     FLYWAY_SKIP_MIGRATIONS: "false"
     DB_HOST: "{{ .Release.Name }}-postgresql"
-    DB_NAME: "{{ .Values.postgresql.postgresqlDatabase}}"
-    DB_USER: "{{ .Values.postgresql.postgresqlUsername}}"
-    DB_PASSWORD: "{{ .Values.postgresql.postgresqlPassword}}"
+    DB_NAME: "{{ .Values.postgresql.auth.database}}"
+    DB_USER: "{{ .Values.postgresql.auth.username}}"
+    DB_PASSWORD: "{{ .Values.postgresql.auth.password}}"
     DB_PORT: '5432'
     DB_CONN_OPTIONS: ""
   keyVaults:
