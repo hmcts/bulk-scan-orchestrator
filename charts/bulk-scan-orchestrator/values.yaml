@@ -73,7 +73,7 @@ java:
     SUPPLEMENTARY_DATA_ENABLED_SSCS: "true"
     FLYWAY_SKIP_MIGRATIONS: "true"
     ENVELOPE_QUEUE_CHECK_POLL_INTERVAL: "PT1H"
-    CDAM_ENABLED: "true"
+    CDAM_ENABLED: "false"
   keyVaults:
     bulk-scan:
       secrets:
