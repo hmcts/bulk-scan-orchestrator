@@ -1,7 +1,7 @@
 name: bulk-scan-orchestrator
 apiVersion: v2
 home: https://github.com/hmcts/bulk-scan-orchestrator
-version: 0.5.9
+version: 0.5.10
 description: HMCTS Bulk scan orchestrator service
 maintainers:
   - name: HMCTS BSP Team
@@ -11,6 +11,6 @@ dependencies:
     version: 4.0.1
     repository: https://hmctspublic.azurecr.io/helm/v1/repo/
   - name: servicebus
-    version: 0.3.1
+    version: 0.4.0
     repository: https://hmctspublic.azurecr.io/helm/v1/repo/
     condition: servicebus.enabled
