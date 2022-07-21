@@ -54,24 +54,24 @@ class ExceptionRecordCreationTest {
     @Test
     public void create_exception_record_from_supplementary_evidence() throws Exception {
         // given
-        UUID randomPoBox = UUID.randomUUID();
+        String envelopeId = UUID.randomUUID().toString();
 
         // when
         envelopeMessager.sendMessageFromFile(
             "envelopes/supplementary-evidence-envelope.json", // no payments
             "0000000000000000",
             null,
-            randomPoBox,
-            dmUrl
+            dmUrl,
+            envelopeId
         );
 
         // then
         await("Exception record being created")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
-            .until(() -> caseSearcher.findExceptionRecord(randomPoBox.toString(), SampleData.CONTAINER).isPresent());
+            .until(() -> caseSearcher.findExceptionRecord(envelopeId, SampleData.CONTAINER).isPresent());
 
-        CaseDetails caseDetails = caseSearcher.findExceptionRecord(randomPoBox.toString(), SampleData.CONTAINER).get();
+        CaseDetails caseDetails = caseSearcher.findExceptionRecord(envelopeId, SampleData.CONTAINER).get();
         assertThat(getCaseDataForField(caseDetails, "awaitingPaymentDCNProcessing")).isEqualTo("No");
         assertThat(getCaseDataForField(caseDetails, "containsPayments")).isEqualTo("No");
         assertThat(getCaseDataForField(caseDetails, "surname")).isNull();
@@ -81,27 +81,27 @@ class ExceptionRecordCreationTest {
     @Test
     public void should_create_exception_record_for_new_application() throws Exception {
         // given
-        UUID randomPoBox = UUID.randomUUID();
+        String envelopeId = UUID.randomUUID().toString();
 
         // when
-        String messageEnvelopeId = envelopeMessager.sendMessageFromFile(
+        envelopeMessager.sendMessageFromFile(
             "envelopes/new-envelope-with-evidence.json", // with payments dcn
             "0000000000000000",
             null,
-            randomPoBox,
-            dmUrl
+            dmUrl,
+            envelopeId
         );
 
         // then
         await("Exception record should be created")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
-            .until(() -> caseSearcher.findExceptionRecord(randomPoBox.toString(), SampleData.CONTAINER).isPresent());
+            .until(() -> caseSearcher.findExceptionRecord(envelopeId, SampleData.CONTAINER).isPresent());
 
-        CaseDetails caseDetails = caseSearcher.findExceptionRecord(randomPoBox.toString(), SampleData.CONTAINER).get();
+        CaseDetails caseDetails = caseSearcher.findExceptionRecord(envelopeId, SampleData.CONTAINER).get();
 
         // envelope ID from the JSON resource representing the test message
-        assertThat(caseDetails.getData().get("envelopeId")).isEqualTo(messageEnvelopeId);
+        assertThat(caseDetails.getData().get("envelopeId")).isEqualTo(envelopeId);
 
         assertThat(caseDetails.getCaseTypeId()).isEqualTo("BULKSCAN_ExceptionRecord");
         assertThat(caseDetails.getJurisdiction()).isEqualTo("BULKSCAN");
@@ -124,30 +124,31 @@ class ExceptionRecordCreationTest {
     @Test
     public void create_exception_record_for_invalid_case_reference() throws Exception {
         // given
-        UUID randomPoBox = UUID.randomUUID();
+        String envelopeId = UUID.randomUUID().toString();
 
         // when
         envelopeMessager.sendMessageFromFile(
             "envelopes/supplementary-evidence-envelope.json",
             "1234",
             null,
-            randomPoBox,
-            dmUrl
+            dmUrl,
+            envelopeId
         );
 
         // then
         await("Exception record being created")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
-            .until(() -> caseSearcher.findExceptionRecord(randomPoBox.toString(), SampleData.CONTAINER).isPresent());
+            .until(() -> caseSearcher.findExceptionRecord(envelopeId, SampleData.CONTAINER).isPresent());
     }
 
     @DisplayName("Should create ExceptionRecord when classification is SUPPLEMENTARY_EVIDENCE_WITH_OCR")
     @Test
     void create_exception_record_for_supplementary_evidence_with_ocr() throws Exception {
         //given
+        String envelopeId = UUID.randomUUID().toString();
         String envelopeCaseRef = "1539860706648396";
-        Map<String, String> expectedOcrData = ImmutableMap.of(
+        final Map<String, String> expectedOcrData = ImmutableMap.of(
             "first_name", "value1",
             "last_name", "value2",
             "email", "hello@test.com",
@@ -155,12 +156,12 @@ class ExceptionRecordCreationTest {
         );
 
         // when
-        String envelopeId = envelopeMessager.sendMessageFromFile(
+        envelopeMessager.sendMessageFromFile(
             "envelopes/supplementary-evidence-with-ocr-envelope.json",
             envelopeCaseRef,
             null,
-            null,
-            dmUrl
+            dmUrl,
+            envelopeId
         );
 
         // then
