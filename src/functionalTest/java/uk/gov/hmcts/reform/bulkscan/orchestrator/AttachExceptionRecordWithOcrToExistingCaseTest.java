@@ -149,9 +149,9 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
         await("Exception record is created")
             .atMost(30, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
-            .until(() -> caseSearcher.findExceptionRecordByEnvelopeId(envelopeId, SampleData.CONTAINER).isPresent());
+            .until(() -> caseSearcher.findExceptionRecord(envelopeId, SampleData.CONTAINER).isPresent());
 
-        return caseSearcher.findExceptionRecordByEnvelopeId(envelopeId, SampleData.CONTAINER).get();
+        return caseSearcher.findExceptionRecord(envelopeId, SampleData.CONTAINER).get();
     }
 
     private void sendAttachRequest(CaseDetails exceptionRecord, String targetCaseId) {

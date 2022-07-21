@@ -27,8 +27,8 @@ public class ExceptionRecordCreator {
         await("Exception record is created")
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
-            .until(() -> caseSearcher.findExceptionRecordByEnvelopeId(envelopeId, container).isPresent());
+            .until(() -> caseSearcher.findExceptionRecord(envelopeId, container).isPresent());
 
-        return caseSearcher.findExceptionRecordByEnvelopeId(envelopeId, container).get();
+        return caseSearcher.findExceptionRecord(envelopeId, container).get();
     }
 }
