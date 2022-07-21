@@ -69,10 +69,9 @@ class ExceptionRecordCreationTest {
         await("Exception record being created")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
-            .until(() -> caseSearcher.findExceptionRecordByEnvelopeId(envelopeId, SampleData.CONTAINER).isPresent());
+            .until(() -> caseSearcher.findExceptionRecord(envelopeId, SampleData.CONTAINER).isPresent());
 
-        CaseDetails caseDetails = caseSearcher.findExceptionRecordByEnvelopeId(
-            envelopeId, SampleData.CONTAINER).get();
+        CaseDetails caseDetails = caseSearcher.findExceptionRecord(envelopeId, SampleData.CONTAINER).get();
         assertThat(getCaseDataForField(caseDetails, "awaitingPaymentDCNProcessing")).isEqualTo("No");
         assertThat(getCaseDataForField(caseDetails, "containsPayments")).isEqualTo("No");
         assertThat(getCaseDataForField(caseDetails, "surname")).isNull();
@@ -97,10 +96,9 @@ class ExceptionRecordCreationTest {
         await("Exception record should be created")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
-            .until(() -> caseSearcher.findExceptionRecordByEnvelopeId(envelopeId, SampleData.CONTAINER).isPresent());
+            .until(() -> caseSearcher.findExceptionRecord(envelopeId, SampleData.CONTAINER).isPresent());
 
-        CaseDetails caseDetails = caseSearcher.findExceptionRecordByEnvelopeId(
-            envelopeId, SampleData.CONTAINER).get();
+        CaseDetails caseDetails = caseSearcher.findExceptionRecord(envelopeId, SampleData.CONTAINER).get();
 
         // envelope ID from the JSON resource representing the test message
         assertThat(caseDetails.getData().get("envelopeId")).isEqualTo(envelopeId);
@@ -141,7 +139,7 @@ class ExceptionRecordCreationTest {
         await("Exception record being created")
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
-            .until(() -> caseSearcher.findExceptionRecordByEnvelopeId(envelopeId, SampleData.CONTAINER).isPresent());
+            .until(() -> caseSearcher.findExceptionRecord(envelopeId, SampleData.CONTAINER).isPresent());
     }
 
     @DisplayName("Should create ExceptionRecord when classification is SUPPLEMENTARY_EVIDENCE_WITH_OCR")
