@@ -147,8 +147,8 @@ public class AutomaticCaseCreationTest {
         var exceptionRecords = findExceptionRecords(envelopeId, DISABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID);
         assertThat(exceptionRecords.size()).isOne();
 
-        var serviceCases = caseSearcher.searchByEnvelopeId
-            (SERVICE_CASE_JURISDICTION, SERVICE_CASE_TYPE_ID, envelopeId);
+        var serviceCases = caseSearcher.searchByEnvelopeId(
+            SERVICE_CASE_JURISDICTION, SERVICE_CASE_TYPE_ID, envelopeId);
         assertThat(serviceCases).isEmpty();
     }
 
