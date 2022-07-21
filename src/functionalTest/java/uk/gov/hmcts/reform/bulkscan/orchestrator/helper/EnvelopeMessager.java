@@ -73,51 +73,6 @@ public class EnvelopeMessager {
         updateCaseData.put("case_ref", caseRef);
         updateCaseData.put("previous_service_case_ref", legacyCaseRef);
 
-        if (poBox != null) {
-            updateCaseData.put("po_box", poBox);
-        }
-
-        JSONArray documents = (JSONArray) updateCaseData.get("documents");
-        JSONObject document = (JSONObject) documents.get(0);
-        document.put("url", documentUrl);
-        document.put("uuid", StringUtils.substringAfterLast(documentUrl, "/")); //extract uuid from document url
-
-        ServiceBusMessage message = new ServiceBusMessage(updateCaseData.toString());
-        message.setMessageId(envelopeId);
-        message.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        client.sendMessage(message);
-
-        logger.info(
-            "Sent message to queue for the Case ID {} for updating the case. MessageId: {} Current time: {}",
-            caseRef,
-            message.getMessageId(),
-            Instant.now()
-        );
-
-        return envelopeId;
-    }
-
-    /**
-     * Sends a message, with content from the given file, to the queue.
-     *
-     * @return Envelope/message ID
-     */
-    public String sendMessageFromFileToCreateExceptionRecord(
-        String jsonFileName,
-        String caseRef,
-        String legacyCaseRef,
-        String documentUrl,
-        String envelopeId
-    ) throws JSONException {
-        String messageContent =
-            SampleData.fileContentAsString(jsonFileName)
-                .replace(ENVELOPE_ID_PLACEHOLDER, envelopeId);
-
-        JSONObject updateCaseData = new JSONObject(messageContent);
-
-        updateCaseData.put("case_ref", caseRef);
-        updateCaseData.put("previous_service_case_ref", legacyCaseRef);
-
         JSONArray documents = (JSONArray) updateCaseData.get("documents");
         JSONObject document = (JSONObject) documents.get(0);
         document.put("url", documentUrl);
