@@ -30,7 +30,6 @@ java:
     DB_PASSWORD: "{{ .Values.postgresql.postgresqlPassword}}"
     DB_PORT: '5432'
     DB_CONN_OPTIONS: ""
-    CDAM_ENABLED: "true"
   keyVaults:
     "bulk-scan":
       secrets:
