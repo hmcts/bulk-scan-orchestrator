@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,7 +22,6 @@ import static java.util.Collections.emptyList;
 import static org.awaitility.Awaitility.await;
 
 @SpringBootTest
-@Disabled
 @ActiveProfiles("nosb")
 public class AutomaticCaseUpdateTest {
 
