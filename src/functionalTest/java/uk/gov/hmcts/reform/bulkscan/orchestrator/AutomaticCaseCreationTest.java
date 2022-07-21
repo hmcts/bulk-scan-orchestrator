@@ -67,10 +67,9 @@ public class AutomaticCaseCreationTest {
     @Test
     void should_create_case_when_envelope_data_is_valid_and_service_is_enabled_for_auto_creation() throws Exception {
         // when
-        var poBox = UUID.randomUUID();
         String envelopeId = UUID.randomUUID().toString();
 
-        sendEnvelopeMessage("envelopes/valid-new-application-bulkscanauto.json", poBox, envelopeId);
+        sendEnvelopeMessage("envelopes/valid-new-application-bulkscanauto.json", envelopeId);
 
         // then
         waitForServiceCaseToBeInElasticSearch(envelopeId);
@@ -88,13 +87,12 @@ public class AutomaticCaseCreationTest {
         assertThat(getCaseDataForField(caseDetails, "email")).isEqualTo("jsmith1@example.com");
 
         // make sure the exception record wasn't created
-        assertThat(findExceptionRecords(poBox, ENABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID)).isEmpty();
+        assertThat(findExceptionRecords(envelopeId, ENABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID)).isEmpty();
     }
 
     @Test
     void should_not_create_more_than_one_case_for_the_same_envelope() throws Exception {
         // given a case has already been created from the envelope
-        var poBox = UUID.randomUUID();
         var envelopeId = UUID.randomUUID().toString();
         var originalFirstName = "TheNameFromOriginalCase";
 
@@ -112,7 +110,7 @@ public class AutomaticCaseCreationTest {
         waitForServiceCaseToBeInElasticSearch(envelopeId);
 
         // when
-        sendEnvelopeMessage("envelopes/valid-new-application-bulkscanauto.json", poBox, envelopeId);
+        sendEnvelopeMessage("envelopes/valid-new-application-bulkscanauto.json", envelopeId);
 
         // wait for the message to be processed and CCD's ElasticSearch to be updated
         Thread.sleep(5000);
@@ -129,69 +127,64 @@ public class AutomaticCaseCreationTest {
         assertThat(getCaseDataForField(caseDetails, "firstName")).isEqualTo(originalFirstName);
 
         // make sure the exception record wasn't created
-        assertThat(findExceptionRecords(poBox, ENABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID)).isEmpty();
+        assertThat(findExceptionRecords(envelopeId, ENABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID)).isEmpty();
     }
 
     @Test
     void should_create_exception_record_when_envelope_data_is_valid_but_service_is_disabled() throws Exception {
         // given
-        UUID poBox = UUID.randomUUID();
-
         // when
         String envelopeId = sendEnvelopeMessage(
             "envelopes/valid-new-application-bulkscan.json",
-            poBox,
             UUID.randomUUID().toString()
         );
 
         // then
-        waitForExceptionRecordToBeCreated(poBox, envelopeId, DISABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID);
+        waitForExceptionRecordToBeCreated(envelopeId, DISABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID);
 
-        var exceptionRecords = findExceptionRecords(poBox, DISABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID);
+        var exceptionRecords = findExceptionRecords(envelopeId, DISABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID);
         assertThat(exceptionRecords.size()).isOne();
 
-        var serviceCases = caseSearcher.searchByEnvelopeId(SERVICE_CASE_JURISDICTION, SERVICE_CASE_TYPE_ID, envelopeId);
+        var serviceCases = caseSearcher.searchByEnvelopeId(
+            SERVICE_CASE_JURISDICTION, SERVICE_CASE_TYPE_ID, envelopeId);
         assertThat(serviceCases).isEmpty();
     }
 
     @Test
     void should_create_exception_record_when_envelope_data_is_invalid() throws Exception {
         // given
-        UUID poBox = UUID.randomUUID();
-
         // when
         String envelopeId = sendEnvelopeMessage(
             "envelopes/invalid-new-application-bulkscanauto.json",
-            poBox,
             UUID.randomUUID().toString()
         );
 
         // then
-        waitForExceptionRecordToBeCreated(poBox, envelopeId, ENABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID);
+        waitForExceptionRecordToBeCreated(envelopeId, ENABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID);
 
-        var exceptionRecords = findExceptionRecords(poBox, ENABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID);
+        var exceptionRecords = findExceptionRecords(envelopeId, ENABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID);
         assertThat(exceptionRecords.size()).isOne();
 
-        var serviceCases = caseSearcher.searchByEnvelopeId(SERVICE_CASE_JURISDICTION, SERVICE_CASE_TYPE_ID, envelopeId);
+        var serviceCases = caseSearcher.searchByEnvelopeId(
+            SERVICE_CASE_JURISDICTION, SERVICE_CASE_TYPE_ID, envelopeId);
         assertThat(serviceCases).isEmpty();
     }
 
-    private String sendEnvelopeMessage(String resourcePath, UUID poBox, String envelopeId) throws Exception {
+    private String sendEnvelopeMessage(String resourcePath, String envelopeId) throws Exception {
         return envelopeMessager.sendMessageFromFile(
             resourcePath,
             "0000000000000000",
             null,
-            poBox,
             documentUrl,
             envelopeId
         );
     }
 
-    private List<CaseDetails> findExceptionRecords(UUID poBox, String caseTypeId) {
+    private List<CaseDetails> findExceptionRecords(String envelopeId, String caseTypeId) {
         return caseSearcher.search(
             SERVICE_CASE_JURISDICTION,
             caseTypeId,
-            ImmutableMap.of("case.poBox", poBox.toString())
+            ImmutableMap.of("case.envelopeId", envelopeId)
         );
     }
 
@@ -223,10 +216,10 @@ public class AutomaticCaseCreationTest {
             );
     }
 
-    private void waitForExceptionRecordToBeCreated(UUID poBox, String envelopeId, String caseTypeId) {
+    private void waitForExceptionRecordToBeCreated(String envelopeId, String caseTypeId) {
         await("Wait for exception record to be created. Envelope ID: " + envelopeId)
             .atMost(60, TimeUnit.SECONDS)
             .pollInterval(Duration.ofSeconds(5))
-            .until(() -> !findExceptionRecords(poBox, caseTypeId).isEmpty());
+            .until(() -> !findExceptionRecords(envelopeId, caseTypeId).isEmpty());
     }
 }
