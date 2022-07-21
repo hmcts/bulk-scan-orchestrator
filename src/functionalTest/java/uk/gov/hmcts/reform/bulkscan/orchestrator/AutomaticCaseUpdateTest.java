@@ -20,7 +20,6 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.Collections.emptyList;
-import static java.util.UUID.randomUUID;
 import static org.awaitility.Awaitility.await;
 
 @SpringBootTest
@@ -46,7 +45,6 @@ public class AutomaticCaseUpdateTest {
             "envelopes/supplementary-evidence-with-ocr-bulkscanauto.json",
             String.valueOf(existingCase.getId()),
             null,
-            randomUUID(),
             docUrl
         );
 
@@ -81,7 +79,6 @@ public class AutomaticCaseUpdateTest {
             "envelopes/supplementary-evidence-with-ocr-bulkscanauto.json",
             String.valueOf(existingCase.getId()),
             null,
-            randomUUID(),
             docUrl
         );
 
@@ -116,7 +113,6 @@ public class AutomaticCaseUpdateTest {
             "envelopes/supplementary-evidence-with-ocr-bulkscanauto.json",
             String.valueOf(existingCase.getId()),
             null,
-            randomUUID(),
             docUrl
         );
 
@@ -140,7 +136,6 @@ public class AutomaticCaseUpdateTest {
             "envelopes/supplementary-evidence-with-updated-ocr-bulkscanauto.json",
             String.valueOf(existingCase.getId()),
             null,
-            randomUUID(),
             docUrl
         );
 

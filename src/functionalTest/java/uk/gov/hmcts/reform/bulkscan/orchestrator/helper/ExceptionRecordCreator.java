@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
@@ -23,15 +22,13 @@ public class ExceptionRecordCreator {
     }
 
     public CaseDetails createExceptionRecord(String container, String resourceName, String fileUrl) throws Exception {
-        UUID poBox = UUID.randomUUID();
-
-        envelopeMessager.sendMessageFromFile(resourceName, "0000000000000000", null, poBox, fileUrl);
+        String envelopeId = envelopeMessager.sendMessageFromFile(resourceName, "0000000000000000", null, fileUrl);
 
         await("Exception record is created")
             .atMost(60, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
-            .until(() -> caseSearcher.findExceptionRecord(poBox.toString(), container).isPresent());
+            .until(() -> caseSearcher.findExceptionRecordByEnvelopeId(envelopeId, container).isPresent());
 
-        return caseSearcher.findExceptionRecord(poBox.toString(), container).get();
+        return caseSearcher.findExceptionRecordByEnvelopeId(envelopeId, container).get();
     }
 }

@@ -29,7 +29,6 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static java.time.Instant.now;
@@ -143,18 +142,16 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
     }
 
     private CaseDetails createExceptionRecord(String resourceName) throws Exception {
-        UUID poBox = UUID.randomUUID();
-
         String dmUrl = dmUploadService.uploadToDmStore("doc.pdf", "documents/supplementary-evidence.pdf");
 
-        envelopeMessager.sendMessageFromFile(resourceName, "0000000000000000", null, poBox, dmUrl);
+        String envelopeId = envelopeMessager.sendMessageFromFile(resourceName, "0000000000000000", null, dmUrl);
 
         await("Exception record is created")
             .atMost(30, TimeUnit.SECONDS)
             .pollDelay(2, TimeUnit.SECONDS)
-            .until(() -> caseSearcher.findExceptionRecord(poBox.toString(), SampleData.CONTAINER).isPresent());
+            .until(() -> caseSearcher.findExceptionRecordByEnvelopeId(envelopeId, SampleData.CONTAINER).isPresent());
 
-        return caseSearcher.findExceptionRecord(poBox.toString(), SampleData.CONTAINER).get();
+        return caseSearcher.findExceptionRecordByEnvelopeId(envelopeId, SampleData.CONTAINER).get();
     }
 
     private void sendAttachRequest(CaseDetails exceptionRecord, String targetCaseId) {

@@ -61,7 +61,6 @@ class ExceptionRecordCreationTest {
             "envelopes/supplementary-evidence-envelope.json", // no payments
             "0000000000000000",
             null,
-            null,
             dmUrl,
             envelopeId
         );
@@ -89,7 +88,6 @@ class ExceptionRecordCreationTest {
         envelopeMessager.sendMessageFromFile(
             "envelopes/new-envelope-with-evidence.json", // with payments dcn
             "0000000000000000",
-            null,
             null,
             dmUrl,
             envelopeId
@@ -135,7 +133,6 @@ class ExceptionRecordCreationTest {
             "envelopes/supplementary-evidence-envelope.json",
             "1234",
             null,
-            null,
             dmUrl,
             envelopeId
         );
@@ -164,7 +161,6 @@ class ExceptionRecordCreationTest {
         envelopeMessager.sendMessageFromFile(
             "envelopes/supplementary-evidence-with-ocr-envelope.json",
             envelopeCaseRef,
-            null,
             null,
             dmUrl,
             envelopeId

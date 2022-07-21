@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getScannedDocuments;
@@ -63,7 +62,6 @@ class SupplementaryEvidenceTest {
             "envelopes/supplementary-evidence-envelope.json",
             String.valueOf(caseDetails.getId()),
             null,
-            randomUUID(),
             dmUrl
         );
 
@@ -94,7 +92,6 @@ class SupplementaryEvidenceTest {
             "envelopes/supplementary-evidence-envelope.json",
             String.valueOf(caseDetails.getId()),
             null,
-            randomUUID(),
             dmUrlNew
         );
 
@@ -124,7 +121,6 @@ class SupplementaryEvidenceTest {
             "envelopes/supplementary-evidence-with-legacy-id.json",
             null,
             legacyId,
-            randomUUID(),
             dmUrl
         );
 
@@ -150,7 +146,6 @@ class SupplementaryEvidenceTest {
             "envelopes/supplementary-evidence-envelope-with-payment.json",
             String.valueOf(exceptionRecord.getId()),
             null,
-            randomUUID(),
             dmUrl
         );
 
@@ -168,7 +163,6 @@ class SupplementaryEvidenceTest {
             "envelopes/supplementary-evidence-envelope.json", // no payments
             "0000000000000000",
             null,
-            randomUUID(),
             dmUrl
         );
 

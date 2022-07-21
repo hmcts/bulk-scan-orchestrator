@@ -45,7 +45,6 @@ public class CleanupDlqMessagesTest {
                 "envelopes/dead-letter-envelope.json",
                 "1234",
                 null,
-                null,
                 null
             );
         }
