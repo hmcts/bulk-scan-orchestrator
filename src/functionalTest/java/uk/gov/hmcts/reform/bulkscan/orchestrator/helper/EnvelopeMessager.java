@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class EnvelopeMessager {
     private static final String ENVELOPE_ID_PLACEHOLDER = "{ENVELOPE_ID}";
 
     @Autowired
+    @Qualifier("testWriteClient")
     private ServiceBusSenderClient client;
 
     /**

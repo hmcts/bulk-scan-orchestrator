@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes;
 
 import com.azure.messaging.servicebus.ServiceBusErrorContext;
+import com.azure.messaging.servicebus.ServiceBusMessage;
 import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
 import com.azure.messaging.servicebus.ServiceBusReceivedMessageContext;
-import com.azure.messaging.servicebus.models.DeadLetterOptions;
+import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.logging.AppInsights;
@@ -18,8 +20,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.pro
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.InvalidMessageException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.MessageProcessingException;
 
-import java.time.Instant;
-import java.util.Map;
+import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeParser.parse;
@@ -38,17 +40,23 @@ public class EnvelopeMessageProcessor {
     private final IProcessedEnvelopeNotifier processedEnvelopeNotifier;
     private final int maxDeliveryCount;
     private final AppInsights appInsights;
+    private final ServiceBusSenderClient envelopesDeadLetterSend;
+    private final Duration ttl;
 
     public EnvelopeMessageProcessor(
         EnvelopeHandler envelopeHandler,
         IProcessedEnvelopeNotifier processedEnvelopeNotifier,
         @Value("${azure.servicebus.envelopes.max-delivery-count}") int maxDeliveryCount,
-        AppInsights appInsights
+        AppInsights appInsights,
+        @Qualifier("envelopes-dead-letter-send") ServiceBusSenderClient envelopesDeadLetterSend,
+        @Value("${scheduling.task.delete-envelopes-dlq-messages.ttl}") Duration ttl
     ) {
         this.envelopeHandler = envelopeHandler;
         this.processedEnvelopeNotifier = processedEnvelopeNotifier;
         this.maxDeliveryCount = maxDeliveryCount;
         this.appInsights = appInsights;
+        this.envelopesDeadLetterSend = envelopesDeadLetterSend;
+        this.ttl = ttl;
     }
 
     /**
@@ -163,13 +171,14 @@ public class EnvelopeMessageProcessor {
         String reason,
         String description
     ) {
-        context.deadLetter(
-            new DeadLetterOptions()
-                .setDeadLetterReason(reason)
-                .setDeadLetterErrorDescription(description)
-                .setPropertiesToModify(Map.of("deadLetteredAt", Instant.now().toString()))
-        );
         var message = context.getMessage();
+        var deadMessage = new ServiceBusMessage(message.getBody());
+        deadMessage.setMessageId(message.getMessageId());
+        envelopesDeadLetterSend.scheduleMessage(
+            deadMessage,
+            OffsetDateTime.now().plus(this.ttl)
+        );
+        context.complete();
         log.info("Message with ID {} has been dead-lettered", message.getMessageId());
         // track used for alert
         appInsights.trackDeadLetteredMessage(message, "envelopes", reason, description);

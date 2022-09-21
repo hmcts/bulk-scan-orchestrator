@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
+import com.azure.messaging.servicebus.ServiceBusProcessorClient;
 import com.azure.messaging.servicebus.ServiceBusReceiverClient;
 import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import com.azure.messaging.servicebus.models.SubQueue;
@@ -11,6 +12,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.pay
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.IProcessedEnvelopeNotifier;
 
 import java.util.function.Supplier;
+
+import static org.mockito.Mockito.mock;
 
 public class FunctionalQueueConfig {
     public static final String CONNECTION_STR_FORMAT =
@@ -34,7 +37,7 @@ public class FunctionalQueueConfig {
     @Value("${queue.namespace}")
     private String queueNamespace;
 
-    @Bean
+    @Bean("testWriteClient")
     public ServiceBusSenderClient testWriteClient() {
         return new ServiceBusClientBuilder()
             .connectionString(getEnvelopQueueConnectionString(queueWriteAccessKeyName, queueWriteAccessKey))
@@ -68,6 +71,16 @@ public class FunctionalQueueConfig {
         // return implementation that does nothing
         return cmd -> {
         };
+    }
+
+    @Bean("envelopes-dead-letter-send")
+    public ServiceBusSenderClient envelopesDeadLetterSend() {
+        return mock(ServiceBusSenderClient.class);
+    }
+
+    @Bean("envelopes")
+    public ServiceBusProcessorClient envelopesMessageReceiver() {
+        return mock(ServiceBusProcessorClient.class);
     }
 
     private String getEnvelopQueueConnectionString(String accessKeyName, String accessKey) {
