@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -37,7 +36,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.BULK_SCANNED_
 
 @SpringBootTest
 @ActiveProfiles("nosb") // no servicebus queue handler registration
-@Disabled
 class CreateCaseTest {
 
     private static final String DISPLAY_WARNINGS_FIELD = "displayWarnings";
