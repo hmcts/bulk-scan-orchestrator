@@ -241,7 +241,9 @@ service-config:
 
     - service: privatelaw
       jurisdiction: PRIVATELAW
-      case-type-ids: []
+      transformation-url: ${TRANSFORMATION_URL_PRIVATELAW}
+      case-type-ids:
+        - PRLAPPS
       auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_PRIVATELAW}
       auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_PRIVATELAW}
       case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_PRIVATELAW}
