@@ -219,8 +219,8 @@ repositories {
 def versions = [
   reformLogging     : '5.1.9',
   springfoxSwagger  : '2.9.2',
-  junit             : '5.8.1',
-  junitPlatform     : '1.8.1',
+  junit             : '5.9.1',
+  junitPlatform     : '1.9.1',
 ]
 
 ext["rest-assured.version"] = '4.3.0'
