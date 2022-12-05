@@ -217,7 +217,7 @@ repositories {
 // it is important to specify logback classic and core packages explicitly as libraries like spring boot
 // enforces it's own (older) version which is not recommended.
 def versions = [
-  reformLogging     : '5.1.9',
+  reformLogging     : '6.0.1',
   springfoxSwagger  : '2.9.2',
   junit             : '5.9.1',
   junitPlatform     : '1.9.1',
