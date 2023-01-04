@@ -4,13 +4,13 @@ plugins {
   id 'pmd'
   id 'jacoco'
   id 'io.spring.dependency-management' version '1.1.0'
-  id 'org.owasp.dependencycheck' version '7.4.1'
+  id 'org.owasp.dependencycheck' version '7.4.3'
   id 'org.springframework.boot' version '2.7.2'
   id 'com.github.ben-manes.versions' version '0.44.0'
   id 'org.sonarqube' version '3.5.0.2730'
   id 'info.solidsoft.pitest' version '1.7.0'
   id 'au.com.dius.pact' version '4.3.14'
-  id 'org.flywaydb.flyway' version '9.10.0'
+  id 'org.flywaydb.flyway' version '9.10.2'
 }
 
 group = 'uk.gov.hmcts.reform'
@@ -107,7 +107,7 @@ checkstyle {
 }
 
 pmd {
-  toolVersion = "6.52.0"
+  toolVersion = "6.53.0"
   ignoreFailures = true
   incrementalAnalysis = true
   sourceSets = [sourceSets.main, sourceSets.test, sourceSets.functionalTest, sourceSets.integrationTest, sourceSets.smokeTest]
@@ -263,7 +263,7 @@ dependencyManagement {
       entry 'logback-classic'
     }
     //CVE-2022-24823
-    dependencySet(group: 'io.netty', version: '4.1.85.Final') {
+    dependencySet(group: 'io.netty', version: '4.1.86.Final') {
       entry 'netty-buffer'
       entry 'netty-codec'
       entry 'netty-codec-dns'
@@ -304,7 +304,7 @@ dependencies {
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap', version: '3.1.5'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.2.10.RELEASE'
 
-  implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.6.13'
+  implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.6.14'
   implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
 
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformLogging
@@ -326,7 +326,7 @@ dependencies {
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
   testImplementation group: 'com.typesafe', name: 'config', version: '1.4.2'
-  testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '4.9.0'
+  testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '4.11.0'
   testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.23.1'
   testImplementation group: 'org.awaitility', name: 'awaitility', version: '4.2.0'
   testImplementation group: 'io.rest-assured', name: 'rest-assured'
