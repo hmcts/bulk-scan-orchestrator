@@ -4,7 +4,7 @@ plugins {
   id 'pmd'
   id 'jacoco'
   id 'io.spring.dependency-management' version '1.1.0'
-  id 'org.owasp.dependencycheck' version '7.4.3'
+  id 'org.owasp.dependencycheck' version '7.4.4'
   id 'org.springframework.boot' version '2.7.2'
   id 'com.github.ben-manes.versions' version '0.44.0'
   id 'org.sonarqube' version '3.5.0.2730'
@@ -327,7 +327,7 @@ dependencies {
   }
   testImplementation group: 'com.typesafe', name: 'config', version: '1.4.2'
   testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '4.11.0'
-  testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.24.0'
+  testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.24.1'
   testImplementation group: 'org.awaitility', name: 'awaitility', version: '4.2.0'
   testImplementation group: 'io.rest-assured', name: 'rest-assured'
 
