@@ -327,7 +327,7 @@ dependencies {
   }
   testImplementation group: 'com.typesafe', name: 'config', version: '1.4.2'
   testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '4.11.0'
-  testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.24.1'
+  testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.24.2'
   testImplementation group: 'org.awaitility', name: 'awaitility', version: '4.2.0'
   testImplementation group: 'io.rest-assured', name: 'rest-assured'
 
