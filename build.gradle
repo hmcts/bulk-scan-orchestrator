@@ -314,7 +314,7 @@ dependencies {
   implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '2.1.1'
   implementation group: 'com.github.hmcts', name: 'ccd-client', version: '4.9.1'
 
-  implementation group: 'com.azure', name: 'azure-messaging-servicebus', version: '7.13.1'
+  implementation group: 'com.azure', name: 'azure-messaging-servicebus', version: '7.13.0'
 
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.4'
   implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '3.1.2'
@@ -326,7 +326,7 @@ dependencies {
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
   testImplementation group: 'com.typesafe', name: 'config', version: '1.4.2'
-  testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '5.1.0'
+  testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '5.1.1'
   testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.24.2'
   testImplementation group: 'org.awaitility', name: 'awaitility', version: '4.2.0'
   testImplementation group: 'io.rest-assured', name: 'rest-assured'
