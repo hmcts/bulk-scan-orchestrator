@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.CallbackRes
 import uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.NewCallbackResult;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -76,8 +77,8 @@ public class CallbackResultRepositoryTest {
     @Test
     void should_find_by_case_id() {
         // given
-        var createdAt1 = Instant.now();
-        var createdAt2 = Instant.now();
+        var createdAt1 = Instant.now().truncatedTo(ChronoUnit.MICROS);
+        var createdAt2 = Instant.now().truncatedTo(ChronoUnit.MICROS);
         var id1 = dbHelper.insertCallbackResultWithCreatedAt(NEW_CALLBACK_RESULT_1, createdAt1);
         dbHelper.insertCallbackResultWithCreatedAt(NEW_CALLBACK_RESULT_2, createdAt2);
 
@@ -94,8 +95,8 @@ public class CallbackResultRepositoryTest {
     @Test
     void should_find_by_exception_record_id() {
         // given
-        var createdAt1 = Instant.now();
-        var createdAt2 = Instant.now();
+        var createdAt1 = Instant.now().truncatedTo(ChronoUnit.MICROS);
+        var createdAt2 = Instant.now().truncatedTo(ChronoUnit.MICROS);
         var id1 = dbHelper.insertCallbackResultWithCreatedAt(NEW_CALLBACK_RESULT_1, createdAt1);
         dbHelper.insertCallbackResultWithCreatedAt(NEW_CALLBACK_RESULT_2, createdAt2);
 
