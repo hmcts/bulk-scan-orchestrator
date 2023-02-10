@@ -22,8 +22,6 @@ variable "env" {
   type = string
 }
 
-variable "ilbIp" {}
-
 variable "tenant_id" {}
 
 variable "jenkins_AAD_objectId" {
