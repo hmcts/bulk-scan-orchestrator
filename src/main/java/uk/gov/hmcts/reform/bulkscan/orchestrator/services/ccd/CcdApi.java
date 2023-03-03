@@ -325,6 +325,19 @@ public class CcdApi {
                 ),
                 e
             );
+        } catch (FeignException.UnprocessableEntity e) {
+            throw new UnableToAttachDocumentsException(
+                String.format(
+                    "CCD returned 422 Unprocessable Entity response "
+                        + "when trying to attach scanned documents to case for %s jurisdiction "
+                        + "with case type %s and case ref %s. CCD response: %s",
+                    jurisdiction,
+                    caseTypeId,
+                    caseRef,
+                    e.contentUTF8()
+                ),
+                e
+            );
         } catch (FeignException e) {
             debugCcdException(log, e, "Failed to call 'attachScannedDocs'");
             removeFromIdamCacheIfAuthProblem(e.status(), jurisdiction);
