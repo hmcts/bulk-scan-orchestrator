@@ -263,7 +263,7 @@ dependencyManagement {
       entry 'log4j-to-slf4j'
     }
     //CVE-2022-23181
-    dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.72') {
+    dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.73') {
       entry 'tomcat-embed-core'
       entry 'tomcat-embed-websocket'
     }
@@ -334,7 +334,7 @@ dependencies {
   implementation group: 'com.azure', name: 'azure-messaging-servicebus', version: '7.13.2'
 
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.4'
-  implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '3.1.4'
+  implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '3.1.5'
 
   annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
 
