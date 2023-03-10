@@ -1,23 +1,18 @@
 #!/usr/bin/env bash
 
 # Script to create a .env file
-# Format of command: sudo ./create-env-file.sh <key vault> <service name (in the chart yaml)>
-# Example of use: sudo ./create-env-file.sh bulk-scan-aat bulk-scan-orchestrator
+# Format of command: sudo ./create-env-file.sh <key vault> <service name> <env> (in the chart yaml)>
+# Example of use: sudo ./create-env-file.sh bulk-scan bulk-scan-orchestrator aat
 # Author/contact for updating: Adam Stevenson
 
 # Refresh env file by removing one if it currently exists
-rm .localenv
+rm ../.localenv
 
 KEY_VAULT="${1}"
 SERVICE_NAME="${2}"
+ENV="${3}"
 
-SECRETS=$(yq eval ".java.keyVaults.${KEY_VAULT}.secrets[]" ../charts/"${SERVICE_NAME}"/values.yaml)
-SECRETS=${SECRETS//alias: /}
-SECRETS=${SECRETS//name: /}
-SECRETS_AS_ARRAY=("${x//\n/}")
-readarray -t SECRETS_AS_ARRAY <<<"$SECRETS"
-
-KEY_VAULT="${KEY_VAULT}-aat"
+KEY_VAULT="${KEY_VAULT}"
 
 function fetch_secret_from_keyvault() {
     local SECRET_NAME=$1
@@ -37,13 +32,22 @@ function store_secret() {
     local SECRET_VAR=$1
     local SECRET_VALUE=$2
     local SECRET_TO_WRITE="${SECRET_VAR}=${SECRET_VALUE}"
-
+    SECRET_TO_WRITE=$(echo "${SECRET_TO_WRITE}" | tr -d '"' )
     echo "${SECRET_TO_WRITE}"
-    echo "${SECRET_TO_WRITE}" >> .localenv
+    echo "${SECRET_TO_WRITE}" >> ../.localenv
 }
 
 echo "# ----------------------- "
-echo "# Populating secrets to .localenv file from ${KEY_VAULT} on ""$(date)"
+echo "# Populating secrets to localenv file from ${KEY_VAULT} on ""$(date)"
+
+# Secrets from Azure listed in chart
+SECRETS=$(yq eval ".java.keyVaults.${KEY_VAULT}.secrets[]" ../charts/"${SERVICE_NAME}"/values.yaml)
+SECRETS=${SECRETS//alias: /}
+SECRETS=${SECRETS//name: /}
+SECRETS_AS_ARRAY=("${x//\n/}")
+readarray -t SECRETS_AS_ARRAY <<<"$SECRETS"
+
+KEY_VAULT="${KEY_VAULT}-${ENV}"
 LENGTH="${#SECRETS_AS_ARRAY[@]}"
 for ((i=0; i <= LENGTH-1; i+=2)) do
 
@@ -61,3 +65,19 @@ for ((i=0; i <= LENGTH-1; i+=2)) do
 done
 echo "# End of fetched secrets. "
 echo "# ----------------------- "
+
+echo "# ----------------------- "
+echo "# Populating environment variables from chart to localenv file from ${KEY_VAULT} on ""$(date)"
+
+# Environment var list from chart
+ENVIRONMENT_LIST=$(yq eval ".java.environment" ../charts/"${SERVICE_NAME}"/values.yaml)
+ENVIRONMENT_LIST=$(echo "${ENVIRONMENT_LIST}" | tr : =)
+ENVIRONMENT_LIST=$(echo "${ENVIRONMENT_LIST}" | tr -d '"' )
+ENVIRONMENT_LIST=${ENVIRONMENT_LIST// /}
+
+echo "${ENVIRONMENT_LIST}"
+echo "${ENVIRONMENT_LIST}" >> ../.localenv
+
+echo "# End of fetched environment variables. "
+echo "# ----------------------- "
+
