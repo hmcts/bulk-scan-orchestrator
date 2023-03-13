@@ -19,3 +19,5 @@
 
 .DS_store
 /src/main/resources/application-default.yaml
+
+.env
