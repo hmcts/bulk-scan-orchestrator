@@ -12,8 +12,6 @@ KEY_VAULT="${1}"
 SERVICE_NAME="${2}"
 ENV="${3}"
 
-KEY_VAULT="${KEY_VAULT}"
-
 function fetch_secret_from_keyvault() {
     local SECRET_NAME=$1
 
@@ -38,9 +36,29 @@ function store_secret() {
 }
 
 echo "# ----------------------- "
+echo "# Populating substitutions to localenv file on ""$(date)"
+
+SUBS_KEYS=($(jq -r '' substitutions.json))
+SUB_KEYS_LENGTH="${#SUBS_KEYS[@]}"
+
+for ((i=0; i <= SUB_KEYS_LENGTH-3; i+=2)) do
+  SUB_NAME="${SUBS_KEYS[$((i+1))]}"
+  SUB_VALUE="${SUBS_KEYS[$((i+2))]}"
+  SUB_COMBINED="${SUB_NAME}=${SUB_VALUE}"
+  SUB_COMBINED=$(echo "${SUB_COMBINED}" | sed 's/://g')
+  SUB_COMBINED=$(echo "${SUB_COMBINED}" | sed 's/"//g')
+  SUB_COMBINED=$(echo "${SUB_COMBINED}" | sed 's/,//g')
+  echo "${SUB_COMBINED}"
+  echo "${SUB_COMBINED}" >> ../.localenv
+done
+echo "# End of fetched secrets. "
+echo "# ----------------------- "
+
+
+echo "# ----------------------- "
 echo "# Populating secrets to localenv file from ${KEY_VAULT} on ""$(date)"
 
-# Secrets from Azure listed in chart
+# Secrets from Azure listed in chart, excluding substitutions
 SECRETS=$(yq eval ".java.keyVaults.${KEY_VAULT}.secrets[]" ../charts/"${SERVICE_NAME}"/values.yaml)
 SECRETS=${SECRETS//alias: /}
 SECRETS=${SECRETS//name: /}
@@ -50,18 +68,17 @@ readarray -t SECRETS_AS_ARRAY <<<"$SECRETS"
 KEY_VAULT="${KEY_VAULT}-${ENV}"
 LENGTH="${#SECRETS_AS_ARRAY[@]}"
 for ((i=0; i <= LENGTH-1; i+=2)) do
-
-  # Secret env name. Substitute dots and -'s with _'s
   ENV_NAME="${SECRETS_AS_ARRAY[$((i+1))]}"
   ENV_NAME=${ENV_NAME^^}
   ENV_NAME=$(echo "${ENV_NAME}" | tr . _)
   ENV_NAME=$(echo "${ENV_NAME}" | tr - _)
 
-  # Secret env value
-  ENV_VALUE=${SECRETS_AS_ARRAY[${i}]}
-
-  # Retrieve secret from keyvault
-  store_secret_from_keyvault "${ENV_NAME}" "${ENV_VALUE}"
+  if [[ ! " ${SUBS_KEYS[*]} " =~ ${ENV_NAME} ]]; then
+    ENV_VALUE=${SECRETS_AS_ARRAY[${i}]}
+    store_secret_from_keyvault "${ENV_NAME}" "${ENV_VALUE}"
+  else
+    echo "Ignoring ${ENV_NAME} as it is listed within substitutions.json"
+  fi
 done
 echo "# End of fetched secrets. "
 echo "# ----------------------- "
@@ -69,15 +86,30 @@ echo "# ----------------------- "
 echo "# ----------------------- "
 echo "# Populating environment variables from chart to localenv file from ${KEY_VAULT} on ""$(date)"
 
-# Environment var list from chart
+# Get environment var list from chart, and save to file. Loop through as we need to exclude substitutions
 ENVIRONMENT_LIST=$(yq eval ".java.environment" ../charts/"${SERVICE_NAME}"/values.yaml)
 ENVIRONMENT_LIST=$(echo "${ENVIRONMENT_LIST}" | tr : =)
 ENVIRONMENT_LIST=$(echo "${ENVIRONMENT_LIST}" | tr -d '"' )
+ENVIRONMENT_LIST=$(echo "${ENVIRONMENT_LIST}" | tr -d '{{')
+ENVIRONMENT_LIST=$(echo "${ENVIRONMENT_LIST}" | tr -d '}}')
+ENVIRONMENT_LIST=$(echo "${ENVIRONMENT_LIST}" | tr -d '}}')
 ENVIRONMENT_LIST=${ENVIRONMENT_LIST// /}
+ENVIRONMENT_LIST_AS_ARRAY=("${x//\n/}")
+readarray -t ENVIRONMENT_LIST_AS_ARRAY <<<"${ENVIRONMENT_LIST}"
 
-echo "${ENVIRONMENT_LIST}"
-echo "${ENVIRONMENT_LIST}" >> ../.localenv
+ENV_LENGTH="${#ENVIRONMENT_LIST_AS_ARRAY[@]}"
+for ((i=0; i <= ENV_LENGTH-1; i++)) do
+  ENV_NAME_AND_VALUE=${ENVIRONMENT_LIST_AS_ARRAY[i]}
+  ENV_NAME_AND_VALUE="$(sed "s/.Values.global.environment/${ENV}/g" <<<${ENV_NAME_AND_VALUE})"
+  ENV_NAME=${ENV_NAME_AND_VALUE%%=*}
+
+  if [[ ! " ${SUBS_KEYS[*]} " =~ ${ENV_NAME} ]]; then
+    echo "${ENV_NAME_AND_VALUE}"
+    echo "${ENV_NAME_AND_VALUE}" >> ../.localenv
+  else
+    echo "Ignoring ${ENV_NAME} as it is listed within substitutions.json"
+  fi
+done
 
 echo "# End of fetched environment variables. "
 echo "# ----------------------- "
-
