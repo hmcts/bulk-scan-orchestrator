@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Script to create a .env file
-# Format of command: sudo ./create-env-file.sh <key vault> <service name> <env> (in the chart yaml)>
+# Format of command: sudo ./create-env-file.sh <key vault> <service name (in the chart yaml)> <env>
 # Example of use: sudo ./create-env-file.sh bulk-scan bulk-scan-orchestrator aat
 # Author/contact for updating: Adam Stevenson
 
