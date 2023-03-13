@@ -14,14 +14,12 @@ ENV="${3}"
 
 function fetch_secret_from_keyvault() {
     local SECRET_NAME=$1
-
     az keyvault secret show --vault-name "${KEY_VAULT}" --name "${SECRET_NAME}" --query "value"
 }
 
 function store_secret_from_keyvault() {
     local SECRET_VAR=$1
     local SECRET_NAME=$2
-
     SECRET_VALUE=$(fetch_secret_from_keyvault "${SECRET_NAME}")
     store_secret "${SECRET_VAR}" "${SECRET_VALUE}"
 }
@@ -51,7 +49,7 @@ for ((i=0; i <= SUB_KEYS_LENGTH-3; i+=2)) do
   echo "${SUB_COMBINED}"
   echo "${SUB_COMBINED}" >> ../.localenv
 done
-echo "# End of fetched secrets. "
+echo "# End of substitutions "
 echo "# ----------------------- "
 
 
@@ -88,7 +86,6 @@ echo "# Populating environment variables from chart to localenv file from ${KEY_
 
 # Get environment var list from chart, and save to file. Loop through as we need to exclude substitutions
 ENVIRONMENT_LIST=$(yq eval ".java.environment" ../charts/"${SERVICE_NAME}"/values.yaml)
-ENVIRONMENT_LIST=$(echo "${ENVIRONMENT_LIST}" | tr : =)
 ENVIRONMENT_LIST=$(echo "${ENVIRONMENT_LIST}" | tr -d '"' )
 ENVIRONMENT_LIST=$(echo "${ENVIRONMENT_LIST}" | tr -d '{{')
 ENVIRONMENT_LIST=$(echo "${ENVIRONMENT_LIST}" | tr -d '}}')
@@ -99,10 +96,11 @@ readarray -t ENVIRONMENT_LIST_AS_ARRAY <<<"${ENVIRONMENT_LIST}"
 
 ENV_LENGTH="${#ENVIRONMENT_LIST_AS_ARRAY[@]}"
 for ((i=0; i <= ENV_LENGTH-1; i++)) do
-  ENV_NAME_AND_VALUE=${ENVIRONMENT_LIST_AS_ARRAY[i]}
-  ENV_NAME_AND_VALUE="$(sed "s/.Values.global.environment/${ENV}/g" <<<${ENV_NAME_AND_VALUE})"
-  ENV_NAME=${ENV_NAME_AND_VALUE%%=*}
-
+  ENV_NAME_AND_VALUE_PLACEHOLDER=${ENVIRONMENT_LIST_AS_ARRAY[i]}
+  ENV_NAME_AND_VALUE_PLACEHOLDER="$(sed "s/.Values.global.environment/${ENV}/g" <<<${ENV_NAME_AND_VALUE_PLACEHOLDER})"
+  ENV_NAME=${ENV_NAME_AND_VALUE_PLACEHOLDER%%:*}
+  ENV_VALUE="$( cut -d ':' -f 2- <<< "${ENV_NAME_AND_VALUE_PLACEHOLDER}" )";
+  ENV_NAME_AND_VALUE="${ENV_NAME}=${ENV_VALUE}"
   if [[ ! " ${SUBS_KEYS[*]} " =~ ${ENV_NAME} ]]; then
     echo "${ENV_NAME_AND_VALUE}"
     echo "${ENV_NAME_AND_VALUE}" >> ../.localenv
@@ -110,6 +108,9 @@ for ((i=0; i <= ENV_LENGTH-1; i++)) do
     echo "Ignoring ${ENV_NAME} as it is listed within substitutions.json"
   fi
 done
+
+# Give ownership of file to allow editing if needed
+chmod 775 ../.localenv
 
 echo "# End of fetched environment variables. "
 echo "# ----------------------- "
