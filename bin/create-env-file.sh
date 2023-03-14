@@ -36,23 +36,24 @@ function store_secret() {
 echo "# ----------------------- "
 echo "# Populating substitutions to localenv file on ""$(date)"
 
-SUBS_KEYS=($(jq -r '' substitutions.json))
-SUB_KEYS_LENGTH="${#SUBS_KEYS[@]}"
+SUBS_KEYS_JSON=$(jq -r '' substitutions.json)
+IFS=$'\n'; set -f; SUBS_KEYS_ARRAY=($(<substitutions.json))
 
-for ((i=0; i <= SUB_KEYS_LENGTH-3; i+=2)) do
-  SUB_NAME="${SUBS_KEYS[$((i+1))]}"
-  SUB_VALUE="${SUBS_KEYS[$((i+2))]}"
+for ((i=0; i <= "${#SUBS_KEYS_ARRAY[@]}"-3; i+=1)) do
+  SUB_PLACEHOLDER="${SUBS_KEYS_ARRAY[$((i+1))]}"
+  SUB_NAME=${SUB_PLACEHOLDER%%:*}
+  SUB_NAME=$(echo "${SUB_NAME}" | sed 's/ //g')
+  SUB_NAME=$(echo "${SUB_NAME}" | sed 's/"//g')
+  SUB_VALUE="$( cut -d ':' -f 2- <<< "${SUB_PLACEHOLDER}" )";
+  SUB_VALUE=$(echo "${SUB_VALUE}" | sed 's/,//g')
+  SUB_VALUE=$(echo "${SUB_VALUE}" | sed 's/"//g')
+  SUB_VALUE="${SUB_VALUE:1}"
   SUB_COMBINED="${SUB_NAME}=${SUB_VALUE}"
-  SUB_COMBINED=$(echo "${SUB_COMBINED}" | sed 's/://g')
-  SUB_COMBINED=$(echo "${SUB_COMBINED}" | sed 's/"//g')
-  SUB_COMBINED=$(echo "${SUB_COMBINED}" | sed 's/,//g')
   echo "${SUB_COMBINED}"
   echo "${SUB_COMBINED}" >> ../.localenv
 done
 echo "# End of substitutions "
 echo "# ----------------------- "
-
-
 echo "# ----------------------- "
 echo "# Populating secrets to localenv file from ${KEY_VAULT} on ""$(date)"
 
@@ -71,7 +72,7 @@ for ((i=0; i <= LENGTH-1; i+=2)) do
   ENV_NAME=$(echo "${ENV_NAME}" | tr . _)
   ENV_NAME=$(echo "${ENV_NAME}" | tr - _)
 
-  if [[ ! " ${SUBS_KEYS[*]} " =~ ${ENV_NAME} ]]; then
+  if [[ ! " ${SUBS_KEYS_ARRAY[*]} " =~ ${ENV_NAME} ]]; then
     ENV_VALUE=${SECRETS_AS_ARRAY[${i}]}
     store_secret_from_keyvault "${ENV_NAME}" "${ENV_VALUE}"
   else
@@ -101,7 +102,7 @@ for ((i=0; i <= ENV_LENGTH-1; i++)) do
   ENV_NAME=${ENV_NAME_AND_VALUE_PLACEHOLDER%%:*}
   ENV_VALUE="$( cut -d ':' -f 2- <<< "${ENV_NAME_AND_VALUE_PLACEHOLDER}" )";
   ENV_NAME_AND_VALUE="${ENV_NAME}=${ENV_VALUE}"
-  if [[ ! " ${SUBS_KEYS[*]} " =~ ${ENV_NAME} ]]; then
+  if [[ ! " ${SUBS_KEYS_ARRAY[*]} " =~ ${ENV_NAME} ]]; then
     echo "${ENV_NAME_AND_VALUE}"
     echo "${ENV_NAME_AND_VALUE}" >> ../.localenv
   else
