@@ -21,3 +21,5 @@
 /src/main/resources/application-default.yaml
 
 .env
+.localenv
+bin/.localenv
