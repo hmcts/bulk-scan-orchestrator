@@ -14,4 +14,4 @@ docker-compose up -d
 
 sudo ./create-env-file.sh "${KEY_VAULT}" "${SERVICE_NAME}" "${ENV}"
 
-echo "Setup complete! Next step is to add the .localenv file as your env var and run the application afterwards"
+echo "Setup complete! Next step is to add the .localenv file through the ENV plugin and run the application afterwards"
