@@ -6,7 +6,12 @@ public enum DocumentType {
     CHERISHED("cherished"),
     COVERSHEET("coversheet"),
     FORM("form"),
-    OTHER("other");
+    OTHER("other"),
+    SUPPORTING_DOCUMENTS("supporting_documents"),
+    WILL("will"),
+    FORENSIC_SHEETS("forensic_sheets"),
+    IHT("iht"),
+    PPS_LEGAL_STATEMENT("pps_legal_statement");
 
     private final String value;
 
