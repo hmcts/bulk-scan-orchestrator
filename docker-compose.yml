@@ -11,3 +11,12 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - 5436:5432 # Different port to run more than one DB locally
+  bulk-scan-orchestrator-service:
+    build:
+      context: ./
+    links:
+      - bulk-scan-orchestrator-db
+    ports:
+      - 8582:8582
+    env_file:
+      - .env
