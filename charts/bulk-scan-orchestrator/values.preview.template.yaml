@@ -54,7 +54,7 @@ java:
 servicebus:
   resourceGroup: bulk-scan-aks
   teamName: "Software Engineering"
-  location: ukwest
+  location: uksouth
   serviceplan: basic
   setup:
     queues:
