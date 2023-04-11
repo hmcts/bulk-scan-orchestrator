@@ -334,7 +334,7 @@ dependencies {
   implementation group: 'com.azure', name: 'azure-messaging-servicebus', version: '7.13.3'
 
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.4'
-  implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '3.1.5'
+  implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '3.1.6'
 
   annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
 
@@ -366,7 +366,7 @@ dependencies {
 
   integrationTestImplementation group: 'com.github.tomakehurst', name: 'wiremock-jre8', version: '2.35.0'
 
-  integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.17.6', {
+  integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.18.0', {
     exclude group: 'junit', module: 'junit'
   }
   integrationTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.18.0'
@@ -378,7 +378,7 @@ dependencies {
 
   functionalTestImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.2'
 
-  functionalTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.17.6', {
+  functionalTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.18.0', {
     exclude group: 'junit', module: 'junit'
   }
   functionalTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.18.0'
