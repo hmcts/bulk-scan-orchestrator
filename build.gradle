@@ -329,7 +329,7 @@ dependencies {
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version: '7.3'
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: '4.1.2'
   implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '3.0.0'
-  implementation group: 'com.github.hmcts', name: 'ccd-client', version: '4.9.1'
+  implementation group: 'com.github.hmcts', name: 'ccd-client', version: '4.9.2'
 
   implementation group: 'com.azure', name: 'azure-messaging-servicebus', version: '7.13.3'
 
