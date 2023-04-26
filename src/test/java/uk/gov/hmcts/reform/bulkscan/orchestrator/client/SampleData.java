@@ -108,7 +108,7 @@ public class SampleData {
                 LocalDateTime.now().plusSeconds(3)
             ),
             new ScannedDocument(
-                DocumentType.OTHER,
+                DocumentType.SUPPORTING_DOCUMENTS,
                 "subtype2",
                 new DocumentUrl("url2", "binaryUrl2", "filename2"),
                 "controlNumber2",
