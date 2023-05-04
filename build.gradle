@@ -249,10 +249,17 @@ dependencyManagement {
     dependencySet(group: 'com.google.guava', version: '31.1-jre') {
       entry 'guava'
     }
+    dependencySet(group: 'org.yaml', version: '1.33') {
+      entry 'snakeyaml'
+    }
+    dependencySet(group: 'commons-fileupload', version: '1.5') {
+      entry 'commons-fileupload'
+    }
   }
 }
 
 dependencies {
+
   implementation group: 'org.postgresql', name: 'postgresql', version: '42.5.4'
   implementation group: 'org.flywaydb', name: 'flyway-core', version: '8.5.13'
 
