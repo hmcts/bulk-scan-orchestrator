@@ -243,6 +243,12 @@ configurations.all {
 
 dependencyManagement {
   dependencies {
+    dependencySet(group: 'org.springframework.cloud', version: '3.1.6') {
+      entry 'spring-cloud-starter-openfeign'
+    }
+    dependencySet(group: 'com.google.guava', version: '31.1-jre') {
+      entry 'guava'
+    }
   }
 }
 
