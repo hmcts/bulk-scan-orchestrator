@@ -6,6 +6,7 @@ import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import com.azure.messaging.servicebus.models.ServiceBusReceiveMode;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.env
 
 @Configuration
 @Profile("!nosb") // do not register handler for the nosb (test) profile
+@ConditionalOnExpression("!${jms.enabled}")
 public class QueueClientsConfig {
     public static final String CONNECTION_STR_FORMAT =
         "Endpoint=sb://%s.servicebus.windows.net;SharedAccessKeyName=%s;SharedAccessKey=%s;";

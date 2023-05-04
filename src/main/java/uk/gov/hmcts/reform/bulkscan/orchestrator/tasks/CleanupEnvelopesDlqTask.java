@@ -7,6 +7,7 @@ import com.azure.messaging.servicebus.ServiceBusReceiverClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -25,6 +26,7 @@ import java.util.function.Supplier;
  */
 @Component
 @ConditionalOnProperty("scheduling.task.delete-envelopes-dlq-messages.enabled")
+@ConditionalOnExpression("!${jms.enabled}")
 public class CleanupEnvelopesDlqTask {
 
     private static final Logger log = LoggerFactory.getLogger(CleanupEnvelopesDlqTask.class);
