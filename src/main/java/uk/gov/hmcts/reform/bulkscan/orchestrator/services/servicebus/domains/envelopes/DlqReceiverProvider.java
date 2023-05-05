@@ -4,6 +4,7 @@ import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import com.azure.messaging.servicebus.ServiceBusReceiverClient;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.QueueConfigurationProperties;
@@ -14,6 +15,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.QueueClientsConfi
 
 @Component
 @Profile("!nosb") // do not register handler for the nosb (test) profile
+@ConditionalOnExpression("!${jms.enabled}")
 public class DlqReceiverProvider implements Supplier<ServiceBusReceiverClient> {
 
     private final String namespace;

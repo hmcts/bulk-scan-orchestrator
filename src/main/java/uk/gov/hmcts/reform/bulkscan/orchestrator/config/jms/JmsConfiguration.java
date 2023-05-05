@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.config.jms;
 
 import org.apache.qpid.jms.JmsConnectionFactory;
 import org.apache.qpid.jms.policy.JmsDefaultRedeliveryPolicy;
@@ -45,7 +45,7 @@ public class JmsConfiguration {
     public String amqpConnectionStringTemplate;
 
     @Bean
-    public ConnectionFactory notificationsJmsConnectionFactory(@Value("${jms.application-name}")
+    public ConnectionFactory orchestratorJmsConnectionFactory(@Value("${jms.application-name}")
                                                                final String clientId) {
         String connection = String.format(amqpConnectionStringTemplate, namespace, idleTimeout);
         JmsConnectionFactory jmsConnectionFactory = new JmsConnectionFactory(connection);
@@ -68,11 +68,11 @@ public class JmsConfiguration {
     }
 
     @Bean
-    public JmsListenerContainerFactory<DefaultMessageListenerContainer> notificationsEventQueueContainerFactory(
-        ConnectionFactory notificationsJmsConnectionFactory) {
+    public JmsListenerContainerFactory<DefaultMessageListenerContainer> orchestratorEventQueueContainerFactory(
+        ConnectionFactory orchestratorJmsConnectionFactory) {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         factory.setSessionAcknowledgeMode(2);
-        factory.setConnectionFactory(notificationsJmsConnectionFactory);
+        factory.setConnectionFactory(orchestratorJmsConnectionFactory);
         factory.setReceiveTimeout(receiveTimeout);
         factory.setSessionTransacted(Boolean.TRUE);
         factory.setSessionAcknowledgeMode(Session.SESSION_TRANSACTED);

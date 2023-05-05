@@ -31,32 +31,11 @@ spring:
       poolName: OrchestratorHikariCP
       maxLifetime: 7200000
       connectionTimeout: 30000
-  autoconfigure:
-    exclude: org.springframework.boot.autoconfigure.jms.JmsAutoConfiguration,org.springframework.boot.autoconfigure.jms.activemq.ActiveMQAutoConfiguration
 
 flyway:
   skip-migrations: ${FLYWAY_SKIP_MIGRATIONS}
   noop:
     strategy: "false"
-
-azure:
-  servicebus:
-    namespace: ${QUEUE_NAMESPACE}
-    envelopes:
-      access-key: ${ENVELOPES_QUEUE_READ_ACCESS_KEY}
-      access-key-name: ${QUEUE_ACCESS_KEY_LISTEN_NAME}
-      queue-name: ${ENVELOPES_QUEUE_NAME}
-      max-delivery-count: ${ENVELOPES_QUEUE_MAX_DELIVERY_COUNT}
-    processed-envelopes:
-      access-key: ${PROCESSED_ENVELOPES_QUEUE_WRITE_ACCESS_KEY}
-      access-key-name: ${QUEUE_ACCESS_KEY_SEND_NAME}
-      queue-name: ${PROCESSED_ENVELOPES_QUEUE_NAME}
-    payments:
-      access-key: ${PAYMENTS_QUEUE_WRITE_ACCESS_KEY}
-      access-key-name: ${QUEUE_ACCESS_KEY_SEND_NAME}
-      queue-name: ${PAYMENTS_QUEUE_NAME}
-      manual-retry-count: 3
-      manual-retry-wait-in-ms: 2000
 
 core_case_data:
   api:
@@ -299,5 +278,12 @@ springdoc:
   pathsToMatch: /**
 
 jms:
-  # Set to disable configuration in envs besides local/dev
+  # JMS Configuration for local dev
+  application-name: BulkScanOrchestratorApiDev
   enabled: ${JMS_ENABLED:false}
+  namespace: ${JMS_NAMESPACE:5672}
+  amqp-connection-string-template: ${JMS_AMQP_CONNECTION_TEMPLATE:amqp://localhost:%1s?amqp.idleTimeout=%2d}
+  username: ${JMS_USERNAME:admin}
+  password: ${JMS_PASSWORD:admin}
+  receiveTimeout: ${JMS_RECEIVE_TIMEOUT:30000}
+  idleTimeout: ${JMS_IDLE_TIMEOUT:30000}

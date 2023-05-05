@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentCommand;
@@ -17,7 +18,10 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Service
 @Profile("!nosb") // do not register for the nosb (test) profile
+@ConditionalOnExpression("!${jms.enabled}")
 public class PaymentsPublisher implements IPaymentsPublisher {
+
+    // TODO: make version of this
 
     private static final Logger LOG = LoggerFactory.getLogger(PaymentsPublisher.class);
 
