@@ -14,9 +14,9 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.pro
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.InvalidMessageException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.MessageProcessingException;
 
+import java.nio.charset.StandardCharsets;
 import javax.jms.JMSException;
 import javax.jms.Message;
-import java.nio.charset.StandardCharsets;
 
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeParser.parse;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.handler.MessageProcessingResultType.POTENTIALLY_RECOVERABLE_FAILURE;
@@ -58,7 +58,8 @@ public class JmsEnvelopeMessageProcessor {
         }
     }
 
-    private MessageProcessingResult process(Message message, String messageBody, long deliveryCount) throws JMSException {
+    private MessageProcessingResult process(Message message, String messageBody, long deliveryCount)
+        throws JMSException {
 
         Envelope envelope = null;
         try {
@@ -139,8 +140,8 @@ public class JmsEnvelopeMessageProcessor {
         String reason,
         String description
     ) throws JMSException {
-        log.info("Message with ID {} has been dead-lettered...if this was using ASB, reason was {}: " +
-                "description was: {}",
+        log.info("Message with ID {} has been dead-lettered...if this was using ASB, reason was {}: "
+                + "description was: {}",
             context.getJMSMessageID(), reason, description);
     }
 

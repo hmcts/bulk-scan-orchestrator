@@ -9,9 +9,9 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessagePostProcessor;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
 import javax.jms.JMSException;
 import javax.jms.Message;
-import java.util.UUID;
 
 /**
  * Notifies about successfully processed envelopes via queue.
