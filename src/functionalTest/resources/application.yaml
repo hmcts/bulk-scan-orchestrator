@@ -97,5 +97,5 @@ cdam:
     enabled: false
 
 jms:
-  # Set to disable configuration in envs besides local/dev
+  # Set to disable configuration in envs besides local/dev/tests
   enabled: ${JMS_ENABLED:false}
