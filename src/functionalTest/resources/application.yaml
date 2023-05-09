@@ -95,3 +95,7 @@ cdam:
   api:
     url: http://localhost/cdam
     enabled: false
+
+jms:
+  # Set to disable configuration in envs besides local/dev
+  enabled: ${JMS_ENABLED:false}
