@@ -186,7 +186,7 @@ sonarqube {
     property "sonar.coverage.exclusions", "**/config/**"
     property "sonar.pitest.mode", "reuseReport"
     property "sonar.pitest.reportsDirectory", "build/reports/pitest"
-    property "sonar.cpd.exclusions", "**/caseupdate/model/request/ExceptionRecord.java,**/TransformationRequest.java,**/internal/ExceptionRecord.java,**/envelopes/JmsEnvelopeMessageProcessor,**/payments/JmsPaymentsPublisher,**/processedenvelopes/JmsProcessedEnvelopeNotifier"
+    property "sonar.cpd.exclusions", "**/caseupdate/model/request/ExceptionRecord.java,**/TransformationRequest.java,**/internal/ExceptionRecord.java,**/envelopes/JmsEnvelopeMessageProcessor.java,**/payments/JmsPaymentsPublisher.java,**/processedenvelopes/JmsProcessedEnvelopeNotifier.java"
   }
 }
 
