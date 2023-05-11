@@ -47,20 +47,21 @@ public class AutomaticCaseUpdateTest {
         CaseDetails existingCase = ccdCaseCreator.createCase(emptyList(), Instant.now());
 
         // when
-        if (!Boolean.parseBoolean(System.getenv("JMS_ENABLED")))
+        if (!Boolean.parseBoolean(System.getenv("JMS_ENABLED"))) {
             envelopeMessager.sendMessageFromFile(
                 "envelopes/supplementary-evidence-with-ocr-bulkscanauto.json",
                 String.valueOf(existingCase.getId()),
                 null,
                 docUrl
             );
-        else
+        } else {
             jmsEnvelopeMessager.sendMessageFromFile(
                 "envelopes/supplementary-evidence-with-ocr-bulkscanauto.json",
                 String.valueOf(existingCase.getId()),
                 null,
                 docUrl
             );
+        }
 
         // then
         await("Case in CCD was updated with data from envelope")
@@ -89,20 +90,21 @@ public class AutomaticCaseUpdateTest {
         CaseDetails existingCase = ccdCaseCreator.createCase(emptyList(), Instant.now(), ocrFields);
 
         // when
-        if (!Boolean.parseBoolean(System.getenv("JMS_ENABLED")))
+        if (!Boolean.parseBoolean(System.getenv("JMS_ENABLED"))) {
             envelopeMessager.sendMessageFromFile(
                 "envelopes/supplementary-evidence-with-ocr-bulkscanauto.json",
                 String.valueOf(existingCase.getId()),
                 null,
                 docUrl
             );
-        else
+        } else {
             jmsEnvelopeMessager.sendMessageFromFile(
                 "envelopes/supplementary-evidence-with-ocr-bulkscanauto.json",
                 String.valueOf(existingCase.getId()),
                 null,
                 docUrl
             );
+        }
 
         // then
         await("Case in CCD was updated with data from envelope")
@@ -131,20 +133,21 @@ public class AutomaticCaseUpdateTest {
         CaseDetails existingCase = ccdCaseCreator.createCase(emptyList(), Instant.now(), ocrFields);
 
         // when
-        if (!Boolean.parseBoolean(System.getenv("JMS_ENABLED")))
+        if (!Boolean.parseBoolean(System.getenv("JMS_ENABLED"))) {
             envelopeMessager.sendMessageFromFile(
                 "envelopes/supplementary-evidence-with-ocr-bulkscanauto.json",
                 String.valueOf(existingCase.getId()),
                 null,
                 docUrl
             );
-        else
+        } else {
             jmsEnvelopeMessager.sendMessageFromFile(
                 "envelopes/supplementary-evidence-with-ocr-bulkscanauto.json",
                 String.valueOf(existingCase.getId()),
                 null,
                 docUrl
             );
+        }
 
         // then
         await("Case in CCD was updated with data from envelope")
@@ -162,20 +165,21 @@ public class AutomaticCaseUpdateTest {
             });
 
         // when
-        if (!Boolean.parseBoolean(System.getenv("JMS_ENABLED")))
+        if (!Boolean.parseBoolean(System.getenv("JMS_ENABLED"))) {
             envelopeMessager.sendMessageFromFile(
                 "envelopes/supplementary-evidence-with-updated-ocr-bulkscanauto.json",
                 String.valueOf(existingCase.getId()),
                 null,
                 docUrl
             );
-        else
+        } else {
             jmsEnvelopeMessager.sendMessageFromFile(
                 "envelopes/supplementary-evidence-with-updated-ocr-bulkscanauto.json",
                 String.valueOf(existingCase.getId()),
                 null,
                 docUrl
             );
+        }
 
         // then
         await("Case in CCD was updated with data from envelope")
