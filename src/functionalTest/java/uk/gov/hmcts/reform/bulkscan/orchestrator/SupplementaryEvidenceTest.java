@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadServ
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseSearcher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.JmsEnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.envelopehandlers.CreateExceptionRecord;
@@ -29,7 +30,8 @@ import static org.awaitility.Awaitility.await;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getScannedDocuments;
 
 @SpringBootTest
-@ActiveProfiles("nosb") // no servicebus queue handler registration
+@ActiveProfiles("nosb")
+    // no servicebus queue handler registration
 class SupplementaryEvidenceTest {
 
     private static final String TEST_SERVICE_NAME = "bulkscan";
@@ -47,6 +49,9 @@ class SupplementaryEvidenceTest {
     private EnvelopeMessager envelopeMessager;
 
     @Autowired
+    private JmsEnvelopeMessager jmsEnvelopeMessager;
+
+    @Autowired
     private DocumentManagementUploadService dmUploadService;
 
     @Test
@@ -56,12 +61,20 @@ class SupplementaryEvidenceTest {
         CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
 
         // when
-        envelopeMessager.sendMessageFromFile(
-            "envelopes/supplementary-evidence-envelope.json",
-            String.valueOf(caseDetails.getId()),
-            null,
-            dmUrl
-        );
+        if (!Boolean.parseBoolean(System.getenv("JMS_ENABLED")))
+            envelopeMessager.sendMessageFromFile(
+                "envelopes/supplementary-evidence-envelope.json",
+                String.valueOf(caseDetails.getId()),
+                null,
+                dmUrl
+            );
+        else
+            jmsEnvelopeMessager.sendMessageFromFile(
+                "envelopes/supplementary-evidence-envelope.json",
+                String.valueOf(caseDetails.getId()),
+                null,
+                dmUrl
+            );
 
         // then
         assertThat(dmUrl).isNotNull();
@@ -83,15 +96,24 @@ class SupplementaryEvidenceTest {
                 singletonList(
                     new Document("evidence.pdf", "123", "other", null, Instant.now(), documentUuid, Instant.now())
                 ),
-                Instant.now());
+                Instant.now()
+            );
 
         // when
-        envelopeMessager.sendMessageFromFile(
-            "envelopes/supplementary-evidence-envelope.json",
-            String.valueOf(caseDetails.getId()),
-            null,
-            dmUrlNew
-        );
+        if (!Boolean.parseBoolean(System.getenv("JMS_ENABLED")))
+            envelopeMessager.sendMessageFromFile(
+                "envelopes/supplementary-evidence-envelope.json",
+                String.valueOf(caseDetails.getId()),
+                null,
+                dmUrlNew
+            );
+        else
+            jmsEnvelopeMessager.sendMessageFromFile(
+                "envelopes/supplementary-evidence-envelope.json",
+                String.valueOf(caseDetails.getId()),
+                null,
+                dmUrlNew
+            );
 
         // then
         await("Supplementary evidence is attached to the case in ccd")
@@ -115,12 +137,20 @@ class SupplementaryEvidenceTest {
             .until(() -> !ccdApi.getCaseRefsByLegacyId(legacyId, TEST_SERVICE_NAME).isEmpty());
 
         // when
-        envelopeMessager.sendMessageFromFile(
-            "envelopes/supplementary-evidence-with-legacy-id.json",
-            null,
-            legacyId,
-            dmUrl
-        );
+        if (!Boolean.parseBoolean(System.getenv("JMS_ENABLED")))
+            envelopeMessager.sendMessageFromFile(
+                "envelopes/supplementary-evidence-with-legacy-id.json",
+                null,
+                legacyId,
+                dmUrl
+            );
+        else
+            jmsEnvelopeMessager.sendMessageFromFile(
+                "envelopes/supplementary-evidence-with-legacy-id.json",
+                null,
+                legacyId,
+                dmUrl
+            );
 
         // then
         await("Supplementary evidence is attached to the case in ccd. LegacyId = " + legacyId)
@@ -140,7 +170,14 @@ class SupplementaryEvidenceTest {
         // when
         // try attaching documents to the BULKSCAN_ExceptionRecord case type
         // for which attachScannedDocs event is not configured
-        String envelopeId = envelopeMessager.sendMessageFromFile(
+        String envelopeId = !Boolean.parseBoolean(System.getenv("JMS_ENABLED"))
+            ? envelopeMessager.sendMessageFromFile(
+            "envelopes/supplementary-evidence-envelope-with-payment.json",
+            String.valueOf(exceptionRecord.getId()),
+            null,
+            dmUrl
+        )
+            : jmsEnvelopeMessager.sendMessageFromFile(
             "envelopes/supplementary-evidence-envelope-with-payment.json",
             String.valueOf(exceptionRecord.getId()),
             null,
@@ -157,7 +194,14 @@ class SupplementaryEvidenceTest {
     private CaseDetails createExceptionRecord() throws Exception {
         String dmUrl = dmUploadService.uploadToDmStore("Evidence1.pdf", "documents/supplementary-evidence.pdf");
 
-        String envelopeId = envelopeMessager.sendMessageFromFile(
+        String envelopeId = !Boolean.parseBoolean(System.getenv("JMS_ENABLED"))
+            ? envelopeMessager.sendMessageFromFile(
+            "envelopes/supplementary-evidence-envelope.json", // no payments
+            "0000000000000000",
+            null,
+            dmUrl
+        )
+            : jmsEnvelopeMessager.sendMessageFromFile(
             "envelopes/supplementary-evidence-envelope.json", // no payments
             "0000000000000000",
             null,

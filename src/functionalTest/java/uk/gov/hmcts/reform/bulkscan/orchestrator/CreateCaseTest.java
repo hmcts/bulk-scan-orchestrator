@@ -71,6 +71,8 @@ class CreateCaseTest {
         // given
         String exceptionRecordResource = "envelopes/new-envelope-create-case-with-evidence-" + service + ".json";
 
+        String jmsEnabled = System.getenv("JMS_ENABLED");
+
         CaseDetails exceptionRecord = exceptionRecordCreator.createExceptionRecord(
             service,
             exceptionRecordResource,

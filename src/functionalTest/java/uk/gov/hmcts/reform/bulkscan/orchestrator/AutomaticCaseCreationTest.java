@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadServ
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseSearcher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.JmsEnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CcdCollectionElement;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.EnvelopeReference;
@@ -41,12 +42,14 @@ public class AutomaticCaseCreationTest {
     // case type ID for exception records related to service which is enabled for automatic case creation
     private static final String ENABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID = "BULKSCANAUTO_ExceptionRecord";
 
-
     @Autowired
     private CaseSearcher caseSearcher;
 
     @Autowired
     private EnvelopeMessager envelopeMessager;
+
+    @Autowired
+    private JmsEnvelopeMessager jmsEnvelopeMessager;
 
     @Autowired
     private DocumentManagementUploadService dmUploadService;
@@ -171,13 +174,19 @@ public class AutomaticCaseCreationTest {
     }
 
     private String sendEnvelopeMessage(String resourcePath, String envelopeId) throws Exception {
-        return envelopeMessager.sendMessageFromFile(
+        return (!Boolean.parseBoolean(System.getenv("JMS_ENABLED")))
+            ? envelopeMessager.sendMessageFromFile(
             resourcePath,
             "0000000000000000",
             null,
             documentUrl,
             envelopeId
-        );
+        ) : jmsEnvelopeMessager.sendMessageFromFile(
+            resourcePath,
+            "0000000000000000",
+            null,
+            documentUrl,
+            envelopeId);
     }
 
     private List<CaseDetails> findExceptionRecords(String envelopeId, String caseTypeId) {

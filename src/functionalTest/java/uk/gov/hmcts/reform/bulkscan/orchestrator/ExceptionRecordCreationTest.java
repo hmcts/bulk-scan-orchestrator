@@ -10,6 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseSearcher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.JmsEnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.envelopehandlers.CreateExceptionRecord;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -27,7 +28,8 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataExtractor.getOcrDataValidationWarnings;
 
 @SpringBootTest
-@ActiveProfiles("nosb")  // no servicebus queue handler registration
+@ActiveProfiles("nosb")
+    // no servicebus queue handler registration
 class ExceptionRecordCreationTest {
 
     @Autowired
@@ -35,6 +37,9 @@ class ExceptionRecordCreationTest {
 
     @Autowired
     private EnvelopeMessager envelopeMessager;
+
+    @Autowired
+    private JmsEnvelopeMessager jmsEnvelopeMessager;
 
     @Autowired
     private DocumentManagementUploadService dmUploadService;
@@ -57,13 +62,22 @@ class ExceptionRecordCreationTest {
         String envelopeId = UUID.randomUUID().toString();
 
         // when
-        envelopeMessager.sendMessageFromFile(
-            "envelopes/supplementary-evidence-envelope.json", // no payments
-            "0000000000000000",
-            null,
-            dmUrl,
-            envelopeId
-        );
+        if (!Boolean.parseBoolean(System.getenv("JMS_ENABLED")))
+            envelopeMessager.sendMessageFromFile(
+                "envelopes/supplementary-evidence-envelope.json", // no payments
+                "0000000000000000",
+                null,
+                dmUrl,
+                envelopeId
+            );
+        else
+            jmsEnvelopeMessager.sendMessageFromFile(
+                "envelopes/supplementary-evidence-envelope.json", // no payments
+                "0000000000000000",
+                null,
+                dmUrl,
+                envelopeId
+            );
 
         // then
         await("Exception record being created")
@@ -84,13 +98,22 @@ class ExceptionRecordCreationTest {
         String envelopeId = UUID.randomUUID().toString();
 
         // when
-        envelopeMessager.sendMessageFromFile(
-            "envelopes/new-envelope-with-evidence.json", // with payments dcn
-            "0000000000000000",
-            null,
-            dmUrl,
-            envelopeId
-        );
+        if (!Boolean.parseBoolean(System.getenv("JMS_ENABLED")))
+            envelopeMessager.sendMessageFromFile(
+                "envelopes/new-envelope-with-evidence.json", // with payments dcn
+                "0000000000000000",
+                null,
+                dmUrl,
+                envelopeId
+            );
+        else
+            jmsEnvelopeMessager.sendMessageFromFile(
+                "envelopes/new-envelope-with-evidence.json", // with payments dcn
+                "0000000000000000",
+                null,
+                dmUrl,
+                envelopeId
+            );
 
         // then
         await("Exception record should be created")
@@ -127,13 +150,22 @@ class ExceptionRecordCreationTest {
         String envelopeId = UUID.randomUUID().toString();
 
         // when
-        envelopeMessager.sendMessageFromFile(
-            "envelopes/supplementary-evidence-envelope.json",
-            "1234",
-            null,
-            dmUrl,
-            envelopeId
-        );
+        if (!Boolean.parseBoolean(System.getenv("JMS_ENABLED")))
+            envelopeMessager.sendMessageFromFile(
+                "envelopes/supplementary-evidence-envelope.json",
+                "1234",
+                null,
+                dmUrl,
+                envelopeId
+            );
+        else
+            jmsEnvelopeMessager.sendMessageFromFile(
+                "envelopes/supplementary-evidence-envelope.json",
+                "1234",
+                null,
+                dmUrl,
+                envelopeId
+            );
 
         // then
         await("Exception record being created")
@@ -156,13 +188,22 @@ class ExceptionRecordCreationTest {
         );
 
         // when
-        envelopeMessager.sendMessageFromFile(
-            "envelopes/supplementary-evidence-with-ocr-envelope.json",
-            envelopeCaseRef,
-            null,
-            dmUrl,
-            envelopeId
-        );
+        if (!Boolean.parseBoolean(System.getenv("JMS_ENABLED")))
+            envelopeMessager.sendMessageFromFile(
+                "envelopes/supplementary-evidence-with-ocr-envelope.json",
+                envelopeCaseRef,
+                null,
+                dmUrl,
+                envelopeId
+            );
+        else
+            jmsEnvelopeMessager.sendMessageFromFile(
+                "envelopes/supplementary-evidence-with-ocr-envelope.json",
+                envelopeCaseRef,
+                null,
+                dmUrl,
+                envelopeId
+            );
 
         // then
         await("Exception record being created")
