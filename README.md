@@ -20,7 +20,7 @@ run configuration or bash shell
 IDAM_USERS_BULKSCAN_USERNAME = bulkscan+ccd@gmail.com
 IDAM_USERS_BULKSCAN_PASSWORD = Password12
 ```
-- either using the environment vars or application default you will need to set
+- Either using the environment vars or application default you will need to set
   ```
   queue:
     envelopes:
