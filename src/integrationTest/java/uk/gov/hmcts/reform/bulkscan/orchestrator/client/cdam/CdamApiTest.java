@@ -4,7 +4,6 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam.CdamApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;

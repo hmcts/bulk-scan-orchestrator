@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadServ
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseSearcher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.JmsEnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdApi;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CcdAuthenticator;
@@ -53,12 +54,20 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
     @Value("${document_management.context-path}")
     String dmContextPath;
 
-    @Autowired CcdApi ccdApi;
-    @Autowired CcdCaseCreator ccdCaseCreator;
-    @Autowired CaseSearcher caseSearcher;
-    @Autowired EnvelopeMessager envelopeMessager;
-    @Autowired DocumentManagementUploadService dmUploadService;
-    @Autowired CcdAuthenticatorFactory ccdAuthenticatorFactory;
+    @Autowired
+    CcdApi ccdApi;
+    @Autowired
+    CcdCaseCreator ccdCaseCreator;
+    @Autowired
+    CaseSearcher caseSearcher;
+    @Autowired
+    EnvelopeMessager envelopeMessager;
+    @Autowired
+    JmsEnvelopeMessager jmsEnvelopeMessager;
+    @Autowired
+    DocumentManagementUploadService dmUploadService;
+    @Autowired
+    CcdAuthenticatorFactory ccdAuthenticatorFactory;
 
     @Test
     @SuppressWarnings("unchecked")
@@ -142,7 +151,9 @@ class AttachExceptionRecordWithOcrToExistingCaseTest {
     private CaseDetails createExceptionRecord(String resourceName) throws Exception {
         String dmUrl = dmUploadService.uploadToDmStore("doc.pdf", "documents/supplementary-evidence.pdf");
 
-        String envelopeId = envelopeMessager.sendMessageFromFile(resourceName, "0000000000000000", null, dmUrl);
+        String envelopeId = (!Boolean.parseBoolean(System.getenv("JMS_ENABLED")))
+            ? envelopeMessager.sendMessageFromFile(resourceName, "0000000000000000", null, dmUrl)
+            : jmsEnvelopeMessager.sendMessageFromFile(resourceName, "0000000000000000", null, dmUrl);
 
         await("Exception record is created")
             .atMost(30, TimeUnit.SECONDS)

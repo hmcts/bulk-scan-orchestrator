@@ -2,9 +2,9 @@
 @Library("Infrastructure")
 
 import uk.gov.hmcts.contino.AppPipelineDsl
+import uk.gov.hmcts.contino.DockerImage
 import uk.gov.hmcts.contino.GradleBuilder
 import uk.gov.hmcts.contino.Kubectl
-import uk.gov.hmcts.contino.DockerImage
 import uk.gov.hmcts.pipeline.TeamConfig
 
 def type = "java"
@@ -66,6 +66,8 @@ withPipeline(type, product, component) {
     env.QUEUE_PAYMENTS_NAME = "payments-staging"
     env.QUEUE_READ_ACCESS_KEY_NAME = 'ListenSharedAccessKey'
     env.QUEUE_WRITE_ACCESS_KEY_NAME = 'SendSharedAccessKey'
+    env.JMS_ENABLED = false
+    env.SPRING_PROFILES_ACTIVE = 'default'
   }
 
   before('smoketest:preview') {

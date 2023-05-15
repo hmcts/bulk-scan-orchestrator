@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator;
 import com.azure.messaging.servicebus.ServiceBusException;
 import com.azure.messaging.servicebus.ServiceBusReceiverClient;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,7 @@ public class CleanupDlqMessagesTest {
     private EnvelopeMessager envelopeMessager;
 
     @Test
+    @EnabledIfEnvironmentVariable(named = "JMS_ENABLED", matches = "false") // ASB only as JMS does not have DLQ
     public void testCleanupDlqTask() throws Exception {
         // when
         // Sending more than 1 invalid message so that we can make sure the dlq messages are completed

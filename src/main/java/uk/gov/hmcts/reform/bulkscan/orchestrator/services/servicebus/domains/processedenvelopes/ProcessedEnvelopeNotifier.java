@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,10 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
  */
 @Service
 @Profile("!nosb") // do not register for the nosb (test) profile
+@ConditionalOnExpression("!${jms.enabled}")
 public class ProcessedEnvelopeNotifier implements IProcessedEnvelopeNotifier {
+
+    // TODO: make jms version of this
 
     private final Logger log = LoggerFactory.getLogger(ProcessedEnvelopeNotifier.class);
 
