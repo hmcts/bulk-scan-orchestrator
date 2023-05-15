@@ -10,7 +10,7 @@ plugins {
   id 'org.sonarqube' version '4.0.0.2929'
   id 'info.solidsoft.pitest' version '1.7.0'
   id 'au.com.dius.pact' version '4.3.14'
-  id 'org.flywaydb.flyway' version '9.16.3'
+  id 'org.flywaydb.flyway' version '9.17.0'
 }
 
 group = 'uk.gov.hmcts.reform'
@@ -318,7 +318,7 @@ dependencies {
 
   integrationTestImplementation sourceSets.main.runtimeClasspath
   integrationTestImplementation sourceSets.test.runtimeClasspath
-  integrationTestImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '3.1.6'
+  integrationTestImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '3.1.7'
   integrationTestImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.2'
 
   integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.18.0', {
