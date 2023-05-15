@@ -36,8 +36,6 @@ spring:
 
 flyway:
   skip-migrations: ${FLYWAY_SKIP_MIGRATIONS}
-  noop:
-    strategy: "false"
 
 azure:
   servicebus:
