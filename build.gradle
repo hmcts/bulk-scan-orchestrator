@@ -246,7 +246,7 @@ dependencyManagement {
   dependencies {
     // This includes the deprecated @EnableCircuitBreaker (Application.class)
     // Consider removing this and fixing the issues that come out
-    dependencySet(group: 'org.springframework.cloud', version: '3.1.6') {
+    dependencySet(group: 'org.springframework.cloud', version: '3.1.7') {
       entry 'spring-cloud-starter-openfeign'
     }
     dependencySet(group: 'com.google.guava', version: '31.1-jre') {
