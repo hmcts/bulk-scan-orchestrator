@@ -321,10 +321,10 @@ dependencies {
   integrationTestImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '3.1.7'
   integrationTestImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.2'
 
-  integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.18.0', {
+  integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.18.3', {
     exclude group: 'junit', module: 'junit'
   }
-  integrationTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.18.1'
+  integrationTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.18.3'
 
   functionalTestImplementation sourceSets.main.runtimeClasspath
   functionalTestImplementation sourceSets.test.runtimeClasspath
@@ -333,10 +333,10 @@ dependencies {
 
   functionalTestImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.2'
 
-  functionalTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.18.0', {
+  functionalTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.18.3', {
     exclude group: 'junit', module: 'junit'
   }
-  functionalTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.18.1'
+  functionalTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.18.3'
 
   smokeTestImplementation sourceSets.main.runtimeClasspath
   smokeTestImplementation sourceSets.test.runtimeClasspath
