@@ -1,11 +1,11 @@
 java:
   secrets:
     SB_ACCESS_KEY:
-      secretRef: servicebus-secret-namespace-{{ .Release.Name }}-servicebus
+      secretRef: bsp-sb-preview
       key: primaryKey
     SB_NAMESPACE:
-      secretRef: servicebus-secret-namespace-{{ .Release.Name }}-servicebus
-      key: namespaceName
+      secretRef: bsp-sb-preview
+      key: connectionString
   environment:
     S2S_URL: "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
     IDAM_API_URL: "https://idam-api.aat.platform.hmcts.net"
@@ -18,7 +18,10 @@ java:
     UPDATE_URL_PROBATE: "http://probate-back-office-aat.service.core-compute-aat.internal/update-case"
     QUEUE_ACCESS_KEY_LISTEN_NAME: "RootManageSharedAccessKey"
     QUEUE_ACCESS_KEY_SEND_NAME: "RootManageSharedAccessKey"
-    QUEUE_NAMESPACE: "$(SB_NAMESPACE)"
+    QUEUE_NAMESPACE: "bsp-sb-preview"
+    ENVELOPES_QUEUE_NAME: "{{ .Release.Name }}-servicebus-envelopes"
+    PROCESSED_ENVELOPES_QUEUE_NAME: "{{ .Release.Name }}-servicebus-processed-envelopes"
+    PAYMENTS_QUEUE_NAME: "{{ .Release.Name }}-servicebus-payments"
     ENVELOPES_QUEUE_READ_ACCESS_KEY: "$(SB_ACCESS_KEY)"
     ENVELOPES_QUEUE_MAX_DELIVERY_COUNT: "10"
     PROCESSED_ENVELOPES_QUEUE_WRITE_ACCESS_KEY: "$(SB_ACCESS_KEY)"
@@ -52,10 +55,11 @@ java:
     postgresqlDatabase: db
 
 servicebus:
-  resourceGroup: bulk-scan-aks
+  resourceGroup: bsp-aso-preview-rg
   teamName: "Software Engineering"
   location: uksouth
   serviceplan: basic
+  sbNamespace: bsp
   setup:
     queues:
       - name: envelopes
