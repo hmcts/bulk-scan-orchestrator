@@ -4,7 +4,4 @@
         <packageUrl regex="true">^pkg:maven/com.fasterxml.jackson.core/jackson-databind@.*$</packageUrl>
         <cve>CVE-2023-35116</cve>
   </suppress>
-  <suppress>
-    <cve>CVE-2023-34034</cve>
-  </suppress>
 </suppressions>
