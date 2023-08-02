@@ -318,7 +318,7 @@ dependencies {
 
   integrationTestImplementation sourceSets.main.runtimeClasspath
   integrationTestImplementation sourceSets.test.runtimeClasspath
-  integrationTestImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '3.1.8'
+  integrationTestImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '4.0.4'
   integrationTestImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.2'
 
   integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.18.3', {
