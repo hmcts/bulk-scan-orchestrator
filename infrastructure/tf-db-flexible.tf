@@ -30,7 +30,7 @@ module "postgresql" {
 }
 
 module "postgresql-staging" {
-  count                = var.env == "aat" ? 1 : 0
+  count = var.env == "aat" ? 1 : 0
   providers = {
     azurerm.postgres_network = azurerm.postgres_network
   }
