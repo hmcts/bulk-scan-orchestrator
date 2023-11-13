@@ -28,7 +28,7 @@ locals {
 
   flexible_secrets_staging = [
     {
-      name_suffix = "password"
+      name_suffix = "pass"
       value       = module.postgresql-staging[0].password
     },
     {
@@ -44,7 +44,7 @@ locals {
       value       = "5432"
     },
     {
-      name_suffix = "DATABASE"
+      name_suffix = "database"
       value       = local.db_name
     }
   ]
