@@ -59,7 +59,7 @@ servicebus:
   teamName: "Software Engineering"
   location: uksouth
   serviceplan: basic
-  sbNamespace: bsp
+  sbNamespace: bulk-scan-servicebus-preview
   setup:
     queues:
       - name: envelopes
