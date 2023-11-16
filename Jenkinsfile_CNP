@@ -88,7 +88,7 @@ withPipeline(type, product, component) {
       env.ENVELOPES_QUEUE_WRITE_ACCESS_KEY = sbPrimaryKey
       env.ENVELOPES_QUEUE_READ_ACCESS_KEY = sbPrimaryKey
       env.PAYMENTS_QUEUE_WRITE_ACCESS_KEY = sbPrimaryKey
-      env.QUEUE_NAMESPACE = "bsp-servicebus-preview"
+      env.QUEUE_NAMESPACE = "bsp-sb-preview"
       env.QUEUE_ENVELOPES_NAME = "${aksServiceName}-servicebus-envelopes"
       env.QUEUE_PAYMENTS_NAME = "${aksServiceName}-servicebus-payments"
       env.QUEUE_READ_ACCESS_KEY_NAME = 'RootManageSharedAccessKey'
