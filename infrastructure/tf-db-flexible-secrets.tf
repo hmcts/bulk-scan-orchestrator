@@ -26,8 +26,6 @@ locals {
     }
   ]
 
-  flexible_secret_prefix_staging = "${var.component}-staging-flexible-db"
-
   flexible_secrets_staging = var.env == "aat" ? [
     {
       name_suffix = "password"
