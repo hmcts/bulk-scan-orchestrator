@@ -93,6 +93,13 @@ withPipeline(type, product, component) {
       env.QUEUE_PAYMENTS_NAME = "${aksServiceName}-servicebus-payments"
       env.QUEUE_READ_ACCESS_KEY_NAME = 'RootManageSharedAccessKey'
       env.QUEUE_WRITE_ACCESS_KEY_NAME = 'RootManageSharedAccessKey'
+
+      // log the values
+      echo "ENVELOPES_QUEUE_WRITE_ACCESS_KEY : ${env.ENVELOPES_QUEUE_WRITE_ACCESS_KEY}"
+      echo "ENVELOPES_QUEUE_READ_ACCESS_KEY : ${env.ENVELOPES_QUEUE_READ_ACCESS_KEY}"
+      echo "PAYMENTS_QUEUE_WRITE_ACCESS_KEY : ${env.PAYMENTS_QUEUE_WRITE_ACCESS_KEY}"
+      echo "QUEUE_ENVELOPES_NAME : ${aksServiceName}-servicebus-envelopes"
+      echo "QUEUE_PAYMENTS_NAME : ${aksServiceName}-servicebus-payments"
     }
   }
 
