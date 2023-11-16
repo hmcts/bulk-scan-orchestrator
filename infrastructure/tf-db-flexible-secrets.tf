@@ -26,28 +26,35 @@ locals {
     }
   ]
 
-  flexible_secrets_staging = [
-    {
-      name_suffix = "pass"
-      value       = module.postgresql-staging[0].password
-    },
-    {
-      name_suffix = "host"
-      value       = module.postgresql-staging[0].fqdn
-    },
-    {
-      name_suffix = "user"
-      value       = module.postgresql-staging[0].username
-    },
-    {
-      name_suffix = "port"
-      value       = "5432"
-    },
-    {
-      name_suffix = "database"
-      value       = local.db_name
-    }
-  ]
+  locals {
+    flexible_secret_prefix_staging = "${var.component}-staging-flexible-db"
+
+    flexible_secrets_staging = var.env == "aat" ? [
+      {
+        name_suffix = "password"
+        value       = module.postgresql-staging[0].password
+        count       = var.num_staging_dbs
+      },
+      {
+        name_suffix = "host"
+        value       = module.postgresql-staging[0].fqdn
+        count       = var.num_staging_dbs
+      },
+      {
+        name_suffix = "user"
+        value       = module.postgresql-staging[0].username
+        count       = var.num_staging_dbs
+      },
+      {
+        name_suffix = "port"
+        value       = "5432"
+      },
+      {
+        name_suffix = "name"
+        value       = local.db_name
+      }
+    ] : []
+  }
 }
 
 resource "azurerm_key_vault_secret" "flexible_secret" {

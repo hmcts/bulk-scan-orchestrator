@@ -37,3 +37,6 @@ variable "common_tags" {
 
 variable "aks_subscription_id" {}
 
+variable "num_staging_dbs" {
+  default = 0
+}
