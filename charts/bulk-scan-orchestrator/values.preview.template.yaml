@@ -18,7 +18,7 @@ java:
     UPDATE_URL_PROBATE: "http://probate-back-office-aat.service.core-compute-aat.internal/update-case"
     QUEUE_ACCESS_KEY_LISTEN_NAME: "RootManageSharedAccessKey"
     QUEUE_ACCESS_KEY_SEND_NAME: "RootManageSharedAccessKey"
-    QUEUE_NAMESPACE: "bsp-sb-preview"
+    QUEUE_NAMESPACE: "bsp-servicebus-preview"
     ENVELOPES_QUEUE_NAME: "{{ .Release.Name }}-servicebus-envelopes"
     PROCESSED_ENVELOPES_QUEUE_NAME: "{{ .Release.Name }}-servicebus-processed-envelopes"
     PAYMENTS_QUEUE_NAME: "{{ .Release.Name }}-servicebus-payments"
