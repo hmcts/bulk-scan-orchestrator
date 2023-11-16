@@ -3,7 +3,7 @@ java:
     SB_ACCESS_KEY:
       secretRef: bsp-sb-preview
       key: primaryKey
-    SB_NAMESPACE:
+    SB_CONNECTION_STRING:
       secretRef: bsp-sb-preview
       key: connectionString
   environment:
