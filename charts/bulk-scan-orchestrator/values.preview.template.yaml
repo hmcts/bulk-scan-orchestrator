@@ -1,4 +1,11 @@
 java:
+  secrets:
+    SB_ACCESS_KEY:
+      secretRef: bsp-sb-preview
+      key: primaryKey
+    SB_CONNECTION_STRING:
+      secretRef: bsp-sb-preview
+      key: connectionString
   environment:
     S2S_URL: "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
     IDAM_API_URL: "https://idam-api.aat.platform.hmcts.net"
@@ -52,7 +59,7 @@ servicebus:
   teamName: "Software Engineering"
   location: uksouth
   serviceplan: basic
-  sbNamespace: bulk-scan-servicebus-preview
+  sbNamespace: bsp-servicebus-preview
   setup:
     queues:
       - name: envelopes
