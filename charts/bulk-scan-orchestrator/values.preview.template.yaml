@@ -22,12 +22,6 @@ java:
     ENVELOPES_QUEUE_NAME: "{{ .Release.Name }}-servicebus-envelopes"
     PROCESSED_ENVELOPES_QUEUE_NAME: "{{ .Release.Name }}-servicebus-processed-envelopes"
     PAYMENTS_QUEUE_NAME: "{{ .Release.Name }}-servicebus-payments"
-    ENVELOPES_QUEUE_READ_ACCESS_KEY: "$(SB_ACCESS_KEY)"
-    ENVELOPES_QUEUE_WRITE_ACCESS_KEY: "$(SB_ACCESS_KEY)"
-    PROCESSED_ENVELOPES_QUEUE_READ_ACCESS_KEY: "$(SB_ACCESS_KEY)"
-    PROCESSED_ENVELOPES_QUEUE_WRITE_ACCESS_KEY: "$(SB_ACCESS_KEY)"
-    PAYMENTS_QUEUE_READ_ACCESS_KEY: "$(SB_ACCESS_KEY)"
-    PAYMENTS_QUEUE_WRITE_ACCESS_KEY: "$(SB_ACCESS_KEY)"
     ENVELOPES_QUEUE_MAX_DELIVERY_COUNT: "10"
     FLYWAY_SKIP_MIGRATIONS: "false"
     DB_HOST: "{{ .Release.Name }}-postgresql"
@@ -47,6 +41,16 @@ java:
           alias: idam.users.bulkscan.username
         - name: idam-users-bulkscan-password
           alias: idam.users.bulkscan.password
+        - name: BSP_SB_PREVIEW
+          alias: QUEUE_READ_ACCESS_KEY_NAME
+        - name: BSP_SB_PREVIEW
+          alias: QUEUE_WRITE_ACCESS_KEY_NAME
+        - name: BSP_SB_PREVIEW
+          alias: ENVELOPES_QUEUE_WRITE_ACCESS_KEY
+        - name: BSP_SB_PREVIEW
+          alias: ENVELOPES_QUEUE_READ_ACCESS_KEY
+        - name: BSP_SB_PREVIEW
+          alias: PAYMENTS_QUEUE_WRITE_ACCESS_KEY
   # Don't modify below here
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
