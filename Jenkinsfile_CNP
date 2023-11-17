@@ -83,8 +83,10 @@ withPipeline(type, product, component) {
       def kubectl = new Kubectl(this, subscription, namespace)
       kubectl.login()
 
+      echo "NAMESPACE : ${namespace}"
+
       // Get envelopes queue connection string
-      def sbPrimaryKey = kubectl.getSecret(serviceBusSecret, namespace, "{.data.primaryKey}")
+      def sbPrimaryKey = kubectl.getSecret(serviceBusSecret, namespace)
       env.ENVELOPES_QUEUE_WRITE_ACCESS_KEY = sbPrimaryKey
       env.ENVELOPES_QUEUE_READ_ACCESS_KEY = sbPrimaryKey
       env.PAYMENTS_QUEUE_WRITE_ACCESS_KEY = sbPrimaryKey
