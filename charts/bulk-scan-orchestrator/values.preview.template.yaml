@@ -1,11 +1,4 @@
 java:
-  secrets:
-    SB_ACCESS_KEY:
-      secretRef: bsp-sb-preview
-      key: primaryKey
-    SB_CONNECTION_STRING:
-      secretRef: bsp-sb-preview
-      key: connectionString
   environment:
     S2S_URL: "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
     IDAM_API_URL: "https://idam-api.aat.platform.hmcts.net"
@@ -41,16 +34,6 @@ java:
           alias: idam.users.bulkscan.username
         - name: idam-users-bulkscan-password
           alias: idam.users.bulkscan.password
-        - name: bsp-sb-preview
-          alias: QUEUE_READ_ACCESS_KEY_NAME
-        - name: bsp-sb-preview
-          alias: QUEUE_WRITE_ACCESS_KEY_NAME
-        - name: bsp-sb-preview
-          alias: ENVELOPES_QUEUE_WRITE_ACCESS_KEY
-        - name: bsp-sb-preview
-          alias: ENVELOPES_QUEUE_READ_ACCESS_KEY
-        - name: bsp-sb-preview
-          alias: PAYMENTS_QUEUE_WRITE_ACCESS_KEY
   # Don't modify below here
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
