@@ -90,7 +90,6 @@ withPipeline(type, product, component) {
       echo "NAMESPACE : ${namespace}"
 
       // Get envelopes queue connection string
-      def sbPrimaryKey = kubectl.getSecret(serviceBusSecret, namespace)
       env.QUEUE_NAMESPACE = "bsp-sb-preview"
       env.QUEUE_ENVELOPES_NAME = "${aksServiceName}-servicebus-envelopes"
       env.QUEUE_PAYMENTS_NAME = "${aksServiceName}-servicebus-payments"
