@@ -36,11 +36,11 @@ def prSecrets = [
   'bulk-scan-${env}': [
     secret('idam-users-bulkscan-username', 'IDAM_USER_NAME'),
     secret('idam-users-bulkscan-password', 'IDAM_USER_PASSWORD'),
-    secret('bsp-sb-preview', 'QUEUE_READ_ACCESS_KEY_NAME'),
-    secret('bsp-sb-preview', 'QUEUE_WRITE_ACCESS_KEY_NAME'),
-    secret('bsp-sb-preview', 'ENVELOPES_QUEUE_WRITE_ACCESS_KEY'),
-    secret('bsp-sb-preview', 'ENVELOPES_QUEUE_READ_ACCESS_KEY'),
-    secret('bsp-sb-preview', 'PAYMENTS_QUEUE_WRITE_ACCESS_KEY'),
+    secret('bsp-servicebus-preview', 'QUEUE_READ_ACCESS_KEY_NAME'),
+    secret('bsp-servicebus-preview', 'QUEUE_WRITE_ACCESS_KEY_NAME'),
+    secret('bsp-servicebus-preview', 'ENVELOPES_QUEUE_WRITE_ACCESS_KEY'),
+    secret('bsp-servicebus-preview', 'ENVELOPES_QUEUE_READ_ACCESS_KEY'),
+    secret('bsp-servicebus-preview', 'PAYMENTS_QUEUE_WRITE_ACCESS_KEY'),
     secret('idam-client-secret', 'IDAM_CLIENT_SECRET')
   ]
 ]
@@ -98,6 +98,7 @@ withPipeline(type, product, component) {
       env.QUEUE_WRITE_ACCESS_KEY_NAME = 'RootManageSharedAccessKey'
 
       // log the values
+      echo "IDAM_USER_NAME: ${env.IDAM_USER_NAME}"
       echo "ENVELOPES_QUEUE_WRITE_ACCESS_KEY : ${env.ENVELOPES_QUEUE_WRITE_ACCESS_KEY}"
       echo "ENVELOPES_QUEUE_READ_ACCESS_KEY : ${env.ENVELOPES_QUEUE_READ_ACCESS_KEY}"
       echo "PAYMENTS_QUEUE_WRITE_ACCESS_KEY : ${env.PAYMENTS_QUEUE_WRITE_ACCESS_KEY}"
