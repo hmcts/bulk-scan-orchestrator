@@ -36,8 +36,6 @@ def prSecrets = [
   'bulk-scan-${env}': [
     secret('idam-users-bulkscan-username', 'IDAM_USER_NAME'),
     secret('idam-users-bulkscan-password', 'IDAM_USER_PASSWORD'),
-    secret('bsp-servicebus-preview', 'QUEUE_READ_ACCESS_KEY_NAME'),
-    secret('bsp-servicebus-preview', 'QUEUE_WRITE_ACCESS_KEY_NAME'),
     secret('bsp-servicebus-preview', 'ENVELOPES_QUEUE_WRITE_ACCESS_KEY'),
     secret('bsp-servicebus-preview', 'ENVELOPES_QUEUE_READ_ACCESS_KEY'),
     secret('bsp-servicebus-preview', 'PAYMENTS_QUEUE_WRITE_ACCESS_KEY'),
