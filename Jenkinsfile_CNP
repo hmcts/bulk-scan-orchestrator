@@ -36,6 +36,11 @@ def prSecrets = [
   'bulk-scan-${env}': [
     secret('idam-users-bulkscan-username', 'IDAM_USER_NAME'),
     secret('idam-users-bulkscan-password', 'IDAM_USER_PASSWORD'),
+    secret('bsp-sb-preview', 'QUEUE_READ_ACCESS_KEY_NAME'),
+    secret('bsp-sb-preview', 'QUEUE_WRITE_ACCESS_KEY_NAME'),
+    secret('bsp-sb-preview', 'ENVELOPES_QUEUE_WRITE_ACCESS_KEY'),
+    secret('bsp-sb-preview', 'ENVELOPES_QUEUE_READ_ACCESS_KEY'),
+    secret('bsp-sb-preview', 'PAYMENTS_QUEUE_WRITE_ACCESS_KEY'),
     secret('idam-client-secret', 'IDAM_CLIENT_SECRET')
   ]
 ]
@@ -77,7 +82,6 @@ withPipeline(type, product, component) {
       def dockerImage = new DockerImage(product, component, null, env.BRANCH_NAME, env.GIT_COMMIT, env.LAST_COMMIT_TIMESTAMP)
       def subscription = env.SUBSCRIPTION_NAME
       def aksServiceName = dockerImage.getAksServiceName().toLowerCase()
-      def serviceBusSecret = "bsp-servicebus-preview"
       def namespace = new TeamConfig(this).getNameSpace(product)
 
       def kubectl = new Kubectl(this, subscription, namespace)
@@ -87,9 +91,6 @@ withPipeline(type, product, component) {
 
       // Get envelopes queue connection string
       def sbPrimaryKey = kubectl.getSecret(serviceBusSecret, namespace)
-      env.ENVELOPES_QUEUE_WRITE_ACCESS_KEY = sbPrimaryKey
-      env.ENVELOPES_QUEUE_READ_ACCESS_KEY = sbPrimaryKey
-      env.PAYMENTS_QUEUE_WRITE_ACCESS_KEY = sbPrimaryKey
       env.QUEUE_NAMESPACE = "bsp-sb-preview"
       env.QUEUE_ENVELOPES_NAME = "${aksServiceName}-servicebus-envelopes"
       env.QUEUE_PAYMENTS_NAME = "${aksServiceName}-servicebus-payments"
