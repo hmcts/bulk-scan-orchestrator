@@ -13,6 +13,10 @@
     <cve>CVE-2023-46604</cve>
   </suppress>
   <suppress>
+    <notes>Wait for a version that fixes this.</notes>
+    <cve>CVE-2023-36052</cve>
+  </suppress>
+  <suppress>
     <notes>Suppression for netty. Pulled in by springboot on latest version</notes>
     <cve>CVE-2023-4586</cve>
   </suppress>
