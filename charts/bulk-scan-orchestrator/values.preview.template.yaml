@@ -54,15 +54,13 @@ java:
 
 servicebus:
   resourceGroup: bsp-aso-preview-rg
-  teamName: "Software Engineering"
-  location: uksouth
   serviceplan: basic
   sbNamespace: bsp-servicebus-preview
+  enabled: true
   setup:
     queues:
       - name: envelopes
       - name: notifications
       - name: processed-envelopes
       - name: payments
-  enabled: true
 
