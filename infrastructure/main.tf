@@ -1,7 +1,3 @@
-provider "azurerm" {
-  features {}
-}
-
 # Make sure the resource group exists
 resource "azurerm_resource_group" "rg" {
   name     = "${var.product}-${var.component}-${var.env}"
@@ -21,7 +17,7 @@ data "azurerm_key_vault" "s2s_key_vault" {
 
 data "azurerm_key_vault_secret" "s2s_secret" {
   key_vault_id = data.azurerm_key_vault.s2s_key_vault.id
-  name      = "microservicekey-bulk-scan-orchestrator"
+  name         = "microservicekey-bulk-scan-orchestrator"
 }
 
 # Copy orchestrator s2s secret from s2s key vault to bulkscan key vault

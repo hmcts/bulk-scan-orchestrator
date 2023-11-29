@@ -1,7 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
-  <suppress until="2023-09-29">
+  <suppress until="2023-12-29">
         <packageUrl regex="true">^pkg:maven/com.fasterxml.jackson.core/jackson-databind@.*$</packageUrl>
         <cve>CVE-2023-35116</cve>
+  </suppress>
+  <suppress>
+    <notes>Suppression for netty. Pulled in by springboot on latest version</notes>
+    <cve>CVE-2023-4586</cve>
+  </suppress>
+  <suppress>
+    <notes>Suppression for activeMQ. Pulled in by springboot on latest version, need release for springboot.</notes>
+    <cve>CVE-2023-46604</cve>
+  </suppress>
+  <suppress>
+    <notes>Wait for a version that fixes this.</notes>
+    <cve>CVE-2023-36052</cve>
+  </suppress>
+  <suppress>
+    <notes>Suppression for netty. Pulled in by springboot on latest version</notes>
+    <cve>CVE-2023-4586</cve>
   </suppress>
 </suppressions>
