@@ -252,7 +252,7 @@ dependencyManagement {
     dependencySet(group: 'com.google.guava', version: '32.1.0-jre') {
       entry 'guava'
     }
-    dependencySet(group: 'org.yaml', version: '2.0') {
+    dependencySet(group: 'org.yaml', version: '2.2') {
       entry 'snakeyaml'
     }
     dependencySet(group: 'commons-fileupload', version: '1.5') {
