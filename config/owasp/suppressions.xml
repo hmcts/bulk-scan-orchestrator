@@ -28,8 +28,4 @@
     <notes>Logback, waiting for fix</notes>
     <cve>CVE-2023-6481</cve>
   </suppress>
-  <suppress>
-    <notes>Bouncy castle, wait for fix</notes>
-    <cve>CVE-2023-33202</cve>
-  </suppress>
 </suppressions>
