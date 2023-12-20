@@ -1,4 +1,4 @@
-# bulk-scan-orchestrator
+# bulk-scan-orchestrator.
 
 ![](https://github.com/hmcts/bulk-scan-orchestrator/workflows/CI/badge.svg)
 [![](https://github.com/hmcts/bulk-scan-orchestrator/workflows/Publish%20Swagger%20Specs/badge.svg)](https://hmcts.github.io/reform-api-docs/swagger.html?url=https://hmcts.github.io/reform-api-docs/specs/bulk-scan-orchestrator.json)
