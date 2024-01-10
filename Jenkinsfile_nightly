@@ -34,7 +34,7 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 
 withNightlyPipeline(type, product, component) {
   loadVaultSecrets(secrets)
-  enableMutationTest()
+  // enableMutationTest() Disabled for now as also disabled in gradle
   enableFortifyScan('bulk-scan-aat')
   enableSlackNotifications(channel)
   afterSuccess('fortify-scan') {
