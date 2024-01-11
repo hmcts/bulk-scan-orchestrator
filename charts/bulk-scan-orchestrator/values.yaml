@@ -132,6 +132,10 @@ java:
           alias: DB_PORT
         - name: orchestrator-POSTGRES-DATABASE
           alias: DB_NAME
+        - name: launch-darkly-sdk-key
+          alias: LAUNCH_DARKLY_SDK_KEY
+        - name: launch-darkly-offline-mode
+          alias: LAUNCH_DARKLY_OFFLINE_MODE
   image: hmctspublic.azurecr.io/bulk-scan/orchestrator:latest
 
 servicebus:
