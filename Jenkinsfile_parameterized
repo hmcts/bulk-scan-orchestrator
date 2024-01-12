@@ -21,7 +21,9 @@ def secrets = [
   ],
   'bulk-scan-${env}': [
     secret('idam-users-bulkscan-password', 'IDAM_USER_PASSWORD'),
-    secret('idam-client-secret', 'IDAM_CLIENT_SECRET')
+    secret('idam-client-secret', 'IDAM_CLIENT_SECRET'),
+    secret('launch-darkly-sdk-key', 'LAUNCH_DARKLY_SDK_KEY'),
+    secret('launch-darkly-offline-mode', 'LAUNCH_DARKLY_OFFLINE_MODE')
   ]
 ]
 
