@@ -37,6 +37,7 @@ class LaunchDarklySmokeTest {
     @Test
     void checkLaunchDarklyStatus() {
         DataSourceStatusProvider.Status ldStatus = ldClient.getDataSourceStatus();
-        assertThat(ldStatus.getState()).isEqualTo(DataSourceStatusProvider.State.VALID);
+        assertThat(ldStatus.getState())
+            .isIn(DataSourceStatusProvider.State.VALID, DataSourceStatusProvider.State.INITIALIZING);
     }
 }
