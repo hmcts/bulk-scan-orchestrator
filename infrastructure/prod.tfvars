@@ -1,0 +1,1 @@
+deploy_single_server_db = 1
