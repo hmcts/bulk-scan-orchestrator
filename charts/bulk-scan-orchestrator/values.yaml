@@ -122,15 +122,15 @@ java:
           alias: azure.application-insights.instrumentation-key
         - name: app-insights-connection-string
           alias: app-insights-connection-string
-        - name: orchestrator-POSTGRES-PASS
+        - name: orchestrator-POSTGRES-FLEXIBLE-PASS
           alias: DB_PASSWORD
-        - name: orchestrator-POSTGRES-USER
+        - name: orchestrator-POSTGRES-FLEXIBLE-USER
           alias: DB_USER
-        - name: orchestrator-POSTGRES-HOST
+        - name: orchestrator-POSTGRES-FLEXIBLE-HOST
           alias: DB_HOST
-        - name: orchestrator-POSTGRES-PORT
+        - name: orchestrator-POSTGRES-FLEXIBLE-PORT
           alias: DB_PORT
-        - name: orchestrator-POSTGRES-DATABASE
+        - name: orchestrator-POSTGRES-FLEXIBLE-DATABASE
           alias: DB_NAME
         - name: launch-darkly-sdk-key
           alias: LAUNCH_DARKLY_SDK_KEY
