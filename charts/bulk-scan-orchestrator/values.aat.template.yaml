@@ -53,13 +53,13 @@ java:
           alias: ENVELOPES_QUEUE_MAX_DELIVERY_COUNT
         - name: app-insights-instrumentation-key
           alias: azure.application-insights.instrumentation-key
-        - name: orchestrator-staging-postgres-pass
+        - name: orchestrator-staging-db-flexible-password
           alias: DB_PASSWORD
-        - name: orchestrator-staging-postgres-user
+        - name: orchestrator-staging-db-flexible-user
           alias: DB_USER
-        - name: orchestrator-staging-postgres-host
+        - name: orchestrator-staging-db-flexible-host
           alias: DB_HOST
-        - name: orchestrator-staging-postgres-port
+        - name: orchestrator-staging-db-flexible-port
           alias: DB_PORT
-        - name: orchestrator-staging-postgres-database
+        - name: orchestrator-staging-db-flexible-name
           alias: DB_NAME
