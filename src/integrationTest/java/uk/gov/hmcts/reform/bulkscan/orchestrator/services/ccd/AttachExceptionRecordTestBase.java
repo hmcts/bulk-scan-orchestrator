@@ -115,6 +115,7 @@ public class AttachExceptionRecordTestBase {
 
     private static final StartEventResponse START_EVENT_RESPONSE = StartEventResponse
         .builder()
+        .caseDetails(CASE_DETAILS)
         .eventId(EVENT_ID)
         .token(EVENT_TOKEN)
         .build();
@@ -125,6 +126,7 @@ public class AttachExceptionRecordTestBase {
     @BeforeEach
     public void before() throws JsonProcessingException {
         WireMock.reset();
+        //TODO Think we need it to return some other stuff in here alongside start event
         givenThat(ccdStartEvent().willReturn(okJson(MAPPER.writeValueAsString(START_EVENT_RESPONSE))));
         mockCaseSearchByCcdId(CASE_REF, okJson(MAPPER.writeValueAsString(CASE_DETAILS)));
         givenThat(ccdSubmitEvent().willReturn(okJson(MAPPER.writeValueAsString(CASE_DETAILS))));
