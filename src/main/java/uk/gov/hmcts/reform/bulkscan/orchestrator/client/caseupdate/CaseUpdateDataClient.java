@@ -11,9 +11,9 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.request
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response.SuccessfulUpdateResponse;
 
 import java.util.Set;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Validator;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 

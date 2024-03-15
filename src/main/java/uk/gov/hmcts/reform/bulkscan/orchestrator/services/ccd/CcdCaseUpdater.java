@@ -23,7 +23,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import javax.validation.ConstraintViolationException;
+import jakarta.validation.ConstraintViolationException;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;

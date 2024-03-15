@@ -19,7 +19,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;

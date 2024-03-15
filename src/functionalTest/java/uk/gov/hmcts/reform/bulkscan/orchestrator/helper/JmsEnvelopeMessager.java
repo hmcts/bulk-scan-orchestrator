@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 
 import java.time.Instant;
 import java.util.UUID;
-import javax.jms.ConnectionFactory;
+import jakarta.jms.ConnectionFactory;
 
 @Service
 public class JmsEnvelopeMessager {

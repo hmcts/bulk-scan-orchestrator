@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.function.Predicate;
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;

@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.re
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Map;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 public class CaseCreationDetails {
 
