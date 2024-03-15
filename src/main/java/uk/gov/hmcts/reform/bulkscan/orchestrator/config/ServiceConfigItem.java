@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
 
+import jakarta.validation.constraints.NotNull;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import jakarta.validation.constraints.NotNull;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toMap;

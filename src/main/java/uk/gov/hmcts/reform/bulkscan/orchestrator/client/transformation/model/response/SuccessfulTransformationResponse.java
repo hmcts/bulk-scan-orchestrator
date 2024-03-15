@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 import java.util.Map;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 
 public class SuccessfulTransformationResponse {
 

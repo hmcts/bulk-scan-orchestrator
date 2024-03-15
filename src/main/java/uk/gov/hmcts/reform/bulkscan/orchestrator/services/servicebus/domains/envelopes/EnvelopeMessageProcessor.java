@@ -171,7 +171,7 @@ public class EnvelopeMessageProcessor {
         var message = context.getMessage();
         log.info("Message with ID {} has been dead-lettered", message.getMessageId());
         // track used for alert
-       // appInsights.trackDeadLetteredMessage(message, "envelopes", reason, description);
+        appInsights.trackDeadLetteredMessage(message, "envelopes", reason, description);
     }
 
     private void logMessageFinaliseError(

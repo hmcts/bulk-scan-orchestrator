@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -10,8 +12,6 @@ import org.springframework.jms.core.MessagePostProcessor;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
-import jakarta.jms.JMSException;
-import jakarta.jms.Message;
 
 /**
  * Notifies about successfully processed envelopes via queue.

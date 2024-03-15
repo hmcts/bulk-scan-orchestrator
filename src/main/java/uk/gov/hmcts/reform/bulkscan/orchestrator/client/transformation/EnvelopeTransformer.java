@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation;
 
 import io.vavr.control.Either;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -9,8 +10,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.req
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.response.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
-
-import jakarta.validation.ConstraintViolationException;
 
 import static io.vavr.control.Either.left;
 import static io.vavr.control.Either.right;

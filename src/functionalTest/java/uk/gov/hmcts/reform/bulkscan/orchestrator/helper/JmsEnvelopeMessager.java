@@ -1,8 +1,9 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 
+import jakarta.jms.ConnectionFactory;
+import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.RedeliveryPolicy;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.qpid.jms.JmsConnectionFactory;
-import org.apache.qpid.jms.policy.JmsDefaultRedeliveryPolicy;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,7 +16,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
 
 import java.time.Instant;
 import java.util.UUID;
-import jakarta.jms.ConnectionFactory;
 
 @Service
 public class JmsEnvelopeMessager {
@@ -91,13 +91,13 @@ public class JmsEnvelopeMessager {
 
     public ConnectionFactory getTestFactory() {
         String connection = String.format("amqp://localhost:%1s?amqp.idleTimeout=%2d", "5672", 30000);
-        JmsConnectionFactory jmsConnectionFactory = new JmsConnectionFactory(connection);
-        jmsConnectionFactory.setUsername("admin");
-        jmsConnectionFactory.setPassword("admin");
-        JmsDefaultRedeliveryPolicy jmsDefaultRedeliveryPolicy = new JmsDefaultRedeliveryPolicy();
-        jmsDefaultRedeliveryPolicy.setMaxRedeliveries(3);
-        jmsConnectionFactory.setRedeliveryPolicy(jmsDefaultRedeliveryPolicy);
-        jmsConnectionFactory.setClientID(UUID.randomUUID().toString());
-        return new CachingConnectionFactory(jmsConnectionFactory);
+        ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory(connection);
+        activeMQConnectionFactory.setUserName("admin");
+        activeMQConnectionFactory.setPassword("admin");
+        RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
+        redeliveryPolicy.setMaximumRedeliveries(3);
+        activeMQConnectionFactory.setRedeliveryPolicy(redeliveryPolicy);
+        activeMQConnectionFactory.setClientID(UUID.randomUUID().toString());
+        return new CachingConnectionFactory(activeMQConnectionFactory);
     }
 }

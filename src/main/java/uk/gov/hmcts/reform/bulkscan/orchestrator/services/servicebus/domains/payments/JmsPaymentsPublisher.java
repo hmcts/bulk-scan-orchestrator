@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -11,8 +13,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentCommand;
 
 import java.util.UUID;
-import jakarta.jms.JMSException;
-import jakarta.jms.Message;
 
 @Service
 @Profile("!nosb") // do not register for the nosb (test) profile

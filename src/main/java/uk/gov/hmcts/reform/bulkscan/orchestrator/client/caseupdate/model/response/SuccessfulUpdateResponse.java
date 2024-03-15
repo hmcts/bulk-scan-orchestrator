@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.List;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
 
 public class SuccessfulUpdateResponse {
 

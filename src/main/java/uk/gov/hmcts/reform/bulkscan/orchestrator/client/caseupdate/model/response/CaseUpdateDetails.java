@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.caseupdate.model.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.Map;
-import jakarta.validation.constraints.NotNull;
 
 public class CaseUpdateDetails {
 

@@ -1,14 +1,13 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.config.jms;
 
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.JmsListener;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.JmsEnvelopeMessageProcessor;
-
-import jakarta.jms.JMSException;
-import jakarta.jms.Message;
 
 @Configuration()
 @ConditionalOnProperty(name = "jms.enabled", havingValue = "true")

@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import io.vavr.control.Validation;
+import jakarta.annotation.Nonnull;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.function.Predicate;
-import jakarta.annotation.Nonnull;
 
 import static io.vavr.control.Validation.invalid;
 import static io.vavr.control.Validation.valid;
