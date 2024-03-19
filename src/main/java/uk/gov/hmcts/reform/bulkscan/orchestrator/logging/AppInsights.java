@@ -13,10 +13,6 @@ public class AppInsights {
 
     private final TelemetryClient telemetryClient = new TelemetryClient();
 
-//    public AppInsights(TelemetryClient telemetryClient) {
-//        this.telemetryClient = telemetryClient;
-//    }
-
     public void trackDeadLetteredMessage(
         ServiceBusReceivedMessage message,
         String queue,
