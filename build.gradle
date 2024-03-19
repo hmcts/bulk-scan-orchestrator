@@ -242,16 +242,6 @@ configurations.all {
   exclude group: 'org.springframework.boot', module: 'spring-boot-starter-security'
 }
 
-dependencyManagement {
-  dependencies {
-    // This includes the deprecated @EnableCircuitBreaker (Application.class)
-    // Consider removing this and fixing the issues that come out
-    dependencySet(group: 'org.springframework.cloud', version: '3.1.8') {
-      entry 'spring-cloud-starter-openfeign'
-    }
-
-  }
-}
 
 dependencies {
 
@@ -264,6 +254,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-jdbc'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
+  implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.1.0'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap', version: '3.1.8'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.2.10.RELEASE'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-activemq'
