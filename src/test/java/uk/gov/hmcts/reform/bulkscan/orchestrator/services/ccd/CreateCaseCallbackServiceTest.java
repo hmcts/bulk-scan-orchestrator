@@ -463,7 +463,11 @@ class CreateCaseCallbackServiceTest {
         Map<String, Object> data = basicCaseData();
         data.put(ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING, YesNoFieldValues.YES);
 
-        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null));
         given(exceptionRecordValidator.getCaseId(any(CaseDetails.class))).willReturn(Validation.valid(CASE_ID));
         given(exceptionRecordValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SERVICE));
