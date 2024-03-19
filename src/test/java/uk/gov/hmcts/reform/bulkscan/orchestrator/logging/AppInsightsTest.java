@@ -25,7 +25,7 @@ class AppInsightsTest {
 
     @BeforeEach
     void setUp() {
-        appInsights = new AppInsights(telemetryClient);
+        appInsights = new AppInsights();
     }
 
     @Test
