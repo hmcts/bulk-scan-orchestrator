@@ -45,7 +45,8 @@ public class QueueProcessingReadinessChecker {
      *         Otherwise, throws LoginAttemptRejectedException in order to
      *         open the circuit and let resilience4j.circuitbreaker manage the problem.
      */
-    @CircuitBreaker(name= LOG_IN_CHECK_COMMAND_KEY, fallbackMethod= "isNoLogInAttemptRejectedByIdamFallback")
+
+    @CircuitBreaker(name = LOG_IN_CHECK_COMMAND_KEY, fallbackMethod = "isNoLogInAttemptRejectedByIdamFallback")
     public boolean isNoLogInAttemptRejectedByIdam() throws LogInAttemptRejectedException {
         try {
             if (hasLogInCheckExpired()) {
