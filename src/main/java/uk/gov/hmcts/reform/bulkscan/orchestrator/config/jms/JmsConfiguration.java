@@ -20,6 +20,9 @@ import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 @Configuration
 @EnableJms
 @ConditionalOnProperty(name = "jms.enabled", havingValue = "true")
@@ -48,6 +51,7 @@ public class JmsConfiguration {
                                                                final String clientId) {
         String connection = String.format(amqpConnectionStringTemplate, namespace, idleTimeout);
         ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory(connection);
+        activeMQConnectionFactory.setTrustedPackages(Arrays.asList("org.apache.activemq"));
         activeMQConnectionFactory.setUserName(username);
         activeMQConnectionFactory.setPassword(password);
         RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
