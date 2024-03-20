@@ -14,7 +14,7 @@ public class AppInsights {
     private final TelemetryClient telemetryClient = new TelemetryClient();
 
     public AppInsights() {
-
+        // Do nothing
     }
 
     public void trackDeadLetteredMessage(

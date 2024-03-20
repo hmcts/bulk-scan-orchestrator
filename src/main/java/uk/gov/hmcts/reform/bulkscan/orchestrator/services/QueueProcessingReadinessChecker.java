@@ -83,6 +83,7 @@ public class QueueProcessingReadinessChecker {
     }
 
     public boolean isNoLogInAttemptRejectedByIdamFallback(Throwable throwable) {
+        throwable.getMessage();
         log.warn("Executing fallback method for {} command", LOG_IN_CHECK_COMMAND_KEY);
         return false;
     }

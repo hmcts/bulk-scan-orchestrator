@@ -85,7 +85,7 @@ public class EnvelopeTransformer {
         log.error(
             "Received a response with status {} from transformation endpoint called for envelope. "
                 + "{}. Response starts with: [{}]",
-            exception.getRawStatusCode(),
+            exception.getStatusCode(),
             loggingContext,
             responseBody.substring(0, Math.min(10000, responseBody.length())),
             exception
