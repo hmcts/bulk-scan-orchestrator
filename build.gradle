@@ -254,10 +254,10 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-jdbc'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: '3.2.3'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-activemq'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.1.0'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap', version: '3.1.8'
-  implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.2.10.RELEASE'
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-activemq'
 
   implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.3.0'
   implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
@@ -269,6 +269,7 @@ dependencies {
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: '4.1.2'
   implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '3.0.1'
   implementation group: 'com.github.hmcts', name: 'ccd-client', version: '4.9.2'
+  implementation group: 'io.github.resilience4j', name: 'resilience4j-spring-boot3', version: '2.2.0'
 
   implementation group: 'javax.jms', name: 'javax.jms-api', version: '2.0.1'
   implementation group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0' // until logging-appinsights supports SB 3.x
@@ -311,7 +312,6 @@ dependencies {
   integrationTestImplementation sourceSets.test.runtimeClasspath
   integrationTestImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '4.1.1'
   integrationTestImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.2'
-  //integrationTestImplementation group: 'org.wiremock', name: 'wiremock-standalone', version: '3.4.2'
   integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.19.7', {
     exclude group: 'junit', module: 'junit'
   }

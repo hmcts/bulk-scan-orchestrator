@@ -1,6 +1,8 @@
 server:
   port: 8582
 
+
+
 management:
   endpoints:
     web:
@@ -10,6 +12,8 @@ management:
   endpoint:
     health:
       show-details: always
+  health:
+    circuitbreakers.enabled: true
 
 # liveness alert settings depend on application name, if it is changed alert configuration must also be adjusted
 # https://github.com/hmcts/bulk-scan-shared-infrastructure/blob/master/liveness-alert.tf
@@ -260,17 +264,19 @@ scheduling:
     check-envelopes-queue:
       fixedDelay:  ${ENVELOPE_QUEUE_CHECK_POLL_INTERVAL}
 
-hystrix:
-  command:
+resilience4j.circuitbreaker:
+  configs:
     default:
-      execution.timeout.enabled: false
-      fallback.enabled: true
-      circuitBreaker.enabled: true
-    check-jurisdiction-log-in:
-      circuitBreaker:
-        requestVolumeThreshold: 1
-        sleepWindowInMilliseconds: 300000 # pause processing for 5 minutes if IDAM rejects log-in attempts
-        errorThresholdPercentage: 1
+      registerHealthIndicator: true
+      slidingWindowSize: 10
+      minimumNumberOfCalls: 5
+      permittedNumberOfCallsInHalfOpenState: 3
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+      waitDurationInOpenState: 5s
+      failureRateThreshold: 50
+      eventConsumerBufferSize: 10
+
+
 
 task:
   check-jurisdiction-log-in:
