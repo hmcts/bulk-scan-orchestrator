@@ -68,6 +68,9 @@ document_management:
   url: ${DOCUMENT_MANAGEMENT_URL:http://localhost:4460}
   context-path: documents
 
+case_document_am:
+  url: ${CDAM_URL:http://localhost:4455}
+
 idam:
   s2s-auth:
     url:    ${S2S_URL:http://localhost:4552}
@@ -275,8 +278,6 @@ resilience4j.circuitbreaker:
       waitDurationInOpenState: 5s
       failureRateThreshold: 50
       eventConsumerBufferSize: 10
-
-
 
 task:
   check-jurisdiction-log-in:
