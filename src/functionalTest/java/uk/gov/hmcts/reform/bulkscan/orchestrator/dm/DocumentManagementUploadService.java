@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.dm;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,7 +31,7 @@ public class DocumentManagementUploadService {
     private static final String FILES_NAME = "files";
 
     DocumentManagementUploadService(
-        @Qualifier("processor-s2s-auth") AuthTokenGenerator s2sTokenGenerator,
+        AuthTokenGenerator s2sTokenGenerator,
         CaseDocumentClientApi documentUploadClientApi,
         IdamCachedClient idamCachedClient
     ) {
