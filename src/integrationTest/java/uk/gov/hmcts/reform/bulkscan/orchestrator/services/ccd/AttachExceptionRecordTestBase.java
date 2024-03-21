@@ -115,6 +115,7 @@ public class AttachExceptionRecordTestBase {
 
     private static final StartEventResponse START_EVENT_RESPONSE = StartEventResponse
         .builder()
+        .caseDetails(CASE_DETAILS)
         .eventId(EVENT_ID)
         .token(EVENT_TOKEN)
         .build();

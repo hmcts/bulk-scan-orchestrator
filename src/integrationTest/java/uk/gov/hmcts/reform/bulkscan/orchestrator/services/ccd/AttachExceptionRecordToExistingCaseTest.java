@@ -122,7 +122,7 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
             .statusCode(200);
 
         verifySuccessResponse(response, callbackRequest, false);
-        verify(exactly(0), startEventRequest());
+        verify(exactly(1), startEventRequest());
         verify(exactly(0), submittedScannedRecords());
     }
 
@@ -229,7 +229,7 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
                 DOCUMENT_NUMBER
             )));
 
-        verify(exactly(0), startEventRequest());
+        verify(exactly(1), startEventRequest());
         verify(exactly(0), submittedScannedRecords());
     }
 
