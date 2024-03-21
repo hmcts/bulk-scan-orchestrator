@@ -63,7 +63,8 @@ idam:
       username: ${IDAM_USER_NAME:bulkscan+ccd@gmail.com}
       password: ${IDAM_USER_PASSWORD:Password12}
 
-
+case_document_am:
+  url: http://localhost:4455
 
 document_management:
   url: http://dm-store:4460
