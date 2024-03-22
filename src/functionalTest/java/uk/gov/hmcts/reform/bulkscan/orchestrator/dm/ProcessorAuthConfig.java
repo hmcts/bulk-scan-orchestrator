@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGeneratorFactory;
 @Configuration
 public class ProcessorAuthConfig {
     @Primary
-    @Bean("idam.s2s-auth.url")
+    @Bean("processor-s2s-auth")
     public AuthTokenGenerator authTokenGenerator(
         @Value("${idam.s2s-auth.processor.secret}") String secret,
         @Value("${idam.s2s-auth.processor.name}") String name,

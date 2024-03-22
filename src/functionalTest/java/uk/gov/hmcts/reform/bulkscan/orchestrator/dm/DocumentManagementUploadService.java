@@ -32,7 +32,7 @@ public class DocumentManagementUploadService {
     private static final String FILES_NAME = "files";
 
     DocumentManagementUploadService(
-        @Qualifier("idam.s2s-auth.url") AuthTokenGenerator s2sTokenGenerator,
+        @Qualifier("processor-s2s-auth") AuthTokenGenerator s2sTokenGenerator,
         CaseDocumentClientApi documentUploadClientApi,
         IdamCachedClient idamCachedClient
     ) {
