@@ -329,6 +329,7 @@ dependencies {
     exclude group: 'junit', module: 'junit'
   }
   functionalTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.19.7'
+  functionalTestImplementation group: 'io.rest-assured', name: 'rest-assured', version: '5.4.0'
 
   smokeTestImplementation sourceSets.main.runtimeClasspath
   smokeTestImplementation sourceSets.test.runtimeClasspath
