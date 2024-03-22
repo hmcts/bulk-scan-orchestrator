@@ -79,6 +79,7 @@ task runAndPublishConsumerPactTests(type: Test) {
 runAndPublishConsumerPactTests.finalizedBy pactPublish
 
 task functional(type: Test, description: 'Runs the functional tests.', group: 'Verification') {
+  logger.lifecycle("Running functional Tests")
   testClassesDirs = sourceSets.functionalTest.output.classesDirs
   classpath = sourceSets.functionalTest.runtimeClasspath
 }
