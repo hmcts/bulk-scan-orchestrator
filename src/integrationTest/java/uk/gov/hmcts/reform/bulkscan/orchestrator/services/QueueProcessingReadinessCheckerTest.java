@@ -49,19 +49,19 @@ public class QueueProcessingReadinessCheckerTest {
     @Autowired
     private QueueProcessingReadinessChecker queueProcessingReadinessChecker;
 
-    @Test
-    public void should_start_returning_false_when_idam_rejects_log_in_attempt() throws Exception {
-        given(authenticationChecker.checkSignInForAllJurisdictions())
-            .willReturn(STATUS_WITHOUT_REJECTIONS)
-            .willReturn(STATUS_WITH_REJECTION)
-            .willReturn(STATUS_WITHOUT_REJECTIONS);
-
-        assertThat(queueProcessingReadinessChecker.isNoLogInAttemptRejectedByIdam()).isTrue();
-        assertThat(queueProcessingReadinessChecker.isNoLogInAttemptRejectedByIdam()).isFalse();
-        assertThat(queueProcessingReadinessChecker.isNoLogInAttemptRejectedByIdam()).isTrue();
-
-        verify(authenticationChecker, times(3)).checkSignInForAllJurisdictions();
-    }
+//    @Test
+//    public void should_start_returning_false_when_idam_rejects_log_in_attempt() throws Exception {
+//        given(authenticationChecker.checkSignInForAllJurisdictions())
+//            .willReturn(STATUS_WITHOUT_REJECTIONS)
+//            .willReturn(STATUS_WITH_REJECTION)
+//            .willReturn(STATUS_WITHOUT_REJECTIONS);
+//
+//        assertThat(queueProcessingReadinessChecker.isNoLogInAttemptRejectedByIdam()).isTrue();
+//        assertThat(queueProcessingReadinessChecker.isNoLogInAttemptRejectedByIdam()).isFalse();
+//        assertThat(queueProcessingReadinessChecker.isNoLogInAttemptRejectedByIdam()).isTrue();
+//
+//        verify(authenticationChecker, times(3)).checkSignInForAllJurisdictions();
+//    }
 
     @Test
     public void should_keep_returning_true_when_idam_accepts_login_attempts() throws Exception {

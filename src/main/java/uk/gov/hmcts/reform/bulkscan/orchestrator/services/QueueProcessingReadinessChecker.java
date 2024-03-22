@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
 
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,7 +46,7 @@ public class QueueProcessingReadinessChecker {
      *         open the circuit and let resilience4j.circuitbreaker manage the problem.
      */
 
-    @CircuitBreaker(name = LOG_IN_CHECK_COMMAND_KEY, fallbackMethod = "isNoLogInAttemptRejectedByIdamFallback")
+    //@CircuitBreaker(name = LOG_IN_CHECK_COMMAND_KEY, fallbackMethod = "isNoLogInAttemptRejectedByIdamFallback")
     public boolean isNoLogInAttemptRejectedByIdam() throws LogInAttemptRejectedException {
         try {
             if (hasLogInCheckExpired()) {
