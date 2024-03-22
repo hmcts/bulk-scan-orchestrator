@@ -328,7 +328,6 @@ dependencies {
     exclude group: 'junit', module: 'junit'
   }
   functionalTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.19.7'
-  functionalTestImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.1.0'
 
   smokeTestImplementation sourceSets.main.runtimeClasspath
   smokeTestImplementation sourceSets.test.runtimeClasspath

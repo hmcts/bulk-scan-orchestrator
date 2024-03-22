@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
 
+import com.azure.core.http.HttpClient;
+import com.azure.core.http.netty.NettyAsyncHttpClientBuilder;
 import feign.Client;
 import feign.httpclient.ApacheHttpClient;
 import org.apache.hc.core5.util.Timeout;
@@ -40,6 +42,11 @@ public class HttpConfiguration {
             .useSystemProperties()
             .setDefaultRequestConfig(config)
             .build();
+    }
+
+    @Bean
+    public HttpClient azureHttpClient() {
+        return new NettyAsyncHttpClientBuilder().build();
     }
 
     private CloseableHttpClient getHttpClient() {
