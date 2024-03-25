@@ -110,10 +110,10 @@ class AttachExceptionRecordToExistingCaseTest {
         attachExceptionRecord(caseDetails, exceptionRecord, null);
 
         //then
-        //        await("Exception record is attached to the case")
-        //            .atMost(60, TimeUnit.SECONDS)
-        //            .pollDelay(2, TimeUnit.SECONDS)
-        //            .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 2));
+        await("Exception record is attached to the case")
+            .atMost(60, TimeUnit.SECONDS)
+            .pollDelay(2, TimeUnit.SECONDS)
+            .until(() -> isExceptionRecordAttachedToTheCase(caseDetails, 2));
 
         verifyExistingCaseIsUpdatedWithExceptionRecordData(caseDetails, exceptionRecord, 1);
     }
