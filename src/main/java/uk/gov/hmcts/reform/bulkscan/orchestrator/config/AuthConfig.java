@@ -5,17 +5,15 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Primary;
 import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGeneratorFactory;
 
-
 @Configuration
-@Lazy
 public class AuthConfig {
-
-    @Bean
-    @ConditionalOnProperty(name = "idam.s2s-auth.url")
+    @Primary
+    @Bean("idam.s2s-auth.url")
     public AuthTokenGenerator authTokenGenerator(
         @Value("${idam.s2s-auth.secret}") String secret,
         @Value("${idam.s2s-auth.name}") String name,
