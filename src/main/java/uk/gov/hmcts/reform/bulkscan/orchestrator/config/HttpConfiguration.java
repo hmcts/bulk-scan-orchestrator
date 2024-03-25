@@ -60,7 +60,7 @@ public class HttpConfiguration {
             .create()
             .useSystemProperties()
             .setDefaultRequestConfig(config)
-            .setRedirectStrategy(new LaxRedirectStrategy())
+            .disableRedirectHandling()
             .build();
     }
 }
