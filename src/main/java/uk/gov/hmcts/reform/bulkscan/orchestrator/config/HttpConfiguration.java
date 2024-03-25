@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
 
 import feign.Client;
+import feign.Logger;
 import feign.httpclient.ApacheHttpClient;
 import org.apache.hc.core5.util.Timeout;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -13,6 +15,11 @@ import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class HttpConfiguration {
+
+    @Bean
+    Logger.Level feignLoggerLevel() {
+        return Logger.Level.FULL;
+    }
 
     @Bean
     public Client getFeignHttpClient() {
@@ -53,6 +60,7 @@ public class HttpConfiguration {
             .create()
             .useSystemProperties()
             .setDefaultRequestConfig(config)
+            .setRedirectStrategy(new LaxRedirectStrategy())
             .build();
     }
 }

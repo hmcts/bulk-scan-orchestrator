@@ -270,6 +270,7 @@ dependencies {
   implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '3.0.1'
   implementation group: 'com.github.hmcts', name: 'ccd-client', version: '4.9.2'
   implementation group: 'io.github.resilience4j', name: 'resilience4j-spring-boot3', version: '2.2.0'
+  implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: '13.2.1'
 
   implementation group: 'javax.jms', name: 'javax.jms-api', version: '2.0.1'
   implementation group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0' // until logging-appinsights supports SB 3.x
