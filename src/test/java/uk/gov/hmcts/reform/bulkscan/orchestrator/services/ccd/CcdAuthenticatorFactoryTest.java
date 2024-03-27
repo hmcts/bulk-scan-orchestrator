@@ -48,5 +48,18 @@ class CcdAuthenticatorFactoryTest {
         assertThat(authenticator.getUserToken()).isEqualTo(USER_TOKEN);
         assertThat(authenticator.getUserId()).isEqualTo(USER_ID);
     }
+    @Test
+    void should_return_null() {
+        CachedIdamCredential cachedIdamCredential = new CachedIdamCredential(
+            USER_TOKEN,
+            USER_ID,
+            28800L
+        );
+
+        CcdAuthenticator authenticator = service.createForJurisdiction(JURSIDICTION);
+
+        assertThat(authenticator).isEqualTo(null);
+
+    }
 
 }
