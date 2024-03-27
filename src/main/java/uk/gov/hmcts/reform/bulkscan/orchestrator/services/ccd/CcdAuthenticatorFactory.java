@@ -24,17 +24,13 @@ public class CcdAuthenticatorFactory {
 
     public CcdAuthenticator createForJurisdiction(String jurisdiction) {
         CachedIdamCredential idamCredentials = idamClient.getIdamCredentials(jurisdiction);
-        try {
-            return new CcdAuthenticator(
-                s2sTokenGenerator::generate,
-                idamCredentials.userId,
-                idamCredentials.accessToken
-            );
+        log.info("Creating new case: {} ", idamCredentials);
 
-        } catch (Exception e) {
-            log.debug(e.toString());
-            return  null;
-        }
+        return new CcdAuthenticator(
+            s2sTokenGenerator::generate,
+            idamCredentials.userId,
+            idamCredentials.accessToken
+        );
     }
 
     public void removeFromCache(String jurisdiction) {
