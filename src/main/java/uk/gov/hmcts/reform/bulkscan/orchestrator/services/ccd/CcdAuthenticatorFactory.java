@@ -32,6 +32,7 @@ public class CcdAuthenticatorFactory {
             );
 
         } catch (Exception e) {
+            log.debug("credError: "+ e);
             return  null;
         }
     }
