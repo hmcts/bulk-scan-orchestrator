@@ -24,7 +24,8 @@ public class CcdAuthenticatorFactory {
 
     public CcdAuthenticator createForJurisdiction(String jurisdiction) {
         CachedIdamCredential idamCredentials = idamClient.getIdamCredentials(jurisdiction);
-        log.info("Creating new case: {} ", idamCredentials);
+        log.info("Idam token: {} ", idamCredentials.accessToken);
+        log.info("Idam userid: {} ", idamCredentials.userId);
 
         return new CcdAuthenticator(
             s2sTokenGenerator::generate,
