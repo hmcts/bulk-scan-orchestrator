@@ -281,7 +281,7 @@ logging:
     uk:
       gov:
         hmcts:
-          reform: ${REFORM_LOG_LEVEL:INFO}
+          reform: ${REFORM_LOG_LEVEL:debug}
 
 callback:
   store:
