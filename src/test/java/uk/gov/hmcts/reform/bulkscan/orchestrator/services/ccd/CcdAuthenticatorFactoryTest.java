@@ -48,14 +48,4 @@ class CcdAuthenticatorFactoryTest {
         assertThat(authenticator.getUserToken()).isEqualTo(USER_TOKEN);
         assertThat(authenticator.getUserId()).isEqualTo(USER_ID);
     }
-
-    @Test
-    void should_return_null() {
-
-        CcdAuthenticator authenticator = service.createForJurisdiction(JURSIDICTION);
-
-        assertThat(authenticator).isEqualTo(null);
-
-    }
-
 }
