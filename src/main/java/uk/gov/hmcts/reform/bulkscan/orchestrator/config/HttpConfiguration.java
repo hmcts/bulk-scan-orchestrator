@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
 
 import feign.Client;
+import feign.Logger;
 import feign.httpclient.ApacheHttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -12,6 +13,12 @@ import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class HttpConfiguration {
+
+    @Bean
+    Logger.Level feignLoggerLevel() {
+        return Logger.Level.FULL;
+    }
+
 
     @Bean
     public Client getFeignHttpClient() {
