@@ -105,20 +105,15 @@ public class CcdCaseCreator {
     }
 
     private StartEventResponse startEventForCreateCase(CcdAuthenticator authenticator) {
-        try {
-            // not including in try catch to fast fail the method
-            return coreCaseDataApi.startForCaseworker(
-                authenticator.getUserToken(),
-                authenticator.getServiceToken(),
-                authenticator.getUserId(),
-                JURISDICTION,
-                CASE_TYPE_ID,
-                CREATE_CASE_EVENT_TYPE_ID
-            );
-        } catch (Exception e) {
-            log.debug("ApiError: " + e.toString());
-        }
-        return null;
+        // not including in try catch to fast fail the method
+        return coreCaseDataApi.startForCaseworker(
+            authenticator.getUserToken(),
+            authenticator.getServiceToken(),
+            authenticator.getUserId(),
+            JURISDICTION,
+            CASE_TYPE_ID,
+            CREATE_CASE_EVENT_TYPE_ID
+        );
     }
 
     private CaseDetails submitNewCase(
