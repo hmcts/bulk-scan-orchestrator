@@ -106,17 +106,12 @@ public class CcdCaseCreator {
 
     private StartEventResponse startEventForCreateCase(CcdAuthenticator authenticator) {
         // not including in try catch to fast fail the method
-
-        log.info("User token: {} ", authenticator.getUserToken());
-        log.info("Service token: {} ", authenticator.getServiceToken());
-        log.info("UserId: {} ", authenticator.getUserId());
-
         return coreCaseDataApi.startForCaseworker(
             authenticator.getUserToken(),
             authenticator.getServiceToken(),
             authenticator.getUserId(),
             JURISDICTION,
-            CASE_TYPE_ID,
+            "Bulk_Scanned",
             CREATE_CASE_EVENT_TYPE_ID
         );
     }
