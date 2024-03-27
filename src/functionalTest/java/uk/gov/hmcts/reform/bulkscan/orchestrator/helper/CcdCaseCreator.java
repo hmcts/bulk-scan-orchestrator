@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.helper;
 
+import com.launchdarkly.shaded.com.launchdarkly.eventsource.StartedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -116,7 +117,7 @@ public class CcdCaseCreator {
                 CREATE_CASE_EVENT_TYPE_ID
             );
         } catch (Exception e) {
-            log.info(e.getMessage());
+            log.debug("ApiError: " + e.toString());
         }
         return null;
     }
