@@ -14,6 +14,8 @@ spring:
     url: ${DB_URI:jdbc:tc:postgresql:11.0}://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:bs_orchestrator}${DB_CONN_OPTIONS:}
     username: ${DB_USER:}
     password: ${DB_PASSWORD:}
+  main:
+    allow-bean-definition-overriding: true
 
 flyway:
   skip-migrations: false
@@ -63,7 +65,8 @@ idam:
       username: ${IDAM_USER_NAME:bulkscan+ccd@gmail.com}
       password: ${IDAM_USER_PASSWORD:Password12}
 
-
+case_document_am:
+  url: ${CDAM_URL:http://localhost:4455}
 
 document_management:
   url: http://dm-store:4460

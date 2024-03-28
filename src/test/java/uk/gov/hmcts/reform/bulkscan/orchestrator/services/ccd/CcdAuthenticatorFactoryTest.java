@@ -48,5 +48,4 @@ class CcdAuthenticatorFactoryTest {
         assertThat(authenticator.getUserToken()).isEqualTo(USER_TOKEN);
         assertThat(authenticator.getUserId()).isEqualTo(USER_ID);
     }
-
 }

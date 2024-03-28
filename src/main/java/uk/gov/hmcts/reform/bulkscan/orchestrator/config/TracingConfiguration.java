@@ -16,7 +16,7 @@ public class TracingConfiguration {
     @Bean
     public TelemetryProcessor healthRecognitionProcessor() {
         return telemetry -> {
-            String operationName = telemetry.getContext().getOperation().getName();
+            String operationName = telemetry.getContext().getOperation().toString();
 
             if (telemetry instanceof RemoteDependencyTelemetry
                     && operationName != null

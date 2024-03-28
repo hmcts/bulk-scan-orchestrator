@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.base.Strings;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

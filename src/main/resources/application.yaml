@@ -33,6 +33,8 @@ spring:
       connectionTimeout: 30000
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.jms.JmsAutoConfiguration,org.springframework.boot.autoconfigure.jms.activemq.ActiveMQAutoConfiguration
+  main:
+    allow-bean-definition-overriding: true
 
 flyway:
   skip-migrations: ${FLYWAY_SKIP_MIGRATIONS}
@@ -63,6 +65,9 @@ core_case_data:
 document_management:
   url: ${DOCUMENT_MANAGEMENT_URL:http://localhost:4460}
   context-path: documents
+
+case_document_am:
+  url: ${CDAM_URL:http://localhost:4455}
 
 idam:
   s2s-auth:
@@ -260,18 +265,6 @@ scheduling:
     check-envelopes-queue:
       fixedDelay:  ${ENVELOPE_QUEUE_CHECK_POLL_INTERVAL}
 
-hystrix:
-  command:
-    default:
-      execution.timeout.enabled: false
-      fallback.enabled: true
-      circuitBreaker.enabled: true
-    check-jurisdiction-log-in:
-      circuitBreaker:
-        requestVolumeThreshold: 1
-        sleepWindowInMilliseconds: 300000 # pause processing for 5 minutes if IDAM rejects log-in attempts
-        errorThresholdPercentage: 1
-
 task:
   check-jurisdiction-log-in:
     check-validity-duration: PT5M # only ensure this often that no log-in attempt is rejected by IDAM
@@ -281,7 +274,7 @@ logging:
     uk:
       gov:
         hmcts:
-          reform: ${REFORM_LOG_LEVEL:INFO}
+          reform: ${REFORM_LOG_LEVEL:debug}
 
 callback:
   store:

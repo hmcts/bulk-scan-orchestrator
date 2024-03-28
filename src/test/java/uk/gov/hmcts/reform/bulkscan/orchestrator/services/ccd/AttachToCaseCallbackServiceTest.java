@@ -46,7 +46,6 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 
 @ExtendWith(MockitoExtension.class)
 class AttachToCaseCallbackServiceTest {
-
     public static final String WRONG_CASE_TYPE_ID = "BULKSCAN_Exception";
 
     private AttachToCaseCallbackService attachToCaseCallbackService;
@@ -111,7 +110,11 @@ class AttachToCaseCallbackServiceTest {
         // given
         CaseDetails caseDetails = getValidCaseDetails();
         given(exceptionRecordValidator.getValidation(caseDetails)).willReturn(Validation.valid(exceptionRecord));
-        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+                .willReturn(Validation.valid(null))
+                .willReturn(Validation.valid(null))
+                .willReturn(Validation.valid(null))
+                .willReturn(Validation.valid(null));
         given(exceptionRecordAttacher.tryAttachToCase(
             any(AttachToCaseEventData.class),
             any(CaseDetails.class),
@@ -159,7 +162,10 @@ class AttachToCaseCallbackServiceTest {
     void process_should_not_update_case_if_mandatory_prerequisites_invalid() {
         // given
         CaseDetails caseDetails = getValidCaseDetails();
-        given(exceptionRecordValidator.mandatoryPrerequisites(any()))
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+            .willReturn(Validation.invalid(PREREQUISITES_ERROR))
+            .willReturn(Validation.invalid(PREREQUISITES_ERROR))
+            .willReturn(Validation.invalid(PREREQUISITES_ERROR))
             .willReturn(Validation.invalid(PREREQUISITES_ERROR));
 
         // when
@@ -180,7 +186,11 @@ class AttachToCaseCallbackServiceTest {
         // given
         CaseDetails caseDetails = getValidCaseDetails();
         given(exceptionRecordValidator.getValidation(caseDetails)).willReturn(Validation.valid(exceptionRecord));
-        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null));
         given(exceptionRecordAttacher.tryAttachToCase(
             any(AttachToCaseEventData.class),
             any(CaseDetails.class),
@@ -229,7 +239,11 @@ class AttachToCaseCallbackServiceTest {
             SUPPLEMENTARY_EVIDENCE_WITH_OCR.name()
         );
         given(exceptionRecordValidator.getValidation(caseDetails)).willReturn(Validation.valid(exceptionRecord));
-        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any(CaseDetails.class)))
                 .willReturn(Validation.invalid("Internal Error: invalid jurisdiction supplied: null"));
         given(callbackValidator.hasTargetCaseReference(any(CaseDetails.class))).willReturn(Validation.valid(null));
@@ -274,7 +288,11 @@ class AttachToCaseCallbackServiceTest {
             SUPPLEMENTARY_EVIDENCE_WITH_OCR.name()
         );
         given(exceptionRecordValidator.getValidation(caseDetails)).willReturn(Validation.valid(exceptionRecord));
-        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any(CaseDetails.class))).willReturn(Validation.valid(JURISDICTION));
         given(callbackValidator.hasTargetCaseReference(any(CaseDetails.class))).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any(CaseDetails.class))).willReturn(Validation.valid(null));
@@ -311,7 +329,11 @@ class AttachToCaseCallbackServiceTest {
             SUPPLEMENTARY_EVIDENCE_WITH_OCR.name()
         );
         given(exceptionRecordValidator.getValidation(caseDetails)).willReturn(Validation.valid(exceptionRecord));
-        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any(CaseDetails.class))).willReturn(Validation.valid(JURISDICTION));
         given(callbackValidator.hasTargetCaseReference(any(CaseDetails.class))).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any(CaseDetails.class))).willReturn(Validation.valid(null));
@@ -348,7 +370,11 @@ class AttachToCaseCallbackServiceTest {
             SUPPLEMENTARY_EVIDENCE_WITH_OCR.name()
         );
         given(exceptionRecordValidator.getValidation(caseDetails)).willReturn(Validation.valid(exceptionRecord));
-        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any(CaseDetails.class))).willReturn(Validation.valid(JURISDICTION));
         given(callbackValidator.hasTargetCaseReference(any(CaseDetails.class))).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any(CaseDetails.class)))
@@ -393,7 +419,11 @@ class AttachToCaseCallbackServiceTest {
             SUPPLEMENTARY_EVIDENCE_WITH_OCR.name()
         );
         given(exceptionRecordValidator.getValidation(caseDetails)).willReturn(Validation.valid(exceptionRecord));
-        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any(CaseDetails.class))).willReturn(Validation.valid(JURISDICTION));
         given(callbackValidator.hasTargetCaseReference(any(CaseDetails.class))).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any(CaseDetails.class))).willReturn(Validation.valid(null));
@@ -438,7 +468,11 @@ class AttachToCaseCallbackServiceTest {
             SUPPLEMENTARY_EVIDENCE_WITH_OCR.name()
         );
         given(exceptionRecordValidator.getValidation(caseDetails)).willReturn(Validation.valid(exceptionRecord));
-        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any(CaseDetails.class))).willReturn(Validation.valid(JURISDICTION));
         given(callbackValidator.hasTargetCaseReference(any(CaseDetails.class))).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any(CaseDetails.class))).willReturn(Validation.valid(null));
@@ -482,7 +516,11 @@ class AttachToCaseCallbackServiceTest {
             CASE_REF,
             null
         );
-        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any(CaseDetails.class))).willReturn(Validation.valid(JURISDICTION));
         given(callbackValidator.hasTargetCaseReference(any(CaseDetails.class))).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any(CaseDetails.class))).willReturn(Validation.valid(null));
@@ -518,7 +556,11 @@ class AttachToCaseCallbackServiceTest {
             CASE_REF,
             NEW_APPLICATION.name()
         );
-        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null));
         given(callbackValidator.hasJurisdiction(any(CaseDetails.class))).willReturn(Validation.valid(JURISDICTION));
         given(callbackValidator.hasTargetCaseReference(any(CaseDetails.class))).willReturn(Validation.valid(null));
         given(callbackValidator.hasAnId(any(CaseDetails.class))).willReturn(Validation.valid(null));

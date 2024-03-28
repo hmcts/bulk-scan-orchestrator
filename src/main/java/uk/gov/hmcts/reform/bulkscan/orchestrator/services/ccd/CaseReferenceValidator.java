@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.base.Strings;
 import io.vavr.control.Validation;
+import jakarta.annotation.Nonnull;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -10,7 +11,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
-import javax.annotation.Nonnull;
 
 import static io.vavr.control.Validation.invalid;
 import static java.lang.String.format;

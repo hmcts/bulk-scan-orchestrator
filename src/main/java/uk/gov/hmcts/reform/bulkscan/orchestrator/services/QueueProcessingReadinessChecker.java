@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,12 +43,10 @@ public class QueueProcessingReadinessChecker {
      *
      * @return true if IDAM doesn't reject any login attempt.
      *         Otherwise, throws LoginAttemptRejectedException in order to
-     *         open the circuit and let Hystrix manage the problem.
+     *         open the circuit and let resilience4j.circuitbreaker manage the problem.
      */
-    @HystrixCommand(
-        commandKey = LOG_IN_CHECK_COMMAND_KEY,
-        fallbackMethod = "isNoLogInAttemptRejectedByIdamFallback"
-    )
+
+    @CircuitBreaker(name = LOG_IN_CHECK_COMMAND_KEY, fallbackMethod = "isNoLogInAttemptRejectedByIdamFallback")
     public boolean isNoLogInAttemptRejectedByIdam() throws LogInAttemptRejectedException {
         try {
             if (hasLogInCheckExpired()) {
@@ -84,7 +82,8 @@ public class QueueProcessingReadinessChecker {
         }
     }
 
-    public boolean isNoLogInAttemptRejectedByIdamFallback() {
+    public boolean isNoLogInAttemptRejectedByIdamFallback(Throwable throwable) {
+        throwable.getMessage();
         log.warn("Executing fallback method for {} command", LOG_IN_CHECK_COMMAND_KEY);
         return false;
     }

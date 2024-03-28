@@ -17,7 +17,7 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.ValidatableResponse;
 import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam.GetDocumentHashResponse;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;

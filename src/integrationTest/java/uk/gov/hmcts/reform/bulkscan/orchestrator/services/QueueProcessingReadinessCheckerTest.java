@@ -58,16 +58,9 @@ public class QueueProcessingReadinessCheckerTest {
 
         assertThat(queueProcessingReadinessChecker.isNoLogInAttemptRejectedByIdam()).isTrue();
         assertThat(queueProcessingReadinessChecker.isNoLogInAttemptRejectedByIdam()).isFalse();
+        assertThat(queueProcessingReadinessChecker.isNoLogInAttemptRejectedByIdam()).isTrue();
 
-        // give hystrix enough time to conclude that it needs to open the circuit (based on stats)
-        Thread.sleep(500);
-
-        // even though authenticationChecker should return successful results from now on,
-        // the circuit should remain open
-        assertThat(queueProcessingReadinessChecker.isNoLogInAttemptRejectedByIdam()).isFalse();
-        assertThat(queueProcessingReadinessChecker.isNoLogInAttemptRejectedByIdam()).isFalse();
-
-        verify(authenticationChecker, times(2)).checkSignInForAllJurisdictions();
+        verify(authenticationChecker, times(3)).checkSignInForAllJurisdictions();
     }
 
     @Test

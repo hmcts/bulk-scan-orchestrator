@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes;
 
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,8 +17,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.MessageProcessingException;
 
 import java.nio.charset.StandardCharsets;
-import javax.jms.JMSException;
-import javax.jms.Message;
 
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.EnvelopeParser.parse;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.handler.MessageProcessingResultType.POTENTIALLY_RECOVERABLE_FAILURE;

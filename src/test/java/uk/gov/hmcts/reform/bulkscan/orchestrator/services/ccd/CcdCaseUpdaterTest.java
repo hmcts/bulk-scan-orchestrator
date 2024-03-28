@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import feign.FeignException;
 import feign.Request;
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +32,6 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.Map;
 import java.util.Optional;
-import javax.validation.ConstraintViolationException;
 
 import static java.time.LocalDateTime.now;
 import static java.util.Arrays.asList;

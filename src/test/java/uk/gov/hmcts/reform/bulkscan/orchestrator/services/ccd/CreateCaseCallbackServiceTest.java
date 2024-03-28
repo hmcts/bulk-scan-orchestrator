@@ -85,8 +85,14 @@ class CreateCaseCallbackServiceTest {
     @Test
     void should_not_allow_to_process_callback_in_case_wrong_event_id_is_received() {
         // given
-        given(exceptionRecordValidator.mandatoryPrerequisites(any()))
-                .willReturn(Validation.invalid("The some event event is not supported. "
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+            .willReturn(Validation.invalid("The some event event is not supported. "
+                + "Please contact service team"))
+            .willReturn(Validation.invalid("The some event event is not supported. "
+                + "Please contact service team"))
+            .willReturn(Validation.invalid("The some event event is not supported. "
+                + "Please contact service team"))
+            .willReturn(Validation.invalid("The some event event is not supported. "
                         + "Please contact service team"));
 
         final CcdCallbackRequest ccdCallbackRequest = new CcdCallbackRequest(
@@ -117,8 +123,11 @@ class CreateCaseCallbackServiceTest {
     void should_not_allow_to_process_callback_when_case_type_id_is_missing() {
         // given
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.id(1L));
-        given(exceptionRecordValidator.mandatoryPrerequisites(any()))
-                .willReturn(Validation.invalid("No case type ID supplied"));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+            .willReturn(Validation.invalid("No case type ID supplied"))
+            .willReturn(Validation.invalid("No case type ID supplied"))
+            .willReturn(Validation.invalid("No case type ID supplied"))
+            .willReturn(Validation.invalid("No case type ID supplied"));
 
         final CcdCallbackRequest ccdCallbackRequest = new CcdCallbackRequest(
                 EventIds.CREATE_NEW_CASE,
@@ -148,7 +157,10 @@ class CreateCaseCallbackServiceTest {
     void should_not_allow_to_process_callback_when_case_type_id_is_empty() {
         // given
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(""));
-        given(exceptionRecordValidator.mandatoryPrerequisites(any()))
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+                .willReturn(Validation.invalid("Case type ID () has invalid format"))
+                .willReturn(Validation.invalid("Case type ID () has invalid format"))
+                .willReturn(Validation.invalid("Case type ID () has invalid format"))
                 .willReturn(Validation.invalid("Case type ID () has invalid format"));
 
         final CcdCallbackRequest ccdCallbackRequest = new CcdCallbackRequest(
@@ -179,7 +191,11 @@ class CreateCaseCallbackServiceTest {
     void should_not_allow_to_process_callback_in_case_service_not_configured() {
         // given
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(CASE_TYPE_ID));
-        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.invalid("oh no"));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+            .willReturn(Validation.invalid("oh no"))
+            .willReturn(Validation.invalid("oh no"))
+            .willReturn(Validation.invalid("oh no"))
+            .willReturn(Validation.invalid("oh no"));
 
         final CcdCallbackRequest ccdCallbackRequest = new CcdCallbackRequest(
                 EventIds.CREATE_NEW_CASE,
@@ -207,8 +223,11 @@ class CreateCaseCallbackServiceTest {
     void should_not_allow_to_process_callback_in_case_transformation_url_not_configured() {
         // given
         CaseDetails caseDetails = TestCaseBuilder.createCaseWith(builder -> builder.caseTypeId(CASE_TYPE_ID));
-        given(exceptionRecordValidator.mandatoryPrerequisites(any()))
-                .willReturn(Validation.invalid("Transformation URL is not configured"));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+            .willReturn(Validation.invalid("Transformation URL is not configured"))
+            .willReturn(Validation.invalid("Transformation URL is not configured"))
+            .willReturn(Validation.invalid("Transformation URL is not configured"))
+            .willReturn(Validation.invalid("Transformation URL is not configured"));
 
         final CcdCallbackRequest ccdCallbackRequest = new CcdCallbackRequest(
                 EventIds.CREATE_NEW_CASE,
@@ -241,8 +260,11 @@ class CreateCaseCallbackServiceTest {
             .caseTypeId(CASE_TYPE_ID)
             .jurisdiction("some jurisdiction")
         );
-        given(exceptionRecordValidator.mandatoryPrerequisites(any()))
-                .willReturn(Validation.invalid("Callback has no Idam token received in the header"));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+            .willReturn(Validation.invalid("Callback has no Idam token received in the header"))
+            .willReturn(Validation.invalid("Callback has no Idam token received in the header"))
+            .willReturn(Validation.invalid("Callback has no Idam token received in the header"))
+            .willReturn(Validation.invalid("Callback has no Idam token received in the header"));
 
         final CcdCallbackRequest ccdCallbackRequest = new CcdCallbackRequest(
                 EventIds.CREATE_NEW_CASE,
@@ -274,7 +296,10 @@ class CreateCaseCallbackServiceTest {
             .caseTypeId(CASE_TYPE_ID)
             .jurisdiction("some jurisdiction")
         );
-        given(exceptionRecordValidator.mandatoryPrerequisites(any()))
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+                .willReturn(Validation.invalid("Callback has no user id received in the header"))
+                .willReturn(Validation.invalid("Callback has no user id received in the header"))
+                .willReturn(Validation.invalid("Callback has no user id received in the header"))
                 .willReturn(Validation.invalid("Callback has no user id received in the header"));
 
         final CcdCallbackRequest ccdCallbackRequest = new CcdCallbackRequest(
@@ -313,7 +338,11 @@ class CreateCaseCallbackServiceTest {
         data.put("openingDate", "2019-09-06T15:30:04.000Z");
         data.put("scannedDocuments", TestCaseBuilder.document("https://url", "some doc"));
 
-        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null));
 
         given(exceptionRecordValidator.getCaseId(any(CaseDetails.class))).willReturn(Validation.valid(CASE_ID));
         given(exceptionRecordValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class))).willReturn(Validation.valid(SERVICE));
@@ -353,7 +382,11 @@ class CreateCaseCallbackServiceTest {
         given(exceptionRecordFinalizer.finalizeExceptionRecord(caseData, "345", CASE_CREATION))
             .willReturn(finalizedCaseData);
 
-        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null));
         given(exceptionRecordValidator.getCaseId(any())).willReturn(Validation.valid(CASE_ID));
         given(exceptionRecordValidator.hasServiceNameInCaseTypeId(any())).willReturn(Validation.valid(SERVICE));
         given(exceptionRecordValidator.getValidation(any(CaseDetails.class)))
@@ -380,7 +413,11 @@ class CreateCaseCallbackServiceTest {
         // given
         setUpServiceConfig();
 
-        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null));
         given(caseFinder.findCases(any(), any())).willReturn(asList(345L, 456L));
 
         given(exceptionRecordValidator.getCaseId(any(CaseDetails.class))).willReturn(Validation.valid(CASE_ID));
@@ -426,7 +463,11 @@ class CreateCaseCallbackServiceTest {
         Map<String, Object> data = basicCaseData();
         data.put(ExceptionRecordFields.AWAITING_PAYMENT_DCN_PROCESSING, YesNoFieldValues.YES);
 
-        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null));
         given(exceptionRecordValidator.getCaseId(any(CaseDetails.class))).willReturn(Validation.valid(CASE_ID));
         given(exceptionRecordValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SERVICE));
@@ -481,7 +522,11 @@ class CreateCaseCallbackServiceTest {
             anyString()
         )).willReturn(new CreateCaseResult(newCaseId));
 
-        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null));
         given(exceptionRecordValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SERVICE));
         given(exceptionRecordValidator.getCaseId(any(CaseDetails.class))).willReturn(Validation.valid(CASE_ID));
@@ -515,7 +560,11 @@ class CreateCaseCallbackServiceTest {
         // given
         setUpServiceConfig("https://localhost", true); // allowed to create case despite pending payments
 
-        given(exceptionRecordValidator.mandatoryPrerequisites(any())).willReturn(Validation.valid(null));
+        given(exceptionRecordValidator.mandatoryPrerequisites(any(), any(), any(), any()))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null))
+            .willReturn(Validation.valid(null));
         given(exceptionRecordValidator.hasServiceNameInCaseTypeId(any(CaseDetails.class)))
                 .willReturn(Validation.valid(SERVICE));
         given(exceptionRecordValidator.getCaseId(any(CaseDetails.class))).willReturn(Validation.valid(CASE_ID));
