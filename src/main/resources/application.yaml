@@ -33,6 +33,8 @@ spring:
       connectionTimeout: 30000
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.jms.JmsAutoConfiguration,org.springframework.boot.autoconfigure.jms.activemq.ActiveMQAutoConfiguration
+  main:
+    allow-bean-definition-overriding: true
 
 flyway:
   skip-migrations: ${FLYWAY_SKIP_MIGRATIONS}
