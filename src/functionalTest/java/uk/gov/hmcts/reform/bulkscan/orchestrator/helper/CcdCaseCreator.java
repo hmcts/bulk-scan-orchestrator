@@ -111,7 +111,7 @@ public class CcdCaseCreator {
             authenticator.getServiceToken(),
             authenticator.getUserId(),
             JURISDICTION,
-            "Bulk_Scanned",
+            CASE_TYPE_ID,
             CREATE_CASE_EVENT_TYPE_ID
         );
     }
