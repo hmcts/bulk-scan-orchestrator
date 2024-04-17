@@ -36,4 +36,4 @@ IDAM_USERS_BULKSCAN_PASSWORD = Password12
 - get the secret and run the getSasSecret script to create the queue jwt token.
 - put this in the send_message.sh script
 - run the send_message script in and make sure the 201 success is returned.
-- Voila ... you should see the debug of your service retrieving the message and processing it.
+- Voila ... you should see the debug of your service retrieving the message and processing it!
