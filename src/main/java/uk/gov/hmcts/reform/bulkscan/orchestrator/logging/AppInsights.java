@@ -11,10 +11,10 @@ public class AppInsights {
 
     static final String DEAD_LETTER_EVENT = "DeadLetter";
 
-    private final TelemetryClient telemetryClient;
+    private final TelemetryClient telemetryClient = new TelemetryClient();
 
-    public AppInsights(TelemetryClient telemetryClient) {
-        this.telemetryClient = telemetryClient;
+    public AppInsights() {
+        // Do nothing
     }
 
     public void trackDeadLetteredMessage(

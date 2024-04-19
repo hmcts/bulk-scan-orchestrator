@@ -16,6 +16,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class QueueProcessingReadinessCheckerTest {
@@ -65,7 +66,7 @@ class QueueProcessingReadinessCheckerTest {
     @Test
     void isNoLogInAttemptRejectedByIdamFallback_returns_false() {
         assertThat(
-            processingReadinessChecker.isNoLogInAttemptRejectedByIdamFallback()
+            processingReadinessChecker.isNoLogInAttemptRejectedByIdamFallback(mock(Throwable.class))
         ).isFalse();
     }
 
