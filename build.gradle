@@ -267,7 +267,7 @@ dependencies {
   implementation group: 'com.github.hmcts.java-logging', name: 'logging-appinsights', version: versions.reformLogging
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version: '7.4'
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: '4.1.2'
-  implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '3.0.1'
+  implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '3.0.3'
   implementation group: 'com.github.hmcts', name: 'ccd-client', version: '4.9.2'
   implementation group: 'io.github.resilience4j', name: 'resilience4j-spring-boot3', version: '2.2.0'
   //implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: '13.2.1'
