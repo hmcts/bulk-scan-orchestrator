@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import feign.FeignException;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,6 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import javax.validation.ConstraintViolationException;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
