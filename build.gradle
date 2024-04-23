@@ -246,6 +246,8 @@ configurations.all {
 
 dependencies {
 
+  runtimeOnly group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '10.11.1'
+
   implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.3'
   implementation group: 'org.flywaydb', name: 'flyway-core', version: '9.22.3'
 
