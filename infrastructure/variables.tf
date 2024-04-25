@@ -42,5 +42,6 @@ variable "num_staging_dbs" {
 }
 
 variable "test" {
+  default = "test"
   type = string
 }
