@@ -25,7 +25,7 @@ service cases or be attached to existing service cases)
 ## Running end to end using docker
 - Run up the docker environment from bulk-scan-shared-infrastructure
 - You will have to setup these environment variables on either your
-  run configuration or bash shell
+run configuration or bash shell
 ```
 IDAM_USERS_BULKSCAN_USERNAME = bulkscan+ccd@gmail.com
 IDAM_USERS_BULKSCAN_PASSWORD = Password12
