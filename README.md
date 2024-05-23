@@ -22,9 +22,15 @@ service cases or be attached to existing service cases)
 - Clone the repository
 - Ensure all required environment variables have been set.
 
+## Running end to end using docker
+- Run up the docker environment from bulk-scan-shared-infrastructure
+- You will have to setup these environment variables on either your
+  run configuration or bash shell
+```
 IDAM_USERS_BULKSCAN_USERNAME = bulkscan+ccd@gmail.com
 IDAM_USERS_BULKSCAN_PASSWORD = Password12
 ```
+
 - Either using the environment vars or application default you will need to set
   ```
   queue:
