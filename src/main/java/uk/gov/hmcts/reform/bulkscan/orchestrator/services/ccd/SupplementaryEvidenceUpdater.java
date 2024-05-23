@@ -42,8 +42,11 @@ public class SupplementaryEvidenceUpdater {
         CaseDetails targetCase,
         String targetCaseCcdRef
     ) {
+        StartEventResponse ccdStartEvent =
+            ccdApi.startAttachScannedDocs(targetCase, callBackEvent.idamToken, callBackEvent.userId);
+
         boolean attached = false;
-        List<Map<String, Object>> targetCaseDocuments = Documents.getScannedDocuments(targetCase);
+        List<Map<String, Object>> targetCaseDocuments = Documents.getScannedDocuments(ccdStartEvent.getCaseDetails());
 
         scannedDocumentsValidator.verifyExceptionRecordAddsNoDuplicates(
             targetCaseDocuments,
@@ -67,13 +70,10 @@ public class SupplementaryEvidenceUpdater {
 
             log.info("Update SupplementaryEvidence newCaseDocuments {}", newCaseDocuments);
 
-            StartEventResponse ccdStartEvent =
-                ccdApi.startAttachScannedDocs(targetCase, callBackEvent.idamToken, callBackEvent.userId);
-
             Map<String, Object> newCaseData = buildCaseData(newCaseDocuments, targetCaseDocuments);
 
             final String eventSummary = createEventSummary(
-                targetCase.getId(),
+                ccdStartEvent.getCaseDetails().getId(),
                 callBackEvent.exceptionRecordId,
                 Documents.getDocumentNumbers(newCaseDocuments)
             );
@@ -81,7 +81,7 @@ public class SupplementaryEvidenceUpdater {
             log.info(eventSummary);
 
             ccdApi.attachExceptionRecord(
-                targetCase,
+                ccdStartEvent.getCaseDetails(),
                 callBackEvent.idamToken,
                 callBackEvent.userId,
                 newCaseData,
@@ -92,7 +92,7 @@ public class SupplementaryEvidenceUpdater {
             log.info(
                 "Attached Exception Record to a case in CCD. ER ID: {}. Case ID: {}",
                 callBackEvent.exceptionRecordId,
-                targetCase.getId()
+                ccdStartEvent.getCaseDetails().getId()
             );
         }
         return attached;

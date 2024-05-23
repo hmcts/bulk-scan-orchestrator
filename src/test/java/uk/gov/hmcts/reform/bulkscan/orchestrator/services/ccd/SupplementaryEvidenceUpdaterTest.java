@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
-import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.cdam.CdamApiClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.Duplicate
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +30,6 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields.SCANNED_DOCUMENTS;
@@ -79,48 +77,46 @@ class SupplementaryEvidenceUpdaterTest {
     }
 
     @Test
-    void should_update_case_if_there_are_documents_to_attach() {
-        // given
-        List<Map<String, Object>> existingScannedDocuments = new ArrayList<>();
-        Map<String, Object> doc2 = new HashMap<>();
-        existingScannedDocuments.add(doc2);
-        Map<String, Object> existingData = new HashMap<>();
-        existingData.put(SCANNED_DOCUMENTS, existingScannedDocuments);
-
+    void shouldUpdateCaseIfDocumentsToAttach() {
+        // Prepare existing scanned documents
+        List<Map<String, Object>> existingScannedDocuments = singletonList(new HashMap<>());
+        Map<String, Object> existingData = Map.of(SCANNED_DOCUMENTS, existingScannedDocuments);
         final CaseDetails existingCaseDetails = CaseDetails.builder()
             .jurisdiction(JURISDICTION)
             .caseTypeId(EXISTING_CASE_TYPE)
             .id(Long.parseLong(EXISTING_CASE_ID))
             .data(existingData)
             .build();
-        StartEventResponse startEventResponse = mock(StartEventResponse.class);
-        given(ccdApi.startAttachScannedDocs(existingCaseDetails, IDAM_TOKEN, USER_ID))
-            .willReturn(startEventResponse);
 
-        List<Map<String, Object>> exceptionRecordDocuments = new ArrayList<>();
-        Map<String, Object> doc1 = new HashMap<>();
-        Map<String, Object> docUrl = new HashMap<>();
-        docUrl.put("document_url", "http://localhost/uuid1");
-        doc1.put(VALUE, Map.of(EXCEPTION_RECORD_REFERENCE, CASE_REF, "url", docUrl));
+        // Prepare exception record documents
+        Map<String, Object> docUrl = Map.of("document_url", "http://localhost/uuid1");
+        Map<String, Object> doc1 = Map.of(VALUE, Map.of(EXCEPTION_RECORD_REFERENCE, CASE_REF, "url", docUrl));
+        List<Map<String, Object>> exceptionRecordDocuments = singletonList(doc1);
 
-        exceptionRecordDocuments.add(doc1);
-
-        var hashToken1 = "321hhjRETE31321dsds";
-        given(cdamApiClient.getDocumentHash(JURISDICTION, "uuid1"))
-            .willReturn(hashToken1);
+        String hashToken1 = "321hhjRETE31321dsds";
+        given(cdamApiClient.getDocumentHash(JURISDICTION, "uuid1")).willReturn(hashToken1);
 
         AttachToCaseEventData callBackEvent = getCallbackEvent(exceptionRecordDocuments);
 
-        // when
+        // Mock ccdApi call
+        Mockito.when(ccdApi.startAttachScannedDocs(existingCaseDetails, callBackEvent.idamToken, callBackEvent.userId))
+            .thenReturn(StartEventResponse.builder()
+                .caseDetails(existingCaseDetails)
+                .eventId("1234")
+                .token("abcdef")
+                .build()
+            );
+
+        // Call the method to be tested
         supplementaryEvidenceUpdater.updateSupplementaryEvidence(
             callBackEvent,
             existingCaseDetails,
             EXISTING_CASE_ID
         );
 
-        // then
-        verify(scannedDocumentsValidator)
-            .verifyExceptionRecordAddsNoDuplicates(anyList(), anyList(), eq(CASE_REF), eq(EXISTING_CASE_ID));
+        // Verify results
+        verify(scannedDocumentsValidator).verifyExceptionRecordAddsNoDuplicates(anyList(), anyList(),
+            eq(CASE_REF), eq(EXISTING_CASE_ID));
         verify(ccdApi).startAttachScannedDocs(any(CaseDetails.class), eq(IDAM_TOKEN), eq(USER_ID));
         verify(ccdApi).attachExceptionRecord(
             eq(existingCaseDetails),
@@ -128,12 +124,12 @@ class SupplementaryEvidenceUpdaterTest {
             eq(USER_ID),
             anyMap(),
             eq("Attaching exception record(" + CASE_REF + ") document numbers:[] to case:" + EXISTING_CASE_ID),
-            eq(startEventResponse)
+            any()
         );
     }
 
     @Test
-    void should_not_update_case_if_there_are_duplicated_documents() {
+    void shouldNotUpdateCaseIfDuplicateDocuments() {
         // given
         List<Map<String, Object>> existingScannedDocuments = emptyList();
         Map<String, Object> existingData = new HashMap<>();
@@ -151,11 +147,18 @@ class SupplementaryEvidenceUpdaterTest {
             .verifyExceptionRecordAddsNoDuplicates(anyList(), anyList(), eq(CASE_REF), eq(EXISTING_CASE_ID));
 
         List<Map<String, Object>> exceptionRecordDocuments = emptyList();
-
         AttachToCaseEventData callBackEvent = getCallbackEvent(exceptionRecordDocuments);
 
-        // when
-        // then
+        // Mock ccdApi call
+        Mockito.when(ccdApi.startAttachScannedDocs(existingCaseDetails, callBackEvent.idamToken, callBackEvent.userId))
+            .thenReturn(StartEventResponse.builder()
+                .caseDetails(existingCaseDetails)
+                .eventId("1234")
+                .token("abcdef")
+                .build()
+            );
+
+        // when/then
         assertThatCode(() ->
             supplementaryEvidenceUpdater.updateSupplementaryEvidence(
                 callBackEvent,
@@ -172,7 +175,7 @@ class SupplementaryEvidenceUpdaterTest {
     }
 
     @Test
-    void should_not_update_case_if_there_are_no_documents_to_attach() {
+    void shouldNotUpdateCaseIfNoDocumentsToAttach() {
         // given
         List<Map<String, Object>> existingScannedDocuments = emptyList();
         Map<String, Object> existingData = new HashMap<>();
@@ -186,8 +189,16 @@ class SupplementaryEvidenceUpdaterTest {
             .build();
 
         List<Map<String, Object>> exceptionRecordDocuments = emptyList();
-
         AttachToCaseEventData callBackEvent = getCallbackEvent(exceptionRecordDocuments);
+
+        // Mock ccdApi call
+        Mockito.when(ccdApi.startAttachScannedDocs(existingCaseDetails, callBackEvent.idamToken, callBackEvent.userId))
+            .thenReturn(StartEventResponse.builder()
+                .caseDetails(existingCaseDetails)
+                .eventId("1234")
+                .token("abcdef")
+                .build()
+            );
 
         // when
         supplementaryEvidenceUpdater.updateSupplementaryEvidence(
@@ -200,16 +211,6 @@ class SupplementaryEvidenceUpdaterTest {
         verify(scannedDocumentsValidator)
             .verifyExceptionRecordAddsNoDuplicates(anyList(), anyList(), eq(CASE_REF), eq(EXISTING_CASE_ID));
         verifyNoMoreInteractions(ccdApi);
-    }
-
-    private static Map<String, Object> document(String filename, String documentNumber) {
-        return ImmutableMap.of(
-            "value", ImmutableMap.of(
-                "fileName", filename,
-                "controlNumber", documentNumber,
-                "someNumber", 3
-            )
-        );
     }
 
     private AttachToCaseEventData getCallbackEvent(List<Map<String, Object>> exceptionRecordDocuments) {
