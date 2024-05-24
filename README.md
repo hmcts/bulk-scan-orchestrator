@@ -48,9 +48,9 @@ IDAM_USERS_BULKSCAN_PASSWORD = Password12
 - put this in the send_message.sh script
 - run the send_message script in and make sure the 201 success is returned.
 - Voila ... you should see the debug of your service retrieving the message and processing it.
-  ```
 
-### Alternative (Quick) Start
+
+## Quick Start (Alternative)
 An alternative faster way getting started is by using the automated setup script. This script will help set up all
 bulk scan/print repos including bulk-scan-orchestrator and its dependencies.
 See [common-dev-env-bsbp](https://github.com/hmcts/common-dev-env-bsbp) repository for more information.
