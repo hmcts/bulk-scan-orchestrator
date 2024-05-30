@@ -1,3 +1,9 @@
+buildscript {
+  dependencies {
+    classpath("org.postgresql:postgresql:42.7.3")
+    classpath("org.flywaydb:flyway-database-postgresql:10.13.0")
+  }
+}
 plugins {
   id 'application'
   id 'checkstyle'
@@ -10,7 +16,7 @@ plugins {
   id 'org.sonarqube' version '4.4.1.3373'
   id 'info.solidsoft.pitest' version '1.15.0'
   id 'au.com.dius.pact' version '4.3.14'
-  id 'org.flywaydb.flyway' version '9.22.3'
+  id 'org.flywaydb.flyway' version '10.13.0'
 }
 
 group = 'uk.gov.hmcts.reform'
@@ -246,8 +252,10 @@ configurations.all {
 
 dependencies {
 
+  runtimeOnly group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '10.13.0'
+
   implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.3'
-  implementation group: 'org.flywaydb', name: 'flyway-core', version: '9.22.3'
+  implementation group: 'org.flywaydb', name: 'flyway-core', version: '10.13.0'
 
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
@@ -267,7 +275,7 @@ dependencies {
   implementation group: 'com.github.hmcts.java-logging', name: 'logging-appinsights', version: versions.reformLogging
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version: '7.4'
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: '4.1.2'
-  implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '3.0.1'
+  implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '3.0.3'
   implementation group: 'com.github.hmcts', name: 'ccd-client', version: '4.9.2'
   implementation group: 'io.github.resilience4j', name: 'resilience4j-spring-boot3', version: '2.2.0'
   //implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: '13.2.1'
