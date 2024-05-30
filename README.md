@@ -12,6 +12,16 @@ updating existing cases or by creating exception records (special type of cases 
 service cases or be attached to existing service cases)
 - Handle CCD callbacks for exception records' events, so that they can be attached or converted into service cases
 
+## Getting Started
+### Prerequisites
+
+- [JDK 17](https://www.oracle.com/java)
+- Project requires Spring Boot v3.x to be present
+
+### Installation
+- Clone the repository
+- Ensure all required environment variables have been set.
+
 ## Running end to end using docker
 - Run up the docker environment from bulk-scan-shared-infrastructure
 - You will have to setup these environment variables on either your
@@ -20,6 +30,7 @@ run configuration or bash shell
 IDAM_USERS_BULKSCAN_USERNAME = bulkscan+ccd@gmail.com
 IDAM_USERS_BULKSCAN_PASSWORD = Password12
 ```
+
 - Either using the environment vars or application default you will need to set
   ```
   queue:
@@ -37,3 +48,23 @@ IDAM_USERS_BULKSCAN_PASSWORD = Password12
 - put this in the send_message.sh script
 - run the send_message script in and make sure the 201 success is returned.
 - Voila ... you should see the debug of your service retrieving the message and processing it.
+
+
+## Quick Start (Alternative)
+An alternative faster way getting started is by using the automated setup script. This script will help set up all
+bulk scan/print repos including bulk-scan-orchestrator and its dependencies.
+See [common-dev-env-bsbp](https://github.com/hmcts/common-dev-env-bsbp) repository for more information.
+Once set up script has ran successfully you can move the bulk-scan-orchestrator from the newly created
+common-dev-env-bsbp/apps directory to your desired location.
+
+### Building
+
+The project uses [Gradle](https://gradle.org) as a build tool but you don't have install it locally since there is a
+`./gradlew` wrapper script.
+
+To build project execute the following command:
+
+```bash
+    ./gradlew build
+```
+
