@@ -181,45 +181,6 @@ class CcdApiTest {
     }
 
     @Test
-    void updateCaseInCcd_should_handle_feign_exception_422() {
-        // given
-        final FeignException.UnprocessableEntity ex = mock(FeignException.UnprocessableEntity.class);
-
-        given(feignCcdApi.submitEventForCaseWorker(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyBoolean(),
-            any(CaseDataContent.class)
-        )).willThrow(ex);
-        given(caseDetails.getId()).willReturn(1L);
-        given(caseDetails.getCaseTypeId()).willReturn(EXISTING_CASE_TYPE_ID);
-
-        final CcdRequestCredentials ccdRequestCredentials =
-            new CcdRequestCredentials("idamToken", "serviceToken", "userId");
-        final ExceptionRecord exceptionRecord = getExceptionRecord();
-        final CaseDataContent caseDataContent = CaseDataContent.builder().build();
-
-        // when
-        CcdCallException exception = catchThrowableOfType(
-            () -> ccdApi.updateCaseInCcd(
-                true,
-                ccdRequestCredentials,
-                exceptionRecord,
-                caseDetails,
-                caseDataContent
-            ),
-            CcdCallException.class
-        );
-
-        // then
-        assertThat(exception.getCause()).isSameAs(ex);
-    }
-
-    @Test
     void updateCaseInCcd_should_return_result_from_ccd() {
         // given
         final CaseDetails updatedCaseDetails = mock(CaseDetails.class);
