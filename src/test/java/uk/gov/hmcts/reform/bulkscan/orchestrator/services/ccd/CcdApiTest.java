@@ -179,9 +179,9 @@ class CcdApiTest {
         );
 
         // then
-        assertThat(exc.getMessage()).isEqualTo("CCD returned 422 Unprocessable Entity response when trying to " +
-            "attach scanned documents to case for jurisdiction2 jurisdiction with case type caseTypeId2 and case " +
-            "ref 123-123-123. CCD response: null");
+        assertThat(exc.getMessage()).isEqualTo("CCD returned 422 Unprocessable Entity response when trying to "
+            + "attach scanned documents to case for jurisdiction2 jurisdiction with case type caseTypeId2 and case "
+            + "ref 123-123-123. CCD response: null");
     }
 
     @Test
