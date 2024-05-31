@@ -142,6 +142,49 @@ class CcdApiTest {
     }
 
     @Test
+    void start_event_should_rethrow_exception_when_communication_with_ccd_fails_422() {
+        // given
+        var userToken = "userToken2";
+        var serviceToken = "serviceToken2";
+        var userId = "userId2";
+        var jurisdiction = "jurisdiction2";
+        var caseTypeId = "caseTypeId2";
+        var eventId = "eventId2";
+        var caseId = "123-123-123";
+
+        var ccdException = mock(FeignException.UnprocessableEntity.class);
+
+        given(feignCcdApi.startEventForCaseWorker(
+            userToken,
+            serviceToken,
+            userId,
+            jurisdiction,
+            caseTypeId,
+            caseId,
+            eventId
+        ))
+            .willThrow(ccdException);
+
+        // when
+        Throwable exc = catchThrowable(
+            () -> ccdApi.attachScannedDocs(
+                new CcdAuthenticator(
+                    () -> serviceToken,
+                    userId,
+                    userToken
+                ),
+                jurisdiction, caseTypeId,
+                caseId, eventId, null,"log"
+            )
+        );
+
+        // then
+        assertThat(exc.getMessage()).isEqualTo("CCD returned 422 Unprocessable Entity response when trying to " +
+            "attach scanned documents to case for jurisdiction2 jurisdiction with case type caseTypeId2 and case " +
+            "ref 123-123-123. CCD response: null");
+    }
+
+    @Test
     void updateCaseInCcd_should_handle_feign_exception() {
         // given
         final FeignException.BadRequest ex = mock(FeignException.BadRequest.class);
@@ -179,6 +222,8 @@ class CcdApiTest {
         // then
         assertThat(exception.getCause()).isSameAs(ex);
     }
+
+
 
     @Test
     void updateCaseInCcd_should_return_result_from_ccd() {
