@@ -58,7 +58,7 @@ class AttachExceptionRecordToExistingCaseTest {
     String documentUuid;
 
     @BeforeEach
-    void setup() throws Exception {
+    void setup() {
 
         dmUrl = dmUploadService.uploadToDmStore(
             "Certificate.pdf",
