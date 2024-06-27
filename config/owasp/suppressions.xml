@@ -8,12 +8,4 @@
     <notes>Wait for a version that fixes this.</notes>
     <cve>CVE-2023-36052</cve>
   </suppress>
-  <suppress>
-    <notes>Logback, waiting for fix</notes>
-    <cve>CVE-2023-6378</cve>
-  </suppress>
-  <suppress>
-    <notes>Logback, waiting for fix</notes>
-    <cve>CVE-2023-6481</cve>
-  </suppress>
 </suppressions>
