@@ -16,7 +16,7 @@ service cases or be attached to existing service cases)
 ### Prerequisites
 
 - [JDK 17](https://www.oracle.com/java)
-- Project requires Spring Boot v3.x to be present
+- Project requires Spring Boot v3.x to be present.
 
 ### Installation
 - Clone the repository
