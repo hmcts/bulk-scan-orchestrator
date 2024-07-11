@@ -4,6 +4,12 @@ java:
     PROCESSED_ENVELOPES_QUEUE_NAME: "processed-envelopes-staging"
     PAYMENTS_QUEUE_NAME: "payments-staging"
     FLYWAY_SKIP_MIGRATIONS: "false"
+    DB_HOST: "{{ .Release.Name }}-postgresql"
+    DB_NAME: "{{ .Values.postgresql.auth.database}}"
+    DB_USER: "{{ .Values.postgresql.auth.username}}"
+    DB_PASSWORD: "{{ .Values.postgresql.auth.password}}"
+    DB_PORT: '5432'
+    DB_CONN_OPTIONS: ""
     CDAM_URL: "http://ccd-case-document-am-api-aat.service.core-compute-aat.internal"
   # Don't modify below here
   image: ${IMAGE_NAME}
@@ -53,13 +59,5 @@ java:
           alias: ENVELOPES_QUEUE_MAX_DELIVERY_COUNT
         - name: app-insights-instrumentation-key
           alias: azure.application-insights.instrumentation-key
-        - name: orchestrator-staging-db-flexible-password
-          alias: DB_PASSWORD
-        - name: orchestrator-staging-db-flexible-user
-          alias: DB_USER
-        - name: orchestrator-staging-db-flexible-host
-          alias: DB_HOST
-        - name: orchestrator-staging-db-flexible-port
-          alias: DB_PORT
-        - name: orchestrator-staging-db-flexible-name
-          alias: DB_NAME
+  postgresql:
+    enabled: true
