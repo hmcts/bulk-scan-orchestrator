@@ -1,7 +1,7 @@
 buildscript {
   dependencies {
     classpath("org.postgresql:postgresql:42.7.3")
-    classpath("org.flywaydb:flyway-database-postgresql:10.13.0")
+    classpath("org.flywaydb:flyway-database-postgresql:10.17.0")
   }
 }
 plugins {
@@ -252,7 +252,7 @@ configurations.all {
 
 dependencies {
 
-  runtimeOnly group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '10.13.0'
+  runtimeOnly group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '10.17.0'
 
   implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.3'
   implementation group: 'org.flywaydb', name: 'flyway-core', version: '10.13.0'
