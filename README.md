@@ -20,7 +20,7 @@ service cases or be attached to existing service cases)
 
 ### Installation
 - Clone the repository
-- Ensure all required environment variables have been set.
+- Ensure all required environment variables have been set
 
 ## Running end to end using docker
 - Run up the docker environment from bulk-scan-shared-infrastructure
