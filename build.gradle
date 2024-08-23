@@ -276,7 +276,7 @@ dependencies {
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version: '8.0'
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: '4.1.2'
   implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '3.0.3'
-  implementation group: 'com.github.hmcts', name: 'ccd-client', version: '4.9.2'
+  implementation group: 'com.github.hmcts', name: 'ccd-client', version: '4.9.5-SPRING2'
   implementation group: 'io.github.resilience4j', name: 'resilience4j-spring-boot3', version: '2.2.0'
   //implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: '13.2.1'
 
