@@ -135,8 +135,8 @@ jacocoTestReport {
   reports {
     xml.required.set(true)
     csv.required.set(false)
-    html.destination file("${buildDir}/reports/jacoco/html")
-    xml.destination file("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
+    html.outputLocation.set(layout.buildDirectory.dir("reports/jacoco/html"))
+    xml.outputLocation.set(layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml"))
   }
   afterEvaluate {
     getClassDirectories().from = getClassDirectories().files.collect {
