@@ -13,7 +13,7 @@ plugins {
   id 'org.owasp.dependencycheck' version '9.1.0'
   id 'org.springframework.boot' version '3.2.7'
   id 'com.github.ben-manes.versions' version '0.51.0'
-  id 'org.sonarqube' version '4.4.1.3373'
+  id 'org.sonarqube' version '5.0.0.4638'
   id 'info.solidsoft.pitest' version '1.15.0'
   id 'au.com.dius.pact' version '4.3.14'
   id 'org.flywaydb.flyway' version '10.13.0'
@@ -24,7 +24,7 @@ version = '0.1.0' // all the time it was 0.0.1. 0.1.0 marks migration to java 11
 
 java {
   toolchain {
-    languageVersion = JavaLanguageVersion.of(17)
+    languageVersion = JavaLanguageVersion.of(21)
   }
 }
 
@@ -133,8 +133,8 @@ jacocoTestReport {
   dependsOn test, integration
   executionData(test, integration)
   reports {
-    xml.enabled = true
-    csv.enabled = false
+    xml.required.set(true)
+    csv.required.set(false)
     html.destination file("${buildDir}/reports/jacoco/html")
     xml.destination file("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
   }
