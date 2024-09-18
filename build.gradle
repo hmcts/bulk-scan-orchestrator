@@ -1,7 +1,11 @@
 buildscript {
+  ext {
+    flywayVersion = '10.17.3'
+    postgresqlVersion = '42.7.4'
+  }
   dependencies {
-    classpath("org.postgresql:postgresql:42.7.3")
-    classpath("org.flywaydb:flyway-database-postgresql:10.13.0")
+    classpath("org.postgresql:postgresql:$postgresqlVersion") // must be compatible with flyway version
+    classpath("org.flywaydb:flyway-database-postgresql:$flywayVersion") // flyway dependency/plugin versions must always match
   }
 }
 plugins {
@@ -16,7 +20,7 @@ plugins {
   id 'org.sonarqube' version '4.4.1.3373'
   id 'info.solidsoft.pitest' version '1.15.0'
   id 'au.com.dius.pact' version '4.3.14'
-  id 'org.flywaydb.flyway' version '10.13.0'
+  id 'org.flywaydb.flyway' version "$flywayVersion"
 }
 
 group = 'uk.gov.hmcts.reform'
@@ -242,6 +246,8 @@ def versions = [
   springfoxSwagger  : '2.9.2',
   junit             : '5.10.3',
   junitPlatform     : '1.10.3',
+  flyway            : "$flywayVersion",
+  postgresql        : "$postgresqlVersion"
 ]
 
 configurations.all {
@@ -252,10 +258,10 @@ configurations.all {
 
 dependencies {
 
-  runtimeOnly group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '10.13.0'
+  runtimeOnly group: 'org.flywaydb', name: 'flyway-database-postgresql', version: versions.flyway
 
-  implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.3'
-  implementation group: 'org.flywaydb', name: 'flyway-core', version: '10.13.0'
+  implementation group: 'org.flywaydb', name: 'flyway-core', version: versions.flyway
+  implementation group: 'org.postgresql', name: 'postgresql', version: versions.postgresql
 
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
