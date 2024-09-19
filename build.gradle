@@ -17,7 +17,7 @@ plugins {
   id 'org.owasp.dependencycheck' version '10.0.4'
   id 'org.springframework.boot' version '3.2.7'
   id 'com.github.ben-manes.versions' version '0.51.0'
-  id 'org.sonarqube' version '4.4.1.3373'
+  id 'org.sonarqube' version '5.0.0.4638'
   id 'info.solidsoft.pitest' version '1.15.0'
   id 'au.com.dius.pact' version '4.3.14'
   id 'org.flywaydb.flyway' version "$flywayVersion"
@@ -137,8 +137,8 @@ jacocoTestReport {
   dependsOn test, integration
   executionData(test, integration)
   reports {
-    xml.enabled = true
-    csv.enabled = false
+    xml.required = true
+    csv.required = false
     html.destination file("${buildDir}/reports/jacoco/html")
     xml.destination file("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
   }
@@ -192,7 +192,6 @@ pitest {
 sonarqube {
   properties {
     property "sonar.projectName", "Reform :: Bulk Scan Orchestrator"
-    property "sonar.coverage.jacoco.xmlReportPaths", jacocoTestReport.reports.xml.destination.path
     // TODO: remove the specific exclusions when those classes are used
     property "sonar.coverage.exclusions", "**/config/**"
     property "sonar.pitest.mode", "reuseReport"
