@@ -245,6 +245,7 @@ def versions = [
   springfoxSwagger  : '2.9.2',
   junit             : '5.10.3',
   junitPlatform     : '1.10.3',
+  testContainers    : '1.20.1',
   flyway            : "$flywayVersion",
   postgresql        : "$postgresqlVersion"
 ]
@@ -326,10 +327,10 @@ dependencies {
   integrationTestImplementation sourceSets.test.runtimeClasspath
   integrationTestImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '4.1.4'
   integrationTestImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.2'
-  integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.19.7', {
+  integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: versions.testContainers, {
     exclude group: 'junit', module: 'junit'
   }
-  integrationTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.19.7'
+  integrationTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: versions.testContainers
 
   functionalTestImplementation sourceSets.main.runtimeClasspath
   functionalTestImplementation sourceSets.test.runtimeClasspath
