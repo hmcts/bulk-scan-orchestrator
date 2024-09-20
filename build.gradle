@@ -1,7 +1,11 @@
 buildscript {
+  ext {
+    flywayVersion = '10.17.3'
+    postgresqlVersion = '42.7.4'
+  }
   dependencies {
-    classpath("org.postgresql:postgresql:42.7.3")
-    classpath("org.flywaydb:flyway-database-postgresql:10.13.0")
+    classpath("org.postgresql:postgresql:$postgresqlVersion") // must be compatible with flyway version
+    classpath("org.flywaydb:flyway-database-postgresql:$flywayVersion") // flyway dependency/plugin versions must always match
   }
 }
 plugins {
@@ -10,13 +14,13 @@ plugins {
   id 'pmd'
   id 'jacoco'
   id 'io.spring.dependency-management' version '1.1.6'
-  id 'org.owasp.dependencycheck' version '9.1.0'
-  id 'org.springframework.boot' version '3.2.7'
+  id 'org.owasp.dependencycheck' version '10.0.4'
+  id 'org.springframework.boot' version '3.3.3'
   id 'com.github.ben-manes.versions' version '0.51.0'
   id 'org.sonarqube' version '5.0.0.4638'
   id 'info.solidsoft.pitest' version '1.15.0'
   id 'au.com.dius.pact' version '4.3.14'
-  id 'org.flywaydb.flyway' version '10.13.0'
+  id 'org.flywaydb.flyway' version "$flywayVersion"
 }
 
 group = 'uk.gov.hmcts.reform'
@@ -242,6 +246,9 @@ def versions = [
   springfoxSwagger  : '2.9.2',
   junit             : '5.10.3',
   junitPlatform     : '1.10.3',
+  testContainers    : '1.20.1',
+  flyway            : "$flywayVersion",
+  postgresql        : "$postgresqlVersion"
 ]
 
 configurations.all {
@@ -252,10 +259,10 @@ configurations.all {
 
 dependencies {
 
-  runtimeOnly group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '10.13.0'
+  runtimeOnly group: 'org.flywaydb', name: 'flyway-database-postgresql', version: versions.flyway
 
-  implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.3'
-  implementation group: 'org.flywaydb', name: 'flyway-core', version: '10.13.0'
+  implementation group: 'org.flywaydb', name: 'flyway-core', version: versions.flyway
+  implementation group: 'org.postgresql', name: 'postgresql', version: versions.postgresql
 
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
@@ -276,7 +283,7 @@ dependencies {
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version: '8.0'
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: '4.1.2'
   implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '3.0.3'
-  implementation group: 'com.github.hmcts', name: 'ccd-client', version: '4.9.2'
+  implementation group: 'com.github.hmcts', name: 'ccd-client', version: '5.0.3'
   implementation group: 'io.github.resilience4j', name: 'resilience4j-spring-boot3', version: '2.2.0'
   //implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: '13.2.1'
 
@@ -285,7 +292,7 @@ dependencies {
 
   implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.3.1'
 
-  implementation group: 'com.azure', name: 'azure-messaging-servicebus', version: '7.17.2'
+  implementation group: 'com.azure', name: 'azure-messaging-servicebus', version: '7.17.3'
 
   implementation group: 'io.vavr', name: 'vavr', version: '1.0.0-alpha-4'
   implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '3.1.8'
@@ -301,9 +308,9 @@ dependencies {
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
   testImplementation group: 'com.typesafe', name: 'config', version: '1.4.3'
-  testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '5.12.0'
+  testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '5.13.0'
   testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.26.3'
-  testImplementation group: 'org.awaitility', name: 'awaitility', version: '4.2.1'
+  testImplementation group: 'org.awaitility', name: 'awaitility', version: '4.2.2'
   testImplementation group: 'io.rest-assured', name: 'rest-assured'
 
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: versions.junit
@@ -321,10 +328,10 @@ dependencies {
   integrationTestImplementation sourceSets.test.runtimeClasspath
   integrationTestImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '4.1.4'
   integrationTestImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.2'
-  integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.19.7', {
+  integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: versions.testContainers, {
     exclude group: 'junit', module: 'junit'
   }
-  integrationTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.19.7'
+  integrationTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: versions.testContainers
 
   functionalTestImplementation sourceSets.main.runtimeClasspath
   functionalTestImplementation sourceSets.test.runtimeClasspath
