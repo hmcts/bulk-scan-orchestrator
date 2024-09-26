@@ -28,7 +28,7 @@ version = '0.1.0' // all the time it was 0.0.1. 0.1.0 marks migration to java 11
 
 java {
   toolchain {
-    languageVersion = JavaLanguageVersion.of(17)
+    languageVersion = JavaLanguageVersion.of(21)
   }
 }
 
@@ -137,10 +137,10 @@ jacocoTestReport {
   dependsOn test, integration
   executionData(test, integration)
   reports {
-    xml.required = true
-    csv.required = false
-    html.destination file("${buildDir}/reports/jacoco/html")
-    xml.destination file("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
+    xml.required.set(true)
+    csv.required.set(false)
+    html.outputLocation.set(layout.buildDirectory.dir("reports/jacoco/html"))
+    xml.outputLocation.set(layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml"))
   }
   afterEvaluate {
     getClassDirectories().from = getClassDirectories().files.collect {
@@ -192,6 +192,7 @@ pitest {
 sonarqube {
   properties {
     property "sonar.projectName", "Reform :: Bulk Scan Orchestrator"
+    property "sonar.coverage.jacoco.xmlReportPaths", jacocoTestReport.reports.xml.outputLocation.get().asFile.absolutePath
     // TODO: remove the specific exclusions when those classes are used
     property "sonar.coverage.exclusions", "**/config/**"
     property "sonar.pitest.mode", "reuseReport"
