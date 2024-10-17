@@ -52,6 +52,12 @@ public class TransformationClient {
                 transformationRequest.ignoreWarnings
             );
         }
+
+        // Create the full request body, including headers
+        HttpEntity<TransformationRequest> requestEntity = new HttpEntity<>(transformationRequest, headers);
+        // Log the request details before sending it
+        log.info("Sending transformation request to transformation service: {} with request: {}", baseUrl, requestEntity);
+
         SuccessfulTransformationResponse response = restTemplate.postForObject(
             getUrl(baseUrl),
             new HttpEntity<>(transformationRequest, headers),
