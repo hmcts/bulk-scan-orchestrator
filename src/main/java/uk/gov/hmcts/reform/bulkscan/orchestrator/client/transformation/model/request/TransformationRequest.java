@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.request;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
@@ -49,7 +48,6 @@ public class TransformationRequest {
     public final String formType;
 
     @JsonProperty("delivery_date")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     public final LocalDateTime deliveryDate;
 
     @JsonProperty("opening_date")
