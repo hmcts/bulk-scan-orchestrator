@@ -62,9 +62,9 @@ public class TransformationClient {
             String requestBody = objectMapper.writeValueAsString(transformationRequest);
 
             // Log the request body in detail before sending it
-            log.info("Sending transformation request to transformation "
-                    + "service: {} with request body: {} and headers: {}",
-                baseUrl, requestBody, headers);
+            log.info("Sending transformation request to transformation service: {}", baseUrl);
+            log.info("Request headers: {}", headers);
+            log.info("Request body: {}", requestBody);
         } catch (JsonProcessingException e) {
             log.error("Failed to convert TransformationRequest to JSON", e);
         }
