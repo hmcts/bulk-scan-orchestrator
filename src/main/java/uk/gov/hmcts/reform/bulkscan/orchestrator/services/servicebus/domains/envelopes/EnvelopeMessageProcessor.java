@@ -189,12 +189,16 @@ public class EnvelopeMessageProcessor {
 
     private void logMessageParsed(ServiceBusReceivedMessage message, Envelope envelope) {
         log.info(
-            "Parsed message. ID: {}, Envelope ID: {}, File name: {}, Container: {}, Jurisdiction: {}, Form type: {}, "
+            "Parsed message. ID: {}, Envelope ID: {}, File name: {}, "
+                + "Container: {}, Delivery Date: {}, Opening Date: {}, PO Box: {}, Jurisdiction: {}, Form type: {}, "
                 + "Classification: {}, {}: {}",
             message.getMessageId(),
             envelope.id,
             envelope.zipFileName,
             envelope.container,
+            envelope.deliveryDate.toString(),
+            envelope.openingDate.toString(),
+            envelope.poBox,
             envelope.jurisdiction,
             envelope.formType == null ? "" : envelope.formType,
             envelope.classification,
