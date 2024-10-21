@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class LaunchDarklyClient {
-    public final LDContext bulkScanOrchestratoeContext;
+    public final LDContext bulkScanOrchestratorContext;
 
     private final LDClientInterface internalClient;
 
@@ -20,11 +20,11 @@ public class LaunchDarklyClient {
         @Value("${launchdarkly.offline-mode:false}") Boolean offlineMode
     ) {
         this.internalClient = launchDarklyClientFactory.create(sdkKey, offlineMode);
-        this.bulkScanOrchestratoeContext = LDContext.builder(sdkKey).build();
+        this.bulkScanOrchestratorContext = LDContext.builder(sdkKey).build();
     }
 
     public boolean isFeatureEnabled(String feature) {
-        return internalClient.boolVariation(feature, bulkScanOrchestratoeContext,
+        return internalClient.boolVariation(feature, bulkScanOrchestratorContext,
             false);
     }
 
