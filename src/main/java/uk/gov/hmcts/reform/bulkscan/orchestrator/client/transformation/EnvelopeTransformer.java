@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.env
 import static io.vavr.control.Either.left;
 import static io.vavr.control.Either.right;
 import static java.lang.String.format;
+import static uk.gov.hmcts.reform.bulkscan.orchestrator.util.Util.getLocalDateTime;
 
 @Service
 public class EnvelopeTransformer {
@@ -43,10 +44,50 @@ public class EnvelopeTransformer {
             log.info("About to transform envelope. {}", loggingContext);
 
             String transformationUrl = serviceConfigProvider.getConfig(envelope.container).getTransformationUrl();
+            log.info("Transformation url: " + transformationUrl);
+
+            log.info("Envelope before transformation: id: {}", envelope.id);
+            log.info("Envelope before transformation: caseRef: {}", envelope.caseRef);
+            log.info("Envelope before transformation: legacyCaseRef: {}", envelope.legacyCaseRef);
+            log.info("Envelope before transformation: poBox: {}", envelope.poBox);
+            log.info("Envelope before transformation: jurisdiction: {}", envelope.jurisdiction);
+            log.info("Envelope before transformation: container: {}", envelope.container);
+            log.info("Envelope before transformation: zipFileName: {}", envelope.zipFileName);
+            log.info("Envelope before transformation: formType: {}", envelope.formType);
+            log.info("Envelope before transformation: classification: {}", envelope.classification);
+            log.info("Envelope before transformation: documents: {}", envelope.documents);
+            log.info("Envelope before transformation: payments: {}", envelope.payments);
+            log.info("Envelope before transformation: ocrData: {}", envelope.ocrData);
+            log.info("Envelope before transformation: ocrDataValidationWarnings: {}",
+                envelope.ocrDataValidationWarnings);
+            log.info("Envelope before transformation: deliveryDate: {}", envelope.deliveryDate);
+            log.info("Envelope before transformation: openingDate: {}", envelope.openingDate);
+            log.info("Envelope before transformation: getLocalDateTime(deliveryDate): {}",
+                getLocalDateTime(envelope.deliveryDate));
+            log.info("Envelope before transformation: getLocalDateTime(openingDate): {}",
+                getLocalDateTime(envelope.openingDate));
+
             TransformationRequest transformationRequest = requestCreator.create(envelope);
+
+            log.info("Envelope after transformation: id: {}", transformationRequest.id);
+            log.info("Envelope after transformation: caseTypeId: {}", transformationRequest.caseTypeId);
+            log.info("Envelope after transformation: envelopeId: {}", transformationRequest.envelopeId);
+            log.info("Envelope after transformation: isAutomatedProcess: {}", transformationRequest.isAutomatedProcess);
+            log.info("Envelope after transformation: poBox: {}", transformationRequest.poBox);
+            log.info("Envelope after transformation: poBoxJurisdiction: {}", transformationRequest.poBoxJurisdiction);
+            log.info("Envelope after transformation: journeyClassification: {}",
+                transformationRequest.journeyClassification);
+            log.info("Envelope after transformation: formType: {}", transformationRequest.formType);
+            log.info("Envelope after transformation: deliveryDate: {}", transformationRequest.deliveryDate);
+            log.info("Envelope after transformation: openingDate: {}", transformationRequest.openingDate);
+            log.info("Envelope after transformation: scannedDocuments: {}", transformationRequest.scannedDocuments);
+            log.info("Envelope after transformation: ocrDataFields: {}", transformationRequest.ocrDataFields);
+            log.info("Envelope after transformation: ignoreWarnings: {}", transformationRequest.ignoreWarnings);
 
             SuccessfulTransformationResponse transformationResponse =
                 transformationClient.transformCaseData(transformationUrl, transformationRequest);
+
+            log.info("Transformation successful for envelope. {}", transformationResponse);
 
             log.info("Received successful transformation response for envelope. {}", loggingContext);
 

@@ -301,6 +301,8 @@ dependencies {
 
   implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '6.3.0'
 
+  implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.15.0'
+
   annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
 
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
