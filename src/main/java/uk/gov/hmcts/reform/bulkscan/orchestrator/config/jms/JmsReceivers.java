@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.config.jms;
 
 import jakarta.jms.JMSException;
-import jakarta.jms.Message;
+import org.apache.activemq.command.ActiveMQMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -23,13 +23,8 @@ public class JmsReceivers {
         this.jmsEnvelopeMessageProcessor = jmsEnvelopeMessageProcessor;
     }
 
-    // TODO
-    // envelopes
-    // processed-envelopes
-    // payments
-
     @JmsListener(destination = "envelopes", containerFactory = "orchestratorEventQueueContainerFactory")
-    public void receiveMessage(Message message) throws JMSException {
+    public void receiveMessage(ActiveMQMessage message) throws JMSException {
         String messageBody = ((jakarta.jms.TextMessage) message).getText();
         log.info("Received Message {} on Service Bus. Delivery count is: {}",
                  messageBody, message.getStringProperty("JMSXDeliveryCount"));
