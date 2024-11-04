@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes;
 
 import jakarta.jms.JMSException;
-import jakarta.jms.Message;
+import org.apache.activemq.command.ActiveMQMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,20 +47,19 @@ public class JmsEnvelopeMessageProcessor {
      * Reads and processes next message from the queue.
      * return false if there was no message to process. Otherwise, true.
      */
-    public void processMessage(Message context, String messageBody) throws JMSException {
+    public void processMessage(ActiveMQMessage context, String messageBody) throws JMSException {
         if (context != null && !messageBody.isEmpty()) {
             log.info("Started processing message with ID {}", context.getJMSMessageID());
             MessageProcessingResult result = process(context, messageBody,
-                Long.parseLong(context.getStringProperty("JMSXDeliveryCount")));
+                Long.parseLong(context.getStringProperty("JMSXDeliveryCount"))
+            );
             tryFinaliseProcessedMessage(context, result);
         } else {
             log.info("No envelope messages left to process");
         }
     }
 
-    private MessageProcessingResult process(Message message, String messageBody, long deliveryCount)
-        throws JMSException {
-
+    private MessageProcessingResult process(ActiveMQMessage message, String messageBody, long deliveryCount) {
         Envelope envelope = null;
         try {
             envelope = parse(messageBody.getBytes(StandardCharsets.UTF_8));
@@ -84,7 +83,7 @@ public class JmsEnvelopeMessageProcessor {
     }
 
     private void tryFinaliseProcessedMessage(
-        Message context,
+        ActiveMQMessage context,
         MessageProcessingResult processingResult
     ) throws JMSException {
         try {
@@ -98,7 +97,7 @@ public class JmsEnvelopeMessageProcessor {
     }
 
     private void finaliseProcessedMessage(
-        Message context,
+        ActiveMQMessage context,
         MessageProcessingResult processingResult
     ) throws InterruptedException, JMSException {
         // starts from 0
@@ -136,17 +135,18 @@ public class JmsEnvelopeMessageProcessor {
     }
 
     private void deadLetterTheMessage(
-        Message context,
+        ActiveMQMessage context,
         String reason,
         String description
     ) throws JMSException {
         log.info("Message with ID {} has been dead-lettered...if this was using ASB, reason was {}: "
                 + "description was: {}",
-            context.getJMSMessageID(), reason, description);
+            context.getJMSMessageID(), reason, description
+        );
     }
 
     private void logMessageFinaliseError(
-        Message message,
+        ActiveMQMessage message,
         MessageProcessingResultType processingResultType,
         Exception ex
     ) throws JMSException {
