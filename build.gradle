@@ -297,7 +297,7 @@ dependencies {
   implementation group: 'io.vavr', name: 'vavr', version: '1.0.0-alpha-4'
   implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '3.1.8'
 
-  implementation group: 'org.apache.qpid', name: 'qpid-jms-client', version: '2.5.0'
+  implementation group: 'org.apache.qpid', name: 'qpid-jms-client', version: '2.6.1'
 
   implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.5.0'
 
