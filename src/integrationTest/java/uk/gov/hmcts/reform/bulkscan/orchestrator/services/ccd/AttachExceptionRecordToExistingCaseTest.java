@@ -20,9 +20,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.status;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.hasItem;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.willThrow;
-import static org.mockito.Mockito.doNothing;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_EXCEPTION_RECORD;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURISDICTION;
@@ -555,13 +552,13 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
     //        willThrow(new PaymentsPublishingException("Payment failed", new RuntimeException("connection")))
     //            .given(paymentsPublisher).send(any());
     //
-    //        given()
-    //            .body(callbackRequest)
-    //            .headers(userHeaders())
-    //            .post(CALLBACK_ATTACH_CASE_PATH)
-    //            .then()
-    //            .statusCode(200)
-    //            .body(RESPONSE_FIELD_ERRORS, hasItem("Payment references cannot be processed. Please try again later"));
+    //      given()
+    //          .body(callbackRequest)
+    //          .headers(userHeaders())
+    //          .post(CALLBACK_ATTACH_CASE_PATH)
+    //          .then()
+    //          .statusCode(200)
+    //          .body(RESPONSE_FIELD_ERRORS, hasItem("Payment references cannot be processed. Please try again later"));
     //    }
 
     private CallbackRequest callbackRequestWith(
