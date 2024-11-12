@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsH
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.CreatePaymentsCommand;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentData;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.UpdatePaymentsCommand;
 
 import static java.util.stream.Collectors.toList;
 
@@ -16,11 +15,11 @@ public class PaymentsProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentsProcessor.class);
 
-//    private final IPaymentsPublisher paymentsPublisher;
-//
-//    public PaymentsProcessor(IPaymentsPublisher paymentsPublisher) {
-//        this.paymentsPublisher = paymentsPublisher;
-//    }
+    //    private final IPaymentsPublisher paymentsPublisher;
+    //
+    //    public PaymentsProcessor(IPaymentsPublisher paymentsPublisher) {
+    //        this.paymentsPublisher = paymentsPublisher;
+    //    }
 
     public void createPayments(Envelope envelope, Long caseId, boolean isExceptionRecord) {
         if (envelope.payments != null && !envelope.payments.isEmpty()) {
