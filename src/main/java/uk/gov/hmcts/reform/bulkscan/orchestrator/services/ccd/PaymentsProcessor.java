@@ -56,14 +56,14 @@ public class PaymentsProcessor {
 
             log.info("Contains Payments, sending payment update message. ER id: {}", exceptionRecordId);
 
-    //            paymentsPublisher.send(
-    //                new UpdatePaymentsCommand(
-    //                    exceptionRecordId,
-    //                    newCaseId,
-    //                    paymentsHelper.envelopeId,
-    //                    jurisdiction
-    //                )
-    //            );
+            //            paymentsPublisher.send(
+            //                new UpdatePaymentsCommand(
+            //                    exceptionRecordId,
+            //                    newCaseId,
+            //                    paymentsHelper.envelopeId,
+            //                    jurisdiction
+            //                )
+            //            );
             log.info("Finished sending payment update message. ER id: {}", exceptionRecordId);
 
         } else {
