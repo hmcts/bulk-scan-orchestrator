@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.IPaymentsPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.CreatePaymentsCommand;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.UpdatePaymentsCommand;
@@ -17,11 +16,11 @@ public class PaymentsProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentsProcessor.class);
 
-    private final IPaymentsPublisher paymentsPublisher;
-
-    public PaymentsProcessor(IPaymentsPublisher paymentsPublisher) {
-        this.paymentsPublisher = paymentsPublisher;
-    }
+//    private final IPaymentsPublisher paymentsPublisher;
+//
+//    public PaymentsProcessor(IPaymentsPublisher paymentsPublisher) {
+//        this.paymentsPublisher = paymentsPublisher;
+//    }
 
     public void createPayments(Envelope envelope, Long caseId, boolean isExceptionRecord) {
         if (envelope.payments != null && !envelope.payments.isEmpty()) {
@@ -38,7 +37,7 @@ public class PaymentsProcessor {
             );
 
             log.info("Started processing payments for case with CCD reference {}", cmd.ccdReference);
-            paymentsPublisher.send(cmd);
+            //paymentsPublisher.send(cmd);
             log.info("Finished processing payments for case with CCD reference {}", cmd.ccdReference);
         } else {
             log.info(
@@ -58,14 +57,14 @@ public class PaymentsProcessor {
 
             log.info("Contains Payments, sending payment update message. ER id: {}", exceptionRecordId);
 
-            paymentsPublisher.send(
-                new UpdatePaymentsCommand(
-                    exceptionRecordId,
-                    newCaseId,
-                    paymentsHelper.envelopeId,
-                    jurisdiction
-                )
-            );
+    //            paymentsPublisher.send(
+    //                new UpdatePaymentsCommand(
+    //                    exceptionRecordId,
+    //                    newCaseId,
+    //                    paymentsHelper.envelopeId,
+    //                    jurisdiction
+    //                )
+    //            );
             log.info("Finished sending payment update message. ER id: {}", exceptionRecordId);
 
         } else {
