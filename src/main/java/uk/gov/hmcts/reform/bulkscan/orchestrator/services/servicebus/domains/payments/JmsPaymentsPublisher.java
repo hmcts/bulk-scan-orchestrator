@@ -9,8 +9,6 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentCommand;
 
-import java.util.UUID;
-
 @Service
 @Profile("!nosb") // do not register for the nosb (test) profile
 @ConditionalOnExpression("${jms.enabled}")
