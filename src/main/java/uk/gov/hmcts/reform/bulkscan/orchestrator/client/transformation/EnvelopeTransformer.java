@@ -105,10 +105,11 @@ public class EnvelopeTransformer {
 
     private String getLoggingContext(Envelope envelope) {
         return format(
-            "Envelope ID: %s. File name: %s. Service: %s.",
+            "Envelope ID: %s. File name: %s. Service: %s. Case Reference: %s",
             envelope.id,
             envelope.zipFileName,
-            envelope.container
+            envelope.container,
+            envelope.caseRef
         );
     }
 

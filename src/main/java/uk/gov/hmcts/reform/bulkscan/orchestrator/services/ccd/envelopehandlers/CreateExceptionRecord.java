@@ -62,10 +62,11 @@ public class CreateExceptionRecord {
 
     private Long createExceptionRecord(Envelope envelope) {
         String loggingContext = String.format(
-            "Envelope ID: %s, file name: %s, service: %s",
+            "Envelope ID: %s, file name: %s, service: %s, case reference: %s",
             envelope.id,
             envelope.zipFileName,
-            envelope.container
+            envelope.container,
+            envelope.caseRef
         );
         log.info("Creating exception record. {}", loggingContext);
 
