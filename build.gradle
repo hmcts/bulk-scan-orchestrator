@@ -271,6 +271,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-jdbc'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-activemq'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.1.3'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap', version: '4.1.4'
 
@@ -294,15 +295,17 @@ dependencies {
 
   implementation group: 'com.azure', name: 'azure-messaging-servicebus', version: '7.17.5'
 
-  implementation group: 'io.vavr', name: 'vavr', version: '1.0.0-alpha-4'
+  implementation group: 'io.vavr', name: 'vavr', version: '0.10.5'
   implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '3.1.8'
 
   implementation group: 'org.apache.qpid', name: 'qpid-jms-client', version: '2.5.0'
 
   implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.5.0'
 
-  annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
+  implementation group: 'org.projectlombok', name: 'lombok', version: '1.18.36'
 
+  annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
+  annotationProcessor 'org.projectlombok:lombok'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
     exclude group: 'junit', module: 'junit'
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
