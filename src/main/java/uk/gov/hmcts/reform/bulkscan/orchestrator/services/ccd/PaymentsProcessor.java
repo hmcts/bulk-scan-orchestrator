@@ -42,8 +42,9 @@ public class PaymentsProcessor {
             log.info("Finished processing payments for case with CCD reference {}", cmd.ccdReference);
         } else {
             log.info(
-                "Envelope has no payments, not sending create command. Envelope id: {}",
-                envelope.id
+                "Envelope has no payments, not sending create command. Envelope id: {}. Case reference {}",
+                envelope.id,
+                envelope.caseRef
             );
         }
     }
