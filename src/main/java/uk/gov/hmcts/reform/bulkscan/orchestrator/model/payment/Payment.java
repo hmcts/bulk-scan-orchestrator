@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
@@ -36,7 +35,7 @@ public class Payment {
     public final List<PaymentData> payments;
 
 
-    public Payment( final uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment payment) {
+    public Payment(final uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment payment) {
         this.envelopeId = payment.getEnvelopeId();
         this.ccdReference = payment.getCcdReference();
         this.jurisdiction = payment.getJurisdiction();

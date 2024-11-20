@@ -42,7 +42,7 @@ public class Payment {
 
     private boolean isExceptionRecord;
 
-    @OneToMany(mappedBy = "payment" ,orphanRemoval = true)
+    @OneToMany(mappedBy = "payment", orphanRemoval = true)
     private List<PaymentData> paymentData;
 
 
