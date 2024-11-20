@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.payment;
 
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.entity.PaymentData;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.entity.PaymentDataRepository;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.entity.PaymentRepository;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment;
 
@@ -13,7 +12,7 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
 
-    public PaymentService(PaymentRepository paymentRepository, PaymentDataService paymentDataService, PaymentDataRepository paymentDataRepository) {
+    public PaymentService(PaymentRepository paymentRepository) {
         this.paymentRepository = paymentRepository;
     }
 
