@@ -65,8 +65,8 @@ public class SupplementaryEvidenceHandler {
             }
         } else {
             log.info(
-                    "Case not found, zipFileName {}, envelopeId {}, case reference {}. " +
-                        "Creating exception record instead",
+                    "Case not found, zipFileName {}, envelopeId {}, case reference {}. "
+                        + "Creating exception record instead",
                     envelope.zipFileName,
                     envelope.id,
                     envelope.caseRef
