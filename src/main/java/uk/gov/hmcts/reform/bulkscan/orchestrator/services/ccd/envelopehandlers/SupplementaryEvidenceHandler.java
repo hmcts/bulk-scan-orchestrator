@@ -69,7 +69,7 @@ public class SupplementaryEvidenceHandler {
                         + "Creating exception record instead",
                     envelope.zipFileName,
                     envelope.id,
-                    envelope.caseRef
+                    Optional.ofNullable(envelope.caseRef).orElse("(NOT PRESENT)")
             );
             Long erId = exceptionRecordCreator.tryCreateFrom(envelope);
             paymentsProcessor.createPayments(envelope, erId, true);

@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.pay
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.UpdatePaymentsCommand;
 
+import java.util.Optional;
+
 import static java.util.stream.Collectors.toList;
 
 @Service
@@ -44,7 +46,7 @@ public class PaymentsProcessor {
             log.info(
                 "Envelope has no payments, not sending create command. Envelope id: {}. Case reference {}",
                 envelope.id,
-                envelope.caseRef
+                Optional.ofNullable(envelope.caseRef).orElse("(NOT PRESENT)")
             );
         }
     }

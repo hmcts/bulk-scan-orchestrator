@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 @Component
 public class CreateExceptionRecord {
@@ -66,7 +67,7 @@ public class CreateExceptionRecord {
             envelope.id,
             envelope.zipFileName,
             envelope.container,
-            envelope.caseRef
+            Optional.ofNullable(envelope.caseRef).orElse("(NOT PRESENT)")
         );
         log.info("Creating exception record. {}", loggingContext);
 

@@ -11,6 +11,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.res
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 
+import java.util.Optional;
+
 import static io.vavr.control.Either.left;
 import static io.vavr.control.Either.right;
 import static java.lang.String.format;
@@ -109,7 +111,7 @@ public class EnvelopeTransformer {
             envelope.id,
             envelope.zipFileName,
             envelope.container,
-            envelope.caseRef
+            Optional.ofNullable(envelope.caseRef).orElse("(NOT PRESENT)")
         );
     }
 
