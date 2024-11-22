@@ -11,6 +11,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation.model.res
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 
+import java.util.Optional;
+
 import static io.vavr.control.Either.left;
 import static io.vavr.control.Either.right;
 import static java.lang.String.format;
@@ -105,10 +107,11 @@ public class EnvelopeTransformer {
 
     private String getLoggingContext(Envelope envelope) {
         return format(
-            "Envelope ID: %s. File name: %s. Service: %s.",
+            "Envelope ID: %s. File name: %s. Service: %s. Case Reference: %s",
             envelope.id,
             envelope.zipFileName,
-            envelope.container
+            envelope.container,
+            Optional.ofNullable(envelope.caseRef).orElse("(NOT PRESENT)")
         );
     }
 

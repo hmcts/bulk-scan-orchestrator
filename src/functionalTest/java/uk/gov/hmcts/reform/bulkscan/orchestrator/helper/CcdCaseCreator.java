@@ -58,7 +58,6 @@ public class CcdCaseCreator {
         Instant deliveryDate,
         Map<String, Object> fieldsToOverwrite
     ) {
-        log.info("Creating new case");
         CcdAuthenticator authenticator = ccdAuthenticatorFactory.createForJurisdiction(JURISDICTION);
 
         StartEventResponse startEventResponse = startEventForCreateCase(authenticator);
