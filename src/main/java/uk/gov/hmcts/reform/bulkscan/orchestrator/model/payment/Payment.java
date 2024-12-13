@@ -34,6 +34,25 @@ public class Payment {
     @JsonProperty("payments")
     public final List<PaymentData> payments;
 
+    public Payment(
+        String envelopeId,
+        String ccdReference,
+        String jurisdiction,
+        String service,
+        String poBox,
+        boolean isExceptionRecord,
+        String status,
+        List<PaymentData> payments
+    ) {
+        this.envelopeId = envelopeId;
+        this.ccdReference = ccdReference;
+        this.jurisdiction = jurisdiction;
+        this.service = service;
+        this.poBox = poBox;
+        this.isExceptionRecord = isExceptionRecord;
+        this.status = status;
+        this.payments = payments;
+    }
 
     public Payment(final uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment payment) {
         this.envelopeId = payment.getEnvelopeId();

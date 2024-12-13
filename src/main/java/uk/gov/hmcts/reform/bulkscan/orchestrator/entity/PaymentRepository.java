@@ -9,4 +9,6 @@ public interface PaymentRepository extends JpaRepository<Payment, UUID> {
 
     List<Payment> getPaymentsByStatus(String status);
 
+    Payment updatePaymentByStatus(String status, Payment payment);
+
 }

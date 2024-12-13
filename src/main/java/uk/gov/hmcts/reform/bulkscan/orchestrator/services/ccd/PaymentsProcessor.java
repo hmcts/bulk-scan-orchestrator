@@ -3,10 +3,12 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.PaymentData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.payment.PaymentService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.CreatePaymentsCommand;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentData;
+
 
 import static java.util.stream.Collectors.toList;
 
@@ -15,29 +17,32 @@ public class PaymentsProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentsProcessor.class);
 
-    //    private final IPaymentsPublisher paymentsPublisher;
-    //
-    //    public PaymentsProcessor(IPaymentsPublisher paymentsPublisher) {
-    //        this.paymentsPublisher = paymentsPublisher;
-    //    }
+    private static final String Status  = "awaiting";
+    private final PaymentService paymentService;
 
+    public PaymentsProcessor(PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
+
+    // adds the payment record to the payment table if a payment exists.
     public void createPayments(Envelope envelope, Long caseId, boolean isExceptionRecord) {
         if (envelope.payments != null && !envelope.payments.isEmpty()) {
-            CreatePaymentsCommand cmd = new CreatePaymentsCommand(
+            Payment payment = new Payment(
                 envelope.id,
                 Long.toString(caseId),
                 envelope.jurisdiction,
                 envelope.container,
                 envelope.poBox,
                 isExceptionRecord,
+                Status,
                 envelope.payments.stream()
-                    .map(payment -> new PaymentData(payment.documentControlNumber))
+                    .map(pay -> new PaymentData(pay.documentControlNumber))
                     .collect(toList())
             );
 
-            log.info("Started processing payments for case with CCD reference {}", cmd.ccdReference);
-            //paymentsPublisher.send(cmd);
-            log.info("Finished processing payments for case with CCD reference {}", cmd.ccdReference);
+            paymentService.savePayment(payment);
+            log.info("Started processing payments for case with CCD reference {}", payment.ccdReference);
+            log.info("Finished processing payments for case with CCD reference {}", payment.ccdReference);
         } else {
             log.info(
                 "Envelope has no payments, not sending create command. Envelope id: {}",
