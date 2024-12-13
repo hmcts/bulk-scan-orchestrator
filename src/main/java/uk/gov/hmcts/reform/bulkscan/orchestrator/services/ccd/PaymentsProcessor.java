@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsH
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.payment.PaymentService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 
-
 import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
