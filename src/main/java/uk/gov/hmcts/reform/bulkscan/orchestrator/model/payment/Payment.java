@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.Collection;
 import java.util.List;
