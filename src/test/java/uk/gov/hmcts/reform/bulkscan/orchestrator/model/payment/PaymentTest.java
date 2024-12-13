@@ -21,7 +21,8 @@ public class PaymentTest {
 
     @Test
     void testCreationWhenContactTypeIsSet() {
-        final uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment paymentEntity = new uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment(
+        final uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment paymentEntity =
+            new uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment(
             Instant.now(),
             envelope_id,
             ccdReference,
