@@ -5,7 +5,6 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/e9272daf4b714e4f95280916e763b6b2)](https://www.codacy.com/app/HMCTS/bulk-scan-orchestrator)
 
 ## Purpose
-
 The purpose of this application is to:
 - Process envelopes (with scanned documents) received from bulk-scan-processor and update CCD with them, either by
 updating existing cases or by creating exception records (special type of cases that need to be converted into proper
