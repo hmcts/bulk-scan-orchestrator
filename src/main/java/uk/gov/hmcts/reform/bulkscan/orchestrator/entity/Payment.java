@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -43,7 +44,7 @@ public class Payment {
 
     private boolean isExceptionRecord;
 
-    @OneToMany(mappedBy = "payment", orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "payment", orphanRemoval = true)
     private List<PaymentData> paymentData;
 
 
