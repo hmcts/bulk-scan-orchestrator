@@ -26,7 +26,7 @@ public class UpdatePayment {
 
 
     public UpdatePayment(final uk.gov.hmcts.reform.bulkscan.orchestrator.entity.UpdatePayment  updatePayment) {
-        this.exceptionRecordRef = updatePayment.getEnvelopeId();
+        this.exceptionRecordRef = updatePayment.getExceptionRecordRef();
         this.newCaseRef = updatePayment.getNewCaseRef();
         this.envelopeId = updatePayment.getEnvelopeId();
         this.jurisdiction = updatePayment.getJurisdiction();

@@ -37,11 +37,11 @@ public class PaymentData {
     private String documentControlNumber;
 
 
-    public PaymentData (
+    public PaymentData(
         Instant createdAt,
         String documentControlNumber
 
-    ){
+    ) {
         this.createdAt = createdAt;
         this.documentControlNumber = documentControlNumber;
     }

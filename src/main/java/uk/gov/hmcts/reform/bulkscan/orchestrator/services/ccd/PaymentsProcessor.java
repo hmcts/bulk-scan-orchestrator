@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.PaymentData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Status;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.UpdatePayment;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
@@ -38,10 +39,7 @@ public class PaymentsProcessor {
                 envelope.poBox,
                 isExceptionRecord,
                 Status.AWAITING.toString(),
-                envelope.payments.stream()
-                    .map(pay ->
-                        new uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.PaymentData
-                            (pay.documentControlNumber)).toList());
+                envelope.payments.stream().map(pay -> new PaymentData(pay.documentControlNumber)).toList());
 
             paymentService.savePayment(payment);
             log.info("Finished saving payments for case with CCD reference {}", caseId);

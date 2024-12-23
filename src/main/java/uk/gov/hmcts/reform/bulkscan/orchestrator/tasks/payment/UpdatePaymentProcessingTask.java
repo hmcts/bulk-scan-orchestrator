@@ -20,9 +20,11 @@ public class UpdatePaymentProcessingTask {
     private static final Logger log = LoggerFactory.getLogger(UpdatePaymentProcessingTask.class);
     private final UpdatePaymentService updatePaymentService;
     private final PaymentApiClient paymentApiClient;
-    private final int retryCount ;
+    private final int retryCount;
 
-    public UpdatePaymentProcessingTask(UpdatePaymentService updatePaymentService, PaymentApiClient paymentApiClient, @Value("${scheduling.task.post-payments.retry-count}") int retryCount) {
+    public UpdatePaymentProcessingTask(UpdatePaymentService updatePaymentService,
+                                       PaymentApiClient paymentApiClient,
+                                       @Value("${scheduling.task.post-payments.retry-count}") int retryCount) {
         this.updatePaymentService = updatePaymentService;
         this.paymentApiClient = paymentApiClient;
         this.retryCount = retryCount;
@@ -32,7 +34,8 @@ public class UpdatePaymentProcessingTask {
     public void processUpdatePayments() {
 
         try {
-            List<UpdatePayment> updatePayments = updatePaymentService.getUpdatePaymentByStatus(Status.AWAITING.toString());
+            List<UpdatePayment> updatePayments =
+                updatePaymentService.getUpdatePaymentByStatus(Status.AWAITING.toString());
 
             if (!updatePayments.isEmpty()) {
 
@@ -44,11 +47,14 @@ public class UpdatePaymentProcessingTask {
 
                     if (responseEntity.getStatusCode().is2xxSuccessful()) {
 
-                        log.info("Posting update payment was successful for envelope. {}", payment.getEnvelopeId());
-                        updatePaymentService.updateStatusByEnvelopeId(Status.SUCCESS.toString(), payment.getEnvelopeId());
+                        log.info("Posting update payment was successful for envelope. {}",
+                            payment.getEnvelopeId());
+                        updatePaymentService.updateStatusByEnvelopeId(Status.SUCCESS.toString(),
+                            payment.getEnvelopeId());
                         log.info("Updated payment status to success for envelope. {}", payment.getEnvelopeId());
                     } else {
-                        log.info("Posting update payment was unsuccessful for envelope. {}", payment.getEnvelopeId());
+                        log.info("Posting update payment was unsuccessful for envelope. {}",
+                            payment.getEnvelopeId());
                         updatePaymentService.updateStatusByEnvelopeId(Status.ERROR.toString(), payment.getEnvelopeId());
                         log.info("Updated update payment status to error for envelope. {}", payment.getEnvelopeId());
                     }
@@ -60,16 +66,14 @@ public class UpdatePaymentProcessingTask {
     }
 
     private ResponseEntity<String> postPaymentsToPaymentApi(UpdatePayment updatePayment, int retryCount) {
-
-        if (retryCount > 0){
+        if (retryCount > 0) {
 
             ResponseEntity<String> responseEntity = paymentApiClient.postUpdatePayment(updatePayment);
 
             if (responseEntity.getStatusCode().is2xxSuccessful()) {
 
                 return responseEntity;
-            }
-            else {
+            } else {
                 postPaymentsToPaymentApi(updatePayment, --retryCount);
             }
 

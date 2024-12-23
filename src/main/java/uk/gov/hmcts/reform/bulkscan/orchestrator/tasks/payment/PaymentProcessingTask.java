@@ -20,9 +20,10 @@ public class PaymentProcessingTask {
     private static final Logger log = LoggerFactory.getLogger(PaymentProcessingTask.class);
     private final PaymentService paymentService;
     private final PaymentApiClient paymentApiClient;
-    private final int retryCount ;
+    private final int retryCount;
 
-    public PaymentProcessingTask(PaymentService paymentService, PaymentApiClient paymentApiClient, @Value("${scheduling.task.post-payments.retry-count}") int retryCount) {
+    public PaymentProcessingTask(PaymentService paymentService, PaymentApiClient paymentApiClient,
+                                 @Value("${scheduling.task.post-payments.retry-count}") int retryCount) {
         this.paymentService = paymentService;
         this.paymentApiClient = paymentApiClient;
         this.retryCount = retryCount;
@@ -61,20 +62,17 @@ public class PaymentProcessingTask {
 
     private ResponseEntity<String> postPaymentsToPaymentApi(Payment payment, int retryCount) {
 
-            if (retryCount > 0) {
+        if (retryCount > 0) {
 
-                ResponseEntity<String> responseEntity = paymentApiClient.postPayment(payment);
+            ResponseEntity<String> responseEntity = paymentApiClient.postPayment(payment);
 
-                if (responseEntity.getStatusCode().is2xxSuccessful()) {
+            if (responseEntity.getStatusCode().is2xxSuccessful()) {
 
-                    return responseEntity;
-                } else {
-                    postPaymentsToPaymentApi(payment, --retryCount);
-                }
-
+                return responseEntity;
+            } else {
+                postPaymentsToPaymentApi(payment, --retryCount);
             }
-            return new ResponseEntity<>("Attempted 3 times", HttpStatus.REQUEST_TIMEOUT);
-
+        }
+        return new ResponseEntity<>("Attempted 3 times", HttpStatus.REQUEST_TIMEOUT);
     }
-
 }

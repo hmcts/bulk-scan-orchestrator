@@ -11,8 +11,6 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.UpdatePayment;
 
-
-
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Component
@@ -30,13 +28,12 @@ public class PaymentApiClient {
     }
 
     public ResponseEntity<String> postPayment(Payment payment) {
-
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", APPLICATION_JSON.toString());
 
         log.info("Posting payment to payment processor api for envelope. {}", payment.getEnvelopeId());
 
-        return restTemplate.postForEntity(paymentUrl +"/create", new HttpEntity<>(payment, headers), String.class);
+        return restTemplate.postForEntity(paymentUrl + "/create", new HttpEntity<>(payment, headers), String.class);
 
     }
 
@@ -47,7 +44,8 @@ public class PaymentApiClient {
 
         log.info("Posting update payment to payment processor api for envelope. {}", updatePayment.getEnvelopeId());
 
-        return restTemplate.postForEntity(paymentUrl + "/update", new HttpEntity<>(updatePayment, headers), String.class);
+        return restTemplate.postForEntity(paymentUrl + "/update",
+            new HttpEntity<>(updatePayment, headers), String.class);
 
     }
 
