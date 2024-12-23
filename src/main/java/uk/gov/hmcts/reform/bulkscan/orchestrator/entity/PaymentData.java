@@ -17,7 +17,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "paymentData")
+@Table(name = "payments_data")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -36,5 +36,14 @@ public class PaymentData {
 
     private String documentControlNumber;
 
+
+    public PaymentData (
+        Instant createdAt,
+        String documentControlNumber
+
+    ){
+        this.createdAt = createdAt;
+        this.documentControlNumber = documentControlNumber;
+    }
 
 }

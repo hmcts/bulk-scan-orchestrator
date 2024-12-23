@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment;
 
 import org.junit.jupiter.api.Test;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.entity.PaymentData;
 
 import java.time.Instant;
@@ -16,13 +17,12 @@ public class PaymentTest {
     private static final String poBox = "poBox";
     private static final boolean isExceptionRecord = false;
     private static final String status = "status";
-    private static final PaymentData paymentData = new PaymentData();
-
+    private static final PaymentData paymentData = new PaymentData(Instant.now(),"123");
 
     @Test
-    void testCreationWhenContactTypeIsSet() {
-        final uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment paymentEntity =
-            new uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment(
+    void testPaymentCreation() {
+        final Payment paymentEntity =
+            new Payment(
             Instant.now(),
             envelope_id,
             ccdReference,
@@ -33,7 +33,8 @@ public class PaymentTest {
             isExceptionRecord,
             Collections.singletonList(paymentData)
         );
-        Payment payment = new Payment(paymentEntity);
+        uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment payment = new uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment(
+            paymentEntity);
 
         assertThat(payment.getEnvelopeId()).isEqualTo(envelope_id);
         assertThat(payment.getCcdReference()).isEqualTo(ccdReference);

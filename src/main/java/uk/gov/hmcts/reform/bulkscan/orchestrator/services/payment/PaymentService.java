@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.entity.PaymentRepository;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment;
 
 import java.time.Instant;
+import java.util.List;
 
 @Service
 public class PaymentService {
@@ -26,8 +27,18 @@ public class PaymentService {
             payment.poBox,
             payment.status,
             payment.isExceptionRecord,
-            payment.payments.stream().map(p -> new PaymentData()).toList()
+            payment.payments.stream().map(p -> new PaymentData(Instant.now(),p.documentControlNumber)).toList()
             ));
+    }
+
+    public List<Payment> getPaymentsByStatus(String status) {
+
+        return paymentRepository.getPaymentsByStatus(status).stream().map(Payment::new).toList();
+    }
+
+    public void updateStatusByEnvelopeId(String status, String envelopeId) {
+
+        paymentRepository.updateStatusByEnvelopeId(status, envelopeId);
     }
 
 }
