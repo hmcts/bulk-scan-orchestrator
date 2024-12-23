@@ -23,11 +23,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -59,8 +58,9 @@ class PaymentsProcessorTest {
             emptyList(),
             emptyList()
         );
-        ArgumentCaptor<uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment> paymentArgumentCaptor = ArgumentCaptor.forClass(
-            uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment.class);
+        ArgumentCaptor<uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment>
+            paymentArgumentCaptor =
+            ArgumentCaptor.forClass(uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment.class);
 
         // when
         paymentsProcessor.createPayments(envelope, CCD_REFERENCE, true);
@@ -73,7 +73,7 @@ class PaymentsProcessorTest {
         assertThat(paymentArgumentCaptor.getValue().isExceptionRecord()).isTrue();
         assertThat(paymentArgumentCaptor.getValue().getPayments().size()).isEqualTo(envelope.payments.size());
         assertThat(paymentArgumentCaptor.getValue().getPayments().getFirst().documentControlNumber)
-        .isEqualTo(envelope.payments.getFirst().documentControlNumber);
+            .isEqualTo(envelope.payments.getFirst().documentControlNumber);
     }
 
     @Test

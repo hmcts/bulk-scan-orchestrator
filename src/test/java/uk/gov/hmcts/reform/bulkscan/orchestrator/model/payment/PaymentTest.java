@@ -33,8 +33,8 @@ public class PaymentTest {
             isExceptionRecord,
             Collections.singletonList(paymentData)
         );
-        uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment payment = new uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment(
-            paymentEntity);
+        uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment payment =
+            new uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment(paymentEntity);
 
         assertThat(payment.getEnvelopeId()).isEqualTo(envelope_id);
         assertThat(payment.getCcdReference()).isEqualTo(ccdReference);

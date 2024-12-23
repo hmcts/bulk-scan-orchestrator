@@ -72,7 +72,7 @@ public class PaymentProcessingTaskTest {
     @BeforeEach
     void setUp() {
         int retryCount = 3;
-        paymentProcessingTask = new PaymentProcessingTask(paymentService ,paymentApiClient, retryCount);
+        paymentProcessingTask = new PaymentProcessingTask(paymentService, paymentApiClient, retryCount);
     }
 
     @Test
@@ -88,7 +88,7 @@ public class PaymentProcessingTaskTest {
         List<Payment> paymentList = Arrays.asList(payment1, payment2);
 
         given(paymentService.getPaymentsByStatus("awaiting")).willReturn(paymentList);
-        given(paymentApiClient.postPayment(any())).willReturn( new ResponseEntity<>("body", HttpStatus.OK));
+        given(paymentApiClient.postPayment(any())).willReturn(new ResponseEntity<>("body", HttpStatus.OK));
         paymentProcessingTask.processPayments();
         verify(paymentApiClient, times(2)).postPayment(any());
     }
@@ -100,7 +100,7 @@ public class PaymentProcessingTaskTest {
         List<Payment> paymentList = List.of(payment1);
 
         given(paymentService.getPaymentsByStatus("awaiting")).willReturn(paymentList);
-        given(paymentApiClient.postPayment(any())).willReturn( new ResponseEntity<>("body", HttpStatus.BAD_REQUEST));
+        given(paymentApiClient.postPayment(any())).willReturn(new ResponseEntity<>("body", HttpStatus.BAD_REQUEST));
         paymentProcessingTask.processPayments();
         verify(paymentApiClient, times(3)).postPayment(any());
     }
@@ -111,7 +111,7 @@ public class PaymentProcessingTaskTest {
         List<Payment> paymentList = List.of(payment1);
 
         given(paymentService.getPaymentsByStatus("awaiting")).willReturn(paymentList);
-        given(paymentApiClient.postPayment(any())).willReturn( new ResponseEntity<>("body", HttpStatus.OK));
+        given(paymentApiClient.postPayment(any())).willReturn(new ResponseEntity<>("body", HttpStatus.OK));
         paymentProcessingTask.processPayments();
         verify(paymentService, times(1)).updateStatusByEnvelopeId("success","123");
     }
@@ -122,7 +122,7 @@ public class PaymentProcessingTaskTest {
         List<Payment> paymentList = List.of(payment1);
 
         given(paymentService.getPaymentsByStatus("awaiting")).willReturn(paymentList);
-        given(paymentApiClient.postPayment(any())).willReturn( new ResponseEntity<>("body", HttpStatus.BAD_REQUEST));
+        given(paymentApiClient.postPayment(any())).willReturn(new ResponseEntity<>("body", HttpStatus.BAD_REQUEST));
         paymentProcessingTask.processPayments();
         verify(paymentService, times(1)).updateStatusByEnvelopeId("error","123");
     }

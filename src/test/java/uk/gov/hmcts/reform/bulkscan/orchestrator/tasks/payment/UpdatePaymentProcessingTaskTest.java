@@ -18,8 +18,8 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 
@@ -31,7 +31,7 @@ public class UpdatePaymentProcessingTaskTest {
         new uk.gov.hmcts.reform.bulkscan.orchestrator.entity.UpdatePayment(
             Instant.now(),
             "123456",
-            "7891234" ,
+            "7891234",
             "987654321",
             "jurisdiction1",
             "awaiting"
@@ -41,7 +41,7 @@ public class UpdatePaymentProcessingTaskTest {
         new uk.gov.hmcts.reform.bulkscan.orchestrator.entity.UpdatePayment(
             Instant.now(),
             "123456",
-            "7891234" ,
+            "7891234",
             "987654321",
             "jurisdiction1",
             "awaiting"
@@ -64,7 +64,8 @@ public class UpdatePaymentProcessingTaskTest {
     @BeforeEach
     void setUp() {
         int retryCount = 3;
-        updatePaymentProcessingTask = new UpdatePaymentProcessingTask(updatePaymentService ,paymentApiClient, retryCount);
+        updatePaymentProcessingTask =
+            new UpdatePaymentProcessingTask(updatePaymentService, paymentApiClient, retryCount);
     }
 
     @Test
@@ -76,11 +77,9 @@ public class UpdatePaymentProcessingTaskTest {
 
     @Test
     void should_post_when_payments_with_status_awaiting() {
-
         List<UpdatePayment> paymentList = Arrays.asList(updatePayment1, updatePayment2);
-
         given(updatePaymentService.getUpdatePaymentByStatus("awaiting")).willReturn(paymentList);
-        given(paymentApiClient.postUpdatePayment(any())).willReturn( new ResponseEntity<>("body", HttpStatus.OK));
+        given(paymentApiClient.postUpdatePayment(any())).willReturn(new ResponseEntity<>("body", HttpStatus.OK));
         updatePaymentProcessingTask.processUpdatePayments();
         verify(paymentApiClient, times(2)).postUpdatePayment(any());
     }
@@ -88,33 +87,30 @@ public class UpdatePaymentProcessingTaskTest {
 
     @Test
     void should_retry_three_times_when_posting_payment() {
-
         List<UpdatePayment> paymentList = List.of(updatePayment1);
-
         given(updatePaymentService.getUpdatePaymentByStatus("awaiting")).willReturn(paymentList);
-        given(paymentApiClient.postUpdatePayment(any())).willReturn( new ResponseEntity<>("body", HttpStatus.BAD_REQUEST));
+        given(paymentApiClient.postUpdatePayment(any())).willReturn(
+            new ResponseEntity<>("body", HttpStatus.BAD_REQUEST));
         updatePaymentProcessingTask.processUpdatePayments();
         verify(paymentApiClient, times(3)).postUpdatePayment(any());
     }
 
     @Test
     void should_update_status_after_successfully_posting_payment() {
-
         List<UpdatePayment> paymentList = List.of(updatePayment1);
-
         given(updatePaymentService.getUpdatePaymentByStatus("awaiting")).willReturn(paymentList);
-        given(paymentApiClient.postUpdatePayment(any())).willReturn( new ResponseEntity<>("body", HttpStatus.OK));
+        given(paymentApiClient.postUpdatePayment(any())).willReturn(
+            new ResponseEntity<>("body", HttpStatus.OK));
         updatePaymentProcessingTask.processUpdatePayments();
         verify(updatePaymentService, times(1)).updateStatusByEnvelopeId("success","987654321");
     }
 
     @Test
     void should_update_status_after_unsuccessfully_posting_payment() {
-
         List<UpdatePayment> paymentList = List.of(updatePayment1);
-
         given(updatePaymentService.getUpdatePaymentByStatus("awaiting")).willReturn(paymentList);
-        given(paymentApiClient.postUpdatePayment(any())).willReturn( new ResponseEntity<>("body", HttpStatus.BAD_REQUEST));
+        given(paymentApiClient.postUpdatePayment(any())).willReturn(
+            new ResponseEntity<>("body", HttpStatus.BAD_REQUEST));
         updatePaymentProcessingTask.processUpdatePayments();
         verify(updatePaymentService, times(1)).updateStatusByEnvelopeId("error","987654321");
     }
