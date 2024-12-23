@@ -5,6 +5,8 @@ scheduling:
       enabled: false
     check-envelopes-queue:
       enabled: false
+    post-payments:
+      retry-count: 3
 
 spring:
   application:
