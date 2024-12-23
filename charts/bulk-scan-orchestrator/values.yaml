@@ -76,7 +76,7 @@ java:
     FLYWAY_SKIP_MIGRATIONS: "true"
     ENVELOPE_QUEUE_CHECK_POLL_INTERVAL: "PT1H"
     CDAM_ENABLED: "true"
-    PAYMENT_PROCESSING_INTERVAL: "10s"
+    PAYMENT_PROCESSING_INTERVAL: "10000"
   keyVaults:
     bulk-scan:
       secrets:
