@@ -7,6 +7,7 @@ scheduling:
       enabled: false
     post-payments:
       retry-count: 3
+      interval: 10000
 
 spring:
   application:
