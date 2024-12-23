@@ -124,43 +124,43 @@ class SupplementaryEvidenceTest {
             .until(() -> hasCaseBeenUpdatedWithSupplementaryEvidence(caseDetails, 2));
     }
 
-    //    @Test
-    //    public void should_be_able_to_attach_supplementary_evidence_to_case_by_legacy_id() throws Exception {
-    //        //given
-    //        String dmUrl = dmUploadService.uploadToDmStore("Evidence2.pdf", "documents/supplementary-evidence.pdf");
-    //        assertThat(dmUrl).isNotNull();
-    //        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
-    //        String legacyId = (String) caseDetails.getData().get("legacyId");
-    //        assertThat(legacyId).isNotEmpty();
-    //
-    //        await("The new case can be found by legacy ID")
-    //            .atMost(60, TimeUnit.SECONDS)
-    //            .pollInterval(Duration.ofSeconds(1))
-    //            .until(() -> !ccdApi.getCaseRefsByLegacyId(legacyId, TEST_SERVICE_NAME).isEmpty());
-    //
-    //        // when
-    //        if (!Boolean.parseBoolean(System.getenv("JMS_ENABLED"))) {
-    //            envelopeMessager.sendMessageFromFile(
-    //                "envelopes/supplementary-evidence-with-legacy-id.json",
-    //                null,
-    //                legacyId,
-    //                dmUrl
-    //            );
-    //        } else {
-    //            jmsEnvelopeMessager.sendMessageFromFile(
-    //                "envelopes/supplementary-evidence-with-legacy-id.json",
-    //                null,
-    //                legacyId,
-    //                dmUrl
-    //            );
-    //        }
-    //
-    //        // then
-    //        await("Supplementary evidence is attached to the case in ccd. LegacyId = " + legacyId)
-    //            .atMost(60, TimeUnit.SECONDS)
-    //            .pollInterval(Duration.ofSeconds(2))
-    //            .until(() -> hasCaseBeenUpdatedWithSupplementaryEvidence(caseDetails, 1));
-    //    }
+    @Test
+    public void should_be_able_to_attach_supplementary_evidence_to_case_by_legacy_id() throws Exception {
+        //given
+        String dmUrl = dmUploadService.uploadToDmStore("Evidence2.pdf", "documents/supplementary-evidence.pdf");
+        assertThat(dmUrl).isNotNull();
+        CaseDetails caseDetails = ccdCaseCreator.createCase(emptyList(), Instant.now());
+        String legacyId = (String) caseDetails.getData().get("legacyId");
+        assertThat(legacyId).isNotEmpty();
+
+        await("The new case can be found by legacy ID")
+            .atMost(60, TimeUnit.SECONDS)
+            .pollInterval(Duration.ofSeconds(1))
+            .until(() -> !ccdApi.getCaseRefsByLegacyId(legacyId, TEST_SERVICE_NAME).isEmpty());
+
+        // when
+        if (!Boolean.parseBoolean(System.getenv("JMS_ENABLED"))) {
+            envelopeMessager.sendMessageFromFile(
+                "envelopes/supplementary-evidence-with-legacy-id.json",
+                null,
+                legacyId,
+                dmUrl
+            );
+        } else {
+            jmsEnvelopeMessager.sendMessageFromFile(
+                "envelopes/supplementary-evidence-with-legacy-id.json",
+                null,
+                legacyId,
+                dmUrl
+            );
+        }
+
+        // then
+        await("Supplementary evidence is attached to the case in ccd. LegacyId = " + legacyId)
+            .atMost(60, TimeUnit.SECONDS)
+            .pollInterval(Duration.ofSeconds(2))
+            .until(() -> hasCaseBeenUpdatedWithSupplementaryEvidence(caseDetails, 1));
+    }
 
     @Test
     public void should_create_exception_record_when_fails_to_attach_documents_to_the_case() throws Exception {
