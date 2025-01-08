@@ -43,8 +43,8 @@ public class PaymentService {
     }
 
     public List<Payment> getAllByPaymentsForPreviousDay() {
-       return paymentRepository.findAllByCreatedAt(LocalDate.now().minusDays(1))
-           .stream().map(Payment::new).toList();
+        return paymentRepository.findAllByCreatedAt(LocalDate.now().minusDays(1))
+            .stream().map(Payment::new).toList();
     }
 
 }
