@@ -31,13 +31,13 @@ public final class CsvWriter {
         // utility class constructor
     }
 
-    public static File writeCreatePaymentsToCsv(
-        List<Payment> data
-    ) throws IOException {
-        File csvFile = File.createTempFile("CreatePayment-summary-", ".csv");
+    public static File writeCreatePaymentsToCsv(List<Payment> data) throws IOException {
+
+        File csvFile = File.createTempFile("CreatePayment-summary-", ".csv", null);
 
         CSVFormat csvFileHeader = CSVFormat.DEFAULT.withHeader(CREATE_PAYMENT_CSV_HEADERS);
         try (
+
             FileWriter fileWriter = new FileWriter(csvFile);
             CSVPrinter printer = new CSVPrinter(fileWriter, csvFileHeader)
         ) {
@@ -55,10 +55,9 @@ public final class CsvWriter {
         return csvFile;
     }
 
-    public static File writeUpdatePaymentsToCsv(
-        List<UpdatePayment> data
-    ) throws IOException {
-        File csvFile = File.createTempFile("UpdatePayment-summary-", ".csv");
+    public static File writeUpdatePaymentsToCsv(List<UpdatePayment> data) throws IOException {
+
+        File csvFile = File.createTempFile("UpdatePayment-summary-", ".csv", null);
 
         CSVFormat csvFileHeader = CSVFormat.DEFAULT.withHeader(UPDATE_PAYMENT_CSV_HEADERS);
         try (
