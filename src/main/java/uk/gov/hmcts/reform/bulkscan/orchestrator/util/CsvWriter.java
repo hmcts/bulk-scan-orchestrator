@@ -17,8 +17,8 @@ import static java.util.Optional.ofNullable;
 public final class CsvWriter {
 
     private static final String[] CREATE_PAYMENT_CSV_HEADERS = {
-        "Envelope Id",  "Date Received", "CCD Reference",
-        "Service", "Exception Record","Status"
+        "Envelope Id", "Date Received", "CCD Reference",
+        "Service", "Exception Record", "Status"
     };
 
     private static final String[] UPDATE_PAYMENT_CSV_HEADERS = {
