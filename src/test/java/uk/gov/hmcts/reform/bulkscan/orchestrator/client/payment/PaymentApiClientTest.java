@@ -16,7 +16,10 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.UpdatePayment;
 import java.time.Instant;
 import java.util.Collections;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -64,17 +67,23 @@ public class PaymentApiClientTest {
     @Test
     void should_post_create_payments_successfully() throws Exception {
 
-        given(restTemplate.postForEntity(anyString(), any(), eq(String.class))).willReturn(new ResponseEntity<String>("RESULT", HttpStatus.OK));
+        given(restTemplate.postForEntity(anyString(), any(), eq(String.class)))
+            .willReturn(new ResponseEntity<String>("RESULT", HttpStatus.OK));
+
         ResponseEntity<String> result = paymentApiClient.postPayment(payment);
-        assert(result.getStatusCode()==HttpStatus.OK);
+
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
     void should_post_update_payments_successfully() throws Exception {
 
-        given(restTemplate.postForEntity(anyString(), any(), eq(String.class))).willReturn(new ResponseEntity<String>("RESULT", HttpStatus.OK));
+        given(restTemplate.postForEntity(anyString(), any(), eq(String.class)))
+            .willReturn(new ResponseEntity<String>("RESULT", HttpStatus.OK));
         ResponseEntity<String> result = paymentApiClient.postUpdatePayment(updatePayment);
-        assert(result.getStatusCode()==HttpStatus.OK);
+
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+
     }
 
 }
