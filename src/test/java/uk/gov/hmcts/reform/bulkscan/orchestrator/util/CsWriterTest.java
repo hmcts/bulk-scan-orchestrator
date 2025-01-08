@@ -23,10 +23,9 @@ public class CsWriterTest {
     @Test
     void should_return_csv_file_with_headers_and_csv_records_for_create_payments() throws IOException {
 
-         final PaymentData paymentData =
-             new PaymentData("123");
+        final PaymentData paymentData = new PaymentData("123");
 
-         final Instant date = Instant.now();
+        final Instant date = Instant.now();
 
         //given
         List<Payment> paymentList = Arrays.asList(
