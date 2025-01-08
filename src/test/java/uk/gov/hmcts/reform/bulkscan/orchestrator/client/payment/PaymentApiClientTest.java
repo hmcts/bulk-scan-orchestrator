@@ -1,57 +1,53 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.payment;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.entity.PaymentData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.PaymentData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.UpdatePayment;
 
 import java.time.Instant;
 import java.util.Collections;
 
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.given;
+
 @ExtendWith(MockitoExtension.class)
 public class PaymentApiClientTest {
-
 
     @Mock
     private RestTemplate restTemplate;
 
 
-    private static final PaymentData paymentData = new PaymentData(Instant.now(),"123");
+    private static final PaymentData paymentData = new PaymentData("123");
 
-    private static final uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment paymentEntity1 =
-        new uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment(
-            Instant.now(),
+    private static final Payment payment = new Payment(
             "123",
+            Instant.now(),
             "234",
             "jurisdiction1",
             "service1",
             "poBox1",
-            "awaiting",
             true,
+            "awaiting",
             Collections.singletonList(paymentData)
         );
 
-    private static final  uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment paymentEntity2 =
-        new uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment(
-            Instant.now(),
-            "456",
-            "789",
-            "jurisdiction2",
-            "service2",
-            "poBox2",
-            "awaiting",
-            true,
-            Collections.singletonList(paymentData)
-        );
-
-    private static final uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment payment1 =
-        new uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment(paymentEntity1);
-
-    private static final uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment payment2 =
-        new uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment(paymentEntity2);
+    private static final UpdatePayment updatePayment = new UpdatePayment(
+        Instant.now(),
+        "12345",
+        "34567",
+        "6789432",
+        "jurisidiction",
+        "awaiting"
+    );
 
     private String url;
     private PaymentApiClient paymentApiClient;
@@ -65,6 +61,20 @@ public class PaymentApiClientTest {
     }
 
 
+    @Test
+    void should_post_create_payments_successfully() throws Exception {
 
+        given(restTemplate.postForEntity(anyString(), any(), eq(String.class))).willReturn(new ResponseEntity<String>("RESULT", HttpStatus.OK));
+        ResponseEntity<String> result = paymentApiClient.postPayment(payment);
+        assert(result.getStatusCode()==HttpStatus.OK);
+    }
+
+    @Test
+    void should_post_update_payments_successfully() throws Exception {
+
+        given(restTemplate.postForEntity(anyString(), any(), eq(String.class))).willReturn(new ResponseEntity<String>("RESULT", HttpStatus.OK));
+        ResponseEntity<String> result = paymentApiClient.postUpdatePayment(updatePayment);
+        assert(result.getStatusCode()==HttpStatus.OK);
+    }
 
 }
