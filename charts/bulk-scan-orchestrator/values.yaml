@@ -77,6 +77,7 @@ java:
     ENVELOPE_QUEUE_CHECK_POLL_INTERVAL: "PT1H"
     CDAM_ENABLED: "true"
     PAYMENT_PROCESSING_INTERVAL: "10000"
+    SMTP_HOST: "false"
   keyVaults:
     bulk-scan:
       secrets:
@@ -138,6 +139,12 @@ java:
           alias: LAUNCH_DARKLY_SDK_KEY
         - name: launch-darkly-offline-mode
           alias: LAUNCH_DARKLY_OFFLINE_MODE
+        - name: reports-email-username
+          alias: SMTP_USERNAME
+        - name: reports-email-password
+          alias: SMTP_PASSWORD
+        - name: reports-recipients
+          alias: REPORTS_RECIPIENTS
   image: hmctspublic.azurecr.io/bulk-scan/orchestrator:latest
 
 servicebus:

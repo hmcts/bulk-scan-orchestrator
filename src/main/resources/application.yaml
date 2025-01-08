@@ -35,7 +35,18 @@ spring:
     exclude: org.springframework.boot.autoconfigure.jms.JmsAutoConfiguration,org.springframework.boot.autoconfigure.jms.activemq.ActiveMQAutoConfiguration
   main:
     allow-bean-definition-overriding: true
-
+  mail:
+    host: ${SMTP_HOST}
+    username: ${SMTP_USERNAME}
+    password: ${SMTP_PASSWORD}
+    port: 587
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+    test-connection: true
 flyway:
   skip-migrations: ${FLYWAY_SKIP_MIGRATIONS}
 
@@ -303,3 +314,7 @@ jms:
 launchdarkly:
   sdk-key: ${LAUNCH_DARKLY_SDK_KEY:XXXXX}
   offline-mode: ${LAUNCH_DARKLY_OFFLINE_MODE:false}
+
+reports:
+  cron: ${REPORTS_CRON:0 10 * * *}
+  recipients: ${REPORTS_RECIPIENTS:}

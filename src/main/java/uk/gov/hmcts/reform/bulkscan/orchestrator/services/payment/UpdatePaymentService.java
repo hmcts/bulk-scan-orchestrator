@@ -5,6 +5,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.entity.UpdatePaymentRepository;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.UpdatePayment;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -35,5 +36,10 @@ public class UpdatePaymentService {
     public void updateStatusByEnvelopeId(String status, String envelopeId) {
 
         updatePaymentRepository.updateStatusByEnvelopeId(status, envelopeId);
+    }
+
+    public List<UpdatePayment> getAllByPaymentsForPreviousDay() {
+        return updatePaymentRepository.findAllByCreatedAt(LocalDate.now().minusDays(1))
+            .stream().map(UpdatePayment::new).toList();
     }
 }

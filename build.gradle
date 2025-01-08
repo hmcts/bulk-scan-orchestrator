@@ -269,6 +269,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-jdbc'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-activemq'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
@@ -303,6 +304,8 @@ dependencies {
   implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.5.0'
 
   implementation group: 'org.projectlombok', name: 'lombok', version: '1.18.36'
+
+  implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.12.0'
 
   annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
   annotationProcessor 'org.projectlombok:lombok'

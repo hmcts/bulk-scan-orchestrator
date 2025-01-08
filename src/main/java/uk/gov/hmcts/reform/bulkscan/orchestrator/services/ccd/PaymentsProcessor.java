@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.services.payment.PaymentService
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.payment.UpdatePaymentService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 
+import java.time.Instant;
 import java.util.Optional;
 
 @Service
@@ -33,6 +34,7 @@ public class PaymentsProcessor {
             log.info("Started saving payments for case with CCD reference {}", caseId);
             Payment payment = new Payment(
                 envelope.id,
+                Instant.now(),
                 Long.toString(caseId),
                 envelope.jurisdiction,
                 envelope.container,
@@ -63,6 +65,7 @@ public class PaymentsProcessor {
             log.info("Contains Payments, saving payment update message. ER id: {}", exceptionRecordId);
 
             UpdatePayment updatePayment = new UpdatePayment(
+                Instant.now(),
                 exceptionRecordId,
                 newCaseId,
                 paymentsHelper.envelopeId,

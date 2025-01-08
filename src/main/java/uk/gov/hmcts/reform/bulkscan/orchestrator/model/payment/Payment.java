@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 
@@ -16,6 +18,10 @@ public class Payment {
 
     @JsonProperty("envelope_id")
     public final String envelopeId;
+
+    @JsonProperty("created_at")
+    @JsonFormat(pattern = "HH:mm:ss")
+    public final Instant createdAt;
 
     @JsonProperty("ccd_reference")
     public final String ccdReference;
@@ -42,6 +48,7 @@ public class Payment {
 
     public Payment(final uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment payment) {
         this.envelopeId = payment.getEnvelopeId();
+        this.createdAt = payment.getCreatedAt();
         this.ccdReference = payment.getCcdReference();
         this.jurisdiction = payment.getJurisdiction();
         this.service = payment.getService();

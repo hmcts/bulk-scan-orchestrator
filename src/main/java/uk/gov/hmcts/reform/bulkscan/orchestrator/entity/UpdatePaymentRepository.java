@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,4 +16,6 @@ public interface UpdatePaymentRepository extends JpaRepository<UpdatePayment, UU
     @Query("UPDATE UpdatePayment  SET status = :status WHERE envelopeId = :envelopeId")
     void updateStatusByEnvelopeId(String status, String envelopeId);
 
+    @Query("SELECT p from UpdatePayment p where p.createdAt <= :creationDateTime")
+    List<UpdatePayment> findAllByCreatedAt(LocalDate creationDateTime);
 }

@@ -1,13 +1,19 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+
+import java.time.Instant;
 
 @Data
 @AllArgsConstructor
 public class UpdatePayment {
 
+    @JsonProperty("created_at")
+    @JsonFormat(pattern = "HH:mm:ss")
+    public final Instant createdAt;
 
     @JsonProperty("exception_record_ref")
     public final String exceptionRecordRef;
@@ -26,6 +32,7 @@ public class UpdatePayment {
 
 
     public UpdatePayment(final uk.gov.hmcts.reform.bulkscan.orchestrator.entity.UpdatePayment  updatePayment) {
+        this.createdAt = updatePayment.getCreatedAt();
         this.exceptionRecordRef = updatePayment.getExceptionRecordRef();
         this.newCaseRef = updatePayment.getNewCaseRef();
         this.envelopeId = updatePayment.getEnvelopeId();
