@@ -43,7 +43,7 @@ public class SendReportTask {
         PaymentService paymentService,
         UpdatePaymentService updatePaymentService,
         @Value("${spring.mail.username}") String from,
-        @Value("${reports.recipients}") String[] recipients) {
+        @Value("${payment.reports.recipients}") String[] recipients) {
         this.mailSender = mailSender;
         this.paymentService = paymentService;
         this.updatePaymentService = updatePaymentService;
@@ -60,7 +60,7 @@ public class SendReportTask {
         }
     }
 
-    @Scheduled(cron = "${reports.cron}")
+    @Scheduled(cron = "${payment.reports.cron}")
     public void send() {
         try {
             log.info("Sending daily report: {}", EMAIL_SUBJECT);

@@ -66,8 +66,8 @@ azure:
       access-key: ${PAYMENTS_QUEUE_WRITE_ACCESS_KEY}
       access-key-name: ${QUEUE_ACCESS_KEY_SEND_NAME}
       queue-name: ${PAYMENTS_QUEUE_NAME}
-      manual-retry-count: 3
-      manual-retry-wait-in-ms: 2000
+
+
 
 core_case_data:
   api:
@@ -317,6 +317,9 @@ cdam:
 payment:
       api:
         url: ${PAYMENT_API_URL}
+      reports:
+        cron: ${REPORTS_CRON:0 10 * * *}
+        recipients: ${PAYMENT_REPORTS_RECIPIENTS:}
 
 springdoc:
   packagesToScan: uk.gov.hmcts.reform.bulkscan.orchestrator.controllers
@@ -330,6 +333,4 @@ launchdarkly:
   sdk-key: ${LAUNCH_DARKLY_SDK_KEY:XXXXX}
   offline-mode: ${LAUNCH_DARKLY_OFFLINE_MODE:false}
 
-reports:
-  cron: ${REPORTS_CRON:0 10 * * *}
-  recipients: ${REPORTS_RECIPIENTS:}
+

@@ -76,7 +76,6 @@ java:
     FLYWAY_SKIP_MIGRATIONS: "true"
     ENVELOPE_QUEUE_CHECK_POLL_INTERVAL: "PT1H"
     CDAM_ENABLED: "true"
-    PAYMENT_PROCESSING_INTERVAL: "10000"
     SMTP_HOST: "false"
   keyVaults:
     bulk-scan:
@@ -144,7 +143,9 @@ java:
         - name: reports-email-password
           alias: SMTP_PASSWORD
         - name: reports-recipients
-          alias: REPORTS_RECIPIENTS
+          alias: PAYMENTS_REPORTS_RECIPIENTS
+        - name: payment-processing-interval
+          alias: PAYMENT_PROCESSING_INTERVAL
   image: hmctspublic.azurecr.io/bulk-scan/orchestrator:latest
 
 servicebus:
