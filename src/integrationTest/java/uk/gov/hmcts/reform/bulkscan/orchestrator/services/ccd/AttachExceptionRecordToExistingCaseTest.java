@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
@@ -37,7 +38,7 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
     private static final String CASE_REFERENCE_TYPE_EXTERNAL = "externalCaseReference";
     private static final String CASE_REFERENCE_TYPE_CCD = "ccdCaseReference";
 
-    @Autowired
+    @Mock
     private PaymentService paymentService;
 
     @DisplayName("Should successfully callback with correct information")
