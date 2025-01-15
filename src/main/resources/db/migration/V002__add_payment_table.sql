@@ -13,7 +13,7 @@ CREATE TABLE payments(
 CREATE TABLE payments_data (
   id UUID PRIMARY KEY,
   created_at TIMESTAMP NOT NULL,
-  payment_id UUID REFERENCES payments_table(id),
+  payment_id UUID REFERENCES payments(id),
   document_control_number VARCHAR(50) NOT NULL
 );
 
