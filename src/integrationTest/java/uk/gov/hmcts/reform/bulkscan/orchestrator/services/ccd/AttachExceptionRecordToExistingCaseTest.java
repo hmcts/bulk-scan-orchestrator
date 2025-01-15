@@ -5,11 +5,10 @@ import com.google.common.collect.ImmutableList;
 import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.payment.PaymentService;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.payment.UpdatePaymentService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -38,8 +37,8 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
     private static final String CASE_REFERENCE_TYPE_EXTERNAL = "externalCaseReference";
     private static final String CASE_REFERENCE_TYPE_CCD = "ccdCaseReference";
 
-    @Mock
-    private PaymentService paymentService;
+    @Autowired
+    private UpdatePaymentService updatePaymentService;
 
     @DisplayName("Should successfully callback with correct information")
     @Test
@@ -554,7 +553,7 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
         CallbackRequest callbackRequest = exceptionRecordCallbackRequestWithPayment();
 
         willThrow(new PaymentsPublishingException("Payment failed", new RuntimeException("connection")))
-            .given(paymentService).savePayment(any());
+            .given(updatePaymentService).savePayment(any());
 
         given()
             .body(callbackRequest)
