@@ -59,6 +59,8 @@ java:
           alias: ENVELOPES_QUEUE_MAX_DELIVERY_COUNT
         - name: app-insights-instrumentation-key
           alias: azure.application-insights.instrumentation-key
+        - name: payment-processing-interval
+          alias: PAYMENT_PROCESSING_INTERVAL
   postgresql:
     enabled: true
     image:
