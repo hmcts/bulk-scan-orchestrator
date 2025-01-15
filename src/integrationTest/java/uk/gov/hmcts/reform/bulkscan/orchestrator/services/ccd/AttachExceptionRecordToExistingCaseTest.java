@@ -32,8 +32,6 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
     private static final String CASE_REFERENCE_TYPE_EXTERNAL = "externalCaseReference";
     private static final String CASE_REFERENCE_TYPE_CCD = "ccdCaseReference";
 
-    //    @Autowired
-    //    private IPaymentsPublisher paymentsPublisher;
 
     @DisplayName("Should successfully callback with correct information")
     @Test
@@ -527,38 +525,33 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
             );
     }
 
-    //    @Test
-    //    void should_callback_with_correct_information_when_attaching_by_attachToCaseReference_with_payment() {
-    //        CallbackRequest callbackRequest = exceptionRecordCallbackRequestWithPayment();
-    //
-    //        doNothing().when(paymentsPublisher).send(any());
-    //        ValidatableResponse response =
-    //            given()
-    //                .body(callbackRequest)
-    //                .headers(userHeaders())
-    //                .post(CALLBACK_ATTACH_CASE_PATH)
-    //                .then()
-    //                .statusCode(200);
-    //
-    //        verifySuccessResponse(response, callbackRequest);
-    //        verifyRequestedAttachingToCase();
-    //    }
+    @Test
+    void should_callback_with_correct_information_when_attaching_by_attachToCaseReference_with_payment() {
+        CallbackRequest callbackRequest = exceptionRecordCallbackRequestWithPayment();
 
-    //    @Test
-    //    void should_fail_with_the_correct_error_when_payments_fails() {
-    //        CallbackRequest callbackRequest = exceptionRecordCallbackRequestWithPayment();
-    //
-    //        willThrow(new PaymentsPublishingException("Payment failed", new RuntimeException("connection")))
-    //            .given(paymentsPublisher).send(any());
-    //
-    //      given()
-    //          .body(callbackRequest)
-    //          .headers(userHeaders())
-    //          .post(CALLBACK_ATTACH_CASE_PATH)
-    //          .then()
-    //          .statusCode(200)
-    //          .body(RESPONSE_FIELD_ERRORS, hasItem("Payment references cannot be processed. Please try again later"));
-    //    }
+        ValidatableResponse response =
+            given()
+                .body(callbackRequest)
+                .headers(userHeaders())
+                .post(CALLBACK_ATTACH_CASE_PATH)
+                .then()
+                .statusCode(200);
+
+        verifySuccessResponse(response, callbackRequest);
+        verifyRequestedAttachingToCase();
+    }
+
+    @Test
+    void should_fail_with_the_correct_error_when_payments_fails() {
+        CallbackRequest callbackRequest = exceptionRecordCallbackRequestWithPayment();
+        given()
+            .body(callbackRequest)
+            .headers(userHeaders())
+            .post(CALLBACK_ATTACH_CASE_PATH)
+            .then()
+            .statusCode(200)
+            .body(RESPONSE_FIELD_ERRORS, hasItem("Payment references cannot be processed. Please try again later"));
+    }
 
     private CallbackRequest callbackRequestWith(
         String eventId,

@@ -51,14 +51,14 @@ public class PaymentProcessingTask {
                         paymentService.updateStatusByEnvelopeId(Status.SUCCESS.toString(), payment.getEnvelopeId());
                         log.info("Updated payment status to success for envelope. {}", payment.getEnvelopeId());
                     } else {
-                        log.info("Posting payment was unsuccessful for envelope. {}", payment.getEnvelopeId());
+                        log.debug("Posting payment was unsuccessful for envelope. {}", payment.getEnvelopeId());
                         paymentService.updateStatusByEnvelopeId(Status.ERROR.toString(), payment.getEnvelopeId());
-                        log.info("Updated payment status to error for envelope. {}", payment.getEnvelopeId());
+                        log.debug("Updated payment status to error for envelope. {}", payment.getEnvelopeId());
                     }
                 });
             }
         } catch (Exception e) {
-            log.info("Error posting payments to payment api client. {}", e.getMessage());
+            log.debug("Error posting payments to payment api client. {}", e.getMessage());
         }
     }
 

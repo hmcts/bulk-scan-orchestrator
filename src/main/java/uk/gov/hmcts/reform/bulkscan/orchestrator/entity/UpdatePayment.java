@@ -14,7 +14,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "update_payments_table")
+@Table(name = "update_payments")
 @Getter
 @Setter
 @AllArgsConstructor

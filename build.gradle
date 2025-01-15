@@ -248,7 +248,8 @@ def versions = [
   junitPlatform     : '1.10.3',
   testContainers    : '1.20.1',
   flyway            : "$flywayVersion",
-  postgresql        : "$postgresqlVersion"
+  postgresql        : "$postgresqlVersion",
+  mockitoJupiter    : '3.3.3'
 ]
 
 configurations.all {
@@ -328,6 +329,8 @@ dependencies {
 
   testImplementation group: 'io.github.netmikey.logunit', name: 'logunit-core', version: '2.0.0'
   testImplementation group: 'com.github.hmcts', name: 'fortify-client', version: '1.4.3', classifier: 'all'
+  testImplementation group: 'com.icegreen', name: 'greenmail', version: '2.1.0'
+
   testRuntimeOnly group: 'io.github.netmikey.logunit', name: 'logunit-logback', version: '2.0.0'
 
   integrationTestImplementation sourceSets.main.runtimeClasspath
