@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.payment.UpdatePaymentService;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.payment.PaymentService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -38,7 +38,7 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
     private static final String CASE_REFERENCE_TYPE_CCD = "ccdCaseReference";
 
     @Autowired
-    private UpdatePaymentService updatePaymentService;
+    private PaymentService paymentService;
 
     @DisplayName("Should successfully callback with correct information")
     @Test
@@ -553,7 +553,7 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
         CallbackRequest callbackRequest = exceptionRecordCallbackRequestWithPayment();
 
         willThrow(new PaymentsPublishingException("Payment failed", new RuntimeException("connection")))
-            .given(updatePaymentService).savePayment(any());
+            .given(paymentService).savePayment(any());
 
         given()
             .body(callbackRequest)
