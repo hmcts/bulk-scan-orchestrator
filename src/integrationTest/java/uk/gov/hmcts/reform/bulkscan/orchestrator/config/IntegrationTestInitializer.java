@@ -27,10 +27,10 @@ class IntegrationTestInitializer implements ApplicationContextInitializer<Config
         return mock(ProcessedEnvelopeNotifier.class);
     }
 
-        @Bean
-        public PaymentService paymentService() {
-            return mock(PaymentService.class);
-        }
+    @Bean
+    public PaymentService paymentService() {
+        return mock(PaymentService.class);
+    }
 
     @Bean
     public ServiceBusProcessorClient envelopesMessageReceiver() {
