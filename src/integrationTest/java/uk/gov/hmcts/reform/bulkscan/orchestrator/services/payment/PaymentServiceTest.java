@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.PaymentData;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -48,7 +49,10 @@ public class PaymentServiceTest {
 
         paymentService.savePayment(payment);
 
-        assertThat(paymentService.getPaymentsByStatus("awaiting")).size().isEqualTo(1);
+        List<Payment> results =
+            paymentService.getPaymentsByStatus("awaiting");
+
+        assertThat(results.size()).isEqualTo(1);
     }
 
 
