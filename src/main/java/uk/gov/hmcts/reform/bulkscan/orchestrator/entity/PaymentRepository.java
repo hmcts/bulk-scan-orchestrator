@@ -3,11 +3,13 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.entity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+@Repository
 public interface PaymentRepository extends JpaRepository<Payment, UUID> {
 
     List<Payment> getPaymentsByStatus(String status);
