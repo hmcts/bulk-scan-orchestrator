@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.PaymentData;
 import java.time.Instant;
 import java.util.Collections;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 @AutoConfigureWireMock(port = 0)
@@ -19,27 +20,35 @@ public class PaymentServiceTest {
     @Autowired
     PaymentService paymentService;
 
+    final PaymentData paymentData = new PaymentData("123");
+    final Payment payment = new Payment(
+        "envelope_id",
+        Instant.now(),
+        "ccdReference",
+        "jurisdiction",
+        "service",
+        "poBox",
+        true,
+        "awaiting",
+        Collections.singletonList(paymentData)
+    );
+
     @Test
     void shouldAddPaymentToDatabase() {
-
-        final PaymentData paymentData = new PaymentData("123");
-        final Payment payment = new Payment(
-            "envelope_id",
-            Instant.now(),
-            "ccdReference",
-            "jurisdiction",
-            "service",
-            "poBox",
-            true,
-            "awaiting",
-            Collections.singletonList(paymentData)
-        );
 
         paymentService.savePayment(payment);
 
         assertThatCode(() -> paymentService.savePayment(payment))
             .doesNotThrowAnyException();
 
+    }
+
+    @Test
+    void shouldGetPaymentFromDatabaseByStatus() {
+
+        paymentService.savePayment(payment);
+
+        assertThat(paymentService.getPaymentsByStatus("awaiting")).size().isEqualTo(1);
     }
 
 
