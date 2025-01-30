@@ -57,10 +57,10 @@ public class PaymentProcessingTask {
                     }
                 });
             }
-            } catch (Exception e) {
-                log.error("Error posting payments to payment API client", e);
-                throw new PaymentProcessingException("Failed to post payments to payment API client", e);
-            }
+        } catch (Exception e) {
+            log.error("Error posting payments to payment API client", e);
+            throw new PaymentProcessingException("Failed to post payments to payment API client", e);
+        }
     }
 
     private ResponseEntity<String> postPaymentsToPaymentApi(Payment payment, int retryCount) {
