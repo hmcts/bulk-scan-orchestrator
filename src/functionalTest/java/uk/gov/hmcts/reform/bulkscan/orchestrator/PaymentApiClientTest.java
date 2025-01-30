@@ -31,7 +31,7 @@ class PaymentApiClientTest {
 
     private Payment testPayment = new Payment(
         "137436bd-ed50-460c-b6c8-f7205528a5a9",
-        Instant.now(),
+        Instant.now().truncatedTo(java.time.temporal.ChronoUnit.SECONDS),
         "CCD-REF-5678",
         "sscs",
         "Bulk Scanning",
@@ -42,7 +42,7 @@ class PaymentApiClientTest {
     );
 
     private UpdatePayment testUpdatePayment = new UpdatePayment(
-        Instant.now(),
+        Instant.now().truncatedTo(java.time.temporal.ChronoUnit.SECONDS),
         "EXC-REF-12345",
         "NEW-CASE-REF-67890",
         "137436bd-ed50-460c-b6c8-f7205528a5a9",
