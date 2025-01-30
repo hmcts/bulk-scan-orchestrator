@@ -50,7 +50,6 @@ class PaymentApiClientTest {
         Status.SUCCESS.toString()
     );
 
-
     @BeforeAll
     static void setUp() throws IOException {
         mockWebServer = new MockWebServer();
