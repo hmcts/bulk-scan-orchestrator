@@ -12,7 +12,7 @@ import java.time.Instant;
 public class UpdatePayment {
 
     @JsonProperty("created_at")
-    @JsonFormat(pattern = "HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     public final Instant createdAt;
 
     @JsonProperty("exception_record_ref")
