@@ -20,7 +20,7 @@ public class Payment {
     public final String envelopeId;
 
     @JsonProperty("created_at")
-    @JsonFormat(pattern = "HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     public final Instant createdAt;
 
     @JsonProperty("ccd_reference")
