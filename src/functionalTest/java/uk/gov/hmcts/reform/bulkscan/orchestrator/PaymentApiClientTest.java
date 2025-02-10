@@ -10,15 +10,11 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.payment.PaymentApiClient
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.PaymentData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Status;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.UpdatePayment;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
 @SpringBootTest(classes = {PaymentApiClient.class, RestTemplate.class})
 @TestPropertySource(locations = "classpath:application.yaml")
