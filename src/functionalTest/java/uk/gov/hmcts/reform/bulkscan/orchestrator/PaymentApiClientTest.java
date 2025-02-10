@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.payment.PaymentApiClient
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.PaymentData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Status;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.UpdatePayment;
 
 import java.time.Instant;
 import java.util.List;
@@ -35,11 +36,28 @@ class PaymentApiClientTest {
         List.of(new PaymentData("154565768345123456789"))
     );
 
+    private UpdatePayment testUpdatePayment = new UpdatePayment(
+        Instant.now(),
+        "1111222233334444",
+        "3454645678909876",
+        "137436bd-ed50-460c-b6c8-f7205528a5a9",
+        "BULKSCAN",
+        Status.SUCCESS.toString()
+    );
+
     @Test
     void shouldPostPaymentSuccessfully() {
         ResponseEntity<String> response = paymentApiClient.postPayment(testPayment);
 
         assertThat(response.getStatusCodeValue()).isEqualTo(201);
         assertThat(response.getBody()).isEqualTo("Payment created successfully");
+    }
+
+    @Test
+    void shouldPostUpdatePaymentSuccessfully() {
+        ResponseEntity<String> response = paymentApiClient.postUpdatePayment(testUpdatePayment);
+
+        assertThat(response.getStatusCodeValue()).isEqualTo(200);
+        assertThat(response.getBody()).isEqualTo("Payment updated successfully");
     }
 }
