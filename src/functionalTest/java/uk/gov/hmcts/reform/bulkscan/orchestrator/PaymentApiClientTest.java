@@ -35,15 +35,6 @@ class PaymentApiClientTest {
         List.of(new PaymentData("154565768345123456789"))
     );
 
-//    private UpdatePayment testUpdatePayment = new UpdatePayment(
-//        Instant.now(),
-//        "EXC-REF-12345",
-//        "NEW-CASE-REF-67890",
-//        "137436bd-ed50-460c-b6c8-f7205528a5a9",
-//        "BULKSCAN",
-//        Status.SUCCESS.toString()
-//    );
-
     @Test
     void shouldPostPaymentSuccessfully() {
         ResponseEntity<String> response = paymentApiClient.postPayment(testPayment);
