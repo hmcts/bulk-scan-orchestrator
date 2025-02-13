@@ -6,8 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.HttpClientErrorException;
@@ -33,9 +35,23 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@SpringBootTest(classes = {PaymentApiClient.class, RestTemplate.class})
+@SpringBootTest()
+@ActiveProfiles("nosb")
 @TestPropertySource(locations = "classpath:application.yaml")
+@Import(FunctionalQueueConfig.class)
 class PaymentApiClientTest {
+
+    @Autowired
+    private CaseSearcher caseSearcher;
+
+    @Autowired
+    private EnvelopeMessager envelopeMessager;
+
+    @Autowired
+    private JmsEnvelopeMessager jmsEnvelopeMessager;
+
+    @Autowired
+    private DocumentManagementUploadService dmUploadService;
 
     @Autowired
     private PaymentApiClient paymentApiClient;
@@ -57,7 +73,7 @@ class PaymentApiClientTest {
         false,
         Status.AWAITING.toString(),
         List.of(new PaymentData(
-            "111111111111111111111"))
+            "11111111111111111111"))
     );
 
     private UpdatePayment testUpdatePayment = new UpdatePayment(
@@ -106,7 +122,14 @@ class PaymentApiClientTest {
     @Test
     void shouldPostUpdatePaymentSuccessfully() {
 
+        // create exception record one (refer to ExceptionRecordCreationTest tests for this)
 
+        // create exception record two (in reality it would be a real case)
+        // alternatively create a real case for this which is more realistic
+
+        // call endpoint update to say "assign payments from creation record 1 to 2"
+
+        // verify response 200 or w/e it is
         ResponseEntity<String> response = paymentApiClient.postUpdatePayment(testUpdatePayment);
 
         assertThat(response.getStatusCodeValue()).isEqualTo(200);
