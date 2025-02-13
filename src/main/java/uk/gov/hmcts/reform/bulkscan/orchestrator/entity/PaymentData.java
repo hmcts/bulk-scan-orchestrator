@@ -15,6 +15,10 @@ import lombok.Setter;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Model representation of an item from the payments data table in the database. It is the child of
+ * {@link uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment}.
+ */
 @Entity
 @Table(name = "payments_data")
 @Getter

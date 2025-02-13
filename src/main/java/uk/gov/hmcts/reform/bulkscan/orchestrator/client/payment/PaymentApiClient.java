@@ -13,6 +13,11 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.UpdatePayment;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
+/**
+ * Client for calling the Bulk Scan Payment Processor (BSPP) API endpoints.
+ * The environment variable for base URL of BSPP needs to be set before using this client.
+ * @see <a href="https://github.com/hmcts/bulk-scan-payment-processor">Repo for BSPP</a>
+ */
 @Component
 public class PaymentApiClient {
 

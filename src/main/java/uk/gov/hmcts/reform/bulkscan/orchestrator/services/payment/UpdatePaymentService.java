@@ -8,6 +8,9 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Service layer for retrieving/persisting payment updates.
+ */
 @Service
 public class UpdatePaymentService {
 

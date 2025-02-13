@@ -31,6 +31,16 @@ public class PaymentProcessingTask {
         this.retryCount = retryCount;
     }
 
+    /**
+     * Responsible for getting the payments that are awaiting being processed.
+     * The task occurs according to a certain interval set by the PAYMENT_PROCESSING_INTERVAL
+     * environment variable. The task gathers all the payment items from the database that
+     * are awaiting processing, and sends them to Bulk Scan Payment Processor.
+     *
+     * If there is a failure processing a payment, then it will be retried according to the
+     * retry amount set in the application config.
+     *
+     */
     @Scheduled(fixedDelayString = "${scheduling.task.post-payments.interval}")
     public void processPayments() {
 
@@ -47,13 +57,11 @@ public class PaymentProcessingTask {
 
                     if (responseEntity.getStatusCode().is2xxSuccessful()) {
 
-                        log.info("Posting payment was successful for envelope. {}", payment.getEnvelopeId());
                         paymentService.updateStatusByEnvelopeId(Status.SUCCESS.toString(), payment.getEnvelopeId());
                         log.info("Updated payment status to success for envelope. {}", payment.getEnvelopeId());
                     } else {
-                        log.debug("Posting payment was unsuccessful for envelope. {}", payment.getEnvelopeId());
                         paymentService.updateStatusByEnvelopeId(Status.ERROR.toString(), payment.getEnvelopeId());
-                        log.debug("Updated payment status to error for envelope. {}", payment.getEnvelopeId());
+                        log.error("Updated payment status to error for envelope. {}", payment.getEnvelopeId());
                     }
                 });
             }
@@ -66,7 +74,7 @@ public class PaymentProcessingTask {
     private ResponseEntity<String> postPaymentsToPaymentApi(Payment payment, int retryCount) {
 
         if (retryCount > 0) {
-
+            log.info("{} attempts remaining.", retryCount);
             ResponseEntity<String> responseEntity = paymentApiClient.postPayment(payment);
 
             if (responseEntity.getStatusCode().is2xxSuccessful()) {

@@ -9,6 +9,9 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Service layer for retrieving and persisting payments.
+ */
 @Service
 public class PaymentService {
 

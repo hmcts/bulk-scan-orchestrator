@@ -9,6 +9,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Responsible for interacting with the payment table.
+ */
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, UUID> {
 

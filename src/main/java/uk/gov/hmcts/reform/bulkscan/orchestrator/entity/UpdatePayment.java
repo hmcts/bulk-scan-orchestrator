@@ -13,6 +13,9 @@ import lombok.Setter;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Model representing an item in the update payment table.
+ */
 @Entity
 @Table(name = "update_payments")
 @Getter

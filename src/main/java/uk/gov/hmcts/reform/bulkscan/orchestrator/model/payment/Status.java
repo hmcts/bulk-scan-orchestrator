@@ -2,6 +2,9 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
+/**
+ * The valid statuses that a payment can have.
+ */
 public enum Status {
     AWAITING("awaiting"),
     SUCCESS("success"),
