@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,11 +12,8 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.payment.PaymentApiClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.dm.DocumentManagementUploadService;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseSearcher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CcdCaseCreator;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.EnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.ExceptionRecordCreator;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.JmsEnvelopeMessager;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.PaymentData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Status;
@@ -36,15 +34,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class PaymentApiClientTest {
 
     @Autowired
-    private CaseSearcher caseSearcher;
-
-    @Autowired
-    private EnvelopeMessager envelopeMessager;
-
-    @Autowired
-    private JmsEnvelopeMessager jmsEnvelopeMessager;
-
-    @Autowired
     private DocumentManagementUploadService dmUploadService;
 
     @Autowired
@@ -57,12 +46,13 @@ class PaymentApiClientTest {
     CcdCaseCreator ccdCaseCreator;
 
     String dmUrl;
-    String documentUuid;
+
+    private static final int CCD_EIGHT_DIGIT_UPPER = 99_999_999;
+    private static final int CCD_EIGHT_DIGIT_LOWER = 10_000_000;
 
     private Payment testPayment = new Payment(
         "137436bd-ed50-460c-b6c8-f7205528a5a9",
         Instant.now(),
-//        "1539860706648396",
         "2222222222222222",
         "BULKSCAN",
         "bulkscan",
@@ -71,15 +61,6 @@ class PaymentApiClientTest {
         Status.AWAITING.toString(),
         List.of(new PaymentData(
             "672329182343485934323"))
-    );
-
-    private UpdatePayment testUpdatePayment = new UpdatePayment(
-        Instant.now(),
-        "1111222233334444",
-        "3454645678909876",
-        "137436bd-ed50-460c-b6c8-f7205528a5a9",
-        "BULKSCAN",
-        Status.SUCCESS.toString()
     );
 
     @BeforeEach
@@ -95,7 +76,7 @@ class PaymentApiClientTest {
 
         ResponseEntity<String> response = paymentApiClient.postPayment(testPayment);
 
-        assertThat(response.getStatusCodeValue()).isEqualTo(201);
+        assertThat(response.getStatusCode().value()).isEqualTo(201);
         assertThat(response.getBody()).isEqualTo("Payment created successfully");
     }
 
@@ -121,19 +102,35 @@ class PaymentApiClientTest {
 
     @Test
     void shouldPostUpdatePaymentSuccessfully() throws Exception {
+        //create a random dcn number in style of ccpay-bulkscanning-app
+        String dcn = "6200000000001" + RandomUtils.nextInt(CCD_EIGHT_DIGIT_LOWER, CCD_EIGHT_DIGIT_UPPER);
 
-        // create exception record one (refer to ExceptionRecordCreationTest tests for this)
-        //given
+        // create exception record
         CaseDetails exceptionRecord = exceptionRecordCreator.createExceptionRecord(
             SampleData.CONTAINER,
-            "envelopes/supplementary-evidence-envelope.json",
+            "envelopes/exception-classification-envelope-with-payment.json",
             dmUrl
         );
 
-        // create exception record two (in reality it would be a real case)
+        // create new case
         CaseDetails newCase = ccdCaseCreator.createCase(emptyList(), Instant.now());
 
-        // call endpoint update to say "assign payments from creation record 1 to 2"
+        Payment testPayment = new Payment(
+            "137436bd-ed50-460c-b6c8-f7205528a5a9",
+            Instant.now(),
+            exceptionRecord.getId().toString(),
+            "BULKSCAN",
+            "bulkscan",
+            "BULKSCANPO",
+            true,
+            Status.AWAITING.toString(),
+            List.of(new PaymentData(dcn))
+        );
+
+        //create payment for exception record
+        paymentApiClient.postPayment(testPayment);
+
+        // call endpoint update to say "assign payments from exception record to new case"
         UpdatePayment testUpdatePayment = new UpdatePayment(
             Instant.now(),
             exceptionRecord.getId().toString(),
@@ -143,10 +140,10 @@ class PaymentApiClientTest {
             Status.SUCCESS.toString()
         );
 
-        // verify response 200 or w/e it is
+        // verify response 200
         ResponseEntity<String> response = paymentApiClient.postUpdatePayment(testUpdatePayment);
 
-        assertThat(response.getStatusCodeValue()).isEqualTo(200);
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
         assertThat(response.getBody()).isEqualTo("Payment updated successfully");
     }
 }

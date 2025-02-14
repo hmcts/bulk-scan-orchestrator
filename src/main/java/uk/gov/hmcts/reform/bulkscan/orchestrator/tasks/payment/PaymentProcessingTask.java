@@ -36,10 +36,8 @@ public class PaymentProcessingTask {
      * The task occurs according to a certain interval set by the PAYMENT_PROCESSING_INTERVAL
      * environment variable. The task gathers all the payment items from the database that
      * are awaiting processing, and sends them to Bulk Scan Payment Processor.
-     *
      * If there is a failure processing a payment, then it will be retried according to the
      * retry amount set in the application config.
-     *
      */
     @Scheduled(fixedDelayString = "${scheduling.task.post-payments.interval}")
     public void processPayments() {
