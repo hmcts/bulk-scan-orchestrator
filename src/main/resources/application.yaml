@@ -35,7 +35,18 @@ spring:
     exclude: org.springframework.boot.autoconfigure.jms.JmsAutoConfiguration,org.springframework.boot.autoconfigure.jms.activemq.ActiveMQAutoConfiguration
   main:
     allow-bean-definition-overriding: true
-
+  mail:
+    host: ${SMTP_HOST}
+    username: ${SMTP_USERNAME}
+    password: ${SMTP_PASSWORD}
+    port: 587
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+    test-connection: true
 flyway:
   skip-migrations: ${FLYWAY_SKIP_MIGRATIONS}
 
@@ -55,8 +66,8 @@ azure:
       access-key: ${PAYMENTS_QUEUE_WRITE_ACCESS_KEY}
       access-key-name: ${QUEUE_ACCESS_KEY_SEND_NAME}
       queue-name: ${PAYMENTS_QUEUE_NAME}
-      manual-retry-count: 3
-      manual-retry-wait-in-ms: 2000
+
+
 
 core_case_data:
   api:
@@ -279,6 +290,9 @@ scheduling:
       ttl: ${DELETE_ENVELOPES_DLQ_MESSAGES_TTL}
     check-envelopes-queue:
       fixedDelay:  ${ENVELOPE_QUEUE_CHECK_POLL_INTERVAL}
+    post-payments:
+      interval: ${PAYMENT_PROCESSING_INTERVAL}
+      retry-count: 3
 
 task:
   check-jurisdiction-log-in:
@@ -300,6 +314,13 @@ cdam:
     url: ${CDAM_URL}
     enabled: ${CDAM_ENABLED}
 
+payment:
+      api:
+        url: ${PAYMENT_API_URL}
+      reports:
+        cron: ${REPORTS_CRON:0 10 * * *}
+        recipients: ${PAYMENT_REPORTS_RECIPIENTS:}
+
 springdoc:
   packagesToScan: uk.gov.hmcts.reform.bulkscan.orchestrator.controllers
   pathsToMatch: /**
@@ -311,3 +332,5 @@ jms:
 launchdarkly:
   sdk-key: ${LAUNCH_DARKLY_SDK_KEY:XXXXX}
   offline-mode: ${LAUNCH_DARKLY_OFFLINE_MODE:false}
+
+
