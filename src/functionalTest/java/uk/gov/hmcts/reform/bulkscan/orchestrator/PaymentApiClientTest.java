@@ -50,19 +50,6 @@ class PaymentApiClientTest {
     private static final int CCD_EIGHT_DIGIT_UPPER = 99_999_999;
     private static final int CCD_EIGHT_DIGIT_LOWER = 10_000_000;
 
-    private Payment testPayment = new Payment(
-        "137436bd-ed50-460c-b6c8-f7205528a5a9",
-        Instant.now(),
-        "2222222222222222",
-        "BULKSCAN",
-        "bulkscan",
-        "BULKSCANPO",
-        false,
-        Status.AWAITING.toString(),
-        List.of(new PaymentData(
-            "672329182343485934323"))
-    );
-
     @BeforeEach
     void setup() {
         dmUrl = dmUploadService.uploadToDmStore(
@@ -73,6 +60,18 @@ class PaymentApiClientTest {
 
     @Test
     void shouldPostPaymentSuccessfully() throws Exception {
+        Payment testPayment = new Payment(
+            "137436bd-ed50-460c-b6c8-f7205528a5a9",
+            Instant.now(),
+            "2222222222222222",
+            "BULKSCAN",
+            "bulkscan",
+            "BULKSCANPO",
+            false,
+            Status.AWAITING.toString(),
+            List.of(new PaymentData(
+                "672329182343485934323"))
+        );
 
         ResponseEntity<String> response = paymentApiClient.postPayment(testPayment);
 
@@ -115,6 +114,7 @@ class PaymentApiClientTest {
         // create new case
         CaseDetails newCase = ccdCaseCreator.createCase(emptyList(), Instant.now());
 
+        //create payment for exception record
         Payment testPayment = new Payment(
             "137436bd-ed50-460c-b6c8-f7205528a5a9",
             Instant.now(),
@@ -126,8 +126,6 @@ class PaymentApiClientTest {
             Status.AWAITING.toString(),
             List.of(new PaymentData(dcn))
         );
-
-        //create payment for exception record
         paymentApiClient.postPayment(testPayment);
 
         // call endpoint update to say "assign payments from exception record to new case"
