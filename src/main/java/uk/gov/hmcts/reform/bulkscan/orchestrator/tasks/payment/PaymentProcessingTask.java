@@ -72,16 +72,20 @@ public class PaymentProcessingTask {
     private ResponseEntity<String> postPaymentsToPaymentApi(Payment payment, int retryCount) {
 
         if (retryCount > 0) {
-            log.info("{} attempts remaining.", retryCount);
-            ResponseEntity<String> responseEntity = paymentApiClient.postPayment(payment);
+            log.info("{} attempt{} remaining for posting payment with envelope ID {}",
+                retryCount,
+                (retryCount == 1 ? "" : "s"),
+                payment.getEnvelopeId());
 
-            if (responseEntity.getStatusCode().is2xxSuccessful()) {
-
-                return responseEntity;
-            } else {
+            try {
+                return paymentApiClient.postPayment(payment);
+            }
+            catch (Exception e) {
                 postPaymentsToPaymentApi(payment, --retryCount);
             }
         }
-        return new ResponseEntity<>("Attempted 3 times", HttpStatus.REQUEST_TIMEOUT);
+        return new ResponseEntity<>("All attempts to post payment to payment API have failed. Envelope ID: "
+            + payment.getEnvelopeId()
+            , HttpStatus.FAILED_DEPENDENCY);
     }
 }
