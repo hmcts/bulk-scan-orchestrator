@@ -4,9 +4,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.payment.PaymentApiClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.entity.PaymentData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment;
@@ -17,11 +21,17 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -100,8 +110,56 @@ public class PaymentProcessingTaskTest {
         List<Payment> paymentList = List.of(payment1);
 
         given(paymentService.getPaymentsByStatus("awaiting")).willReturn(paymentList);
-        given(paymentApiClient.postPayment(any())).willReturn(new ResponseEntity<>("body", HttpStatus.BAD_REQUEST));
+        given(paymentApiClient.postPayment(any()))
+            .willThrow(new HttpClientErrorException(HttpStatusCode.valueOf(400)))
+            .willThrow(new HttpClientErrorException(HttpStatusCode.valueOf(422)))
+            .willThrow(new HttpClientErrorException(HttpStatusCode.valueOf(424)));
+
         paymentProcessingTask.processPayments();
+
+        verify(paymentApiClient, times(3)).postPayment(any());
+    }
+
+    @Test
+    void should_update_status_after_failing_then_succeeding_posting_payment() {
+        List<Payment> paymentList = List.of(payment1);
+
+        given(paymentService.getPaymentsByStatus("awaiting")).willReturn(paymentList);
+//        given(paymentApiClient.postPayment(any()))
+//            .willThrow(new HttpClientErrorException(HttpStatusCode.valueOf(400)));
+//        reset(paymentApiClient);
+//        given(paymentApiClient.postPayment(any()))
+//            .willThrow(new HttpClientErrorException(HttpStatusCode.valueOf(422)));
+//
+//        reset(paymentApiClient);
+//        given(paymentApiClient.postPayment(any()))
+//            .willReturn(new ResponseEntity<>("body", HttpStatus.OK));
+
+        when(paymentApiClient.postPayment(any())).thenAnswer(new Answer<ResponseEntity<String>>() {
+            private int invocations = 0;
+            @Override
+            public ResponseEntity<String> answer(InvocationOnMock invocationOnMock) throws Throwable {
+                invocations++;
+                if (invocations <= 1) {
+                    throw new HttpClientErrorException(HttpStatus.FAILED_DEPENDENCY);
+                }
+                if (invocations == 2) {
+                    throw new HttpClientErrorException(HttpStatus.BAD_REQUEST);
+                }
+                else {
+                    System.out.println("HELLO");
+                    return new ResponseEntity<>("body", HttpStatus.OK);
+                }
+            }
+        });
+
+//        doThrow(new HttpClientErrorException(HttpStatus.FAILED_DEPENDENCY))
+//            .doThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST))
+//            .doReturn(ResponseEntity.status(HttpStatus.OK).build())
+//                .when(paymentApiClient).postPayment(any());
+
+        paymentProcessingTask.processPayments();
+        verify(paymentService, times(1)).updateStatusByEnvelopeId("success","123");
         verify(paymentApiClient, times(3)).postPayment(any());
     }
 
@@ -122,7 +180,7 @@ public class PaymentProcessingTaskTest {
         List<Payment> paymentList = List.of(payment1);
 
         given(paymentService.getPaymentsByStatus("awaiting")).willReturn(paymentList);
-        given(paymentApiClient.postPayment(any())).willReturn(new ResponseEntity<>("body", HttpStatus.BAD_REQUEST));
+        given(paymentApiClient.postPayment(any())).willThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
         paymentProcessingTask.processPayments();
         verify(paymentService, times(1)).updateStatusByEnvelopeId("error","123");
     }
