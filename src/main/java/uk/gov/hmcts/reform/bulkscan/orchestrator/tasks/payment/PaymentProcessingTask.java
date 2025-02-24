@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpStatusCodeException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.payment.PaymentApiClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Status;
@@ -69,21 +70,26 @@ public class PaymentProcessingTask {
         }
     }
 
-    private ResponseEntity<String> postPaymentsToPaymentApi(Payment payment, int retryCount) {
+    /**
+     * Sends payments to Bulk Scan Payment Processor (BSPP) API endpoint.
+     * If sending the payment to BSPP fails, the method will call itself again (recursive) and reduce
+     * the maxRetry parameter by 1. If the maxRetry reaches 0, the method will return 422 failed dependency to
+     * represent the fact that all attempts to send payment to BSPP has failed.
+     * @param payment - the payment to be sent to BSPP
+     * @param maxRetry - the amount of times the method should try and send to BSPP
+     * @return ResponseEntity - 200 if call to BSPP is successfully, 422 if not
+     */
     private ResponseEntity<String> postPaymentsToPaymentApi(Payment payment, int maxRetry) {
 
-        if (retryCount > 0) {
-            log.info("{} attempt{} remaining for posting payment with envelope ID {}",
-                retryCount,
-                (retryCount == 1 ? "" : "s"),
-                payment.getEnvelopeId());
-
+        if (maxRetry > 0) {
             try {
                 return paymentApiClient.postPayment(payment);
             }
-            catch (Exception e) {
-                postPaymentsToPaymentApi(payment, --retryCount);
+            catch (HttpStatusCodeException e) {
+                log.error("Failed send payment to payment API. Status code {}, with body {},  Envelope ID {}. "
+                        + "Attempts remaining {}",
                     e.getStatusCode(), e.getResponseBodyAsString(), payment.getEnvelopeId(), maxRetry);
+                return postPaymentsToPaymentApi(payment, --maxRetry);
             }
         }
         return new ResponseEntity<>("All attempts to post payment to payment API have failed. Envelope ID: "

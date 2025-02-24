@@ -125,38 +125,11 @@ public class PaymentProcessingTaskTest {
         List<Payment> paymentList = List.of(payment1);
 
         given(paymentService.getPaymentsByStatus("awaiting")).willReturn(paymentList);
-//        given(paymentApiClient.postPayment(any()))
-//            .willThrow(new HttpClientErrorException(HttpStatusCode.valueOf(400)));
-//        reset(paymentApiClient);
-//        given(paymentApiClient.postPayment(any()))
-//            .willThrow(new HttpClientErrorException(HttpStatusCode.valueOf(422)));
-//
-//        reset(paymentApiClient);
-//        given(paymentApiClient.postPayment(any()))
-//            .willReturn(new ResponseEntity<>("body", HttpStatus.OK));
 
-        when(paymentApiClient.postPayment(any())).thenAnswer(new Answer<ResponseEntity<String>>() {
-            private int invocations = 0;
-            @Override
-            public ResponseEntity<String> answer(InvocationOnMock invocationOnMock) throws Throwable {
-                invocations++;
-                if (invocations <= 1) {
-                    throw new HttpClientErrorException(HttpStatus.FAILED_DEPENDENCY);
-                }
-                if (invocations == 2) {
-                    throw new HttpClientErrorException(HttpStatus.BAD_REQUEST);
-                }
-                else {
-                    System.out.println("HELLO");
-                    return new ResponseEntity<>("body", HttpStatus.OK);
-                }
-            }
-        });
-
-//        doThrow(new HttpClientErrorException(HttpStatus.FAILED_DEPENDENCY))
-//            .doThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST))
-//            .doReturn(ResponseEntity.status(HttpStatus.OK).build())
-//                .when(paymentApiClient).postPayment(any());
+        doThrow(new HttpClientErrorException(HttpStatus.FAILED_DEPENDENCY))
+            .doThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST))
+            .doReturn(ResponseEntity.status(HttpStatus.OK).build())
+                .when(paymentApiClient).postPayment(any());
 
         paymentProcessingTask.processPayments();
         verify(paymentService, times(1)).updateStatusByEnvelopeId("success","123");

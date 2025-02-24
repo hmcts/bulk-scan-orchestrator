@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpStatusCodeException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.payment.PaymentApiClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Status;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.UpdatePayment;
@@ -22,7 +23,7 @@ public class UpdatePaymentProcessingTask {
     private static final Logger log = LoggerFactory.getLogger(UpdatePaymentProcessingTask.class);
     private final UpdatePaymentService updatePaymentService;
     private final PaymentApiClient paymentApiClient;
-    private final int retryCount;
+    private final int maxRetry;
 
     public UpdatePaymentProcessingTask(UpdatePaymentService updatePaymentService,
                                        PaymentApiClient paymentApiClient,
@@ -32,6 +33,14 @@ public class UpdatePaymentProcessingTask {
         this.maxRetry = maxRetry;
     }
 
+    /**
+     * Responsible for getting the payment updates that are awaiting being processed.
+     * The task occurs according to a certain interval set by the PAYMENT_PROCESSING_INTERVAL
+     * environment variable. The task gathers all the payment update items from the database that
+     * are awaiting processing, and sends them to Bulk Scan Payment Processor.
+     * If there is a failure processing a payment, then it will be retried according to the
+     * retry amount set in the application config.
+     */
     @Scheduled(fixedDelayString = "${scheduling.task.post-payments.interval}")
     public void processUpdatePayments() {
 
@@ -48,15 +57,10 @@ public class UpdatePaymentProcessingTask {
                     ResponseEntity<String> responseEntity = postPaymentsToPaymentApi(payment, maxRetry);
 
                     if (responseEntity.getStatusCode().is2xxSuccessful()) {
-
-                        log.info("Posting update payment was successful for envelope. {}",
-                            payment.getEnvelopeId());
                         updatePaymentService.updateStatusByEnvelopeId(Status.SUCCESS.toString(),
                             payment.getEnvelopeId());
                         log.info("Updated payment status to success for envelope. {}", payment.getEnvelopeId());
                     } else {
-                        log.info("Posting update payment was unsuccessful for envelope. {}",
-                            payment.getEnvelopeId());
                         updatePaymentService.updateStatusByEnvelopeId(Status.ERROR.toString(), payment.getEnvelopeId());
                         log.info("Updated update payment status to error for envelope. {}", payment.getEnvelopeId());
                     }
@@ -67,23 +71,29 @@ public class UpdatePaymentProcessingTask {
         }
     }
 
-    private ResponseEntity<String> postPaymentsToPaymentApi(UpdatePayment updatePayment, int retryCount) {
-        if (retryCount > 0) {
-
-            ResponseEntity<String> responseEntity = paymentApiClient.postUpdatePayment(updatePayment);
-
-            if (responseEntity.getStatusCode().is2xxSuccessful()) {
-
-                return responseEntity;
-            } else {
-                postPaymentsToPaymentApi(updatePayment, --retryCount);
+    /**
+     * Sends a payment update to Bulk Scan Payment Processor (BSPP) API endpoint.
+     * If BSPP returns a failure status code (4xx, 5xx), a child of the HttpStatusCodeException will be thrown. This
+     * exception is caught the method calls itself again (recursive) with a reduction in the amount of times it
+     * should retry. If the amount of retries reached 0, the method will return 422.
+     * @param updatePayment - info on how payment should be updated
+     * @param maxRetry - the maximum of times the method should try to send the payment to BSPP
+     * @return ResponseEntity - 200 (OK) if successfully calls BSPP, 422 (FAILED DEPENDENCY) if not
+     */
     private ResponseEntity<String> postPaymentsToPaymentApi(UpdatePayment updatePayment, int maxRetry) {
         if (maxRetry > 0) {
+            try {
+                return paymentApiClient.postUpdatePayment(updatePayment);
             }
-
+            catch (HttpStatusCodeException e) {
+                log.error("Failed send payment to payment API. Status code {}, with body {},  Envelope ID {}",
+                    e.getStatusCode(), e.getResponseBodyAsString(), updatePayment.getEnvelopeId());
+                return postPaymentsToPaymentApi(updatePayment, --maxRetry);
+            }
         }
-        return new ResponseEntity<>("Attempted 3 times", HttpStatus.REQUEST_TIMEOUT);
-
+        return new ResponseEntity<>("All attempts to post payment update to payment API have failed. Envelope ID: "
+            + updatePayment.getEnvelopeId()
+            , HttpStatus.FAILED_DEPENDENCY);
     }
 
 }
