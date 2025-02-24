@@ -26,10 +26,10 @@ public class UpdatePaymentProcessingTask {
 
     public UpdatePaymentProcessingTask(UpdatePaymentService updatePaymentService,
                                        PaymentApiClient paymentApiClient,
-                                       @Value("${scheduling.task.post-payments.retry-count}") int retryCount) {
+                                       @Value("${scheduling.task.post-payments.max-retry}") int maxRetry) {
         this.updatePaymentService = updatePaymentService;
         this.paymentApiClient = paymentApiClient;
-        this.retryCount = retryCount;
+        this.maxRetry = maxRetry;
     }
 
     @Scheduled(fixedDelayString = "${scheduling.task.post-payments.interval}")
@@ -45,7 +45,7 @@ public class UpdatePaymentProcessingTask {
 
                     log.info("Posting update payment to payment api client for envelope. {}", payment.getEnvelopeId());
 
-                    ResponseEntity<String> responseEntity = postPaymentsToPaymentApi(payment, retryCount);
+                    ResponseEntity<String> responseEntity = postPaymentsToPaymentApi(payment, maxRetry);
 
                     if (responseEntity.getStatusCode().is2xxSuccessful()) {
 
@@ -77,6 +77,8 @@ public class UpdatePaymentProcessingTask {
                 return responseEntity;
             } else {
                 postPaymentsToPaymentApi(updatePayment, --retryCount);
+    private ResponseEntity<String> postPaymentsToPaymentApi(UpdatePayment updatePayment, int maxRetry) {
+        if (maxRetry > 0) {
             }
 
         }

@@ -292,7 +292,7 @@ scheduling:
       fixedDelay:  ${ENVELOPE_QUEUE_CHECK_POLL_INTERVAL}
     post-payments:
       interval: ${PAYMENT_PROCESSING_INTERVAL}
-      retry-count: 3
+      max-retry: 3
 
 task:
   check-jurisdiction-log-in:

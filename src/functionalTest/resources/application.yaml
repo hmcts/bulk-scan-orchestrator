@@ -6,7 +6,7 @@ scheduling:
     check-envelopes-queue:
       enabled: false
     post-payments:
-      retry-count: 3
+      max-retry: 3
       interval: 10000
 
 spring:

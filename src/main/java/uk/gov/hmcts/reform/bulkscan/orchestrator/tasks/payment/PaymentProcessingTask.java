@@ -22,13 +22,13 @@ public class PaymentProcessingTask {
     private static final Logger log = LoggerFactory.getLogger(PaymentProcessingTask.class);
     private final PaymentService paymentService;
     private final PaymentApiClient paymentApiClient;
-    private final int retryCount;
+    private final int maxRetry;
 
     public PaymentProcessingTask(PaymentService paymentService, PaymentApiClient paymentApiClient,
-                                 @Value("${scheduling.task.post-payments.retry-count}") int retryCount) {
+                                 @Value("${scheduling.task.post-payments.max-retry}") int maxRetry) {
         this.paymentService = paymentService;
         this.paymentApiClient = paymentApiClient;
-        this.retryCount = retryCount;
+        this.maxRetry = maxRetry;
     }
 
     /**
@@ -51,7 +51,7 @@ public class PaymentProcessingTask {
 
                     log.info("Posting payment to payment api client for envelope. {}", payment.getEnvelopeId());
 
-                    ResponseEntity<String> responseEntity = postPaymentsToPaymentApi(payment, retryCount);
+                    ResponseEntity<String> responseEntity = postPaymentsToPaymentApi(payment, maxRetry);
 
                     if (responseEntity.getStatusCode().is2xxSuccessful()) {
 
@@ -70,6 +70,7 @@ public class PaymentProcessingTask {
     }
 
     private ResponseEntity<String> postPaymentsToPaymentApi(Payment payment, int retryCount) {
+    private ResponseEntity<String> postPaymentsToPaymentApi(Payment payment, int maxRetry) {
 
         if (retryCount > 0) {
             log.info("{} attempt{} remaining for posting payment with envelope ID {}",
@@ -82,6 +83,7 @@ public class PaymentProcessingTask {
             }
             catch (Exception e) {
                 postPaymentsToPaymentApi(payment, --retryCount);
+                    e.getStatusCode(), e.getResponseBodyAsString(), payment.getEnvelopeId(), maxRetry);
             }
         }
         return new ResponseEntity<>("All attempts to post payment to payment API have failed. Envelope ID: "

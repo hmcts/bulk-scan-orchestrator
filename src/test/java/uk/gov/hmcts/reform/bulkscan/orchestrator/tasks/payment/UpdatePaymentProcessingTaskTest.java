@@ -63,7 +63,7 @@ public class UpdatePaymentProcessingTaskTest {
 
     @BeforeEach
     void setUp() {
-        int retryCount = 3;
+        int maxRetry = 3;
         updatePaymentProcessingTask =
             new UpdatePaymentProcessingTask(updatePaymentService, paymentApiClient, retryCount);
     }
