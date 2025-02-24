@@ -84,16 +84,14 @@ public class UpdatePaymentProcessingTask {
         if (maxRetry > 0) {
             try {
                 return paymentApiClient.postUpdatePayment(updatePayment);
-            }
-            catch (HttpStatusCodeException e) {
+            } catch (HttpStatusCodeException e) {
                 log.error("Failed send payment to payment API. Status code {}, with body {},  Envelope ID {}",
                     e.getStatusCode(), e.getResponseBodyAsString(), updatePayment.getEnvelopeId());
                 return postPaymentsToPaymentApi(updatePayment, --maxRetry);
             }
         }
         return new ResponseEntity<>("All attempts to post payment update to payment API have failed. Envelope ID: "
-            + updatePayment.getEnvelopeId()
-            , HttpStatus.FAILED_DEPENDENCY);
+            + updatePayment.getEnvelopeId(), HttpStatus.FAILED_DEPENDENCY);
     }
 
 }
