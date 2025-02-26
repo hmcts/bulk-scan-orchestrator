@@ -1,33 +1,37 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.UpdatePayment;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.payment.PaymentService;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.payment.UpdatePaymentService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Payment;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublisher;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.CreatePaymentsCommand;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.UpdatePaymentsCommand;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({SpringExtension.class, MockitoExtension.class})
+@ContextConfiguration(classes = PaymentsProcessor.class)
 class PaymentsProcessorTest {
     private static final long CCD_REFERENCE = 20L;
     private static final String SERVICE = "service";
@@ -35,65 +39,49 @@ class PaymentsProcessorTest {
     private static final String NEW_CASE_ID = "1";
     private static final String CASE_TYPE_ID = SERVICE + "_ExceptionRecord";
 
-    @Mock
-    private PaymentsPublisher paymentsPublisher;
-
+    @Autowired
     private PaymentsProcessor paymentsProcessor;
 
-    @BeforeEach
-    void setUp() {
-        paymentsProcessor = new PaymentsProcessor(paymentsPublisher);
-    }
+    @MockBean
+    private PaymentService paymentService;
+
+    @MockBean
+    private UpdatePaymentService updatePaymentService;
+
 
     @Test
-    void calls_payments_publisher_if_envelope_contains_payments() {
+    void saves_payment_to_database_if_envelope_contains_payments() {
         // given
         Envelope envelope = SampleData.envelope(
             1,
-            asList(new Payment("dcn1")),
+            List.of(new Payment("dcn1")),
             emptyList(),
             emptyList()
         );
-        ArgumentCaptor<CreatePaymentsCommand> cmdCaptor = ArgumentCaptor.forClass(CreatePaymentsCommand.class);
+        ArgumentCaptor<uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment>
+            paymentArgumentCaptor =
+            ArgumentCaptor.forClass(uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment.class);
 
         // when
         paymentsProcessor.createPayments(envelope, CCD_REFERENCE, true);
 
         // then
-        verify(paymentsPublisher).send(cmdCaptor.capture());
-        CreatePaymentsCommand cmd = cmdCaptor.getValue();
-        assertThat(cmd.ccdReference).isEqualTo(Long.toString(CCD_REFERENCE));
-        assertThat(cmd.jurisdiction).isEqualTo(envelope.jurisdiction);
-        assertThat(cmd.poBox).isEqualTo(envelope.poBox);
-        assertThat(cmd.isExceptionRecord).isTrue();
-        assertThat(cmd.payments.size()).isEqualTo(envelope.payments.size());
-        assertThat(cmd.payments.get(0).documentControlNumber)
-            .isEqualTo(envelope.payments.get(0).documentControlNumber);
+        verify(paymentService, atLeastOnce()).savePayment(paymentArgumentCaptor.capture());
+        assertThat(paymentArgumentCaptor.getValue().getCcdReference()).isEqualTo(Long.toString(CCD_REFERENCE));
+        assertThat(paymentArgumentCaptor.getValue().getJurisdiction()).isEqualTo(envelope.jurisdiction);
+        assertThat(paymentArgumentCaptor.getValue().getPoBox()).isEqualTo(envelope.poBox);
+        assertThat(paymentArgumentCaptor.getValue().isExceptionRecord()).isTrue();
+        assertThat(paymentArgumentCaptor.getValue().getPayments().size()).isEqualTo(envelope.payments.size());
+        assertThat(paymentArgumentCaptor.getValue().getPayments().getFirst().documentControlNumber)
+            .isEqualTo(envelope.payments.getFirst().documentControlNumber);
     }
 
     @Test
-    void does_not_call_payments_publisher_if_envelope_contains_zero_payments() {
+    void does_not_save_payment_to_database_if_envelope_contains_no_payments() {
         // given
         Envelope envelope = SampleData.envelope(
             1,
             emptyList(),
-            emptyList(),
-            emptyList()
-        );
-
-        // when
-        paymentsProcessor.createPayments(envelope, CCD_REFERENCE, true);
-
-        // then
-        verify(paymentsPublisher, never()).send(any(CreatePaymentsCommand.class));
-    }
-
-    @Test
-    void does_not_call_payments_publisher_if_envelope_contains_null_payments() {
-        // given
-        Envelope envelope = SampleData.envelope(
-            1,
-            null,
             emptyList(),
             emptyList()
         );
@@ -102,11 +90,12 @@ class PaymentsProcessorTest {
         paymentsProcessor.createPayments(envelope, CCD_REFERENCE, true);
 
         // then
-        verify(paymentsPublisher, never()).send(any(CreatePaymentsCommand.class));
+        verify(paymentService, never()).savePayment(any());
     }
 
+
     @Test
-    void should_send_payment_message_when_case_has_payments() {
+    void should_save_update_payment_when_case_has_payments() {
         // given
         Map<String, Object> data = new HashMap<>();
 
@@ -129,16 +118,16 @@ class PaymentsProcessorTest {
         paymentsProcessor.updatePayments(PaymentsHelper.create(caseDetails), CASE_ID, jurisdiction, NEW_CASE_ID);
 
         // then
-        ArgumentCaptor<UpdatePaymentsCommand> cmd = ArgumentCaptor.forClass(UpdatePaymentsCommand.class);
-        verify(paymentsPublisher).send(cmd.capture());
-        assertThat(cmd.getValue().exceptionRecordRef).isEqualTo(CASE_ID);
-        assertThat(cmd.getValue().newCaseRef).isEqualTo(NEW_CASE_ID);
-        assertThat(cmd.getValue().envelopeId).isEqualTo(envelopeId);
-        assertThat(cmd.getValue().jurisdiction).isEqualTo(jurisdiction);
+        ArgumentCaptor<UpdatePayment> updatePaymentArgumentCaptor = ArgumentCaptor.forClass(UpdatePayment.class);
+        verify(updatePaymentService, atLeastOnce()).savePayment(updatePaymentArgumentCaptor.capture());
+        assertThat(updatePaymentArgumentCaptor.getValue().getExceptionRecordRef()).isEqualTo(CASE_ID);
+        assertThat(updatePaymentArgumentCaptor.getValue().getNewCaseRef()).isEqualTo(NEW_CASE_ID);
+        assertThat(updatePaymentArgumentCaptor.getValue().getEnvelopeId()).isEqualTo(envelopeId);
+        assertThat(updatePaymentArgumentCaptor.getValue().getJurisdiction()).isEqualTo(jurisdiction);
     }
 
     @Test
-    void should_not_send_payment_message_when_case_has_no_payments() {
+    void should_not_save_update_payment_when_case_has_no_payments() {
         // given
         Map<String, Object> data = new HashMap<>();
 
@@ -162,6 +151,6 @@ class PaymentsProcessorTest {
         paymentsProcessor.updatePayments(PaymentsHelper.create(caseDetails), CASE_ID, jurisdiction, NEW_CASE_ID);
 
         // then
-        verify(paymentsPublisher, never()).send(any());
+        verify(updatePaymentService, never()).savePayment(any());
     }
 }

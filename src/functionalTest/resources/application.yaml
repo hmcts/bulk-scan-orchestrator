@@ -5,6 +5,9 @@ scheduling:
       enabled: false
     check-envelopes-queue:
       enabled: false
+    post-payments:
+      max-retry: 3
+      interval: 10000
 
 spring:
   application:
@@ -99,6 +102,10 @@ cdam:
     url: http://localhost/cdam
     enabled: false
 
+
+payment:
+  api:
+    url: ${PAYMENT_API_URL:http://localhost:8583/payment}
 jms:
   # JMS Configuration for local dev/func tests
   application-name: BulkScanOrchestratorApiDev

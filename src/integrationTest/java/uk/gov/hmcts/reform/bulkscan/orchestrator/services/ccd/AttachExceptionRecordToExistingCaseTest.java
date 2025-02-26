@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.IPaymentsPublisher;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.payment.PaymentService;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -22,9 +21,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.status;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.hasItem;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.willThrow;
-import static org.mockito.Mockito.doNothing;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_REF;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.CASE_TYPE_EXCEPTION_RECORD;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.config.Environment.JURISDICTION;
@@ -39,7 +35,7 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
     private static final String CASE_REFERENCE_TYPE_CCD = "ccdCaseReference";
 
     @Autowired
-    private IPaymentsPublisher paymentsPublisher;
+    private PaymentService paymentService;
 
     @DisplayName("Should successfully callback with correct information")
     @Test
@@ -537,7 +533,6 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
     void should_callback_with_correct_information_when_attaching_by_attachToCaseReference_with_payment() {
         CallbackRequest callbackRequest = exceptionRecordCallbackRequestWithPayment();
 
-        doNothing().when(paymentsPublisher).send(any());
         ValidatableResponse response =
             given()
                 .body(callbackRequest)
@@ -550,21 +545,6 @@ class AttachExceptionRecordToExistingCaseTest extends AttachExceptionRecordTestB
         verifyRequestedAttachingToCase();
     }
 
-    @Test
-    void should_fail_with_the_correct_error_when_payments_fails() {
-        CallbackRequest callbackRequest = exceptionRecordCallbackRequestWithPayment();
-
-        willThrow(new PaymentsPublishingException("Payment failed", new RuntimeException("connection")))
-            .given(paymentsPublisher).send(any());
-
-        given()
-            .body(callbackRequest)
-            .headers(userHeaders())
-            .post(CALLBACK_ATTACH_CASE_PATH)
-            .then()
-            .statusCode(200)
-            .body(RESPONSE_FIELD_ERRORS, hasItem("Payment references cannot be processed. Please try again later"));
-    }
 
     private CallbackRequest callbackRequestWith(
         String eventId,
