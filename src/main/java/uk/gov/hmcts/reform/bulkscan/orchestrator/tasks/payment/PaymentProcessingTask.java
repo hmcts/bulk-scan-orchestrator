@@ -85,10 +85,14 @@ public class PaymentProcessingTask {
             try {
                 return paymentApiClient.postPayment(payment);
             } catch (HttpStatusCodeException e) {
-                log.error("Failed send payment to payment API. Status code {}, with body {},  Envelope ID {}. "
-                        + "Attempts remaining {}",
+                log.error("Failed to send payment to payment API. Status code {}, with body {},  Envelope ID {}. "
+                        + "Attempts remaining {} ",
                     e.getStatusCode(), e.getResponseBodyAsString(), payment.getEnvelopeId(), maxRetry);
                 return postPaymentsToPaymentApi(payment, --maxRetry);
+            } catch (Exception e) {
+                log.error("Failed to send payment to payment API. Exception message {}, Stack trace {},  Envelope ID {}. "
+                        + "Attempts remaining {}. ",
+                    e.getMessage(), e.getStackTrace(), payment.getEnvelopeId(), maxRetry);
             }
         }
         return new ResponseEntity<>("All attempts to post payment to payment API have failed. Envelope ID: "
