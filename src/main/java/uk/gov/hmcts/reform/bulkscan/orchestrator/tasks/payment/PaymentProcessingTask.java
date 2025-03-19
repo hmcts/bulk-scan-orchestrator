@@ -60,12 +60,13 @@ public class PaymentProcessingTask {
                         log.info("Updated payment status to success for envelope. {}", payment.getEnvelopeId());
                     } else {
                         paymentService.updateStatusByEnvelopeId(Status.ERROR.toString(), payment.getEnvelopeId());
-                        log.error("Updated payment status to error for envelope. {}", payment.getEnvelopeId());
+                        log.error("All attempts to post payment to payment API have failed. "
+                            + "Updated payment status to error for envelope. {}", payment.getEnvelopeId());
                     }
                 });
             }
         } catch (Exception e) {
-            log.error("Error posting payments to payment API client", e);
+            log.error("In trying to post payments to payment processor API an unexpected error occurred.", e);
             throw new PaymentProcessingException("Failed to post payments to payment API client", e);
         }
     }
@@ -85,14 +86,16 @@ public class PaymentProcessingTask {
             try {
                 return paymentApiClient.postPayment(payment);
             } catch (HttpStatusCodeException e) {
-                log.error("Failed to send payment to payment API. Status code {}, with body {},  Envelope ID {}. "
+                log.error("Failed to send payment to payment API. Payment Processor returned an error response. "
+                        + "Status code {}, with body {},  Envelope ID {}. "
                         + "Attempts remaining {} ",
                     e.getStatusCode(), e.getResponseBodyAsString(), payment.getEnvelopeId(), maxRetry);
                 return postPaymentsToPaymentApi(payment, --maxRetry);
             } catch (Exception e) {
-                log.error("Failed to send payment to payment API. Exception message {}, Stack trace {}, Envelope ID {} "
-                        + ". Attempts remaining {}. ",
-                    e.getMessage(), e.getStackTrace(), payment.getEnvelopeId(), maxRetry);
+                log.error("Failed to send payment to payment API. Unexpected issue. Exception message {}, "
+                        + "Envelope ID {} . Attempts remaining {}. Stack trace {} ",
+                    e.getMessage(), payment.getEnvelopeId(), maxRetry, e.getStackTrace());
+                return postPaymentsToPaymentApi(payment, --maxRetry);
             }
         }
         return new ResponseEntity<>("All attempts to post payment to payment API have failed. Envelope ID: "

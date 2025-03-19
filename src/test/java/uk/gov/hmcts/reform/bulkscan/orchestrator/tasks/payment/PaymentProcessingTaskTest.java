@@ -150,4 +150,14 @@ public class PaymentProcessingTaskTest {
         verify(paymentService, times(1)).updateStatusByEnvelopeId("error","123");
     }
 
+    @Test
+    void should_update_status_after_unsuccessfully_posting_payment_causes_non_http_exception() {
+
+        List<Payment> paymentList = List.of(payment1);
+
+        given(paymentService.getPaymentsByStatus("awaiting")).willReturn(paymentList);
+        given(paymentApiClient.postPayment(any())).willThrow(new RuntimeException("I am not expected"));
+        paymentProcessingTask.processPayments();
+        verify(paymentService, times(1)).updateStatusByEnvelopeId("error","123");
+    }
 }
