@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.payment;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.entity.PaymentData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.entity.PaymentRepository;
@@ -21,6 +22,7 @@ public class PaymentService {
         this.paymentRepository = paymentRepository;
     }
 
+    @Transactional
     public void savePayment(Payment payment) {
         paymentRepository.save(new uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment(
             Instant.now(),
@@ -40,6 +42,7 @@ public class PaymentService {
         return paymentRepository.getPaymentsByStatus(status).stream().map(Payment::new).toList();
     }
 
+    @Transactional
     public void updateStatusByEnvelopeId(String status, String envelopeId) {
 
         paymentRepository.updateStatusByEnvelopeId(status, envelopeId);
