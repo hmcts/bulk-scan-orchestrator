@@ -336,7 +336,7 @@ dependencies {
   functionalTestImplementation sourceSets.main.runtimeClasspath
   functionalTestImplementation sourceSets.test.runtimeClasspath
 
-  implementation group: 'com.github.hmcts', name: 'ccd-case-document-am-client', version: '1.59'
+  implementation group: 'com.github.hmcts', name: 'ccd-case-document-am-client', version: '1.7.2'
 
   functionalTestImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.2'
 
