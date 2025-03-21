@@ -67,7 +67,8 @@ public class UpdatePaymentProcessingTask {
                 });
             }
         } catch (Exception e) {
-            log.info("Error posting update payments to payment api client. {}", e.getMessage());
+            log.error("In trying to post payment updates to payment processor API an unexpected error occurred.", e);
+            throw new PaymentProcessingException("Failed to post payment updates to payment API client", e);
         }
     }
 
@@ -85,8 +86,14 @@ public class UpdatePaymentProcessingTask {
             try {
                 return paymentApiClient.postUpdatePayment(updatePayment);
             } catch (HttpStatusCodeException e) {
-                log.error("Failed send payment to payment API. Status code {}, with body {},  Envelope ID {}",
-                    e.getStatusCode(), e.getResponseBodyAsString(), updatePayment.getEnvelopeId());
+                log.error("Failed to send payment update to payment API. "
+                        + " Attempts remaining {}. Status code {}, with body {},  Envelope ID {}",
+                    maxRetry, e.getStatusCode(), e.getResponseBodyAsString(), updatePayment.getEnvelopeId());
+                return postPaymentsToPaymentApi(updatePayment, --maxRetry);
+            } catch (Exception e) {
+                log.error("Failed to send payment update to payment API. Unexpected issue. Exception message {}, "
+                        + "Envelope ID {} . Attempts remaining {}. Stack trace {} ",
+                    e.getMessage(), updatePayment.getEnvelopeId(), maxRetry, e.getStackTrace());
                 return postPaymentsToPaymentApi(updatePayment, --maxRetry);
             }
         }
