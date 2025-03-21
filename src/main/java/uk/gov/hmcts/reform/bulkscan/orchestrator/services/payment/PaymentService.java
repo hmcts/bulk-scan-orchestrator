@@ -26,7 +26,8 @@ public class PaymentService {
 
     @Transactional
     public void savePayment(Payment payment) {
-        uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment paymentEntity = new uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment(
+        uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment
+            paymentEntity = new uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment(
             Instant.now(),
             payment.envelopeId,
             payment.ccdReference,
@@ -41,6 +42,7 @@ public class PaymentService {
         for(PaymentData paymentData: paymentEntity.getPaymentData()) {
             paymentData.setPayment(paymentEntity);
         }
+
         paymentRepository.save(paymentEntity);
     }
 
