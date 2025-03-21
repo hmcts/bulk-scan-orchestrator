@@ -19,7 +19,7 @@ import java.util.UUID;
 
 /**
  * Model representation of a payment item from the payments table. It is the parent of
- * model representation of an item from the payment data table -
+ * payment data -
  * {@link uk.gov.hmcts.reform.bulkscan.orchestrator.entity.PaymentData}
  * . Actions that occur (such as
  * deletion) will 'cascade' downwards and affect any payment data children.
