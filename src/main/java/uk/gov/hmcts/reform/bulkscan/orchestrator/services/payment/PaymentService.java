@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.payment;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.entity.PaymentData;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.entity.PaymentRepository;
@@ -13,6 +14,7 @@ import java.util.List;
 /**
  * Service layer for retrieving and persisting payments.
  */
+@Slf4j
 @Service
 public class PaymentService {
 
@@ -24,7 +26,7 @@ public class PaymentService {
 
     @Transactional
     public void savePayment(Payment payment) {
-        paymentRepository.save(new uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment(
+        uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment paymentEntity = new uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment(
             Instant.now(),
             payment.envelopeId,
             payment.ccdReference,
@@ -34,11 +36,17 @@ public class PaymentService {
             payment.status,
             payment.isExceptionRecord,
             payment.payments.stream().map(p -> new PaymentData(Instant.now(), p.documentControlNumber)).toList()
-        ));
+        );
+
+        for(PaymentData paymentData: paymentEntity.getPaymentData()) {
+            paymentData.setPayment(paymentEntity);
+        }
+        paymentRepository.save(paymentEntity);
     }
 
     public List<Payment> getPaymentsByStatus(String status) {
 
+        log.info("Payments by Status" + paymentRepository.getPaymentsByStatus(status).toString());
         return paymentRepository.getPaymentsByStatus(status).stream().map(Payment::new).toList();
     }
 
