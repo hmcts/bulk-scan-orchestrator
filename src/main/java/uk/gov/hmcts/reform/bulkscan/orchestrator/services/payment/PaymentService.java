@@ -39,7 +39,8 @@ public class PaymentService {
             payment.payments.stream().map(p -> new PaymentData(Instant.now(), p.documentControlNumber)).toList()
         );
 
-        for(PaymentData paymentData: paymentEntity.getPaymentData()) {
+        //Associate payment data to the payment parent
+        for (PaymentData paymentData: paymentEntity.getPaymentData()) {
             paymentData.setPayment(paymentEntity);
         }
 
