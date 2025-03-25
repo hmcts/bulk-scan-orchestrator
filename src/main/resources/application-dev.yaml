@@ -306,3 +306,12 @@ jms:
   password: ${JMS_PASSWORD:admin}
   receiveTimeout: ${JMS_RECEIVE_TIMEOUT:30000}
   idleTimeout: ${JMS_IDLE_TIMEOUT:30000}
+
+actions:
+  api-key: ${ACTIONS_API_KEY}
+
+payment:
+  api:
+    url: ${PAYMENT_API_URL:http://localhost:8583/payment}
+  reports:
+    recipients: ${PAYMENTS_REPORTS_RECIPIENTS}

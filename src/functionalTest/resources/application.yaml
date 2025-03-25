@@ -106,6 +106,9 @@ cdam:
 payment:
   api:
     url: ${PAYMENT_API_URL:http://localhost:8583/payment}
+  reports:
+    recipients: ${PAYMENTS_REPORTS_RECIPIENTS}
+
 jms:
   # JMS Configuration for local dev/func tests
   application-name: BulkScanOrchestratorApiDev

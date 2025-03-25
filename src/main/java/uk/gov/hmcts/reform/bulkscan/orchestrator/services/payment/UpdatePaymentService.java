@@ -5,7 +5,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.entity.UpdatePaymentRepository;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.UpdatePayment;
 
 import java.time.Instant;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 /**
@@ -42,7 +43,7 @@ public class UpdatePaymentService {
     }
 
     public List<UpdatePayment> getAllByPaymentsForPreviousDay() {
-        return updatePaymentRepository.findAllByCreatedAt(LocalDate.now().minusDays(1))
+    return updatePaymentRepository.findAllByCreatedAt(LocalDateTime.now().minusDays(1).toInstant(ZoneOffset.UTC))
             .stream().map(UpdatePayment::new).toList();
     }
 }

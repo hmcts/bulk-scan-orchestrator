@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,6 +22,6 @@ public interface PaymentRepository extends JpaRepository<Payment, UUID> {
     void updateStatusByEnvelopeId(String status, String envelopeId);
 
     @Query("SELECT p from Payment p where p.createdAt <= :creationDateTime")
-    List<Payment> findAllByCreatedAt(LocalDate creationDateTime);
+    List<Payment> findAllByCreatedAt(Instant creationDateTime);
 
 }

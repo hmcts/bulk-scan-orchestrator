@@ -337,4 +337,5 @@ launchdarkly:
   sdk-key: ${LAUNCH_DARKLY_SDK_KEY:XXXXX}
   offline-mode: ${LAUNCH_DARKLY_OFFLINE_MODE:false}
 
-
+actions:
+  api-key: ${ACTIONS_API_KEY}
