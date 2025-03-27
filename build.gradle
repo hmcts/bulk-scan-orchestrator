@@ -246,7 +246,7 @@ def versions = [
   springfoxSwagger  : '2.9.2',
   junit             : '5.10.3',
   junitPlatform     : '1.10.3',
-  testContainers    : '1.20.1',
+  testContainers    : '1.20.6',
   flyway            : "$flywayVersion",
   postgresql        : "$postgresqlVersion"
 ]
@@ -340,10 +340,10 @@ dependencies {
 
   functionalTestImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.2'
 
-  functionalTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.19.7', {
+  functionalTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.20.6', {
     exclude group: 'junit', module: 'junit'
   }
-  functionalTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.19.7'
+  functionalTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.20.6'
 
   smokeTestImplementation sourceSets.main.runtimeClasspath
   smokeTestImplementation sourceSets.test.runtimeClasspath
