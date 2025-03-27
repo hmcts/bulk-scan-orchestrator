@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.payment.PaymentService;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.payment.SendPaymentReportService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.ProcessedEnvelopeNotifier;
 
 import static org.mockito.Mockito.mock;
@@ -30,6 +31,11 @@ class IntegrationTestInitializer implements ApplicationContextInitializer<Config
     @Bean
     public PaymentService paymentService() {
         return mock(PaymentService.class);
+    }
+
+    @Bean
+    public SendPaymentReportService sendPaymentReportService() {
+        return mock(SendPaymentReportService.class);
     }
 
     @Bean

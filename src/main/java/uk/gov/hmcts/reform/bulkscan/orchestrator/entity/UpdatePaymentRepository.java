@@ -23,4 +23,7 @@ public interface UpdatePaymentRepository extends JpaRepository<UpdatePayment, UU
 
     @Query("SELECT p from UpdatePayment p where p.createdAt <= :creationDateTime")
     List<UpdatePayment> findAllByCreatedAt(Instant creationDateTime);
+
+    @Query("SELECT p from UpdatePayment p where p.createdAt BETWEEN :earliestCreatedTime AND :latestCreatedTime")
+    List<UpdatePayment> findAllWithDatesBetween(Instant earliestCreatedTime, Instant latestCreatedTime);
 }

@@ -98,7 +98,7 @@ public class UpdatePaymentServiceTest {
 
     @Test
     void shouldGetAllByPaymentsForPreviousDay() {
-        when(updatePaymentRepository.findAllByCreatedAt(any()))
+        when(updatePaymentRepository.findAllWithDatesBetween(any(), any()))
             .thenReturn(List.of(updatePaymentEntity1,updatePaymentEntity1));
 
         //when

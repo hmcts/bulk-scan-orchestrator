@@ -48,13 +48,13 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
      * @return ResponseEntity
      */
     @ExceptionHandler(InvalidApiKeyException.class)
-    protected ResponseEntity<Void> handleInvalidApiKeyException(InvalidApiKeyException exc) {
+    protected ResponseEntity<String> handleInvalidApiKeyException(InvalidApiKeyException exc) {
         log.warn(exc.getMessage(), exc);
-        return status(UNAUTHORIZED).build();
+        return ResponseEntity.status(UNAUTHORIZED).body(exc.getMessage());
     }
 
     /**
-     * Handles SendReportException
+     * Handles SendReportException.
      *
      * @param exc SendReportException
      * @return ResponseEntity

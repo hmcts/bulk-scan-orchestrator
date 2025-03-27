@@ -8,7 +8,9 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.entity.PaymentRepository;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
@@ -29,7 +31,7 @@ public class PaymentService {
     public void savePayment(Payment payment) {
         uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment
             paymentEntity = new uk.gov.hmcts.reform.bulkscan.orchestrator.entity.Payment(
-            Instant.now(),
+            payment.createdAt,
             payment.envelopeId,
             payment.ccdReference,
             payment.jurisdiction,
@@ -50,7 +52,7 @@ public class PaymentService {
 
     public List<Payment> getPaymentsByStatus(String status) {
 
-        log.info("Payments by Status" + paymentRepository.getPaymentsByStatus(status).toString());
+        log.info("Payments by Status{}", paymentRepository.getPaymentsByStatus(status).toString());
         return paymentRepository.getPaymentsByStatus(status).stream().map(Payment::new).toList();
     }
 
@@ -61,9 +63,22 @@ public class PaymentService {
     }
 
     public List<Payment> getAllByPaymentsForPreviousDay() {
-        return paymentRepository.findAllByCreatedAt(
-                LocalDateTime.now().minusDays(1).toInstant(ZoneOffset.UTC))
+        Instant startOfPreviousDay = LocalDateTime.of(
+            LocalDate.now().minusDays(1), LocalTime.MIDNIGHT).toInstant(ZoneOffset.UTC);
+        Instant endOfPreviousDay = LocalDateTime.of(
+            LocalDate.now().minusDays(1), LocalTime.MAX).toInstant(ZoneOffset.UTC);
+        return paymentRepository.findAllWithDatesBetween(startOfPreviousDay, endOfPreviousDay)
             .stream().map(Payment::new).toList();
     }
 
+    public List<Payment> getAllByPaymentsByDate(LocalDate date) {
+        Instant startOfDay = LocalDateTime.of(
+            date, LocalTime.MIDNIGHT).toInstant(ZoneOffset.UTC);
+        log.info(startOfDay.toString());
+        Instant endOfDay = LocalDateTime.of(
+            date, LocalTime.MAX).toInstant(ZoneOffset.UTC);
+        log.info(endOfDay.toString());
+        return paymentRepository.findAllWithDatesBetween(startOfDay, endOfDay)
+            .stream().map(Payment::new).toList();
+    }
 }

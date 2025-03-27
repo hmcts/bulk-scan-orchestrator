@@ -19,6 +19,18 @@ spring:
     password: ${DB_PASSWORD:}
   main:
     allow-bean-definition-overriding: true
+  mail:
+    host: ${SMTP_HOST}
+    username: ${SMTP_USERNAME}
+    password: ${SMTP_PASSWORD}
+    port: 587
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+    test-connection: true
 
 flyway:
   skip-migrations: false
@@ -108,6 +120,7 @@ payment:
     url: ${PAYMENT_API_URL:http://localhost:8583/payment}
   reports:
     recipients: ${PAYMENTS_REPORTS_RECIPIENTS}
+    cron: ${REPORTS_CRON:0 0 15 * * *}
 
 jms:
   # JMS Configuration for local dev/func tests

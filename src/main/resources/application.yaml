@@ -322,7 +322,7 @@ payment:
       api:
         url: ${PAYMENT_API_URL}
       reports:
-        cron: ${REPORTS_CRON:0 10 * * *}
+        cron: ${REPORTS_CRON:0 0 15 * * *}
         recipients: ${PAYMENT_REPORTS_RECIPIENTS:}
 
 springdoc:

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.payment;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,11 +14,15 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.PaymentData;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Slf4j
 @AutoConfigureWireMock(port = 0)
 @IntegrationTest
 public class PaymentServiceTest {
@@ -126,5 +131,129 @@ public class PaymentServiceTest {
             .extracting("documentControlNumber")
             .containsExactly("123", "456")
             .doesNotContainNull();
+    }
+
+    @Test
+    void shouldNotRetrievePaymentDataCreatedAfterDateGiven() {
+        Instant createdAt1 = LocalDateTime.of(2025, 3, 21, 23, 58, 59, 0).toInstant(ZoneOffset.UTC);
+        final PaymentData paymentData1 = new PaymentData("123");
+        final Payment payment1 = new Payment(
+            "envelope_id",
+            createdAt1,
+            "ccdReference",
+            "jurisdiction",
+            "service",
+            "poBox",
+            true,
+            "awaiting",
+            Collections.singletonList(paymentData1)
+        );
+        paymentService.savePayment(payment1);
+
+        System.out.println(payment1.createdAt.toString());
+
+        Instant createdAt2 = LocalDateTime.of(2025, 3, 21, 1, 0, 0, 0).toInstant(ZoneOffset.UTC);
+        final PaymentData paymentData2 = new PaymentData("123");
+        final Payment payment2 = new Payment(
+            "envelope_id",
+            createdAt2,
+            "ccdReference",
+            "jurisdiction",
+            "service",
+            "poBox",
+            true,
+            "awaiting",
+            Collections.singletonList(paymentData2)
+        );
+
+        paymentService.savePayment(payment2);
+
+        System.out.println(payment2.createdAt.toString());
+
+        Instant createdAt3 = LocalDateTime.of(2025, 3, 22, 0, 0, 1, 0).toInstant(ZoneOffset.UTC);
+        final PaymentData paymentData3 = new PaymentData("123");
+        final Payment payment3 = new Payment(
+            "envelope_id",
+            createdAt3,
+            "ccdReference",
+            "jurisdiction",
+            "service",
+            "poBox",
+            true,
+            "awaiting",
+            Collections.singletonList(paymentData3)
+        );
+
+        paymentService.savePayment(payment3);
+
+        System.out.println(payment3.createdAt.toString());
+
+        List<Payment> paymentsFromDb =
+            paymentService.getAllByPaymentsByDate(LocalDate.of(2025, 3, 21));
+
+        assertThat(paymentsFromDb)
+            .hasSize(2);
+    }
+
+    @Test
+    void shouldNotRetrievePaymentDataCreatedBeforeDateGiven() {
+        Instant createdAt1 = LocalDateTime.of(2025, 3, 21, 23, 58, 59, 0).toInstant(ZoneOffset.UTC);
+        final PaymentData paymentData1 = new PaymentData("123");
+        final Payment payment1 = new Payment(
+            "envelope_id",
+            createdAt1,
+            "ccdReference",
+            "jurisdiction",
+            "service",
+            "poBox",
+            true,
+            "awaiting",
+            Collections.singletonList(paymentData1)
+        );
+        paymentService.savePayment(payment1);
+
+        System.out.println(payment1.createdAt.toString());
+
+        Instant createdAt2 = LocalDateTime.of(2025, 3, 21, 1, 0, 0, 0).toInstant(ZoneOffset.UTC);
+        final PaymentData paymentData2 = new PaymentData("123");
+        final Payment payment2 = new Payment(
+            "envelope_id",
+            createdAt2,
+            "ccdReference",
+            "jurisdiction",
+            "service",
+            "poBox",
+            true,
+            "awaiting",
+            Collections.singletonList(paymentData2)
+        );
+
+        paymentService.savePayment(payment2);
+
+        System.out.println(payment2.createdAt.toString());
+
+        Instant createdAt3 = LocalDateTime.of(2025, 3, 20, 23, 59, 59, 0).toInstant(ZoneOffset.UTC);
+        final PaymentData paymentData3 = new PaymentData("123");
+        final Payment payment3 = new Payment(
+            "envelope_id",
+            createdAt3,
+            "ccdReference",
+            "jurisdiction",
+            "service",
+            "poBox",
+            true,
+            "awaiting",
+            Collections.singletonList(paymentData3)
+        );
+
+        paymentService.savePayment(payment3);
+
+        System.out.println(payment3.createdAt.toString());
+
+        List<Payment> paymentsFromDb =
+            paymentService.getAllByPaymentsByDate(LocalDate.of(2025, 3, 21));
+
+        assertThat(paymentsFromDb)
+            .hasSize(2);
     }
 }

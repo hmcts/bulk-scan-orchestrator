@@ -24,4 +24,7 @@ public interface PaymentRepository extends JpaRepository<Payment, UUID> {
     @Query("SELECT p from Payment p where p.createdAt <= :creationDateTime")
     List<Payment> findAllByCreatedAt(Instant creationDateTime);
 
+    @Query("SELECT p from Payment p where p.createdAt BETWEEN :earliestCreatedTime AND :latestCreatedTime")
+    List<Payment> findAllWithDatesBetween(Instant earliestCreatedTime, Instant latestCreatedTime);
+
 }

@@ -105,7 +105,8 @@ public class PaymentServiceTest {
 
     @Test
     void shouldGetAllByPaymentsForPreviousDay() {
-        when(paymentRepository.findAllByCreatedAt(any())).thenReturn(List.of(paymentEntity1,paymentEntity2));
+        when(paymentRepository.findAllWithDatesBetween(any(), any()))
+            .thenReturn(List.of(paymentEntity1,paymentEntity2));
 
         //when
         List<uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment> results =

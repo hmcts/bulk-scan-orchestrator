@@ -69,6 +69,28 @@ public class SendPaymentReportService {
         }
     }
 
+    public void send(LocalDate date) {
+        try {
+            log.info("Sending payment report (specific date): {}", EMAIL_SUBJECT);
+            MimeMessage msg = mailSender.createMimeMessage();
+
+            MimeMessageHelper helper = new MimeMessageHelper(msg, true);
+            helper.setFrom(from);
+            helper.setTo(this.recipients);
+            helper.setSubject(EMAIL_SUBJECT);
+            helper.setText(EMAIL_BODY);
+            helper.addAttachment(ATTACHMENT_PREFIX_1
+                + date + ".csv", getCreatePaymentCsvReportByDate(date));
+            helper.addAttachment(ATTACHMENT_PREFIX_2
+                + date + ".csv", getUpdatePaymentCsvReportByDate(date));
+            mailSender.send(msg);
+
+        } catch (Exception exc) {
+            log.error("Error sending report", exc);
+            throw new SendReportException("Report could not be sent.", exc);
+        }
+    }
+
     private File getCreatePaymentCsvReport() throws IOException {
         List<Payment> allByPaymentsForPreviousDay = paymentService.getAllByPaymentsForPreviousDay();
         return CsvWriter.writeCreatePaymentsToCsv(allByPaymentsForPreviousDay);
@@ -76,6 +98,16 @@ public class SendPaymentReportService {
 
     private File getUpdatePaymentCsvReport() throws IOException {
         List<UpdatePayment> allByPaymentsForPreviousDay = updatePaymentService.getAllByPaymentsForPreviousDay();
+        return CsvWriter.writeUpdatePaymentsToCsv(allByPaymentsForPreviousDay);
+    }
+
+    private File getCreatePaymentCsvReportByDate(LocalDate date) throws IOException {
+        List<Payment> allByPaymentsForPreviousDay = paymentService.getAllByPaymentsByDate(date);
+        return CsvWriter.writeCreatePaymentsToCsv(allByPaymentsForPreviousDay);
+    }
+
+    private File getUpdatePaymentCsvReportByDate(LocalDate date) throws IOException {
+        List<UpdatePayment> allByPaymentsForPreviousDay = updatePaymentService.getAllByPaymentsByDate(date);
         return CsvWriter.writeUpdatePaymentsToCsv(allByPaymentsForPreviousDay);
     }
 
