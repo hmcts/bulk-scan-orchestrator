@@ -7,7 +7,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.jdbc.JdbcTestUtils;
@@ -68,8 +67,8 @@ public class SendPaymentReportServiceTest {
     private static final String PASSWORD = "test_password";
 
     @BeforeEach
-    public void setUp() {greenMail = new GreenMail(
-        new ServerSetup(
+    public void setUp() {
+        greenMail = new GreenMail(new ServerSetup(
             3026,
             null,
             ServerSetupTest.SMTP.getProtocol()
