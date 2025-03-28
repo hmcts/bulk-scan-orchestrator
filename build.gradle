@@ -341,7 +341,9 @@ dependencies {
     exclude group: 'junit', module: 'junit'
   }
   integrationTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: versions.testContainers
-
+  integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: versions.testContainers, {
+    exclude group: 'junit', module: 'junit'
+  }
   functionalTestImplementation sourceSets.main.runtimeClasspath
   functionalTestImplementation sourceSets.test.runtimeClasspath
 
