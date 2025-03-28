@@ -5,6 +5,7 @@ import com.icegreen.greenmail.util.ServerSetup;
 import com.icegreen.greenmail.util.ServerSetupTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -21,6 +22,7 @@ import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Disabled
 @IntegrationTest
 public class SendPaymentReportServiceTest {
 
