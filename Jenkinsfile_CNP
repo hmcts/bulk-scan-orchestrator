@@ -29,7 +29,9 @@ def nonPrSecrets = [
     secret('envelopes-staging-queue-listen-shared-access-key', 'ENVELOPES_QUEUE_READ_ACCESS_KEY'),
     secret('payments-staging-queue-send-shared-access-key', 'PAYMENTS_QUEUE_WRITE_ACCESS_KEY'),
     secret('launch-darkly-sdk-key', 'LAUNCH_DARKLY_SDK_KEY'),
-    secret('launch-darkly-offline-mode', 'LAUNCH_DARKLY_OFFLINE_MODE')
+    secret('launch-darkly-offline-mode', 'LAUNCH_DARKLY_OFFLINE_MODE'),
+    secret('payment-processing-interval', 'PAYMENT_PROCESSING_INTERVAL'),
+    secret('actions-api-key', 'ACTIONS_API_KEY')
   ]
 ]
 def prSecrets = [
@@ -45,7 +47,9 @@ def prSecrets = [
     secret('all-preview-queue-access-key', 'PAYMENTS_QUEUE_WRITE_ACCESS_KEY'),
     secret('idam-client-secret', 'IDAM_CLIENT_SECRET'),
     secret('launch-darkly-sdk-key', 'LAUNCH_DARKLY_SDK_KEY'),
-    secret('launch-darkly-offline-mode', 'LAUNCH_DARKLY_OFFLINE_MODE')
+    secret('launch-darkly-offline-mode', 'LAUNCH_DARKLY_OFFLINE_MODE'),
+    secret('payment-processing-interval', 'PAYMENT_PROCESSING_INTERVAL'),
+    secret('actions-api-key', 'ACTIONS_API_KEY')
   ]
 ]
 static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
