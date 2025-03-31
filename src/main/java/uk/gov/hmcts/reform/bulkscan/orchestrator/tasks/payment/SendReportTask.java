@@ -23,7 +23,7 @@ public class SendReportTask {
     public void send() {
         try {
             sendPaymentReportService.send();
-            log.info("Successfully sent payment reports.");
+            log.info("Successfully sent daily payment reports.");
         } catch (Exception exc) {
             log.error("Error sending payment reports", exc);
         }
