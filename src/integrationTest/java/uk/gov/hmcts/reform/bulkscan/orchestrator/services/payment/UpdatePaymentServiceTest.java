@@ -63,6 +63,22 @@ public class UpdatePaymentServiceTest {
     }
 
     @Test
+    void shouldSaveAndThenNotGetUpdatePaymentFromDatabaseThatDoesNotMatchStatus() {
+
+        updatePaymentService.savePayment(updatePayment);
+
+        List<UpdatePayment> results =
+            updatePaymentService.getUpdatePaymentByStatus("success");
+
+        assertThat(results).isEmpty();
+
+        results =
+            updatePaymentService.getUpdatePaymentByStatus("error");
+
+        assertThat(results).isEmpty();
+    }
+
+    @Test
     void shouldNotRetrievePaymentUpdatesCreatedAfterDateGiven() {
         Instant createdAt1 = LocalDateTime.of(2025, 3, 21, 23, 58, 59, 0).toInstant(ZoneOffset.UTC);
         final UpdatePayment payment1 = new UpdatePayment(

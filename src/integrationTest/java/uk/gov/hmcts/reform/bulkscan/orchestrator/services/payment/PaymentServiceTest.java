@@ -80,6 +80,11 @@ public class PaymentServiceTest {
             paymentService.getPaymentsByStatus("error");
 
         assertThat(results).isEmpty();
+
+        results =
+            paymentService.getPaymentsByStatus("success");
+
+        assertThat(results).isEmpty();
     }
 
     @Test
