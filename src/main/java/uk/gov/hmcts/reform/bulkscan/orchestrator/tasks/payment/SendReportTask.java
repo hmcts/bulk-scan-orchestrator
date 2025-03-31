@@ -25,7 +25,7 @@ public class SendReportTask {
             sendPaymentReportService.send();
             log.info("Successfully sent daily payment reports.");
         } catch (Exception exc) {
-            log.error("Error sending payment reports", exc);
+            log.error("Error sending daily payment reports", exc);
         }
     }
 }
