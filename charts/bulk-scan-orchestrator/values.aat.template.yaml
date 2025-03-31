@@ -59,6 +59,12 @@ java:
           alias: ENVELOPES_QUEUE_MAX_DELIVERY_COUNT
         - name: app-insights-instrumentation-key
           alias: azure.application-insights.instrumentation-key
+        - name: reports-email-username
+          alias: SMTP_USERNAME
+        - name: reports-email-password
+          alias: SMTP_PASSWORD
+        - name: reports-recipients
+          alias: PAYMENTS_REPORTS_RECIPIENTS
         - name: payment-processing-interval
           alias: PAYMENT_PROCESSING_INTERVAL
         - name: actions-api-key
