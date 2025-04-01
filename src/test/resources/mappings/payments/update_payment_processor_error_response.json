@@ -1,0 +1,19 @@
+{
+  "name": "update_payment_fail",
+  "request": {
+    "url": "/payment/update",
+    "method": "POST",
+    "bodyPatterns": [
+      {
+        "contains": "1234fail"
+      }
+    ]
+  },
+  "response": {
+    "status": 424,
+    "body": "Failed updating payment.",
+    "headers": {
+      "Content-Type": "text/plain;charset=UTF-8"
+    }
+  }
+}

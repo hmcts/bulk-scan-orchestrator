@@ -1,0 +1,19 @@
+{
+  "name": "payment_success",
+  "request": {
+    "url": "/payment/create",
+    "method": "POST",
+    "bodyPatterns": [
+      {
+        "contains": "1234pass"
+      }
+    ]
+  },
+  "response": {
+    "status": 201,
+    "body": "Payment created successfully",
+    "headers": {
+      "Content-Type": "text/plain;charset=UTF-8"
+    }
+  }
+}

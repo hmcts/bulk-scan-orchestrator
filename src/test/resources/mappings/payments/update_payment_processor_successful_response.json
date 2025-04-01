@@ -1,0 +1,19 @@
+{
+  "name": "update payment success",
+  "request": {
+    "url": "/payment/update",
+    "method": "POST",
+    "bodyPatterns": [
+      {
+        "contains": "1234pass"
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "body": "Payment updated successfully",
+    "headers": {
+      "Content-Type": "text/plain;charset=UTF-8"
+    }
+  }
+}
