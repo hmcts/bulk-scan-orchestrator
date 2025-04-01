@@ -38,7 +38,7 @@ public class SendReportController {
 
     @PostMapping(path = "/email-daily-report")
     public void generateAndEmailReports(
-        @RequestHeader(value = AUTHORIZATION) String authHeader) {
+        @RequestHeader(value = AUTHORIZATION, required = false) String authHeader) {
         validateAuthorization(authHeader, bulkScanApiKey);
 
         // email report
@@ -47,7 +47,7 @@ public class SendReportController {
 
     @PostMapping(path = "/email-report")
     public void generateAndEmailReports(
-        @RequestHeader(value = AUTHORIZATION) String authHeader,
+        @RequestHeader(value = AUTHORIZATION, required = false) String authHeader,
         @RequestParam(name = "date") @DateTimeFormat(iso = DATE) LocalDate date) {
         validateAuthorization(authHeader, bulkScanApiKey);
 

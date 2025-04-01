@@ -78,7 +78,7 @@ public class SendReportControllerTest {
     public void should_not_send_daily_report_by_date_when_authorisation_not_valid() throws Exception {
         try (MockedStatic<Util> mockedStatic = mockStatic(Util.class)) {
             mockedStatic.when(() -> Util.validateAuthorization(eq("Bearer not-valid"), any())).thenThrow(
-                new InvalidApiKeyException("API Key is missing")
+                new InvalidApiKeyException("Invalid API Key")
             );
             this.mockMvc.perform(post("/reports/email-report?date=2025-04-03")
                     .header(HttpHeaders.AUTHORIZATION, "Bearer not-valid"))
