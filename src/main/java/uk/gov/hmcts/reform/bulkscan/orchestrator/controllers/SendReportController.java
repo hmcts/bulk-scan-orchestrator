@@ -19,7 +19,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.util.Util.validateAuthor
 
 @RestController
 @RequestMapping(path = "/reports")
-@ConditionalOnProperty(prefix = "spring.mail", name = "host")
+@ConditionalOnProperty(prefix = "spring.mail", name = "host", matchIfMissing = false)
 public class SendReportController {
 
     private final String bulkScanApiKey;
