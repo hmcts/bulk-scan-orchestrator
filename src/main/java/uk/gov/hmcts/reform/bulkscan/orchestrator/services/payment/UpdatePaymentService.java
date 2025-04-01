@@ -32,8 +32,8 @@ public class UpdatePaymentService {
         updatePaymentRepository.save(new uk.gov.hmcts.reform.bulkscan.orchestrator.entity.UpdatePayment(
             updatePayment.createdAt,
             updatePayment.exceptionRecordRef,
-            updatePayment.envelopeId,
             updatePayment.newCaseRef,
+            updatePayment.envelopeId,
             updatePayment.jurisdiction,
             updatePayment.status
             ));
