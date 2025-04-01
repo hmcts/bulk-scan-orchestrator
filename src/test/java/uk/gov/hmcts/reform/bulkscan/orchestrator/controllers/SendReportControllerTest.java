@@ -49,7 +49,8 @@ public class SendReportControllerTest {
     @Test
     public void should_send_report_by_date() throws Exception {
         try (MockedStatic<Util> mockedStatic = mockStatic(Util.class)) {
-            this.mockMvc.perform(post("/reports/email-report?date=2025-04-03").header(HttpHeaders.AUTHORIZATION, "Bearer valid"))
+            this.mockMvc.perform(post("/reports/email-report?date=2025-04-03")
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer valid"))
                 .andDo(print()).andExpect(status().isOk());
             verify(sendPaymentReportService, times(1)).send(LocalDate.of(2025, 4, 3));
         }
