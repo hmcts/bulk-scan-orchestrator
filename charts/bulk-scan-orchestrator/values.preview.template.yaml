@@ -24,6 +24,7 @@ java:
     DB_PASSWORD: "{{ .Values.postgresql.auth.password}}"
     DB_PORT: '5432'
     DB_CONN_OPTIONS: ""
+    SMTP_HOST: "false"
   keyVaults:
     "bulk-scan":
       secrets:

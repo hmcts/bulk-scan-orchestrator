@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -18,6 +19,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.util.Util.validateAuthor
 
 @RestController
 @RequestMapping(path = "/reports")
+@ConditionalOnProperty(prefix = "spring.mail", name = "host")
 public class SendReportController {
 
     private final String bulkScanApiKey;
