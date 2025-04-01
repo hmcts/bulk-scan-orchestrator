@@ -91,8 +91,6 @@ public class UpdatePaymentServiceTest {
         );
         updatePaymentService.savePayment(payment1);
 
-        System.out.println(payment1.createdAt.toString());
-
         Instant createdAt2 = LocalDateTime.of(2025, 3, 21, 1, 0, 0, 0).toInstant(ZoneOffset.UTC);
         final UpdatePayment payment2 = new UpdatePayment(
             createdAt2,
@@ -104,8 +102,6 @@ public class UpdatePaymentServiceTest {
         );
         updatePaymentService.savePayment(payment2);
 
-        System.out.println(payment2.createdAt.toString());
-
         Instant createdAt3 = LocalDateTime.of(2025, 3, 20, 23, 59, 59, 0).toInstant(ZoneOffset.UTC);
         final UpdatePayment payment3 = new UpdatePayment(
             createdAt3,
@@ -116,8 +112,6 @@ public class UpdatePaymentServiceTest {
             "awaiting"
         );
         updatePaymentService.savePayment(payment3);
-
-        System.out.println(payment3.createdAt.toString());
 
         List<UpdatePayment> paymentsFromDb =
             updatePaymentService.getAllByPaymentsByDate(LocalDate.of(2025, 3, 21));
@@ -139,8 +133,6 @@ public class UpdatePaymentServiceTest {
         );
         updatePaymentService.savePayment(payment1);
 
-        System.out.println(payment1.createdAt.toString());
-
         Instant createdAt2 = LocalDateTime.of(2025, 3, 21, 1, 0, 0, 0).toInstant(ZoneOffset.UTC);
         final UpdatePayment payment2 = new UpdatePayment(
             createdAt2,
@@ -152,8 +144,6 @@ public class UpdatePaymentServiceTest {
         );
         updatePaymentService.savePayment(payment2);
 
-        System.out.println(payment2.createdAt.toString());
-
         Instant createdAt3 = LocalDateTime.of(2025, 3, 22, 0, 0, 1, 0).toInstant(ZoneOffset.UTC);
         final UpdatePayment payment3 = new UpdatePayment(
             createdAt3,
@@ -164,8 +154,6 @@ public class UpdatePaymentServiceTest {
             "awaiting"
         );
         updatePaymentService.savePayment(payment3);
-
-        System.out.println(payment3.createdAt.toString());
 
         List<UpdatePayment> paymentsFromDb =
             updatePaymentService.getAllByPaymentsByDate(LocalDate.of(2025, 3, 21));

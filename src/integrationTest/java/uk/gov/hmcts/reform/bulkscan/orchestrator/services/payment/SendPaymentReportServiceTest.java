@@ -85,7 +85,6 @@ public class SendPaymentReportServiceTest {
         );
         greenMail.setUser(USERNAME, PASSWORD);
         greenMail.start();
-        System.out.println("GreenMail started: " + greenMail.isRunning());
         greenMail.getSmtp();
 
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();

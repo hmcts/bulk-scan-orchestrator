@@ -153,8 +153,6 @@ public class PaymentServiceTest {
         );
         paymentService.savePayment(payment1);
 
-        System.out.println(payment1.createdAt.toString());
-
         Instant createdAt2 = LocalDateTime.of(2025, 3, 21, 1, 0, 0, 0).toInstant(ZoneOffset.UTC);
         final PaymentData paymentData2 = new PaymentData("123");
         final Payment payment2 = new Payment(
@@ -171,8 +169,6 @@ public class PaymentServiceTest {
 
         paymentService.savePayment(payment2);
 
-        System.out.println(payment2.createdAt.toString());
-
         Instant createdAt3 = LocalDateTime.of(2025, 3, 22, 0, 0, 1, 0).toInstant(ZoneOffset.UTC);
         final PaymentData paymentData3 = new PaymentData("123");
         final Payment payment3 = new Payment(
@@ -188,8 +184,6 @@ public class PaymentServiceTest {
         );
 
         paymentService.savePayment(payment3);
-
-        System.out.println(payment3.createdAt.toString());
 
         List<Payment> paymentsFromDb =
             paymentService.getAllByPaymentsByDate(LocalDate.of(2025, 3, 21));
@@ -215,8 +209,6 @@ public class PaymentServiceTest {
         );
         paymentService.savePayment(payment1);
 
-        System.out.println(payment1.createdAt.toString());
-
         Instant createdAt2 = LocalDateTime.of(2025, 3, 21, 1, 0, 0, 0).toInstant(ZoneOffset.UTC);
         final PaymentData paymentData2 = new PaymentData("123");
         final Payment payment2 = new Payment(
@@ -233,8 +225,6 @@ public class PaymentServiceTest {
 
         paymentService.savePayment(payment2);
 
-        System.out.println(payment2.createdAt.toString());
-
         Instant createdAt3 = LocalDateTime.of(2025, 3, 20, 23, 59, 59, 0).toInstant(ZoneOffset.UTC);
         final PaymentData paymentData3 = new PaymentData("123");
         final Payment payment3 = new Payment(
@@ -250,8 +240,6 @@ public class PaymentServiceTest {
         );
 
         paymentService.savePayment(payment3);
-
-        System.out.println(payment3.createdAt.toString());
 
         List<Payment> paymentsFromDb =
             paymentService.getAllByPaymentsByDate(LocalDate.of(2025, 3, 21));

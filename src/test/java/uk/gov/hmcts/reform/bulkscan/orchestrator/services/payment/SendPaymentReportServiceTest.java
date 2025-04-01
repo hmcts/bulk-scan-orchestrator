@@ -69,7 +69,6 @@ public class SendPaymentReportServiceTest {
         );
 
         Exception exception = assertThrows(SendReportException.class, () -> sendPaymentReportService.send());
-        System.out.println(exception.getMessage());
         assertThat(exception.getMessage()).contains("Mail server connection failed");
         assertThat(exception.getMessage()).contains("Report could not be sent");
     }
@@ -82,7 +81,6 @@ public class SendPaymentReportServiceTest {
 
         Exception exception = assertThrows(SendReportException.class, () ->
             sendPaymentReportService.send(LocalDate.of(2020, 1, 1)));
-        System.out.println(exception.getMessage());
         assertThat(exception.getMessage()).contains("Mail server connection failed");
         assertThat(exception.getMessage()).contains("Report could not be sent");
     }
