@@ -18,6 +18,9 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Service layer for emailing payment reports. Requires spring mail config to be setup.
+ */
 @ConditionalOnProperty(prefix = "spring.mail", name = "host")
 @Service
 public class SendPaymentReportService {

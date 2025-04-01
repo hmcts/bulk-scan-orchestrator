@@ -17,6 +17,9 @@ import static org.springframework.format.annotation.DateTimeFormat.ISO.DATE;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static uk.gov.hmcts.reform.bulkscan.orchestrator.util.Util.validateAuthorization;
 
+/**
+ * Endpoints for emailing reports. Requires Bulk Scan API Key to use.
+ */
 @RestController
 @RequestMapping(path = "/reports")
 @ConditionalOnProperty(prefix = "spring.mail", name = "host", matchIfMissing = false)
@@ -35,7 +38,7 @@ public class SendReportController {
 
     @PostMapping(path = "/email-daily-report")
     public void generateAndEmailReports(
-        @RequestHeader(value = AUTHORIZATION, required = false) String authHeader) {
+        @RequestHeader(value = AUTHORIZATION) String authHeader) {
         validateAuthorization(authHeader, bulkScanApiKey);
 
         // email report
@@ -44,7 +47,7 @@ public class SendReportController {
 
     @PostMapping(path = "/email-report")
     public void generateAndEmailReports(
-        @RequestHeader(value = AUTHORIZATION, required = false) String authHeader,
+        @RequestHeader(value = AUTHORIZATION) String authHeader,
         @RequestParam(name = "date") @DateTimeFormat(iso = DATE) LocalDate date) {
         validateAuthorization(authHeader, bulkScanApiKey);
 
