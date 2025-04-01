@@ -21,9 +21,6 @@ public interface PaymentRepository extends JpaRepository<Payment, UUID> {
     @Query("UPDATE Payment SET status = :status WHERE envelopeId = :envelopeId")
     void updateStatusByEnvelopeId(String status, String envelopeId);
 
-    @Query("SELECT p from Payment p where p.createdAt <= :creationDateTime")
-    List<Payment> findAllByCreatedAt(Instant creationDateTime);
-
     @Query("SELECT p from Payment p where p.createdAt BETWEEN :earliestCreatedTime AND :latestCreatedTime")
     List<Payment> findAllWithDatesBetween(Instant earliestCreatedTime, Instant latestCreatedTime);
 
