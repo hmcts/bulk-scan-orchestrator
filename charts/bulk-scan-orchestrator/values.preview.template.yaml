@@ -3,6 +3,7 @@ java:
     S2S_URL: "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
     IDAM_API_URL: "https://idam-api.aat.platform.hmcts.net"
     IDAM_CLIENT_REDIRECT_URI: "https://bulk-scan-orchestrator-aat.service.core-compute-aat.internal/oauth2/callback"
+    PAYMENT_API_URL: "http://bulk-scan-payment-processor-aat.service.core-compute-aat.internal/payment"
     CORE_CASE_DATA_API_URL: "http://ccd-data-store-api-aat.service.core-compute-aat.internal"
     DOCUMENT_MANAGEMENT_URL: "http://dm-store-aat.service.core-compute-aat.internal"
     CDAM_URL: "http://ccd-case-document-am-api-aat.service.core-compute-aat.internal"
@@ -23,6 +24,7 @@ java:
     DB_PASSWORD: "{{ .Values.postgresql.auth.password}}"
     DB_PORT: '5432'
     DB_CONN_OPTIONS: ""
+    SMTP_HOST: "false"
   keyVaults:
     "bulk-scan":
       secrets:
@@ -42,6 +44,10 @@ java:
           alias: PAYMENTS_QUEUE_WRITE_ACCESS_KEY
         - name: all-preview-queue-access-key
           alias: PROCESSED_ENVELOPES_QUEUE_WRITE_ACCESS_KEY
+        - name: payment-processing-interval
+          alias: PAYMENT_PROCESSING_INTERVAL
+        - name: actions-api-key
+          alias: ACTIONS_API_KEY
   # Don't modify below here
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}

@@ -29,7 +29,9 @@ def nonPrSecrets = [
     secret('envelopes-staging-queue-listen-shared-access-key', 'ENVELOPES_QUEUE_READ_ACCESS_KEY'),
     secret('payments-staging-queue-send-shared-access-key', 'PAYMENTS_QUEUE_WRITE_ACCESS_KEY'),
     secret('launch-darkly-sdk-key', 'LAUNCH_DARKLY_SDK_KEY'),
-    secret('launch-darkly-offline-mode', 'LAUNCH_DARKLY_OFFLINE_MODE')
+    secret('launch-darkly-offline-mode', 'LAUNCH_DARKLY_OFFLINE_MODE'),
+    secret('payment-processing-interval', 'PAYMENT_PROCESSING_INTERVAL'),
+    secret('actions-api-key', 'ACTIONS_API_KEY')
   ]
 ]
 def prSecrets = [
@@ -45,7 +47,9 @@ def prSecrets = [
     secret('all-preview-queue-access-key', 'PAYMENTS_QUEUE_WRITE_ACCESS_KEY'),
     secret('idam-client-secret', 'IDAM_CLIENT_SECRET'),
     secret('launch-darkly-sdk-key', 'LAUNCH_DARKLY_SDK_KEY'),
-    secret('launch-darkly-offline-mode', 'LAUNCH_DARKLY_OFFLINE_MODE')
+    secret('launch-darkly-offline-mode', 'LAUNCH_DARKLY_OFFLINE_MODE'),
+    secret('payment-processing-interval', 'PAYMENT_PROCESSING_INTERVAL'),
+    secret('actions-api-key', 'ACTIONS_API_KEY')
   ]
 ]
 static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
@@ -65,6 +69,7 @@ withPipeline(type, product, component) {
     env.PROCESSOR_S2S_NAME = 'bulk_scan_processor'
     env.S2S_URL = 'http://rpe-service-auth-provider-aat.service.core-compute-aat.internal'
     env.DOCUMENT_MANAGEMENT_URL = 'http://dm-store-aat.service.core-compute-aat.internal'
+    env.PAYMENT_API_URL = 'http://bulk-scan-payment-processor-aat.service.core-compute-aat.internal/payment'
     // CDAM
     env.CASE_DOCUMENT_AM_URL = 'http://ccd-case-document-am-api-aat.service.core-compute-aat.internal'
     env.CORE_CASE_DATA_API_URL = 'http://ccd-data-store-api-aat.service.core-compute-aat.internal'
@@ -77,6 +82,7 @@ withPipeline(type, product, component) {
     env.QUEUE_WRITE_ACCESS_KEY_NAME = 'SendSharedAccessKey'
     env.JMS_ENABLED = false
     env.SPRING_PROFILES_ACTIVE = 'default'
+    env.SMTP_HOST = "false"
   }
 
   before('smoketest:preview') {

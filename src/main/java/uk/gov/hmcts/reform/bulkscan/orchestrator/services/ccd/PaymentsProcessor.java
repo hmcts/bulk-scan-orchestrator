@@ -3,48 +3,51 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Payment;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.PaymentData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.Status;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.model.payment.UpdatePayment;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.payment.PaymentService;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.payment.UpdatePaymentService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.IPaymentsPublisher;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.CreatePaymentsCommand;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentData;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.UpdatePaymentsCommand;
 
+import java.time.Instant;
 import java.util.Optional;
-
-import static java.util.stream.Collectors.toList;
 
 @Service
 public class PaymentsProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentsProcessor.class);
 
-    private final IPaymentsPublisher paymentsPublisher;
+    private final PaymentService paymentService;
+    private final UpdatePaymentService updatePaymentService;
 
-    public PaymentsProcessor(IPaymentsPublisher paymentsPublisher) {
-        this.paymentsPublisher = paymentsPublisher;
+    public PaymentsProcessor(PaymentService paymentService, UpdatePaymentService updatePaymentService) {
+        this.paymentService = paymentService;
+        this.updatePaymentService = updatePaymentService;
     }
 
     public void createPayments(Envelope envelope, Long caseId, boolean isExceptionRecord) {
         if (envelope.payments != null && !envelope.payments.isEmpty()) {
-            CreatePaymentsCommand cmd = new CreatePaymentsCommand(
+
+            log.info("Started saving payments for case with CCD reference {}", caseId);
+            Payment payment = new Payment(
                 envelope.id,
+                Instant.now(),
                 Long.toString(caseId),
                 envelope.jurisdiction,
                 envelope.container,
                 envelope.poBox,
                 isExceptionRecord,
-                envelope.payments.stream()
-                    .map(payment -> new PaymentData(payment.documentControlNumber))
-                    .collect(toList())
-            );
+                Status.AWAITING.toString(),
+                envelope.payments.stream().map(pay -> new PaymentData(pay.documentControlNumber)).toList());
 
-            log.info("Started processing payments for case with CCD reference {}", cmd.ccdReference);
-            paymentsPublisher.send(cmd);
-            log.info("Finished processing payments for case with CCD reference {}", cmd.ccdReference);
+            paymentService.savePayment(payment);
+            log.info("Finished saving payments for case with CCD reference {}", caseId);
         } else {
             log.info(
-                "Envelope has no payments, not sending create command. Envelope id: {}. Case reference {}",
+                "Envelope has no payments, not saving payment. Envelope id: {}. Case reference {}",
                 envelope.id,
                 Optional.ofNullable(envelope.caseRef).orElse("(NOT PRESENT)")
             );
@@ -59,21 +62,23 @@ public class PaymentsProcessor {
     ) {
         if (paymentsHelper.containsPayments) {
 
-            log.info("Contains Payments, sending payment update message. ER id: {}", exceptionRecordId);
+            log.info("Contains Payments, saving payment update message. ER id: {}", exceptionRecordId);
 
-            paymentsPublisher.send(
-                new UpdatePaymentsCommand(
-                    exceptionRecordId,
-                    newCaseId,
-                    paymentsHelper.envelopeId,
-                    jurisdiction
-                )
+            UpdatePayment updatePayment = new UpdatePayment(
+                Instant.now(),
+                exceptionRecordId,
+                newCaseId,
+                paymentsHelper.envelopeId,
+                jurisdiction,
+                Status.AWAITING.toString()
             );
-            log.info("Finished sending payment update message. ER id: {}", exceptionRecordId);
+            updatePaymentService.savePayment(updatePayment);
+
+            log.info("Finished saving payment update message. ER id: {}", exceptionRecordId);
 
         } else {
             log.info(
-                "Exception record has no payments, not sending update command. ER id: {}",
+                "Exception record has no payments, not saving update command. ER id: {}",
                 exceptionRecordId
             );
         }

@@ -1,0 +1,19 @@
+{
+  "name": "payment_fail",
+  "request": {
+    "url": "/payment/create",
+    "method": "POST",
+    "bodyPatterns": [
+      {
+        "contains": "1234fail"
+      }
+    ]
+  },
+  "response": {
+    "status": 422,
+    "body": "Failed creating payment",
+    "headers": {
+      "Content-Type": "text/plain;charset=UTF-8"
+    }
+  }
+}
