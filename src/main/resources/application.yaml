@@ -166,18 +166,6 @@ service-config:
         - formType: SSCS8
           ocrFields:
             - person1_last_name
-      auto-case-creation-enabled: ${AUTO_CASE_CREATION_ENABLED_SSCS}
-      auto-case-update-enabled: ${AUTO_CASE_UPDATE_ENABLED_SSCS}
-      case-definition-has-envelope-ids: ${CASE_DEFINITION_HAS_ENVELOPE_IDS_SSCS}
-      search-cases-by-envelope-id: ${CAN_SEARCH_CASES_BY_ENVELOPE_ID_SSCS}
-      supplementary-data-enabled: ${SUPPLEMENTARY_DATA_ENABLED_SSCS}
-
-    - service: sscs-ibca
-      jurisdiction: SSCS
-      transformation-url: ${TRANSFORMATION_URL_SSCS}
-      case-type-ids:
-        - Benefit
-      form-type-to-surname-ocr-field-mappings:
         - formType: SSCS8
           ocrFields:
             - person1_last_name
