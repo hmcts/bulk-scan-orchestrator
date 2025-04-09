@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS payment (
 );
 
 -- Update payments table
-CREATE TABLE IF NOT EXISTS update_payments (
+CREATE TABLE IF NOT EXISTS update_payment (
   id UUID NOT NULL PRIMARY KEY,
   envelope_id character varying(50) NOT NULL,
   jurisdiction character varying(50) NOT NULL,
