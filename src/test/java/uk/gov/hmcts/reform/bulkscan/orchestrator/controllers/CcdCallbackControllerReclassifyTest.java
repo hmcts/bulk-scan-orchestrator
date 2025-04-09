@@ -75,13 +75,13 @@ class CcdCallbackControllerReclassifyTest {
     }
 
     @Test
-    void should_return_500_response_when_no_body_provided() throws Exception {
-        callReclassifyEndpoint("").andExpect(status().isInternalServerError());
+    void should_return_400_response_when_no_body_provided() throws Exception {
+        callReclassifyEndpoint("").andExpect(status().isBadRequest());
     }
 
     @Test
-    void should_reutrn_500_response_when_body_is_malformed() throws Exception {
-        callReclassifyEndpoint("malformed body").andExpect(status().isInternalServerError());
+    void should_reutrn_400_response_when_body_is_malformed() throws Exception {
+        callReclassifyEndpoint("malformed body").andExpect(status().isBadRequest());
     }
 
     @Test
