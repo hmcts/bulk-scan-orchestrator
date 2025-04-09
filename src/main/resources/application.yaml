@@ -321,4 +321,4 @@ launchdarkly:
   offline-mode: ${LAUNCH_DARKLY_OFFLINE_MODE:false}
 
 payment-processor:
-  url: ${PAYMENT_PROCESSOR_URL}
+  url: ${PAYMENT_PROCESSOR_URL:http://localhost:8583/payment}

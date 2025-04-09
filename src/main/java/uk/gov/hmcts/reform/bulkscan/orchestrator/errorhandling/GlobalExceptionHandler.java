@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.InvalidRequestException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.NotFoundException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.PaymentReprocessFailedException;
@@ -21,7 +22,7 @@ import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
  */
 @Slf4j
 @ControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ExceptionResponse> handle(NotFoundException ex) {
@@ -47,19 +48,19 @@ public class GlobalExceptionHandler {
             .body(generateExceptionResponse(ex.getMessage()));
     }
 
+    @ExceptionHandler(PaymentReprocessFailedException.class)
+    protected ResponseEntity<ExceptionResponse> handle(PaymentReprocessFailedException ex) {
+        log.error(ex.getMessage(), ex);
+
+        return ResponseEntity.status(UNPROCESSABLE_ENTITY).body(generateExceptionResponse(ex.getMessage()));
+    }
+
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<ExceptionResponse> handle(Exception ex) {
         log.error(ex.getMessage(), ex);
 
         return ResponseEntity.status(INTERNAL_SERVER_ERROR)
             .body(generateExceptionResponse(ex.getMessage()));
-    }
-
-    @ExceptionHandler(PaymentReprocessFailedException.class)
-    protected ResponseEntity<ExceptionResponse> handle(PaymentReprocessFailedException ex) {
-        log.error(ex.getMessage(), ex);
-
-        return ResponseEntity.status(UNPROCESSABLE_ENTITY).body(generateExceptionResponse(ex.getMessage()));
     }
 
     private ExceptionResponse generateExceptionResponse(String message) {
