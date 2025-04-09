@@ -7,6 +7,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.PaymentsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
@@ -38,11 +40,17 @@ class PaymentsProcessorTest {
     @Mock
     private PaymentsPublisher paymentsPublisher;
 
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
+
+    @Mock
+    private PaymentsService paymentsService;
+
     private PaymentsProcessor paymentsProcessor;
 
     @BeforeEach
     void setUp() {
-        paymentsProcessor = new PaymentsProcessor(paymentsPublisher);
+        paymentsProcessor = new PaymentsProcessor(paymentsPublisher, launchDarklyClient, paymentsService);
     }
 
     @Test

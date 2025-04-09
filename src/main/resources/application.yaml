@@ -19,6 +19,7 @@ spring:
   config:
     import: "optional:configtree:/mnt/secrets/bulk-scan/"
   datasource:
+    driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_CONN_OPTIONS}
     username: ${DB_USER}
     password: ${DB_PASSWORD}
@@ -35,6 +36,9 @@ spring:
     exclude: org.springframework.boot.autoconfigure.jms.JmsAutoConfiguration,org.springframework.boot.autoconfigure.jms.activemq.ActiveMQAutoConfiguration
   main:
     allow-bean-definition-overriding: true
+  jpa:
+    properties.hibernate:
+      dialect: org.hibernate.dialect.PostgreSQLDialect
 
 flyway:
   skip-migrations: ${FLYWAY_SKIP_MIGRATIONS}
@@ -315,3 +319,6 @@ jms:
 launchdarkly:
   sdk-key: ${LAUNCH_DARKLY_SDK_KEY:XXXXX}
   offline-mode: ${LAUNCH_DARKLY_OFFLINE_MODE:false}
+
+payment-processor:
+  url: ${PAYMENT_PROCESSOR_URL}

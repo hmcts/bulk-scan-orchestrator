@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions;
 
 @SuppressWarnings("serial")
 public class PaymentsPublishingException extends RuntimeException {
