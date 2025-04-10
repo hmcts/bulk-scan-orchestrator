@@ -39,9 +39,11 @@ public class PaymentsProcessor {
         if (envelope.payments != null && !envelope.payments.isEmpty()) {
             //TODO: Remove flag once fully migrated to API route
             if (launchDarklyClient.isFeatureEnabled("process-payment-via-api")) {
-                log.info("Started processing new payment via API");
+                log.info("Started processing new payment via API, envelope id: {}, ccd reference: {}",
+                    envelope.id, caseId);
                 paymentsService.createNewPayment(envelope, isExceptionRecord);
-                log.info("Finished processing new payment via API");
+                log.info("Finished processing new payment via API, envelope id: {}, ccd reference: {}",
+                    envelope.id, caseId);
             } else {
                 CreatePaymentsCommand cmd = new CreatePaymentsCommand(
                     envelope.id,
