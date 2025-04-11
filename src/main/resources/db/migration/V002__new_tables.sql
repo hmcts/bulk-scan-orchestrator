@@ -25,4 +25,3 @@ CREATE TABLE IF NOT EXISTS update_payment (
   status_message character varying(255),
   created_at timestamp NOT NULL,
   last_updated_at timestamp NOT NULL
-)
