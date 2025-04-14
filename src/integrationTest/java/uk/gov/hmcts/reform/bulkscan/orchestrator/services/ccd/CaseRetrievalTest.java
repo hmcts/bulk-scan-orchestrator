@@ -13,6 +13,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.CcdCallException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.CallbackException;
 
 import java.io.IOException;
 

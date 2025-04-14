@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.NotificationSendingException;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 

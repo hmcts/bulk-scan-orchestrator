@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.OcrDataField;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.UnprocessableCaseDataException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CallbackValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.EventIdValidator;

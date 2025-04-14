@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
 
 import jakarta.validation.constraints.NotNull;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.InvalidConfigurationException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 
 import java.util.HashMap;

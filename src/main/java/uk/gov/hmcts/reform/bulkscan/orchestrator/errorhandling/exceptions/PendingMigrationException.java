@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.config;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions;
 
 public class PendingMigrationException extends RuntimeException {
 

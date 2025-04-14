@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
 
 import com.google.common.collect.ImmutableMap;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
 
 import java.util.HashMap;

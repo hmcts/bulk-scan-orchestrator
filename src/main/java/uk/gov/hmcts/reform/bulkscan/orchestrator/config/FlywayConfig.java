@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.PendingMigrationException;
 
 import java.util.stream.Stream;
 
@@ -30,7 +31,7 @@ public class FlywayConfig {
                 .filter(migration -> !migration.getState().isApplied())
                 .findFirst()
                 .ifPresent(notAppliedMigration -> {
-                    throw new uk.gov.hmcts.reform.bulkscan.orchestrator.config.PendingMigrationException(
+                    throw new PendingMigrationException(
                         "Pending migration: " + notAppliedMigration.getScript()
                     );
                 });

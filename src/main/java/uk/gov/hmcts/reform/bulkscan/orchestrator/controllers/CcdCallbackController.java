@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.InvalidRequestException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.AttachToCaseCallbackService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CreateCaseCallbackService;

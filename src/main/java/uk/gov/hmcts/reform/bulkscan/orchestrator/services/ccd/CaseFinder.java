@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.CaseNotFoundException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;

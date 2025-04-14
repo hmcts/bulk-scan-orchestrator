@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.PaymentsPublishingException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.model.PaymentCommand;
 
 import java.util.UUID;

@@ -12,7 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.exceptions.ConnectionException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.ConnectionException;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

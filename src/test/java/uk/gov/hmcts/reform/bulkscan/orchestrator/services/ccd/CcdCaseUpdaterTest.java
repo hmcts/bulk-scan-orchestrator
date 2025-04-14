@@ -21,11 +21,12 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentTy
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.response.ClientServiceErrorResponse;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.CallbackException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.CcdCallException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.helper.CaseDataUpdater;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.ccd.CaseAction;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.caseupdatedetails.CaseUpdateDetailsService;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;

@@ -9,8 +9,8 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentTy
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 

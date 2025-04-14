@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentType;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.DocumentUrl;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.client.model.request.ScannedDocument;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.CcdCallException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
