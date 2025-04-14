@@ -137,6 +137,7 @@ public class PaymentsService {
         try {
             paymentProcessorClient.createPayment(new CreatePaymentDTO(paymentToReprocess));
             paymentToReprocess.setStatus(PaymentStatus.COMPLETE);
+            paymentToReprocess.setStatusMessage("");
         } catch (FeignException ex) {
             paymentToReprocess.setStatusMessage(ex.getMessage());
             paymentsRepository.save(paymentToReprocess);
@@ -161,6 +162,7 @@ public class PaymentsService {
         try {
             paymentProcessorClient.updatePayment(new UpdatePaymentDTO(paymentToReprocess));
             paymentToReprocess.setStatus(PaymentStatus.COMPLETE);
+            paymentToReprocess.setStatusMessage("");
         } catch (FeignException ex) {
             paymentToReprocess.setStatusMessage(ex.getMessage());
             updatePaymentsRepository.save(paymentToReprocess);
