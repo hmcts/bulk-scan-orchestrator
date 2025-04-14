@@ -39,11 +39,12 @@ public class PaymentsService {
      *
      * @param envelope The envelope containing the payment data.
      * @param isExceptionRecord boolean for if the envelope being processed is an exception record.
+     * @param caseId The id of the CCD case.
      */
-    public void createNewPayment(Envelope envelope, boolean isExceptionRecord) {
+    public void createNewPayment(Envelope envelope, boolean isExceptionRecord, Long caseId) {
         CreatePaymentDTO paymentToCreate = new CreatePaymentDTO(
             envelope.id,
-            envelope.caseRef,
+            Long.toString(caseId),
             isExceptionRecord,
             envelope.poBox,
             envelope.jurisdiction,

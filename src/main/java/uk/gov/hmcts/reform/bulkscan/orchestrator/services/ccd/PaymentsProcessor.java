@@ -41,7 +41,7 @@ public class PaymentsProcessor {
             if (launchDarklyClient.isFeatureEnabled("process-payment-via-api")) {
                 log.info("Started processing new payment via API, envelope id: {}, ccd reference: {}",
                     envelope.id, caseId);
-                paymentsService.createNewPayment(envelope, isExceptionRecord);
+                paymentsService.createNewPayment(envelope, isExceptionRecord, caseId);
                 log.info("Finished processing new payment via API, envelope id: {}, ccd reference: {}",
                     envelope.id, caseId);
             } else {

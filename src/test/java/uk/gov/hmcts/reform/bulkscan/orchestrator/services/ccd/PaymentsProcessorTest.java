@@ -187,7 +187,7 @@ class PaymentsProcessorTest {
 
         paymentsProcessor.createPayments(envelope, CCD_REFERENCE, true);
 
-        verify(paymentsService).createNewPayment(envelope, true);
+        verify(paymentsService).createNewPayment(envelope, true, CCD_REFERENCE);
     }
 
     @Test
