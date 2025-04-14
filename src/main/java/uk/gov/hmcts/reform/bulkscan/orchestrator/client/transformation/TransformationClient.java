@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
@@ -52,6 +54,21 @@ public class TransformationClient {
                 transformationRequest.ignoreWarnings
             );
         }
+
+        //using a try catch because wanted to try avoid adding the jsonprocessingexception to the method signature
+        try {
+            // Convert TransformationRequest to JSON for detailed logging
+            ObjectMapper objectMapper = new ObjectMapper();
+            String requestBody = objectMapper.writeValueAsString(transformationRequest);
+
+            // Log the request body in detail before sending it
+            log.info("Sending transformation request to transformation service: {}", baseUrl);
+            log.info("Request headers: {}", headers);
+            log.info("Request body: {}", requestBody);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to convert TransformationRequest to JSON", e);
+        }
+
         SuccessfulTransformationResponse response = restTemplate.postForObject(
             getUrl(baseUrl),
             new HttpEntity<>(transformationRequest, headers),
