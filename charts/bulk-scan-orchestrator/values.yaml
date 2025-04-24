@@ -21,6 +21,7 @@ java:
     UPDATE_URL_PROBATE: "http://probate-back-office-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/update-case"
     TRANSFORMATION_URL_NFD: "http://nfdiv-case-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/transform-exception-record"
     TRANSFORMATION_URL_PRIVATELAW: "http://fis-bulk-scan-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/transform-exception-record"
+    PAYMENT_PROCESSOR_URL: "http://bulk-scan-payment-processor-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/payment"
     QUEUE_READ_INTERVAL: "30000"
     DELETE_ENVELOPES_DLQ_MESSAGES_ENABLED: "true"
     DELETE_ENVELOPES_DLQ_MESSAGES_CRON: "0 * * * * *"

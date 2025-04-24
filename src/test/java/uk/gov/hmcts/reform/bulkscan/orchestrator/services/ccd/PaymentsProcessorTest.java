@@ -7,6 +7,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.PaymentsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.ExceptionRecordFields;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.definition.YesNoFieldValues;
@@ -26,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentsProcessorTest {
@@ -38,11 +41,17 @@ class PaymentsProcessorTest {
     @Mock
     private PaymentsPublisher paymentsPublisher;
 
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
+
+    @Mock
+    private PaymentsService paymentsService;
+
     private PaymentsProcessor paymentsProcessor;
 
     @BeforeEach
     void setUp() {
-        paymentsProcessor = new PaymentsProcessor(paymentsPublisher);
+        paymentsProcessor = new PaymentsProcessor(paymentsPublisher, launchDarklyClient, paymentsService);
     }
 
     @Test
@@ -163,5 +172,46 @@ class PaymentsProcessorTest {
 
         // then
         verify(paymentsPublisher, never()).send(any());
+    }
+
+    @Test
+    void calls_payments_publisher_via_api_if_envelope_contains_payments() {
+        when(launchDarklyClient.isFeatureEnabled("process-payment-via-api")).thenReturn(true);
+
+        Envelope envelope = SampleData.envelope(
+            1,
+            asList(new Payment("dcn1")),
+            emptyList(),
+            emptyList()
+        );
+
+        paymentsProcessor.createPayments(envelope, CCD_REFERENCE, true);
+
+        verify(paymentsService).createNewPayment(envelope, true, CCD_REFERENCE);
+    }
+
+    @Test
+    void should_send_payment_message_via_api_when_case_has_payments() {
+        when(launchDarklyClient.isFeatureEnabled("process-payment-via-api")).thenReturn(true);
+        Map<String, Object> data = new HashMap<>();
+
+        String envelopeId = "987";
+        String jurisdiction = "sample jurisdiction";
+
+        data.put(ExceptionRecordFields.CONTAINS_PAYMENTS, YesNoFieldValues.YES);
+        data.put(ExceptionRecordFields.ENVELOPE_ID, envelopeId);
+
+        CaseDetails caseDetails =
+            TestCaseBuilder
+                .createCaseWith(builder -> builder
+                    .id(Long.valueOf(CASE_ID))
+                    .caseTypeId(CASE_TYPE_ID)
+                    .jurisdiction("some jurisdiction")
+                    .data(data)
+                );
+
+        paymentsProcessor.updatePayments(PaymentsHelper.create(caseDetails), CASE_ID, jurisdiction, NEW_CASE_ID);
+
+        verify(paymentsService).updatePayment(envelopeId, jurisdiction, CASE_ID, NEW_CASE_ID);
     }
 }

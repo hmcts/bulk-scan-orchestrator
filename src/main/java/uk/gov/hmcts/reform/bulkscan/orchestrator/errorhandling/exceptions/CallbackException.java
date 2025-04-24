@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions;
 
 // General exception which we do not want to handle and respond to callback with 500
 public class CallbackException extends RuntimeException {

@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.DuplicateDocsException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.Documents;
 
 import java.util.List;

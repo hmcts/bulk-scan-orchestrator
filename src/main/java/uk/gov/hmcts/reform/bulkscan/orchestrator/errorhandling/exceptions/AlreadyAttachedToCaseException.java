@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd;
+package uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions;
 
 public class AlreadyAttachedToCaseException extends RuntimeException {
     public AlreadyAttachedToCaseException(String message) {

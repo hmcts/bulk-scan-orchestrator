@@ -6,10 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.data.callbackresult.NewCallbackResult;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CallbackException;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.DuplicateDocsException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.AlreadyAttachedToCaseException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.CallbackException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.CaseNotFoundException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.DuplicateDocsException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.PaymentsPublishingException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublishingException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
@@ -82,10 +84,10 @@ public class ExceptionRecordAttacher {
                     attachToCaseRef
                 ));
         } catch (AlreadyAttachedToCaseException
-            | DuplicateDocsException
-            | CaseNotFoundException
-            | MultipleCasesFoundException
-            | InvalidCaseIdException exc
+                 | DuplicateDocsException
+                 | CaseNotFoundException
+                 | MultipleCasesFoundException
+                 | InvalidCaseIdException exc
         ) {
             log.warn(
                 "Validation error when attaching ER {} in {} to case {}",
