@@ -108,7 +108,6 @@ withPipeline(type, product, component) {
   enableAksStagingDeployment()
   disableLegacyDeployment()
   enableSlackNotifications(channel)
-  enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
 
   def branchesToSync = ['demo', 'perftest']
   syncBranchesWithMaster(branchesToSync)
