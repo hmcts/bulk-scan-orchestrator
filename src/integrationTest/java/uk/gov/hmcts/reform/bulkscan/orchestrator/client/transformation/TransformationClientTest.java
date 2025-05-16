@@ -3,9 +3,9 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.client.transformation;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.client.HttpClientErrorException.BadRequest;
 import org.springframework.web.client.HttpClientErrorException.Forbidden;
 import org.springframework.web.client.HttpClientErrorException.Unauthorized;
@@ -52,7 +52,7 @@ public class TransformationClientTest {
 
     private static final String TRANSFORMATION_URL = "/transform-exception-record";
 
-    @MockBean
+    @MockitoBean
     private AuthTokenGenerator s2sTokenGenerator;
 
     @Autowired

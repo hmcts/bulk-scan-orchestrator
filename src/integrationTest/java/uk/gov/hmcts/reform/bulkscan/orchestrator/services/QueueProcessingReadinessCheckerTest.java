@@ -3,8 +3,8 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services;
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.out.JurisdictionConfigurationStatus;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.idam.AuthenticationChecker;
@@ -43,7 +43,7 @@ public class QueueProcessingReadinessCheckerTest {
             )
         );
 
-    @SpyBean
+    @MockitoSpyBean
     private AuthenticationChecker authenticationChecker;
 
     @Autowired
