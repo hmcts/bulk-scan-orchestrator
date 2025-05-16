@@ -9,8 +9,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.IntegrationTest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.CcdCallException;
@@ -45,13 +45,13 @@ class CaseRetrievalTest {
 
     private static final String TEST_SERVICE_NAME = "bulkscan";
 
-    @SpyBean
+    @MockitoSpyBean
     private CcdAuthenticatorFactory authenticatorFactory;
 
     @Autowired
     private CoreCaseDataApi coreCaseDataApi;
 
-    @SpyBean
+    @MockitoSpyBean
     private ServiceConfigProvider serviceConfigProvider;
 
     private CcdApi ccdApi;
