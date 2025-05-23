@@ -227,7 +227,9 @@ dependencies {
   integrationTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.21.0'
 
   functionalTestImplementation sourceSets.main.runtimeClasspath
-  functionalTestImplementation sourceSets.integrationTest.runtimeClasspath
+  functionalTestImplementation sourceSets.test.runtimeClasspath
+  functionalTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.21.0'
+  functionalTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.21.0'
 
   smokeTestImplementation sourceSets.main.runtimeClasspath
   smokeTestImplementation sourceSets.test.runtimeClasspath
