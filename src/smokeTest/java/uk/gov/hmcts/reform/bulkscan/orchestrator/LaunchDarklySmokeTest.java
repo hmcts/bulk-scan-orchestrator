@@ -5,8 +5,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.launchdarkly.LaunchDarklyClientFactory;
@@ -17,9 +17,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 class LaunchDarklySmokeTest {
 
-    @MockBean
+    @MockitoBean
     private LaunchDarklyClient ldClient;
-    @MockBean
+    @MockitoBean
     private LaunchDarklyClientFactory ldFactory;
 
     @Value("${sdk-key:YYYYY}")
