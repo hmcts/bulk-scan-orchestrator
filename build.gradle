@@ -218,8 +218,8 @@ repositories {
 def versions = [
   reformLogging     : '6.0.1',
   springfoxSwagger  : '2.9.2',
-  junit             : '5.10.3',
-  junitPlatform     : '1.10.3',
+  junit             : '5.13.0',
+  junitPlatform     : '1.13.0',
   testContainers    : '1.20.6',
   flyway            : "$flywayVersion",
   postgresql        : "$postgresqlVersion"
