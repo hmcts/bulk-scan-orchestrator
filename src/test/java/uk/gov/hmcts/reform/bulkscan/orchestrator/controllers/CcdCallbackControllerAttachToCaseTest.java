@@ -3,9 +3,9 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.controllers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.AttachToCaseCallbackService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CreateCaseCallbackService;
@@ -22,9 +22,12 @@ class CcdCallbackControllerAttachToCaseTest {
 
     @Autowired MockMvc mvc;
 
-    @MockBean AttachToCaseCallbackService attachService;
-    @MockBean CreateCaseCallbackService createService;
-    @MockBean ReclassifyCallbackService reclassifyCallbackService;
+    @MockitoBean
+    AttachToCaseCallbackService attachService;
+    @MockitoBean
+    CreateCaseCallbackService createService;
+    @MockitoBean
+    ReclassifyCallbackService reclassifyCallbackService;
 
     @Test
     void should_return_500_in_case_of_internal_error() throws Exception {
