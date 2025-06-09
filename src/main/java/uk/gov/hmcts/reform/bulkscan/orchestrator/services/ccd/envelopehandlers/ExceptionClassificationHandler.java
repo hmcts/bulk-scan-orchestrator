@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.envelopehandlers;
 
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.PaymentsProcessor;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.PaymentsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeProcessingResult;
@@ -13,14 +13,14 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 public class ExceptionClassificationHandler {
 
     private final CreateExceptionRecord exceptionRecordCreator;
-    private final PaymentsProcessor paymentsProcessor;
+    private final PaymentsService paymentsService;
 
     public ExceptionClassificationHandler(
         CreateExceptionRecord exceptionRecordCreator,
-        PaymentsProcessor paymentsProcessor
+        PaymentsService paymentsService
     ) {
         this.exceptionRecordCreator = exceptionRecordCreator;
-        this.paymentsProcessor = paymentsProcessor;
+        this.paymentsService = paymentsService;
     }
 
     public EnvelopeProcessingResult handle(Envelope envelope) {
@@ -30,7 +30,7 @@ public class ExceptionClassificationHandler {
         );
 
         Long ccdId = exceptionRecordCreator.tryCreateFrom(envelope);
-        paymentsProcessor.createPayments(envelope, ccdId, true);
+        paymentsService.createNewPayment(envelope, ccdId, true);
 
         return new EnvelopeProcessingResult(ccdId, EXCEPTION_RECORD);
     }

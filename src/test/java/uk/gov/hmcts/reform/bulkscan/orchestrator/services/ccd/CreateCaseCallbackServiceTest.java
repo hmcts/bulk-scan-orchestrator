@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.Callba
 import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.PaymentsPublishingException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.PaymentsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ExceptionRecordValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ProcessResult;
@@ -64,7 +65,7 @@ class CreateCaseCallbackServiceTest {
     @Mock private CaseFinder caseFinder;
     @Mock private CcdNewCaseCreator ccdNewCaseCreator;
     @Mock private ExceptionRecordFinalizer exceptionRecordFinalizer;
-    @Mock private PaymentsProcessor paymentsProcessor;
+    @Mock private PaymentsService paymentsService;
     @Mock private CallbackResultRepositoryProxy callbackResultRepositoryProxy;
 
     private CreateCaseCallbackService createCaseCallbackService;
@@ -77,7 +78,7 @@ class CreateCaseCallbackServiceTest {
             caseFinder,
             ccdNewCaseCreator,
             exceptionRecordFinalizer,
-            paymentsProcessor,
+            paymentsService,
             callbackResultRepositoryProxy
         );
     }
@@ -552,7 +553,7 @@ class CreateCaseCallbackServiceTest {
         });
         assertThat(result.getErrors()).isEmpty();
         assertThat(result.getWarnings()).isEmpty();
-        verify(paymentsProcessor).updatePayments(any(), anyString(), anyString(), eq(Long.toString(newCaseId)));
+        verify(paymentsService).updatePayments(any(), anyString(), anyString(), eq(Long.toString(newCaseId)));
     }
 
     @Test
@@ -583,7 +584,7 @@ class CreateCaseCallbackServiceTest {
             anyString()
         )).willReturn(new CreateCaseResult(newCaseId));
 
-        willThrow(PaymentsPublishingException.class).given(paymentsProcessor)
+        willThrow(PaymentsPublishingException.class).given(paymentsService)
             .updatePayments(any(), anyString(), anyString(), eq(Long.toString(newCaseId)));
 
         // when

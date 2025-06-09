@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.PaymentsProcessor;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.PaymentsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.casecreation.AutoCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.casecreation.CaseCreationException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.casecreation.CaseCreationResult;
@@ -35,14 +35,14 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 class NewApplicationHandlerTest {
 
     @Mock AutoCaseCreator autoCaseCreator;
-    @Mock PaymentsProcessor paymentsProcessor;
+    @Mock PaymentsService paymentsService;
     @Mock CreateExceptionRecord exceptionRecordCreator;
 
     NewApplicationHandler handler;
 
     @BeforeEach
     void setUp() {
-        handler = new NewApplicationHandler(autoCaseCreator, paymentsProcessor, exceptionRecordCreator);
+        handler = new NewApplicationHandler(autoCaseCreator, paymentsService, exceptionRecordCreator);
     }
 
     @Test
@@ -61,7 +61,7 @@ class NewApplicationHandlerTest {
 
         verify(autoCaseCreator).createCase(envelope);
         verify(exceptionRecordCreator, never()).tryCreateFrom(any());
-        verify(paymentsProcessor).createPayments(envelope, caseId, false);
+        verify(paymentsService).createNewPayment(envelope, caseId, false);
     }
 
     @Test
@@ -80,7 +80,7 @@ class NewApplicationHandlerTest {
 
         verify(autoCaseCreator).createCase(envelope);
         verify(exceptionRecordCreator).tryCreateFrom(envelope);
-        verify(paymentsProcessor).createPayments(envelope, CASE_ID, true);
+        verify(paymentsService).createNewPayment(envelope, CASE_ID, true);
     }
 
     @Test
@@ -111,7 +111,7 @@ class NewApplicationHandlerTest {
 
         verify(autoCaseCreator).createCase(envelope);
         verify(exceptionRecordCreator).tryCreateFrom(envelope);
-        verify(paymentsProcessor).createPayments(envelope, CASE_ID, true);
+        verify(paymentsService).createNewPayment(envelope, CASE_ID, true);
     }
 
     @Test

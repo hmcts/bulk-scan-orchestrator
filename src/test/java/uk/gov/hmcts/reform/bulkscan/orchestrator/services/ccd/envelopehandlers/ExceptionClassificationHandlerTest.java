@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.PaymentsProcessor;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.PaymentsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,13 +24,13 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 class ExceptionClassificationHandlerTest {
 
     @Mock CreateExceptionRecord exceptionRecordCreator;
-    @Mock PaymentsProcessor paymentsProcessor;
+    @Mock PaymentsService paymentsService;
 
     ExceptionClassificationHandler handler;
 
     @BeforeEach
     void setUp() {
-        handler = new ExceptionClassificationHandler(exceptionRecordCreator, paymentsProcessor);
+        handler = new ExceptionClassificationHandler(exceptionRecordCreator, paymentsService);
     }
 
     @Test
@@ -47,7 +47,7 @@ class ExceptionClassificationHandlerTest {
         assertThat(result.ccdId).isEqualTo(CASE_ID);
 
         verify(exceptionRecordCreator).tryCreateFrom(envelope);
-        verify(paymentsProcessor).createPayments(envelope, CASE_ID, true);
+        verify(paymentsService).createNewPayment(envelope, CASE_ID, true);
     }
 
     @Test
