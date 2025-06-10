@@ -92,7 +92,7 @@ public class PaymentsService {
         ));
 
         try {
-            paymentProcessorClient.updatePayment(paymentToUpdate);
+            paymentProcessorClient.updatePayment(paymentToUpdate); //TODO calls here
             updatePayment.setStatus(PaymentStatus.COMPLETE);
         } catch (FeignException ex) {
             updatePayment.setStatus(PaymentStatus.FAILED);
@@ -161,7 +161,7 @@ public class PaymentsService {
             new NotFoundException(String.format("Payment with id '%s' not found", paymentId)));
 
         try {
-            paymentProcessorClient.updatePayment(new UpdatePaymentDTO(paymentToReprocess));
+            paymentProcessorClient.updatePayment(new UpdatePaymentDTO(paymentToReprocess)); //TODO calls here
             paymentToReprocess.setStatus(PaymentStatus.COMPLETE);
             paymentToReprocess.setStatusMessage("");
         } catch (FeignException ex) {
