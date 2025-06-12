@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.Callba
 import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.CaseNotFoundException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.PaymentsPublishingException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.PaymentsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -63,7 +64,7 @@ class ExceptionRecordAttacherTest {
     private SupplementaryEvidenceWithOcrUpdater supplementaryEvidenceWithOcrUpdater;
 
     @Mock
-    private PaymentsProcessor paymentsProcessor;
+    private PaymentsService paymentsService;
 
     @Mock
     private CallbackResultRepositoryProxy callbackResultRepositoryProxy;
@@ -117,7 +118,7 @@ class ExceptionRecordAttacherTest {
         exceptionRecordAttacher = new ExceptionRecordAttacher(
             supplementaryEvidenceUpdater,
             supplementaryEvidenceWithOcrUpdater,
-            paymentsProcessor,
+            paymentsService,
             callbackResultRepositoryProxy,
             ccdApi
         );
@@ -153,7 +154,7 @@ class ExceptionRecordAttacherTest {
             assertThat(data.caseId).isEqualTo(EXISTING_CASE_ID);
         });
         var paymentsDataCaptor = ArgumentCaptor.forClass(PaymentsHelper.class);
-        verify(paymentsProcessor)
+        verify(paymentsService)
             .updatePayments(paymentsDataCaptor.capture(), eq(CASE_REF), eq(JURISDICTION), eq(EXISTING_CASE_ID));
         assertThat(paymentsDataCaptor.getValue()).satisfies(data -> {
             assertThat(data.containsPayments).isEqualTo(CASE_DETAILS.getData().get(CONTAINS_PAYMENTS).equals(YES));
@@ -268,7 +269,7 @@ class ExceptionRecordAttacherTest {
         AttachToCaseEventData callBackEvent = getCallbackEvent(SUPPLEMENTARY_EVIDENCE_WITH_OCR);
         Throwable cause = new Exception("cause");
         doThrow(new PaymentsPublishingException("msg", cause))
-            .when(paymentsProcessor).updatePayments(
+            .when(paymentsService).updatePayments(
                 any(PaymentsHelper.class),
                 eq(CASE_REF),
                 eq(JURISDICTION),

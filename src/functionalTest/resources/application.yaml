@@ -28,9 +28,6 @@ queue:
     name: ${QUEUE_ENVELOPES_NAME}
     write-access-key: ${ENVELOPES_QUEUE_WRITE_ACCESS_KEY}
     read-access-key: ${ENVELOPES_QUEUE_READ_ACCESS_KEY}
-  payments:
-    name: ${QUEUE_PAYMENTS_NAME}
-    write-access-key: ${PAYMENTS_QUEUE_WRITE_ACCESS_KEY}
 
 # because functional tests load up SpringBootTest
 azure:

@@ -140,7 +140,7 @@ sonarqube {
     property "sonar.coverage.jacoco.xmlReportPaths", jacocoTestReport.reports.xml.outputLocation.get().asFile.absolutePath
     property "sonar.coverage.exclusions", "**/config/**"
     property "sonar.cpd.exclusions", "**/caseupdate/model/request/ExceptionRecord.java,**/TransformationRequest.java,**/internal/ExceptionRecord.java"
-    property "sonar.exclusions", "**/envelopes/JmsEnvelopeMessageProcessor.java,**/payments/JmsPaymentsPublisher.java,**/processedenvelopes/JmsProcessedEnvelopeNotifier.java"
+    property "sonar.exclusions", "**/envelopes/JmsEnvelopeMessageProcessor.java,**/processedenvelopes/JmsProcessedEnvelopeNotifier.java"
   }
 }
 

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.config.ServiceConfigItem;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.PaymentsProcessor;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.PaymentsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate.AutoCaseUpdateResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate.AutoCaseUpdater;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
@@ -35,7 +35,7 @@ import static uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.doma
 class SupplementaryEvidenceWithOcrHandlerTest {
 
     @Mock CreateExceptionRecord exceptionRecordCreator;
-    @Mock PaymentsProcessor paymentsProcessor;
+    @Mock PaymentsService paymentsService;
     @Mock AutoCaseUpdater autoCaseUpdater;
     @Mock ServiceConfigProvider serviceConfigProvider;
 
@@ -45,7 +45,7 @@ class SupplementaryEvidenceWithOcrHandlerTest {
     void setUp() {
         handler = new SupplementaryEvidenceWithOcrHandler(
             exceptionRecordCreator,
-            paymentsProcessor,
+            paymentsService,
             autoCaseUpdater,
             serviceConfigProvider
         );
@@ -66,7 +66,7 @@ class SupplementaryEvidenceWithOcrHandlerTest {
         assertThat(result.ccdId).isEqualTo(CASE_ID);
 
         verify(exceptionRecordCreator).tryCreateFrom(envelope);
-        verify(paymentsProcessor).createPayments(envelope, CASE_ID, true);
+        verify(paymentsService).createNewPayment(envelope, CASE_ID, true);
     }
 
     @Test
@@ -84,7 +84,7 @@ class SupplementaryEvidenceWithOcrHandlerTest {
         assertThat(result.ccdId).isEqualTo(existingCaseId);
         assertThat(result.envelopeCcdAction).isEqualTo(EnvelopeCcdAction.AUTO_UPDATED_CASE);
 
-        verify(paymentsProcessor).createPayments(envelope, existingCaseId, false);
+        verify(paymentsService).createNewPayment(envelope, existingCaseId, false);
     }
 
     @Test
@@ -103,7 +103,7 @@ class SupplementaryEvidenceWithOcrHandlerTest {
         assertThat(result.ccdId).isEqualTo(CASE_ID);
 
         verify(exceptionRecordCreator).tryCreateFrom(envelope);
-        verify(paymentsProcessor).createPayments(envelope, CASE_ID, true);
+        verify(paymentsService).createNewPayment(envelope, CASE_ID, true);
     }
 
     @Test
@@ -138,7 +138,7 @@ class SupplementaryEvidenceWithOcrHandlerTest {
         assertThat(result.ccdId).isEqualTo(CASE_ID);
 
         verify(exceptionRecordCreator).tryCreateFrom(envelope);
-        verify(paymentsProcessor).createPayments(envelope, CASE_ID, true);
+        verify(paymentsService).createNewPayment(envelope, CASE_ID, true);
     }
 
     @Test

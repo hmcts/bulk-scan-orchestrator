@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.envelopehandlers;
 
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.PaymentsProcessor;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.PaymentsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.autocaseupdate.AutoCaseUpdater;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.config.ServiceConfigProvider;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
@@ -18,18 +18,18 @@ public class SupplementaryEvidenceWithOcrHandler {
     public static final int MAX_RETRIES = 2;
 
     private final CreateExceptionRecord exceptionRecordCreator;
-    private final PaymentsProcessor paymentsProcessor;
+    private final PaymentsService paymentsService;
     private final AutoCaseUpdater autoCaseUpdater;
     private final ServiceConfigProvider serviceConfigProvider;
 
     public SupplementaryEvidenceWithOcrHandler(
         CreateExceptionRecord exceptionRecordCreator,
-        PaymentsProcessor paymentsProcessor,
+        PaymentsService paymentsService,
         AutoCaseUpdater autoCaseUpdater,
         ServiceConfigProvider serviceConfigProvider
     ) {
         this.exceptionRecordCreator = exceptionRecordCreator;
-        this.paymentsProcessor = paymentsProcessor;
+        this.paymentsService = paymentsService;
         this.autoCaseUpdater = autoCaseUpdater;
         this.serviceConfigProvider = serviceConfigProvider;
     }
@@ -45,7 +45,7 @@ public class SupplementaryEvidenceWithOcrHandler {
 
             switch (updateResult.type) {
                 case OK:
-                    paymentsProcessor.createPayments(envelope, updateResult.caseId, false);
+                    paymentsService.createNewPayment(envelope, updateResult.caseId, false);
                     return new EnvelopeProcessingResult(updateResult.caseId, AUTO_UPDATED_CASE);
                 case ERROR:
                     if (deliveryCount < MAX_RETRIES) {
@@ -66,7 +66,7 @@ public class SupplementaryEvidenceWithOcrHandler {
 
     private EnvelopeProcessingResult createExceptionRecord(Envelope envelope) {
         Long ccdId = exceptionRecordCreator.tryCreateFrom(envelope);
-        paymentsProcessor.createPayments(envelope, ccdId, true);
+        paymentsService.createNewPayment(envelope, ccdId, true);
         return new EnvelopeProcessingResult(ccdId, EXCEPTION_RECORD);
     }
 }

@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.Callba
 import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.CaseNotFoundException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.DuplicateDocsException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.PaymentsPublishingException;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.PaymentsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -32,20 +33,20 @@ public class ExceptionRecordAttacher {
 
     private final SupplementaryEvidenceUpdater supplementaryEvidenceUpdater;
     private final SupplementaryEvidenceWithOcrUpdater supplementaryEvidenceWithOcrUpdater;
-    private final PaymentsProcessor paymentsProcessor;
+    private final PaymentsService paymentsService;
     private final CallbackResultRepositoryProxy callbackResultRepositoryProxy;
     private final CcdApi ccdApi;
 
     public ExceptionRecordAttacher(
         SupplementaryEvidenceUpdater supplementaryEvidenceUpdater,
         SupplementaryEvidenceWithOcrUpdater supplementaryEvidenceWithOcrUpdater,
-        PaymentsProcessor paymentsProcessor,
+        PaymentsService paymentsService,
         CallbackResultRepositoryProxy callbackResultRepositoryProxy,
         CcdApi ccdApi
     ) {
         this.supplementaryEvidenceUpdater = supplementaryEvidenceUpdater;
         this.supplementaryEvidenceWithOcrUpdater = supplementaryEvidenceWithOcrUpdater;
-        this.paymentsProcessor = paymentsProcessor;
+        this.paymentsService = paymentsService;
         this.callbackResultRepositoryProxy = callbackResultRepositoryProxy;
         this.ccdApi = ccdApi;
     }
@@ -77,7 +78,7 @@ public class ExceptionRecordAttacher {
             );
 
             return attachToCase(callBackEvent, ignoreWarnings)
-                .peek(attachToCaseRef -> paymentsProcessor.updatePayments(
+                .peek(attachToCaseRef -> paymentsService.updatePayments(
                     PaymentsHelper.create(exceptionRecordDetails),
                     Long.toString(callBackEvent.exceptionRecordId),
                     callBackEvent.exceptionRecordJurisdiction,

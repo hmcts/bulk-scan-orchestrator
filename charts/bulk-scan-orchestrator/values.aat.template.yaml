@@ -2,7 +2,6 @@ java:
   environment:
     ENVELOPES_QUEUE_NAME: "envelopes-staging"
     PROCESSED_ENVELOPES_QUEUE_NAME: "processed-envelopes-staging"
-    PAYMENTS_QUEUE_NAME: "payments-staging"
     FLYWAY_SKIP_MIGRATIONS: "false"
     DB_HOST: "{{ .Release.Name }}-postgresql"
     DB_NAME: "{{ .Values.postgresql.auth.database}}"
@@ -51,8 +50,6 @@ java:
           alias: idam.users.sscs.password
         - name: envelopes-staging-queue-listen-shared-access-key
           alias: ENVELOPES_QUEUE_READ_ACCESS_KEY
-        - name: payments-staging-queue-send-shared-access-key
-          alias: PAYMENTS_QUEUE_WRITE_ACCESS_KEY
         - name: processed-envelopes-staging-queue-send-shared-access-key
           alias: PROCESSED_ENVELOPES_QUEUE_WRITE_ACCESS_KEY
         - name: envelopes-queue-max-delivery-count-premium
