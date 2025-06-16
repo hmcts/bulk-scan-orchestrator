@@ -215,7 +215,7 @@ dependencies {
 
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
   testImplementation group: 'com.typesafe', name: 'config', version: '1.4.3'
-  testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.2'
+  testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.5'
   testImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.2'
   testImplementation group: 'io.github.netmikey.logunit', name: 'logunit-core', version: '2.0.0'
   testRuntimeOnly group: 'io.github.netmikey.logunit', name: 'logunit-logback', version: '2.0.0'
