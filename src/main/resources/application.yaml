@@ -55,12 +55,6 @@ azure:
       access-key: ${PROCESSED_ENVELOPES_QUEUE_WRITE_ACCESS_KEY}
       access-key-name: ${QUEUE_ACCESS_KEY_SEND_NAME}
       queue-name: ${PROCESSED_ENVELOPES_QUEUE_NAME}
-    payments:
-      access-key: ${PAYMENTS_QUEUE_WRITE_ACCESS_KEY}
-      access-key-name: ${QUEUE_ACCESS_KEY_SEND_NAME}
-      queue-name: ${PAYMENTS_QUEUE_NAME}
-      manual-retry-count: 3
-      manual-retry-wait-in-ms: 2000
 
 core_case_data:
   api:

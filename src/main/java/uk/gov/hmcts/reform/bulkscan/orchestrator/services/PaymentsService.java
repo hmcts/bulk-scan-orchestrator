@@ -14,9 +14,11 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.model.PaymentInfoDTO;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.PaymentStatus;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.UpdatePayment;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.UpdatePaymentDTO;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -38,37 +40,63 @@ public class PaymentsService {
      * Creates a new payment in the database, sends it to payment processor.
      *
      * @param envelope The envelope containing the payment data.
-     * @param isExceptionRecord boolean for if the envelope being processed is an exception record.
      * @param caseId The id of the CCD case.
+     * @param isExceptionRecord boolean for if the envelope being processed is an exception record.
      */
-    public void createNewPayment(Envelope envelope, boolean isExceptionRecord, Long caseId) {
-        CreatePaymentDTO paymentToCreate = new CreatePaymentDTO(
-            envelope.id,
-            Long.toString(caseId),
-            isExceptionRecord,
-            envelope.poBox,
-            envelope.jurisdiction,
-            envelope.container,
-            envelope.payments.stream().map(payment ->
-                new PaymentInfoDTO(payment.documentControlNumber)).toList()
-        );
+    public void createNewPayment(Envelope envelope, Long caseId, boolean isExceptionRecord) {
+        if (envelope.payments != null && !envelope.payments.isEmpty()) {
+            CreatePaymentDTO paymentToCreate = new CreatePaymentDTO(
+                envelope.id,
+                Long.toString(caseId),
+                isExceptionRecord,
+                envelope.poBox,
+                envelope.jurisdiction,
+                envelope.container,
+                envelope.payments.stream().map(payment ->
+                    new PaymentInfoDTO(payment.documentControlNumber)).toList()
+            );
 
-        Payment payment = paymentsRepository.save(new Payment(paymentToCreate, PaymentStatus.PENDING));
+            Payment payment = paymentsRepository.save(new Payment(paymentToCreate, PaymentStatus.PENDING));
 
-        try {
-            paymentProcessorClient.createPayment(paymentToCreate);
-            payment.setStatus(PaymentStatus.COMPLETE);
-        } catch (FeignException ex) {
-            payment.setStatus(PaymentStatus.FAILED);
-            payment.setStatusMessage(ex.getMessage());
-            log.error(
-                "Call to payment processor for new payment failed. Status: {}, request: {}",
-                ex.status(),
-                ex.request()
+            try {
+                paymentProcessorClient.createPayment(paymentToCreate);
+                payment.setStatus(PaymentStatus.COMPLETE);
+            } catch (FeignException ex) {
+                payment.setStatus(PaymentStatus.FAILED);
+                payment.setStatusMessage(ex.getMessage());
+                log.error(
+                    "Call to payment processor for new payment failed. Status: {}, request: {}",
+                    ex.status(),
+                    ex.request()
+                );
+            }
+            paymentsRepository.save(payment);
+        } else {
+            log.info(
+                "Envelope has no payments, not sending create command. Envelope id: {}. Case reference {}",
+                envelope.id,
+                Optional.ofNullable(envelope.caseRef).orElse("(NOT PRESENT)")
             );
         }
-        paymentsRepository.save(payment);
     }
+
+    public void updatePayments(
+        PaymentsHelper paymentsHelper,
+        String exceptionRecordId,
+        String jurisdiction,
+        String newCaseId) {
+        if (paymentsHelper.containsPayments) {
+            log.info("Started processing update payment via API");
+            updatePayment(paymentsHelper.envelopeId, jurisdiction, exceptionRecordId, newCaseId);
+            log.info("Finished processing update payment via API");
+        } else {
+            log.info(
+                "Exception record has no payments, not sending update command. ER id: {}",
+                exceptionRecordId
+            );
+        }
+    }
+
 
     /**
      * Creates an update payment in the database, sends it to payment processor.

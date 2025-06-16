@@ -6,7 +6,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.payments.PaymentsPublisher;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.ProcessedEnvelopeNotifier;
 
 import static org.mockito.Mockito.mock;
@@ -25,11 +24,6 @@ class IntegrationTestInitializer implements ApplicationContextInitializer<Config
     @Bean
     public ProcessedEnvelopeNotifier processedEnvelopeNotifier() {
         return mock(ProcessedEnvelopeNotifier.class);
-    }
-
-    @Bean
-    public PaymentsPublisher paymentsPublisher() {
-        return mock(PaymentsPublisher.class);
     }
 
     @Bean

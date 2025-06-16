@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.PaymentsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseFinder;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.PaymentsProcessor;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -30,7 +30,7 @@ class SupplementaryEvidenceHandlerTest {
 
     @Mock CaseFinder caseFinder;
     @Mock AttachDocsToSupplementaryEvidence evidenceAttacher;
-    @Mock PaymentsProcessor paymentsProcessor;
+    @Mock PaymentsService paymentsService;
     @Mock CreateExceptionRecord exceptionRecordCreator;
 
     @Mock CaseDetails caseDetails;
@@ -42,8 +42,8 @@ class SupplementaryEvidenceHandlerTest {
         handler = new SupplementaryEvidenceHandler(
             caseFinder,
             evidenceAttacher,
-            paymentsProcessor,
-            exceptionRecordCreator
+            exceptionRecordCreator,
+            paymentsService
         );
     }
 
@@ -64,7 +64,7 @@ class SupplementaryEvidenceHandlerTest {
         assertThat(result.ccdId).isEqualTo(ccdId);
 
         verify(evidenceAttacher).attach(envelope, caseDetails);
-        verify(paymentsProcessor).createPayments(envelope, caseDetails.getId(), false);
+        verify(paymentsService).createNewPayment(envelope, caseDetails.getId(), false);
     }
 
     @Test
@@ -82,7 +82,7 @@ class SupplementaryEvidenceHandlerTest {
         assertThat(result.ccdId).isEqualTo(CASE_ID);
 
         verify(exceptionRecordCreator).tryCreateFrom(envelope);
-        verify(paymentsProcessor).createPayments(envelope, CASE_ID, true);
+        verify(paymentsService).createNewPayment(envelope, CASE_ID, true);
     }
 
     @Test
@@ -102,7 +102,7 @@ class SupplementaryEvidenceHandlerTest {
 
         verify(evidenceAttacher).attach(envelope, caseDetails);
         verify(exceptionRecordCreator).tryCreateFrom(envelope);
-        verify(paymentsProcessor).createPayments(envelope, CASE_ID, true);
+        verify(paymentsService).createNewPayment(envelope, CASE_ID, true);
     }
 
     @Test

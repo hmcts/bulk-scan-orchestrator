@@ -80,7 +80,7 @@ class PaymentsServiceTest {
             List.of()
         );
 
-        paymentsService.createNewPayment(envelope, false, 0L);
+        paymentsService.createNewPayment(envelope, 0L, false);
 
         ArgumentCaptor<Payment> paymentCaptor = ArgumentCaptor.forClass(Payment.class);
         verify(paymentsRepository, times(2)).save(paymentCaptor.capture());
@@ -228,7 +228,7 @@ class PaymentsServiceTest {
             List.of()
         );
 
-        paymentsService.createNewPayment(envelope, false, 0L);
+        paymentsService.createNewPayment(envelope, 0L, false);
 
         ArgumentCaptor<Payment> paymentCaptor = ArgumentCaptor.forClass(Payment.class);
         verify(paymentsRepository, times(2)).save(paymentCaptor.capture());

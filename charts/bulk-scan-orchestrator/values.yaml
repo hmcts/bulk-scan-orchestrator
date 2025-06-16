@@ -31,7 +31,6 @@ java:
     QUEUE_NAMESPACE: "bulk-scan-servicebus-{{ .Values.global.environment }}-premium"
     ENVELOPES_QUEUE_NAME: "envelopes"
     PROCESSED_ENVELOPES_QUEUE_NAME: "processed-envelopes"
-    PAYMENTS_QUEUE_NAME: "payments"
     AUTO_CASE_CREATION_ENABLED_BULKSCAN: "false"
     AUTO_CASE_CREATION_ENABLED_BULKSCANAUTO: "true"
     AUTO_CASE_CREATION_ENABLED_SSCS: "false"
@@ -113,8 +112,6 @@ java:
           alias: idam.users.sscs.password
         - name: envelopes-queue-listen-shared-access-key-premium
           alias: ENVELOPES_QUEUE_READ_ACCESS_KEY
-        - name: payments-queue-send-shared-access-key-premium
-          alias: PAYMENTS_QUEUE_WRITE_ACCESS_KEY
         - name: processed-envelopes-queue-send-shared-access-key-premium
           alias: PROCESSED_ENVELOPES_QUEUE_WRITE_ACCESS_KEY
         - name: envelopes-queue-max-delivery-count-premium
