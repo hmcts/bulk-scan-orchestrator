@@ -58,19 +58,6 @@ public class QueueClientsConfig {
         return createSendClient(queueProperties);
     }
 
-    @Bean("payments-queue-config")
-    @ConfigurationProperties(prefix = "azure.servicebus.payments")
-    protected QueueConfigurationProperties paymentsQueueConfig() {
-        return new QueueConfigurationProperties();
-    }
-
-    @Bean("payments")
-    public ServiceBusSenderClient paymentsQueueClient(
-        @Qualifier("payments-queue-config") QueueConfigurationProperties queueProperties
-    ) {
-        return createSendClient(queueProperties);
-    }
-
     private ServiceBusSenderClient createSendClient(
         QueueConfigurationProperties queueProperties
     ) {
