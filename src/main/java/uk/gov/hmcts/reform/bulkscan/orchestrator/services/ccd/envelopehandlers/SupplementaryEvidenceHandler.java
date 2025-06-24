@@ -3,8 +3,8 @@ package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.envelopehandlers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.PaymentsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.CaseFinder;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.PaymentsProcessor;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Envelope;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.processedenvelopes.EnvelopeProcessingResult;
@@ -23,18 +23,18 @@ public class SupplementaryEvidenceHandler {
 
     private final CaseFinder caseFinder;
     private final AttachDocsToSupplementaryEvidence evidenceAttacher;
-    private final PaymentsProcessor paymentsProcessor;
+    private final PaymentsService paymentsService;
     private final CreateExceptionRecord exceptionRecordCreator;
 
     public SupplementaryEvidenceHandler(
         CaseFinder caseFinder,
         AttachDocsToSupplementaryEvidence evidenceAttacher,
-        PaymentsProcessor paymentsProcessor,
-        CreateExceptionRecord exceptionRecordCreator
+        CreateExceptionRecord exceptionRecordCreator,
+        PaymentsService paymentsService
     ) {
         this.caseFinder = caseFinder;
         this.evidenceAttacher = evidenceAttacher;
-        this.paymentsProcessor = paymentsProcessor;
+        this.paymentsService = paymentsService;
         this.exceptionRecordCreator = exceptionRecordCreator;
     }
 
@@ -50,7 +50,7 @@ public class SupplementaryEvidenceHandler {
             CaseDetails existingCase = caseDetailsFound.get();
             boolean docsAttached = evidenceAttacher.attach(envelope, existingCase);
             if (docsAttached) {
-                paymentsProcessor.createPayments(envelope, existingCase.getId(), false);
+                paymentsService.createNewPayment(envelope, existingCase.getId(), false);
                 return new EnvelopeProcessingResult(existingCase.getId(), AUTO_ATTACHED_TO_CASE);
             } else {
                 log.info(
@@ -60,7 +60,7 @@ public class SupplementaryEvidenceHandler {
                     existingCase.getId()
                 );
                 Long erId = exceptionRecordCreator.tryCreateFrom(envelope);
-                paymentsProcessor.createPayments(envelope, erId, true);
+                paymentsService.createNewPayment(envelope, erId, true);
                 return new EnvelopeProcessingResult(erId, EXCEPTION_RECORD);
             }
         } else {
@@ -72,7 +72,7 @@ public class SupplementaryEvidenceHandler {
                     Optional.ofNullable(envelope.caseRef).orElse("(NOT PRESENT)")
             );
             Long erId = exceptionRecordCreator.tryCreateFrom(envelope);
-            paymentsProcessor.createPayments(envelope, erId, true);
+            paymentsService.createNewPayment(envelope, erId, true);
             return new EnvelopeProcessingResult(erId, EXCEPTION_RECORD);
         }
     }
