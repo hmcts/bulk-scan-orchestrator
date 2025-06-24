@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.envelopehandlers;
 
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.PaymentsProcessor;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.PaymentsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.casecreation.AutoCaseCreator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.casecreation.CaseCreationException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.servicebus.domains.envelopes.model.Classification;
@@ -22,16 +22,16 @@ public class NewApplicationHandler {
     public static final int MAX_RETRIES_FOR_POTENTIALLY_RECOVERABLE_FAILURES = 2;
 
     private final AutoCaseCreator caseCreator;
-    private final PaymentsProcessor paymentsProcessor;
+    private final PaymentsService paymentsService;
     private final CreateExceptionRecord exceptionRecordCreator;
 
     public NewApplicationHandler(
         AutoCaseCreator caseCreator,
-        PaymentsProcessor paymentsProcessor,
+        PaymentsService paymentsService,
         CreateExceptionRecord exceptionRecordCreator
     ) {
         this.caseCreator = caseCreator;
-        this.paymentsProcessor = paymentsProcessor;
+        this.paymentsService = paymentsService;
         this.exceptionRecordCreator = exceptionRecordCreator;
     }
 
@@ -46,7 +46,7 @@ public class NewApplicationHandler {
         switch (caseCreationResult.resultType) {
             case CASE_CREATED:
             case CASE_ALREADY_EXISTS:
-                paymentsProcessor.createPayments(envelope, caseCreationResult.caseCcdId, false);
+                paymentsService.createNewPayment(envelope, caseCreationResult.caseCcdId, false);
                 return new EnvelopeProcessingResult(caseCreationResult.caseCcdId, AUTO_CREATED_CASE);
             case ABORTED_WITHOUT_FAILURE:
             case UNRECOVERABLE_FAILURE:
@@ -73,7 +73,7 @@ public class NewApplicationHandler {
     private Long createExceptionRecord(Envelope envelope) {
         Long ccdId = exceptionRecordCreator.tryCreateFrom(envelope);
 
-        paymentsProcessor.createPayments(envelope, ccdId, true);
+        paymentsService.createNewPayment(envelope, ccdId, true);
         return ccdId;
     }
 }

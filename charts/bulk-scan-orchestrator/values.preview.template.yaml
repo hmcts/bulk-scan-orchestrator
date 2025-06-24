@@ -15,7 +15,6 @@ java:
     QUEUE_NAMESPACE: "bsp-sb-preview"
     ENVELOPES_QUEUE_NAME: "{{ .Release.Name }}-servicebus-envelopes"
     PROCESSED_ENVELOPES_QUEUE_NAME: "{{ .Release.Name }}-servicebus-processed-envelopes"
-    PAYMENTS_QUEUE_NAME: "{{ .Release.Name }}-servicebus-payments"
     ENVELOPES_QUEUE_MAX_DELIVERY_COUNT: "10"
     FLYWAY_SKIP_MIGRATIONS: "false"
     DB_HOST: "{{ .Release.Name }}-postgresql"
@@ -39,8 +38,6 @@ java:
           alias: ENVELOPES_QUEUE_WRITE_ACCESS_KEY
         - name: all-preview-queue-access-key
           alias: ENVELOPES_QUEUE_READ_ACCESS_KEY
-        - name: all-preview-queue-access-key
-          alias: PAYMENTS_QUEUE_WRITE_ACCESS_KEY
         - name: all-preview-queue-access-key
           alias: PROCESSED_ENVELOPES_QUEUE_WRITE_ACCESS_KEY
   # Don't modify below here
@@ -67,5 +64,4 @@ servicebus:
       - name: envelopes
       - name: notifications
       - name: processed-envelopes
-      - name: payments
 

@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.Callba
 import uk.gov.hmcts.reform.bulkscan.orchestrator.errorhandling.exceptions.PaymentsPublishingException;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.in.CcdCallbackRequest;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.model.internal.ExceptionRecord;
+import uk.gov.hmcts.reform.bulkscan.orchestrator.services.PaymentsService;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.CreateCaseResult;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.ExceptionRecordValidator;
 import uk.gov.hmcts.reform.bulkscan.orchestrator.services.ccd.callback.PaymentsHelper;
@@ -42,7 +43,7 @@ public class CreateCaseCallbackService {
     private final CaseFinder caseFinder;
     private final CcdNewCaseCreator ccdNewCaseCreator;
     private final ExceptionRecordFinalizer exceptionRecordFinalizer;
-    private final PaymentsProcessor paymentsProcessor;
+    private final PaymentsService paymentsService;
     private final CallbackResultRepositoryProxy callbackResultRepositoryProxy;
 
     public CreateCaseCallbackService(
@@ -51,7 +52,7 @@ public class CreateCaseCallbackService {
         CaseFinder caseFinder,
         CcdNewCaseCreator ccdNewCaseCreator,
         ExceptionRecordFinalizer exceptionRecordFinalizer,
-        PaymentsProcessor paymentsProcessor,
+        PaymentsService paymentsService,
         CallbackResultRepositoryProxy callbackResultRepositoryProxy
     ) {
         this.exceptionRecordValidator = exceptionRecordValidator;
@@ -59,7 +60,7 @@ public class CreateCaseCallbackService {
         this.caseFinder = caseFinder;
         this.ccdNewCaseCreator = ccdNewCaseCreator;
         this.exceptionRecordFinalizer = exceptionRecordFinalizer;
-        this.paymentsProcessor = paymentsProcessor;
+        this.paymentsService = paymentsService;
         this.callbackResultRepositoryProxy = callbackResultRepositoryProxy;
     }
 
@@ -242,7 +243,7 @@ public class CreateCaseCallbackService {
         String caseId
     ) {
         try {
-            paymentsProcessor.updatePayments(
+            paymentsService.updatePayments(
                 PaymentsHelper.create(
                     exceptionRecordData
                 ),
