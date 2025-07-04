@@ -6,8 +6,6 @@ java:
     CORE_CASE_DATA_API_URL: "http://ccd-data-store-api-aat.service.core-compute-aat.internal"
     DOCUMENT_MANAGEMENT_URL: "http://dm-store-aat.service.core-compute-aat.internal"
     CDAM_URL: "http://ccd-case-document-am-api-aat.service.core-compute-aat.internal"
-    TRANSFORMATION_URL_BULKSCAN: "http://bulk-scan-sample-app-aat.service.core-compute-aat.internal/transform-exception-record"
-    UPDATE_URL_BULKSCAN: "http://bulk-scan-sample-app-aat.service.core-compute-aat.internal/update-case"
     UPDATE_URL_PROBATE: "http://probate-back-office-aat.service.core-compute-aat.internal/update-case"
     PAYMENT_PROCESSOR_URL: "http://bulk-scan-payment-processor-aat.service.core-compute-aat.internal/payment"
     QUEUE_ACCESS_KEY_LISTEN_NAME: "RootManageSharedAccessKey"
