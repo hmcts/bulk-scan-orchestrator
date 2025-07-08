@@ -1,9 +1,9 @@
 {
   "id": "{ENVELOPE_ID}",
   "case_ref": "1539860706648396",
-  "po_box": "SSCSPO",
-  "jurisdiction": "SSCS",
-  "container": "sscs",
+  "po_box": "BULKSCANPO",
+  "jurisdiction": "BULKSCAN",
+  "container": "bulkscan",
   "formType": "B123",
   "classification": "SUPPLEMENTARY_EVIDENCE_WITH_OCR",
   "zip_file_name": "zip-file-test-updated.zip",
