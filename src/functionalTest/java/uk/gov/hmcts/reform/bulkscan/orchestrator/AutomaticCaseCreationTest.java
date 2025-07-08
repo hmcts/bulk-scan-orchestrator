@@ -127,25 +127,25 @@ public class AutomaticCaseCreationTest {
         assertThat(serviceCases).isEmpty();
     }
 
-    //    @Test
-    //    void should_create_exception_record_when_envelope_data_is_invalid() throws Exception {
-    //        // given
-    //        // when
-    //        String envelopeId = sendEnvelopeMessage(
-    //            "envelopes/invalid-new-application-bulkscanauto.json",
-    //            UUID.randomUUID().toString()
-    //        );
-    //
-    //        // then
-    //        waitForExceptionRecordToBeCreated(envelopeId, ENABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID);
-    //
-    //        var exceptionRecords = findExceptionRecords(envelopeId, ENABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID);
-    //        assertThat(exceptionRecords.size()).isOne();
-    //
-    //        var serviceCases = caseSearcher.searchByEnvelopeId(
-    //            SERVICE_CASE_JURISDICTION, SERVICE_CASE_TYPE_ID, envelopeId);
-    //        assertThat(serviceCases).isEmpty();
-    //    }
+    @Test
+    void should_create_exception_record_when_envelope_data_is_invalid() throws Exception {
+        // given
+        // when
+        String envelopeId = sendEnvelopeMessage(
+            "envelopes/invalid-new-application-bulkscanauto.json",
+            UUID.randomUUID().toString()
+        );
+
+        // then
+        waitForExceptionRecordToBeCreated(envelopeId, ENABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID);
+
+        var exceptionRecords = findExceptionRecords(envelopeId, ENABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID);
+        assertThat(exceptionRecords.size()).isOne();
+
+        var serviceCases = caseSearcher.searchByEnvelopeId(
+            SERVICE_CASE_JURISDICTION, SERVICE_CASE_TYPE_ID, envelopeId);
+        assertThat(serviceCases).isEmpty();
+    }
 
     private String sendEnvelopeMessage(String resourcePath, String envelopeId) throws Exception {
         return (!Boolean.parseBoolean(System.getenv("JMS_ENABLED")))

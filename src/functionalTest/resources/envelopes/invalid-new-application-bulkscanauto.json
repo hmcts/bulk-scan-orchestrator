@@ -1,9 +1,9 @@
 {
   "id": "{ENVELOPE_ID}",
   "case_ref": "",
-  "po_box": "BULKSCANPO",
-  "jurisdiction": "BULKSCAN",
-  "container": "bulkscanauto",
+  "po_box": "13235",
+  "jurisdiction": "PRIVATELAW",
+  "container": "privatelaw",
   "formType": "B123",
   "classification": "NEW_APPLICATION",
   "zip_file_name": "invalid-new-application-bulkscanauto-test.zip",
