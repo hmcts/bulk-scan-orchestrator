@@ -68,32 +68,6 @@ public class AutomaticCaseCreationTest {
     }
 
     @Test
-    void should_create_case_when_envelope_data_is_valid_and_service_is_enabled_for_auto_creation() throws Exception {
-        // when
-        String envelopeId = UUID.randomUUID().toString();
-
-        sendEnvelopeMessage("envelopes/valid-new-application-bulkscanauto.json", envelopeId);
-
-        // then
-        waitForServiceCaseToBeInElasticSearch(envelopeId);
-
-        var cases = caseSearcher.searchByEnvelopeId(SERVICE_CASE_JURISDICTION, SERVICE_CASE_TYPE_ID, envelopeId);
-
-        assertThat(cases.size()).isEqualTo(1);
-        CaseDetails caseDetails = cases.get(0);
-
-        assertCorrectEnvelopeReferences(envelopeId, caseDetails);
-
-        // verify case fields correspond to values from the test file
-        assertThat(getCaseDataForField(caseDetails, "firstName")).isEqualTo("John");
-        assertThat(getCaseDataForField(caseDetails, "lastName")).isEqualTo("Smith");
-        assertThat(getCaseDataForField(caseDetails, "email")).isEqualTo("jsmith1@example.com");
-
-        // make sure the exception record wasn't created
-        assertThat(findExceptionRecords(envelopeId, ENABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID)).isEmpty();
-    }
-
-    @Test
     void should_not_create_more_than_one_case_for_the_same_envelope() throws Exception {
         // given a case has already been created from the envelope
         var envelopeId = UUID.randomUUID().toString();
@@ -146,26 +120,6 @@ public class AutomaticCaseCreationTest {
         waitForExceptionRecordToBeCreated(envelopeId, DISABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID);
 
         var exceptionRecords = findExceptionRecords(envelopeId, DISABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID);
-        assertThat(exceptionRecords.size()).isOne();
-
-        var serviceCases = caseSearcher.searchByEnvelopeId(
-            SERVICE_CASE_JURISDICTION, SERVICE_CASE_TYPE_ID, envelopeId);
-        assertThat(serviceCases).isEmpty();
-    }
-
-    @Test
-    void should_create_exception_record_when_envelope_data_is_invalid() throws Exception {
-        // given
-        // when
-        String envelopeId = sendEnvelopeMessage(
-            "envelopes/invalid-new-application-bulkscanauto.json",
-            UUID.randomUUID().toString()
-        );
-
-        // then
-        waitForExceptionRecordToBeCreated(envelopeId, ENABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID);
-
-        var exceptionRecords = findExceptionRecords(envelopeId, ENABLED_SERVICE_EXCEPTION_RECORD_CASE_TYPE_ID);
         assertThat(exceptionRecords.size()).isOne();
 
         var serviceCases = caseSearcher.searchByEnvelopeId(

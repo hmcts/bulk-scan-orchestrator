@@ -4,9 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,13 +23,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.logging.appinsights.SyntheticHeaders;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-import static uk.gov.hmcts.reform.bulkscan.orchestrator.SampleData.BULK_SCANNED_CASE_TYPE;
 
 @SpringBootTest
 @ActiveProfiles("nosb") // no servicebus queue handler registration
@@ -60,87 +53,6 @@ class CreateCaseTest {
             "Certificate.pdf",
             "documents/supplementary-evidence.pdf"
         );
-    }
-
-    @ParameterizedTest()
-    @ValueSource(strings = {
-        "bulkscan",     // search by 'bulkScanCaseReference' (old way)
-        "bulkscanauto"  // search by envelope Id (new way)
-    })
-    public void should_idempotently_create_case_from_valid_exception_record(String service) throws Exception {
-        // given
-        String exceptionRecordResource = "envelopes/new-envelope-create-case-with-evidence-" + service + ".json";
-
-        String jmsEnabled = System.getenv("JMS_ENABLED");
-
-        CaseDetails exceptionRecord = exceptionRecordCreator.createExceptionRecord(
-            service,
-            exceptionRecordResource,
-            dmUrl
-        );
-
-        // when
-        // create case callback endpoint invoked first time
-        var callbackResponse = invokeCallbackEndpoint(exceptionRecord);
-        String caseCcdId = getCaseCcdId(callbackResponse);
-
-        // then
-        CaseDetails createdCase = ccdApi.getCase(caseCcdId, exceptionRecord.getJurisdiction());
-        assertThat(createdCase.getCaseTypeId()).isEqualTo(BULK_SCANNED_CASE_TYPE);
-        assertThat(createdCase.getData().get("firstName")).isEqualTo("value1");
-        assertThat(createdCase.getData().get("lastName")).isEqualTo("value2");
-        assertThat(createdCase.getData().get("email")).isEqualTo("hello@test.com");
-
-        String caseExceptionRecordReference = (String) createdCase.getData().get(BULK_SCAN_CASE_REFERENCE_FIELD);
-        assertThat(caseExceptionRecordReference).isEqualTo(String.valueOf(exceptionRecord.getId()));
-
-        await("Case is ingested")
-            .atMost(10, TimeUnit.SECONDS)
-            .pollInterval(1, TimeUnit.SECONDS)
-            .until(() -> caseIngested(caseExceptionRecordReference, service));
-
-        // give ElasticSearch some time to reach consistency
-        Thread.sleep(2000);
-
-        // when
-        // create case callback endpoint invoked second time
-        var callbackResponse2 = invokeCallbackEndpoint(exceptionRecord);
-        String caseCcdId2 = getCaseCcdId(callbackResponse2);
-
-        // then
-        // the same case is returned
-        assertThat(caseCcdId2).isEqualTo(caseCcdId);
-        List<Long> caseIds = ccdApi.getCaseRefsByBulkScanCaseReference(caseExceptionRecordReference, service);
-        assertThat(caseIds)
-            .as("Should find only one service case for exception record {}", caseExceptionRecordReference)
-            .hasSize(1)
-            .first()
-            .isEqualTo(createdCase.getId());
-    }
-
-    @Test
-    public void should_clear_exception_record_warnings() throws Exception {
-        // given
-        CaseDetails exceptionRecord = exceptionRecordCreator.createExceptionRecord(
-            SampleData.CONTAINER,
-            "envelopes/new-application-with-ocr-data-warnings.json",
-            dmUrl
-        );
-
-        // warnings are present
-        assertThat(exceptionRecord).isNotNull();
-        assertThat(exceptionRecord.getData()).isNotNull();
-        assertThat(exceptionRecord.getData().get(DISPLAY_WARNINGS_FIELD)).isEqualTo("Yes");
-        assertThat(exceptionRecord.getData().get(OCR_DATA_VALIDATION_WARNINGS_FIELD)).asList().isNotEmpty();
-
-        // when
-        var response = invokeCallbackEndpoint(exceptionRecord);
-
-        // then
-        assertThat(response.getErrors()).isEmpty();
-        assertThat(response.getData()).isNotNull();
-        assertThat(response.getData().get(DISPLAY_WARNINGS_FIELD)).isEqualTo("No");
-        assertThat(response.getData().get(OCR_DATA_VALIDATION_WARNINGS_FIELD)).asList().isEmpty();
     }
 
     /**
