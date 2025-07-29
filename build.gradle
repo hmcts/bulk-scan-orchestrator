@@ -207,7 +207,7 @@ dependencies {
   implementation group: 'io.github.resilience4j', name: 'resilience4j-spring-boot3', version: '2.3.0'
   implementation group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.1'
   implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.5'
-  implementation group: 'com.azure', name: 'azure-messaging-servicebus', version: '7.17.12'
+  implementation group: 'com.azure', name: 'azure-messaging-servicebus', version: '7.17.13'
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.7'
   implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '3.2.2'
   implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.10.1'
