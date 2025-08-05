@@ -1,6 +1,6 @@
 buildscript {
   ext {
-    flywayVersion = '11.10.4'
+    flywayVersion = '11.10.5'
     postgresqlVersion = '42.7.7'
   }
   dependencies {
@@ -203,7 +203,7 @@ dependencies {
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version: '8.1'
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: '5.3.3'
   implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '3.0.4'
-  implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '5.1.1'
+  implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '5.2.0'
   implementation group: 'io.github.resilience4j', name: 'resilience4j-spring-boot3', version: '2.3.0'
   implementation group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.1'
   implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.5'
@@ -219,7 +219,7 @@ dependencies {
   testImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.2'
   testImplementation group: 'io.github.netmikey.logunit', name: 'logunit-core', version: '2.0.0'
   testRuntimeOnly group: 'io.github.netmikey.logunit', name: 'logunit-logback', version: '2.0.0'
-  implementation group: 'com.github.hmcts', name: 'fortify-client', version: '1.4.9', classifier: 'all'
+  implementation group: 'com.github.hmcts', name: 'fortify-client', version: '1.4.10', classifier: 'all'
 
   integrationTestImplementation sourceSets.main.runtimeClasspath
   integrationTestImplementation sourceSets.test.runtimeClasspath
