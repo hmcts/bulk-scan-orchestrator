@@ -214,7 +214,7 @@ dependencies {
   implementation group: 'com.github.hmcts', name: 'ccd-case-document-am-client', version: '1.59.2'
 
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-  testImplementation group: 'com.typesafe', name: 'config', version: '1.4.4'
+  testImplementation group: 'com.typesafe', name: 'config', version: '1.4.5'
   testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.6'
   testImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.2'
   testImplementation group: 'io.github.netmikey.logunit', name: 'logunit-core', version: '2.0.0'
