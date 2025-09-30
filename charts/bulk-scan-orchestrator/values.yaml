@@ -114,9 +114,7 @@ java:
           alias: PROCESSED_ENVELOPES_QUEUE_WRITE_ACCESS_KEY
         - name: envelopes-queue-max-delivery-count-premium
           alias: ENVELOPES_QUEUE_MAX_DELIVERY_COUNT
-        - name: app-insights-instrumentation-key
-          alias: azure.application-insights.instrumentation-key
-        - name: app-insights-connection-string
+        - name: app-insights-connection-string-uk
           alias: app-insights-connection-string
         - name: orchestrator-POSTGRES-PASS
           alias: DB_PASSWORD
