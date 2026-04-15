@@ -25,6 +25,10 @@ plugins {
 group = 'uk.gov.hmcts.reform'
 version = '0.1.0'
 
+ext {
+  testcontainersVersion = '1.21.4'
+}
+
 java {
   toolchain {
     languageVersion = JavaLanguageVersion.of(21)
@@ -167,6 +171,13 @@ dependencyCheck {
   }
 }
 
+dependencyManagement {
+  imports {
+    // fix pipeline issue related to Docker not being found for integration tests
+    mavenBom "org.testcontainers:testcontainers-bom:$testcontainersVersion"
+  }
+}
+
 repositories {
   mavenLocal()
   mavenCentral()
@@ -224,13 +235,13 @@ dependencies {
   integrationTestImplementation sourceSets.main.runtimeClasspath
   integrationTestImplementation sourceSets.test.runtimeClasspath
   integrationTestImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '4.3.0'
-  integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.21.4'
-  integrationTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.21.4'
+  integrationTestImplementation group: 'org.testcontainers', name: 'postgresql'
+  integrationTestImplementation group: 'org.testcontainers', name: 'junit-jupiter'
 
   functionalTestImplementation sourceSets.main.runtimeClasspath
   functionalTestImplementation sourceSets.test.runtimeClasspath
-  functionalTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.21.4'
-  functionalTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.21.4'
+  functionalTestImplementation group: 'org.testcontainers', name: 'postgresql'
+  functionalTestImplementation group: 'org.testcontainers', name: 'junit-jupiter'
 
   smokeTestImplementation sourceSets.main.runtimeClasspath
   smokeTestImplementation sourceSets.test.runtimeClasspath
