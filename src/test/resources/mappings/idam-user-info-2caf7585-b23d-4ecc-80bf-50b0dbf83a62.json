@@ -1,6 +1,6 @@
 {
   "id" : "2caf7585-b23d-4ecc-80bf-50b0dbf83a62",
-  "name" : "details",
+  "name" : "idam_user_info",
   "request" : {
     "url" : "/o/userinfo",
     "method" : "GET"

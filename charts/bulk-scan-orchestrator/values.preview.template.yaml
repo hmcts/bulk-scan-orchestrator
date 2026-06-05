@@ -1,7 +1,7 @@
 java:
   environment:
     S2S_URL: "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
-    IDAM_API_URL: "https://idam-api.aat.platform.hmcts.net"
+    IDAM_API_URL: "https://idam-web-public.aat.platform.hmcts.net"
     IDAM_CLIENT_REDIRECT_URI: "https://bulk-scan-orchestrator-aat.service.core-compute-aat.internal/oauth2/callback"
     CORE_CASE_DATA_API_URL: "http://ccd-data-store-api-aat.service.core-compute-aat.internal"
     DOCUMENT_MANAGEMENT_URL: "http://dm-store-aat.service.core-compute-aat.internal"
@@ -62,4 +62,3 @@ servicebus:
       - name: envelopes
       - name: notifications
       - name: processed-envelopes
-
