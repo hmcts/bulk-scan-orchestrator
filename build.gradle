@@ -187,9 +187,10 @@ repositories {
 }
 
 def versions = [
-  reformLogging     : '6.1.9',
-  flyway            : "$flywayVersion",
-  postgresql        : "$postgresqlVersion"
+  reformLogging            : '8.0.0',
+  reformLoggingAppInsights : '6.1.9',
+  flyway                   : "$flywayVersion",
+  postgresql               : "$postgresqlVersion"
 ]
 
 configurations.all {
@@ -210,7 +211,7 @@ dependencies {
   implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.8.13'
   implementation group: 'com.google.guava', name: 'guava', version: '33.6.0-jre'
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformLogging
-  implementation group: 'com.github.hmcts.java-logging', name: 'logging-appinsights', version: versions.reformLogging
+  implementation group: 'com.github.hmcts.java-logging', name: 'logging-appinsights', version: versions.reformLoggingAppInsights
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version: '8.1'
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: '5.3.3'
   implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '3.0.5'
