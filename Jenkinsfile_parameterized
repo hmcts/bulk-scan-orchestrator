@@ -1,5 +1,5 @@
 #!groovy
-@Library(value="Infrastructure@2.4.3", changelog=false)
+@Library(value="Infrastructure@2.4.5", changelog=false)
 
 def channel = '#bsp-build-notices'
 
