@@ -14,7 +14,7 @@ service cases or be attached to existing service cases)
 ## Getting Started
 ### Prerequisites
 
-- [JDK 21](https://www.oracle.com/java)
+- [JDK 25](https://www.oracle.com/java)
 - Project requires Spring Boot v3.x to be present.
 
 ### Installation
